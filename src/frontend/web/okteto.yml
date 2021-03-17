@@ -1,0 +1,20 @@
+name: frontend
+image:
+  name: okteto.dev/conote-frontend:dev
+  context: ../..
+  dockerfile: ../../Dockerfile.dev
+  target: frontend-dev
+#   # args:
+#   #   - ENV1=dev
+#   #   - ENV2=$VALUE
+command: ["zsh"]
+workdir: /workspace/frontend/web
+sync:
+  - .:/workspace/frontend/web
+resources:
+  limits:
+    cpu: "0.1"
+    memory: 1Gi
+persistentVolume:
+  enabled: false # must set false, otherwise node_modules will not exist in dev-container (bug?)
+# autocreate: true

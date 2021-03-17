@@ -1,0 +1,9 @@
+version: '2'
+services:
+  app:
+    volumes:
+      - app-sync:/workspace:nocopy # nocopy is important
+
+volumes:
+  app-sync:
+    external: true

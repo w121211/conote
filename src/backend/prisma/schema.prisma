@@ -1,0 +1,622 @@
+// DROP DB: http://localhost:5050/
+// DROP ALL TABLES: DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;
+// RUN: npm run migratedev
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  // profile      Profile
+  // dailyProfile DailyProfile
+  votes        Vote[]
+  comments     Comment[]
+  commentLikes CommentLike[]
+  polls        Poll[]
+  replies      Reply[]
+  replyLikes   ReplyLike[]
+  selfcards    Selfcard[]
+  cardTexts    CardBody[]
+  anchors      Anchor[]
+  anchorLikes  AnchorLike[]
+}
+
+// TODO: 非常像symbol，可以合併進symbol？ -> No!poll的情況需要以oauthor為代表
+model Oauthor {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  votes     Vote[]
+  links     Link[]
+  ocards    Ocard[]
+}
+
+// Ref
+// 分成1.personal-page (facebook, twitter, etc), 2.third-content(news)
+// 一定會有author(open-user)，mentioned-open-users不考慮（因為可用voteCommits來表示）
+model Link {
+  id          Int      @id @default(autoincrement())
+  url         String   @unique
+  domain      String
+  srcType     SrcType  @default(OTHER)
+  srcId       String?
+  // extra資訊
+  extra       Json?
+  // 圖片存擋位址 or byte64?
+  // snapshot String
+  // 這個content是由這個oauthor建立
+  oauthor     Oauthor? @relation(fields: [oauthorName], references: [name])
+  oauthorName String?
+  cocard      Cocard?
+}
+
+model Symbol {
+  id        Int          @id @default(autoincrement())
+  name      String       @unique
+  cat       SymbolCat
+  status    SymbolStatus @default(ACTIVE)
+  ticks     Tick[]
+  comments  Comment[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  // follows   Follow[]
+  // bets      Bet[]
+  // roboPolls RoboPoll[]
+  ocards    Ocard[]
+  selfcards Selfcard[]
+}
+
+// model Profile {
+//   id               Int    @id @default(autoincrement())
+//   user             User   @relation(fields: [userId], references: [id])
+//   userId           String
+//   lv               Int    @default(0)
+//   exp              Int    @default(0)
+//   nGotLikes        Int    @default(0)
+//   nCommits         Int    @default(0)
+//   nFollowedEvents  Int    @default(0)
+//   nFollowedTickers Int    @default(0)
+// }
+
+// model DailyProfile {
+//   id             Int      @id @default(autoincrement())
+//   user           User     @relation(fields: [userId], references: [id])
+//   userId         String
+//   nLikes         Int      @default(0)
+//   nFeeds         Int      @default(0)
+//   nEventFollows  Int      @default(0)
+//   nTickerFollows Int      @default(0)
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @updatedAt
+// }
+
+model PollCount {
+  id         Int      @id @default(autoincrement())
+  poll       Poll     @relation(fields: [pollId], references: [id])
+  pollId     Int      @unique
+  nViews     Int      @default(0)
+  nUps       Int      @default(0)
+  nDowns     Int      @default(0)
+  nComments  Int      @default(0)
+  // 依照ＯＯＯ方式排序
+  nVotes     Int[]
+  nJudgments Int[]
+  // judgeStartedAt DateTime?
+  // judgeEndedAt   DateTime?
+  // verdictValid   Boolean?
+  // verdictChoice  Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Poll建立後不能修改？或者允許user修改？目前不行
+model Poll {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  comment   Comment    @relation(fields: [commentId], references: [id])
+  commentId Int
+  cat       PollCat    @default(FIXED)
+  status    PollStatus @default(OPEN)
+  choices   String[]
+  // start        DateTime   @default(now())
+  // end          DateTime   @default(now())
+  // nDays        Int        @default(0)
+  // minVotes     Int        @default(30)
+  // nDaysJudge   Int        @default(5)
+  // minJudgments Int        @default(5)
+  votes     Vote[]
+  count     PollCount?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Vote {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  oauthor     Oauthor? @relation(fields: [oauthorName], references: [name])
+  oauthorName String?
+  poll        Poll     @relation(fields: [pollId], references: [id])
+  pollId      Int
+  choiceIdx   Int
+  // reward    Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // @@unique([userId, pollId])
+}
+
+model ReplyLike {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  reply     Reply      @relation(fields: [replyId], references: [id])
+  replyId   Int
+  choice    LikeChoice
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, replyId])
+}
+
+model ReplyCount {
+  id        Int      @id @default(autoincrement())
+  reply     Reply    @relation(fields: [replyId], references: [id])
+  replyId   Int      @unique
+  nViews    Int      @default(0)
+  nUps      Int      @default(0)
+  nDowns    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Reply {
+  id        Int         @id @default(autoincrement())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  // status         PostStatus    @default(ACTIVE)
+  text      String
+  count     ReplyCount?
+  likes     ReplyLike[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  comment   Comment     @relation(fields: [commentId], references: [id])
+  commentId Int
+}
+
+model CommentLike {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  comment   Comment    @relation(fields: [commentId], references: [id])
+  commentId Int
+  choice    LikeChoice
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, commentId])
+}
+
+model CommentCount {
+  id        Int      @id @default(autoincrement())
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  commentId Int      @unique
+  nViews    Int      @default(0)
+  nUps      Int      @default(0)
+  nDowns    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id        Int           @id @default(autoincrement())
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String
+  symbols   Symbol[]
+  // status    PostStatus    @default(ACTIVE)
+  // isTop     Boolean       @default(false)
+  // isProp    Boolean       @default(false)
+  // meta      Json?
+  text      String
+  count     CommentCount?
+  likes     CommentLike[]
+  replies   Reply[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  poll      Poll?
+}
+
+model AnchorLike {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  anchor    Anchor     @relation(fields: [anchorId], references: [id])
+  anchorId  Int
+  choice    LikeChoice
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, anchorId])
+}
+
+model AnchorCount {
+  id        Int      @id @default(autoincrement())
+  anchor    Anchor   @relation(fields: [anchorId], references: [id])
+  anchorId  Int      @unique
+  nViews    Int      @default(0)
+  nUps      Int      @default(0)
+  nDowns    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Anchor {
+  id         Int          @id @default(autoincrement())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id])
+  count      AnchorCount?
+  likes      AnchorLike[]
+  path       String?
+  cocardId   Int?
+  cocard     Cocard?      @relation(fields: [cocardId], references: [id])
+  ocardId    Int?
+  ocard      Ocard?       @relation(fields: [ocardId], references: [id])
+  selfcardId Int?
+  selfcard   Selfcard?    @relation(fields: [selfcardId], references: [id])
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model CardBody {
+  id        Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  text      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  prevId    Int?
+  prev      CardBody? @relation("SelfCardBodyHistory", fields: [prevId], references: [id])
+  next      CardBody? @relation("SelfCardBodyHistory")
+  cocard    Cocard?
+  ocard     Ocard?
+  selfcard  Selfcard?
+}
+
+model Cocard {
+  id        Int          @id @default(autoincrement())
+  template  CardTemplate
+  meta      Json
+  link      Link         @relation(fields: [linkUrl], references: [url])
+  linkUrl   String       @unique
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  bodyId    Int
+  body      CardBody     @relation(fields: [bodyId], references: [id])
+  anchors   Anchor[]
+}
+
+model Ocard {
+  id          Int          @id @default(autoincrement())
+  template    CardTemplate
+  meta        Json?
+  oauthor     Oauthor      @relation(fields: [oauthorName], references: [name])
+  oauthorName String
+  symbol      Symbol       @relation(fields: [symbolName], references: [name])
+  symbolName  String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  bodyId      Int
+  body        CardBody     @relation(fields: [bodyId], references: [id])
+  anchors     Anchor[]
+
+  @@unique([oauthorName, symbolName])
+}
+
+model Selfcard {
+  id         Int          @id @default(autoincrement())
+  template   CardTemplate
+  meta       Json?
+  user       User         @relation(fields: [userId], references: [id])
+  userId     String
+  symbol     Symbol       @relation(fields: [symbolName], references: [name])
+  symbolName String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  bodyId     Int
+  body       CardBody     @relation(fields: [bodyId], references: [id])
+  anchors    Anchor[]
+
+  @@unique([userId, symbolName])
+}
+
+// -----------------------
+
+model Tick {
+  id            Int      @id @default(autoincrement())
+  symbol        Symbol   @relation(fields: [symbolId], references: [id])
+  symbolId      Int
+  open          Float
+  close         Float
+  high          Float
+  low           Float
+  volume        Int
+  change        Float
+  changePercent Float
+  at            DateTime
+}
+
+enum PostCat {
+  LINK
+  REPLY
+}
+
+enum PostStatus {
+  // 不能comment、edit,
+  ACTIVE
+  // ���以comment，不���edit
+  LOCK
+  DELETED
+  REPORTED
+  ARCHIVED
+}
+
+enum PollCat {
+  // 固定的選項
+  FIXED
+  // 可以簡易新增選項
+  ADD
+  // 需要reply才能新增選項
+  ADD_BY_POST
+}
+
+enum PollStatus {
+  OPEN
+  JUDGE
+  CLOSE_SUCCESS
+  CLOSE_FAIL
+}
+
+enum PollFailReason {
+  // 沒達到最低票數要求
+  MIN_VOTES
+  MIN_JUDGMENTS
+  // 沒有一個多數同意的共識
+  MAJOR_VERDICT
+  // 結果判定為無效
+  VERDICT_AS_FAIL
+  // 其他問題
+  OTHER
+}
+
+enum NoticeCat {
+  POLL_REVOTE
+  POLL_START_JUDGE
+  POLL_INVITE_JUDGE
+  POLL_VERDICT
+  SIGNAL
+}
+
+enum NoticeStatus {
+  OPEN
+  READ
+}
+
+enum SymbolCat {
+  TICKER
+  TOPIC
+  // TITLE
+  // TAG
+  // EVENT
+  // OAUTHOR
+  // DOMAIN
+  // ?
+  // SYS_TICKER_FOLLOWERS
+}
+
+enum SymbolStatus {
+  ACTIVE
+  REPORTED
+  ARCHIVED
+  DUPLICATED
+}
+
+enum CommitStatus {
+  REVIEW
+  PASS
+  REJECT
+}
+
+enum CommitAction {
+  CREATE
+  UPDATE
+  DELETE
+  MERGE
+}
+
+enum LikeChoice {
+  UP
+  DOWN
+  NEUTRAL
+}
+
+enum SrcType {
+  VIDEO
+  POST
+  AUTHOR
+  OTHER
+}
+
+enum CardTemplate {
+  TICKER
+  TOPIC
+  WEBPAGE
+}
+
+// entity? dummy? external user? usersymbol?
+// open-user-predictates: get-votes -> polls/posts
+// model OpenUser {
+//   id          String       @id @default(cuid())
+//   // 自動建立open-user對應的dummy-user
+//   user        User         @relation(fields: [userId], references: [id])
+//   userId      String
+//   links       Link[]
+//   follows     Follow[]
+//   voteCommits VoteCommit[]
+// }
+
+// 等同想法： 1.有自��的predicates 2.二擇一：���應poll或來自link(user為autolink)
+// 1個link只能有1個thought?
+// 要查open-credit時：open-user -> get-open-user（即便一個link有複數個open-users，仍然為這個
+// 1. 擂台：latest-polls: poll{comments} & replies(posts){reply指向一個poll}
+//    1. reply-to-poll 2. reply-to-post �����立的情況：優點：好找polls、邏輯較為清處；缺點：notice會較為複雜？
+// 2. 情報流：latest-posts-by-feeder
+// link要獨立嗎？ vs post就存粹作為reply？idea？->
+//    1. 在查詢credit時get-thoughts（透過openUser） vs get-links（透過mentionedOpenUsers）
+//    2. poll在看thoughts時，get-thoughts（取得全部相關的) vs get-replies + get-links
+// 若是link的情況，user要是誰？ open-user?
+// model Post {
+//   id          Int          @id @default(autoincrement())
+//   cat         PostCat      @default(REPLY)
+//   status      PostStatus   @default(ACTIVE)
+//   user        User         @relation(fields: [userId], references: [id])
+//   userId      String
+//   // reply-poll-post
+//   poll        Poll?        @relation(fields: [pollId], references: [id])
+//   pollId      Int?
+//   // link-post
+//   link        Link?        @relation(fields: [linkId], references: [id])
+//   linkId      Int?
+//   // title     String?
+//   text        String
+//   count       PostCount
+//   commments   Comment[]
+//   likes       PostLike[]
+//   symbols     Symbol[]     @relation(references: [id])
+//   createdAt   DateTime     @default(now())
+//   updatedAt   DateTime     @updatedAt
+//   notices     Notice[]
+//   // Commit      Commit[]
+//   votes       Vote[]
+//   voteCommits VoteCommit[]
+// }
+
+// model Choice {
+//   id        Int      @id @default(autoincrement())
+//   user      User     @relation(fields: [userId], references: [id])
+//   userId    String
+//   poll      Poll     @relation(fields: [pollId], references: [id])
+//   pollId    Int
+//   text      String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   votes     Vote[]
+// }
+
+// 讓user幫open-user產生predicates
+// 先不考慮幫reply產生predicates
+// model VoteCommit {
+//   id         Int      @id @default(autoincrement())
+//   user       User     @relation(fields: [userId], references: [id])
+//   userId     String
+//   post       Post     @relation(fields: [postId], references: [id])
+//   postId     Int
+//   openUser   OpenUser @relation(fields: [openUserId], references: [id])
+//   openUserId String
+//   vote       Vote     @relation(fields: [voteId], references: [id])
+//   voteId     Int
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+// }
+
+// 用於通知post、poll狀態更新
+// model Notice {
+//   id        Int          @id @default(autoincrement())
+//   cat       NoticeCat
+//   status    NoticeStatus @default(OPEN)
+//   user      User         @relation(fields: [userId], references: [id])
+//   userId    String
+//   post      Post         @relation(fields: [postId], references: [id])
+//   postId    Int
+//   text      String?
+//   nPops     Int          @default(0)
+//   expiredAt DateTime
+//   createdAt DateTime     @default(now())
+//   updatedAt DateTime     @updatedAt
+// }
+
+// model Follow {
+//   id        Int      @id @default(autoincrement())
+//   user      User     @relation(fields: [userId], references: [id])
+//   userId    String
+//   symbol    Symbol   @relation(fields: [symbolId], references: [id])
+//   symbolId  Int
+//   followed  Boolean
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   OpenUser   OpenUser? @relation(fields: [openUserId], references: [id])
+//   openUserId String?
+//   @@unique([userId, symbolId])
+// }
+
+// model Commit {
+//   id        Int            @default(autoincrement()) @id
+//   user      User           @relation(fields: [userId], references: [id])
+//   userId    String
+//   symbol    Symbol         @relation(fields: [symbolId], references: [id])
+//   symbolId  Int
+//   post      Post           @relation(fields: [postId], references: [id])
+//   postId    Int
+//   status    CommitStatus   @default(REVIEW)
+//   action    CommitAction
+//   body      String
+//   // count     CommitCount
+//   reviews   CommitReview[]
+//   createdAt DateTime       @default(now())
+//   updatedAt DateTime       @updatedAt
+// }
+
+// model CommitCount {
+// id         Int      @default(autoincrement()) @id
+// commit     Commit   @relation(fields: [commitId], references: [id])
+// commitId   Int      @unique
+// nAgrees    Int      @default(0)
+// nDisagrees Int      @default(0)
+// nHolds     Int      @default(0)
+// createdAt  DateTime @default(now())
+// updatedAt  DateTime @updatedAt
+// }
+
+// model CommitReview {
+//   id        Int      @default(autoincrement()) @id
+//   user      User     @relation(fields: [userId], references: [id])
+//   userId    String
+//   commit    Commit   @relation(fields: [commitId], references: [id])
+//   commitId  Int
+//   choice    Int
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@unique([userId, commitId])
+// }
+
+// model Bet {
+//   id        Int      @id @default(autoincrement())
+//   user      User     @relation(fields: [userId], references: [id])
+//   userId    String
+//   symbol    Symbol   @relation(fields: [symbolId], references: [id])
+//   symbolId  Int
+//   body      String
+//   result    String?
+//   expiredAt DateTime
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }

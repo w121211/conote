@@ -1,0 +1,37 @@
+{
+  "name": "Node.js 14",
+  // "dockerFile": "Dockerfile",
+  "dockerComposeFile": ["docker-compose.yml", "docker-compose-dev.yml"],
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  // Set *default* container specific settings.json values on container create.
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/zsh"
+  },
+  // Add the IDs of extensions you want installed when the container is created.
+  "extensions": [
+    "Prisma.prisma",
+    "apollographql.vscode-apollo",
+    "visualstudioexptteam.vscodeintellicode",
+    "dbaeumer.vscode-eslint",
+    // "EditorConfig.editorconfig",
+    "esbenp.prettier-vscode"
+    // "graphql.vscode-graphql"
+    // "exiasr.hadolint",
+    // "bierner.markdown-mermaid",
+    // "ecmel.vscode-html-css",
+    // "orta.vscode-jest",
+    // "dbaeumer.vscode-eslint",
+    // "foxundermoon.shell-format",
+    // "timonwong.shellcheck",
+    // "felixfbecker.css-stacking-contexts",
+  ]
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [
+  // 	4000
+  // ]
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "yarn install",
+  // Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
+  // "remoteUser": "node"
+}

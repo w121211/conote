@@ -1,0 +1,56 @@
+{
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "dist": true,
+    "ui/assets": true,
+    "client/browser/build": true,
+    "**/coverage": true,
+    "**/out": true,
+    "**/__fixtures__/**": true,
+    "**/.cache": true,
+    "**/.nyc_output": true,
+    "doc/_resources/assets": true,
+    "**/.eslintcache": true
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // "[javascript]": {
+  //   "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.options": { "cache": true },
+  "eslint.workingDirectories": [
+    {
+      "directory": "./frontend/browser",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "./frontend/web",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "./backend",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "./lib/editor",
+      "changeProcessCWD": true
+    }
+  ],
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}

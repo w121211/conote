@@ -1,0 +1,544 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TextEditor add connected contents 1`] = `
+"[key]
+[?]買 vs 賣？ %hF7
+[+]
+[-]
+[Alternative]
+[Q]
+[Comment]這是一個comment %3qR"
+`;
+
+exports[`TextEditor add connected contents 2`] = `
+Array [
+  Object {
+    "linenumber": 0,
+    "marker": Object {
+      "mark": "[key]",
+    },
+    "nestedCard": undefined,
+    "str": "[key]",
+  },
+  Object {
+    "linenumber": 1,
+    "marker": Object {
+      "mark": "[?]",
+    },
+    "nestedCard": undefined,
+    "str": "[?]",
+  },
+  Object {
+    "linenumber": 1,
+    "marker": Object {
+      "mark": "[?]",
+      "value": "買 vs 賣？",
+    },
+    "nestedCard": undefined,
+    "new": true,
+    "oauthor": "@oauthor",
+    "src": "a.source",
+    "stampId": "%hF7",
+    "str": "買 vs 賣？",
+  },
+  Object {
+    "linenumber": 2,
+    "marker": Object {
+      "mark": "[+]",
+    },
+    "nestedCard": undefined,
+    "str": "[+]",
+  },
+  Object {
+    "linenumber": 3,
+    "marker": Object {
+      "mark": "[-]",
+    },
+    "nestedCard": undefined,
+    "str": "[-]",
+  },
+  Object {
+    "linenumber": 4,
+    "marker": Object {
+      "mark": "[Alternative]",
+    },
+    "nestedCard": undefined,
+    "str": "[Alternative]",
+  },
+  Object {
+    "linenumber": 5,
+    "marker": Object {
+      "mark": "[Q]",
+    },
+    "nestedCard": undefined,
+    "str": "[Q]",
+  },
+  Object {
+    "linenumber": 6,
+    "marker": Object {
+      "mark": "[Comment]",
+    },
+    "nestedCard": undefined,
+    "str": "[Comment]",
+  },
+  Object {
+    "comment": true,
+    "commentId": 3,
+    "linenumber": 6,
+    "marker": Object {
+      "mark": "[Comment]",
+      "value": "這是一個comment",
+    },
+    "nestedCard": undefined,
+    "oauthor": "@oauthor",
+    "src": "a.source",
+    "stampId": "%3qR",
+    "str": "這是一個comment",
+  },
+]
+`;
+
+exports[`TextEditor add connected contents 3`] = `
+"[key]
+[?:poll]<買> vs <賣>？ %3Wx
+[+]
+[-]
+[Alternative]
+[Q]"
+`;
+
+exports[`TextEditor add connected contents 4`] = `
+Array [
+  Object {
+    "linenumber": 0,
+    "marker": Object {
+      "mark": "[key]",
+    },
+    "nestedCard": undefined,
+    "str": "[key]",
+  },
+  Object {
+    "linenumber": 1,
+    "marker": Object {
+      "mark": "[?:poll]",
+    },
+    "nestedCard": undefined,
+    "str": "[?:poll]",
+  },
+  Object {
+    "commentId": 3,
+    "linenumber": 1,
+    "marker": Object {
+      "mark": "[?:poll]",
+      "value": "<買> vs <賣>？",
+    },
+    "nestedCard": undefined,
+    "oauthor": "@oauthor",
+    "poll": true,
+    "pollId": 10,
+    "src": "a.source",
+    "stampId": "%3Wx",
+    "str": "<買> vs <賣>？",
+  },
+  Object {
+    "linenumber": 2,
+    "marker": Object {
+      "mark": "[+]",
+    },
+    "nestedCard": undefined,
+    "str": "[+]",
+  },
+  Object {
+    "linenumber": 3,
+    "marker": Object {
+      "mark": "[-]",
+    },
+    "nestedCard": undefined,
+    "str": "[-]",
+  },
+  Object {
+    "linenumber": 4,
+    "marker": Object {
+      "mark": "[Alternative]",
+    },
+    "nestedCard": undefined,
+    "str": "[Alternative]",
+  },
+  Object {
+    "linenumber": 5,
+    "marker": Object {
+      "mark": "[Q]",
+    },
+    "nestedCard": undefined,
+    "str": "[Q]",
+  },
+]
+`;
+
+exports[`TextEditor edit text from previous stored text 1`] = `
+"$PLTR
+[=] [[大數據]] [[SaaS]] %hF7
+[?] B@23-25 小倉位 %3qR
+[*]
+產品：用大數據和人工智能幫情報局及美軍尋找目標，戰略分析、決策模擬、分析關鍵訊息等數據，反金融犯罪 %3Wx
+- 情報 %5uM
+- 企業決策中心 %Bv0
+[+]
+提供政府服務 %nhh
+營收增長高 %Hfx
+利潤率進步 %xB7
+[-]
+至今10多年仍無法盈利 %i61
+需要商業化，不僅是做政府生意 %vYk
+
+[[太空股]]
+[+]
+有美國軍方、政府在背後支持扶持，有國家利益，藉資本市場孵化 %vjo"
+`;
+
+exports[`TextEditor edit text from previous stored text 2`] = `
+"$PLTR
+[=] [[大數據]] [[SaaS]] %hF7
+[?] B@23-25 小倉位 %3qR
+[*]
+產品：用大數據和人工智能幫情報局及美軍尋找目標，戰略分析、決策模擬、分析關鍵訊息等數據，反金融犯罪 %3Wx
+- 情報 %5uM
+- 企業決策中心 %Bv0
+對象：各國政府，FBI、CIA、美軍等 %7Wi
+有125個客戶，企業營收佔44%，除美國外商業營收增長低 %Kci
+[+]
+提供政府服務 %nhh
+營收增長高 %Hfx
+利潤率進步 %xB7
+現金充足，財務沒有問題 %00Y
+有炒股動力，@ARK、@WSB皆關注 %oQj
+[-]
+至今10多年仍無法盈利 %i61
+需要商業化，不僅是做政府生意 %vYk
+股權獎勵高，拉低盈利 %5KH
+很難做到像消費者級別的量，增長的想像空間不大 %Jrd
+
+[[太空股]]
+[+]
+有美國軍方、政府在背後支持扶持，有國家利益，藉資本市場孵化 %vjo
+[[Elon Musk]]、[[Bezos]]、[[Ark]]均投入太空市場 %iKS
+太空商業化將帶來新的商業模式 %psv"
+`;
+
+exports[`TextEditor embed markerlines to tokens 1`] = `
+Array [
+  Object {
+    "breaker": undefined,
+    "nestedCard": undefined,
+    "root": true,
+    "stream": Array [
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[=]",
+            "length": 3,
+            "linenumber": 0,
+            "marker": Object {
+              "mark": "[=]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 0,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 1,
+            "marker": Object {
+              "mark": "[?]",
+            },
+            "type": "inline-mark",
+          },
+          Object {
+            "alias": undefined,
+            "content": Array [
+              "買 vs 賣？",
+              Object {
+                "alias": undefined,
+                "content": " %5uM",
+                "length": 5,
+                "linenumber": 1,
+                "markerline": Object {
+                  "comment": true,
+                  "commentId": 3,
+                  "linenumber": 1,
+                  "marker": Object {
+                    "mark": "[?]",
+                    "value": "買 vs 賣？",
+                  },
+                  "nestedCard": undefined,
+                  "oauthor": "@oauthor",
+                  "src": "a.source",
+                  "stampId": "%5uM",
+                  "str": "買 vs 賣？ %5uM",
+                },
+                "type": "stamp",
+              },
+            ],
+            "length": 12,
+            "linenumber": 1,
+            "marker": Object {
+              "mark": "[?]",
+              "value": "買 vs 賣？",
+            },
+            "markerline": Object {
+              "comment": true,
+              "commentId": 3,
+              "linenumber": 1,
+              "marker": Object {
+                "mark": "[?]",
+                "value": "買 vs 賣？",
+              },
+              "nestedCard": undefined,
+              "oauthor": "@oauthor",
+              "src": "a.source",
+              "stampId": "%5uM",
+              "str": "買 vs 賣？ %5uM",
+            },
+            "type": "inline-value",
+          },
+        ],
+        "length": 15,
+        "linenumber": 1,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[+]",
+            "length": 3,
+            "linenumber": 2,
+            "marker": Object {
+              "mark": "[+]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 2,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 3,
+            "marker": Object {
+              "mark": "[-]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 3,
+        "type": "inline-marker",
+      },
+      "
+",
+    ],
+    "ticker": undefined,
+    "topic": undefined,
+  },
+]
+`;
+
+exports[`TextEditor embed markerlines to tokens 2`] = `
+Array [
+  Object {
+    "breaker": undefined,
+    "nestedCard": undefined,
+    "root": undefined,
+    "stream": Array [],
+    "ticker": undefined,
+    "topic": undefined,
+  },
+  Object {
+    "breaker": undefined,
+    "nestedCard": Object {
+      "oauthor": undefined,
+      "symbol": "$AAA",
+    },
+    "root": undefined,
+    "stream": Array [
+      Object {
+        "alias": "sect-ticker",
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "$AAA",
+            "length": 4,
+            "linenumber": 0,
+            "type": "sect-symbol",
+          },
+          "
+",
+        ],
+        "length": 5,
+        "linenumber": 0,
+        "type": "sect-ticker-begin-line",
+      },
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[=]",
+            "length": 3,
+            "linenumber": 1,
+            "marker": Object {
+              "mark": "[=]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 1,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 2,
+            "marker": Object {
+              "mark": "[?]",
+            },
+            "type": "inline-mark",
+          },
+          Object {
+            "alias": undefined,
+            "content": Array [
+              "買 vs 賣？",
+              Object {
+                "alias": undefined,
+                "content": " %Bv0",
+                "length": 5,
+                "linenumber": 2,
+                "markerline": Object {
+                  "comment": true,
+                  "commentId": 3,
+                  "linenumber": 2,
+                  "marker": Object {
+                    "mark": "[?]",
+                    "value": "買 vs 賣？",
+                  },
+                  "nestedCard": Object {
+                    "oauthor": undefined,
+                    "symbol": "$AAA",
+                  },
+                  "oauthor": "@oauthor",
+                  "src": "a.source",
+                  "stampId": "%Bv0",
+                  "str": "買 vs 賣？ %Bv0",
+                },
+                "type": "stamp",
+              },
+            ],
+            "length": 12,
+            "linenumber": 2,
+            "marker": Object {
+              "mark": "[?]",
+              "value": "買 vs 賣？",
+            },
+            "markerline": Object {
+              "comment": true,
+              "commentId": 3,
+              "linenumber": 2,
+              "marker": Object {
+                "mark": "[?]",
+                "value": "買 vs 賣？",
+              },
+              "nestedCard": Object {
+                "oauthor": undefined,
+                "symbol": "$AAA",
+              },
+              "oauthor": "@oauthor",
+              "src": "a.source",
+              "stampId": "%Bv0",
+              "str": "買 vs 賣？ %Bv0",
+            },
+            "type": "inline-value",
+          },
+        ],
+        "length": 15,
+        "linenumber": 2,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[+]",
+            "length": 3,
+            "linenumber": 3,
+            "marker": Object {
+              "mark": "[+]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 3,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 4,
+            "marker": Object {
+              "mark": "[-]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 4,
+        "type": "inline-marker",
+      },
+      "
+",
+    ],
+    "ticker": true,
+    "topic": undefined,
+  },
+]
+`;

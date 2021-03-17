@@ -1,0 +1,19 @@
+@import '../../style/global.module.scss';
+
+:global(.ant-popover-inner-content) {
+  padding: 6px !important;
+  font-size: $font-xs;
+  span {
+    padding-right: 6px;
+    padding-left: 0;
+    &:not(:first-child) {
+      padding-left: 6px;
+      padding-right: 0;
+      border-left: 1px solid $natual;
+    }
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  // "references": [{ "path": "../web" }],
+  "compilerOptions": {
+    // "target": "es5",
+    "module": "commonjs",
+    // "lib": ["esnext", "es2015", "dom", "dom.iterable"],
+    // "moduleResolution": "node",
+    // "jsx": "react",
+    // "strict": true,
+    // // "sourceMap": true,
+    // "esModuleInterop": true,
+    // // "experimentalDecorators": true,
+    // "allowSyntheticDefaultImports": true,
+    // "allowJs": false,
+    // // "declaration": true,
+    // // "declarationMap": true,
+    // "skipLibCheck": true,
+    // // "noErrorTruncation": true,
+    // // "importHelpers": true,
+    // "resolveJsonModule": true,
+    // "composite": true,
+    // "downlevelIteration": true,
+
+    "target": "es5",
+    // "module": "esnext",
+    "lib": ["dom", "dom.iterable", "es2015", "esnext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    // "noEmit": true,
+    "jsx": "react",
+    "downlevelIteration": true,
+
+    "rootDir": ".",
+    "outDir": "dist/js"
+    // "outDir": "out",
+    // "baseUrl": ".",
+    // "paths": {
+    // "@src/*": ["./src/*", "../web/src/*"]
+    //   "*": ["src/types/*", "../shared/src/types/*", "*"],
+    // "*": ["./src/*", "../web/src/*", "*"]
+    // }
+  },
+  // "include": ["src", "../web/src"],
+  "include": ["**/*", ".*", "src/**/*.json"],
+  // "include": ["**/*", ".*", "src/**/*.json", "src/types/**/*.d.ts"],
+  "exclude": [
+    "**/__tests__",
+    "**/__deprecated__",
+    "out",
+    "node_modules",
+    "code-intel-extensions",
+    "../../node_modules",
+    "./build/**/*",
+    "coverage",
+    "stories", // TODO fix type errors and include
+    "src/end-to-end"
+  ]
+}

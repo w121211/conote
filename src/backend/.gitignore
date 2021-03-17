@@ -1,0 +1,5 @@
+dist/
+*.db
+aadr.us.txt
+migrations/
+downloads/
