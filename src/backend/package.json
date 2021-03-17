@@ -4,7 +4,8 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "migrate": "prisma migrate dev --preview-feature",
+    "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
     "generate": "prisma generate",
     "gen:schema": "graphql-schema-typescript generate-ts src/schema.gql --output src/schemaTypes.d.ts --typePrefix=''",
     "seed:": "ts-node prisma/seed.ts",

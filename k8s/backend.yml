@@ -56,7 +56,7 @@ spec:
           image: conote-backend
           # command: ['yarn', 'start']
           command: ['/bin/sh', '-c']
-          args: ['yarn run migrate && yarn run seed:fromfile && yarn run start']
+          args: ['yarn run migrate:deploy && yarn run seed:fromfile && yarn run start']
           ports:
             - name: http-server
               containerPort: 4000 # The port that the container exposes
