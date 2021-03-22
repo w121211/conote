@@ -46,6 +46,7 @@ export function PollChoices({
   const myVotes = useQuery<QT.myVotes>(queries.MY_VOTES, { fetchPolicy: 'cache-only' })
   const meVote = myVotes.data?.myVotes.find(e => e.pollId === pollId)
   const [selectedIdx, setSelectedIdx] = useState<number | null>()
+
   function onChange(e: RadioChangeEvent) {
     // console.log('radio checked', e.target.value)
     if (!meVote) {
@@ -84,7 +85,7 @@ export function PollChoices({
     )
   }
   return (
-    <Form.Item name="choice">
+    <Form.Item name="choice" rules={[{ required: true, message: 'Please input your username!' }]}>
       <Radio.Group onChange={onChange} value={meVote?.choiceIdx ?? selectedIdx}>
         {choices.map((e, i) => _choice(i, e))}
       </Radio.Group>
@@ -142,29 +143,41 @@ export function PollForm({ poll, setShowModal }: { poll: QT.poll; setShowModal(a
     },
   })
   function onFinish(values: any) {
-    // console.log(values)
-    // if (choiceIdx === null) return
-    // createVote({
-    //   variables: {
-    //     pollId: poll.id,
-    //     choiceIdx: choiceIdx,
-    //   },
-    // })
-    // if (values.text) {
-    //   createReply({
-    //     variables: {
-    //       data: { text: `[${choices[choiceIdx]}]${values.text}` },
-    //       commentId: poll.commentId,
-    //     },
+    console.log(values)
+    // form
+    //   .validateFields()
+    //   .then(v => {
+    //     console.log(v)
     //   })
+    //   .catch(e => {
+    //     console.log(e)
+    //   })
+
+    const choiceIdx = values.choice
+    // if (choiceIdx === undefined) {
+    //   form.
     // }
+    createVote({
+      variables: {
+        pollId: poll.id,
+        choiceIdx,
+      },
+    })
+    if (values.text) {
+      createReply({
+        variables: {
+          data: { text: `<${poll.choices[choiceIdx]}>${values.text}` },
+          commentId: poll.commentId,
+        },
+      })
+    }
   }
   return (
     <Form form={form} onFinish={onFinish}>
       {/* Form.Item 需要跟<PollChoices />綁在一起，否則無法抓到value */}
       <PollChoices pollId={poll.id} choices={poll.choices} />
 
-      <Form.Item name="text">
+      <Form.Item name="text" rules={[{ required: true, message: 'Please input your username!' }]}>
         <Input.TextArea placeholder="意見（可留空）" autoSize={{ minRows: 3 }} />
       </Form.Item>
 

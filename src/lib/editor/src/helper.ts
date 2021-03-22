@@ -48,7 +48,7 @@ export function filterTokens<T extends Prism.Token>(
 
 export function markerToStr(marker: Marker, addMarker = false): string {
   if (addMarker) {
-    return `${marker.mark}\n${marker.value}`
+    return `${marker.key}\n${marker.value}`
   }
   return marker.value || ''
 }

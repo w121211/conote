@@ -17,7 +17,7 @@ export function ReplyForm({
   suggestText?: string
   onFinish?(): void
   onFinishFailed?(): void
-}) {
+}): JSX.Element {
   const [form] = Form.useForm()
   const [createReply] = useMutation<QT.createReply, QT.createReplyVariables>(queries.CREATE_REPLY, {
     update(cache, { data }) {

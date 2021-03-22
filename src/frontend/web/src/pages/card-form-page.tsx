@@ -5,7 +5,8 @@ import { Alert, Form, Layout, Button, Input } from 'antd'
 import * as QT from '../graphql/query-types'
 import * as queries from '../graphql/queries'
 import { getCardUrlParam, symbolToUrl } from '../helper'
-import { CardForm, CardBody } from '../components/card'
+import { CardBody } from '../components/card'
+import { CardForm } from '../components/card-form'
 
 interface RouteProps extends RouteComponentProps {
   me?: QT.me_me

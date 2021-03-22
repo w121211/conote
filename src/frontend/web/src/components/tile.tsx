@@ -6,7 +6,7 @@ import { PlusOutlined } from '@ant-design/icons'
 import * as queries from '../graphql/queries'
 import * as QT from '../graphql/query-types'
 // import { CommentList } from './commentList'
-import { PollChoices, PollForm } from './poll-choice'
+import { PollForm } from './poll-form'
 import { ReplyPanel, CommentPanel } from './tile-panel'
 import { ReplyList, QueryReplyList } from './tile-list'
 import { ReplyForm } from './tile-forms'
@@ -101,18 +101,16 @@ export function SuggestReply({
 }
 
 export function QueryCommentModal({
-  // options = defaultTileOptions,
-  cardId,
+  commentId,
   children,
 }: {
-  // options?: TileOptions
-  cardId: string
+  commentId: string
   children: React.ReactNode
 }): JSX.Element {
   const [showModal, setShowModal] = useState<boolean>(false)
   const [suggestReply, setSuggestReply] = useState<string | undefined>()
   const { data, loading, error, refetch } = useQuery<QT.comment, QT.commentVariables>(queries.COMMENT, {
-    variables: { id: cardId },
+    variables: { id: commentId },
   })
 
   function onClickFactory(text: string) {
@@ -128,7 +126,7 @@ export function QueryCommentModal({
   return (
     <div>
       <Modal
-        title="Comment"
+        // title="Comment"
         visible={showModal}
         footer={null}
         onCancel={() => {
@@ -142,9 +140,9 @@ export function QueryCommentModal({
             commentId={data.comment.id}
             suggestText={suggestReply}
             addReplyCountByOne={() => {}}
-            onFinish={() => {
-              setShowModal(false)
-            }}
+            // onFinish={() => {
+            //   setShowModal(false)
+            // }}
           />
         )}
         <QueryReplyList commentId={data.comment.id} />

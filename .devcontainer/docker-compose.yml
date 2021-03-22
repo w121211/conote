@@ -20,7 +20,6 @@ services:
     ports:
       - 4000:4000
       - 3000:3000
-      # - 5555:5555
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
@@ -31,16 +30,12 @@ services:
 
   postgres:
     image: postgres:13.2-alpine
-    # container_name: pg01
-    restart: unless-stopped
     environment:
       POSTGRES_USER: postgresuser
       POSTGRES_PASSWORD: postgrespassword
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    # container_name: pgadmin01
-    # restart: unless-stopped
     ports:
       - 5050:80
     environment:

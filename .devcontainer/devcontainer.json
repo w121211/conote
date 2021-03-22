@@ -15,12 +15,12 @@
     "visualstudioexptteam.vscodeintellicode",
     "dbaeumer.vscode-eslint",
     // "EditorConfig.editorconfig",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "orta.vscode-jest"
     // "graphql.vscode-graphql"
     // "exiasr.hadolint",
     // "bierner.markdown-mermaid",
     // "ecmel.vscode-html-css",
-    // "orta.vscode-jest",
     // "dbaeumer.vscode-eslint",
     // "foxundermoon.shell-format",
     // "timonwong.shellcheck",

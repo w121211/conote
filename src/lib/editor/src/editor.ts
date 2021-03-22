@@ -49,7 +49,8 @@ import {
   CardLabel,
   Marker,
   MarkerFormat,
-  MarkerLine,
+  Markerheader,
+  Markerline,
   ExtToken,
   ExtTokenStream,
   Section,
@@ -58,146 +59,173 @@ import {
 import { filterTokens, streamToStr, markerToStr } from './helper'
 import { tokenizeSection } from './parser'
 
-// TODO: 測試時需要給seed，應該用mock取代
-const chance = new Chance(123456)
-// const chance = new Chance()
+// export const MARKER_FORMAT: Record<string, MarkerFormat> = {
+//   // srcId: { mark: '[_srcId]', inline: true, meta: true, freeze: true, },
+//   // srcType: { mark: '[_srcType]', inline: true, meta: true, freeze: true, },
+//   // '_oauthor': {},
+//   // '_url': {},
+//   srcTitle: { mark: '[_srcTitle]', meta: true, inline: true, freeze: true },
+//   srcPublishDate: { mark: '[_srcPublishDate]', meta: true, inline: true, freeze: true },
+//   link: { mark: '[_link]', meta: true, multiline: true },
+//   keyword: { mark: '[_keyword]', meta: true, inline: true, list: true },
 
-export const MARKER_FORMAT: Record<string, MarkerFormat> = {
-  // srcId: { mark: '[_srcId]', inline: true, meta: true, freeze: true, },
-  // srcType: { mark: '[_srcType]', inline: true, meta: true, freeze: true, },
-  // '_oauthor': {},
-  // '_url': {},
-  srcTitle: { mark: '[_srcTitle]', meta: true, inline: true, freeze: true },
-  srcPublishDate: { mark: '[_srcPublishDate]', meta: true, inline: true, freeze: true },
-  link: { mark: '[_link]', meta: true, multiline: true },
-  keyword: { mark: '[_keyword]', meta: true, inline: true, list: true },
+//   plus: { mark: '[+]', multiline: true },
+//   minus: { mark: '[-]', multiline: true },
+//   note: { mark: '[note]', multiline: true },
+//   // ticker: { mark: '[car]', nested: true },
+//   // card: { mark: '[card]', nested: true },
 
-  plus: { mark: '[+]', multiline: true },
-  minus: { mark: '[-]', multiline: true },
-  note: { mark: '[note]', multiline: true },
-  // ticker: { mark: '[car]', nested: true },
-  // card: { mark: '[card]', nested: true },
+//   price: {
+//     mark: '[price]',
+//     inline: true,
+//     poll: true,
+//     pollVotes: [],
+//     validater: a => !isNaN(parseFloat(a)),
+//   },
+//   act: { mark: '[act]', inline: true, poll: true, pollVotes: ['Buy', 'Sell'] },
+// }
+// export const WEBPAGE_HEAD_FORMATTER: MarkerFormat[] = [
+//   MARKER_FORMAT.srcTitle,
+//   MARKER_FORMAT.srcPublishDate,
+//   MARKER_FORMAT.keyword,
+//   MARKER_FORMAT.link,
+// ]
+// export const TICKER_FORMATTER: MarkerFormat[] = [MARKER_FORMAT.plus, MARKER_FORMAT.minus, MARKER_FORMAT.price]
+// export const WEBPAGE_BODY_FORMATTER: MarkerFormat[] = [MARKER_FORMAT.note]
 
-  price: {
-    mark: '[price]',
-    inline: true,
-    poll: true,
-    pollVotes: [],
-    validater: a => !isNaN(parseFloat(a)),
-  },
-  act: { mark: '[act]', inline: true, poll: true, pollVotes: ['Buy', 'Sell'] },
-}
-export const WEBPAGE_HEAD_FORMATTER: MarkerFormat[] = [
-  MARKER_FORMAT.srcTitle,
-  MARKER_FORMAT.srcPublishDate,
-  MARKER_FORMAT.keyword,
-  MARKER_FORMAT.link,
-]
-export const TICKER_FORMATTER: MarkerFormat[] = [MARKER_FORMAT.plus, MARKER_FORMAT.minus, MARKER_FORMAT.price]
-export const WEBPAGE_BODY_FORMATTER: MarkerFormat[] = [MARKER_FORMAT.note]
-
-function insertMarkerlinesToBody(cur: MarkerLine[], body: string, insert: MarkerLine[]): [string, MarkerLine[]] {
+export function insertMarkerlinesToBody(
+  curMarkerheaders: Markerheader[],
+  curMarkerlines: Markerline[],
+  curBody: string,
+  insertMarkerlines: Markerline[],
+  chance: { string: (a: any) => string },
+): [string, Markerline[]] {
   /** 將markerline插入至body-text中，插入的line會同時加入stamp 注意：插入後line-number會變動，這裡不更新line-number */
-  // 將body分成一行一行，每行搭配對應的marker-line
-  const lns: [string, MarkerLine | undefined][] = body.split('\n').map<[string, MarkerLine | undefined]>((e, i) => {
-    const found = cur.find(e => e.linenumber === i)
-    return [e, found]
-  })
 
-  function _insert(item: MarkerLine) {
-    const a: MarkerLine = {
-      // line-number不重要
+  // 將body分成一行一行，每行搭配對應的markerline, markerheader
+  const lns: [string, { markerheader?: Markerheader; markerline?: Markerline }][] = curBody
+    .split('\n')
+    .map<[string, { markerheader?: Markerheader; markerline?: Markerline }]>((e, i) => {
+      const markerheader = curMarkerheaders.find(e => e.linenumber === i)
+      const markerline = curMarkerlines.find(e => e.linenumber === i)
+      return [e, { markerheader, markerline }]
+    })
+
+  function _insert(marekerline: Markerline, chance: { string: (a: any) => string }) {
+    const a: Markerline = {
+      // line-number需要之後再update
       linenumber: -1,
-      str: item.str,
-      marker: item.marker,
+      str: marekerline.str,
+      marker: marekerline.marker,
       new: true,
-      src: item.src,
-      srcStamp: item.stampId,
-      oauthor: item.oauthor,
+      src: marekerline.src,
+      srcStamp: marekerline.stampId,
+      oauthor: marekerline.oauthor,
       stampId: `%${chance.string({
         length: 3,
         pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
       })}`,
     }
+
     if (a.marker) {
-      const idx = findLastIndex(lns, e => e[1]?.marker?.mark === item.marker?.mark)
-      const str = `${markerToStr(a.marker, false)} ${a.stampId}`
+      const strWithStamp = `${markerToStr(a.marker, false)} ${a.stampId}`
+
+      // 找對應的marker-header，並插入至header下一行
+      const idx = lns.findIndex(e => e[1].markerheader?.marker.key && e[1].markerheader.marker.key === a.marker?.key)
       if (idx >= 0) {
-        // 若有，插入至下一行 TODO: 應考慮inline
-        lns.splice(idx + 1, 0, [str, a])
+        lns.splice(idx + 1, 0, [strWithStamp, { markerline: a }])
       } else {
-        // 若沒有，建立一個新marker
-        lns.push([a.marker.mark, undefined])
-        lns.push([str, a])
+        // 找不到marker-header的情況，插入一個header
+        lns.push([a.marker.key, { markerheader: { linenumber: -1, marker: { key: a.marker.key } } }])
+        lns.push([strWithStamp, { markerline: a }])
       }
+
+      // const idx = findLastIndex(lns, e => e[1]?.marker?.mark === marekerline.marker?.mark)
     }
   }
 
-  for (const e of insert) {
-    if (e.poll) {
-      throw new Error('尚未實現')
-    }
-    if (e.marker && e.marker.mark && e.marker.value) {
-      _insert(e)
+  for (const e of insertMarkerlines) {
+    if (e.marker && e.marker.key && e.marker.value) {
+      _insert(e, chance)
+    } else {
+      console.error(`想插入的markerline不符合格式\n${e}`)
+      // throw new Error('想插入的markerline不符合格式')
     }
   }
 
   // 將分行的body重新組合起來
   let joinedBody = ''
-  const markerlines: MarkerLine[] = []
-  for (const [str, mkln] of lns) {
+  const markerlines: Markerline[] = []
+  for (const [str, { markerline }] of lns) {
     joinedBody += `${str}\n`
-    if (mkln) markerlines.push(mkln)
+    if (markerline) {
+      markerlines.push(markerline)
+    }
   }
 
   return [joinedBody, markerlines]
 }
 
-function updateMarkerlines(cur: MarkerLine[], sects: Section[], src?: string, oauthor?: string): MarkerLine[] {
+export function updateMarkerlines(
+  cur: Markerline[],
+  sects: Section[],
+  chance: { string: (a: any) => string },
+  src?: string,
+  oauthor?: string,
+): {
+  markerheaders: Markerheader[]
+  markerlines: Markerline[]
+} {
   /** 和初始比較，1. 基於stamp更新markerline的line-number、value等等、2. 對新的line增加markerline，返回更新後的markerLines，這裡面不會動到body-text */
+
   // 建立stamp-dict
-  const dict: Record<string, MarkerLine> = {}
+  const dict: Record<string, Markerline> = {}
   for (const e of cur) {
-    dict[e.stampId as string] = e
+    if (e.stampId !== undefined) {
+      dict[e.stampId as string] = e
+    }
   }
 
   // 建立、更新markerLines，同步檢查、建立stamp
-  const lns: MarkerLine[] = []
+  const markerlines: Markerline[] = []
+  const markerheaders: Markerheader[] = []
+
   for (const sect of sects) {
-    // 1. 針對mark，不需要stamp，只需紀錄mark的linenumber（方便未來插入新行）
-    for (const markToken of filterTokens<ExtToken>(
+    // 1. 針對marker-header，只需紀錄mark的linenumber
+    for (const tk of filterTokens<ExtToken>(
       sect.stream ?? [],
       e => e.type === 'line-mark' || e.type === 'inline-mark',
     )) {
-      lns.push({
-        linenumber: markToken.linenumber,
-        str: streamToStr(markToken),
-        marker: markToken.marker,
-        nestedCard: sect.nestedCard,
+      if (tk.marker === undefined) {
+        throw new Error('line-marker, inline-mark token一定要有marker')
+      }
+      markerheaders.push({
+        linenumber: tk.linenumber,
+        marker: tk.marker,
+        inline: tk.type === 'inline-mark' ? true : undefined,
       })
     }
 
-    // 2. 針對inline-value, line-value
-    for (const lineToken of filterTokens<ExtToken>(
+    // 2. 針對line-value
+    for (const tk of filterTokens<ExtToken>(
       sect.stream ?? [],
       e => e.type === 'inline-value' || e.type === 'line-value',
     )) {
-      if (lineToken.marker === undefined) {
-        throw new Error('value-token一定要有marker & linenumber')
+      if (tk.marker === undefined) {
+        throw new Error('line-value, inline-value token一定要有marker')
       }
-
       const _updated = {
-        linenumber: lineToken.linenumber,
-        str: streamToStr(lineToken),
-        marker: lineToken.marker,
+        linenumber: tk.linenumber,
+        str: streamToStr(tk),
+        marker: tk.marker,
         nestedCard: sect.nestedCard,
       }
-      const stampTokens = filterTokens<ExtToken>(lineToken.content ?? [], e => e.type === 'stamp')
+      const stampTokens = filterTokens<ExtToken>(tk.content ?? [], e => e.type === 'stamp')
 
       if (stampTokens.length === 0) {
         // 沒有stamp
         // TODO: 要確保stampId不重複
-        lns.push({
+        markerlines.push({
           ..._updated,
           new: true,
           noStamp: true,
@@ -215,32 +243,37 @@ function updateMarkerlines(cur: MarkerLine[], sects: Section[], src?: string, oa
         const _stamp = (stampTokens[0].content as string).trim()
         if (_stamp in dict) {
           // TODO: 和原始markerLine比較是否有更動
-          lns.push({ ...dict[_stamp], ..._updated })
+          markerlines.push({ ...dict[_stamp], ..._updated })
         } else {
           // 有anchor但broken
-          lns.push({ ..._updated, stampId: _stamp, broken: true })
+          // console.log(cur)
+          // console.log(dict)
+          // console.log({ ..._updated, stampId: _stamp, broken: true })
+          markerlines.push({ ..._updated, stampId: _stamp, broken: true })
         }
       }
     }
   }
 
   // 依linenumber排序markerlines（不能忽略，因為有些function會需要找最後一行）
-  lns.sort((a, b) => a.linenumber - b.linenumber)
+  markerheaders.sort((a, b) => a.linenumber - b.linenumber)
+  markerlines.sort((a, b) => a.linenumber - b.linenumber)
 
-  return lns
+  return { markerheaders, markerlines }
 }
 
 export class TextEditor {
   // 從前次儲存的text開始做編輯
   private readonly _storedText: string
   // private readonly _storedMarkerLines: MarkerLine[];
+  private readonly chance = new Chance()
 
   private _sects: Section[]
   private _body: string
-  private _markerlines: MarkerLine[] = []
+  private _markerlines: Markerline[] = []
 
   // 預定要插入至bod的markerlines，在flush()時插入並清空（用在nested-card）
-  private _markerlinesToInsert: MarkerLine[] = []
+  private _markerlinesToInsert: Markerline[] = []
 
   private _src: string | undefined
   private _oauthor: string | undefined
@@ -260,11 +293,11 @@ export class TextEditor {
     this._oauthor = oauthor
   }
 
-  private static _toStoredText(body: string, markerLines: MarkerLine[]): string {
+  private static _toStoredText(body: string, markerLines: Markerline[]): string {
     return [JSON.stringify(markerLines), body].join('\n')
   }
 
-  private static _splitStoredText(storedText: string): [MarkerLine[], string] {
+  private static _splitStoredText(storedText: string): [Markerline[], string] {
     const lns = storedText.split('\n')
     const markerLines = JSON.parse(lns[0])
     const body = lns.splice(1).join('\n')
@@ -289,12 +322,12 @@ export class TextEditor {
     this._body = body
   }
 
-  public getMarkerLines(): MarkerLine[] {
+  public getMarkerlines(): Markerline[] {
     return this._markerlines
   }
 
-  public getNestedMarkerLines(): [CardLabel, MarkerLine[]][] {
-    const nested: [CardLabel, MarkerLine[]][] = []
+  public getNestedMarkerlines(): [CardLabel, Markerline[]][] {
+    const nested: [CardLabel, Markerline[]][] = []
     for (const e of this._markerlines) {
       if (e.nestedCard && e.nestedCard.symbol) {
         const res = nested.find(f => f[0].symbol === e.nestedCard?.symbol)
@@ -308,7 +341,7 @@ export class TextEditor {
     return nested
   }
 
-  public setMarkerlinesToInsert(items: MarkerLine[]): void {
+  public setMarkerlinesToInsert(items: Markerline[]): void {
     this._markerlinesToInsert = cloneDeep(items)
   }
 
@@ -316,16 +349,32 @@ export class TextEditor {
     return TextEditor._toStoredText(this._body, this._markerlines)
   }
 
-  public flush(opt = { embedMarkerlinesToTokens: false }): void {
+  public flush(opt = { attachMarkerlinesToTokens: false }): void {
     /** 跑tokenizer、更新markerlines, stamp，因為expensive，所以將此步驟獨立出來 */
     if (this._markerlinesToInsert.length > 0) {
-      const [body, markerlines] = insertMarkerlinesToBody(this._markerlines, this._body, this._markerlinesToInsert)
+      const { markerheaders, markerlines } = updateMarkerlines(
+        this._markerlines,
+        tokenizeSection(this._body),
+        this.chance,
+        this._src,
+        this._oauthor,
+      )
+      // console.log(markerlines)
+      // return
+      const [body, _markerlines] = insertMarkerlinesToBody(
+        markerheaders,
+        markerlines,
+        this._body,
+        this._markerlinesToInsert,
+        this.chance,
+      )
       this._body = body
-      this._markerlines = markerlines
+      this._markerlines = _markerlines
       this._markerlinesToInsert = []
     }
     this._sects = tokenizeSection(this._body)
-    this._markerlines = updateMarkerlines(this._markerlines, this._sects, this._src, this._oauthor)
+    const { markerlines } = updateMarkerlines(this._markerlines, this._sects, this.chance, this._src, this._oauthor)
+    this._markerlines = markerlines
 
     // 依照line-number對還沒有stamp的line插入stamp
     const lns = this._body.split('\n')
@@ -337,9 +386,9 @@ export class TextEditor {
     }
     this._body = lns.join('\n')
 
-    if (opt.embedMarkerlinesToTokens) {
-      // embed marklines with tokens
-      const dict: Record<number, MarkerLine> = {}
+    if (opt.attachMarkerlinesToTokens) {
+      // attach marklines with tokens
+      const dict: Record<number, Markerline> = {}
       for (const e of this._markerlines) {
         dict[e.linenumber] = e
       }
@@ -354,7 +403,7 @@ export class TextEditor {
   }
 
   public addAnchors(anchors: { id: number; userId: string; stamp: string }[]): void {
-    const dict: Record<string, MarkerLine> = {}
+    const dict: Record<string, Markerline> = {}
     for (const e of this._markerlines) {
       dict[e.stampId as string] = e
     }
@@ -368,9 +417,12 @@ export class TextEditor {
   }
 
   public addConnectedContents(record: MarkToConnectedContentRecord): void {
-    /** 將connected-contents併入marker-lines，marker-line需要先有stamp-id，併入後會把該marker-line的new拿掉（表示不需要建立anchor） */
+    /** 將connected-contents併入marker-lines
+     * - marker-line需要先有stamp-id，併入後會把該marker-line的new拿掉（表示不需要建立anchor）
+     * - 不用flush()
+     *  */
     for (const k in record) {
-      const mkln = this._markerlines.find(e => e.stampId && e.marker?.mark === k)
+      const mkln = this._markerlines.find(e => e.stampId && e.marker?.key === k)
       if (mkln === undefined) {
         console.error(this._body)
         throw new Error(`Card-body裡找不到${k}`)
@@ -405,57 +457,57 @@ export class TextEditor {
 
 // --- Unused functions, wait to remove ---
 
-function markersToText(markers: Marker[], formatter: MarkerFormat[]): string {
-  /**
-   * TODO:
-   * - netsed card
-   * - 排序、filter
-   * - 再編輯的情況：poll需要涵蓋上次投票&本次全新的
-   */
-  const lines: string[] = []
-  for (const e of formatter) {
-    if (e.inline) {
-      // TODO: 缺少驗證（例如inline mark可有複數個marker）
-      const mk = markers.find(f => f.mark === e.mark)
-      lines.push(`${e.mark} ${mk?.value ?? ''}`)
-    } else if (e.multiline) {
-      lines.push(`${e.mark}`)
-      for (const mk of markers.filter(f => f.mark === e.mark)) lines.push(`${mk.value}`)
-      lines.push('')
-    }
-  }
-  return lines.join('\n')
-}
+// function markersToText(markers: Marker[], formatter: MarkerFormat[]): string {
+//   /**
+//    * TODO:
+//    * - netsed card
+//    * - 排序、filter
+//    * - 再編輯的情況：poll需要涵蓋上次投票&本次全新的
+//    */
+//   const lines: string[] = []
+//   for (const e of formatter) {
+//     if (e.inline) {
+//       // TODO: 缺少驗證（例如inline mark可有複數個marker）
+//       const mk = markers.find(f => f.mark === e.mark)
+//       lines.push(`${e.mark} ${mk?.value ?? ''}`)
+//     } else if (e.multiline) {
+//       lines.push(`${e.mark}`)
+//       for (const mk of markers.filter(f => f.mark === e.mark)) lines.push(`${mk.value}`)
+//       lines.push('')
+//     }
+//   }
+//   return lines.join('\n')
+// }
 
-function initText(formatter: MarkerFormat[]): string {
-  let lines: string[] = []
-  // let linenumber = 0;
+// function initText(formatter: MarkerFormat[]): string {
+//   let lines: string[] = []
+//   // let linenumber = 0;
 
-  for (const e of formatter) {
-    let stamp: string
+//   for (const e of formatter) {
+//     let stamp: string
 
-    // 先處理data-creation & 建立linemeta, stamp
-    // if (e.poll) {
-    //   await prisma.poll.create({
-    //     data: {
-    //       cat: PA.PollCat.FIXED,
-    //       // status?: PollStatus
-    //       // choices?: XOR<PollCreatechoicesInput, Enumerable<string>>
-    //       // user: UserCreateOneWithoutPollsInput
-    //       // comment: CommentCreateOneWithoutPollInput
-    //       // votes?: VoteCreateManyWithoutPollInput
-    //       // count?: PollCountCreateOneWithoutPollInput
-    //     }
-    //   })
-    // }
+//     // 先處理data-creation & 建立linemeta, stamp
+//     // if (e.poll) {
+//     //   await prisma.poll.create({
+//     //     data: {
+//     //       cat: PA.PollCat.FIXED,
+//     //       // status?: PollStatus
+//     //       // choices?: XOR<PollCreatechoicesInput, Enumerable<string>>
+//     //       // user: UserCreateOneWithoutPollsInput
+//     //       // comment: CommentCreateOneWithoutPollInput
+//     //       // votes?: VoteCreateManyWithoutPollInput
+//     //       // count?: PollCountCreateOneWithoutPollInput
+//     //     }
+//     //   })
+//     // }
 
-    // 處理實際的text
-    if (e.inline) {
-      lines = lines.concat(`${e.mark}\n`.split('\n'))
-    }
-    if (e.multiline) {
-      lines = lines.concat(`${e.mark}\n\n\n\n`.split('\n'))
-    }
-  }
-  return lines.join('\n')
-}
+//     // 處理實際的text
+//     if (e.inline) {
+//       lines = lines.concat(`${e.mark}\n`.split('\n'))
+//     }
+//     if (e.multiline) {
+//       lines = lines.concat(`${e.mark}\n\n\n\n`.split('\n'))
+//     }
+//   }
+//   return lines.join('\n')
+// }

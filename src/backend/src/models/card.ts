@@ -11,9 +11,12 @@ interface CardTemplate {
   connContents: MarkToConnectedContentRecord
 }
 
-interface CardMeta {
+export interface CardMeta {
   symbol?: string
+  // 紀錄marker-line與connected-content（poll, comment, etc)
   conn: MarkToConnectedContentRecord
+  // 每個card都帶有一個comment作為discuss-board
+  commentId: number
 }
 
 const TEMPLATE: Record<PA.CardTemplate, CardTemplate> = {
@@ -51,7 +54,6 @@ const SYMBOL_TO_TEMPLATE: Record<PA.SymbolCat, PA.CardTemplate> = {
 export async function createConnectedContents(
   contents: MarkToConnectedContentRecord,
 ): Promise<MarkToConnectedContentRecord> {
-  /** 創comments, polls */
   const record: MarkToConnectedContentRecord = {}
   for (const k in contents) {
     const e = contents[k]
@@ -105,7 +107,8 @@ async function createCard(
   }
   const conn = await createConnectedContents(TEMPLATE[template].connContents)
 
-  // 創body，因為是初次創，不採用`createCardBody()`
+  // 創body，因為是第一次創，不使用`createCardBody()`
+  // 將connected-contents加到markerlines中
   const editor = new TextEditor()
   editor.setBody(TEMPLATE[template].body)
   editor.flush()
@@ -114,8 +117,15 @@ async function createCard(
     data: {
       text: editor.toStoredText(),
       user: { connect: { email: getBotEmail() } },
-      // cocard: { connect: { id: card.id } },
-      // prev: { connect: { id: card.bodyId } },
+    },
+  })
+
+  // 創card專屬comment
+  const cardComment = await prisma.comment.create({
+    data: {
+      text: '',
+      user: { connect: { email: getBotEmail() } },
+      count: { create: {} },
     },
   })
 
@@ -123,6 +133,7 @@ async function createCard(
   const meta: CardMeta = {
     symbol: symbol ? symbol.name : undefined,
     conn,
+    commentId: cardComment.id,
   }
 
   // 創card, link
@@ -144,7 +155,7 @@ async function createCard(
 
 export async function createCardBody(card: PA.Cocard, editor: TextEditor, userId: string): Promise<PA.CardBody> {
   const creaters: PA.Prisma.Prisma__AnchorClient<PA.Anchor>[] = []
-  for (const e of editor.getMarkerLines()) {
+  for (const e of editor.getMarkerlines()) {
     if (e.comment && e.commentId && e.marker?.value) {
       // TODO: 對comment創reply
       // await prisma.reply.create({})

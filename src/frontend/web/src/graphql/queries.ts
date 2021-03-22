@@ -195,7 +195,11 @@ const COCARD_FRAGMENT = gql`
     __typename
     id
     template
-    meta
+    meta {
+      commentId
+      symbol
+      conn
+    }
     body {
       ...cardBody
     }

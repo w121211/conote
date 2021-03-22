@@ -103,7 +103,7 @@ export function tokenizeSymbol(text: string): Array<string | Prism.Token> {
 
 function validate(items: Marker[], allowedMarkers: MarkerFormat[]): Marker[] {
   for (const e of items) {
-    const format = allowedMarkers.find(f => f.mark === e.mark)
+    const format = allowedMarkers.find(f => f.key === e.key)
     if (format === undefined) {
       e.error = '不在允許的markers中'
       continue
@@ -117,7 +117,7 @@ function validate(items: Marker[], allowedMarkers: MarkerFormat[]): Marker[] {
       continue
     }
     if (format.inline) {
-      const filtered = items.filter(e => e.mark === format.mark)
+      const filtered = items.filter(e => e.key === format.key)
       for (let i = 0; i < filtered.length - 1; i++) {
         filtered[i].error = '只能define一次，最後一個會被保留'
       }
@@ -236,7 +236,7 @@ export function tokenizeSection(
 
   // 對每個token紀錄linenumber、marker
   let linenumber = 0
-  let mark: string | null = null
+  let key: string | null = null
 
   function _recursiveExtend(stream: Prism.TokenStream): ExtTokenStream {
     if (typeof stream === 'string') {
@@ -245,17 +245,13 @@ export function tokenizeSection(
     } else if (Array.isArray(stream)) {
       return stream.map<string | ExtToken>(e => _recursiveExtend(e) as string | ExtToken)
     } else if (stream.type === 'inline-mark' || stream.type === 'line-mark') {
-      mark = streamToStr(stream.content)
-      if (mark === '') {
-        throw new Error()
-      }
-      return { ...stream, linenumber, marker: { mark }, content: _recursiveExtend(stream.content) }
+      key = streamToStr(stream.content)
+      if (key === '') throw new Error()
+      return { ...stream, linenumber, marker: { key }, content: _recursiveExtend(stream.content) }
     } else if (stream.type === 'inline-value' || stream.type === 'line-value') {
       const value = streamToStr(stream.content, 'stamp').trim()
-      if (mark === null) {
-        throw new Error()
-      }
-      return { ...stream, linenumber, marker: { mark, value }, content: _recursiveExtend(stream.content) }
+      if (key === null) throw new Error()
+      return { ...stream, linenumber, marker: { key, value }, content: _recursiveExtend(stream.content) }
     } else {
       return { ...stream, linenumber, content: _recursiveExtend(stream.content) }
     }
@@ -268,7 +264,7 @@ export function tokenizeSection(
     stream = stream.concat(e.bodyTokens)
 
     // 轉成ext-token
-    mark = null
+    key = null
     e.stream = _recursiveExtend(stream)
   }
 

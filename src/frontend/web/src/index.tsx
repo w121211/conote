@@ -1,17 +1,20 @@
+import dotenv from 'dotenv'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { ApolloClient, ApolloProvider, NormalizedCacheObject, InMemoryCache } from '@apollo/client'
-
 import { typeDefs } from './graphql/resolvers'
 import { cache } from './cache'
 import { Pages } from './pages'
 // import { DemoPages } from './demo'
 // import './index.less'
 
+console.log(process.env.REACT_APP_API_URL)
+
 const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
   cache,
+  uri: process.env.REACT_APP_API_URL,
   // uri: 'http://localhost:4000/graphql',
-  uri: '/api',
+  // uri: '/api',
   headers: {
     // authorization: localStorage.getItem('token') || '',
     'client-name': 'conote[web]',

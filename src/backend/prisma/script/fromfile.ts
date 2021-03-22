@@ -72,7 +72,7 @@ async function main() {
     editor.flush()
 
     console.log('--- 創nested-symbol-card')
-    for (const [cardlabel, markerlines] of editor.getNestedMarkerLines()) {
+    for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
       // eslint-disable-next-line no-await-in-loop
       const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
       const nestedEditor = new TextEditor(nestedCard.body.text)
@@ -88,7 +88,6 @@ async function main() {
     await createCardBody(card, editor, testusers[0].id)
   }
 }
-// console.log('start')
 
 main()
   .catch(e => {

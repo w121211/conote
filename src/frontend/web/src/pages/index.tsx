@@ -11,6 +11,7 @@ import { HomePage } from './home-page'
 import { CardPage } from './card-page'
 import { CardFormPage } from './card-form-page'
 import { GiveandtakeCardPage } from './card-giveandtake'
+import { DebugPage } from './debug-page'
 import '../appLayout/appLayout.less'
 
 function NotFoundPage({ path }: RouteComponentProps): JSX.Element {
@@ -51,6 +52,8 @@ export function Pages(): JSX.Element | null {
         {/* <TickerFormPage path="ticker/:symbol/form" /> */}
         {/* <TopicPage path="topic/:title" /> */}
         {/* <AuthorPage path="author/:symbol" /> */}
+
+        <DebugPage path="debug" me={data?.me} />
 
         <PageContainer path="/" isLoggedIn={isLoggedIn}>
           {/* <ProtectedRoute as={Feed} isLoggedIn={isLoggedIn} default /> */}

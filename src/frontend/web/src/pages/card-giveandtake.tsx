@@ -4,7 +4,8 @@ import { useQuery } from '@apollo/client'
 import { Layout, Button } from 'antd'
 import * as queries from '../graphql/queries'
 import * as QT from '../graphql/query-types'
-import { CardForm, CardBody } from '../components/card'
+import { CardBody } from '../components/card'
+import { CardForm } from '../components/card-form'
 import { symbolToUrl, getCardUrlParam } from '../helper'
 import { ResolvedCardPage } from './card-page'
 import { TextEditor } from '@conote/editor'
@@ -57,7 +58,7 @@ export function GiveandtakeCardPage({ path, me }: RouteProps): JSX.Element {
   }
 
   const editor = new TextEditor(data.cocard.body?.text)
-  const found = editor.getMarkerLines().find(e => e.userId === me.id)
+  const found = editor.getMarkerlines().find(e => e.userId === me.id)
   if (found === undefined) {
     return (
       <div>

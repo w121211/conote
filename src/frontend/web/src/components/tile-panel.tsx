@@ -90,7 +90,6 @@ export function ReplyPanel({ reply, meAuthor }: { reply: QT.replies_replies; meA
   })
   const myReplyLikes = useQuery<QT.myReplyLikes>(queries.MY_REPLY_LIKES, { fetchPolicy: 'cache-only' })
   const meLike = myReplyLikes.data?.myReplyLikes.find(e => e.replyId === reply.id)
-  console.log(meLike)
   return (
     <span>
       <ReplyLike {...{ replyId: reply.id, count, meLike, createReplyLike, updateReplyLike }} />
@@ -120,7 +119,7 @@ interface CommentPanelProps {
   meAuthor?: boolean
 }
 
-export const CommentPanel: React.FC<CommentPanelProps> = ({ comment, meAuthor = false }) => {
+export function CommentPanel({ comment, meAuthor = false }: CommentPanelProps): JSX.Element {
   const [count, setCount] = useState<QT.comment_comment_count>(comment.count)
   const [createCommentLike] = useMutation<QT.createCommentLike, QT.createCommentLikeVariables>(
     queries.CREATE_COMMENT_LIKE,

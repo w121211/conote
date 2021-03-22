@@ -9,13 +9,13 @@ import { GraphQLResolverMap } from 'apollo-graphql'
 import { AuthenticationError, UserInputError } from 'apollo-server'
 import { GraphQLDateTime } from 'graphql-iso-date'
 import * as PA from '@prisma/client'
-import { APP_SECRET } from './main'
+import { APP_SECRET } from '.'
 import { TextEditor } from '../../lib/editor/src'
 import { Context } from './context'
 import { searchAllSymbol } from './store/fuzzy'
 import { symbolToUrl, urlToSymbol } from './models/symbol'
 import { getOrCreateLink } from './models/link'
-import { getOrCreateCardByLink, getOrCreateCardBySymbol, createCardBody } from './models/card'
+import { getOrCreateCardByLink, getOrCreateCardBySymbol, createCardBody, CardMeta } from './models/card'
 
 // function parsePostCount(count: PostCount): ST.PostCount {
 //   if (!count.poll)
@@ -93,7 +93,13 @@ export const resolvers: GraphQLResolverMap<Context> = {
         include: { link: true, body: true },
       })
       // console.log(cards)
-      return cards.map(e => ({ ...e, meta: JSON.stringify(e.meta) }))
+      return cards.map(e => {
+        const meta = (e.meta as unknown) as CardMeta
+        return {
+          ...e,
+          meta: { ...meta, conn: JSON.stringify(meta.conn) },
+        }
+      })
     },
 
     cocard: async function (parent, { url }, { prisma }): Promise<PA.Cocard> {
@@ -105,7 +111,11 @@ export const resolvers: GraphQLResolverMap<Context> = {
         const [link] = await getOrCreateLink(url)
         card = await getOrCreateCardByLink(link)
       }
-      return { ...card, meta: JSON.stringify(card.meta) }
+      const meta = (card.meta as unknown) as CardMeta
+      return {
+        ...card,
+        meta: { ...meta, conn: JSON.stringify(meta.conn) },
+      }
     },
 
     selfcard: function (parent, { id }, { prisma }) {
@@ -372,7 +382,7 @@ export const resolvers: GraphQLResolverMap<Context> = {
       editor.flush()
 
       // TODO: 1. 只有web-card才需要處理nested 2. 這裡的logic可以移到card.ts
-      for (const [cardlabel, markerlines] of editor.getNestedMarkerLines()) {
+      for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
         // eslint-disable-next-line no-await-in-loop
         const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
         const nestedEditor = new TextEditor(nestedCard.body.text)

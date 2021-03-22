@@ -392,10 +392,16 @@ export const typeDefs = gql`
     # linemetas: [Linemeta!]!
   }
 
+  type CardMeta {
+    commentId: Int!
+    symbol: String
+    conn: String # JSON string，需要parse
+  }
+
   type Cocard {
     id: ID!
     template: CardTemplate!
-    meta: String
+    meta: CardMeta!
     link: Link!
     body: CardBody
   }

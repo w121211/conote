@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
-    "clean": "rimraf dist && rimraf reports",
+    "clean": "rm -rf dist && rm -rf reports",
     "build-ts": "tsc --build",
     "build": "yarn run clean && yarn run build-ts",
-    "test": "jest --verbose --watchAll ./test"
+    "test": "jest --verbose --watchAll"
   },
   "main": "./dist/src/index.js",
   "module": "./dist/src/index.js",
@@ -16,6 +16,7 @@
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.155",
     "@types/node": "^13.13.21",
+    "@types/omit-deep-lodash": "^1.1.1",
     "@types/prismjs": "^1.16.3",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
@@ -23,6 +24,7 @@
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",
     "jest": "^25.5.4",
+    "omit-deep-lodash": "^1.1.5",
     "prettier": "^2.2.1",
     "ts-jest": "^26.5.3",
     "ts-node": "^8.10.2",

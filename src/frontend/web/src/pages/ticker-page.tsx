@@ -5,7 +5,8 @@ import { Button, Layout } from 'antd'
 import * as queries from '../graphql/queries'
 import * as QT from '../graphql/query-types'
 import { On404 } from '../components/result'
-import { CardBody, CardForm } from '../components/card'
+import { CardBody } from '../components/card'
+import { CardForm } from '../components/card-form'
 
 // interface RouteProps extends RouteComponentProps<{ symbol: string, location: { state?: { mycard: QT.selfcardFragment } } }> {
 //   me?: QT.me_me

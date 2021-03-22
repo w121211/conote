@@ -7,8 +7,7 @@ import dotenv from 'dotenv'
 import { hash } from 'bcryptjs'
 import * as PA from '@prisma/client'
 import { getOrCreateCardBySymbol, createCardBody } from '../models/card'
-import { TextEditor } from '../src/editor'
-import { BOT_EMAIL } from '../main'
+import { TextEditor } from '../../../lib/editor/src'
 
 const config = dotenv.config()
 if (config.error) {

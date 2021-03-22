@@ -27,30 +27,26 @@
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "eslint.options": { "cache": true },
   "eslint.workingDirectories": [
     {
-      "directory": "./frontend/browser",
+      "directory": "./src/frontend/browser",
       "changeProcessCWD": true
     },
     {
-      "directory": "./frontend/web",
+      "directory": "./src/frontend/web",
       "changeProcessCWD": true
     },
     {
-      "directory": "./backend",
+      "directory": "./src/backend",
       "changeProcessCWD": true
     },
     {
-      "directory": "./lib/editor",
+      "directory": "./src/lib/editor",
       "changeProcessCWD": true
     }
   ],
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "jest.autoEnable": false
 }

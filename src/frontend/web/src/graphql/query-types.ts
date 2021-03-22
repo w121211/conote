@@ -7,6 +7,13 @@
 // GraphQL query operation: latestCards
 // ====================================================
 
+export interface latestCards_latestCards_meta {
+  __typename: "CardMeta";
+  commentId: number;
+  symbol: string | null;
+  conn: string | null;
+}
+
 export interface latestCards_latestCards_body {
   __typename: "CardBody";
   id: string;
@@ -29,7 +36,7 @@ export interface latestCards_latestCards {
   __typename: "Cocard";
   id: string;
   template: CardTemplate;
-  meta: string | null;
+  meta: latestCards_latestCards_meta;
   body: latestCards_latestCards_body | null;
   link: latestCards_latestCards_link;
 }
@@ -50,6 +57,13 @@ export interface latestCardsVariables {
 // ====================================================
 // GraphQL query operation: cocard
 // ====================================================
+
+export interface cocard_cocard_meta {
+  __typename: "CardMeta";
+  commentId: number;
+  symbol: string | null;
+  conn: string | null;
+}
 
 export interface cocard_cocard_body {
   __typename: "CardBody";
@@ -73,7 +87,7 @@ export interface cocard_cocard {
   __typename: "Cocard";
   id: string;
   template: CardTemplate;
-  meta: string | null;
+  meta: cocard_cocard_meta;
   body: cocard_cocard_body | null;
   link: cocard_cocard_link;
 }
@@ -1283,6 +1297,13 @@ export interface cardBody {
 // GraphQL fragment: cocardFragment
 // ====================================================
 
+export interface cocardFragment_meta {
+  __typename: "CardMeta";
+  commentId: number;
+  symbol: string | null;
+  conn: string | null;
+}
+
 export interface cocardFragment_body {
   __typename: "CardBody";
   id: string;
@@ -1305,7 +1326,7 @@ export interface cocardFragment {
   __typename: "Cocard";
   id: string;
   template: CardTemplate;
-  meta: string | null;
+  meta: cocardFragment_meta;
   body: cocardFragment_body | null;
   link: cocardFragment_link;
 }

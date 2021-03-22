@@ -1,5 +1,5 @@
 export interface Marker {
-  mark: string
+  key: string
   value?: string
   error?: string
   // nested的時候，需要確認對應的卡是存在的
@@ -30,7 +30,13 @@ export interface CardLabel {
   me?: true
 }
 
-export interface MarkerLine {
+export interface Markerheader {
+  linenumber: number
+  marker: Marker
+  inline?: true
+}
+
+export interface Markerline {
   linenumber: number
   // 這行實際的string（原封不動）
   str: string
@@ -67,8 +73,6 @@ export interface MarkerLine {
   nested?: true
   nestedCard?: CardLabel
 
-  // 這個line是純mark，沒value
-  markonly?: true
   // 這個line的marker
   marker?: Marker
 }
@@ -84,7 +88,6 @@ interface ConnectedContent {
   commentId?: number
 }
 
-// {mark: ConnectedContent}
 export type MarkToConnectedContentRecord = Record<string, ConnectedContent>
 
 export interface ExtToken extends Prism.Token {
@@ -92,7 +95,7 @@ export interface ExtToken extends Prism.Token {
   linenumber: number
   marker?: Marker
   // 需要embed，預設沒有
-  markerline?: MarkerLine
+  markerline?: Markerline
 }
 
 export type ExtTokenStream = string | ExtToken | Array<string | ExtToken>
