@@ -102,10 +102,6 @@ model PollCount {
   id         Int      @id @default(autoincrement())
   poll       Poll     @relation(fields: [pollId], references: [id])
   pollId     Int      @unique
-  nViews     Int      @default(0)
-  nUps       Int      @default(0)
-  nDowns     Int      @default(0)
-  nComments  Int      @default(0)
   // 依照ＯＯＯ方式排序
   nVotes     Int[]
   nJudgments Int[]
@@ -232,6 +228,8 @@ model Comment {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   poll      Poll?
+  cocard    Cocard        @relation(fields: [cocardId], references: [id])
+  cocardId  Int
 }
 
 model AnchorLike {
@@ -301,6 +299,7 @@ model Cocard {
   bodyId    Int
   body      CardBody     @relation(fields: [bodyId], references: [id])
   anchors   Anchor[]
+  comment   Comment?
 }
 
 model Ocard {
