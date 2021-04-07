@@ -8,8 +8,6 @@ import { Pages } from './pages'
 // import { DemoPages } from './demo'
 // import './index.less'
 
-console.log(process.env.REACT_APP_API_URL)
-
 const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
   cache,
   uri: process.env.REACT_APP_API_URL,

@@ -45,6 +45,10 @@
     {
       "directory": "./src/lib/editor",
       "changeProcessCWD": true
+    },
+    {
+      "directory": "./src/lib/fetcher",
+      "changeProcessCWD": true
     }
   ],
   "typescript.enablePromptUseWorkspaceTsdk": true,

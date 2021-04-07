@@ -2,7 +2,14 @@ import Prism from 'prismjs'
 import { Marker, MarkerFormat, ExtToken, ExtTokenStream, Section } from './typing'
 import { streamToStr } from './helper'
 
-const GRAMMAR = {
+export const LINE_VALUE_GRAMMAR = {
+  ticker: { pattern: /\$[A-Z-]+/ },
+  topic: { pattern: /\[\[[^\]]+\]\]/u },
+  stamp: { pattern: /(?<=\s)%[a-zA-Z0-9]{3}$/ },
+  'vote-chocie': { pattern: /<[^>\s]+>/u },
+}
+
+export const GRAMMAR = {
   'multiline-marker': {
     // pattern: /^\[[^\s\]]*\]$(?:\n^(?!\[).+)+/m,
     pattern: /^\[[^\s[\]]*\]$(?:\n^(?!\[[^\s[\]]*\]).+)+/m,
@@ -10,17 +17,13 @@ const GRAMMAR = {
       'line-mark': {
         pattern: /^\[[^\s[\]]*\]$/m,
       },
+      'list-value': {
+        pattern: /^(?!-\s)(?:.+\n)(-\s.+(?:\n|$))+/m,
+      },
       'line-value': {
         pattern: /^.+$/m,
-        inside: {
-          ticker: { pattern: /\$[A-Z-]+/ },
-          topic: { pattern: /\[\[[^\]]+\]\]/u },
-          stamp: { pattern: /\s%[a-zA-Z0-9]{3}$/ },
-        },
+        inside: LINE_VALUE_GRAMMAR,
       },
-      // 'list-string': {
-      //     pattern: /^[-]+\s.+$/m,
-      // },
     },
   },
   'inline-marker': {
@@ -31,29 +34,18 @@ const GRAMMAR = {
       },
       'inline-value': {
         pattern: /^.+$/,
-        inside: {
-          ticker: { pattern: /\$[A-Z-]+/ },
-          topic: { pattern: /\[\[[^\]]+\]\]/u },
-          // TODO: 沒辦法將space與stamp分開（會成為一個string，需要trim）
-          stamp: { pattern: /\s%[a-zA-Z0-9]{3}$/ },
-        },
+        inside: LINE_VALUE_GRAMMAR,
       },
     },
   },
-  ticker: { pattern: /\$[A-Z-]+/ },
-  topic: { pattern: /\[\[[^\]]+\]\]/u },
-  // 'radio': {
-  //   pattern: /[\s\t]+\[\w?\]\p{L}+/u,
-  //   // greedy: true
-  // },
 }
 
-const SYMBOL_GRAMMAR = {
-  ticker: GRAMMAR.ticker,
-  topic: GRAMMAR.topic,
+export const SYMBOL_GRAMMAR = {
+  ticker: LINE_VALUE_GRAMMAR.ticker,
+  topic: LINE_VALUE_GRAMMAR.topic,
 }
 
-const SECTION_GRAMMAR = {
+export const SECTION_GRAMMAR = {
   'sect-ticker': {
     alias: 'sect-ticker',
     pattern: /^\n\$[A-Z-]+(@\w+)?$/m,
@@ -94,11 +86,6 @@ const SECTION_GRAMMAR = {
     alias: 'sect-url',
     pattern: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/m,
   },
-}
-
-export function tokenizeSymbol(text: string): Array<string | Prism.Token> {
-  /** 將text中的symbol($AA, [[Topic]])轉成token */
-  return Prism.tokenize(text, SYMBOL_GRAMMAR)
 }
 
 function validate(items: Marker[], allowedMarkers: MarkerFormat[]): Marker[] {
@@ -142,6 +129,51 @@ function validate(items: Marker[], allowedMarkers: MarkerFormat[]): Marker[] {
     // }
   }
   return items
+}
+
+export function findUrl(text: string): { url: string | undefined; textAfterUrl: string } {
+  /** 從首先出現的單行URL開始，擷取從URL以下的文章 */
+  const tokens = Prism.tokenize(text, SECTION_GRAMMAR)
+  let url: string | undefined
+  const _tokensAfterUrl: Array<string | Prism.Token> = []
+  for (const e of tokens) {
+    if (url === undefined) {
+      if (typeof e !== 'string' && e.type === 'sect-url') url = e.content as string
+      else continue
+    }
+    _tokensAfterUrl.push(e)
+  }
+  // return { url, textAfterUrl: tokensToText(_tokensAfterUrl) }
+  return { url, textAfterUrl: 'tokensToText(_tokensAfterUrl)' }
+}
+
+export function splitByUrl(text: string): [string | undefined, string][] {
+  /** 以text中的單行URL做split，返回:[url, part-text][] */
+  const tokens = Prism.tokenize(text, SECTION_GRAMMAR)
+  let buffer: (string | Prism.Token)[] = []
+  let url: string | undefined
+  const splits: [string | undefined, string][] = []
+
+  for (const e of tokens) {
+    if (typeof e !== 'string' && e.type === 'sect-url') {
+      // 儲存前一個buffer後清空
+      splits.push([url, streamToStr(buffer)])
+      buffer = []
+      // 當前url
+      url = e.content as string
+    } else {
+      buffer.push(e)
+    }
+  }
+  // 儲存最後一個
+  splits.push([url, streamToStr(buffer)])
+
+  return splits
+}
+
+export function tokenizeSymbol(text: string): Array<string | Prism.Token> {
+  /** 將text中的symbol($AA, [[Topic]])轉成token */
+  return Prism.tokenize(text, SYMBOL_GRAMMAR)
 }
 
 export function tokenizeSection(
@@ -278,44 +310,4 @@ export function tokenizeSection(
       stream: e.stream,
     }
   })
-}
-
-export function findUrl(text: string): { url: string | undefined; textAfterUrl: string } {
-  /** 從首先出現的單行URL開始，擷取從URL以下的文章 */
-  const tokens = Prism.tokenize(text, SECTION_GRAMMAR)
-  let url: string | undefined
-  const _tokensAfterUrl: Array<string | Prism.Token> = []
-  for (const e of tokens) {
-    if (url === undefined) {
-      if (typeof e !== 'string' && e.type === 'sect-url') url = e.content as string
-      else continue
-    }
-    _tokensAfterUrl.push(e)
-  }
-  // return { url, textAfterUrl: tokensToText(_tokensAfterUrl) }
-  return { url, textAfterUrl: 'tokensToText(_tokensAfterUrl)' }
-}
-
-export function splitByUrl(text: string): [string | undefined, string][] {
-  /** 以text中的單行URL做split，返回:[url, part-text][] */
-  const tokens = Prism.tokenize(text, SECTION_GRAMMAR)
-  let buffer: (string | Prism.Token)[] = []
-  let url: string | undefined
-  const splits: [string | undefined, string][] = []
-
-  for (const e of tokens) {
-    if (typeof e !== 'string' && e.type === 'sect-url') {
-      // 儲存前一個buffer後清空
-      splits.push([url, streamToStr(buffer)])
-      buffer = []
-      // 當前url
-      url = e.content as string
-    } else {
-      buffer.push(e)
-    }
-  }
-  // 儲存最後一個
-  splits.push([url, streamToStr(buffer)])
-
-  return splits
 }

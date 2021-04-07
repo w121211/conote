@@ -1,7 +1,8 @@
 https://www.abc.com
 
-[=]
-[?]買 vs 賣？
+[~] aaa
+[?]
+<買> vs <賣>
 [+]
 [-]
 
@@ -9,7 +10,8 @@ https://www.abc.com
 
 $AAA
 [=]
-[?]買 vs 賣？
+[?]
+- <買> vs <賣>
 [+]
 [-]
 

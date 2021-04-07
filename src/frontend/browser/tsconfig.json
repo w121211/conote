@@ -1,57 +1,22 @@
 {
-  // "references": [{ "path": "../web" }],
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    // "target": "es5",
-    "module": "commonjs",
-    // "lib": ["esnext", "es2015", "dom", "dom.iterable"],
-    // "moduleResolution": "node",
-    // "jsx": "react",
-    // "strict": true,
-    // // "sourceMap": true,
-    // "esModuleInterop": true,
-    // // "experimentalDecorators": true,
-    // "allowSyntheticDefaultImports": true,
-    // "allowJs": false,
-    // // "declaration": true,
-    // // "declarationMap": true,
-    // "skipLibCheck": true,
-    // // "noErrorTruncation": true,
-    // // "importHelpers": true,
-    // "resolveJsonModule": true,
-    // "composite": true,
-    // "downlevelIteration": true,
-
-    "target": "es5",
-    // "module": "esnext",
-    "lib": ["dom", "dom.iterable", "es2015", "esnext"],
-    "allowJs": false,
+    // 當設為es5時會有error，與apollo-gql有關
+    "target": "es6",
+    "module": "esnext",
+    "rootDir": ".",
     "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    // "noEmit": true,
     "jsx": "react",
     "downlevelIteration": true,
-
-    "rootDir": ".",
-    "outDir": "dist/js"
-    // "outDir": "out",
-    // "baseUrl": ".",
-    // "paths": {
-    // "@src/*": ["./src/*", "../web/src/*"]
-    //   "*": ["src/types/*", "../shared/src/types/*", "*"],
-    // "*": ["./src/*", "../web/src/*", "*"]
-    // }
+    "allowSyntheticDefaultImports": true,
+    // "noEmit": true,
+    "isolatedModules": true,
+    "sourceMap": true
   },
-  // "include": ["src", "../web/src"],
-  "include": ["**/*", ".*", "src/**/*.json"],
-  // "include": ["**/*", ".*", "src/**/*.json", "src/types/**/*.d.ts"],
+  "include": ["src"],
   "exclude": [
     "**/__tests__",
     "**/__deprecated__",
@@ -61,7 +26,7 @@
     "../../node_modules",
     "./build/**/*",
     "coverage",
-    "stories", // TODO fix type errors and include
+    "stories",
     "src/end-to-end"
   ]
 }

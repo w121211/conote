@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../lib/editor" }],
+  "references": [{ "path": "../lib/editor" }, { "path": "../lib/fetcher" }],
   "compilerOptions": {
     //   "module": "commonjs",
     //   "rootDir": ".",

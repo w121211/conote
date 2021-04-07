@@ -1,11 +1,217 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Grammar tokenize by list 1`] = `
+Array [
+  Object {
+    "content": Array [
+      Object {
+        "content": "[111]",
+        "length": 5,
+        "type": "line-mark",
+      },
+      "
+",
+      Object {
+        "content": "aaa
+- bbb
+- ccc
+",
+        "length": 16,
+        "type": "list-value",
+      },
+      Object {
+        "content": Array [
+          "ddd",
+        ],
+        "length": 3,
+        "type": "line-value",
+      },
+      "
+",
+      Object {
+        "content": "eee
+- fff
+- ggg",
+        "length": 15,
+        "type": "list-value",
+      },
+    ],
+    "length": 41,
+    "type": "multiline-marker",
+  },
+  "
+
+",
+  Object {
+    "content": Array [
+      Object {
+        "content": "[222]",
+        "length": 5,
+        "type": "line-mark",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          "- hhh",
+        ],
+        "length": 5,
+        "type": "line-value",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          "- iii",
+        ],
+        "length": 5,
+        "type": "line-value",
+      },
+      "
+",
+      Object {
+        "content": "jjj
+- kkk",
+        "length": 9,
+        "type": "list-value",
+      },
+    ],
+    "length": 27,
+    "type": "multiline-marker",
+  },
+  "
+",
+]
+`;
+
 exports[`Parser tokenize to sections 1`] = `
 Array [
   Object {
     "breaker": undefined,
     "nestedCard": undefined,
     "root": true,
+    "stream": Array [
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[~]",
+            "length": 3,
+            "linenumber": 0,
+            "marker": Object {
+              "key": "[~]",
+            },
+            "type": "inline-mark",
+          },
+          Object {
+            "alias": undefined,
+            "content": Array [
+              " aaa",
+            ],
+            "length": 4,
+            "linenumber": 0,
+            "marker": Object {
+              "key": "[~]",
+              "value": "aaa",
+            },
+            "type": "inline-value",
+          },
+        ],
+        "length": 7,
+        "linenumber": 0,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 1,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "alias": undefined,
+            "content": Array [
+              Object {
+                "alias": undefined,
+                "content": "<買>",
+                "length": 3,
+                "linenumber": 2,
+                "type": "vote-chocie",
+              },
+              " vs ",
+              Object {
+                "alias": undefined,
+                "content": "<賣>",
+                "length": 3,
+                "linenumber": 2,
+                "type": "vote-chocie",
+              },
+            ],
+            "length": 10,
+            "linenumber": 2,
+            "marker": Object {
+              "key": "[?]",
+              "value": "<買> vs <賣>",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 14,
+        "linenumber": 1,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[+]",
+            "length": 3,
+            "linenumber": 3,
+            "marker": Object {
+              "key": "[+]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 3,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 4,
+            "marker": Object {
+              "key": "[-]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 4,
+        "type": "inline-marker",
+      },
+    ],
     "ticker": undefined,
     "topic": undefined,
   },
@@ -18,6 +224,7 @@ Array [
     "breaker": undefined,
     "nestedCard": undefined,
     "root": undefined,
+    "stream": Array [],
     "ticker": undefined,
     "topic": undefined,
   },
@@ -28,6 +235,135 @@ Array [
       "symbol": "$AAA",
     },
     "root": undefined,
+    "stream": Array [
+      Object {
+        "alias": "sect-ticker",
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "$AAA",
+            "length": 4,
+            "linenumber": 0,
+            "type": "sect-symbol",
+          },
+          "
+",
+        ],
+        "length": 5,
+        "linenumber": 0,
+        "type": "sect-ticker-begin-line",
+      },
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[=]",
+            "length": 3,
+            "linenumber": 1,
+            "marker": Object {
+              "key": "[=]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 1,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 2,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "alias": undefined,
+            "content": Array [
+              "- ",
+              Object {
+                "alias": undefined,
+                "content": "<買>",
+                "length": 3,
+                "linenumber": 3,
+                "type": "vote-chocie",
+              },
+              " vs ",
+              Object {
+                "alias": undefined,
+                "content": "<賣>",
+                "length": 3,
+                "linenumber": 3,
+                "type": "vote-chocie",
+              },
+            ],
+            "length": 12,
+            "linenumber": 3,
+            "marker": Object {
+              "key": "[?]",
+              "value": "- <買> vs <賣>",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 16,
+        "linenumber": 2,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[+]",
+            "length": 3,
+            "linenumber": 4,
+            "marker": Object {
+              "key": "[+]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 4,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 5,
+            "marker": Object {
+              "key": "[-]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 5,
+        "type": "inline-marker",
+      },
+      "
+",
+    ],
     "ticker": true,
     "topic": undefined,
   },
@@ -38,6 +374,119 @@ Array [
       "symbol": "[[TOPIC]]",
     },
     "root": undefined,
+    "stream": Array [
+      Object {
+        "alias": "sect-topic",
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "
+[[TOPIC]]",
+            "length": 10,
+            "linenumber": 6,
+            "type": "sect-symbol",
+          },
+        ],
+        "length": 10,
+        "linenumber": 6,
+        "type": "sect-topic",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[=]",
+            "length": 3,
+            "linenumber": 8,
+            "marker": Object {
+              "key": "[=]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 8,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 9,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "inline-mark",
+          },
+          Object {
+            "alias": undefined,
+            "content": Array [
+              "買 vs 賣？",
+            ],
+            "length": 7,
+            "linenumber": 9,
+            "marker": Object {
+              "key": "[?]",
+              "value": "買 vs 賣？",
+            },
+            "type": "inline-value",
+          },
+        ],
+        "length": 10,
+        "linenumber": 9,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[+]",
+            "length": 3,
+            "linenumber": 10,
+            "marker": Object {
+              "key": "[+]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 10,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 11,
+            "marker": Object {
+              "key": "[-]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 11,
+        "type": "inline-marker",
+      },
+      "
+",
+    ],
     "ticker": undefined,
     "topic": true,
   },
@@ -48,6 +497,117 @@ Array [
       "symbol": "$BBB",
     },
     "root": undefined,
+    "stream": Array [
+      Object {
+        "alias": "sect-ticker",
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "
+$BBB",
+            "length": 5,
+            "linenumber": 12,
+            "type": "sect-symbol",
+          },
+        ],
+        "length": 5,
+        "linenumber": 12,
+        "type": "sect-ticker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[=]",
+            "length": 3,
+            "linenumber": 14,
+            "marker": Object {
+              "key": "[=]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 14,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 15,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "inline-mark",
+          },
+          Object {
+            "alias": undefined,
+            "content": Array [
+              "買 vs 賣？",
+            ],
+            "length": 7,
+            "linenumber": 15,
+            "marker": Object {
+              "key": "[?]",
+              "value": "買 vs 賣？",
+            },
+            "type": "inline-value",
+          },
+        ],
+        "length": 10,
+        "linenumber": 15,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[+]",
+            "length": 3,
+            "linenumber": 16,
+            "marker": Object {
+              "key": "[+]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 16,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "alias": undefined,
+        "content": Array [
+          Object {
+            "alias": undefined,
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 17,
+            "marker": Object {
+              "key": "[-]",
+            },
+            "type": "inline-mark",
+          },
+        ],
+        "length": 3,
+        "linenumber": 17,
+        "type": "inline-marker",
+      },
+    ],
     "ticker": true,
     "topic": undefined,
   },

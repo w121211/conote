@@ -6,7 +6,7 @@
     "clean": "rm -rf dist && rm -rf reports",
     "build-ts": "tsc --build",
     "build": "yarn run clean && yarn run build-ts",
-    "test": "jest --verbose --watchAll"
+    "test": "jest --verbose --watch"
   },
   "main": "./dist/src/index.js",
   "module": "./dist/src/index.js",

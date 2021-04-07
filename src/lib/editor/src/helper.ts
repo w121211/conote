@@ -1,5 +1,5 @@
 import * as Prism from 'prismjs'
-import { Marker, ExtToken, ExtTokenStream } from './typing'
+import { Marker, ExtToken, ExtTokenStream, Markerline } from './typing'
 
 // export function randStr(nChar: number): string {
 //   return Math.random().toString(36).substr(2, nChar)
@@ -51,4 +51,14 @@ export function markerToStr(marker: Marker, addMarker = false): string {
     return `${marker.key}\n${marker.value}`
   }
   return marker.value || ''
+}
+
+export function toStampMarkerlinesDict(markerlines: Markerline[]): Record<string, Markerline> {
+  const dict: Record<string, Markerline> = {}
+  for (const e of markerlines) {
+    if (e.stampId !== undefined) {
+      dict[e.stampId as string] = e
+    }
+  }
+  return dict
 }

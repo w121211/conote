@@ -1,5 +1,9 @@
 // @ts-check
-// Code borrowed from: https://github.com/prisma/prisma-examples/blob/latest/typescript/testing-express/prisma/prisma-test-environment.js
+/**
+ * Code borrowed from:
+ * - https://github.com/prisma/prisma-examples/blob/latest/typescript/testing-express/prisma/prisma-test-environment.js
+ * - https://github.com/graphql-nexus/tutorial/tree/master/tests
+ */
 const path = require('path')
 const util = require('util')
 const { Client } = require('pg')
@@ -32,11 +36,6 @@ class PrismaTestEnvironment extends NodeEnvironment {
     await client.connect()
     await client.query(`DROP SCHEMA IF EXISTS "${this.schema}" CASCADE`)
     await client.end()
-    // try {
-
-    // } catch (error) {
-    //   // doesn't matter as the environment is torn down
-    // }
   }
 }
 
