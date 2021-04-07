@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /** Run: npx ts-node prisma/script/fromfile.ts */
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
@@ -6,7 +7,7 @@ import { hash, hashSync } from 'bcryptjs'
 import * as PA from '@prisma/client'
 import { getOrCreateLink } from '../../src/models/link'
 import { getOrCreateCardBySymbol, getOrCreateCardByLink, createCardBody } from '../../src/models/card'
-import { splitByUrl, TextEditor } from '../../../lib/editor/src'
+import { splitByUrl, Editor, Markerline } from '../../../lib/editor/src'
 
 const config = dotenv.config()
 if (config.error) throw config.error
@@ -57,29 +58,24 @@ async function main() {
   )
 
   for (const [url, body] of load(SEEDFILE_PATH)) {
-    if (url === undefined) {
-      continue
-    }
+    if (url === undefined) continue
 
     console.log('--- 創web-card')
-    // eslint-disable-next-line no-await-in-loop
+
     const [link] = await getOrCreateLink(url)
-    // eslint-disable-next-line no-await-in-loop
     const card = await getOrCreateCardByLink(link)
 
-    const editor = new TextEditor(card.body.text, link.url)
-    editor.setBody(body)
+    const editor = new Editor(card.body.text, (card.body.meta as unknown) as Markerline[], link.url)
+    editor.setText(body)
     editor.flush()
 
     console.log('--- 創nested-symbol-card')
+
     for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
-      // eslint-disable-next-line no-await-in-loop
       const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
-      const nestedEditor = new TextEditor(nestedCard.body.text)
+      const nestedEditor = new Editor(nestedCard.body.text)
       nestedEditor.setMarkerlinesToInsert(markerlines.filter(e => e.new))
       nestedEditor.flush()
-
-      // eslint-disable-next-line no-await-in-loop
       await createCardBody(nestedCard, nestedEditor, testusers[0].id)
     }
 

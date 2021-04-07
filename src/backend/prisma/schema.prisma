@@ -37,6 +37,7 @@ model Oauthor {
   votes     Vote[]
   links     Link[]
   ocards    Ocard[]
+  replies   Reply[]
 }
 
 // Ref
@@ -48,8 +49,8 @@ model Link {
   domain      String
   srcType     SrcType  @default(OTHER)
   srcId       String?
-  // extra資訊
-  extra       Json?
+  // 任何可以抓到的meta資訊
+  meta        Json?
   // 圖片存擋位址 or byte64?
   // snapshot String
   // 這個content是由這個oauthor建立
@@ -175,17 +176,20 @@ model ReplyCount {
 }
 
 model Reply {
-  id        Int         @id @default(autoincrement())
-  user      User        @relation(fields: [userId], references: [id])
-  userId    String
+  id          Int         @id @default(autoincrement())
+  user        User        @relation(fields: [userId], references: [id])
+  userId      String
+  // user紀錄oauther的reply
+  oauthor     Oauthor?    @relation(fields: [oauthorName], references: [name])
+  oauthorName String?
   // status         PostStatus    @default(ACTIVE)
-  text      String
-  count     ReplyCount?
-  likes     ReplyLike[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  comment   Comment     @relation(fields: [commentId], references: [id])
-  commentId Int
+  text        String
+  count       ReplyCount?
+  likes       ReplyLike[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  comment     Comment     @relation(fields: [commentId], references: [id])
+  commentId   Int
 }
 
 model CommentLike {
@@ -220,7 +224,7 @@ model Comment {
   // status    PostStatus    @default(ACTIVE)
   // isTop     Boolean       @default(false)
   // isProp    Boolean       @default(false)
-  // meta      Json?
+  meta      Json
   text      String
   count     CommentCount?
   likes     CommentLike[]
@@ -228,8 +232,6 @@ model Comment {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   poll      Poll?
-  cocard    Cocard        @relation(fields: [cocardId], references: [id])
-  cocardId  Int
 }
 
 model AnchorLike {
@@ -277,6 +279,7 @@ model CardBody {
   id        Int       @id @default(autoincrement())
   user      User      @relation(fields: [userId], references: [id])
   userId    String
+  meta      Json
   text      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -299,7 +302,6 @@ model Cocard {
   bodyId    Int
   body      CardBody     @relation(fields: [bodyId], references: [id])
   anchors   Anchor[]
-  comment   Comment?
 }
 
 model Ocard {

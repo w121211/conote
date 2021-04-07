@@ -36,59 +36,44 @@ export interface Markerheader {
   inline?: true
 }
 
-export interface Markerline {
-  linenumber: number
-  // 這行實際的string（原封不動）
-  str: string
+export interface DBLinker {
+  createrId?: string // 建立這行的user，新增時輸入
+  editorIds?: string[] // 有修改過這行的user，最後者為最新修改的user
 
-  // 建立這個line的user
-  userId?: string
   anchorId?: number
+  pollId?: number
+  commentId?: number
+  replyId?: number
+}
+
+export interface Markerline extends DBLinker {
+  linenumber: number
+  str: string // 這行實際的string（原封不動）
+
+  new?: true // 這行是新增的，靠此創anchor, comment, poll, reply等
+  broken?: true // 有stamp，但損毀
 
   stampId?: string
-  // 新創的一行，靠此flag創anchor
-  new?: true
-  // 在行內還沒有stamp
-  noStamp?: true
-  // 有stamp，但損毀
-  broken?: true
+  noStamp?: true // 這行沒有stamp，靠此修改body-text，把stamp補進這行
 
-  // 對網頁做筆記時，紀錄該網頁的url，視為來源
-  src?: string
-  // 紀錄src-card對應的那一行
-  srcStamp?: string
+  marker?: Marker // 這行的marker
 
-  // TODO: 還未決定是否需要此項
-  oauthor?: string
-
-  // 這個line對應的是投票
-  poll?: true
-  pollId?: number
-
-  // 這個line對應的是一個comment
-  comment?: true
-  commentId?: number
-
-  // 這個line屬於的nested-card，沒有即代表root
-  nested?: true
+  nested?: true // 這行屬於的nested-card，沒有即代表root
   nestedCard?: CardLabel
 
-  // 這個line的marker
-  marker?: Marker
-}
+  src?: string // 對網頁做筆記時，紀錄該網頁的url，視為來源
+  srcStamp?: string // 紀錄src-card對應的那一行
 
-interface ConnectedContent {
-  // 這行對應的是投票
-  poll?: true
-  pollId?: number
+  oauthor?: string
+
+  comment?: true // 這行是一個comment
+
+  poll?: true // 這行是一個投票
   pollChoices?: string[]
 
-  // 這行對應的是一個comment
-  comment?: true
-  commentId?: number
+  reply?: true // 這行是一個reply
+  neatReply?: true // 這行是一個neat-reply，目前判別方式 -> [?] && 只有一個<choice>
 }
-
-export type MarkToConnectedContentRecord = Record<string, ConnectedContent>
 
 export interface ExtToken extends Prism.Token {
   content: ExtTokenStream
@@ -119,3 +104,16 @@ export interface Section {
 //     markers?: Marker[]
 //     symbols?: Set<string>
 // }
+
+// interface ConnectedContent {
+//   // 這行對應的是投票
+//   poll?: true
+//   pollId?: number
+//   pollChoices?: string[]
+
+//   // 這行對應的是一個comment
+//   comment?: true
+//   commentId?: number
+// }
+
+// export type MarkToConnectedContentRecord = Record<string, ConnectedContent>

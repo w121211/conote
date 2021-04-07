@@ -6,6 +6,6 @@
     "composite": true,
     "declaration": true
   },
-  "include": ["src", "test"],
+  "include": ["src"],
   "exclude": ["**/__deprecated__", "node_modules"]
 }

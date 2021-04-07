@@ -18,16 +18,26 @@ module.exports = {
   devtool: 'inline-source-map', // ts-loader, chrome-extension需要這個才不會報錯
   context: __dirname,
   entry: {
+<<<<<<< HEAD
     'background-script': path.resolve(__dirname, 'src/scripts/background-script.ts'),
     'content-script': path.resolve(__dirname, 'src/scripts/content-script.ts'),
     popup: path.resolve(__dirname, 'src/popup/index.tsx'),
     // main: path.resolve(__dirname, 'src/index.tsx'),
+=======
+    'background-page': path.join(__dirname, './src/background-page.ts'),
+    popup: path.join(__dirname, './src/popup/index.tsx'),
+    main: path.join(__dirname, './src/index.tsx'),
+>>>>>>> 514adbb... .
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
   },
   output: {
+<<<<<<< HEAD
     path: path.resolve(__dirname, 'dist'),
+=======
+    path: path.join(__dirname, './dist'),
+>>>>>>> 514adbb... .
     filename: '[name].js',
   },
   module: {
@@ -35,6 +45,7 @@ module.exports = {
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
+<<<<<<< HEAD
         // 改用babel-lodaer，ts-loader的type-checking會報錯，但單純跑`tsc`卻沒問題，尚未找到解決辦法
         loader: 'babel-loader',
       },
@@ -42,6 +53,10 @@ module.exports = {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
       },
+=======
+        loader: 'babel-loader',
+      },
+>>>>>>> 514adbb... .
       // {
       //   test: /\.tsx?$/,
       //   include: path.join(__dirname, 'src'),
@@ -98,6 +113,7 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
+<<<<<<< HEAD
           from: path.resolve(__dirname, 'public', '*.json'),
           to: path.resolve(__dirname, 'dist', '[name].json'),
         },
@@ -112,6 +128,21 @@ module.exports = {
       ],
     }),
 
+=======
+          from: path.join(__dirname, 'public', '*.json'),
+          to: path.join(__dirname, 'dist', '[name].json'),
+        },
+        {
+          from: path.join(__dirname, 'public', '*.png'),
+          to: path.join(__dirname, 'dist', '[name].png'),
+        },
+        {
+          from: path.join(__dirname, 'public', '*.html'),
+          to: path.join(__dirname, 'dist', '[name].html'),
+        },
+      ],
+    }),
+>>>>>>> 514adbb... .
     // new HtmlWebpackPlugin({
     //   filename: './index.html',
     //   template: './public/index.html',

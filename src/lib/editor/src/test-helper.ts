@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs'
-import { splitByUrl, tokenizeSection } from './parser'
+import { splitByUrl } from './parser'
 
 export function load(filepath: string): [string, string][] {
   return (
@@ -20,4 +20,8 @@ export class FakeChance {
     }
     return str
   }
+}
+
+export function removeUndefinedFields<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj))
 }
