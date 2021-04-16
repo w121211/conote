@@ -20,7 +20,7 @@
   :global(.ant-comment) {
     width: 100%;
     min-height: 30px;
-    border-bottom: 1px solid $natual2;
+    border-bottom: 1px solid $natual;
     background-color: transparent;
   }
   .commentRoot {
@@ -28,12 +28,13 @@
     :global(.ant-comment-actions) {
       flex-direction: row;
       flex-shrink: 0;
+      margin: 0;
       margin-left: auto;
 
       opacity: 0;
     }
     :global(.ant-comment-inner) {
-      padding: 10px 0;
+      padding: 10px 20px;
       background-color: transparent;
       &:hover {
         :global(.ant-comment-actions) {
@@ -53,6 +54,7 @@
     margin: 0 16px 0 10px;
     word-wrap: break-word;
     word-break: break-all;
+    font-size: 13px;
   }
   :global(.ant-comment-nested) {
     margin-left: 0;

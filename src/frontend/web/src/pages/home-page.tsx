@@ -50,7 +50,7 @@ function LatestCards(): JSX.Element | null {
 export function HomePage({ me }: RouteProps): JSX.Element {
   return (
     <Layout.Content className="site-layout-background content" style={{ minHeight: 280 }}>
-      <SearchAllForm />
+      {/* <SearchAllForm /> */}
       <LatestCards />
     </Layout.Content>
   )

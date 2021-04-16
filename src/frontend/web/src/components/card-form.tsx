@@ -9,6 +9,9 @@ import { AnchorPanel } from './tile-panel'
 import { QueryCommentModal } from './tile'
 import { toUrlParams } from '../helper'
 import { RenderCardBody } from './card'
+import classes from './card-form.module.scss'
+// import classes from '../pages/card-page.module.scss'
+import { ReactComponent as SaveIcon } from '../assets/save.svg'
 
 function CardInput() {
   /**
@@ -162,15 +165,28 @@ export function CardForm({ card, onFinishFn }: { card: QT.cocardFragment; onFini
   return (
     <div>
       {/* {symbolTokens.map((e, i) => <RenderToken key={i} token={e} />)} */}
-      <Form onFinish={onFinish} initialValues={{ input: editor.getBody() }} onValuesChange={onValuesChange}>
-        <Form.Item name="input">
-          <Input.TextArea rows={10} autoSize />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            儲存
-          </Button>
-        </Form.Item>
+      <Form
+        className={classes.formContainer}
+        onFinish={onFinish}
+        initialValues={{ input: editor.getBody() }}
+        onValuesChange={onValuesChange}
+      >
+        {/* <div className={classesCard.cardOuter}>
+          <div className={classesCard.cardInner}>
+            <div className={classesCard.cardElement}> */}
+        <div className={classes.formItemWrapper}>
+          <Form.Item name="input" className={classes.textAreaContainer}>
+            <Input.TextArea rows={20} />
+          </Form.Item>
+          {/* </div>
+          </div>
+        </div> */}
+          <Form.Item className={classes.buttonContainer}>
+            <Button className={classes.button} type="primary" htmlType="submit">
+              <SaveIcon className={classes.saveIcon} />
+            </Button>
+          </Form.Item>
+        </div>
       </Form>
       <RenderCardBody sects={sects} />
     </div>

@@ -24,6 +24,7 @@ import * as QT from '../graphql/query-types'
 import { Pane } from './layout'
 import { SymbolAutoComplete } from './symbol-hint'
 import { toUrlParams } from '../helper'
+import '../appLayout/appLayout.less'
 
 // interface VotePostFormProps {
 //   pollId: string
@@ -214,7 +215,7 @@ export function SearchAllForm() {
       onSearch={onSearch}
       // placeholder="input here"
     >
-      <Input.Search placeholder="搜尋全站: $BA, Google, 自動駕駛" loading={loading} />
+      <Input.Search className="search" placeholder="搜尋全站: $BA, Google, 自動駕駛" loading={loading} />
     </AutoComplete>
   )
 }

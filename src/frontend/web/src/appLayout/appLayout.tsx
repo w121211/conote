@@ -57,9 +57,9 @@ class AppLayout extends Component {
               onClick: this.toggle,
             })}
           </Header>
-          <div className="anchorWrapper">
+          {/* <div className="anchorWrapper">
             <Anchor />
-          </div>
+          </div> */}
           <Content
             className="site-layout-background content"
             style={{

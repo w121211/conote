@@ -1,0 +1,12 @@
+@import '../style/global.module.scss';
+
+.tags {
+  display: flex;
+  justify-content: space-around;
+  padding: 0 20px;
+  text-align: center;
+  font-size: 13px;
+  span {
+    flex: 1;
+  }
+}

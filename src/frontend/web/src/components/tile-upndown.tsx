@@ -5,6 +5,7 @@
 import React, { useState } from 'react'
 import { LikeOutlined, DislikeOutlined, LikeFilled, DislikeFilled } from '@ant-design/icons'
 import * as QT from '../graphql/query-types'
+import classes from './tile-updown.module.scss'
 
 // const action = () => setShowLogin(true)
 export function DummyPostLike1({ action }: { action: any }): JSX.Element {
@@ -52,7 +53,7 @@ export function AnchorLike({
     }
   }
   return (
-    <span onClick={onClick}>
+    <span className={classes.icon} onClick={onClick}>
       {liked ? <LikeFilled /> : <LikeOutlined />}
       {showCount && count && count.nUps}
     </span>
@@ -84,7 +85,7 @@ export function AnchorDislike({
     }
   }
   return (
-    <span onClick={onClick}>
+    <span className={classes.icon} onClick={onClick}>
       {disliked ? <DislikeFilled /> : <DislikeOutlined />}
       {showCount && count && count.nDowns}
     </span>

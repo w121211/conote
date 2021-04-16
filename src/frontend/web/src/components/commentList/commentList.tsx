@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { List } from 'antd'
+import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
+import * as QT from '../../graphql/query-types'
 import CommentTemplate from '../commentTemplate/commentTemplate'
 import classes from './commentList.module.scss'
 
@@ -13,6 +15,9 @@ import classes from './commentList.module.scss'
 //     {text}
 //   </Space>
 // )
+// interface RouteProps extends RouteComponentProps {
+//   me?: QT.me_me
+// }
 
 const CommentList = () => {
   interface listData {
@@ -28,17 +33,17 @@ const CommentList = () => {
   }
 
   let listData: Array<listData> = [
-    {
-      // href: 'https://ant.design',
-      // title: `ant design part ${i}`,
-      // description:
-      //   'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-      id: `1`,
-      parent: false,
-      content: '可以買了嗎？',
-      floor: `1`,
-      clicked: false,
-    },
+    // {
+    //   // href: 'https://ant.design',
+    //   // title: `ant design part ${i}`,
+    //   // description:
+    //   //   'Ant Design, a design language for background applications, is refined by Ant UED Team.',
+    //   id: `1`,
+    //   parent: false,
+    //   content: '可以買了嗎？',
+    //   floor: `1`,
+    //   clicked: false,
+    // },
   ]
   for (let i = 0; i < 14; i++) {
     listData.push({
@@ -57,7 +62,7 @@ const CommentList = () => {
 
   const parentCommentClickHandler = (id: string) => {
     const commentId = id
-    const newList = list.map((item) => {
+    const newList = list.map(item => {
       if (item.id === commentId) {
         // if (item.clicked) {
         //   if (item.input) {
@@ -85,9 +90,9 @@ const CommentList = () => {
     <List
       className={classes.List}
       size="large"
-      header={`討論`}
+      // header={`討論`}
       pagination={{
-        onChange: (page) => {
+        onChange: page => {
           console.log(page)
         },
         pageSize: 5,
@@ -98,12 +103,10 @@ const CommentList = () => {
       //   //     <b>ant design</b> footer part
       //   //   </div>
       // }
-      renderItem={(item) => (
-        <li
-          className={classes.commentRoot}
-          onClick={() => parentCommentClickHandler(item.id)}
-        >
-          <CommentTemplate
+      renderItem={item => (
+        <li className={classes.commentRoot} onClick={() => parentCommentClickHandler(item.id)}>
+          <CommentTemplate id={item.id} content={item.content} floor={item.floor} />
+          {/* <CommentTemplate 
             id={item.id}
             content={item.content}
             clicked={item.clicked}
@@ -125,7 +128,7 @@ const CommentList = () => {
                 />
               </>
             ) : null}
-          </CommentTemplate>
+          </CommentTemplate> */}
         </li>
       )}
     />

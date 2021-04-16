@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
 import { useQuery } from '@apollo/client'
 import { Layout, Button } from 'antd'
@@ -6,23 +6,71 @@ import * as queries from '../graphql/queries'
 import * as QT from '../graphql/query-types'
 import { CardHead, CardBody } from '../components/card'
 import { symbolToUrl, getCardUrlParam } from '../helper'
+import TickerAnchor from '../components/anchor/tickerAnchor'
+import { ReactComponent as EditIcon } from '../assets/edit.svg'
+import classes from './card-page.module.scss'
 
 interface RouteProps extends RouteComponentProps {
   me?: QT.me_me
 }
 
 export function ResolvedCardPage({ card }: { card: QT.cocardFragment }): JSX.Element {
+  const [titleCount, setTitleCount] = useState(0)
+
+  const myRef = useRef<any[]>([])
+  console.log(myRef.current)
+  const pushTitleHandler = (el: any) => {
+    // myRef.current[titleCount] = el
+    // setTitleCount(titleCount + 1)
+  }
+  const clickHandler = (e: any, index: number) => {
+    console.log('click')
+    console.log(e)
+    console.log(index)
+    myRef.current[index].scrollIntoView({ behavior: 'smooth' })
+    // console.log(myRef.current)
+    // document.getElementById(data.symbol)?.scrollIntoView({ behavior: 'smooth' })
+    // console.log(data.symbol)
+    // if (myRef && 'current' in myRef) {
+    // ref.current?.focus();
+    // myRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // }
+  }
+
+  const titleRefHandler = (arr: any[]) => {
+    console.log(arr)
+    // if (myRef.current) {
+    // arr.forEach((el, idx) => (myRef.current[idx] = el))
+    // }
+    // myRef.current
+    myRef.current = arr
+    console.log(myRef.current)
+  }
+
   return (
-    <Layout.Content className="site-layout-background content" style={{ minHeight: 280 }}>
-      <CardHead card={card} />
-      <CardBody card={card} />
+    <Layout.Content className="site-layout-background content">
+      {console.log(card)}
+      <TickerAnchor data={card} clickHandler={clickHandler} />
+      <div className={classes.cardOuter}>
+        <div className={classes.cardInner}>
+          <div className={classes.cardElement}>
+            <CardHead card={card} />
+            {/* <div className={classes.cardBodyContainer}> */}
+            <CardBody className={classes.section} card={card} ref={myRef} titleRefHandler={titleRefHandler} />
+            {/* </div> */}
+          </div>
+        </div>
+      </div>
+      {/* <div className={classes.buttonWrapper}> */}
       <Button
+        className={classes.button}
         onClick={() => {
           navigate(`/form?${getCardUrlParam(card)}`)
         }}
       >
-        編輯
+        <EditIcon className={classes.editIcon} />
       </Button>
+      {/* </div> */}
     </Layout.Content>
   )
 }

@@ -12,8 +12,8 @@ console.log(process.env.REACT_APP_API_URL)
 
 const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
   cache,
-  uri: process.env.REACT_APP_API_URL,
-  // uri: 'http://localhost:4000/graphql',
+  // uri: process.env.REACT_APP_API_URL,
+  uri: 'http://localhost:4000/graphql',
   // uri: '/api',
   headers: {
     // authorization: localStorage.getItem('token') || '',

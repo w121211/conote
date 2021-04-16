@@ -4,8 +4,19 @@ import { useQuery, useMutation } from '@apollo/client'
 import * as queries from '../graphql/queries'
 import * as QT from '../graphql/query-types'
 import { AnchorLike, AnchorDislike, ReplyLike, ReplyDislike, CommentLike, CommentDislike } from './tile-upndown'
+import classes from './tile-panel.module.scss'
+import { ReactComponent as CommentIcon } from '../assets/chat.svg'
+import MyModal from '../components/modal/modal'
 
-export function AnchorPanel({ anchorId, meAuthor }: { anchorId: string; meAuthor: boolean }): JSX.Element {
+export function AnchorPanel({
+  anchorId,
+  meAuthor,
+  className,
+}: {
+  anchorId: string
+  meAuthor: boolean
+  className?: string
+}): JSX.Element {
   const [count, setCount] = useState<QT.anchorCount | null>(null)
   const [createLike] = useMutation<QT.createAnchorLike, QT.createAnchorLikeVariables>(queries.CREATE_ANCHOR_LIKE, {
     update(cache, { data }) {
@@ -37,10 +48,22 @@ export function AnchorPanel({ anchorId, meAuthor }: { anchorId: string; meAuthor
   })
   const myAnchorLikes = useQuery<QT.myAnchorLikes>(queries.MY_ANCHOR_LIKES, { fetchPolicy: 'cache-only' })
   const meLike = myAnchorLikes.data?.myAnchorLikes.find(e => e.anchorId.toString() === anchorId)
+  let classList: string[] = []
+  const classLister = (className: string) => {
+    classList.push(className)
+    return classList.join(' ')
+  }
+  const [showModal, setShowModal] = useState(false)
+  const onClickHandler = (e: any) => {
+    e.stopPropagation()
+    setShowModal(prevShowModal => !prevShowModal)
+  }
   return (
-    <span>
+    <span className={classLister(classes.comment)}>
       <AnchorLike {...{ anchorId, count, meLike, createLike, updateLike }} />
       <AnchorDislike {...{ anchorId, count, meLike, createLike, updateLike }} />
+      <CommentIcon className={classes.commentIcon} onClick={onClickHandler} />
+      <MyModal modalVisible={showModal} handleOk={onClickHandler} handleCancel={onClickHandler} />
     </span>
   )
   // return (
