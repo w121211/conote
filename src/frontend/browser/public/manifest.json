@@ -4,6 +4,7 @@
   "description": "A Chrome Extension starter kit",
   "version": "1.0.0",
 <<<<<<< HEAD
+<<<<<<< HEAD
   "background": {
     "scripts": ["background-script.js"],
     "persistent": false
@@ -27,19 +28,42 @@
     "default_icon": "icon-16.png",
     "default_popup": "popup.html"
   },
+=======
+>>>>>>> 6e31220... add extension
   "background": {
-    "scripts": ["background-page.js"],
+    "scripts": ["background-script.js"],
     "persistent": false
   },
+<<<<<<< HEAD
 >>>>>>> 514adbb... .
+=======
+  "browser_action": {
+    "default_icon": {
+      "16": "icon-16.png",
+      "48": "icon-48.png"
+    },
+    "default_title": "Hello world?"
+    // "default_popup": "popup.html"
+  },
+  // "content_scripts": [
+  //   {
+  //     "matches": ["<all_urls>"],
+  //     "js": ["content-script.js"]
+  //   }
+  // ],
+>>>>>>> 6e31220... add extension
   "icons": {
     "16": "icon-16.png",
     "48": "icon-48.png",
     "128": "icon-128.png"
   },
 <<<<<<< HEAD
+<<<<<<< HEAD
   "permissions": ["storage", "tabs", "http://localhost:4000/"]
 =======
   "permissions": ["tabs", "activeTab", "notifications", "http://*/", "https://*/"]
 >>>>>>> 514adbb... .
+=======
+  "permissions": ["storage", "tabs", "http://localhost:4000/"]
+>>>>>>> 6e31220... add extension
 }

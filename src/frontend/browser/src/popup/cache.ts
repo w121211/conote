@@ -51,10 +51,15 @@ import * as QT from '../graphql/query-types'
 // })
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // browser.storage
 
 =======
 >>>>>>> 514adbb... .
+=======
+// browser.storage
+
+>>>>>>> 6e31220... add extension
 export const cache: InMemoryCache = new InMemoryCache({
   typePolicies: {
     Query: {

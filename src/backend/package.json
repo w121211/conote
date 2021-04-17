@@ -8,7 +8,7 @@
     "migrate:deploy": "prisma migrate deploy --preview-feature",
     "generate": "prisma generate",
     "gen:schema": "graphql-schema-typescript generate-ts src/schema.gql --output src/schemaTypes.d.ts --typePrefix=''",
-    "seed:": "ts-node prisma/seed.ts",
+    "seed": "ts-node prisma/script/test.ts",
     "seed:fromfile": "ts-node prisma/script/fromfile.ts",
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts",
     "test": "jest --watch",

@@ -121,10 +121,11 @@ server.applyMiddleware({
   app,
   path: '/',
   // allow CORS (dev only)
-  cors: {
-    origin: 'http://localhost:3000',
-    credentials: true,
-  },
+  // cors: {
+  //   origin: 'http://localhost:3000',
+  //   credentials: true,
+  // },
+  cors: true,
 })
 
 // module.exports = { app };
