@@ -1,41 +1,15 @@
+import 'regenerator-runtime/runtime'
+import 'core-js/stable'
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import { ApolloClient, ApolloProvider, NormalizedCacheObject } from '@apollo/client'
-import { browser } from 'webextension-polyfill-ts'
-import { typeDefs } from '../graphql/resolvers'
-import { cache } from './cache'
-import { CardPage } from '../components/card'
-// import '../scss/app.scss'
-// import * as LaunchDetailTypes from '../pages/__generated__/LaunchDetails';
+import ReactDOM from 'react-dom'
+import { App } from './app'
 
-const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
-  cache,
-  // cache: new InMemoryCache(),
-  uri: 'http://localhost:4000/graphql',
-  headers: {
-    // authorization: localStorage.getItem('token') || '',
-    'client-name': 'Conote[Extension]',
-    'client-version': '0.1.0',
-  },
-  // TODO: 需設為'include'，否則cookies不會被儲存（不確定正式時是否需要）
-  // Ref:
-  // - https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials
-  // - https://github.com/apollographql/apollo-client/issues/4190
-  credentials: 'include',
-  // credentials: "same-origin",
-  resolvers: {},
-  typeDefs,
-})
+async function main(): Promise<void> {
+  // Make sure DOM is fully loaded, see: https://github.com/sourcegraph/sourcegraph/blob/main/client/browser/src/browser-extension/scripts/contentPage.main.ts#L29
+  if (document.readyState !== 'complete' && document.readyState !== 'interactive') {
+    await new Promise<Event>(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }))
+  }
+  ReactDOM.render(<App />, document.getElementById('root'))
+}
 
-browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-  const tab = tabs[0]
-  console.log(tab.url)
-
-  ReactDOM.render(
-    // <h1>Hello World</h1>,
-    <ApolloProvider client={client}>
-      <CardPage />
-    </ApolloProvider>,
-    document.getElementById('root'),
-  )
-})
+main().catch(console.error.bind(console))

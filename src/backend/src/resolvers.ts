@@ -10,7 +10,7 @@ import { AuthenticationError, UserInputError } from 'apollo-server'
 import { GraphQLDateTime } from 'graphql-iso-date'
 import * as PA from '@prisma/client'
 import { APP_SECRET } from '.'
-import { TextEditor } from '../../lib/editor/src'
+import { Editor } from '../../lib/editor/src'
 import { Context } from './context'
 import { searchAllSymbol } from './store/fuzzy'
 import { symbolToUrl, urlToSymbol } from './models/symbol'
@@ -377,15 +377,15 @@ export const resolvers: GraphQLResolverMap<Context> = {
         throw new Error('Card not found, fail to create card body')
       }
 
-      const editor = new TextEditor(card.body.text, card.linkUrl)
-      editor.setBody(data.text)
+      const editor = new Editor(card.body.text, card.body.meta, card.linkUrl)
+      editor.setText(data.text)
       editor.flush()
 
       // TODO: 1. 只有web-card才需要處理nested 2. 這裡的logic可以移到card.ts
       for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
         // eslint-disable-next-line no-await-in-loop
         const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
-        const nestedEditor = new TextEditor(nestedCard.body.text)
+        const nestedEditor = new Editor(nestedCard.body.text)
         nestedEditor.setMarkerlinesToInsert(markerlines.filter(e => e.new))
         nestedEditor.flush()
         // eslint-disable-next-line no-await-in-loop
@@ -417,11 +417,10 @@ export const resolvers: GraphQLResolverMap<Context> = {
 
     signup: async (parent, { email, password }, { prisma, res }) => {
       res.clearCookie('token')
-      const hashedPassword = await hash(password, 10)
       const user = await prisma.user.create({
         data: {
           email,
-          password: hashedPassword,
+          password: await hash(password, 10),
           // profile: { create: {} },
           // dailyProfile: { create: {} },
         },

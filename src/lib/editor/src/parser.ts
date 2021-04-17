@@ -1,4 +1,4 @@
-import Prism from 'prismjs'
+import * as Prism from 'prismjs'
 import { Marker, MarkerFormat, ExtToken, ExtTokenStream, Section } from './typing'
 import { streamToStr } from './helper'
 

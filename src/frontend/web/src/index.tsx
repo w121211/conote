@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { ApolloClient, ApolloProvider, NormalizedCacheObject, InMemoryCache } from '@apollo/client'
+import { ApolloClient, ApolloProvider, NormalizedCacheObject } from '@apollo/client'
 import { typeDefs } from './graphql/resolvers'
 import { cache } from './cache'
 import { Pages } from './pages'

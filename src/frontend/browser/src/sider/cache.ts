@@ -50,8 +50,6 @@ import * as QT from '../graphql/query-types'
 //   },
 // })
 
-// browser.storage
-
 export const cache: InMemoryCache = new InMemoryCache({
   typePolicies: {
     Query: {

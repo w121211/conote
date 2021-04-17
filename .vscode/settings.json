@@ -39,6 +39,10 @@
       "changeProcessCWD": true
     },
     {
+      "directory": "./src/frontend/web-lab",
+      "changeProcessCWD": true
+    },
+    {
       "directory": "./src/backend",
       "changeProcessCWD": true
     },
