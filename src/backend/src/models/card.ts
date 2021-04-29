@@ -146,28 +146,6 @@ export async function getOrCreateCardByLink(
   return await createCard(PA.CardTemplate.WEBPAGE, undefined, link)
 }
 
-export async function createOrUpdateWebCard(url: string, text: string, userId: string): Promise<PA.CardBody> {
-  // 創web-card
-  const [link] = await getOrCreateLink(url)
-  const card = await getOrCreateCardByLink(link)
-
-  const editor = new Editor(card.body.text, (card.body.meta as unknown) as Markerline[], link.url)
-  editor.setText(text)
-  editor.flush()
-
-  // 創nested-symbol-card
-  for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
-    const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
-    const nestedEditor = new Editor(nestedCard.body.text)
-    nestedEditor.setMarkerlinesToInsert(markerlines.filter(e => e.new && !e.neatReply))
-    nestedEditor.flush()
-    await createCardBody(nestedCard, nestedEditor, userId)
-  }
-
-  // 必須在最後才創root-card，不然markerlines的new標記會被刪除，因為已經儲存
-  return await createCardBody(card, editor, userId)
-}
-
 // export async function createConnectedContents(
 //   contents: MarkToConnectedContentRecord,
 //   cardId: number,

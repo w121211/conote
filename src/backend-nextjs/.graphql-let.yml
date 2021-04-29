@@ -1,0 +1,10 @@
+schema: apollo/type-defs.graphqls
+schemaEntrypoint: apollo/type-defs.graphqls
+documents: '**/*.graphql'
+cacheDir: __generated__
+plugins:
+  - typescript
+  - typescript-operations
+  - typescript-react-apollo
+config:
+  preResolveTypes: true # 產生flatten-type，避免Pick<...>，增加易讀性

@@ -95,12 +95,15 @@ export const typeDefs = gql`
   }
 
   type Mutation {
+    # 限定於web-card
+    createWebCardBody(cardId: ID!, data: CardBodyInput!): CardBody!
+
     # 創cardBody，同步更新nested-card
-    createCardBody(cardId: ID, data: CardBodyInput!): CardBody!
+    # createCardBody(cardId: ID, data: CardBodyInput!): CardBody!
 
     # createOcard(symbolName: String!, oauthorName: String!, data: [CommentInput!]!): Ocard!
-    createMycard(symbolName: String!): Selfcard!
-    createMycardBody(cardId: ID, data: CardBodyInput!): CardBody!
+    # createMycard(symbolName: String!): Selfcard!
+    # createMycardBody(cardId: ID, data: CardBodyInput!): CardBody!
 
     # createComment(cardIds: [CardIdInput!]!, data: CommentInput!): Comment!
     # updateComment(id: ID!, data: CommentInput!): Comment!

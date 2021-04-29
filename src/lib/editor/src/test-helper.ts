@@ -11,8 +11,9 @@ export function load(filepath: string): [string, string][] {
 }
 
 export class FakeChance {
-  i = 0
-  string(): string {
+  private i = 0
+
+  public string(): string {
     const str = this.i.toString(36).padStart(3, '0')
     this.i += 1
     if (this.i >= 36 * 36 * 36) {
@@ -20,8 +21,12 @@ export class FakeChance {
     }
     return str
   }
+
+  public reset(): void {
+    this.i = 0
+  }
 }
 
-export function removeUndefinedFields<T>(obj: T): T {
+export function omitUndefined<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj))
 }

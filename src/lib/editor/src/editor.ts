@@ -44,7 +44,6 @@
 // (Server) 更新 my-card
  */
 import { cloneDeep } from 'lodash'
-import { Chance } from 'chance'
 import { CardLabel, DBLinker, Markerheader, Markerline, ExtToken, Section } from './typing'
 import { filterTokens, toStampMarkerlinesDict } from './helper'
 import { tokenizeSection } from './parser'
@@ -53,7 +52,6 @@ import { updateMarkerlines, insertMarkerlinesToText } from './markerline'
 export class Editor {
   // private readonly _storedText: string
   // private readonly _storedMarkerLines: MarkerLine[];
-  private readonly chance = new Chance()
 
   private _sects: Section[]
   private _text: string
@@ -139,7 +137,6 @@ export class Editor {
       const { markerheaders, markerlines } = updateMarkerlines(
         this._markerlines,
         tokenizeSection(this._text),
-        this.chance,
         this._src,
         this._oauthor,
       )
@@ -148,14 +145,14 @@ export class Editor {
         markerlines,
         this._text,
         this._markerlinesToInsert,
-        this.chance,
       )
       this._text = text
       this._markerlines = _markerlines
       this._markerlinesToInsert = []
     }
+
     this._sects = tokenizeSection(this._text)
-    const { markerlines } = updateMarkerlines(this._markerlines, this._sects, this.chance, this._src, this._oauthor)
+    const { markerlines } = updateMarkerlines(this._markerlines, this._sects, this._src, this._oauthor)
     this._markerlines = markerlines
 
     // 依照line-number對還沒有stamp的line插入stamp
@@ -169,7 +166,7 @@ export class Editor {
     this._text = lns.join('\n')
 
     if (opt.attachMarkerlinesToTokens) {
-      // attach marklines with tokens
+      // 在render的時候，token有markerline會更容易使用
       const dict: Record<number, Markerline> = {}
       for (const e of this._markerlines) {
         dict[e.linenumber] = e

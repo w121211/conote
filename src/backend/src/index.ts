@@ -1,6 +1,7 @@
 import util from 'util'
 import dotenv from 'dotenv'
 import express from 'express'
+import expressJwt from 'express-jwt'
 import cookieParser from 'cookie-parser'
 import { verify } from 'jsonwebtoken'
 import { applyMiddleware } from 'graphql-middleware'
@@ -8,10 +9,8 @@ import { ApolloServer } from 'apollo-server-express'
 import { ApolloServerPlugin } from 'apollo-server-plugin-base'
 import { makeExecutableSchema } from 'graphql-tools'
 import faker from 'faker'
+import { PrismaClient } from '@prisma/client'
 
-// const { authorization } = require('./lib/middlewares/authorization');
-import { createContext } from './context'
-// import { schema as baseSchema } from './schema'
 import { typeDefs } from './schema'
 import { resolvers } from './resolvers'
 import { permissions } from './auth'
@@ -33,29 +32,50 @@ if (!process.env.BOT_EMAIL || !process.env.APP_SECRET) {
 export const APP_SECRET = process.env.APP_SECRET
 export const BOT_EMAIL = process.env.BOT_EMAIL
 
-// Ref: https://github.com/maticzav/graphql-shield/blob/master/examples/with-graphql-nexus/src/lib/middlewares/authorization.js
-function authorization(): express.RequestHandler {
-  return function (req, res, next) {
-    const { token } = req.cookies
-    if (!token) return next()
-    try {
-      const verifiedToken = verify(token.replace('Bearer ', ''), APP_SECRET) as Token
-      req.userId = verifiedToken.userId
-      // const verifiedToken = verify(
-      //   token.replace('Bearer ', ''),
-      //   process.env.APP_SECRET || ""
-      // ) as Token
-      // req.userId = verifiedToken && verifiedToken.userId
-    } catch (error) {
-      res.clearCookie('token')
-    }
-    return next()
-  }
-}
+// Initialize prisma client
+
+export const prisma = new PrismaClient({
+  // errorFormat: 'pretty',
+  // log: ['query', 'info', 'warn'],
+})
+
+// Initialize express server
 
 const app = express()
-app.use(cookieParser())
-app.use(authorization())
+
+// Session-based auth, require cookie -> CORS problem
+// See: https://github.com/maticzav/graphql-shield/blob/master/examples/with-graphql-nexus/src/lib/middlewares/authorization.js
+// function authorization(): express.RequestHandler {
+//   return function (req, res, next) {
+//     const { token } = req.cookies
+//     if (!token) return next()
+//     try {
+//       const verifiedToken = verify(token.replace('Bearer ', ''), APP_SECRET) as Token
+//       req.userId = verifiedToken.userId
+//       // const verifiedToken = verify(
+//       //   token.replace('Bearer ', ''),
+//       //   process.env.APP_SECRET || ""
+//       // ) as Token
+//       // req.userId = verifiedToken && verifiedToken.userId
+//     } catch (error) {
+//       res.clearCookie('token')
+//     }
+//     return next()
+//   }
+// }
+// app.use(cookieParser())
+// app.use(authorization())
+
+// Token-based auth
+// See: https://github.com/mandiwise/apollo-federation-auth-demo
+//      https://github.com/auth0/express-jwt
+app.use(
+  expressJwt({
+    secret: APP_SECRET,
+    algorithms: ['HS256'],
+    credentialsRequired: false,
+  }),
+)
 
 const mocks = {
   ID: faker.random.uuid,
@@ -95,12 +115,8 @@ const server = new ApolloServer({
   schema,
   typeDefs,
   resolvers,
-  context: createContext,
-  // context: ({ req, res }) => ({
-  //   request: req,
-  //   response: res,
-  //   prisma,
-  // }),
+  // context: createContext,
+  context: ({ req, res }) => ({ prisma, req, res }),
   // dataSources: {},
   playground: {
     settings: {
@@ -120,12 +136,13 @@ const server = new ApolloServer({
 server.applyMiddleware({
   app,
   path: '/',
+
   // allow CORS (dev only)
   // cors: {
   //   origin: 'http://localhost:3000',
   //   credentials: true,
   // },
-  cors: true,
+  // cors: true,
 })
 
 // module.exports = { app };

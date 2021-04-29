@@ -10,12 +10,12 @@ import { AuthenticationError, UserInputError } from 'apollo-server'
 import { GraphQLDateTime } from 'graphql-iso-date'
 import * as PA from '@prisma/client'
 import { APP_SECRET } from '.'
-import { Editor } from '../../lib/editor/src'
 import { Context } from './context'
-import { searchAllSymbol } from './store/fuzzy'
+import { searchAllSymbol } from './search/fuzzy'
 import { symbolToUrl, urlToSymbol } from './models/symbol'
 import { getOrCreateLink } from './models/link'
-import { getOrCreateCardByLink, getOrCreateCardBySymbol, createCardBody, CardMeta } from './models/card'
+import { getOrCreateCardByLink, getOrCreateCardBySymbol } from './models/card'
+import { createWebCardBody } from './models/card-body'
 
 // function parsePostCount(count: PostCount): ST.PostCount {
 //   if (!count.poll)
@@ -80,7 +80,7 @@ export const resolvers: GraphQLResolverMap<Context> = {
 
     latestCards: async function (parent, { afterId }, { prisma }): Promise<PA.Cocard[]> {
       const maxDate = dayjs().startOf('d').subtract(7, 'd')
-      const cards = await prisma.cocard.findMany({
+      return prisma.cocard.findMany({
         take: 30,
         skip: afterId ? 1 : 0,
         where: {
@@ -93,28 +93,22 @@ export const resolvers: GraphQLResolverMap<Context> = {
         include: { link: true, body: true },
       })
       // console.log(cards)
-      return cards.map(e => {
-        const meta = (e.meta as unknown) as CardMeta
-        return {
-          ...e,
-          meta: { ...meta, conn: JSON.stringify(meta.conn) },
-        }
-      })
+      // return cards.map(e => {
+      //   return {
+      //     ...e,
+      //     meta: { ...meta, conn: JSON.stringify(meta.conn) },
+      //   }
+      // })
+      // return cards
     },
 
     cocard: async function (parent, { url }, { prisma }): Promise<PA.Cocard> {
       const symbol = urlToSymbol(url)
-      let card: PA.Cocard
       if (symbol !== null) {
-        card = await getOrCreateCardBySymbol(symbol)
+        return await getOrCreateCardBySymbol(symbol)
       } else {
         const [link] = await getOrCreateLink(url)
-        card = await getOrCreateCardByLink(link)
-      }
-      const meta = (card.meta as unknown) as CardMeta
-      return {
-        ...card,
-        meta: { ...meta, conn: JSON.stringify(meta.conn) },
+        return await getOrCreateCardByLink(link)
       }
     },
 
@@ -368,52 +362,28 @@ export const resolvers: GraphQLResolverMap<Context> = {
   },
 
   Mutation: {
-    createCardBody: async function (parent, { cardId, data }, { prisma, req }): Promise<PA.CardBody> {
-      const card = await prisma.cocard.findUnique({
-        where: { id: parseInt(cardId) },
-        include: { body: true },
-      })
-      if (card === null || req.userId === undefined) {
-        throw new Error('Card not found, fail to create card body')
-      }
-
-      const editor = new Editor(card.body.text, card.body.meta, card.linkUrl)
-      editor.setText(data.text)
-      editor.flush()
-
-      // TODO: 1. 只有web-card才需要處理nested 2. 這裡的logic可以移到card.ts
-      for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
-        // eslint-disable-next-line no-await-in-loop
-        const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
-        const nestedEditor = new Editor(nestedCard.body.text)
-        nestedEditor.setMarkerlinesToInsert(markerlines.filter(e => e.new))
-        nestedEditor.flush()
-        // eslint-disable-next-line no-await-in-loop
-        await createCardBody(nestedCard, nestedEditor, req.userId)
-      }
-
-      // 必須在最後才創root-card，不然markerlines的new標記會被刪除，因為已經儲存
-      return await createCardBody(card, editor, req.userId)
+    createWebCardBody: function (parent, { cardId, data }, { prisma, req }): Promise<PA.CardBody> {
+      return createWebCardBody(cardId, data.text, req.user.id)
     },
 
-    createMycard: async function (parent, { symbolName, data }, { prisma, req }) {
-      const cocard = await prisma.cocard.findUnique({ where: { linkUrl: symbolToUrl(symbolName) } })
-      if (cocard === null) throw new Error('Symbol not found, fail to create ticker-mycard')
-      // TODO:  需要確認comment的meta，又或者在這裡才加入meta
-      const card = await prisma.selfcard.create({
-        data: {
-          template: PA.CardTemplate.TICKER,
-          user: { connect: { id: req.userId } },
-          symbol: { connect: { name: symbolName } },
-          body: { create: { text: '', user: { connect: { id: req.userId } } } },
-        },
-      })
-      // 無法直接include（prisma的bug）
-      return await prisma.selfcard.findUnique({
-        where: { id: card.id },
-        include: { symbol: true, body: true },
-      })
-    },
+    // createMycard: async function (parent, { symbolName, data }, { prisma, req }) {
+    //   const cocard = await prisma.cocard.findUnique({ where: { linkUrl: symbolToUrl(symbolName) } })
+    //   if (cocard === null) throw new Error('Symbol not found, fail to create ticker-mycard')
+    //   // TODO:  需要確認comment的meta，又或者在這裡才加入meta
+    //   const card = await prisma.selfcard.create({
+    //     data: {
+    //       template: PA.CardTemplate.TICKER,
+    //       user: { connect: { id: req.userId } },
+    //       symbol: { connect: { name: symbolName } },
+    //       body: { create: { text: '', user: { connect: { id: req.userId } } } },
+    //     },
+    //   })
+    //   // 無法直接include（prisma的bug）
+    //   return await prisma.selfcard.findUnique({
+    //     where: { id: card.id },
+    //     include: { symbol: true, body: true },
+    //   })
+    // },
 
     signup: async (parent, { email, password }, { prisma, res }) => {
       res.clearCookie('token')
@@ -426,7 +396,7 @@ export const resolvers: GraphQLResolverMap<Context> = {
         },
       })
       return {
-        token: sign({ userId: user.id }, APP_SECRET),
+        token: sign({ id: user.id }, APP_SECRET, { algorithm: 'HS256', expiresIn: '1d' }),
         user,
       }
     },
@@ -440,13 +410,15 @@ export const resolvers: GraphQLResolverMap<Context> = {
       const valid = await compare(password, user.password)
       if (!valid) throw new Error('Could not find a match for username and password')
 
-      const token = sign({ userId: user.id }, APP_SECRET)
-      res.cookie('token', `Bearer ${token}`, {
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24,
-        // secure: true,  // https only
-      })
+      // const token = sign({ userId: user.id }, APP_SECRET)
+      // res.cookie('token', `Bearer ${token}`, {
+      //   httpOnly: true,
+      //   maxAge: 1000 * 60 * 60 * 24,
+      //   // secure: true,  // https only
+      // })
+      const token = sign({ id: user.id }, APP_SECRET, { algorithm: 'HS256', expiresIn: '1d' })
       console.log(`User ${user.email} login succeess`)
+
       return { token, user }
     },
 

@@ -47,6 +47,10 @@
       "changeProcessCWD": true
     },
     {
+      "directory": "./src/backend-nextjs",
+      "changeProcessCWD": true
+    },
+    {
       "directory": "./src/lib/editor",
       "changeProcessCWD": true
     },
