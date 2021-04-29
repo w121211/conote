@@ -1,22 +1,23 @@
 /**
  * Fuzzy search for page title, ticker, etc （用memory實現）
  */
-import _ from 'lodash'
-import dayjs from 'dayjs'
+// import _ from 'lodash'
+// import dayjs from 'dayjs'
 import Fuse from 'fuse.js'
-import * as PA from '@prisma/client'
+import { Symbol as PrismaSymbol } from '@prisma/client'
+import prisma from '../prisma'
 
 // 將資料庫取出的資料存在記憶體中（定時更新），用於fuzzy search
 // TODO: 改存在Redis
-let symbols: PA.Symbol[] | null = null
-let symbolFuse: Fuse<PA.Symbol>
+let symbols: PrismaSymbol[] | null = null
+let symbolFuse: Fuse<PrismaSymbol>
 let topicFuseUpdatedAt: Date | null = null
 let tickerTitles: string[] | null = null
 
-const prisma = new PA.PrismaClient({
-  errorFormat: 'pretty',
-  log: ['query', 'info', 'warn'],
-})
+// const prisma = new PA.PrismaClient({
+//   errorFormat: 'pretty',
+//   log: ['query', 'info', 'warn'],
+// })
 
 // async function getAllTickers() {
 //   const titles: string[] = [];
@@ -45,22 +46,22 @@ const prisma = new PA.PrismaClient({
 //   return titles;
 // }
 
-async function getAllSymbols(): Promise<PA.Symbol[]> {
-  let symbols: PA.Symbol[] = []
+export async function getAllSymbols(): Promise<PrismaSymbol[]> {
+  console.log('Loading symbols from database...')
+
+  let symbols: PrismaSymbol[] = []
   let cursor: number | undefined = undefined
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     // eslint-disable-next-line no-await-in-loop
-    const res: PA.Symbol[] = await prisma.symbol.findMany({
+    const res: PrismaSymbol[] = await prisma.symbol.findMany({
       take: 100,
       // skip cursor
       skip: cursor ? 1 : undefined,
       orderBy: { id: 'asc' },
       cursor: cursor ? { id: cursor } : undefined,
     })
-
-    // console.log(res)
-
     if (res.length === 0) {
       break
     }
@@ -70,7 +71,7 @@ async function getAllSymbols(): Promise<PA.Symbol[]> {
   return symbols
 }
 
-export async function searchAllSymbol(term: string): Promise<string[]> {
+export async function searchAllSymbols(term: string): Promise<string[]> {
   if (symbols === null) {
     symbols = await getAllSymbols()
     // console.log(symbols)

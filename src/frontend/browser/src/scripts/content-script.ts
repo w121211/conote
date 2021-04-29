@@ -17,11 +17,12 @@ function injectExtensionMarker(): void {
   el.style.top = '1em'
   el.style.right = '1em'
   el.style.height = '100%'
+  el.style.width = '200px'
   el.style.backgroundColor = 'red'
   document.body.append(el)
   // render(React.createElement(SiderApp, null, null), el)
 
-  // CORS error
+  // 若用cookie的話會有CORS error
   render(React.createElement(App, null, null), el)
 }
 

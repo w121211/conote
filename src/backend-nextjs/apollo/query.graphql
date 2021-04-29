@@ -1,0 +1,396 @@
+fragment vote on Vote {
+  __typename
+  id
+  pollId
+  choiceIdx
+}
+
+fragment poll on Poll {
+  __typename
+  id
+  commentId
+  choices
+  count {
+    id
+    nVotes
+  }
+  createdAt
+}
+
+fragment anchorLike on AnchorLike {
+  __typename
+  id
+  anchorId
+  choice
+  createdAt
+  updatedAt
+}
+
+fragment anchorCount on AnchorCount {
+  __typename
+  id
+  nViews
+  nUps
+  nDowns
+}
+
+fragment anchor on Anchor {
+  __typename
+  id
+  userId
+  count {
+    ...anchorCount
+  }
+  cocardId
+  ocardId
+  selfcardId
+}
+
+fragment replyCount on ReplyCount {
+  __typename
+  id
+  nViews
+  nUps
+  nDowns
+  # updatedAt
+}
+
+fragment commentCount on CommentCount {
+  __typename
+  id
+  nViews
+  nUps
+  nDowns
+  # updatedAt
+}
+
+fragment reply on Reply {
+  __typename
+  id
+  userId
+  isTop
+  text
+  updatedAt
+  count {
+    ...replyCount
+  }
+}
+
+fragment comment on Comment {
+  __typename
+  id
+  userId
+  cocardId
+  ocardId
+  selfcardId
+  isTop
+  text
+  # updatedAt
+  createdAt
+  replies {
+    ...reply
+  }
+  topReplies {
+    ...reply
+  }
+  poll {
+    ...poll
+  }
+  count {
+    ...commentCount
+  }
+  meta
+  # meta {
+  #   seq
+  #   mark
+  #   src
+  # }
+}
+
+fragment commentLike on CommentLike {
+  __typename
+  id
+  commentId
+  choice
+  updatedAt
+}
+
+fragment replyLike on ReplyLike {
+  __typename
+  id
+  replyId
+  choice
+  updatedAt
+}
+
+fragment link on Link {
+  __typename
+  id
+  url
+  domain
+  srcType
+  srcId
+  oauthorName
+}
+
+fragment cardBody on CardBody {
+  __typename
+  id
+  userId
+  meta
+  text
+  prevId
+}
+
+fragment cocard on Cocard {
+  __typename
+  id
+  template
+  meta
+  # meta {
+  #   commentId
+  #   symbol
+  #   conn
+  # }
+  body {
+    ...cardBody
+  }
+  link {
+    ...link
+  }
+}
+
+fragment ocard on Ocard {
+  __typename
+  id
+  template
+  body {
+    ...cardBody
+  }
+  symbol {
+    name
+    cat
+  }
+  oauthorName
+}
+
+fragment selfcard on Selfcard {
+  __typename
+  id
+  template
+  body {
+    ...cardBody
+  }
+  symbol {
+    name
+    cat
+  }
+}
+
+query LatestCards($afterId: String) {
+  latestCards(afterId: $afterId) {
+    ...cocard
+  }
+}
+
+query Cocard($url: String!) {
+  cocard(url: $url) {
+    ...cocard
+  }
+}
+
+query Ocard($id: ID, $oauthorName: String, $symbolName: String) {
+  ocard(id: $id, oauthorName: $oauthorName, symbolName: $symbolName) {
+    ...ocard
+  }
+}
+
+query Selfcard($id: ID!) {
+  selfcard(id: $id) {
+    ...selfcard
+  }
+}
+
+query Mycard($symbolName: String!) {
+  mycard(symbolName: $symbolName) {
+    ...selfcard
+  }
+}
+
+# query comments($cardId: ID!, $afterId: ID) {
+#   comments(cardId: $cardId, afterId: $afterId) {
+#     ...comment
+#   }
+# }
+
+# query commentsBySymbol($pageTitle: String!, $symbol: String!, $afterId: ID) {
+#   commentsBySymbol(pageTitle: $pageTitle, symbol: $symbol, afterId: $afterId) {
+#     ...comment
+#   }
+# }
+
+query Anchor($id: ID!) {
+  anchor(id: $id) {
+    ...anchor
+  }
+}
+
+query Comment($id: ID!) {
+  comment(id: $id) {
+    ...comment
+  }
+}
+
+query Replies($commentId: ID!, $afterId: ID) {
+  replies(commentId: $commentId, afterId: $afterId) {
+    ...reply
+  }
+}
+
+query MyAnchorLikes {
+  myAnchorLikes {
+    ...anchorLike
+  }
+}
+
+query MyCommentLikes {
+  myCommentLikes {
+    ...commentLike
+  }
+}
+
+query MyReplyLikes {
+  myReplyLikes {
+    ...replyLike
+  }
+}
+
+query MyVotes {
+  myVotes {
+    ...vote
+  }
+}
+
+# query IsUserLoggedIn {
+#   isLoggedIn @client
+# }
+
+query Me {
+  me {
+    id
+  }
+}
+
+query SearchAll($term: String!) {
+  searchAll(term: $term)
+}
+
+mutation CreateWebCardBody($cardId: ID!, $data: CardBodyInput!) {
+  createWebCardBody(cardId: $cardId, data: $data) {
+    ...cardBody
+  }
+}
+
+# mutation createMycard($symbolName: String!) {
+#   createMycard(symbolName: $symbolName) {
+#     ...selfcardFragment
+#   }
+# }
+
+mutation CreateReply($commentId: ID!, $data: ReplyInput!) {
+  createReply(commentId: $commentId, data: $data) {
+    ...reply
+  }
+}
+
+mutation CreateVote($pollId: ID!, $choiceIdx: Int!) {
+  createVote(pollId: $pollId, choiceIdx: $choiceIdx) {
+    ...vote
+  }
+}
+
+mutation CreateAnchorLike($anchorId: ID!, $data: LikeInput!) {
+  createAnchorLike(anchorId: $anchorId, data: $data) {
+    like {
+      ...anchorLike
+    }
+    count {
+      ...anchorCount
+    }
+  }
+}
+
+mutation UpdateAnchorLike($id: ID!, $data: LikeInput!) {
+  updateAnchorLike(id: $id, data: $data) {
+    like {
+      ...anchorLike
+    }
+    count {
+      ...anchorCount
+    }
+  }
+}
+
+mutation CreateCommentLike($commentId: ID!, $data: LikeInput!) {
+  createCommentLike(commentId: $commentId, data: $data) {
+    like {
+      ...commentLike
+    }
+    count {
+      ...commentCount
+    }
+  }
+}
+
+mutation UpdateCommentLike($id: ID!, $data: LikeInput!) {
+  updateCommentLike(id: $id, data: $data) {
+    like {
+      ...commentLike
+    }
+    count {
+      ...commentCount
+    }
+  }
+}
+
+mutation CreateReplyLike($replyId: ID!, $data: LikeInput!) {
+  createReplyLike(replyId: $replyId, data: $data) {
+    like {
+      ...replyLike
+    }
+    count {
+      ...replyCount
+    }
+  }
+}
+
+mutation UpdateReplyLike($id: ID!, $data: LikeInput!) {
+  updateReplyLike(id: $id, data: $data) {
+    like {
+      ...replyLike
+    }
+    count {
+      ...replyCount
+    }
+  }
+}
+
+mutation SignUp($email: String!, $password: String!) {
+  signUp(email: $email, password: $password) {
+    id
+    email
+  }
+}
+
+mutation SignIn($email: String!, $password: String!) {
+  signIn(email: $email, password: $password) {
+    token
+    user {
+      id
+    }
+  }
+}
+
+mutation SignOut {
+  signOut
+}

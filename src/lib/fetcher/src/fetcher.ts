@@ -5,6 +5,8 @@ import { FetchResult, SrcType } from './index'
 // const keyv = new KeyvRedis('redis://redis:6379')
 // keyv.on('error', (err: any) => console.log('Connection Error', err))
 
+// type Fetcher = (url: string, domain?: string) => Promise<FetchResult>
+
 export const fetcher: Record<string, (url: string, domain?: string) => Promise<FetchResult>> = {
   youtube: async function (url: string) {
     const domain = 'youtube'
@@ -38,6 +40,7 @@ export const fetcher: Record<string, (url: string, domain?: string) => Promise<F
     }
     throw new Error(`youtube fetcher failed: ${url}`)
   },
+
   default: async function (url, domain) {
     if (domain === undefined) throw new Error()
     return {

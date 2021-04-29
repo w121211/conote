@@ -1,4 +1,5 @@
 import { Markerheader, Markerline, ExtToken, Section } from './typing'
+import { createStamp } from './stamp'
 import { filterTokens, streamToStr, markerToStr, toStampMarkerlinesDict } from './helper'
 
 /**
@@ -10,7 +11,6 @@ export function insertMarkerlinesToText(
   curMarkerlines: Markerline[],
   curText: string,
   insertMarkerlines: Markerline[],
-  chance: { string: (a: any) => string },
 ): [string, Markerline[]] {
   // 將body分成一行一行，每行搭配對應的markerline, markerheader
   const lns: [string, { markerheader?: Markerheader; markerline?: Markerline }][] = curText
@@ -21,7 +21,15 @@ export function insertMarkerlinesToText(
       return [e, { markerheader, markerline }]
     })
 
-  function _insert(marekerline: Markerline, chance: { string: (a: any) => string }) {
+  const curStamps: string[] = []
+  for (const e of curMarkerlines) {
+    if (e.stampId) curStamps.push(e.stampId)
+  }
+
+  function _insert(marekerline: Markerline) {
+    const stamp = createStamp(curStamps)
+    curStamps.push(stamp)
+
     const a: Markerline = {
       // line-number需要之後再update
       linenumber: -1,
@@ -31,10 +39,7 @@ export function insertMarkerlinesToText(
       src: marekerline.src,
       srcStamp: marekerline.stampId,
       oauthor: marekerline.oauthor,
-      stampId: `%${chance.string({
-        length: 3,
-        pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-      })}`,
+      stampId: stamp,
     }
 
     if (a.marker) {
@@ -56,7 +61,7 @@ export function insertMarkerlinesToText(
 
   for (const e of insertMarkerlines) {
     if (e.marker && e.marker.key && e.marker.value) {
-      _insert(e, chance)
+      _insert(e)
     } else {
       console.error(`想插入的markerline不符合格式\n${e}`)
       // throw new Error('想插入的markerline不符合格式')
@@ -76,6 +81,23 @@ export function insertMarkerlinesToText(
   return [joinedBody, markerlines]
 }
 
+function getAllStamps(sects: Section[]): string[] {
+  const stamps: string[] = []
+  for (const sect of sects) {
+    for (const tk of filterTokens<ExtToken>(
+      sect.stream ?? [],
+      e => e.type === 'inline-value' || e.type === 'line-value',
+    )) {
+      const stampTokens = filterTokens<ExtToken>(tk.content ?? [], e => e.type === 'stamp')
+      if (stampTokens.length > 0) {
+        const stamp = (stampTokens[0].content as string).trim()
+        stamps.push(stamp)
+      }
+    }
+  }
+  return stamps
+}
+
 /**
  * 和原本的markerlines比較，返回更新後的markerLines，過程中不會動到text
  * 1. 依照stamp更新markerline的line-number、value等等  TODO：需要check, validate
@@ -84,7 +106,6 @@ export function insertMarkerlinesToText(
 export function updateMarkerlines(
   cur: Markerline[],
   sects: Section[],
-  chance: { string: (a: any) => string },
   src?: string,
   oauthor?: string,
 ): {
@@ -93,8 +114,9 @@ export function updateMarkerlines(
 } {
   // 建立、更新markerLines，同步檢查、建立stamp
   const dict = toStampMarkerlinesDict(cur)
-  const markerlines: Markerline[] = []
   const markerheaders: Markerheader[] = []
+  const markerlines: Markerline[] = []
+  const curStamps: string[] = getAllStamps(sects) // 取得所有的stamps，不管是否broken
 
   for (const sect of sects) {
     // 1. 針對marker-header，只需紀錄mark的linenumber
@@ -112,7 +134,7 @@ export function updateMarkerlines(
       })
     }
 
-    // 2. 針對line value, inline-value
+    // 2. 針對line value, inline value
     for (const tk of filterTokens<ExtToken>(
       sect.stream ?? [],
       e => e.type === 'inline-value' || e.type === 'line-value',
@@ -130,7 +152,7 @@ export function updateMarkerlines(
       const stampTokens = filterTokens<ExtToken>(tk.content ?? [], e => e.type === 'stamp')
 
       if (stampTokens.length === 0) {
-        // 沒有stamp，生成一個stmampId TODO: 要確保stampId不重複
+        // 沒有stamp，生成一個stmampId
 
         // 1. 辨識是否為comment, poll, reply, neat-reply，需為`[?]`
         let isComment: true | undefined
@@ -152,6 +174,9 @@ export function updateMarkerlines(
           }
         }
 
+        const stamp = createStamp(curStamps)
+        curStamps.push(stamp)
+
         // 2. 生成stampId、存入
         markerlines.push({
           ..._updated,
@@ -159,15 +184,13 @@ export function updateMarkerlines(
           noStamp: true,
           src,
           oauthor,
-          stampId: `%${chance.string({
-            length: 3,
-            pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-          })}`,
+          stampId: stamp,
           comment: isComment,
           poll: isPoll,
           pollChoices,
           neatReply: isNeatReply,
         })
+
         continue
       } else {
         // 有stamp TODO: validate

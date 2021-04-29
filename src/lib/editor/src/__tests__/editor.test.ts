@@ -1,7 +1,6 @@
 /* eslint-disable no-useless-escape */
 import { resolve } from 'path'
-import { Markerline } from '../typing'
-import { load, removeUndefinedFields } from '../test-helper'
+import { load, omitUndefined } from '../test-helper'
 import { Editor } from '../editor'
 
 /**
@@ -57,14 +56,14 @@ describe('Editor basic', () => {
   })
 
   it('add stamps to inline value', () => {
-    expect(removeUndefinedFields(symbolStarter.getText())).toMatchSnapshot()
-    expect(removeUndefinedFields(symbolStarter.getMarkerlines())).toMatchSnapshot()
+    expect(omitUndefined(symbolStarter.getText())).toMatchSnapshot()
+    expect(omitUndefined(symbolStarter.getMarkerlines())).toMatchSnapshot()
   })
 
   it('parse stamped inline value', () => {
     const editor = new Editor(symbolStarter.getText(), symbolStarter.getMarkerlines())
     editor.flush()
-    expect(removeUndefinedFields(editor.getSections())).toMatchSnapshot()
+    expect(omitUndefined(editor.getSections())).toMatchSnapshot()
   })
 
   it('attach dblink', () => {
@@ -78,7 +77,7 @@ describe('Editor basic', () => {
       },
     })
     expect(symbolStarter.getText()).toMatchSnapshot()
-    expect(removeUndefinedFields(symbolStarter.getMarkerlines())).toMatchSnapshot()
+    expect(omitUndefined(symbolStarter.getMarkerlines())).toMatchSnapshot()
   })
 
   it('insert markerlines to a blank editor', () => {

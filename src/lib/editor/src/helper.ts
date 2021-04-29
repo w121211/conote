@@ -1,11 +1,14 @@
-import * as Prism from 'prismjs'
+import { TokenStream } from 'prismjs'
 import { Marker, ExtToken, ExtTokenStream, Markerline } from './typing'
+import { Chance } from 'chance'
+
+const chance = new Chance()
 
 // export function randStr(nChar: number): string {
 //   return Math.random().toString(36).substr(2, nChar)
 // }
 
-export function streamToStr(stream: Prism.TokenStream | ExtTokenStream, ignoreTokenType?: string): string {
+export function streamToStr(stream: TokenStream | ExtTokenStream, ignoreTokenType?: string): string {
   let t = ''
 
   // console.log(ignoreTokenType);
@@ -61,4 +64,11 @@ export function toStampMarkerlinesDict(markerlines: Markerline[]): Record<string
     }
   }
   return dict
+}
+
+export function randString(): string {
+  return chance.string({
+    length: 3,
+    pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+  })
 }

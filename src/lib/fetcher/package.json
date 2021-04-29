@@ -29,7 +29,9 @@
     "typescript": "^4.2.2"
   },
   "dependencies": {
-    "got": "^11.8.2"
+    "@keyv/redis": "^2.1.2",
+    "got": "^11.8.2",
+    "keyv": "^4.0.3"
   },
   "engines": {
     "node": ">=10.0.0"

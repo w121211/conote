@@ -64,7 +64,8 @@ export function LoginPage(): JSX.Element | null {
   // )
   const me = useQuery<QT.me>(queries.ME)
   const [login, { data, loading, error }] = useMutation<QT.login, QT.loginVariables>(queries.LOGIN, {
-    onCompleted() {
+    onCompleted(data) {
+      localStorage.setItem('token', data.login.token as string) // token-based auth
       me.refetch()
     },
     onError(e) {

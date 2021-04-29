@@ -22,7 +22,7 @@ const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
   // Ref:
   // - https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials
   // - https://github.com/apollographql/apollo-client/issues/4190
-  credentials: 'include',
+  // credentials: 'include',
   // credentials: "same-origin",
   resolvers: {},
   // resolvers,

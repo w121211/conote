@@ -18,13 +18,13 @@ browser.browserAction.onClicked.addListener(function (tab) {
 
   const params = new URLSearchParams({ u: tab.url ?? '' })
 
-  browser.windows.create({
-    // type: 'popup',
-    url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
-    width: 500,
-    height: 500,
-    left: 100,
-  })
+  // browser.windows.create({
+  //   // type: 'popup',
+  //   url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
+  //   width: 500,
+  //   height: 500,
+  //   left: 100,
+  // })
 })
 
 // const creating = browser.windows.create({

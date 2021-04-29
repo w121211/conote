@@ -39,7 +39,8 @@ export function App(): JSX.Element {
       // const cache = new InMemoryCache();
       const newPersistor = new CachePersistor({
         cache,
-        storage: new LocalStorageWrapper(window.localStorage),
+        storage: new LocalStorageWrapper(localStorage),
+        // storage: new LocalStorageWrapper(window.localStorage),
         // storage: new BrowserStorageWrapper(browser.storage.local),
         debug: true,
         trigger: 'write',
@@ -50,15 +51,15 @@ export function App(): JSX.Element {
         cache,
         uri: 'http://localhost:4000/graphql',
         headers: {
-          // authorization: localStorage.getItem('token') || '',
+          authorization: localStorage.getItem('token') || '', // token-based auth
           'client-name': 'Conote[Extension]',
           'client-version': '0.1.0',
         },
-        // TODO: 需設為'include'，否則cookies不會被儲存（不確定正式時是否需要）
+        // TODO: 需設為'include'，否則cookies不會被儲存 -> 但這會有Cross-origin問題
         // Ref:
         // - https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials
         // - https://github.com/apollographql/apollo-client/issues/4190
-        credentials: 'include',
+        // credentials: 'include',
         // credentials: 'same-origin',
         resolvers: {},
         typeDefs,
@@ -81,17 +82,20 @@ export function App(): JSX.Element {
     window.location.reload()
   }, [])
 
-  console.log(window.location.href)
-
   if (!client) {
     return <h2>Initializing app...</h2>
   }
 
-  const params = new URLSearchParams(new URL(window.location.href).search)
-  const url = params.get('u')
-  if (url === null) {
-    return <h2>Require a url</h2>
-  }
+  // popup的情況
+  // const params = new URLSearchParams(new URL(window.location.href).search)
+  // const url = params.get('u')
+  // if (url === null) {
+  //   return <h2>Require a url</h2>
+  // }
+
+  // inject的情況
+  console.log(window.location.href)
+  const url = window.location.href
 
   return (
     <ApolloProvider client={client}>
