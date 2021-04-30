@@ -109,8 +109,7 @@ export function ReplyPanel({ reply, meAuthor }: { reply: ReplyFragment; meAuthor
     },
   })
   const myReplyLikes = useMyReplyLikesQuery({ fetchPolicy: 'cache-only' })
-
-  const meLike = myReplyLikes.data?.myReplyLikes.find(e => e.replyId === reply.id)
+  const meLike = myReplyLikes.data?.myReplyLikes.find(e => e.replyId.toString() === reply.id)
   return (
     <span>
       <ReplyLike {...{ replyId: reply.id, count, meLike, createReplyLike, updateReplyLike }} />
@@ -178,7 +177,7 @@ export function CommentPanel({
   })
   const myCommentLikes = useMyCommentLikesQuery({ fetchPolicy: 'cache-only' })
 
-  const meLike = myCommentLikes.data?.myCommentLikes.find(e => e.commentId === comment.id)
+  const meLike = myCommentLikes.data?.myCommentLikes.find(e => e.commentId.toString() === comment.id)
 
   return (
     <span>

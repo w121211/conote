@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { getCardUrlParam } from '../lib/helper'
 import { useLatestCardsQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
-import useMe from '../components/useMe'
+import useMe from '../components/use-me'
 
 function LatestCards(): JSX.Element | null {
   const { data, loading, error, fetchMore } = useLatestCardsQuery({ fetchPolicy: 'cache-and-network' })
