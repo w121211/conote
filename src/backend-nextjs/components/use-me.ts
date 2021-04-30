@@ -1,6 +1,13 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { MeQuery, useMeQuery } from '../apollo/query.graphql'
+import {
+  MeQuery,
+  useMeQuery,
+  useMyAnchorLikesQuery,
+  useMyCommentLikesQuery,
+  useMyReplyLikesQuery,
+  useMyVotesQuery,
+} from '../apollo/query.graphql'
 // import useSWR from 'swr'
 
 export default function useMe({
@@ -12,6 +19,12 @@ export default function useMe({
 }): MeQuery | undefined {
   const { data, loading, error } = useMeQuery()
   const router = useRouter()
+
+  // 從server取得me相關的資料，用於填充cache <- TODO: a better solution?
+  useMyAnchorLikesQuery()
+  useMyCommentLikesQuery()
+  useMyReplyLikesQuery()
+  useMyVotesQuery()
 
   useEffect(() => {
     if (!redirectTo || loading) return

@@ -1,212 +1,80 @@
+// import dayjs from 'dayjs'
 import React, { useState } from 'react'
-import { Button, Comment as AntdComment, Modal } from 'antd'
-import { MeQuery, ReplyFragment, useCommentQuery } from '../apollo/query.graphql'
+import { Space, Comment as AntdComment } from 'antd'
 // import { CommentList } from './commentList'
-import { PollForm } from './poll-form'
-import { ReplyForm } from './tile-forms'
-import { QueryReplyList } from './tile-list'
-import { ReplyPanel } from './tile-panel'
+// import { PollChoiceRadioGroup } from './pollChoice'
+// import { PollFooter, PostFooter } from './tileFooter'
+// import { VotePostForm, NewChoicePostForm } from './postForm'
+import { Reply, TileOptions, defaultTileOptions } from './tile'
+import { RepliesQuery, useRepliesQuery } from '../apollo/query.graphql'
 
-export interface TileOptions {
-  dispReplies?: boolean
-  dispTopReplies?: boolean
-  dispCommentAs?: 'comment' | 'key-value'
-  dispReplyAs?: 'line' | 'tag' | 'tile'
-  swapText?: string
-  swapChoices?: string[]
-  suggestReplies?: string[]
-}
-
-export const defaultTileOptions: TileOptions = {
-  dispReplies: false,
-  dispTopReplies: true,
-  dispCommentAs: 'comment',
-  dispReplyAs: 'line',
-}
-
-export function Reply({
-  reply,
-  me,
+export function ReplyList({
+  replies,
+  pattern = null,
   options = defaultTileOptions,
 }: {
-  reply: ReplyFragment
-  me?: MeQuery['me']
+  replies: RepliesQuery['replies']
+  pattern?: string | null
   options?: TileOptions
 }): JSX.Element {
-  // const edit = me?.id === post.userId ? <Link to={`/post/${post.id}?update`}>edit</Link> : null
-  // const panel = <ReplyPanel reply={reply} meAuthor={me?.id === reply.userId} />
-  // return <MdText text={reply.text} />
-  // if (options.dispReplyAs === 'tag') {
-  //   return (
-  //     <span>
-  //       <Popover content={panel}>
-  //         <Tag>
-  //           <MdText text={reply.text} />
-  //           <span>({reply.count.nUps - reply.count.nDowns})</span>
-  //         </Tag>
-  //       </Popover>
-  //     </span>
-  //   )
-  // } else if (options.dispReplyAs === 'tile') {
-  //   return (
-  //     <span>
-  //       <Popover className={tagPopoverCss.popover} content={panel}>
-  //         <MdText text={reply.text} />
-  //         <span>({reply.count.nUps - reply.count.nDowns})</span>
-  //       </Popover>
-  //       {/* {panel} */}
-  //     </span>
-  //   )
-  // } else {
-  //   return (
-  //     <li className={commentListSmallCss.commentRoot}>
-  //       <AntdComment content={reply.text} />
-  //       {panel}
-  //     </li>
-  //   )
+  /**
+   * args:
+   * - pattern（還沒實裝）: 依照reply的vote（會嵌進text）做filter，`pattern=null`的情況，就是一個普通的reply list
+   * */
+  // const filtered = replies.map((e, i) => {
+  //   if (pattern === null)
+  //     return <Reply key={i} reply={e} />
+  //   // TODO: 非常naive的pattern search
+  //   else if (e.text.indexOf(pattern) >= 0)
+  //     return <Reply key={i} reply={e} />
+  //   return null
+  // })
+  const filteredReplies = replies
+    .filter(e => pattern === null || e.text.indexOf(pattern) >= 0)
+    .map((e, i) => <Reply key={i} reply={e} options={options} />)
+  // return (
+  //   <List className={commentListSmallCss.List} size="large"
+  //     // pagination={{
+  //     //   onChange: (page) => {
+  //     //     console.log(page)
+  //     //   },
+  //     //   pageSize: 5,
+  //     // }}
+  //     dataSource={filteredReplies}
+  //     renderItem={(e) => (
+  //       // <Reply reply={e} options={options} />
+  //       <li
+  //         className={commentListSmallCss.commentRoot}
+  //       // onClick={() => parentCommentClickHandler(item.id)}
+  //       >
+  //         <AntdComment content={"test"} />
+  //       </li>
+  //     )}
+  //   />
+  // )
+  // if (options.dispReplyAs === 'tile') {
+  //   return <Space>{filteredReplies}</Space>
   // }
-  return (
-    <div>
-      <p>{reply.text}</p>
-      <ReplyPanel reply={reply} meAuthor={me?.id === reply.userId} />
-    </div>
-  )
+  // if (options.dispReplyAs === 'line') {
+  //   return <ul className={commentListSmallCss.List}>{filteredReplies}</ul>
+  // }
+  // return <ul>{filteredReplies}</ul>
+  return <div>{filteredReplies} </div>
 }
 
-// export function SuggestReply({
-//   text,
-//   onClick = () => {},
-//   options = defaultTileOptions,
-// }: {
-//   text: string
-//   onClick(): void
-//   options?: TileOptions
-// }): JSX.Element {
-//   return (
-//     <Tag style={{ background: '#fff', borderStyle: 'dashed' }} onClick={onClick}>
-//       {text}
-//     </Tag>
-//   )
-// }
-
-export function QueryCommentModal({
-  commentId,
-  children,
-}: {
-  commentId: string
-  children: React.ReactNode
-}): JSX.Element {
-  console.log(commentId)
-
-  const [showModal, setShowModal] = useState<boolean>(false)
-  const [suggestReply, setSuggestReply] = useState<string | undefined>()
-  const { data, loading, error } = useCommentQuery({
-    variables: { id: commentId },
-  })
-
-  function onClickFactory(text: string) {
-    return function () {
-      setSuggestReply(text)
-      setShowModal(true)
-    }
-  }
+export function QueryReplyList({ commentId }: { commentId: string }): JSX.Element {
+  const { data, loading, error, refetch } = useRepliesQuery({ variables: { commentId } })
 
   if (loading) {
-    return <p>loading...</p>
+    return <span>loading...</span>
   }
-  if (error) {
-    console.error(error)
-    return <p>API error</p>
+  if (error || !data) {
+    return <p>ERROR: {error?.message}</p>
   }
-  if (!data || !data.comment) {
-    return <p>Comment not found</p>
-  }
-
-  return (
-    <div>
-      <Modal
-        // title="Comment"
-        visible={showModal}
-        footer={null}
-        onCancel={() => {
-          setShowModal(false)
-        }}
-      >
-        {data?.comment?.poll ? (
-          <PollForm poll={data.comment.poll} setShowModal={setShowModal} />
-        ) : (
-          <ReplyForm
-            commentId={data.comment.id}
-            suggestText={suggestReply}
-            addReplyCountByOne={() => {}}
-            // onFinish={() => {
-            //   setShowModal(false)
-            // }}
-          />
-        )}
-        <QueryReplyList commentId={data.comment.id} />
-
-        {/* <SearchAllForm /> */}
-      </Modal>
-      <Button
-        onClick={() => {
-          setShowModal(true)
-        }}
-      >
-        {children}
-      </Button>
-    </div>
-  )
-  // }
-  // if (folded)
-  //   return (
-  //     <div>
-  //       ------Comment-------
-  //       <p>{options.swapText ? options.swapText : comment.text}</p>
-  //       <CommentPanel comment={comment} />
-  //       <h4>-Spot Replies-</h4>
-  //       {comment.topReplies ? <ReplyList replies={comment.topReplies} /> : null}
-  //       <button onClick={function (e) { setFolded(!folded) }}>展開</button>
-  //       <br />
-  //       -------------
-  //     </div>
-  //   )
-  // return (
-  //   <>
-  //     <span>{options.swapText ? options.swapText : comment.text}</span>
-  //     <CommentPanel comment={comment} />
-  //     {/* <h4>-Queried Replies-</h4> */}
-  //     {/* <QueryReplyList commentId={comment.id} /> */}
-  //     {/* <ReplyForm commentId={comment.id} addReplyCountByOne={function () { }} /> */}
-  //     {/* <button onClick={function (e) { setFolded(!folded) }}>折疊</button> */}
-  //   </>
-  // )
-
-  // if (options.dispCommentAs === 'key-value') {
-  // if (folded)
-  //   return (
-  //     <li>
-  //       <span className={blockMetaCss.span}>{options.swapText ? options.swapText : comment.text}</span>
-  //       {/* TODO: 為了replyForm的cache而叫，但每個comment都叫太花費資源 */}
-  //       {<QueryReplyList commentId={comment.id} />}
-  //       {/* {comment.topReplies && <ReplyList replies={comment.topReplies} options={{ dispReplyAs: options.dispReplyAs }} />} */}
-  //       <Button type="link" onClick={function () { setShowModal(true) }}>
-  //         新增
-  //       </Button>
-  //       <Modal title="Reply" visible={showModal} footer={null} onCancel={function () { setShowModal(false) }}>
-  //         <ReplyForm commentId={comment.id} addReplyCountByOne={function () { }} onFinish={function () { setShowModal(false) }} />
-  //       </Modal>
-  //       {/* <p>{options.replacedText ? options.replacedText : comment.text}</p>
-  //       <CommentPanel comment={comment} />
-  //       <h4>-Spot Replies-</h4>
-  //       {comment.topReplies ? <ReplyList replies={comment.topReplies} /> : null}
-  //       <button onClick={function (e) { setFolded(!folded) }}>展開</button>
-  //       <br /> */}
-  //     </li>
-  //   )
+  return <ReplyList replies={data.replies} />
 }
 
-// export function CommentList({ comments }: { comments: QT.comment[] }) {
+// export function CommentList({ comments }: { comments: QT.commentFragment[] }) {
 //   const spotComments = comments.filter(e => e.isTop)
 //   const otherComments = comments.filter(e => !e.isTop)
 //   return (
@@ -221,6 +89,122 @@ export function QueryCommentModal({
 //       })}
 //     </>
 //   )
+// }
+
+export function QueryCommentList({ me, cardId }: { me?: QT.me_me; cardId: string }) {
+  // const { data, loading, error, refetch } = useQuery<QT.comments, QT.commentsVariables>(
+  //   queries.COMMENTS, { variables: { cardId } }
+  // )
+  // if (loading) return null
+  // if (error) return <p>ERROR: {error.message}</p>
+  // if (!data) return null
+  // return <CommentList comments={data.comments} />
+  return null
+}
+
+// interface CommentListProps extends QT.commentsVariables {
+//   me?: QT.me_me
+//   blockId: string
+//   toAddCommentCountByOne: () => void
+// }
+
+// const LoadMoreCommentList: React.FC<CommentListProps> = ({ me, cardId, toAddCommentCountByOne }) => {
+//   const { data, loading, error, refetch } = useQuery<QT.comments, QT.commentsVariables>(
+//     queries.COMMENTS, { variables: { cardId } }
+//   )
+//   const [hasMore, setHasMore] = useState<boolean>(false)
+//   if (loading) return null
+//   // if (error) return <p>ERROR: {error.message}</p>
+//   if (!data) return null
+//   // if (data.comments.length === N_COMMENTS_TAKEN) setHasMore(true)
+//   return (
+//     <Card type="inner" bordered={false}>
+//       <List
+//         // bordered
+//         size="small"
+//         // split={false}
+//         dataSource={data.comments}
+//         // loadMore={hasMore ? <Button type="link">more</Button> : null}
+//         renderItem={e => (
+//           <List.Item>
+//             {/* <span>{e.content}</span> */}
+//             {/* <CommentFooter comment={e} meComment={me?.id === e.userId} /> */}
+//           </List.Item>
+//         )}
+//       />
+//       {/* <CommentForm postId={postId} toAddCommentCountByOne={toAddCommentCountByOne} /> */}
+//     </Card>
+//   )
+// }
+
+// export function WebpageList({ webpages }: { webpages: QT.latestPages_latestPages[] }) {
+//   return (
+//     <>
+//       {webpages.map(e => <WebpageTile page={e} />)}
+//     </>
+//   )
+// }
+
+// export function QueryLatestWebpageList() {
+//   const [isLoadingMore, setIsLoadingMore] = useState(false)
+//   const { data, loading, error, fetchMore } = useQuery<QT.latestPages, QT.latestPagesVariables>(
+//     queries.LATEST_PAGES, { variables: { afterId: null } }
+//   )
+//   async function onClick() {
+//     setIsLoadingMore(true)
+//     await fetchMore({ variables: { afterId: data?.latestPages[-1].id } })
+//     setIsLoadingMore(false)
+//   }
+//   if (loading)
+//     return null
+//   if (error)
+//     return <p>ERROR: {error.message}</p>
+//   if (!data)
+//     return null
+//   return (
+//     <>
+//       <WebpageList webpages={data.latestPages} />
+//       {
+//         isLoadingMore ?
+//           <button onClick={onClick}>Load more</button> : "loading"
+//       }
+//     </>
+//   )
+// }
+
+// interface SymbolListProps {
+//   // symbols: QT.pollFragment_symbols[] | null
+//   symbols: null
+// }
+
+// const SymbolList: React.FC<SymbolListProps> = ({ symbols }) => {
+//   if (symbols === null) return null
+//   return (
+//     <Space>
+//       {
+//         symbols.map((e, i) =>
+//           <Link key={i} to={`/symbol/${encodeURIComponent(e.name)}`}>
+//             {/* <i><Typography.Text type="secondary">{d.name}</Typography.Text></i> */}
+//             <i>{e.name}</i>
+//           </Link>
+//         )
+//       }
+//     </Space>
+//   )
+// }
+
+// interface PostCardProps {
+//   // createPostLike: (variables: QT.createPostLikeVariables) => void
+//   // updatePostLike: (variables: QT.updatePostLikeVariables) => void
+//   // comments: React.StatelessComponent
+//   post: QT.pollFragment_posts
+//   me?: QT.me_me
+//   toLogin?: () => void
+//   folded?: boolean
+//   noHeader?: boolean
+//   noSpin?: boolean
+//   noThread?: boolean
+//   choice: string
 // }
 
 // const PostCard: React.FC<PostCardProps> = ({ post, me, toLogin, choice, folded = true, noHeader = false, noSpin = false, noThread = false }) => {
@@ -387,6 +371,7 @@ export function QueryCommentModal({
 //           {/* <Button type="link" size="small">所有</Button> */}
 //         </Space>
 //       </Typography.Paragraph>
+
 //       {/* {
 //         showDetail &&
 //         <Typography.Paragraph>
@@ -397,6 +382,7 @@ export function QueryCommentModal({
 //           </Typography.Text>
 //         </Typography.Paragraph>
 //       } */}
+
 //       {
 //         // showComments && clickedChoiceId && postsByChoice[clickedChoiceId].length > 0 &&
 //         showComments && clickedChoiceId &&
@@ -416,6 +402,7 @@ export function QueryCommentModal({
 //           />
 //           <br />
 //         </>
+
 //         // <>
 //         //   <Divider />
 //         //   {
@@ -427,6 +414,7 @@ export function QueryCommentModal({
 //         // </>
 //         // <CommentList me={me} postId={poll.id} toAddCommentCountByOne={toAddCommentCountByOne} />
 //       }
+
 //       {
 //         showComments && clickedChoiceId && !meVote &&
 //         <>
@@ -436,6 +424,7 @@ export function QueryCommentModal({
 //           </Card>
 //         </>
 //       }
+
 //     </Card>
 //   )
 // }

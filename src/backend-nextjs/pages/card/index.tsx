@@ -3,8 +3,10 @@ import { symbolToUrl, getCardUrlParam } from '../../lib/helper'
 import { CocardQuery, useCocardQuery } from '../../apollo/query.graphql'
 import { QueryDataProvider } from '../../components/data-provider'
 import { CardBody, CardHead } from '../../components/card'
+import useMe from '../../components/use-me'
 
 function CardPage(): JSX.Element {
+  const me = useMe({ redirectTo: '/signin' })
   const router = useRouter()
   const { u, s } = router.query
   const url = u as string

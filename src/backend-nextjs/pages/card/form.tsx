@@ -6,7 +6,7 @@ import { CocardFragment, CocardQuery, useCocardQuery } from '../../apollo/query.
 import { CardBody } from '../../components/card'
 import { CardForm } from '../../components/card-form'
 import { QueryDataProvider } from '../../components/data-provider'
-import useMe from '../../components/useMe'
+import useMe from '../../components/use-me'
 
 // interface RouteProps extends RouteComponentProps {
 //   me?: QT.me_me
