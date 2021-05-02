@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useEffect, useRef, forwardRef } from 'react'
+import React, { ReactElement, useState, useEffect, useContext, forwardRef, useRef } from 'react'
 import { useQuery, useMutation, useLazyQuery, useApolloClient } from '@apollo/client'
 import { Link, navigate, redirectTo } from '@reach/router'
 import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input } from 'antd'
@@ -15,37 +15,56 @@ import { SpaceContext } from 'antd/lib/space'
 import { ReactComponent as ClockIcon } from '../assets/clock.svg'
 import { ReactComponent as LinkIcon } from '../assets/link.svg'
 
-const titleRef: any[] = []
-const pushTitle = (el: any) => {
-  titleRef.push(el)
-  // console.log(titleRef)
-}
-
 const RenderTokenStream = forwardRef(
   (
     {
       stream,
       className,
       showPanel,
-    }: {
+      pushTitle,
+      titleRef,
+    }: // commentClickHandler,
+    {
       stream: ExtTokenStream
       className?: string
       showPanel?: boolean
+      pushTitle?: (el: HTMLSpanElement | null) => void
+      titleRef?: (arr: any[]) => void
+      // commentClickHandler?: () => void
     },
     ref: any,
   ): JSX.Element | null => {
+    const inlineValueArr: string[] = [classes.inlineValue]
     const [Panel, setPanel] = useState(false)
+    const [commentTextArea, setCommentTextArea] = useState(inlineValueArr)
     const onFocusHandler = (e: any) => {
       e.stopPropagation()
       // e.preventDefault()
       setPanel(true)
     }
     const onBlurHandler = (e: any) => {
-      e.stopPropagation()
+      // e.stopPropagation()
       // e.preventDefault()
+      // if (!commentTextArea) {
       setPanel(false)
+      // }
     }
+    const commentMouseDownHandler = () => {
+      // setPanel(true)
+      setCommentTextArea([classes.inlineValue, classes.inlineValueComment])
+      // inlineValueArr.push(classes.inlineValueComment)
+      // document.getElementById('commentTextArea')?.focus()
+    }
+    // console.log(commentTextArea)
+    const commentMouseUpHandler = () => {
+      // document.getElementById('commentTextArea')?.focus()
+      // setPanel(true)
+      // setCommentTextArea(true)
+    }
+    const inlineValueClassName = commentTextArea.join(' ')
+    // useEffect()
     // console.log(opacity)
+    // const myRef = useRef([])
     if (typeof stream === 'string') {
       // return stream.search(/\n+/g) >= 0 || stream.search(/ {2,}/g) >= 0 || stream === ' ' ? (
       return stream.search(/\n+/g) >= 0 || stream.search(/ {2,}/g) >= 0 || stream === ' ' ? null : (
@@ -70,7 +89,7 @@ const RenderTokenStream = forwardRef(
         <>
           {hasStr && noReturn ? (
             //包含hover效果
-            <div className={classes.array} onFocus={onFocusHandler} onBlur={onBlurHandler} tabIndex={0}>
+            <div className={classes.array} onMouseDown={onFocusHandler} onBlur={onBlurHandler} tabIndex={0}>
               {stream.map((e, i) => {
                 return <RenderTokenStream key={i} stream={e} showPanel={Panel} ref={ref} />
               })}
@@ -99,11 +118,15 @@ const RenderTokenStream = forwardRef(
       case 'sect-symbol': {
         // console.log(`symbol: ${content}`)
         return (
-          <span id={content} className={classes.tickerTitle} ref={el => pushTitle(el)}>
-            <Link to={`/card?${toUrlParams({ s: content })}`}>
-              {content.replace('[[', '').replace(']]', '')}
-              {/* {console.log()} */}
-            </Link>
+          <span
+            id={content}
+            className={classes.tickerTitle}
+            ref={
+              ref
+              // console.log(el)
+            }
+          >
+            <Link to={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link>
           </span>
         )
       }
@@ -132,16 +155,14 @@ const RenderTokenStream = forwardRef(
           //   </QueryCommentModal>
           // )
         }
+        if (stream.marker && (stream.marker.key.search('[key]') >= 0 || stream.marker.key.search('[~]') >= 0)) {
+          return <RenderTokenStream stream={stream.content} ref={ref} />
+        }
         return (
-          <>
-            {stream.marker && (stream.marker.key.search('[key]') >= 0 || stream.marker.key.search('[~]') >= 0) ? (
-              <RenderTokenStream stream={stream.content} ref={ref} />
-            ) : (
-              <li className={classes.inlineValue}>
-                <RenderTokenStream stream={stream.content} ref={ref} />
-              </li>
-            )}
-          </>
+          <li className={classes.inlineValue}>
+            {/* {console.log(commentTextArea)} */}
+            <RenderTokenStream stream={stream.content} ref={ref} />
+          </li>
         )
       }
       case 'line-mark':
@@ -171,7 +192,12 @@ const RenderTokenStream = forwardRef(
       case 'stamp': {
         const panel =
           stream.markerline && stream.markerline.anchorId ? (
-            <AnchorPanel anchorId={stream.markerline.anchorId.toString()} meAuthor={false} />
+            <AnchorPanel
+              anchorId={stream.markerline.anchorId.toString()}
+              meAuthor={false}
+              commentMouseDownHandler={commentMouseDownHandler}
+              // commentMouseUpHandler={commentMouseUpHandler}
+            />
           ) : null
         const src =
           stream.markerline && stream.markerline.src ? (
@@ -196,26 +222,43 @@ const RenderTokenStream = forwardRef(
 )
 RenderTokenStream.displayName = 'RenderTokenStream'
 
-const RenderSection = forwardRef(({ sect }: { sect: Section }, ref): JSX.Element | null => {
-  if (sect.stream) {
-    return (
-      <div>
-        {console.log(sect.stream)}
-        <RenderTokenStream stream={sect.stream} ref={ref} />
-      </div>
-    )
-  }
-  return null
-})
+const RenderSection = forwardRef(
+  ({ sect, titleRef }: { sect: Section; titleRef?: (arr: any[]) => void }, ref): JSX.Element | null => {
+    const titleRefArr: any[] = []
+    const pushTitle = (el: any) => {
+      titleRefArr.push(el)
+      // console.log(titleRefArr)
+    }
+    if (sect.stream) {
+      return (
+        <div>
+          {/* {console.log(sect.stream)} */}
+          <RenderTokenStream
+            stream={sect.stream}
+            ref={ref}
+            // pushTitle={pushTitle}
+            // titleRef={titleRef ? titleRef(titleRefArr) : null}
+          />
+          {/* {console.log(sect)} */}
+        </div>
+      )
+    }
+    return null
+  },
+)
 RenderSection.displayName = 'RenderSection'
 
 export const RenderCardBody = forwardRef(
-  ({ sects, titleRef }: { sects: Section[]; titleRef?: any }, ref): JSX.Element => {
+  ({ sects, titleRef }: { sects: Section[]; titleRef?: (arr: any[]) => void }, ref): JSX.Element => {
+    const myRef = useRef<any[]>([])
+
+    console.log(myRef.current)
     return (
       <>
         {sects.map((e, i) => (
-          <RenderSection key={i} sect={e} ref={ref} />
+          <RenderSection key={i} sect={e} ref={el => (myRef.current[i] = el)} />
         ))}
+        {titleRef && titleRef(myRef.current)}
       </>
     )
   },
@@ -249,7 +292,7 @@ export const CardBody = forwardRef(
       //     <div>discuss</div>
       //   </QueryCommentModal> */}
       // </>
-      <RenderCardBody sects={editor.getSections()} ref={ref} titleRef={titleRefHandler && titleRefHandler(titleRef)} />
+      <RenderCardBody sects={editor.getSections()} titleRef={titleRefHandler} />
     )
   },
 )

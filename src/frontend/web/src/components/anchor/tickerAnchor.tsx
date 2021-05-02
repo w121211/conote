@@ -76,7 +76,7 @@ const TickerAnchor = ({
       type: "inline-marker"
       __proto__: Object */
   sect
-    .filter(key => key.nestedCard)
+    // .filter(key => key.nestedCard)
     .forEach((key, idx) => {
       // const obj: dataObj = { symbol: '', subtitles: [] }
       if (key.nestedCard) {
@@ -104,7 +104,7 @@ const TickerAnchor = ({
         // }
       }
 
-      console.log(anchArr)
+      // console.log(anchArr)
       // anchArr.push(obj)
     })
 

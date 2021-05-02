@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useState, useRef, useContext, createContext } from 'react'
 import { Layout, Input } from 'antd'
 import { Link, Router, RouteComponentProps, Redirect } from '@reach/router'
 import { useQuery } from '@apollo/client'
@@ -23,6 +23,9 @@ import { ReactComponent as Arrow } from '../assets/arrow.svg'
 const { Search } = Input
 function NotFoundPage({ path }: RouteComponentProps): JSX.Element {
   return <h1>Page not found</h1>
+}
+const commentClickHandler = (ref: any) => {
+  ref && ref.focus()
 }
 
 export function Pages(): JSX.Element | null {
@@ -100,8 +103,8 @@ export function Pages(): JSX.Element | null {
           <div className="routerPage">
             <Router primary={false} component={Fragment}>
               <HomePage path="/" />
-
               <CardPage path="card" />
+
               <CardFormPage path="form" />
 
               <GiveandtakeCardPage path="give" me={data?.me} />

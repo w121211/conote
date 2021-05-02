@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useQuery, useMutation } from '@apollo/client'
 import * as queries from '../graphql/queries'
 import * as QT from '../graphql/query-types'
@@ -12,10 +12,14 @@ export function AnchorPanel({
   anchorId,
   meAuthor,
   className,
-}: {
+  commentMouseDownHandler,
+}: // commentMouseUpHandler,
+{
   anchorId: string
   meAuthor: boolean
   className?: string
+  commentMouseDownHandler: () => void
+  // commentMouseUpHandler: () => void
 }): JSX.Element {
   const [count, setCount] = useState<QT.anchorCount | null>(null)
   const [createLike] = useMutation<QT.createAnchorLike, QT.createAnchorLikeVariables>(queries.CREATE_ANCHOR_LIKE, {
@@ -54,16 +58,21 @@ export function AnchorPanel({
     return classList.join(' ')
   }
   const [showModal, setShowModal] = useState(false)
-  const onClickHandler = (e: any) => {
-    e.stopPropagation()
-    setShowModal(prevShowModal => !prevShowModal)
+  const onMouseDownHandler = (e: any) => {
+    // e.stopPropagation()
+    commentMouseDownHandler()
   }
+  const onMouseupHandler = (e: any) => {
+    // e.stopPropagation()
+    commentMouseDownHandler()
+  }
+  const ref = useRef()
   return (
     <span className={classLister(classes.comment)}>
       <AnchorLike {...{ anchorId, count, meLike, createLike, updateLike }} />
       <AnchorDislike {...{ anchorId, count, meLike, createLike, updateLike }} />
-      <CommentIcon className={classes.commentIcon} onClick={onClickHandler} />
-      <MyModal modalVisible={showModal} handleOk={onClickHandler} handleCancel={onClickHandler} />
+      <CommentIcon className={classes.commentIcon} onClick={onMouseDownHandler} />
+      {/* <MyModal modalVisible={showModal} handleOk={onClickHandler} handleCancel={onClickHandler} /> */}
     </span>
   )
   // return (
