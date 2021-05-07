@@ -20,12 +20,16 @@ module.exports = {
   entry: {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 6e31220... add extension
+=======
+>>>>>>> backend-dev
     'background-script': path.resolve(__dirname, 'src/scripts/background-script.ts'),
     'content-script': path.resolve(__dirname, 'src/scripts/content-script.ts'),
     popup: path.resolve(__dirname, 'src/popup/index.tsx'),
     // main: path.resolve(__dirname, 'src/index.tsx'),
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
     'background-page': path.join(__dirname, './src/background-page.ts'),
@@ -34,11 +38,14 @@ module.exports = {
 >>>>>>> 514adbb... .
 =======
 >>>>>>> 6e31220... add extension
+=======
+>>>>>>> backend-dev
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
   },
   output: {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     path: path.resolve(__dirname, 'dist'),
@@ -48,6 +55,9 @@ module.exports = {
 =======
     path: path.resolve(__dirname, 'dist'),
 >>>>>>> 6e31220... add extension
+=======
+    path: path.resolve(__dirname, 'dist'),
+>>>>>>> backend-dev
     filename: '[name].js',
   },
   module: {
@@ -57,8 +67,11 @@ module.exports = {
         exclude: /node_modules/,
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 6e31220... add extension
+=======
+>>>>>>> backend-dev
         // 改用babel-lodaer，ts-loader的type-checking會報錯，但單純跑`tsc`卻沒問題，尚未找到解決辦法
         loader: 'babel-loader',
       },
@@ -67,12 +80,15 @@ module.exports = {
         use: ['style-loader', 'css-loader'],
       },
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         loader: 'babel-loader',
       },
 >>>>>>> 514adbb... .
 =======
 >>>>>>> 6e31220... add extension
+=======
+>>>>>>> backend-dev
       // {
       //   test: /\.tsx?$/,
       //   include: path.join(__dirname, 'src'),
@@ -131,6 +147,7 @@ module.exports = {
         {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
           from: path.resolve(__dirname, 'public', '*.json'),
           to: path.resolve(__dirname, 'dist', '[name].json'),
         },
@@ -152,6 +169,10 @@ module.exports = {
           from: path.resolve(__dirname, 'public', '*.json'),
           to: path.resolve(__dirname, 'dist', '[name].json'),
 >>>>>>> 6e31220... add extension
+=======
+          from: path.resolve(__dirname, 'public', '*.json'),
+          to: path.resolve(__dirname, 'dist', '[name].json'),
+>>>>>>> backend-dev
         },
         {
           from: path.resolve(__dirname, 'public', '*.png'),
@@ -164,10 +185,14 @@ module.exports = {
       ],
     }),
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 514adbb... .
 =======
 
 >>>>>>> 6e31220... add extension
+=======
+
+>>>>>>> backend-dev
     // new HtmlWebpackPlugin({
     //   filename: './index.html',
     //   template: './public/index.html',

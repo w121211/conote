@@ -9,9 +9,13 @@ import {
   CocardQueryVariables,
 } from '../apollo/query.graphql'
 import { RenderCardBody } from './card'
+<<<<<<< HEAD
 import Preview from './preview/preview'
 import SaveIcon from '../assets/svg/save.svg'
 import classes from './card-form.module.scss'
+=======
+
+>>>>>>> backend-dev
 function CardInput() {
   /**
    * 理想（類code-editor）：
@@ -160,6 +164,7 @@ export function CardForm({ card, onFinish }: { card: Cocard; onFinish?: () => vo
     }
   }
 
+<<<<<<< HEAD
   const [preview, setPreview] = useState(false)
   const showPreview = () => {
     setPreview(true)
@@ -220,5 +225,24 @@ export function CardForm({ card, onFinish }: { card: Cocard; onFinish?: () => vo
     //   </Form>
     //   <RenderCardBody sects={sects} />
     // </div>
+=======
+  if (card.body === null) return <p>[Error]: null body</p>
+
+  return (
+    <div>
+      {/* {symbolTokens.map((e, i) => <RenderToken key={i} token={e} />)} */}
+      <Form onFinish={_onFinish} initialValues={{ input: editor.getText() }} onValuesChange={onValuesChange}>
+        <Form.Item name="input">
+          <Input.TextArea rows={10} autoSize />
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            儲存
+          </Button>
+        </Form.Item>
+      </Form>
+      <RenderCardBody sects={sects} />
+    </div>
+>>>>>>> backend-dev
   )
 }

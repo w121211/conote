@@ -1,5 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+<<<<<<< HEAD
 exports[`Fetch youtube get meta info 1`] = `
 Object {
   "authorId": "UCeTEWFsNC3eeUsn9hvsDALQ",
@@ -55,6 +56,9 @@ All my videos are just my own opinions, my opinions could be wrong, my videos ar
 `;
 
 exports[`fetch function get fetch url 1`] = `
+=======
+exports[`domain fetch general 1`] = `
+>>>>>>> backend-dev
 Object {
   "domain": "test.com",
   "resolvedUrl": "https://test.com",
@@ -62,7 +66,11 @@ Object {
 }
 `;
 
+<<<<<<< HEAD
 exports[`fetch youtube get meta info 1`] = `
+=======
+exports[`domain fetch youtube 1`] = `
+>>>>>>> backend-dev
 Object {
   "authorId": "UCeTEWFsNC3eeUsn9hvsDALQ",
   "authorName": "老汤美股财经",

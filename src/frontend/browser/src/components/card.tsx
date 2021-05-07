@@ -1,7 +1,10 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 6e31220... add extension
+=======
+>>>>>>> backend-dev
 import React, { ReactElement, useState, useEffect } from 'react'
 import { useQuery, useMutation, useLazyQuery, useApolloClient } from '@apollo/client'
 // import { Link, navigate, redirectTo } from '@reach/router'
@@ -9,6 +12,9 @@ import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input 
 import { hello } from '../../../../lib/editor/src/index'
 import { Editor, Section, ExtTokenStream, streamToStr } from '../../../../lib/editor/src/index'
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> backend-dev
 import * as queries from '../graphql/queries'
 import * as QT from '../graphql/query-types'
 import { AnchorPanel } from './tile-panel'
@@ -320,6 +326,7 @@ export function CardHead({ card }: { card: QT.cocardFragment }): JSX.Element {
 // //   if (data?.ocard) return <CardBody card={data.ocard} rootFormat={MK.TICKER_FORMATTER} bySrc={src} />
 // //   return <span>Error!</span>
 // // }
+<<<<<<< HEAD
 =======
 import React, { useState } from 'react'
 // import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
@@ -663,3 +670,5 @@ export function CardPage(): JSX.Element {
 // //   return <span>Error!</span>
 // // }
 >>>>>>> 6e31220... add extension
+=======
+>>>>>>> backend-dev

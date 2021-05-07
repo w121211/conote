@@ -2,7 +2,11 @@
 // import { useQuery, useMutation, useLazyQuery, useApolloClient } from '@apollo/client'
 // import { Link, navigate, redirectTo } from '@reach/router'
 // import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input } from 'antd'
+<<<<<<< HEAD
 import React, { useState, useRef, forwardRef } from 'react'
+=======
+import React from 'react'
+>>>>>>> backend-dev
 import { Editor, Section, ExtTokenStream, streamToStr } from '../../lib/editor/src/index'
 import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
 import { AnchorPanel } from './tile-panel'
@@ -10,6 +14,7 @@ import { QueryCommentModal } from './tile'
 import { toUrlParams } from '../lib/helper'
 import { PollChoices } from './poll-form'
 import { Link } from './link'
+<<<<<<< HEAD
 import classes from './card.module.scss'
 import ClockIcon from '../assets/svg/clock.svg'
 import LinkIcon from '../assets/svg/link.svg'
@@ -319,6 +324,121 @@ export function CardBody({
   showQuestion?: () => void
 }): JSX.Element {
   // console.log(card)
+=======
+
+function RenderTokenStream({ stream }: { stream: ExtTokenStream }): JSX.Element | null {
+  if (typeof stream === 'string') {
+    return <>{stream}</>
+  }
+  if (Array.isArray(stream)) {
+    return (
+      <>
+        {stream.map((e, i) => (
+          <RenderTokenStream key={i} stream={e} />
+        ))}
+      </>
+    )
+  }
+  // const err = token.marker ? <span>({token.marker.error})</span> : null
+  const content = streamToStr(stream.content)
+  switch (stream.type) {
+    // case 'sect-ticker':
+    // case 'sect-topic': {
+    //   console.log(`symbol: ${content}`)
+    //   return (
+    //     <span>
+    //       <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
+    //     </span>
+    //   )
+    // }
+    case 'sect-symbol': {
+      // console.log(`symbol: ${content}`)
+      return <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
+    }
+    case 'multiline-marker':
+    case 'inline-marker':
+      return <RenderTokenStream stream={stream.content} />
+    case 'inline-value':
+    case 'line-value': {
+      if ((stream.markerline?.comment || stream.markerline?.poll) && stream.markerline.commentId) {
+        return (
+          <QueryCommentModal commentId={stream.markerline.commentId.toString()}>
+            <RenderTokenStream stream={stream.content} />
+          </QueryCommentModal>
+        )
+      }
+      if (stream.markerline?.comment && stream.markerline.commentId) {
+        return <PollChoices pollId={'10'} choices={['aaa', 'bbb']} />
+        // return (
+        //   <QueryCommentModal id={stream.markerline.commentId.toString()}>
+        //     <RenderTokenStream stream={stream.content} />
+        //   </QueryCommentModal>
+        // )
+      }
+      return (
+        <span style={{ color: '#905' }}>
+          <RenderTokenStream stream={stream.content} />
+        </span>
+      )
+    }
+    case 'line-mark':
+    case 'inline-mark':
+      return <span style={{ color: 'orange' }}>{content}</span>
+    case 'ticker':
+    case 'topic': {
+      // console.log(`symbol: ${content}`)
+      return <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
+    }
+    case 'stamp': {
+      console.log(stream.markerline)
+      const panel =
+        stream.markerline && stream.markerline.anchorId ? (
+          <AnchorPanel anchorId={stream.markerline.anchorId.toString()} meAuthor={false} />
+        ) : null
+      const src =
+        stream.markerline && stream.markerline.src ? (
+          <Link to={`/card?${toUrlParams({ u: stream.markerline.src })}`}>src</Link>
+        ) : null
+
+      if (panel || src)
+        return (
+          <span style={{ color: 'orange' }}>
+            {panel}
+            {src}
+          </span>
+        )
+      return null
+    }
+    default:
+      // Recursive
+      return <RenderTokenStream stream={stream.content} />
+  }
+}
+
+function RenderSection({ sect }: { sect: Section }): JSX.Element | null {
+  if (sect.stream) {
+    return (
+      <span style={{ color: 'grey' }}>
+        <RenderTokenStream stream={sect.stream} />
+      </span>
+    )
+  }
+  return null
+}
+
+export function RenderCardBody({ sects }: { sects: Section[] }): JSX.Element {
+  return (
+    <pre>
+      {sects.map((e, i) => (
+        <RenderSection key={i} sect={e} />
+      ))}
+    </pre>
+  )
+}
+
+export function CardBody({ card, bySrc }: { card: CocardFragment; bySrc?: string }): JSX.Element {
+  console.log(card)
+>>>>>>> backend-dev
 
   if (card.body === null) return <p>[Error]: null body</p>
 
@@ -327,12 +447,21 @@ export function CardBody({
   editor.flush({ attachMarkerlinesToTokens: true })
 
   return (
+<<<<<<< HEAD
     // <>
     //   <QueryCommentModal commentId={card.meta.commentId.toString()}>
     //     <div>discuss</div>
     // </QueryCommentModal>
     <RenderCardBody sects={editor.getSections()} titleRef={titleRefHandler} showQuestion={showQuestion} />
     // </>
+=======
+    <>
+      <QueryCommentModal commentId={card.meta.commentId.toString()}>
+        <div>discuss</div>
+      </QueryCommentModal>
+      <RenderCardBody sects={editor.getSections()} />
+    </>
+>>>>>>> backend-dev
   )
 }
 
@@ -361,6 +490,7 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
     meta: null,
     createdAt: null,
   }
+<<<<<<< HEAD
   let cardTitle = card.link.url
   // ticker的title
   const cardDomain = card.link.domain
@@ -391,12 +521,22 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
       {/* <div><Comment comment={comment} /></div> */}
       {/* {console.log(card)} */}
       {/* {cardTitle} */}
+=======
+  return (
+    <h1>
+      <div>{/* <Comment comment={comment} /> */}</div>
+      {card.link.url}
+>>>>>>> backend-dev
       {/* {title && title.text + '\n'} */}
       {/* {publishDate && publishDate.text + '\n'} */}
       {/* {card.link.oauthorName + '\n'} */}
       {/* {'(NEXT)Keywords\n'} */}
       {/* {card.comments.length === 0 ? "新建立" : undefined} */}
+<<<<<<< HEAD
     </div>
+=======
+    </h1>
+>>>>>>> backend-dev
   )
 }
 

@@ -1,10 +1,18 @@
 {
+<<<<<<< HEAD
+=======
+  "references": [{ "path": "../lib/editor" }, { "path": "../lib/fetcher" }],
+>>>>>>> backend-dev
   "compilerOptions": {
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
+<<<<<<< HEAD
     "strict": false,
+=======
+    "strict": true,
+>>>>>>> backend-dev
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,

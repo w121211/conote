@@ -37,7 +37,11 @@ class PrismaTestEnvironment extends NodeEnvironment {
     await client.connect()
     await client.query(`DROP SCHEMA IF EXISTS "${this.schema}" CASCADE`)
     await client.end()
+<<<<<<< HEAD
     console.log('Drop test database completed.')
+=======
+    console.log('Drop test database success')
+>>>>>>> backend-dev
   }
 }
 

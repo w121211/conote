@@ -15,7 +15,11 @@
     "test:server": "jest -c=jest-server.config.js --watch",
     "test-all": "yarn lint && yarn type-check && yarn test",
     "migrate": "prisma migrate dev --preview-feature",
+<<<<<<< HEAD
     "seed": "ts-node prisma/scripts/fromfile.ts"
+=======
+    "seed": "ts-node prisma/scripts/from-file.ts ./prisma/seeds"
+>>>>>>> backend-dev
   },
   "husky": {
     "hooks": {
@@ -41,11 +45,16 @@
     "graphql-scalars": "^1.9.0",
     "jsonwebtoken": "^8.5.1",
     "next": "latest",
+<<<<<<< HEAD
     "next-react-svg": "1.1.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-use-measure": "^2.0.4",
     "sass": "^1.32.12"
+=======
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+>>>>>>> backend-dev
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^1.21.3",

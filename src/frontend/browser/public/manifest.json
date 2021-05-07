@@ -5,6 +5,9 @@
   "version": "1.0.0",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> backend-dev
   "background": {
     "scripts": ["background-script.js"],
     "persistent": false
@@ -17,6 +20,7 @@
     "default_title": "Hello world?"
     // "default_popup": "popup.html"  // 改用bg來叫，開新視窗
   },
+<<<<<<< HEAD
 <<<<<<< HEAD
   // "content_scripts": [
   //   {
@@ -54,18 +58,24 @@
   // ],
 >>>>>>> 6e31220... add extension
 =======
+=======
+>>>>>>> backend-dev
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": ["content-script.js"]
     }
   ],
+<<<<<<< HEAD
 >>>>>>> 807dc66... add nextjs
+=======
+>>>>>>> backend-dev
   "icons": {
     "16": "icon-16.png",
     "48": "icon-48.png",
     "128": "icon-128.png"
   },
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
   "permissions": ["storage", "tabs", "http://localhost:4000/"]
@@ -75,4 +85,7 @@
 =======
   "permissions": ["storage", "tabs", "http://localhost:4000/"]
 >>>>>>> 6e31220... add extension
+=======
+  "permissions": ["storage", "tabs", "http://localhost:4000/"]
+>>>>>>> backend-dev
 }
