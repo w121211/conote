@@ -3,6 +3,7 @@ import { hash, hashSync } from 'bcryptjs'
 import { PrismaClient, SymbolCat } from '@prisma/client'
 // import omitDeep from 'omit-deep-lodash'
 import { omitUndefined } from '../../lib/editor/src/test-helper'
+
 /**
  * See: https://github.com/lodash/lodash/issues/723
  * Recursively remove keys from an object
@@ -36,8 +37,8 @@ function omitDeep(input: Record<string, unknown>, excludes: Array<number | strin
   }, {})
 }
 
-export function clean(obj: Record<string, unknown>): Record<string, unknown> {
-  return omitUndefined(omitDeep(obj, ['createdAt', 'updatedAt']))
+export function clean(obj: Record<string, unknown> | null): Record<string, unknown> | null {
+  return obj === null ? obj : omitUndefined(omitDeep(obj, ['createdAt', 'updatedAt']))
 }
 
 const config = dotenv.config()

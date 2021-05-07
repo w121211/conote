@@ -75,6 +75,7 @@ function RenderTokenStream({ stream }: { stream: ExtTokenStream }): JSX.Element 
       return <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
     }
     case 'stamp': {
+      console.log(stream.markerline)
       const panel =
         stream.markerline && stream.markerline.anchorId ? (
           <AnchorPanel anchorId={stream.markerline.anchorId.toString()} meAuthor={false} />
@@ -126,7 +127,7 @@ export function CardBody({ card, bySrc }: { card: CocardFragment; bySrc?: string
   if (card.body === null) return <p>[Error]: null body</p>
 
   // const meta: CardMeta | undefined = card.meta ? (JSON.parse(card.meta) as CardMeta) : undefined
-  const editor = new Editor(card.body?.text, [], card.link.url, card.link.oauthorName ?? undefined)
+  const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
   editor.flush({ attachMarkerlinesToTokens: true })
 
   return (

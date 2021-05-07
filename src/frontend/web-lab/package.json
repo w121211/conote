@@ -29,7 +29,10 @@
     "antd": "^4.15.1",
     "next": "latest",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "slate": "^0.62.0",
+    "slate-history": "^0.62.0",
+    "slate-react": "^0.62.0"
   },
   "devDependencies": {
     "@testing-library/react": "^11.2.5",

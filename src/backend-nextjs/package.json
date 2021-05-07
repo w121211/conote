@@ -15,7 +15,7 @@
     "test:server": "jest -c=jest-server.config.js --watch",
     "test-all": "yarn lint && yarn type-check && yarn test",
     "migrate": "prisma migrate dev --preview-feature",
-    "seed": "ts-node prisma/scripts/fromfile.ts"
+    "seed": "ts-node prisma/scripts/from-file.ts ./prisma/seeds"
   },
   "husky": {
     "hooks": {
