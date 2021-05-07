@@ -1,0 +1,339 @@
+// @import '../style/global.module.scss';
+// .formContainer {
+//     display: flex;
+//     .textAreaContainer {
+//         flex-grow: 9;
+//     }
+//     .buttonContainer {
+//         flex-grow: 1;
+//     }
+// }
+
+.black {
+  margin: 0;
+  /* display: inline-block; */
+  color: #2c4460;
+  font-weight: normal;
+  cursor: pointer;
+  position: relative;
+  white-space: break-spaces;
+  font-size: 13px;
+  /* border-left: 1px solid; */
+  // overflow: hidden;
+  /* padding-top: 10px; */
+  // padding: 0 0 0 16px;
+  // &:before {
+  //   content: '\2022';
+  //   font-size: 13px;
+  //   /* border-left: 1px dotted #c0c2d0; */
+  //   display: inline-block;
+  //   width: 6px;
+  //   height: 25px;
+  //   position: absolute;
+  //   left: 3px;
+  // top: 1px;
+  // }
+
+  &:focus {
+    outline: none;
+  }
+}
+.inlineBlack {
+  margin: 0;
+  display: inline-block;
+  color: #2c4460;
+  font-weight: normal;
+  position: relative;
+  /* border-left: 1px solid; */
+  overflow: hidden;
+  /* padding-top: 10px; */
+  padding: 5px 0 17px;
+}
+.inlineValue {
+  // margin: 0;
+  flex: auto;
+  display: flex;
+  color: #2c4460;
+  font-weight: normal;
+  position: relative;
+  margin-left: 23px;
+  padding: 3px 0;
+  align-items: center;
+  font-size: 13px;
+  // border-left: 2px solid #dad7d7;
+  // overflow: hidden;
+  cursor: pointer;
+  &:hover {
+    background-color: $natualHover;
+  }
+  &:focus {
+    outline: none;
+  }
+  &:before {
+    content: '\26AC';
+    font-size: 13px;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    position: relative;
+    left: -8px;
+    top: -8px;
+    color: #cfd0d6;
+  }
+}
+.inlineValueComment {
+  background-color: $black;
+}
+.tickerHl {
+  position: relative;
+  display: inline-block;
+  margin: 3px 0 0;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background-color: $primary;
+  font-weight: bold;
+  font-size: 14px;
+  color: white;
+  //  梯形tab
+  // &:before {
+  //     content: "";
+  //     width: 100%;
+  //     height: 100%;
+  //     background: white;
+  //     position: absolute;
+  //     top: 0;
+  //     left: 0;
+  //     transform: perspective(0.5em) rotatex(5deg) scale(1.5);
+  //     z-index: -1;
+  //     border-radius: 5px 5px 0 0;
+  //     transform-origin: left bottom;
+  // }
+}
+
+.marker {
+  // display: inline-block;
+  // margin: 10px 0 0;
+  // padding: 0px 0px 3px;
+  // border-radius: 5px;
+  // background-color: $light-blue;
+
+  // padding-bottom: 6px;
+  color: $black;
+  font-weight: 500;
+  font-size: 14px;
+  margin-top: 10px;
+  margin-left: 10px;
+  letter-spacing: 2px;
+}
+.inlineMarker {
+  display: flex;
+  width: 100%;
+  // margin: 10px 0 0;
+  padding: 0px 0px 24px;
+  // border-radius: 5px;
+  // background-color: $light-blue;
+  color: $black;
+  font-weight: 700;
+  font-size: 16px;
+}
+.preMarker {
+  // display: inline-block;
+  // margin: 10px 0 0;
+  // padding: 0px 0px 36px;
+  // border-radius: 5px;
+  // background-color: $light-blue;
+  color: $black;
+  font-weight: 700;
+  font-size: 16px;
+  margin-top: 10px;
+  & ~ .black {
+    cursor: auto;
+    &:hover {
+      background: none;
+    }
+  }
+}
+.section {
+  // display: block;
+  // box-shadow: 0 0 10px #ddd;
+  // margin: 30px 0 20px;
+  padding: 10px 0 0;
+  // border-top: 1px solid $natual;
+  background: white;
+  font-weight: bold;
+  // border-radius: 20px;
+  // box-shadow: 0 0 22px #8e8e8e61;
+
+  ul {
+    margin-bottom: 0;
+    // padding-left: 10px;
+    // list-style-type: disc;
+  }
+}
+.preSection {
+  // margin-left: -10dspx;
+  li {
+    // margin-bottom: 3px;
+  }
+}
+.tickerTitle {
+  scroll-margin: 20px;
+  position: relative;
+  display: block;
+  margin-top: 38px;
+  border-bottom: 1px solid $natual;
+  font-family: 'Noto Sans TC';
+  // margin: 0 0 15px;
+  // padding: 1px 8px;
+  // border-radius: 5px 5px 0;
+  // background-color: white;
+  // border-bottom: 1px solid #ddd;
+  font-weight: 900;
+  font-size: 18px;
+  a {
+    display: block;
+    color: $black;
+  }
+}
+h1.tickerTitle {
+  padding: 0 0 3px;
+}
+// @import "../../style/global.module.scss";
+
+.comment {
+  display: inline-block;
+  margin-left: 36px;
+  :global(.ant-comment-inner) {
+    margin: 0;
+    padding: 0;
+    ul {
+      flex-direction: row;
+      margin: 0;
+    }
+    li {
+      margin-bottom: 0;
+    }
+  }
+}
+.commentIcon {
+  position: relative;
+  height: 1.2em;
+  top: 3px;
+  fill: $gray-natual;
+  &:hover {
+    fill: $gray-hover;
+  }
+}
+
+.tooltip {
+  background-color: $primary;
+}
+
+.visible {
+  display: inline-flex;
+  visibility: visible;
+  span,
+  a {
+    margin-right: 4px;
+  }
+}
+.hidden {
+  display: inline-flex;
+  visibility: hidden;
+  span,
+  a {
+    margin-right: 4px;
+  }
+}
+.array {
+  display: inline-block;
+  align-items: center;
+
+  width: 100%;
+  // padding-left: 20px;
+  &:focus {
+    outline: none;
+  }
+
+  // a {
+  //   color: black;
+  // }
+}
+.lineValue {
+  &:hover {
+    background-color: $natualHover;
+  }
+}
+.header {
+  // width: 95%;
+  line-height: 1.6em;
+  letter-spacing: 1px;
+  overflow-wrap: break-word;
+  .title {
+    // font-family: "Noto Sans TC";
+    display: block;
+    margin: 10px 0;
+    line-height: 1.8em;
+    white-space: pre-line;
+    font-weight: 500;
+    font-size: 14px;
+    color: $black;
+  }
+  .date {
+    @extend %Round_sm_gray_en;
+    display: inline-block;
+    margin-right: 16px;
+  }
+  .webName {
+    @extend %Round_sm_gray_en;
+  }
+  .link {
+    @extend %Round_sm_ch;
+  }
+  .author {
+    @extend %Round_sm_gray_en;
+    @extend %Round_sm_ch;
+    color: $primary;
+  }
+}
+.flexContainer {
+  display: flex;
+  align-items: center;
+}
+.textArea {
+  &:global(.ant-input) {
+    border: none;
+  }
+}
+.clockIcon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  fill: $gray;
+}
+a {
+  .linkIcon {
+    width: 16px;
+    height: 16px;
+    position: relative;
+    top: 3px;
+    margin-right: 3px;
+    fill: $primary;
+  }
+  &:hover {
+    .linkIcon {
+      fill: $primaryHover;
+    }
+  }
+}
+.keyword {
+  // margin-top: 6px;
+  // margin-left: 10px;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  background-color: $natual;
+  a {
+    color: $gray;
+  }
+}

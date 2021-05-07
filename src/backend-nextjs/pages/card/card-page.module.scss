@@ -1,0 +1,153 @@
+// @import '../style/global.module.scss';
+// pre span {
+//   // font-family: 微軟正黑體, sans-serif;
+//   font-family: 'Noto Sans TC', BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
+//     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+// }
+.main {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  background-color: $bg;
+}
+.mainInner {
+  display: flex;
+  flex: auto;
+  padding: 0 24px;
+}
+.header {
+  // width: 90%;
+  line-height: 1.6em;
+  letter-spacing: 1px;
+  .title {
+    // font-family: "Noto Sans TC";
+    display: block;
+    margin: 10px 0;
+    line-height: 1.8em;
+    white-space: pre-line;
+    font-weight: 500;
+    font-size: 18px;
+    color: $black;
+  }
+  .date {
+    @extend %Round_sm_gray_en;
+    display: inline-block;
+    margin-right: 16px;
+  }
+  .webName {
+    @extend %Round_sm_gray_en;
+  }
+  .link {
+    @extend %Round_sm_ch;
+  }
+  .author {
+    @extend %Round_sm_gray_en;
+    @extend %Round_sm_ch;
+    color: $primary;
+  }
+}
+.flexContainer {
+  display: flex;
+  align-items: center;
+}
+.textArea {
+  &:global(.ant-input) {
+    border: none;
+  }
+}
+.clockIcon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  fill: $gray;
+}
+a {
+  .linkIcon {
+    width: 16px;
+    height: 16px;
+    position: relative;
+    top: 3px;
+    margin-right: 3px;
+    fill: $primary;
+  }
+  &:hover {
+    .linkIcon {
+      fill: $primaryHover;
+    }
+  }
+}
+.cardInner {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  position: absolute;
+  left: 0;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+.cardElement {
+  // height: calc(100vh - 60px);
+
+  width: 88%;
+  margin: 30px auto;
+  background: #fff;
+  margin-bottom: 60px;
+  padding: 18px 40px;
+}
+.cardOuter {
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.cardBodyContainer {
+  width: 95%;
+  // height: 100%;
+  // display: flex;
+  .buttonWrapper {
+    // flex-grow: 1;
+    // left: 30%;
+  }
+}
+.button:global(.ant-btn) {
+  // @extend %Round_sm_ch;
+  position: relative;
+  // top: 100px;
+  // left: 70%;
+  width: 58px;
+  height: 58px;
+  margin-top: 5em;
+  border-radius: 29px;
+  // box-shadow: 9px 9px 16px rgb(198, 198, 226), -9px -9px 16px white;
+  border: none;
+  background: white;
+
+  box-shadow: 0 3px 6px #00000029;
+  .editIcon {
+    width: 27px;
+    height: 27px;
+    display: block;
+    position: relative;
+    left: 2px;
+    top: -1px;
+    fill: $icon;
+    stroke: $icon;
+  }
+  &:hover {
+    background: $natual;
+    .editIcon {
+      fill: $primary;
+      stroke: $primary;
+    }
+  }
+}
+.section {
+  display: block;
+  box-shadow: 0 0 10px #ddd;
+  margin: 0 0 40px;
+  padding: 6px 16px;
+  border-left: 6px solid $primary;
+
+  border-radius: 5px;
+}

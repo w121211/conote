@@ -41,8 +41,11 @@
     "graphql-scalars": "^1.9.0",
     "jsonwebtoken": "^8.5.1",
     "next": "latest",
+    "next-react-svg": "1.1.2",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "react-use-measure": "^2.0.4",
+    "sass": "^1.32.12"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^1.21.3",

@@ -1,0 +1,20 @@
+// @import '../../style/variables.scss';
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 4px;
+}
+.barWrapper {
+  height: 8px;
+  width: 100%;
+  background: $bg;
+}
+.bar {
+  height: 100%;
+  background-color: #c1d0e2;
+}
+.number {
+  font-size: 10px;
+  color: #73808c;
+}

@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { SearchAllForm } from '../search-all-form'
-import { ReactComponent as HomeIcon } from '../../assets/icon/home.svg'
-import { ReactComponent as CocardIcon } from '../../assets/icon/app.svg'
-import { ReactComponent as HeartIcon } from '../../assets/icon/heart.svg'
+import HomeIcon from '../../assets/svg/home.svg'
+import CocardIcon from '../../assets/svg/app.svg'
+import HeartIcon from '../../assets/svg/heart.svg'
+import classes from './sidebar.module.scss'
 
 const SideBar = () => {
   const [sidebar, setSidebar] = useState(false)
@@ -12,7 +13,7 @@ const SideBar = () => {
   }
 
   return (
-    <div className={'sidebar' + (sidebar ? '' : ' collapse')}>
+    <div className={classes.sidebar}>
       <span className="logo">
         <Link href="/">COCARD</Link>
       </span>
@@ -21,7 +22,7 @@ const SideBar = () => {
       <div className="searchBar">
         <SearchAllForm />
       </div>
-      <ul className="sideList">
+      <ul className={classes.sideList}>
         {/* <li>
             <Link to="/">
               <HomeIcon />

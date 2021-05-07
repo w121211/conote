@@ -1,0 +1,54 @@
+// @import '../../style/variables.scss';
+.Wrapper {
+  display: flex;
+  padding-bottom: 10px;
+  padding-left: 16px;
+  padding-top: 10px;
+
+  button {
+    font-size: inherit;
+  }
+}
+
+.TextArea {
+  &:global(.ant-input) {
+    resize: none;
+    line-height: inherit;
+    background-color: $natual-hover;
+    border: none;
+    padding-bottom: 0;
+    font-size: inherit;
+
+    &:focus {
+      box-shadow: none;
+    }
+
+    // &:focus {
+    //   border-bottom: 1px solid #000;
+    // }
+    // &:hover {
+    //   border-bottom: 1px solid #000;
+    // }
+  }
+}
+.Wrapper.small {
+  padding-top: 0;
+  padding-left: 0;
+  :global(.ant-input) {
+    width: 100px;
+    background: none;
+    border: {
+      left: none;
+      right: none;
+      top: none;
+      bottom: 1px solid $natual2;
+      radius: 0;
+    }
+    &:hover {
+      border-bottom: 1px solid $black;
+    }
+    &:focus {
+      border-bottom: 1px solid $black;
+    }
+  }
+}

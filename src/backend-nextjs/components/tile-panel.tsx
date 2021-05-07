@@ -23,8 +23,18 @@ import {
   useUpdateReplyLikeMutation,
 } from '../apollo/query.graphql'
 import { AnchorLike, AnchorDislike, ReplyLike, ReplyDislike, CommentLike, CommentDislike } from './tile-upndown'
+import classes from './tile-panel.module.scss'
+import CommentIcon from '../assets/svg/message.svg'
 
-export function AnchorPanel({ anchorId, meAuthor }: { anchorId: string; meAuthor: boolean }): JSX.Element {
+export function AnchorPanel({
+  anchorId,
+  meAuthor,
+  onClickHandler,
+}: {
+  anchorId: string
+  meAuthor: boolean
+  onClickHandler: () => void
+}): JSX.Element {
   const [count, setCount] = useState<AnchorCountFragment | null>(null)
   const [createLike] = useCreateAnchorLikeMutation({
     update(cache, { data }) {
@@ -57,10 +67,12 @@ export function AnchorPanel({ anchorId, meAuthor }: { anchorId: string; meAuthor
   const myAnchorLikes = useMyAnchorLikesQuery({ fetchPolicy: 'cache-only' })
 
   const meLike = myAnchorLikes.data?.myAnchorLikes.find(e => e.anchorId.toString() === anchorId)
+
   return (
-    <span>
+    <span className={classes.comment}>
       <AnchorLike {...{ anchorId, count, meLike, createLike, updateLike }} />
       <AnchorDislike {...{ anchorId, count, meLike, createLike, updateLike }} />
+      <CommentIcon className={classes.commentIcon} onClick={onClickHandler} />
     </span>
   )
   // return (

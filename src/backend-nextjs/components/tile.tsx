@@ -96,7 +96,7 @@ export function QueryCommentModal({
   commentId: string
   children: React.ReactNode
 }): JSX.Element {
-  console.log(commentId)
+  // console.log(commentId)
 
   const [showModal, setShowModal] = useState<boolean>(false)
   const [suggestReply, setSuggestReply] = useState<string | undefined>()
