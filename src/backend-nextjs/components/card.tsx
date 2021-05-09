@@ -75,7 +75,6 @@ function RenderTokenStream({ stream }: { stream: ExtTokenStream }): JSX.Element 
       return <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
     }
     case 'stamp': {
-      console.log(stream.markerline)
       const panel =
         stream.markerline && stream.markerline.anchorId ? (
           <AnchorPanel anchorId={stream.markerline.anchorId.toString()} meAuthor={false} />
@@ -102,6 +101,7 @@ function RenderTokenStream({ stream }: { stream: ExtTokenStream }): JSX.Element 
 
 function RenderSection({ sect }: { sect: Section }): JSX.Element | null {
   if (sect.stream) {
+    console.log(sect.stream)
     return (
       <span style={{ color: 'grey' }}>
         <RenderTokenStream stream={sect.stream} />

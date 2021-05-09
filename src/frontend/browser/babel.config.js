@@ -31,6 +31,7 @@ module.exports = function (api) {
           ],
           // See https://github.com/zloirock/core-js#babelpreset-env
           corejs: 3,
+          loose: true,
         },
       ],
       '@babel/preset-typescript',

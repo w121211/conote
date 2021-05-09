@@ -39,3 +39,4 @@ yarn-error.log*
 
 /prisma/seeds
 /lib/models/__tests__/local-cache.dump.json
+.out

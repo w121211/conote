@@ -1,25 +1,14 @@
 /* eslint-disable no-useless-escape */
 import { resolve } from 'path'
 import { Markerline } from '../typing'
-import { load, removeUndefinedFields as _clean } from '../test-helper'
 import { Editor } from '../editor'
+import * as helper from '../helper'
+import { load, omitUndefined, FakeChance } from '../test-helper'
 
-jest.mock('chance', () => {
-  return {
-    Chance: jest.fn().mockImplementation(() => {
-      return {
-        i: 0,
-        string(): string {
-          const str = this.i.toString(36).padStart(3, '0')
-          this.i += 1
-          if (this.i >= 36 * 36 * 36) {
-            this.i = 0
-          }
-          return str
-        },
-      }
-    }),
-  }
+const fakeChance = new FakeChance()
+
+jest.spyOn(helper, 'randString').mockImplementation(() => {
+  return fakeChance.string()
 })
 
 const symbolCardTemplate = `[*]
@@ -44,9 +33,9 @@ $BB
 [?] <SELL> @30`)
   editor.flush()
 
-  expect(_clean(editor.getText())).toMatchSnapshot()
-  expect(_clean(editor.getMarkerlines())).toMatchSnapshot()
-  expect(_clean(editor.getNestedMarkerlines())).toMatchSnapshot()
+  expect(omitUndefined(editor.getText())).toMatchSnapshot()
+  expect(omitUndefined(editor.getMarkerlines())).toMatchSnapshot()
+  expect(omitUndefined(editor.getNestedMarkerlines())).toMatchSnapshot()
 
   for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
     // const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)

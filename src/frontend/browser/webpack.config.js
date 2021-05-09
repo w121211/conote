@@ -42,6 +42,16 @@ module.exports = {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.graphql$/,
+        exclude: /node_modules/,
+        use: [{ loader: 'babel-loader' }, { loader: 'graphql-let/loader' }],
+      },
+      // {
+      //   test: /\.graphqls$/,
+      //   exclude: /node_modules/,
+      //   use: ['graphql-let/schema/loader'],
+      // },
       // {
       //   test: /\.tsx?$/,
       //   include: path.join(__dirname, 'src'),

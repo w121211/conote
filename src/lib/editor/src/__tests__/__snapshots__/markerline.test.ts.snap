@@ -50,70 +50,91 @@ Object {
   "markerheaders": Array [
     Object {
       "inline": true,
-      "linenumber": 1,
+      "linenumber": 0,
       "marker": Object {
         "key": "[~]",
       },
     },
     Object {
       "inline": true,
-      "linenumber": 2,
+      "linenumber": 1,
       "marker": Object {
         "key": "[=]",
       },
     },
     Object {
-      "linenumber": 3,
+      "linenumber": 2,
       "marker": Object {
         "key": "[?]",
       },
     },
     Object {
-      "linenumber": 9,
+      "linenumber": 8,
       "marker": Object {
         "key": "[+]",
       },
     },
     Object {
       "inline": true,
-      "linenumber": 12,
+      "linenumber": 11,
       "marker": Object {
         "key": "[-]",
       },
     },
     Object {
       "inline": true,
-      "linenumber": 13,
+      "linenumber": 12,
       "marker": Object {
         "key": "[?]",
+      },
+    },
+    Object {
+      "inline": true,
+      "linenumber": 13,
+      "marker": Object {
+        "key": "[小標句尾多了空格111]",
+      },
+    },
+    Object {
+      "inline": true,
+      "linenumber": 14,
+      "marker": Object {
+        "key": "[小標句尾多了空格222]",
+      },
+    },
+    Object {
+      "inline": true,
+      "linenumber": 18,
+      "marker": Object {
+        "key": "[小標沒有連在一起]",
       },
     },
   ],
   "markerlines": Array [
     Object {
-      "linenumber": 1,
+      "linenumber": 0,
       "marker": Object {
         "key": "[~]",
-        "value": "inline 111 inline 111",
+        "value": "inline 111",
       },
       "new": true,
       "noStamp": true,
-      "stampId": "000",
-      "str": " inline 111 inline 111",
+      "stampId": "%000",
+      "str": " inline 111 ",
     },
     Object {
-      "linenumber": 2,
+      "linenumber": 1,
       "marker": Object {
         "key": "[=]",
-        "value": "inline 222 inline 222",
+        "value": "inline 222",
       },
       "new": true,
       "noStamp": true,
-      "stampId": "001",
-      "str": " inline 222 inline 222",
+      "stampId": "%001",
+      "str": " inline 222 ",
     },
     Object {
-      "linenumber": 4,
+      "linenumber": 3,
       "marker": Object {
         "key": "[?]",
         "value": "<AAA> <BBB> poll 111",
@@ -125,11 +146,11 @@ Object {
         "<AAA>",
         "<BBB>",
       ],
-      "stampId": "002",
+      "stampId": "%002",
       "str": "<AAA> <BBB> poll 111",
     },
     Object {
-      "linenumber": 5,
+      "linenumber": 4,
       "marker": Object {
         "key": "[?]",
         "value": "poll 222 <AAA> <BBB>",
@@ -141,33 +162,33 @@ Object {
         "<AAA>",
         "<BBB>",
       ],
-      "stampId": "003",
+      "stampId": "%003",
       "str": "poll 222 <AAA> <BBB>",
     },
     Object {
-      "linenumber": 10,
+      "linenumber": 9,
       "marker": Object {
         "key": "[+]",
         "value": "point 111",
       },
       "new": true,
       "noStamp": true,
-      "stampId": "004",
+      "stampId": "%004",
       "str": "point 111",
     },
     Object {
-      "linenumber": 11,
+      "linenumber": 10,
       "marker": Object {
         "key": "[+]",
         "value": "point 222",
       },
       "new": true,
       "noStamp": true,
-      "stampId": "005",
+      "stampId": "%005",
       "str": "point 222",
     },
     Object {
-      "linenumber": 13,
+      "linenumber": 12,
       "marker": Object {
         "key": "[?]",
         "value": "<CCC> neat reply",
@@ -178,8 +199,30 @@ Object {
       "pollChoices": Array [
         "<CCC>",
       ],
-      "stampId": "006",
+      "stampId": "%006",
       "str": " <CCC> neat reply",
+    },
+    Object {
+      "linenumber": 13,
+      "marker": Object {
+        "key": "[小標句尾多了空格111]",
+        "value": "s",
+      },
+      "new": true,
+      "noStamp": true,
+      "stampId": "%007",
+      "str": "s",
+    },
+    Object {
+      "linenumber": 14,
+      "marker": Object {
+        "key": "[小標句尾多了空格222]",
+        "value": "s",
+      },
+      "new": true,
+      "noStamp": true,
+      "stampId": "%008",
+      "str": "s",
     },
   ],
 }

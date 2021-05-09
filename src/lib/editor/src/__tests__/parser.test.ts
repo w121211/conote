@@ -1,10 +1,10 @@
 import { resolve } from 'path'
 import Prism from 'prismjs'
 import { splitByUrl, tokenizeSection, GRAMMAR } from '../parser'
-import { load, removeUndefinedFields } from '../test-helper'
+import { load, omitUndefined } from '../test-helper'
 
-describe('Grammar', () => {
-  it('tokenize by list', () => {
+describe('Card grammar', () => {
+  it('tokenize list', () => {
     const t = `[111]
 aaa
 - bbb
@@ -21,7 +21,11 @@ jjj
 - kkk
 `
     // kkk 不會被識別出來
-    expect(removeUndefinedFields(Prism.tokenize(t, GRAMMAR))).toMatchSnapshot()
+    expect(omitUndefined(Prism.tokenize(t, GRAMMAR))).toMatchSnapshot()
+  })
+
+  test.each(['[111]<AAA><BBB>', '[111] <AAA> <BBB>', '[111] <AAA> <BBB> CCC'])('tokenize vote-choice', (t: string) => {
+    expect(omitUndefined(Prism.tokenize(t, GRAMMAR))).toMatchSnapshot()
   })
 })
 
@@ -45,10 +49,10 @@ describe('Parser', () => {
   //   expect(tokenizeSection(a)[0].stream).toMatchSnapshot()
   // })
 
-  it.each<[string, string]>(load(resolve(__dirname, '__samples', 'common.txt')))(
-    'tokenize to sections',
+  it.each<[string, string]>(load(resolve(__dirname, '__samples__', 'common.txt')))(
+    'tokenizeSection()',
     (url: string, body: string) => {
-      expect(tokenizeSection(body)).toMatchSnapshot()
+      expect(omitUndefined(tokenizeSection(body))).toMatchSnapshot()
     },
   )
 })

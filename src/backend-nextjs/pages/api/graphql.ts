@@ -1,4 +1,5 @@
 import util from 'util'
+import microCors from 'micro-cors'
 import { ApolloServer } from 'apollo-server-micro'
 import { schema } from '../../apollo/schema'
 
@@ -14,13 +15,6 @@ const apolloServer = new ApolloServer({
     return error
   },
 })
-
-// See: https://nextjs.org/docs/api-routes/api-middlewares
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
 
 // type handler = (req: NextApiRequest, res: NextApiResponse) => Promise<handler>
 // const cookies = handler => (req, res) => {
@@ -54,4 +48,15 @@ export const config = {
 // }
 // export default cookies(handler)
 
-export default apolloServer.createHandler({ path: '/api/graphql' })
+const cors = microCors()
+const handler = apolloServer.createHandler({ path: '/api/graphql' })
+
+// export default apolloServer.createHandler({ path: '/api/graphql' })
+export default cors((req, res) => (req.method === 'OPTIONS' ? res.end() : handler(req, res)))
+
+// See: https://nextjs.org/docs/api-routes/api-middlewares
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}

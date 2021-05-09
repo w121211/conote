@@ -15,7 +15,9 @@
     "test:server": "jest -c=jest-server.config.js --watch",
     "test-all": "yarn lint && yarn type-check && yarn test",
     "migrate": "prisma migrate dev --preview-feature",
-    "seed": "ts-node prisma/scripts/from-file.ts ./prisma/seeds"
+    "seed": "ts-node prisma/scripts/from-file.ts ./prisma/seeds",
+    "clean:types": "rm -rf dist && rm -rf reports",
+    "build:types": "yarn run clean:types && yarn tsc --build --verbose tsconfig.build.json"
   },
   "husky": {
     "hooks": {
@@ -40,6 +42,7 @@
     "graphql": "^15.5.0",
     "graphql-scalars": "^1.9.0",
     "jsonwebtoken": "^8.5.1",
+    "micro-cors": "^0.1.1",
     "next": "latest",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
@@ -54,6 +57,7 @@
     "@types/bcryptjs": "^2.4.2",
     "@types/cookie": "^0.4.0",
     "@types/jest": "^26.0.22",
+    "@types/micro-cors": "^0.1.1",
     "@types/node": "^14.14.25",
     "@types/react": "^17.0.1",
     "@typescript-eslint/eslint-plugin": "^4.14.2",

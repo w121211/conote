@@ -1,5 +1,8 @@
 {
-  "references": [{ "path": "../lib/editor" }, { "path": "../lib/fetcher" }],
+  "references": [
+    { "path": "../../lib/editor" },
+    { "path": "../../lib/fetcher" }
+  ],
   "compilerOptions": {
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],

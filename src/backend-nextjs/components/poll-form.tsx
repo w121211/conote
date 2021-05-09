@@ -53,7 +53,7 @@ export function PollChoices({
 }): JSX.Element {
   // const myVotes = useQuery<QT.myVotes>(queries.MY_VOTES, { fetchPolicy: 'cache-only' })
   const myVotes = useMyVotesQuery({ fetchPolicy: 'cache-only' })
-  const meVote = myVotes.data?.myVotes.find(e => e.pollId === pollId)
+  const meVote = myVotes.data?.myVotes.find(e => e.pollId === parseInt(pollId))
   const [selectedIdx, setSelectedIdx] = useState<number | null>()
 
   function onChange(e: RadioChangeEvent) {

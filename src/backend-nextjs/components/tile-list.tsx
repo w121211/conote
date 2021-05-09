@@ -91,16 +91,16 @@ export function QueryReplyList({ commentId }: { commentId: string }): JSX.Elemen
 //   )
 // }
 
-export function QueryCommentList({ me, cardId }: { me?: QT.me_me; cardId: string }) {
-  // const { data, loading, error, refetch } = useQuery<QT.comments, QT.commentsVariables>(
-  //   queries.COMMENTS, { variables: { cardId } }
-  // )
-  // if (loading) return null
-  // if (error) return <p>ERROR: {error.message}</p>
-  // if (!data) return null
-  // return <CommentList comments={data.comments} />
-  return null
-}
+// export function QueryCommentList({ me, cardId }: { me?: QT.me_me; cardId: string }) {
+// const { data, loading, error, refetch } = useQuery<QT.comments, QT.commentsVariables>(
+//   queries.COMMENTS, { variables: { cardId } }
+// )
+// if (loading) return null
+// if (error) return <p>ERROR: {error.message}</p>
+// if (!data) return null
+// return <CommentList comments={data.comments} />
+// return null
+// }
 
 // interface CommentListProps extends QT.commentsVariables {
 //   me?: QT.me_me

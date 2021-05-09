@@ -6,6 +6,7 @@ import { FakeChance, omitUndefined } from '../test-helper'
 import * as helper from '../helper'
 
 const fakeChance = new FakeChance()
+
 jest.spyOn(helper, 'randString').mockImplementation(() => {
   return fakeChance.string()
 })

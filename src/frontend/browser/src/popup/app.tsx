@@ -4,8 +4,7 @@ import { ApolloClient, ApolloProvider, NormalizedCacheObject } from '@apollo/cli
 import { CachePersistor, PersistentStorage, LocalStorageWrapper } from 'apollo3-cache-persist'
 import { typeDefs } from '../graphql/resolvers'
 import { cache } from './cache'
-import { FetchCard } from './card-page'
-import { AutoLogin } from './login'
+import { AutoLogin } from '../../../../backend-nextjs/components/auto-login'
 import './app.css'
 
 class BrowserStorageWrapper implements PersistentStorage {
@@ -49,7 +48,7 @@ export function App(): JSX.Element {
 
       const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
         cache,
-        uri: 'http://localhost:4000/graphql',
+        uri: 'http://localhost:3000/api/graphql',
         headers: {
           authorization: localStorage.getItem('token') || '', // token-based auth
           'client-name': 'Conote[Extension]',
@@ -100,7 +99,7 @@ export function App(): JSX.Element {
   return (
     <ApolloProvider client={client}>
       <AutoLogin />
-      <FetchCard url={url} />
+      {/* <FetchCard url={url} /> */}
       {/* <button onClick={clearCache}>Clear cache</button>
       <button onClick={reload}>Reload page</button> */}
     </ApolloProvider>
