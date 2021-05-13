@@ -23,23 +23,20 @@ import {
   useUpdateReplyLikeMutation,
 } from '../apollo/query.graphql'
 import { AnchorLike, AnchorDislike, ReplyLike, ReplyDislike, CommentLike, CommentDislike } from './tile-upndown'
-<<<<<<< HEAD
 import classes from './tile-panel.module.scss'
 import CommentIcon from '../assets/svg/message.svg'
 
 export function AnchorPanel({
   anchorId,
+  commentId,
   meAuthor,
-  onClickHandler,
-}: {
+}: // onClickHandler,
+{
   anchorId: string
+  commentId?: string
   meAuthor: boolean
-  onClickHandler: () => void
+  // onClickHandler: (commentId: string | undefined) => void
 }): JSX.Element {
-=======
-
-export function AnchorPanel({ anchorId, meAuthor }: { anchorId: string; meAuthor: boolean }): JSX.Element {
->>>>>>> backend-dev
   const [count, setCount] = useState<AnchorCountFragment | null>(null)
   const [createLike] = useCreateAnchorLikeMutation({
     update(cache, { data }) {
@@ -70,21 +67,22 @@ export function AnchorPanel({ anchorId, meAuthor }: { anchorId: string; meAuthor
     },
   })
   const myAnchorLikes = useMyAnchorLikesQuery({ fetchPolicy: 'cache-only' })
+  const commentClickHandler = () => {
+    // setPanel(true)
+    // setCommentTextArea([classes.inlineValue, classes.inlineValueComment])
+    // inlineValueArr.push(classes.inlineValueComment)
+    document.getElementById('commentTextArea')?.focus()
+    // onClickHandler(commentId)
+    // console.log(commentId)
+  }
 
   const meLike = myAnchorLikes.data?.myAnchorLikes.find(e => e.anchorId.toString() === anchorId)
-<<<<<<< HEAD
 
   return (
     <span className={classes.comment}>
       <AnchorLike {...{ anchorId, count, meLike, createLike, updateLike }} />
       <AnchorDislike {...{ anchorId, count, meLike, createLike, updateLike }} />
-      <CommentIcon className={classes.commentIcon} onClick={onClickHandler} />
-=======
-  return (
-    <span>
-      <AnchorLike {...{ anchorId, count, meLike, createLike, updateLike }} />
-      <AnchorDislike {...{ anchorId, count, meLike, createLike, updateLike }} />
->>>>>>> backend-dev
+      <CommentIcon className={classes.commentIcon} onClick={commentClickHandler} />
     </span>
   )
   // return (

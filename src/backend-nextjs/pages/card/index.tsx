@@ -2,7 +2,6 @@ import { useRouter } from 'next/router'
 import { symbolToUrl, getCardUrlParam } from '../../lib/helper'
 import { CocardQuery, useCocardQuery } from '../../apollo/query.graphql'
 import { QueryDataProvider } from '../../components/data-provider'
-<<<<<<< HEAD
 import { Button } from 'antd'
 import TickerAnchor from '../../components/anchor/tickerAnchor'
 import { CardBody, CardHead } from '../../components/card'
@@ -11,10 +10,6 @@ import useMe from '../../components/use-me'
 import EditIcon from '../../assets/svg/edit.svg'
 import classes from './card-page.module.scss'
 import { useState } from 'react'
-=======
-import { CardBody, CardHead } from '../../components/card'
-import useMe from '../../components/use-me'
->>>>>>> backend-dev
 
 function CardPage(): JSX.Element {
   const me = useMe({ redirectTo: '/signin' })
@@ -22,15 +17,23 @@ function CardPage(): JSX.Element {
   const { u, s } = router.query
   const url = u as string
   const symbol = s as string
-<<<<<<< HEAD
   // const [Question, setQuestion] = useState(false)
   const [discuss, setDiscuss] = useState(true)
+  const [commentId, setCommentId] = useState('')
+  const [anchorId, setAnchorId] = useState('')
 
   const discussClickLHandler = () => {
     setDiscuss(true)
   }
   const discussClickRHandler = () => {
     setDiscuss(false)
+  }
+
+  const commentIdHandler = (id: string) => {
+    setCommentId(id)
+  }
+  const anchorIdHandler = (id: string) => {
+    setAnchorId(id)
   }
 
   let titleRefArr: any[] = []
@@ -43,8 +46,6 @@ function CardPage(): JSX.Element {
   const showQuestion = () => {
     setDiscuss(false)
   }
-=======
->>>>>>> backend-dev
 
   function _render(url: string): JSX.Element {
     return (
@@ -54,7 +55,6 @@ function CardPage(): JSX.Element {
           if (data && data.cocard) {
             const url = `/card/form?${getCardUrlParam(data.cocard)}`
             return (
-<<<<<<< HEAD
               <div className={classes.main}>
                 <div className={classes.mainInner}>
                   <TickerAnchor data={data.cocard} clickHandler={clickHandler} />
@@ -62,7 +62,13 @@ function CardPage(): JSX.Element {
                     <div className={classes.cardInner}>
                       <div className={classes.cardElement}>
                         <CardHead card={data.cocard} />
-                        <CardBody card={data.cocard} titleRefHandler={titleRefHandler} showQuestion={showQuestion} />
+                        <CardBody
+                          card={data.cocard}
+                          titleRefHandler={titleRefHandler}
+                          showQuestion={showQuestion}
+                          commentIdHandler={commentIdHandler}
+                          anchorIdHandler={anchorIdHandler}
+                        />
                       </div>
                     </div>
                   </div>
@@ -87,19 +93,9 @@ function CardPage(): JSX.Element {
                   switchTab={discuss}
                   discussClickLHandler={discussClickLHandler}
                   discussClickRHandler={discussClickRHandler}
+                  commentId={commentId}
+                  anchorId={anchorId}
                 />
-=======
-              <div>
-                <CardHead card={data.cocard} />
-                <CardBody card={data.cocard} />
-                <button
-                  onClick={() => {
-                    router.push(url)
-                  }}
-                >
-                  編輯
-                </button>
->>>>>>> backend-dev
               </div>
             )
           }

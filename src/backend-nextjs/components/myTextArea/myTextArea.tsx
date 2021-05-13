@@ -1,14 +1,15 @@
 import React, { useState, forwardRef, LegacyRef } from 'react'
-import { Input, Button } from 'antd'
+import { Input, Button, Form } from 'antd'
 
 import classes from './myTextArea.module.scss'
-import { TextAreaRef } from 'antd/lib/input/TextArea'
+// import { TextAreaRef } from 'antd/lib/input/TextArea'
 
 const { TextArea } = Input
 
 interface props {
   size?: string
   placeHolder?: string
+  clickHandler: () => void
 }
 
 const MyTextArea = (props: props) => {
@@ -16,11 +17,11 @@ const MyTextArea = (props: props) => {
 
   const [buttonDisable, setButtonState] = useState(true)
 
-  // const onChangeHandler = () => {
-  //   let texts = event.target.value
-  //   setValue(texts)
-  //   buttonStateHandler(texts)
-  // }
+  const onChangeHandler = (e: any) => {
+    const texts = e.target.value
+    setValue(texts)
+    buttonStateHandler(texts)
+  }
   const buttonStateHandler = (value: string) => {
     if (value == '') {
       setButtonState(true)
@@ -43,18 +44,20 @@ const MyTextArea = (props: props) => {
   }
 
   return (
-    <div className={classLister(classes.Wrapper)} onClick={onClickHandler}>
-      <TextArea
-        className={classes.TextArea}
-        placeholder={props.placeHolder ? props.placeHolder : '留言...'}
-        autoSize
-        // onChange={onChangeHandler}
-        id="commentTextArea"
-      />
-      <Button type="text" disabled={buttonDisable}>
+    <>
+      <Form.Item className={classLister(classes.Wrapper)} name="text">
+        <TextArea
+          className={classes.TextArea}
+          placeholder={props.placeHolder ? props.placeHolder : '留言...'}
+          autoSize
+          onChange={onChangeHandler}
+          id="commentTextArea"
+        />
+      </Form.Item>
+      <Button type="text" disabled={buttonDisable} onClick={props.clickHandler}>
         送出
       </Button>
-    </div>
+    </>
   )
 }
 export default MyTextArea

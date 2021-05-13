@@ -3,16 +3,11 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { getCardUrlParam } from '../lib/helper'
 import { useLatestCardsQuery } from '../apollo/query.graphql'
-<<<<<<< HEAD
 // import { SearchAllForm } from '../components/search-all-form'
 import SideBar from '../components/sidebar/sidebar'
 import Layout from '../components/layout/layout'
 import useMe from '../components/use-me'
 import classes from './index.module.scss'
-=======
-import { SearchAllForm } from '../components/search-all-form'
-import useMe from '../components/use-me'
->>>>>>> backend-dev
 
 function LatestCards(): JSX.Element | null {
   const { data, loading, error, fetchMore } = useLatestCardsQuery({ fetchPolicy: 'cache-and-network' })
@@ -31,7 +26,6 @@ function LatestCards(): JSX.Element | null {
   // }
 
   return (
-<<<<<<< HEAD
     <>
       <div>
         {data.latestCards &&
@@ -62,36 +56,6 @@ function LatestCards(): JSX.Element | null {
         )}
       </div>
     </>
-=======
-    <div>
-      {data.latestCards &&
-        data.latestCards.map((e, i) => (
-          <div key={i}>
-            <Link href={`/card?${getCardUrlParam(e)}`}>{e.link.url.substring(0, 50)}</Link>
-          </div>
-        ))}
-      {hasMore ? (
-        <div>
-          {loading ? (
-            <div>Loading</div>
-          ) : (
-            <button
-              onClick={async () => {
-                const result = await fetchMore({ variables: { afterId } })
-                if (result.data.latestCards.length === 0) {
-                  setHasMore(false)
-                }
-              }}
-            >
-              更多
-            </button>
-          )}
-        </div>
-      ) : (
-        <div>已經到底</div>
-      )}
-    </div>
->>>>>>> backend-dev
   )
 }
 
@@ -102,7 +66,6 @@ function HomePage(): JSX.Element {
   }
   return (
     <>
-<<<<<<< HEAD
       {/* <SideBar /> */}
       {/* <SearchAllForm /> */}
       {/* <Layout> */}
@@ -110,10 +73,6 @@ function HomePage(): JSX.Element {
         <LatestCards />
       </div>
       {/* </Layout> */}
-=======
-      <SearchAllForm />
-      <LatestCards />
->>>>>>> backend-dev
     </>
   )
 }

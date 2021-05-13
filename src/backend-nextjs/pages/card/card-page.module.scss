@@ -115,8 +115,8 @@ a {
   position: relative;
   // top: 100px;
   // left: 70%;
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   margin-top: 5em;
   border-radius: 29px;
   // box-shadow: 9px 9px 16px rgb(198, 198, 226), -9px -9px 16px white;
@@ -125,11 +125,11 @@ a {
 
   box-shadow: 0 3px 6px #00000029;
   .editIcon {
-    width: 27px;
-    height: 27px;
+    width: 25px;
+    height: 25px;
     display: block;
     position: relative;
-    left: 2px;
+    // left: 2px;
     top: -1px;
     fill: $icon;
     stroke: $icon;

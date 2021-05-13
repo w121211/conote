@@ -1,19 +1,47 @@
 import React, { forwardRef, useRef, useState } from 'react'
+import { Form } from 'antd'
 import useMeasure from 'react-use-measure'
+import {
+  useCreateReplyMutation,
+  useCommentQuery,
+  RepliesQuery,
+  RepliesQueryVariables,
+  RepliesDocument,
+} from '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
-import MyTextArea from '../myTextArea/myTextArea'
+import { CommentForm } from './discuss-comment-form'
 import classes from './discuss-page.module.scss'
 
 const Discuss = ({
   switchTab,
+  commentId,
+  anchorId,
   discussClickLHandler,
   discussClickRHandler,
 }: {
   switchTab: boolean
+  commentId: string
+  anchorId: string
   discussClickLHandler: () => void
   discussClickRHandler: () => void
 }) => {
   const [ref, bounds] = useMeasure()
+  const [form] = Form.useForm()
+
+  const { data, loading, error } = useCommentQuery({
+    variables: { id: commentId },
+  })
+
+  if (loading) {
+    return <p>loading...</p>
+  }
+  if (error) {
+    console.error(error)
+    return <p>API error</p>
+  }
+  if (!data || !data.comment) {
+    return <p>Comment not found</p>
+  }
 
   const classLister = (...classArr: string[]) => {
     const arr: string[] = []
@@ -35,16 +63,15 @@ const Discuss = ({
         <div className={classes.underLine}>
           <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div>
         </div>
-
-        <MyTextArea />
+        <CommentForm commentId={commentId} />
       </div>
 
       {/* content */}
       <div className={classes.outer} style={{ height: `calc(100vh - ${bounds.height}px)` }}>
         <div className={classes.inner}>
           <div className={classes.element} style={{ height: `calc(100vh - ${bounds.height}px)` }}>
-            {switchTab && <CommentList />}
-            {switchTab || <CommentList type="vote" />}
+            {switchTab && <CommentList commentId={commentId} />}
+            {switchTab || <CommentList type="vote" commentId={commentId} />}
           </div>
         </div>
       </div>

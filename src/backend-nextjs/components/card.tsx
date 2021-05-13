@@ -2,11 +2,7 @@
 // import { useQuery, useMutation, useLazyQuery, useApolloClient } from '@apollo/client'
 // import { Link, navigate, redirectTo } from '@reach/router'
 // import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input } from 'antd'
-<<<<<<< HEAD
 import React, { useState, useRef, forwardRef } from 'react'
-=======
-import React from 'react'
->>>>>>> backend-dev
 import { Editor, Section, ExtTokenStream, streamToStr } from '../../lib/editor/src/index'
 import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
 import { AnchorPanel } from './tile-panel'
@@ -14,7 +10,6 @@ import { QueryCommentModal } from './tile'
 import { toUrlParams } from '../lib/helper'
 import { PollChoices } from './poll-form'
 import { Link } from './link'
-<<<<<<< HEAD
 import classes from './card.module.scss'
 import ClockIcon from '../assets/svg/clock.svg'
 import LinkIcon from '../assets/svg/link.svg'
@@ -28,8 +23,10 @@ const RenderTokenStream = forwardRef(
       titleRef,
       showQuestion,
       type,
-    }: // commentClickHandler,
-    {
+      commentIdHandler,
+      anchorIdHandler,
+      commentId,
+    }: {
       stream: ExtTokenStream
       className?: string
       showPanel?: boolean
@@ -37,7 +34,9 @@ const RenderTokenStream = forwardRef(
       titleRef?: (arr: any[]) => void
       showQuestion?: () => void
       type?: string
-      // commentClickHandler?: () => void
+      commentIdHandler: (commentId: string) => void
+      anchorIdHandler: (anchorId: string) => void
+      commentId?: string
     },
     ref: any,
   ): JSX.Element | null => {
@@ -57,18 +56,8 @@ const RenderTokenStream = forwardRef(
       setPanel(false)
       // }
     }
-    const commentClickHandler = () => {
-      // setPanel(true)
-      // setCommentTextArea([classes.inlineValue, classes.inlineValueComment])
-      // inlineValueArr.push(classes.inlineValueComment)
-      document.getElementById('commentTextArea')?.focus()
-    }
-    // console.log(commentTextArea)
 
-    // const panelOnClickHandler = (stream: any) => {
-    //   console.log(stream)
-    //   showPanelHandler?.(stream[1].content)
-    // }
+    // console.log(commentTextArea)
 
     if (typeof stream === 'string') {
       // return stream.search(/\n+/g) >= 0 || stream.search(/ {2,}/g) >= 0 || stream === ' ' ? (
@@ -78,18 +67,11 @@ const RenderTokenStream = forwardRef(
         //   {/* {console.log(stream)} */}
         // </>
         <>
-          {/*  問題按鈕 */}
-          {type == 'question' ? (
-            <button onClick={showQuestion}>
-              <span className={classes.black}>{stream.replace(/^ +/g, '').replace(/ +$/g, '')}</span>
-            </button>
-          ) : (
-            // 一般render
-            <span className={classes.black}>
-              {stream.replace(/^ +/g, '').replace(/ +$/g, '')}
-              {/* {children} */}
-            </span>
-          )}
+          {/* // 一般render */}
+          <span className={classes.black}>
+            {stream.replace(/^ +/g, '').replace(/ +$/g, '')}
+            {/* {children} */}
+          </span>
         </>
       )
     }
@@ -100,19 +82,41 @@ const RenderTokenStream = forwardRef(
 
       return (
         <>
+          {/* {console.log(stream)} */}
           {hasStr && noReturn ? (
             //包含hover效果
             // <div className={classes.array} onClick={onFocusHandler} onBlur={onBlurHandler} tabIndex={0}>
             <div className={classes.array} onMouseEnter={onFocusHandler} onMouseLeave={onBlurHandler} tabIndex={0}>
-              {/* {console.log(stream)} */}
               {stream.map((e, i) => {
-                return <RenderTokenStream key={i} stream={e} showPanel={Panel} ref={ref} showQuestion={showQuestion} />
+                return (
+                  <RenderTokenStream
+                    key={i}
+                    stream={e}
+                    showPanel={Panel}
+                    ref={ref}
+                    showQuestion={showQuestion}
+                    commentIdHandler={commentIdHandler}
+                    anchorIdHandler={anchorIdHandler}
+                    // commentId={commentId}
+                  />
+                )
               })}
             </div>
           ) : (
             //一般render
             stream.map((e, i) => {
-              return <RenderTokenStream key={i} stream={e} ref={ref} showQuestion={showQuestion} />
+              // console.log(e)
+              return (
+                <RenderTokenStream
+                  key={i}
+                  stream={e}
+                  ref={ref}
+                  showQuestion={showQuestion}
+                  commentIdHandler={commentIdHandler}
+                  anchorIdHandler={anchorIdHandler}
+                  // commentId={commentId}
+                />
+              )
             })
           )}
         </>
@@ -130,7 +134,21 @@ const RenderTokenStream = forwardRef(
       //     </span>
       //   )
       // }
-      case 'sect-symbol': {
+      case 'vote-choice':
+        return (
+          <button>
+            {console.log(stream)}
+            {stream.content}
+            {/* <RenderTokenStream
+              stream={stream.content}
+              ref={ref}
+              showQuestion={showQuestion}
+              commentIdHandler={commentIdHandler}
+            /> */}
+          </button>
+        )
+
+      case 'sect-symbol':
         // console.log(`symbol: ${content}`)
         return (
           <span
@@ -144,44 +162,95 @@ const RenderTokenStream = forwardRef(
             <Link to={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link>
           </span>
         )
-      }
+
       case 'multiline-marker':
         return (
           <ul>
-            <RenderTokenStream stream={stream.content} ref={ref} showQuestion={showQuestion} />
+            <RenderTokenStream
+              stream={stream.content}
+              ref={ref}
+              showQuestion={showQuestion}
+              commentIdHandler={commentIdHandler}
+              anchorIdHandler={anchorIdHandler}
+            />
           </ul>
         )
       case 'inline-marker':
-        return <RenderTokenStream stream={stream.content} ref={ref} showQuestion={showQuestion} />
+        return (
+          <RenderTokenStream
+            stream={stream.content}
+            ref={ref}
+            showQuestion={showQuestion}
+            commentIdHandler={commentIdHandler}
+            anchorIdHandler={anchorIdHandler}
+          />
+        )
       case 'inline-value':
       case 'line-value': {
-        if ((stream.markerline?.comment || stream.markerline?.poll) && stream.markerline.commentId) {
+        if (stream.markerline?.anchorId && typeof stream.markerline?.poll === 'undefined') {
+          // console.log(stream.markerline.comment)
+          // console.log(stream.markerline)
           return (
             // <QueryCommentModal commentId={stream.markerline.commentId.toString()}>
-            <button onClick={showQuestion}>
-              <RenderTokenStream stream={stream.content} ref={ref} showQuestion={showQuestion} type="question" />
-            </button>
+            // <button onClick={showQuestion}>
+            <>
+              <RenderTokenStream
+                stream={stream.content}
+                ref={ref}
+                showQuestion={showQuestion}
+                // commentOnClickHandler={commentOnClickHandler}
+                commentIdHandler={commentIdHandler}
+                anchorIdHandler={anchorIdHandler}
+              />
+
+              {stream.markerline && commentIdHandler(stream.markerline.anchorId.toString())}
+            </>
+            // </button>
             // </QueryCommentModal>
           )
         }
-        if (stream.markerline?.comment && stream.markerline.commentId) {
-          return <PollChoices pollId={'10'} choices={['aaa', 'bbb']} />
-          // return (
-          //   <QueryCommentModal id={stream.markerline.commentId.toString()}>
-          //     <RenderTokenStream stream={stream.content} />
-          //   </QueryCommentModal>
-          // )
+        if (stream.markerline?.commentId && stream.markerline.anchorId) {
+          // return <PollChoices pollId={'10'} choices={['aaa', 'bbb']} />
+          return (
+            // <QueryCommentModal id={stream.markerline.commentId.toString()}>
+            <>
+              <RenderTokenStream
+                stream={stream.content}
+                ref={ref}
+                showQuestion={showQuestion}
+                commentIdHandler={commentIdHandler}
+                anchorIdHandler={anchorIdHandler}
+              />
+              {stream.markerline && commentIdHandler(stream.markerline.commentId.toString())}
+            </>
+            // {/* </QueryCommentModal> */}
+          )
         }
         if (stream.marker && (stream.marker.key.search('[key]') >= 0 || stream.marker.key.search('[~]') >= 0)) {
-          return <RenderTokenStream stream={stream.content} ref={ref} showQuestion={showQuestion} />
+          return (
+            <RenderTokenStream
+              stream={stream.content}
+              ref={ref}
+              showQuestion={showQuestion}
+              commentIdHandler={commentIdHandler}
+              anchorIdHandler={anchorIdHandler}
+            />
+          )
         }
         return (
           <li className={classes.inlineValue}>
             {/* {console.log(commentTextArea)} */}
-            <RenderTokenStream stream={stream.content} ref={ref} showQuestion={showQuestion} />
+            <RenderTokenStream
+              stream={stream.content}
+              ref={ref}
+              showQuestion={showQuestion}
+              commentIdHandler={commentIdHandler}
+              anchorIdHandler={anchorIdHandler}
+            />
           </li>
         )
       }
+
       case 'line-mark':
       case 'inline-mark':
         return (
@@ -208,7 +277,7 @@ const RenderTokenStream = forwardRef(
             <AnchorPanel
               anchorId={stream.markerline.anchorId.toString()}
               meAuthor={false}
-              onClickHandler={commentClickHandler}
+
               // commentMouseUpHandler={commentMouseUpHandler}
             />
           ) : null
@@ -221,7 +290,7 @@ const RenderTokenStream = forwardRef(
           return (
             <span className={`${showPanel ? classes.visible : classes.hidden}`}>
               {/* <span> */}
-              {/* {console.log(showPanel)} */}
+              {/* {console.log(stream.markerline)} */}
               {panel}
               {src}
             </span>
@@ -230,7 +299,15 @@ const RenderTokenStream = forwardRef(
       }
       default:
         // Recursive
-        return <RenderTokenStream stream={stream.content} ref={ref} showQuestion={showQuestion} />
+        return (
+          <RenderTokenStream
+            stream={stream.content}
+            ref={ref}
+            showQuestion={showQuestion}
+            commentIdHandler={commentIdHandler}
+            anchorIdHandler={anchorIdHandler}
+          />
+        )
     }
   },
 )
@@ -238,7 +315,21 @@ RenderTokenStream.displayName = 'RenderTokenStream'
 
 const RenderSection = forwardRef(
   (
-    { sect, titleRef, showQuestion }: { sect: Section; titleRef?: (arr: any[]) => void; showQuestion?: () => void },
+    {
+      sect,
+      titleRef,
+      showQuestion,
+      commentIdHandler,
+      anchorIdHandler,
+    }: // commentId
+    {
+      sect: Section
+      titleRef?: (arr: any[]) => void
+      showQuestion?: () => void
+      commentIdHandler: (commentId: string) => void
+      anchorIdHandler: (anchorId: string) => void
+      // commentId:string
+    },
     ref,
   ): JSX.Element | null => {
     const titleRefArr: any[] = []
@@ -254,6 +345,9 @@ const RenderSection = forwardRef(
             stream={sect.stream}
             ref={ref}
             showQuestion={showQuestion}
+            // commentOnClickHandler={commentOnClickHandler}
+            commentIdHandler={commentIdHandler}
+            anchorIdHandler={anchorIdHandler}
             // pushTitle={pushTitle}
             // titleRef={titleRef ? titleRef(titleRefArr) : null}
           />
@@ -268,7 +362,19 @@ RenderSection.displayName = 'RenderSection'
 
 export const RenderCardBody = forwardRef(
   (
-    { sects, titleRef, showQuestion }: { sects: Section[]; titleRef?: (arr: any[]) => void; showQuestion?: () => void },
+    {
+      sects,
+      titleRef,
+      showQuestion,
+      commentIdHandler,
+      anchorIdHandler,
+    }: {
+      sects: Section[]
+      titleRef?: (arr: any[]) => void
+      showQuestion?: () => void
+      commentIdHandler: (commentId: string) => void
+      anchorIdHandler: (anchorId: string) => void
+    },
     ref,
   ): JSX.Element => {
     const myRef = useRef<any[]>([])
@@ -303,7 +409,14 @@ export const RenderCardBody = forwardRef(
     return (
       <>
         {sects.map((e, i) => (
-          <RenderSection key={i} sect={e} ref={el => (myRef.current[i] = el)} showQuestion={showQuestion} />
+          <RenderSection
+            key={i}
+            sect={e}
+            ref={el => (myRef.current[i] = el)}
+            showQuestion={showQuestion}
+            commentIdHandler={commentIdHandler}
+            anchorIdHandler={anchorIdHandler}
+          />
         ))}
         {titleRef && titleRef(myRef.current)}
       </>
@@ -317,128 +430,17 @@ export function CardBody({
   bySrc,
   titleRefHandler,
   showQuestion,
+  commentIdHandler,
+  anchorIdHandler,
 }: {
   card: CocardFragment
   bySrc?: string
   titleRefHandler?: (arr: any[]) => void
   showQuestion?: () => void
+  commentIdHandler: (commentId: string) => void
+  anchorIdHandler: (anchorId: string) => void
 }): JSX.Element {
   // console.log(card)
-=======
-
-function RenderTokenStream({ stream }: { stream: ExtTokenStream }): JSX.Element | null {
-  if (typeof stream === 'string') {
-    return <>{stream}</>
-  }
-  if (Array.isArray(stream)) {
-    return (
-      <>
-        {stream.map((e, i) => (
-          <RenderTokenStream key={i} stream={e} />
-        ))}
-      </>
-    )
-  }
-  // const err = token.marker ? <span>({token.marker.error})</span> : null
-  const content = streamToStr(stream.content)
-  switch (stream.type) {
-    // case 'sect-ticker':
-    // case 'sect-topic': {
-    //   console.log(`symbol: ${content}`)
-    //   return (
-    //     <span>
-    //       <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
-    //     </span>
-    //   )
-    // }
-    case 'sect-symbol': {
-      // console.log(`symbol: ${content}`)
-      return <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
-    }
-    case 'multiline-marker':
-    case 'inline-marker':
-      return <RenderTokenStream stream={stream.content} />
-    case 'inline-value':
-    case 'line-value': {
-      if ((stream.markerline?.comment || stream.markerline?.poll) && stream.markerline.commentId) {
-        return (
-          <QueryCommentModal commentId={stream.markerline.commentId.toString()}>
-            <RenderTokenStream stream={stream.content} />
-          </QueryCommentModal>
-        )
-      }
-      if (stream.markerline?.comment && stream.markerline.commentId) {
-        return <PollChoices pollId={'10'} choices={['aaa', 'bbb']} />
-        // return (
-        //   <QueryCommentModal id={stream.markerline.commentId.toString()}>
-        //     <RenderTokenStream stream={stream.content} />
-        //   </QueryCommentModal>
-        // )
-      }
-      return (
-        <span style={{ color: '#905' }}>
-          <RenderTokenStream stream={stream.content} />
-        </span>
-      )
-    }
-    case 'line-mark':
-    case 'inline-mark':
-      return <span style={{ color: 'orange' }}>{content}</span>
-    case 'ticker':
-    case 'topic': {
-      // console.log(`symbol: ${content}`)
-      return <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
-    }
-    case 'stamp': {
-      console.log(stream.markerline)
-      const panel =
-        stream.markerline && stream.markerline.anchorId ? (
-          <AnchorPanel anchorId={stream.markerline.anchorId.toString()} meAuthor={false} />
-        ) : null
-      const src =
-        stream.markerline && stream.markerline.src ? (
-          <Link to={`/card?${toUrlParams({ u: stream.markerline.src })}`}>src</Link>
-        ) : null
-
-      if (panel || src)
-        return (
-          <span style={{ color: 'orange' }}>
-            {panel}
-            {src}
-          </span>
-        )
-      return null
-    }
-    default:
-      // Recursive
-      return <RenderTokenStream stream={stream.content} />
-  }
-}
-
-function RenderSection({ sect }: { sect: Section }): JSX.Element | null {
-  if (sect.stream) {
-    return (
-      <span style={{ color: 'grey' }}>
-        <RenderTokenStream stream={sect.stream} />
-      </span>
-    )
-  }
-  return null
-}
-
-export function RenderCardBody({ sects }: { sects: Section[] }): JSX.Element {
-  return (
-    <pre>
-      {sects.map((e, i) => (
-        <RenderSection key={i} sect={e} />
-      ))}
-    </pre>
-  )
-}
-
-export function CardBody({ card, bySrc }: { card: CocardFragment; bySrc?: string }): JSX.Element {
-  console.log(card)
->>>>>>> backend-dev
 
   if (card.body === null) return <p>[Error]: null body</p>
 
@@ -447,21 +449,18 @@ export function CardBody({ card, bySrc }: { card: CocardFragment; bySrc?: string
   editor.flush({ attachMarkerlinesToTokens: true })
 
   return (
-<<<<<<< HEAD
     // <>
     //   <QueryCommentModal commentId={card.meta.commentId.toString()}>
     //     <div>discuss</div>
     // </QueryCommentModal>
-    <RenderCardBody sects={editor.getSections()} titleRef={titleRefHandler} showQuestion={showQuestion} />
+    <RenderCardBody
+      sects={editor.getSections()}
+      titleRef={titleRefHandler}
+      showQuestion={showQuestion}
+      commentIdHandler={commentIdHandler}
+      anchorIdHandler={anchorIdHandler}
+    />
     // </>
-=======
-    <>
-      <QueryCommentModal commentId={card.meta.commentId.toString()}>
-        <div>discuss</div>
-      </QueryCommentModal>
-      <RenderCardBody sects={editor.getSections()} />
-    </>
->>>>>>> backend-dev
   )
 }
 
@@ -490,7 +489,6 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
     meta: null,
     createdAt: null,
   }
-<<<<<<< HEAD
   let cardTitle = card.link.url
   // ticker的title
   const cardDomain = card.link.domain
@@ -521,22 +519,12 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
       {/* <div><Comment comment={comment} /></div> */}
       {/* {console.log(card)} */}
       {/* {cardTitle} */}
-=======
-  return (
-    <h1>
-      <div>{/* <Comment comment={comment} /> */}</div>
-      {card.link.url}
->>>>>>> backend-dev
       {/* {title && title.text + '\n'} */}
       {/* {publishDate && publishDate.text + '\n'} */}
       {/* {card.link.oauthorName + '\n'} */}
       {/* {'(NEXT)Keywords\n'} */}
       {/* {card.comments.length === 0 ? "新建立" : undefined} */}
-<<<<<<< HEAD
     </div>
-=======
-    </h1>
->>>>>>> backend-dev
   )
 }
 
