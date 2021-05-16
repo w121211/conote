@@ -26,6 +26,11 @@
     "48": "icon-48.png",
     "128": "icon-128.png"
   },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+    // "browser_style": true
+  },
   // 加入api網址 -> 為了CORS
-  "permissions": ["storage", "tabs", "http://localhost:3000/"]
+  "permissions": ["storage", "tabs", "http://localhost:3000/", "https://dev-7k19-j8l.us.auth0.com"]
 }

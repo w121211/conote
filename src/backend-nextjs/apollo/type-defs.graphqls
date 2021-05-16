@@ -10,8 +10,11 @@ type Query {
 
   latestCards(afterId: String): [Cocard!]!
 
-  # 以symbol, url(擇一)尋找，若找不到則自動創一個新的
-  cocard(url: String!): Cocard
+  # 以url查找，不fetch, resolve，若無則返回null
+  link(url: String!): Link
+
+  # 以url/symbol查找，url會fetch, resolve，若無則自動創新一個
+  cocard(url: String, symbol: String): Cocard!
 
   # 以下card目前暫時不考慮（留在這裡只是因為都已經寫了，懶得再拿掉）
   ocard(id: ID, oauthorName: String, symbolName: String): Ocard

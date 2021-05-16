@@ -1,6 +1,7 @@
 // Ref: https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
 import { useState } from 'react'
 import Link from 'next/link'
+import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
 import { getCardUrlParam } from '../lib/helper'
 import { useLatestCardsQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
@@ -55,16 +56,30 @@ function LatestCards(): JSX.Element | null {
 }
 
 function HomePage(): JSX.Element {
-  const me = useMe({ redirectTo: '/signin' })
-  if (!me) {
-    return <p>Loading...</p>
+  const { user, error, isLoading } = useUser()
+
+  if (user) {
+    return (
+      <div>
+        Welcome {user.name}! <a href="/api/auth/logout">Logout</a>
+      </div>
+    )
   }
-  return (
-    <>
-      <SearchAllForm />
-      <LatestCards />
-    </>
-  )
+
+  return <a href="/api/auth/login">Login</a>
+
+  // const me = useMe({ redirectTo: '/signin' })
+  // if (!me) {
+  //   return <p>Loading...</p>
+  // }
+  // return (
+  //   <>
+  //     <SearchAllForm />
+  //     <LatestCards />
+  //   </>
+  // )
 }
 
 export default HomePage
+
+// export const getServerSideProps = withPageAuthRequired()

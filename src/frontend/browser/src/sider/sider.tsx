@@ -1,8 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { browser } from 'webextension-polyfill-ts'
-import { typeDefs } from '../graphql/resolvers'
-import { cache } from './cache'
+// import { cache } from './cache'
 // import { CardPage } from '../components/card'
 // import '../scss/app.scss'
 // import * as LaunchDetailTypes from '../pages/__generated__/LaunchDetails';

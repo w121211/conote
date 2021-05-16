@@ -193,8 +193,14 @@ query LatestCards($afterId: String) {
   }
 }
 
-query Cocard($url: String!) {
-  cocard(url: $url) {
+query Link($url: String!) {
+  link(url: $url) {
+    ...link
+  }
+}
+
+query Cocard($url: String, $symbol: String) {
+  cocard(url: $url, symbol: $symbol) {
     ...cocard
   }
 }

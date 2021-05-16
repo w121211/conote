@@ -9,7 +9,13 @@ async function main(): Promise<void> {
   if (document.readyState !== 'complete' && document.readyState !== 'interactive') {
     await new Promise<Event>(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }))
   }
-  ReactDOM.render(<App />, document.getElementById('root'))
+
+  ReactDOM.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    document.getElementById('root'),
+  )
 }
 
 main().catch(console.error.bind(console))

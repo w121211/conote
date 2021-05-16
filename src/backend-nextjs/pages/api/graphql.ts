@@ -1,6 +1,7 @@
 import util from 'util'
 import microCors from 'micro-cors'
 import { ApolloServer } from 'apollo-server-micro'
+import { withApiAuthRequired, getSession } from '@auth0/nextjs-auth0'
 import { schema } from '../../apollo/schema'
 
 const apolloServer = new ApolloServer({
@@ -48,11 +49,21 @@ const apolloServer = new ApolloServer({
 // }
 // export default cookies(handler)
 
+const apolloHandler = apolloServer.createHandler({ path: '/api/graphql' })
+
 const cors = microCors()
-const handler = apolloServer.createHandler({ path: '/api/graphql' })
+const corsHandler = cors((req, res) => (req.method === 'OPTIONS' ? res.end() : apolloHandler(req, res)))
 
 // export default apolloServer.createHandler({ path: '/api/graphql' })
-export default cors((req, res) => (req.method === 'OPTIONS' ? res.end() : handler(req, res)))
+export default withApiAuthRequired(corsHandler)
+
+// export default withApiAuthRequired(async function (req, res) {
+//   // const session = getSession(req, res)
+//   // if (session && session.user) {
+//   //   res.json({ protected: 'My Secret', id: session.user.sub })
+//   // }
+//   // res.json({ protected: 'My Secret', id: user.sub })
+// })
 
 // See: https://nextjs.org/docs/api-routes/api-middlewares
 export const config = {

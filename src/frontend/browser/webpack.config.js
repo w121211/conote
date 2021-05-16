@@ -9,6 +9,8 @@ const path = require('path')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 // const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+// const TransformRuntimePlugin = require('@babel/plugin-transform-runtime')
+const Dotenv = require('dotenv-webpack')
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -94,6 +96,7 @@ module.exports = {
   //   writeToDisk: true,
   // },
   plugins: [
+    new Dotenv(),
     // isDevelopment && new ReactRefreshPlugin(),
     new ForkTsCheckerWebpackPlugin({
       typescript: {
@@ -104,7 +107,6 @@ module.exports = {
         mode: 'write-references',
       },
     }),
-
     new CopyWebpackPlugin({
       patterns: [
         {

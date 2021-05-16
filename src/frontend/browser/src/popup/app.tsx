@@ -1,10 +1,11 @@
 import { browser, Storage } from 'webextension-polyfill-ts'
 import React, { useCallback, useEffect, useState } from 'react'
-import { ApolloClient, ApolloProvider, NormalizedCacheObject } from '@apollo/client'
+import { ApolloClient, createHttpLink, NormalizedCacheObject } from '@apollo/client'
+import { setContext } from '@apollo/client/link/context'
 import { CachePersistor, PersistentStorage, LocalStorageWrapper } from 'apollo3-cache-persist'
-import { typeDefs } from '../graphql/resolvers'
+import { Auth0Provider, AppState, useAuth0 } from '@auth0/auth0-react'
 import { cache } from './cache'
-import { AutoLogin } from '../../../../backend-nextjs/components/auto-login'
+import { CardPage } from './card-page'
 import './app.css'
 
 class BrowserStorageWrapper implements PersistentStorage {
@@ -29,13 +30,19 @@ class BrowserStorageWrapper implements PersistentStorage {
   }
 }
 
+const onRedirectCallback = (appState: AppState) => {
+  // If using a Hash Router, you need to use window.history.replaceState to
+  // remove the `code` and `state` query parameters from the callback url.
+  window.history.replaceState({}, document.title, window.location.pathname)
+  // history.replace((appState && appState.returnTo) || window.location.pathname)
+}
+
 export function App(): JSX.Element {
   const [client, setClient] = useState<ApolloClient<NormalizedCacheObject>>()
   const [persistor, setPersistor] = useState<CachePersistor<NormalizedCacheObject>>()
 
   useEffect(() => {
     async function init() {
-      // const cache = new InMemoryCache();
       const newPersistor = new CachePersistor({
         cache,
         storage: new LocalStorageWrapper(localStorage),
@@ -46,22 +53,39 @@ export function App(): JSX.Element {
       })
       await newPersistor.restore()
 
+      const httpLink = createHttpLink({
+        uri: 'http://localhost:3000/api/graphql',
+      })
+
+      const authLink = setContext((_, { headers }) => {
+        // get the authentication token from local storage if it exists
+        const token = localStorage.getItem('token')
+        // return the headers to the context so httpLink can read them
+        return {
+          headers: {
+            ...headers,
+            authorization: token ? `Bearer ${token}` : '',
+          },
+        }
+      })
+
       const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
         cache,
-        uri: 'http://localhost:3000/api/graphql',
-        headers: {
-          authorization: localStorage.getItem('token') || '', // token-based auth
-          'client-name': 'Conote[Extension]',
-          'client-version': '0.1.0',
-        },
+        link: authLink.concat(httpLink),
+        // uri: 'http://localhost:3000/api/graphql',
+        // headers: {
+        //   authorization: localStorage.getItem('token') || '', // token-based auth
+        //   'client-name': 'Conote[Extension]',
+        //   'client-version': '0.1.0',
+        // },
         // TODO: 需設為'include'，否則cookies不會被儲存 -> 但這會有Cross-origin問題
         // Ref:
         // - https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials
         // - https://github.com/apollographql/apollo-client/issues/4190
         // credentials: 'include',
         // credentials: 'same-origin',
-        resolvers: {},
-        typeDefs,
+        // resolvers: {},
+        // typeDefs,
       })
 
       setPersistor(newPersistor)
@@ -84,24 +108,56 @@ export function App(): JSX.Element {
   if (!client) {
     return <h2>Initializing app...</h2>
   }
-
-  // popup的情況
-  // const params = new URLSearchParams(new URL(window.location.href).search)
-  // const url = params.get('u')
-  // if (url === null) {
-  //   return <h2>Require a url</h2>
-  // }
-
-  // inject的情況
-  console.log(window.location.href)
-  const url = window.location.href
-
   return (
-    <ApolloProvider client={client}>
-      <AutoLogin />
-      {/* <FetchCard url={url} /> */}
+    <Auth0Provider
+      domain={process.env.REACT_APP_DOMAIN as string}
+      clientId={process.env.REACT_APP_CLIENT_ID as string}
+      // redirectUri={window.location.origin}
+      redirectUri="chrome-extension://cidlgggnhfkmlodkoneabjiiddokpecm/popup.html"
+      // audience={process.env.REACT_APP_AUDIENCE}
+      // scope="read:users"
+      // onRedirectCallback={onRedirectCallback}
+    >
+      <SignIn />
       {/* <button onClick={clearCache}>Clear cache</button>
       <button onClick={reload}>Reload page</button> */}
-    </ApolloProvider>
+      {/* <ApolloProvider client={client}>
+        <CardPage />
+      </ApolloProvider> */}
+    </Auth0Provider>
+  )
+}
+
+function SignIn(): JSX.Element {
+  const { isLoading, isAuthenticated, user, loginWithRedirect, logout, getAccessTokenSilently } =
+    useAuth0<{
+      name: string
+      email: string
+    }>()
+
+  // getAccessTokenSilently().then(e => {
+  //   console.log(e)
+  // })
+
+  if (isLoading) {
+    return <div>Loading</div>
+  }
+  return (
+    <div>
+      {isAuthenticated ? (
+        <div>
+          <span id="hello">Hello, {user?.email}!</span>{' '}
+          <button
+            onClick={() => logout({ returnTo: 'chrome-extension://cidlgggnhfkmlodkoneabjiiddokpecm/popup.html' })}
+          >
+            logout
+          </button>
+        </div>
+      ) : (
+        <button id="login" onClick={() => loginWithRedirect()}>
+          login
+        </button>
+      )}
+    </div>
   )
 }

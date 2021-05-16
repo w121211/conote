@@ -70,24 +70,36 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     }))
   },
 
-  async cocard(_parent, { url }, _context, _info) {
-    let card: PA.Cocard & {
-      link: PA.Link
-      body: PA.CardBody
+  async link(_parent, { url }, _context, _info) {
+    const link = await prisma.link.findUnique({
+      where: { url },
+    })
+    if (link) return _toStringId(link)
+    return null
+  },
+
+  async cocard(_parent, { url, symbol }, _context, _info) {
+    if (symbol) {
+      const card = await getOrCreateCardBySymbol(symbol)
+      return {
+        ..._toStringId(card),
+        template: card.template as CardTemplate,
+        link: _toStringId(card.link),
+        body: _toStringId(card.body),
+      }
     }
-    const symbol = urlToSymbol(url)
-    if (symbol !== null) {
-      card = await getOrCreateCardBySymbol(symbol)
-    } else {
+    if (url) {
+      // 找不到即創新cocard
       const [link] = await getOrCreateLink(url)
-      card = await getOrCreateCardByLink(link)
+      const card = await getOrCreateCardByLink(link)
+      return {
+        ..._toStringId(card),
+        template: card.template as CardTemplate,
+        link: _toStringId(card.link),
+        body: _toStringId(card.body),
+      }
     }
-    return {
-      ..._toStringId(card),
-      template: card.template as CardTemplate,
-      link: _toStringId(card.link),
-      body: _toStringId(card.body),
-    }
+    throw new Error('Not found')
   },
 
   selfcard(_parent, _args, _context, _info) {

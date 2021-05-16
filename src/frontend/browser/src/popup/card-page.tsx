@@ -1,46 +1,58 @@
 import React, { useState } from 'react'
-// import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
-import { useQuery } from '@apollo/client'
-import { Layout, Button } from 'antd'
-import * as queries from '../graphql/queries'
-import * as QT from '../graphql/query-types'
-import { CardHead, CardBody } from '../components/card'
-import { symbolToUrl, getCardUrlParam } from '../helper'
+import { QueryDataProvider } from '../../../../backend-nextjs/components/data-provider'
+import { CardHead, CardBody } from '../../../../backend-nextjs/components/card'
+import { CardForm } from '../../../../backend-nextjs/components/card-form'
+import { useCocardQuery, CocardQuery } from '../../../../backend-nextjs/apollo/query.graphql'
 
-interface RouteProps {
-  me?: QT.me_me
-  path?: string
-  url?: string
+function getTabUrl(): string | null {
+  // popup的情況
+  const params = new URLSearchParams(new URL(window.location.href).search)
+  const url = params.get('u')
+
+  // inject的情況
+  // console.log(window.location.href)
+  // const url = window.location.href
+
+  return url
 }
 
-export function ResolvedCardPage({ card }: { card: QT.cocardFragment }): JSX.Element {
-  return (
-    <Layout.Content className="site-layout-background content" style={{ minHeight: 280 }}>
-      <CardHead card={card} />
-      <CardBody card={card} />
-      {/* <Button
-        onClick={() => {
-          navigate(`/form?${getCardUrlParam(card)}`)
+export function CardPage(): JSX.Element {
+  const [edit, setEdit] = useState<boolean>(false)
+  const url = getTabUrl()
+
+  if (url) {
+    return (
+      <QueryDataProvider
+        useQuery={() => useCocardQuery({ variables: { url } })}
+        render={(data: CocardQuery) => {
+          if (data && data.cocard) {
+            // const url = `/card/form?${getCardUrlParam(data.cocard)}`
+            return (
+              <div>
+                <button
+                  onClick={() => {
+                    setEdit(!edit)
+                  }}
+                >
+                  編輯
+                </button>
+                <CardHead card={data.cocard} />
+                {edit ? <CardBody card={data.cocard} /> : <CardForm card={data.cocard} />}
+              </div>
+            )
+          }
+          return null
         }}
-      >
-        編輯
-      </Button> */}
-    </Layout.Content>
-  )
-}
-
-export function FetchCard({ url }: { url: string }) {
-  const { loading, data, error } = useQuery<QT.cocard, QT.cocardVariables>(queries.COCARD, {
-    variables: { url },
-    // fetchPolicy: 'no-cache',
-  })
-  if (loading) return <h1>loading</h1>
-  if (error || !data) return <h1>{error?.message}</h1>
-  if (data.cocard === null) {
-    // 目前query cocard若沒找到會直接建立新的，所以這個原則上不會發生
-    // navigate(`/webpage/form?${_toUrlParams('url', url)}`)
-    console.error('something wrong')
-    return <h1>Unpected error</h1>
+      />
+    )
   }
-  return <ResolvedCardPage card={data.cocard} />
+  // if (symbol) {
+  //   try {
+  //     symbolToUrl(symbol)
+  //     return _render(undefined, symbol)
+  //   } catch {
+  //     return <h1>Symbol format error</h1>
+  //   }
+  // }
+  return <h1>Require URL or Symbol (現階段還未支援symbol)</h1>
 }
