@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useRepliesQuery } from '../../apollo/query.graphql'
+import { SubmitErrorHandler, SubmitHandler, useForm, useFieldArray } from 'react-hook-form'
+import { useRepliesQuery, Reply, useCommentQuery } from '../../apollo/query.graphql'
 import { List } from 'antd'
 // import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
 // import * as QT from '../../graphql/query-types'
@@ -10,19 +11,6 @@ import BarChart from '../bar/bar'
 import classes from './commentList.module.scss'
 import Item from 'antd/lib/list/Item'
 
-// interface IconText {
-//   icon: React.FunctionComponent
-//   text: string
-// }
-// const IconText = ({ icon, text }: IconText) => (
-//   <Space>
-//     {React.createElement(icon)}
-//     {text}
-//   </Space>
-// )
-// interface RouteProps extends RouteComponentProps {
-//   me?: QT.me_me
-// }
 type RadioArr = {
   label: string
   counts: number
@@ -43,132 +31,80 @@ interface listData {
   // commentId:string
   // counts?: number[]
 }
-const CommentList = ({ type, commentId }: { type?: string; commentId: string }) => {
-  const listData = []
-  // const { data, loading, error } = useCommentQuery({
-  //   variables: { id: commentId },
-  // })
-  const { data, loading, error } = useRepliesQuery({
+
+type FormValues = {
+  votes: string
+}
+
+const CommentList = ({
+  type,
+  commentId,
+  pollCommentId,
+}: {
+  type?: string
+  commentId: string
+  pollCommentId?: string
+}) => {
+  //如果有poll的commentid replies query 的 variable 要輸入pollCommentId
+
+  const { data: commentsData, loading: commentsLoading, error: commentsError } = useCommentQuery({
+    variables: { id: commentId },
+  })
+
+  const { data: repliesData, loading: repliesLoading, error: repliesError } = useRepliesQuery({
+    // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
     variables: { commentId },
   })
 
-  if (type === 'vote') {
-    // for (let i = 0; i < 14; i++) {
-    const commentArr = []
-    for (let i = 0; i < 14; i++) {
-      commentArr.push({
-        // href: 'https://ant.design',
-        // title: `ant design part ${i}`,
-        // description:
-        //   'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-        id: `${i}`,
-        parent: false,
-        content: '可以買了嗎',
-        floor: `#${i + 1}`,
-        clicked: false,
-      })
-    }
-    const voteData = {
-      // href: 'https://ant.design',
-      // title: `ant design part ${i}`,
-      // description:
-      //   'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-      id: `1`,
-      type: 'vote',
-      content: `#1 我是問題？`,
-      radios: [
-        { label: '買', counts: 20 },
-        { label: '我是選項Ｂ', counts: 1 },
-        { label: '我是選項Ｃ', counts: 50 },
-        { label: '賣', counts: 36 },
-        { label: '我是選項Ｄ', counts: 11 },
-      ],
-      // counts: [20, 1, 50, 36, 11],
-      floor: `#1`,
-      clicked: false,
-      comment: commentArr,
-    }
+  const { register, handleSubmit } = useForm<FormValues>()
+  // const {fields}=useFieldArray()
 
-    listData.push(voteData)
-    // }
-  } else {
-    for (let i = 0; i < 14; i++) {
-      listData.push({
-        // href: 'https://ant.design',
-        // title: `ant design part ${i}`,
-        // description:
-        //   'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-        id: `${i}`,
-        parent: false,
-        content: '可以買了嗎',
-        floor: `#${i + 1}`,
-        clicked: false,
-      })
-    }
+  const onSubmit: SubmitHandler<FormValues> = (data, e) => {
+    console.log(data, e)
   }
-  const [list, setList] = useState(listData)
-
-  const countsHandler = (prevIdx: number | null, idx: number) => {
-    // const keyNumber = +key
-    if (list) {
-      const deepCopyObj = JSON.parse(JSON.stringify(list))
-      prevIdx !== null && (deepCopyObj[0].radios[prevIdx].counts -= 1)
-      idx !== null && (deepCopyObj[0].radios[idx].counts += 1)
-      setList(deepCopyObj)
-      // setList(prev => {
-      //   prev[keyNumber].radios[prevIdx].counts = prev[keyNumber].radios[prevIdx].counts - 1
-      //   prev[keyNumber].radios[prevIdx].counts = prev[keyNumber].radios[prevIdx].counts + 1
-      // })
-    }
+  const onError: SubmitErrorHandler<FormValues> = (data, e) => {
+    console.log(data, e)
   }
 
-  const parentCommentClickHandler = (id: string) => {
-    const commentId = id
-    const newList = list.map(item => {
-      if (item.id === commentId) {
-        // if (item.clicked) {
-        //   if (item.input) {
-        //     return item
-        //   } else {
-        //     const updatedItem = {
-        //       ...item,
-        //       clicked: !item.clicked,
-        //     }
-        //     return updatedItem
-        //   }
-        // }
-        const updatedItem = {
-          ...item,
-          clicked: !item.clicked,
-        }
-        return updatedItem
-      }
-      return item
-    })
-    setList(newList)
-  }
+  const repliesLength = repliesData?.replies.length
 
   return (
+    // <>
+    //   {commentsData?.comment?.poll && (
+    //     <form onSubmit={handleSubmit(onSubmit, onError)}>
+    //       {/* {commentsData.comment.poll.choices.map((e, i) => (
+    //         ))} */}
+    //       {count?.map((e, i) => (
+    //         <div key={i}>
+    //           <label>
+    //             <input type="radio" {...register('votes')} value={`${i}`} />
+    //             {commentsData.comment?.poll?.choices[i]}
+    //           </label>
+    //           <BarChart count={e} total={total && total} />
+    //         </div>
+    //       ))}
+    //       <button type="submit">送出</button>
+    //     </form>)}
     <List
       className={classes.List}
       size="small"
       itemLayout="vertical"
       // header={`討論`}
-      pagination={{
-        onChange: page => {
-          console.log(page)
-        },
-        pageSize: 5,
-      }}
+      // pagination={{
+      //   onChange: page => {
+      //     // console.log(page)
+      //   },
+      //   pageSize: 5,
+      // }}
       rowKey={item => item.id}
-      dataSource={data?.replies}
+      dataSource={repliesData?.replies}
       // footer={
       //   //   <div>
       //   //     <b>ant design</b> footer part
       //   //   </div>
       // }
       renderItem={
-        item => (
+        (item, idx) => (
           // item.type == 'vote' ? (null
           // <>
           //   <List.Item>
@@ -188,12 +124,18 @@ const CommentList = ({ type, commentId }: { type?: string; commentId: string }) 
           // </>
           // ) : (
           <li className={classes.commentRoot}>
-            <CommentTemplate id={item.id} content={item.text} />
+            <CommentTemplate
+              id={item.id}
+              content={item.text}
+              updatedAt={item.updatedAt}
+              floor={`#${repliesLength && repliesLength - idx}`}
+            />
           </li>
         )
         // )
       }
     />
+    // </>
   )
 }
 

@@ -44,6 +44,7 @@
     "next-react-svg": "1.1.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-hook-form": "^7.6.2",
     "react-use-measure": "^2.0.4",
     "sass": "^1.32.12"
   },

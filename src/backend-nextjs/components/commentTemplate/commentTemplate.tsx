@@ -13,11 +13,11 @@ interface commentTemplate {
   floor?: string
   className?: string
   clicked?: boolean
-  parent?: boolean
-  type?: string | undefined
+  updatedAt: any
+  // type?: string | undefined
 }
 
-const CommenTemplate = ({ id, content, floor, className, clicked, parent, type }: commentTemplate) => {
+const CommenTemplate = ({ id, content, floor, className, clicked, updatedAt }: commentTemplate) => {
   const [likes, setLikes] = useState(0)
   const [dislikes, setDislikes] = useState(0)
   const [action, setAction] = useState('')
@@ -67,17 +67,13 @@ const CommenTemplate = ({ id, content, floor, className, clicked, parent, type }
 
   return (
     <Tooltip title="點擊回覆" overlayClassName={classes.tooltip}>
-      {type === 'vote' ? (
-        <Comment className={classes.comment} author={floor} actions={actions} content={content} />
-      ) : (
-        <Comment
-          className={classes.comment}
-          author={floor}
-          actions={actions}
-          content={content}
-          datetime={moment().subtract(1, 'days').format('YYYY-MM-DD ')}
-        />
-      )}
+      <Comment
+        className={classes.comment}
+        author={floor}
+        actions={actions}
+        content={content}
+        datetime={moment(updatedAt).format('YYYY-MM-DD')}
+      />
     </Tooltip>
   )
 }

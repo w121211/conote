@@ -10,7 +10,7 @@ type RadioArr = {
 
 interface Props {
   title?: string
-  data: RadioArr[]
+  data: string[]
   // buttonText: string[]
   // counts?: number[]
   countsHandler?: (prevIdx: number | null, countIdx: number) => void
@@ -37,7 +37,7 @@ const Radios = (props: Props) => {
           {props.data.map((el, idx) => (
             <>
               <Radio value={idx} key={idx}>
-                {el.label}
+                {/* {el.label} */}
                 {/* {el.counts} */}
               </Radio>
               <BarChart total={totalArr.reduce((a, b) => a + b)} count={el.counts} />

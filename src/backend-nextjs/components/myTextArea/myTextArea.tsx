@@ -1,7 +1,8 @@
-import React, { useState, forwardRef, LegacyRef } from 'react'
+import React, { useState, forwardRef, useImperativeHandle, useRef } from 'react'
 import { Input, Button, Form } from 'antd'
 
 import classes from './myTextArea.module.scss'
+
 // import { TextAreaRef } from 'antd/lib/input/TextArea'
 
 const { TextArea } = Input
@@ -9,19 +10,24 @@ const { TextArea } = Input
 interface props {
   size?: string
   placeHolder?: string
-  clickHandler: () => void
+  clickHandler?: () => void
+  onChangeHandler?: (e: any) => void
 }
 
-const MyTextArea = (props: props) => {
+const MyTextArea = forwardRef((props: props, ref) => {
   const [commentValue, setValue] = useState('')
 
   const [buttonDisable, setButtonState] = useState(true)
-
-  const onChangeHandler = (e: any) => {
-    const texts = e.target.value
-    setValue(texts)
-    buttonStateHandler(texts)
-  }
+  const textAreaRef = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
+  console.log(textAreaRef)
+  useImperativeHandle(ref, () => ({
+    focus: () => textAreaRef?.current?.focus(),
+  }))
+  // const onChangeHandler = (e: any) => {
+  //   const texts = e.target.value
+  //   setValue(texts)
+  //   buttonStateHandler(texts)
+  // }
   const buttonStateHandler = (value: string) => {
     if (value == '') {
       setButtonState(true)
@@ -50,14 +56,15 @@ const MyTextArea = (props: props) => {
           className={classes.TextArea}
           placeholder={props.placeHolder ? props.placeHolder : '留言...'}
           autoSize
-          onChange={onChangeHandler}
-          id="commentTextArea"
+          // onChange={props.onChangeHandler}
+          ref={textAreaRef}
         />
       </Form.Item>
-      <Button type="text" disabled={buttonDisable} onClick={props.clickHandler}>
+      {/* <Button type="text" disabled={buttonDisable} onClick={props.clickHandler}>
         送出
-      </Button>
+      </Button> */}
     </>
   )
-}
+})
+
 export default MyTextArea

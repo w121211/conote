@@ -9,7 +9,7 @@ import Discuss from '../../components/discuss/discuss'
 import useMe from '../../components/use-me'
 import EditIcon from '../../assets/svg/edit.svg'
 import classes from './card-page.module.scss'
-import { useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 
 function CardPage(): JSX.Element {
   const me = useMe({ redirectTo: '/signin' })
@@ -17,23 +17,44 @@ function CardPage(): JSX.Element {
   const { u, s } = router.query
   const url = u as string
   const symbol = s as string
-  // const [Question, setQuestion] = useState(false)
+  const [Question, setQuestion] = useState(false)
   const [discuss, setDiscuss] = useState(true)
+  const [cardCommentId, setCardCommentId] = useState('')
   const [commentId, setCommentId] = useState('')
+  const [pollCommentId, setPollCommentId] = useState<string[]>([])
+  const [clickPollCommentId, setClickPollCommentId] = useState('')
   const [anchorId, setAnchorId] = useState('')
+  const textRef = useRef<HTMLTextAreaElement>(null)
 
   const discussClickLHandler = () => {
     setDiscuss(true)
   }
   const discussClickRHandler = () => {
+    setAnchorId('')
     setDiscuss(false)
   }
 
   const commentIdHandler = (id: string) => {
     setCommentId(id)
   }
+  const cardCommentIdHandler = (id: string) => {
+    setCardCommentId(id)
+  }
   const anchorIdHandler = (id: string) => {
     setAnchorId(id)
+  }
+
+  const pollCommentIdHandler = (id: string) => {
+    setPollCommentId(prev => {
+      const prevArr = prev
+      prevArr.some(e => e === id) || prevArr.push(id)
+      return (prev = prevArr)
+    })
+  }
+
+  const clickPoll = (id: string) => {
+    setClickPollCommentId(id)
+    setAnchorId('')
   }
 
   let titleRefArr: any[] = []
@@ -47,6 +68,12 @@ function CardPage(): JSX.Element {
     setDiscuss(false)
   }
 
+  const showDiscuss = () => {
+    setDiscuss(true)
+    console.log(textRef.current)
+    if (textRef) textRef.current?.focus()
+  }
+
   function _render(url: string): JSX.Element {
     return (
       <QueryDataProvider
@@ -54,6 +81,7 @@ function CardPage(): JSX.Element {
         render={(data: CocardQuery) => {
           if (data && data.cocard) {
             const url = `/card/form?${getCardUrlParam(data.cocard)}`
+
             return (
               <div className={classes.main}>
                 <div className={classes.mainInner}>
@@ -64,10 +92,14 @@ function CardPage(): JSX.Element {
                         <CardHead card={data.cocard} />
                         <CardBody
                           card={data.cocard}
+                          cardCommentIdHandler={cardCommentIdHandler}
                           titleRefHandler={titleRefHandler}
                           showQuestion={showQuestion}
-                          commentIdHandler={commentIdHandler}
+                          // commentIdHandler={commentIdHandler}
                           anchorIdHandler={anchorIdHandler}
+                          pollCommentIdHandler={pollCommentIdHandler}
+                          clickPoll={clickPoll}
+                          showDiscuss={showDiscuss}
                         />
                       </div>
                     </div>
@@ -93,8 +125,12 @@ function CardPage(): JSX.Element {
                   switchTab={discuss}
                   discussClickLHandler={discussClickLHandler}
                   discussClickRHandler={discussClickRHandler}
+                  cardCommentId={cardCommentId}
                   commentId={commentId}
                   anchorId={anchorId}
+                  pollCommentId={pollCommentId}
+                  pollClick={clickPollCommentId}
+                  ref={textRef}
                 />
               </div>
             )

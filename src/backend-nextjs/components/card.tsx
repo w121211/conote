@@ -2,7 +2,7 @@
 // import { useQuery, useMutation, useLazyQuery, useApolloClient } from '@apollo/client'
 // import { Link, navigate, redirectTo } from '@reach/router'
 // import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input } from 'antd'
-import React, { useState, useRef, forwardRef } from 'react'
+import React, { useState, useRef, forwardRef, useEffect } from 'react'
 import { Editor, Section, ExtTokenStream, streamToStr } from '../../lib/editor/src/index'
 import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
 import { AnchorPanel } from './tile-panel'
@@ -25,24 +25,30 @@ const RenderTokenStream = forwardRef(
       type,
       commentIdHandler,
       anchorIdHandler,
+      // pollCommentIdHandler,
       commentId,
+      clickPoll,
+      showDiscuss,
     }: {
       stream: ExtTokenStream
       className?: string
       showPanel?: boolean
       pushTitle?: (el: HTMLSpanElement | null) => void
       titleRef?: (arr: any[]) => void
-      showQuestion?: () => void
+      showQuestion: () => void
       type?: string
-      commentIdHandler: (commentId: string) => void
+      // pollCommentIdHandler: (commentId: string) => void
+      commentIdHandler?: (commentId: string) => void
       anchorIdHandler: (anchorId: string) => void
       commentId?: string
+      clickPoll: (commentId: string) => void
+      showDiscuss: () => void
     },
     ref: any,
   ): JSX.Element | null => {
     const inlineValueArr: string[] = [classes.inlineValue]
     const [Panel, setPanel] = useState(false)
-    const [commentTextArea, setCommentTextArea] = useState(inlineValueArr)
+    // const [commentTextArea, setCommentTextArea] = useState(inlineValueArr)
 
     const onFocusHandler = (e: any) => {
       e.stopPropagation()
@@ -97,6 +103,9 @@ const RenderTokenStream = forwardRef(
                     showQuestion={showQuestion}
                     commentIdHandler={commentIdHandler}
                     anchorIdHandler={anchorIdHandler}
+                    // pollCommentIdHandler={pollCommentIdHandler}
+                    clickPoll={clickPoll}
+                    showDiscuss={showDiscuss}
                     // commentId={commentId}
                   />
                 )
@@ -114,6 +123,9 @@ const RenderTokenStream = forwardRef(
                   showQuestion={showQuestion}
                   commentIdHandler={commentIdHandler}
                   anchorIdHandler={anchorIdHandler}
+                  // pollCommentIdHandler={pollCommentIdHandler}
+                  clickPoll={clickPoll}
+                  showDiscuss={showDiscuss}
                   // commentId={commentId}
                 />
               )
@@ -134,10 +146,10 @@ const RenderTokenStream = forwardRef(
       //     </span>
       //   )
       // }
-      case 'vote-choice':
+      case 'vote-chocie':
         return (
           <button>
-            {console.log(stream)}
+            {/* {console.log(stream)} */}
             {stream.content}
             {/* <RenderTokenStream
               stream={stream.content}
@@ -172,6 +184,9 @@ const RenderTokenStream = forwardRef(
               showQuestion={showQuestion}
               commentIdHandler={commentIdHandler}
               anchorIdHandler={anchorIdHandler}
+              // pollCommentIdHandler={pollCommentIdHandler}
+              clickPoll={clickPoll}
+              showDiscuss={showDiscuss}
             />
           </ul>
         )
@@ -183,13 +198,14 @@ const RenderTokenStream = forwardRef(
             showQuestion={showQuestion}
             commentIdHandler={commentIdHandler}
             anchorIdHandler={anchorIdHandler}
+            // pollCommentIdHandler={pollCommentIdHandler}
+            clickPoll={clickPoll}
+            showDiscuss={showDiscuss}
           />
         )
       case 'inline-value':
       case 'line-value': {
-        if (stream.markerline?.anchorId && typeof stream.markerline?.poll === 'undefined') {
-          // console.log(stream.markerline.comment)
-          // console.log(stream.markerline)
+        if (stream.markerline?.poll && stream.markerline.commentId !== undefined) {
           return (
             // <QueryCommentModal commentId={stream.markerline.commentId.toString()}>
             // <button onClick={showQuestion}>
@@ -199,17 +215,28 @@ const RenderTokenStream = forwardRef(
                 ref={ref}
                 showQuestion={showQuestion}
                 // commentOnClickHandler={commentOnClickHandler}
-                commentIdHandler={commentIdHandler}
+                // pollCommentIdHandler={pollCommentIdHandler}
+                // commentIdHandler={commentIdHandler}
                 anchorIdHandler={anchorIdHandler}
+                clickPoll={clickPoll}
+                showDiscuss={showDiscuss}
               />
 
-              {stream.markerline && commentIdHandler(stream.markerline.anchorId.toString())}
+              <button
+                onClick={() => {
+                  stream.markerline?.commentId !== undefined && clickPoll(stream.markerline.commentId.toString())
+                  stream.markerline?.anchorId !== undefined && anchorIdHandler(stream.markerline.anchorId.toString())
+                  showQuestion()
+                }}
+              >
+                參與投票
+              </button>
             </>
             // </button>
             // </QueryCommentModal>
           )
         }
-        if (stream.markerline?.commentId && stream.markerline.anchorId) {
+        if (stream.markerline?.commentId === undefined && stream.markerline?.anchorId) {
           // return <PollChoices pollId={'10'} choices={['aaa', 'bbb']} />
           return (
             // <QueryCommentModal id={stream.markerline.commentId.toString()}>
@@ -220,8 +247,12 @@ const RenderTokenStream = forwardRef(
                 showQuestion={showQuestion}
                 commentIdHandler={commentIdHandler}
                 anchorIdHandler={anchorIdHandler}
+                // pollCommentIdHandler={pollCommentIdHandler}
+                clickPoll={clickPoll}
+                showDiscuss={showDiscuss}
               />
-              {stream.markerline && commentIdHandler(stream.markerline.commentId.toString())}
+              {/* {stream.markerline && commentIdHandler(stream.markerline.commentId.toString())} */}
+              {/* {stream.markerline && anchorIdHandler(stream.markerline.anchorId.toString())} */}
             </>
             // {/* </QueryCommentModal> */}
           )
@@ -234,18 +265,24 @@ const RenderTokenStream = forwardRef(
               showQuestion={showQuestion}
               commentIdHandler={commentIdHandler}
               anchorIdHandler={anchorIdHandler}
+              // pollCommentIdHandler={pollCommentIdHandler}
+              clickPoll={clickPoll}
+              showDiscuss={showDiscuss}
             />
           )
         }
         return (
           <li className={classes.inlineValue}>
-            {/* {console.log(commentTextArea)} */}
+            {console.log(stream.content)}
             <RenderTokenStream
               stream={stream.content}
               ref={ref}
               showQuestion={showQuestion}
               commentIdHandler={commentIdHandler}
               anchorIdHandler={anchorIdHandler}
+              // pollCommentIdHandler={pollCommentIdHandler}
+              clickPoll={clickPoll}
+              showDiscuss={showDiscuss}
             />
           </li>
         )
@@ -276,8 +313,9 @@ const RenderTokenStream = forwardRef(
           stream.markerline && stream.markerline.anchorId ? (
             <AnchorPanel
               anchorId={stream.markerline.anchorId.toString()}
+              anchorIdHandler={anchorIdHandler}
               meAuthor={false}
-
+              showDiscuss={showDiscuss}
               // commentMouseUpHandler={commentMouseUpHandler}
             />
           ) : null
@@ -306,6 +344,9 @@ const RenderTokenStream = forwardRef(
             showQuestion={showQuestion}
             commentIdHandler={commentIdHandler}
             anchorIdHandler={anchorIdHandler}
+            // pollCommentIdHandler={pollCommentIdHandler}
+            clickPoll={clickPoll}
+            showDiscuss={showDiscuss}
           />
         )
     }
@@ -320,14 +361,20 @@ const RenderSection = forwardRef(
       titleRef,
       showQuestion,
       commentIdHandler,
+      pollCommentIdHandler,
       anchorIdHandler,
+      clickPoll,
+      showDiscuss,
     }: // commentId
     {
       sect: Section
       titleRef?: (arr: any[]) => void
       showQuestion?: () => void
-      commentIdHandler: (commentId: string) => void
+      commentIdHandler?: (commentId: string) => void
+      pollCommentIdHandler: (commentId: string) => void
+      clickPoll: (commentId: string) => void
       anchorIdHandler: (anchorId: string) => void
+      showDiscuss: () => void
       // commentId:string
     },
     ref,
@@ -345,9 +392,12 @@ const RenderSection = forwardRef(
             stream={sect.stream}
             ref={ref}
             showQuestion={showQuestion}
+            showDiscuss={showDiscuss}
             // commentOnClickHandler={commentOnClickHandler}
-            commentIdHandler={commentIdHandler}
+            // commentIdHandler={commentIdHandler}
             anchorIdHandler={anchorIdHandler}
+            // pollCommentIdHandler={pollCommentIdHandler}
+            clickPoll={clickPoll}
             // pushTitle={pushTitle}
             // titleRef={titleRef ? titleRef(titleRefArr) : null}
           />
@@ -367,13 +417,19 @@ export const RenderCardBody = forwardRef(
       titleRef,
       showQuestion,
       commentIdHandler,
+      pollCommentIdHandler,
       anchorIdHandler,
+      clickPoll,
+      showDiscuss,
     }: {
       sects: Section[]
       titleRef?: (arr: any[]) => void
       showQuestion?: () => void
-      commentIdHandler: (commentId: string) => void
+      commentIdHandler?: (commentId: string) => void
+      pollCommentIdHandler: (commentId: string) => void
       anchorIdHandler: (anchorId: string) => void
+      clickPoll: (commentId: string) => void
+      showDiscuss: () => void
     },
     ref,
   ): JSX.Element => {
@@ -414,8 +470,11 @@ export const RenderCardBody = forwardRef(
             sect={e}
             ref={el => (myRef.current[i] = el)}
             showQuestion={showQuestion}
-            commentIdHandler={commentIdHandler}
+            // commentIdHandler={commentIdHandler}
             anchorIdHandler={anchorIdHandler}
+            pollCommentIdHandler={pollCommentIdHandler}
+            clickPoll={clickPoll}
+            showDiscuss={showDiscuss}
           />
         ))}
         {titleRef && titleRef(myRef.current)}
@@ -428,17 +487,25 @@ RenderCardBody.displayName = 'RenderCardBody'
 export function CardBody({
   card,
   bySrc,
+  cardCommentIdHandler,
   titleRefHandler,
   showQuestion,
   commentIdHandler,
+  pollCommentIdHandler,
   anchorIdHandler,
+  clickPoll,
+  showDiscuss,
 }: {
   card: CocardFragment
   bySrc?: string
+  cardCommentIdHandler: (cardCommentId: string) => void
   titleRefHandler?: (arr: any[]) => void
   showQuestion?: () => void
-  commentIdHandler: (commentId: string) => void
+  commentIdHandler?: (commentId: string) => void
+  pollCommentIdHandler: (commentId: string) => void
+  clickPoll: (commentId: string) => void
   anchorIdHandler: (anchorId: string) => void
+  showDiscuss: () => void
 }): JSX.Element {
   // console.log(card)
 
@@ -447,6 +514,10 @@ export function CardBody({
   // const meta: CardMeta | undefined = card.meta ? (JSON.parse(card.meta) as CardMeta) : undefined
   const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
   editor.flush({ attachMarkerlinesToTokens: true })
+
+  useEffect(() => {
+    cardCommentIdHandler(card.meta?.commentId)
+  }, [])
 
   return (
     // <>
@@ -457,8 +528,11 @@ export function CardBody({
       sects={editor.getSections()}
       titleRef={titleRefHandler}
       showQuestion={showQuestion}
-      commentIdHandler={commentIdHandler}
+      // commentIdHandler={commentIdHandler}
       anchorIdHandler={anchorIdHandler}
+      pollCommentIdHandler={pollCommentIdHandler}
+      clickPoll={clickPoll}
+      showDiscuss={showDiscuss}
     />
     // </>
   )

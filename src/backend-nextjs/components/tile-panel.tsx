@@ -28,13 +28,17 @@ import CommentIcon from '../assets/svg/message.svg'
 
 export function AnchorPanel({
   anchorId,
+  anchorIdHandler,
   commentId,
   meAuthor,
+  showDiscuss,
 }: // onClickHandler,
 {
   anchorId: string
+  anchorIdHandler: (anchorId: string) => void
   commentId?: string
   meAuthor: boolean
+  showDiscuss: () => void
   // onClickHandler: (commentId: string | undefined) => void
 }): JSX.Element {
   const [count, setCount] = useState<AnchorCountFragment | null>(null)
@@ -71,7 +75,11 @@ export function AnchorPanel({
     // setPanel(true)
     // setCommentTextArea([classes.inlineValue, classes.inlineValueComment])
     // inlineValueArr.push(classes.inlineValueComment)
-    document.getElementById('commentTextArea')?.focus()
+    showDiscuss()
+    anchorIdHandler(anchorId)
+    // const inputElement = document.getElementById('commentTextArea') as HTMLInputElement
+
+    // inputElement.focus()
     // onClickHandler(commentId)
     // console.log(commentId)
   }
