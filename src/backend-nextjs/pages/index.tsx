@@ -3,9 +3,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
 import { getCardUrlParam } from '../lib/helper'
-import { useLatestCardsQuery } from '../apollo/query.graphql'
+import { useLatestCardsQuery, useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
-import useMe from '../components/use-me'
 
 function LatestCards(): JSX.Element | null {
   const { data, loading, error, fetchMore } = useLatestCardsQuery({ fetchPolicy: 'cache-and-network' })
@@ -57,27 +56,20 @@ function LatestCards(): JSX.Element | null {
 
 function HomePage(): JSX.Element {
   const { user, error, isLoading } = useUser()
+  const { data, loading } = useMeQuery()
 
-  if (user) {
+  if (loading || isLoading) return <h1>Loading</h1>
+
+  if (user && data) {
     return (
       <div>
-        Welcome {user.name}! <a href="/api/auth/logout">Logout</a>
+        Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
+        <LatestCards />
       </div>
     )
   }
 
   return <a href="/api/auth/login">Login</a>
-
-  // const me = useMe({ redirectTo: '/signin' })
-  // if (!me) {
-  //   return <p>Loading...</p>
-  // }
-  // return (
-  //   <>
-  //     <SearchAllForm />
-  //     <LatestCards />
-  //   </>
-  // )
 }
 
 export default HomePage

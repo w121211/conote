@@ -119,9 +119,9 @@ type Mutation {
   createReplyLike(replyId: ID!, data: LikeInput!): ReplyLikeResonse!
   updateReplyLike(id: ID!, data: LikeInput!): ReplyLikeResonse!
 
-  signIn(email: String!, password: String!): AuthPayload!
-  signUp(email: String!, password: String!): User!
-  signOut: Boolean!
+  # signIn(email: String!, password: String!): AuthPayload!
+  # signUp(email: String!, password: String!): User!
+  # signOut: Boolean!
 
   # --- NEXT ---
 
@@ -312,8 +312,8 @@ type Comment {
   userId: String!
   symbols: [Symbol!]
   # null表示無需topReplies
-  topReplies: [Reply!]
-  replies: [Reply!]
+  # topReplies: [Reply!]
+  # replies: [Reply!]
   # cat: CommentCat!
   isTop: Boolean
   text: String
@@ -321,7 +321,6 @@ type Comment {
   createdAt: DateTime!
   # updatedAt: DateTime!
   poll: Poll
-
   meta: JSON
   cocardId: Int
   ocardId: Int

@@ -87,12 +87,12 @@ fragment comment on Comment {
   text
   # updatedAt
   createdAt
-  replies {
-    ...reply
-  }
-  topReplies {
-    ...reply
-  }
+  # replies {
+  #   ...reply
+  # }
+  # topReplies {
+  #   ...reply
+  # }
   poll {
     ...poll
   }
@@ -381,22 +381,22 @@ mutation UpdateReplyLike($id: ID!, $data: LikeInput!) {
   }
 }
 
-mutation SignUp($email: String!, $password: String!) {
-  signUp(email: $email, password: $password) {
-    id
-    email
-  }
-}
+# mutation SignUp($email: String!, $password: String!) {
+#   signUp(email: $email, password: $password) {
+#     id
+#     email
+#   }
+# }
 
-mutation SignIn($email: String!, $password: String!) {
-  signIn(email: $email, password: $password) {
-    token
-    user {
-      id
-    }
-  }
-}
+# mutation SignIn($email: String!, $password: String!) {
+#   signIn(email: $email, password: $password) {
+#     token
+#     user {
+#       id
+#     }
+#   }
+# }
 
-mutation SignOut {
-  signOut
-}
+# mutation SignOut {
+#   signOut
+# }

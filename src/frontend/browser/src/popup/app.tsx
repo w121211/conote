@@ -1,6 +1,6 @@
 import { browser, Storage } from 'webextension-polyfill-ts'
 import React, { useCallback, useEffect, useState } from 'react'
-import { ApolloClient, createHttpLink, NormalizedCacheObject } from '@apollo/client'
+import { ApolloClient, ApolloProvider, createHttpLink, NormalizedCacheObject } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { CachePersistor, PersistentStorage, LocalStorageWrapper } from 'apollo3-cache-persist'
 import { Auth0Provider, AppState, useAuth0 } from '@auth0/auth0-react'
@@ -109,23 +109,23 @@ export function App(): JSX.Element {
     return <h2>Initializing app...</h2>
   }
   return (
-    <Auth0Provider
-      domain={process.env.REACT_APP_DOMAIN as string}
-      clientId={process.env.REACT_APP_CLIENT_ID as string}
-      // redirectUri={window.location.origin}
-      redirectUri="chrome-extension://cidlgggnhfkmlodkoneabjiiddokpecm/popup.html"
-      // audience={process.env.REACT_APP_AUDIENCE}
-      // scope="read:users"
-      // onRedirectCallback={onRedirectCallback}
-    >
-      <SignIn />
-      {/* <button onClick={clearCache}>Clear cache</button>
-      <button onClick={reload}>Reload page</button> */}
-      {/* <ApolloProvider client={client}>
-        <CardPage />
-      </ApolloProvider> */}
-    </Auth0Provider>
+    <ApolloProvider client={client}>
+      <CardPage />
+    </ApolloProvider>
   )
+  // <Auth0Provider
+  //   domain={process.env.REACT_APP_DOMAIN as string}
+  //   clientId={process.env.REACT_APP_CLIENT_ID as string}
+  //   // redirectUri={window.location.origin}
+  //   redirectUri="chrome-extension://cidlgggnhfkmlodkoneabjiiddokpecm/popup.html"
+  //   // audience={process.env.REACT_APP_AUDIENCE}
+  //   // scope="read:users"
+  //   // onRedirectCallback={onRedirectCallback}
+  // >
+  // <SignIn />
+  // <button onClick={clearCache}>Clear cache</button>
+  // <button onClick={reload}>Reload page</button>
+  // </Auth0Provider>
 }
 
 function SignIn(): JSX.Element {

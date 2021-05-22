@@ -12,14 +12,9 @@ import { getOrCreateCardBySymbol, getOrCreateCardByLink } from '../../lib/models
 import { createCardBody, createWebCardBody } from '../../lib/models/card-body'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
 
-const config = dotenv.config()
-if (config.error) {
-  throw config.error
-}
-if (!config.parsed?.BOT_EMAIL || !config.parsed?.BOT_PASSWORD) {
-  throw new Error('.env Error')
-}
-const BOT = { email: config.parsed.BOT_EMAIL, password: config.parsed.BOT_PASSWORD }
+// const config = dotenv.config({ path: resolve(process.cwd(), '.env.local') })
+// if (config.error) throw config.error
+// if (!config.parsed?.BOT_EMAIL) throw new Error('BOT_EMAIL not found in .env')
 
 const prisma = new PrismaClient({
   errorFormat: 'pretty',
@@ -55,9 +50,11 @@ async function main() {
 
       console.log(`--- 創web-card ${url}`)
       const [link] = await getOrCreateLink(url, fetcher)
+      console.log(`link created`)
       const card = await getOrCreateCardByLink(link)
-
+      console.log(`card created`)
       await createWebCardBody(card.id, body, TESTUSERS[0].id)
+      console.log(`card body created`)
     }
   }
 }
@@ -65,6 +62,7 @@ async function main() {
 main()
   .catch(err => {
     console.error(err)
+    throw new Error()
   })
   .finally(async () => {
     console.log('finished, closing primsa')

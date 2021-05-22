@@ -13,7 +13,6 @@ generator client {
 model User {
   id           String        @id @default(cuid())
   email        String        @unique
-  password     String
   // profile      Profile
   // dailyProfile DailyProfile
   votes        Vote[]
@@ -137,17 +136,17 @@ model Poll {
 }
 
 model Vote {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  oauthor     Oauthor? @relation(fields: [oauthorName], references: [name])
-  oauthorName String?
-  poll        Poll     @relation(fields: [pollId], references: [id])
-  pollId      Int
-  choiceIdx   Int
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  oauthor   Oauthor? @relation(fields: [oauthorId], references: [id])
+  oauthorId Int?
+  poll      Poll     @relation(fields: [pollId], references: [id])
+  pollId    Int
+  choiceIdx Int
   // reward    Float?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   // @@unique([userId, pollId])
 }
 
@@ -176,20 +175,20 @@ model ReplyCount {
 }
 
 model Reply {
-  id          Int         @id @default(autoincrement())
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String
+  id        Int         @id @default(autoincrement())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
   // user紀錄oauther的reply
-  oauthor     Oauthor?    @relation(fields: [oauthorName], references: [name])
-  oauthorName String?
+  oauthor   Oauthor?    @relation(fields: [oauthorId], references: [id])
+  oauthorId Int?
   // status         PostStatus    @default(ACTIVE)
-  text        String
-  count       ReplyCount?
-  likes       ReplyLike[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  comment     Comment     @relation(fields: [commentId], references: [id])
-  commentId   Int
+  text      String
+  count     ReplyCount?
+  likes     ReplyLike[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  comment   Comment     @relation(fields: [commentId], references: [id])
+  commentId Int
 }
 
 model CommentLike {

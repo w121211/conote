@@ -201,10 +201,6 @@ const withMentions = (editor: CustomEditor) => {
     return element.type === 'mention' ? true : isVoid(element)
   }
 
-  editor.insertBreak = () => {
-    Editor.insertText(editor, '\n')
-  }
-
   return editor
 }
 
