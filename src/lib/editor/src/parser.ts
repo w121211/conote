@@ -50,7 +50,7 @@ export const SECTION_GRAMMAR = {
     alias: 'sect-ticker',
     pattern: /^\n\$[A-Z-]+(@\w+)?$/m,
     inside: {
-      'sect-symbol': { pattern: /^\n\$[A-Z-]+/ },
+      'sect-symbol': { pattern: /^\$[A-Z-]+/m },
       'sect-user': { pattern: /@\w+/ },
     },
   },

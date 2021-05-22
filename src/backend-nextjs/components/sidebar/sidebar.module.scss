@@ -1,0 +1,44 @@
+// @import '../../style/global.scss';
+
+.sidebar {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  width: 220px;
+  background: white;
+  // height: 100%;
+  grid-area: e('1 / 1 / 2 / -1');
+  padding: 16px;
+  border-right: 1px solid #ecedf2;
+  // border-left: 1px solid #e3eaf7;
+  transition: width 0.3s ease-in;
+  a {
+    display: flex;
+    align-items: center;
+    color: #3f4346;
+    font-weight: 500;
+    span {
+      margin-left: 10px;
+      display: inline-block;
+      transition: display 0.5s;
+      transition-delay: 0.2s;
+    }
+  }
+  .sideList {
+    margin-top: 8px;
+    li {
+      font-size: 13px;
+      margin: 4px 0;
+      padding: 8px 0;
+      overflow: hidden;
+      word-break: keep-all;
+    }
+    svg {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      fill: #ecedf2;
+      // margin-right: 10px;
+    }
+  }
+}

@@ -2,7 +2,7 @@
 // import { useQuery, useMutation, useLazyQuery, useApolloClient } from '@apollo/client'
 // import { Link, navigate, redirectTo } from '@reach/router'
 // import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input } from 'antd'
-import React from 'react'
+import React, { useState, useRef, forwardRef, useEffect } from 'react'
 import { Editor, Section, ExtTokenStream, streamToStr } from '../../lib/editor/src/index'
 import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
 import { AnchorPanel } from './tile-panel'
@@ -10,119 +10,504 @@ import { QueryCommentModal } from './tile'
 import { toUrlParams } from '../lib/helper'
 import { PollChoices } from './poll-form'
 import { Link } from './link'
+import classes from './card.module.scss'
+import ClockIcon from '../assets/svg/clock.svg'
+import LinkIcon from '../assets/svg/link.svg'
 
-function RenderTokenStream({ stream }: { stream: ExtTokenStream }): JSX.Element | null {
-  if (typeof stream === 'string') {
-    return <>{stream}</>
-  }
-  if (Array.isArray(stream)) {
-    return (
-      <>
-        {stream.map((e, i) => (
-          <RenderTokenStream key={i} stream={e} />
-        ))}
-      </>
-    )
-  }
-  // const err = token.marker ? <span>({token.marker.error})</span> : null
-  const content = streamToStr(stream.content)
-  switch (stream.type) {
-    // case 'sect-ticker':
-    // case 'sect-topic': {
-    //   console.log(`symbol: ${content}`)
-    //   return (
-    //     <span>
-    //       <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
-    //     </span>
-    //   )
-    // }
-    case 'sect-symbol': {
-      // console.log(`symbol: ${content}`)
-      return <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
+const RenderTokenStream = forwardRef(
+  (
+    {
+      stream,
+      showPanel,
+      pushTitle,
+      titleRef,
+      showQuestion,
+      type,
+      commentIdHandler,
+      anchorIdHandler,
+      // pollCommentIdHandler,
+      commentId,
+      clickPoll,
+      showDiscuss,
+    }: {
+      stream: ExtTokenStream
+      className?: string
+      showPanel?: boolean
+      pushTitle?: (el: HTMLSpanElement | null) => void
+      titleRef?: (arr: any[]) => void
+      showQuestion: () => void
+      type?: string
+      // pollCommentIdHandler: (commentId: string) => void
+      commentIdHandler?: (commentId: string) => void
+      anchorIdHandler: (anchorId: string) => void
+      commentId?: string
+      clickPoll: (commentId: string) => void
+      showDiscuss: () => void
+    },
+    ref: any,
+  ): JSX.Element | null => {
+    const inlineValueArr: string[] = [classes.inlineValue]
+    const [Panel, setPanel] = useState(false)
+    // const [commentTextArea, setCommentTextArea] = useState(inlineValueArr)
+
+    const onFocusHandler = (e: any) => {
+      e.stopPropagation()
+      // e.preventDefault()
+      setPanel(true)
     }
-    case 'multiline-marker':
-    case 'inline-marker':
-      return <RenderTokenStream stream={stream.content} />
-    case 'inline-value':
-    case 'line-value': {
-      if ((stream.markerline?.comment || stream.markerline?.poll) && stream.markerline.commentId) {
-        return (
-          <QueryCommentModal commentId={stream.markerline.commentId.toString()}>
-            <RenderTokenStream stream={stream.content} />
-          </QueryCommentModal>
-        )
-      }
-      if (stream.markerline?.comment && stream.markerline.commentId) {
-        return <PollChoices pollId={'10'} choices={['aaa', 'bbb']} />
-        // return (
-        //   <QueryCommentModal id={stream.markerline.commentId.toString()}>
-        //     <RenderTokenStream stream={stream.content} />
-        //   </QueryCommentModal>
-        // )
-      }
-      return (
-        <span style={{ color: '#905' }}>
-          <RenderTokenStream stream={stream.content} />
-        </span>
+    const onBlurHandler = (e: any) => {
+      e.stopPropagation()
+      // e.preventDefault()
+      // if (!commentTextArea) {
+      setPanel(false)
+      // }
+    }
+
+    // console.log(commentTextArea)
+
+    if (typeof stream === 'string') {
+      // return stream.search(/\n+/g) >= 0 || stream.search(/ {2,}/g) >= 0 || stream === ' ' ? (
+      return stream.search(/\n+/g) >= 0 || stream.search(/ {2,}/g) >= 0 || stream === ' ' ? null : (
+        // <>
+        //   {stream}
+        //   {/* {console.log(stream)} */}
+        // </>
+        <>
+          {/* // 一般render */}
+          <span className={classes.black}>
+            {stream.replace(/^ +/g, '').replace(/ +$/g, '')}
+            {/* {children} */}
+          </span>
+        </>
       )
     }
-    case 'line-mark':
-    case 'inline-mark':
-      return <span style={{ color: 'orange' }}>{content}</span>
-    case 'ticker':
-    case 'topic': {
-      // console.log(`symbol: ${content}`)
-      return <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
-    }
-    case 'stamp': {
-      const panel =
-        stream.markerline && stream.markerline.anchorId ? (
-          <AnchorPanel anchorId={stream.markerline.anchorId.toString()} meAuthor={false} />
-        ) : null
-      const src =
-        stream.markerline && stream.markerline.src ? (
-          <Link to={`/card?${toUrlParams({ u: stream.markerline.src })}`}>src</Link>
-        ) : null
+    if (Array.isArray(stream)) {
+      const hasStr = stream.some(e => typeof e === 'string')
+      const noReturn = stream.every(e => e !== '\n')
+      // if (condition) console.log(stream)
 
-      if (panel || src)
+      return (
+        <>
+          {/* {console.log(stream)} */}
+          {hasStr && noReturn ? (
+            //包含hover效果
+            // <div className={classes.array} onClick={onFocusHandler} onBlur={onBlurHandler} tabIndex={0}>
+            <div className={classes.array} onMouseEnter={onFocusHandler} onMouseLeave={onBlurHandler} tabIndex={0}>
+              {stream.map((e, i) => {
+                return (
+                  <RenderTokenStream
+                    key={i}
+                    stream={e}
+                    showPanel={Panel}
+                    ref={ref}
+                    showQuestion={showQuestion}
+                    commentIdHandler={commentIdHandler}
+                    anchorIdHandler={anchorIdHandler}
+                    // pollCommentIdHandler={pollCommentIdHandler}
+                    clickPoll={clickPoll}
+                    showDiscuss={showDiscuss}
+                  // commentId={commentId}
+                  />
+                )
+              })}
+            </div>
+          ) : (
+            //一般render
+            stream.map((e, i) => {
+              // console.log(e)
+              return (
+                <RenderTokenStream
+                  key={i}
+                  stream={e}
+                  ref={ref}
+                  showQuestion={showQuestion}
+                  commentIdHandler={commentIdHandler}
+                  anchorIdHandler={anchorIdHandler}
+                  // pollCommentIdHandler={pollCommentIdHandler}
+                  clickPoll={clickPoll}
+                  showDiscuss={showDiscuss}
+                // commentId={commentId}
+                />
+              )
+            })
+          )}
+        </>
+      )
+    }
+    // const err = token.marker ? <span>({token.marker.error})</span> : null
+    const content = streamToStr(stream.content)
+    switch (stream.type) {
+      // case 'sect-ticker':
+      // case 'sect-topic': {
+      //   console.log(`symbol: ${content}`)
+      //   return (
+      //     <span>
+      //       <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
+      //     </span>
+      //   )
+      // }
+      case 'vote-chocie':
         return (
-          <span style={{ color: 'orange' }}>
-            {panel}
-            {src}
+          <button>
+            {/* {console.log(stream)} */}
+            {stream.content}
+            {/* <RenderTokenStream
+              stream={stream.content}
+              ref={ref}
+              showQuestion={showQuestion}
+              commentIdHandler={commentIdHandler}
+            /> */}
+          </button>
+        )
+
+      case 'sect-symbol':
+        // console.log(`symbol: ${content}`)
+        return (
+          <span
+            id={content}
+            className={classes.tickerTitle}
+            ref={
+              ref
+              // console.log(el)
+            }
+          >
+            <Link to={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link>
           </span>
         )
-      return null
+
+      case 'multiline-marker':
+        return (
+          <ul>
+            <RenderTokenStream
+              stream={stream.content}
+              ref={ref}
+              showQuestion={showQuestion}
+              commentIdHandler={commentIdHandler}
+              anchorIdHandler={anchorIdHandler}
+              // pollCommentIdHandler={pollCommentIdHandler}
+              clickPoll={clickPoll}
+              showDiscuss={showDiscuss}
+            />
+          </ul>
+        )
+      case 'inline-marker':
+        return (
+          <RenderTokenStream
+            stream={stream.content}
+            ref={ref}
+            showQuestion={showQuestion}
+            commentIdHandler={commentIdHandler}
+            anchorIdHandler={anchorIdHandler}
+            // pollCommentIdHandler={pollCommentIdHandler}
+            clickPoll={clickPoll}
+            showDiscuss={showDiscuss}
+          />
+        )
+      case 'inline-value':
+      case 'line-value': {
+        if (stream.markerline?.poll && stream.markerline.commentId !== undefined) {
+          return (
+            // <QueryCommentModal commentId={stream.markerline.commentId.toString()}>
+            // <button onClick={showQuestion}>
+            <>
+              <RenderTokenStream
+                stream={stream.content}
+                ref={ref}
+                showQuestion={showQuestion}
+                // commentOnClickHandler={commentOnClickHandler}
+                // pollCommentIdHandler={pollCommentIdHandler}
+                // commentIdHandler={commentIdHandler}
+                anchorIdHandler={anchorIdHandler}
+                clickPoll={clickPoll}
+                showDiscuss={showDiscuss}
+              />
+
+              <button
+                onClick={() => {
+                  stream.markerline?.commentId !== undefined && clickPoll(stream.markerline.commentId.toString())
+                  stream.markerline?.anchorId !== undefined && anchorIdHandler(stream.markerline.anchorId.toString())
+                  showQuestion()
+                }}
+              >
+                參與投票
+              </button>
+            </>
+            // </button>
+            // </QueryCommentModal>
+          )
+        }
+        if (stream.markerline?.commentId === undefined && stream.markerline?.anchorId) {
+          // return <PollChoices pollId={'10'} choices={['aaa', 'bbb']} />
+          return (
+            // <QueryCommentModal id={stream.markerline.commentId.toString()}>
+            <>
+              <RenderTokenStream
+                stream={stream.content}
+                ref={ref}
+                showQuestion={showQuestion}
+                commentIdHandler={commentIdHandler}
+                anchorIdHandler={anchorIdHandler}
+                // pollCommentIdHandler={pollCommentIdHandler}
+                clickPoll={clickPoll}
+                showDiscuss={showDiscuss}
+              />
+              {/* {stream.markerline && commentIdHandler(stream.markerline.commentId.toString())} */}
+              {/* {stream.markerline && anchorIdHandler(stream.markerline.anchorId.toString())} */}
+            </>
+            // {/* </QueryCommentModal> */}
+          )
+        }
+        if (stream.marker && (stream.marker.key.search('[key]') >= 0 || stream.marker.key.search('[~]') >= 0)) {
+          return (
+            <RenderTokenStream
+              stream={stream.content}
+              ref={ref}
+              showQuestion={showQuestion}
+              commentIdHandler={commentIdHandler}
+              anchorIdHandler={anchorIdHandler}
+              // pollCommentIdHandler={pollCommentIdHandler}
+              clickPoll={clickPoll}
+              showDiscuss={showDiscuss}
+            />
+          )
+        }
+        return (
+          <li className={classes.inlineValue}>
+            {console.log(stream.content)}
+            <RenderTokenStream
+              stream={stream.content}
+              ref={ref}
+              showQuestion={showQuestion}
+              commentIdHandler={commentIdHandler}
+              anchorIdHandler={anchorIdHandler}
+              // pollCommentIdHandler={pollCommentIdHandler}
+              clickPoll={clickPoll}
+              showDiscuss={showDiscuss}
+            />
+          </li>
+        )
+      }
+
+      case 'line-mark':
+      case 'inline-mark':
+        return (
+          <span className={classes.marker}>
+            {content.replace('[+]', '優勢').replace('[-]', '劣勢').replace('[?]', '問題').replace('[key]', '關鍵字')}
+          </span>
+        )
+      // return <span className={classes.marker}>{content}</span>
+      case 'ticker':
+      case 'topic': {
+        // console.log(`symbol: ${content}`)
+        return (
+          <span className={classes.keyword}>
+            <Link to={`/card?${toUrlParams({ s: content })}`}>
+              {content.replace('[[', '').replace(']]', '')}
+              {/* {console.log(stream)} */}
+            </Link>
+          </span>
+        )
+      }
+      case 'stamp': {
+        const panel =
+          stream.markerline && stream.markerline.anchorId ? (
+            <AnchorPanel
+              anchorId={stream.markerline.anchorId.toString()}
+              anchorIdHandler={anchorIdHandler}
+              meAuthor={false}
+              showDiscuss={showDiscuss}
+            // commentMouseUpHandler={commentMouseUpHandler}
+            />
+          ) : null
+        const src =
+          stream.markerline && stream.markerline.src ? (
+            <Link to={`/card?${toUrlParams({ u: stream.markerline.src })}`}>src</Link>
+          ) : null
+
+        if (panel || src)
+          return (
+            <span className={`${showPanel ? classes.visible : classes.hidden}`}>
+              {/* <span> */}
+              {/* {console.log(stream.markerline)} */}
+              {panel}
+              {src}
+            </span>
+          )
+        return null
+      }
+      default:
+        // Recursive
+        return (
+          <RenderTokenStream
+            stream={stream.content}
+            ref={ref}
+            showQuestion={showQuestion}
+            commentIdHandler={commentIdHandler}
+            anchorIdHandler={anchorIdHandler}
+            // pollCommentIdHandler={pollCommentIdHandler}
+            clickPoll={clickPoll}
+            showDiscuss={showDiscuss}
+          />
+        )
     }
-    default:
-      // Recursive
-      return <RenderTokenStream stream={stream.content} />
-  }
-}
+  },
+)
+RenderTokenStream.displayName = 'RenderTokenStream'
 
-function RenderSection({ sect }: { sect: Section }): JSX.Element | null {
-  if (sect.stream) {
-    console.log(sect.stream)
+const RenderSection = forwardRef(
+  (
+    {
+      sect,
+      titleRef,
+      showQuestion,
+      commentIdHandler,
+      pollCommentIdHandler,
+      anchorIdHandler,
+      clickPoll,
+      showDiscuss,
+    }: // commentId
+      {
+        sect: Section
+        titleRef?: (arr: any[]) => void
+        showQuestion?: () => void
+        commentIdHandler?: (commentId: string) => void
+        pollCommentIdHandler: (commentId: string) => void
+        clickPoll: (commentId: string) => void
+        anchorIdHandler: (anchorId: string) => void
+        showDiscuss: () => void
+        // commentId:string
+      },
+    ref,
+  ): JSX.Element | null => {
+    const titleRefArr: any[] = []
+    const pushTitle = (el: any) => {
+      titleRefArr.push(el)
+      // console.log(titleRefArr)
+    }
+    if (sect.stream) {
+      return (
+        <div>
+          {/* {console.log(sect.stream)} */}
+          <RenderTokenStream
+            stream={sect.stream}
+            ref={ref}
+            showQuestion={showQuestion}
+            showDiscuss={showDiscuss}
+            // commentOnClickHandler={commentOnClickHandler}
+            // commentIdHandler={commentIdHandler}
+            anchorIdHandler={anchorIdHandler}
+            // pollCommentIdHandler={pollCommentIdHandler}
+            clickPoll={clickPoll}
+          // pushTitle={pushTitle}
+          // titleRef={titleRef ? titleRef(titleRefArr) : null}
+          />
+          {/* {console.log(sect)} */}
+        </div>
+      )
+    }
+    return null
+  },
+)
+RenderSection.displayName = 'RenderSection'
+
+export const RenderCardBody = forwardRef(
+  (
+    {
+      sects,
+      titleRef,
+      showQuestion,
+      commentIdHandler,
+      pollCommentIdHandler,
+      anchorIdHandler,
+      clickPoll,
+      showDiscuss,
+    }: {
+      sects: Section[]
+      titleRef?: (arr: any[]) => void
+      showQuestion?: () => void
+      commentIdHandler?: (commentId: string) => void
+      pollCommentIdHandler: (commentId: string) => void
+      anchorIdHandler: (anchorId: string) => void
+      clickPoll: (commentId: string) => void
+      showDiscuss: () => void
+    },
+    ref,
+  ): JSX.Element => {
+    const myRef = useRef<any[]>([])
+
+    interface PanelArr {
+      content: string
+      panel: boolean
+    }
+    // const [showPanel,setShowPanel]=useState<PanelArr[]>()
+
+    // const showPanelArr:PanelArr[]=[]
+    // const showPanelHandler=(streamContent:string) => {
+
+    //   showPanelArr.push({content:streamContent,panel:true})
+    //   setShowPanel((prev)=>{
+    //     const prevState=prev
+
+    //     prevState?.forEach(el=>{
+
+    //       if(el.content!==streamContent){
+    //       el.panel=false
+    //       }
+
+    //     }
+
+    //     )
+    //     return
+    //   })
+    // }
+
+    // console.log(myRef.current)
     return (
-      <span style={{ color: 'grey' }}>
-        <RenderTokenStream stream={sect.stream} />
-      </span>
+      <>
+        {sects.map((e, i) => (
+          <RenderSection
+            key={i}
+            sect={e}
+            ref={el => (myRef.current[i] = el)}
+            showQuestion={showQuestion}
+            // commentIdHandler={commentIdHandler}
+            anchorIdHandler={anchorIdHandler}
+            pollCommentIdHandler={pollCommentIdHandler}
+            clickPoll={clickPoll}
+            showDiscuss={showDiscuss}
+          />
+        ))}
+        {titleRef && titleRef(myRef.current)}
+      </>
     )
-  }
-  return null
-}
+  },
+)
+RenderCardBody.displayName = 'RenderCardBody'
 
-export function RenderCardBody({ sects }: { sects: Section[] }): JSX.Element {
-  return (
-    <pre>
-      {sects.map((e, i) => (
-        <RenderSection key={i} sect={e} />
-      ))}
-    </pre>
-  )
-}
-
-export function CardBody({ card, bySrc }: { card: CocardFragment; bySrc?: string }): JSX.Element {
-  console.log(card)
+export function CardBody({
+  card,
+  bySrc,
+  cardCommentIdHandler,
+  titleRefHandler,
+  showQuestion,
+  commentIdHandler,
+  pollCommentIdHandler,
+  anchorIdHandler,
+  clickPoll,
+  showDiscuss,
+}: {
+  card: CocardFragment
+  bySrc?: string
+  cardCommentIdHandler: (cardCommentId: string) => void
+  titleRefHandler?: (arr: any[]) => void
+  showQuestion?: () => void
+  commentIdHandler?: (commentId: string) => void
+  pollCommentIdHandler: (commentId: string) => void
+  clickPoll: (commentId: string) => void
+  anchorIdHandler: (anchorId: string) => void
+  showDiscuss: () => void
+}): JSX.Element {
+  // console.log(card)
 
   if (card.body === null) return <p>[Error]: null body</p>
 
@@ -130,13 +515,26 @@ export function CardBody({ card, bySrc }: { card: CocardFragment; bySrc?: string
   const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
   editor.flush({ attachMarkerlinesToTokens: true })
 
+  useEffect(() => {
+    cardCommentIdHandler(card.meta?.commentId)
+  }, [])
+
   return (
-    <>
-      <QueryCommentModal commentId={card.meta.commentId.toString()}>
-        <div>discuss</div>
-      </QueryCommentModal>
-      <RenderCardBody sects={editor.getSections()} />
-    </>
+    // <>
+    //   <QueryCommentModal commentId={card.meta.commentId.toString()}>
+    //     <div>discuss</div>
+    // </QueryCommentModal>
+    <RenderCardBody
+      sects={editor.getSections()}
+      titleRef={titleRefHandler}
+      showQuestion={showQuestion}
+      // commentIdHandler={commentIdHandler}
+      anchorIdHandler={anchorIdHandler}
+      pollCommentIdHandler={pollCommentIdHandler}
+      clickPoll={clickPoll}
+      showDiscuss={showDiscuss}
+    />
+    // </>
   )
 }
 
@@ -165,16 +563,42 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
     meta: null,
     createdAt: null,
   }
+  let cardTitle = card.link.url
+  // ticker的title
+  const cardDomain = card.link.domain
+  if (cardDomain === '_') {
+    cardTitle = cardTitle.slice(2)
+  }
   return (
-    <h1>
-      <div>{/* <Comment comment={comment} /> */}</div>
-      {card.link.url}
+    <div className={classes.header}>
+      {cardDomain === '_' ? (
+        <h1 className={classes.tickerTitle}>{cardTitle}</h1>
+      ) : (
+        <>
+          <span className={classes.author}>author</span>
+          <span className={classes.webName}>{' • ' + 'Youtube' + '\n'}</span>
+          <span className={classes.title}>Title</span>
+          <span className={classes.flexContainer}>
+            <ClockIcon className={classes.clockIcon} />
+            {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}
+            <a className={classes.link} href={cardTitle} target="_blank">
+              <span className={classes.date}>2021-4-9</span>
+              <LinkIcon className={classes.linkIcon} />
+              連結{'\n'}
+            </a>
+          </span>
+        </>
+      )}
+
+      {/* <div><Comment comment={comment} /></div> */}
+      {/* {console.log(card)} */}
+      {/* {cardTitle} */}
       {/* {title && title.text + '\n'} */}
       {/* {publishDate && publishDate.text + '\n'} */}
       {/* {card.link.oauthorName + '\n'} */}
       {/* {'(NEXT)Keywords\n'} */}
       {/* {card.comments.length === 0 ? "新建立" : undefined} */}
-    </h1>
+    </div>
   )
 }
 

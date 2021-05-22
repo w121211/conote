@@ -1,0 +1,12 @@
+@import '../style/global.module.scss';
+
+.icon {
+  :global(.anticon) {
+    // svg {
+    color: $gray-natual;
+    &:hover {
+      color: $gray-hover;
+    }
+    // }
+  }
+}

@@ -7,6 +7,7 @@ import { CardBody } from '../../components/card'
 import { CardForm } from '../../components/card-form'
 import { QueryDataProvider } from '../../components/data-provider'
 import useMe from '../../components/use-me'
+import classes from './card-page.module.scss'
 
 // interface RouteProps extends RouteComponentProps {
 //   me?: QT.me_me
@@ -40,12 +41,14 @@ export function CardFormPage(): JSX.Element | null {
           if (data && data.cocard) {
             const url = `/card?${getCardUrlParam(data.cocard)}`
             return (
-              <CardForm
-                card={data.cocard}
-                onFinish={() => {
-                  router.push(url)
-                }}
-              />
+              <div className={classes.main}>
+                <CardForm
+                  card={data.cocard}
+                  onFinish={() => {
+                    router.push(url)
+                  }}
+                />
+              </div>
             )
           }
           return null

@@ -14,6 +14,6 @@
     "noEmit": true,
     "isolatedModules": true
   },
-  "include": ["src"],
+  "include": ["src", "src/components/pie/.pie.tsx", "src/components/bar/.bar.tsx"],
   "exclude": ["**/__tests__", "**/__deprecated__", "out", "node_modules", "code-intel-extensions", "./build/**/*"]
 }

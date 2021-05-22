@@ -1,0 +1,56 @@
+// @import '../../style/variables.scss';
+.container {
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: $white;
+}
+.outer {
+  position: relative;
+  width: 300px;
+  height: 80%;
+}
+.inner {
+  position: absolute;
+  left: 0;
+  overflow-y: scroll;
+}
+.element {
+  width: 300px;
+  height: 100%;
+}
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  position: relative;
+  padding: 8px 16px;
+
+  text-align: center;
+  font-size: 13px;
+  span {
+    display: block;
+    flex: 1;
+  }
+}
+.underLine {
+  position: relative;
+  // display: flex;
+  height: 4px;
+  margin: 0 16px;
+  .underLineBar {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    background-color: $primary;
+    transition: all 0.3s ease-out;
+    &.left {
+      left: 0;
+      // margin-left: 20px;
+      // justify-items: flex-start;
+    }
+    &.right {
+      left: 50%;
+      // margin-right: 20px;
+      // justify-items: flex-end;
+    }
+  }
+}

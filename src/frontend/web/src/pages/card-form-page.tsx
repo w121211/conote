@@ -7,6 +7,7 @@ import * as queries from '../graphql/queries'
 import { getCardUrlParam, symbolToUrl } from '../helper'
 import { CardBody } from '../components/card'
 import { CardForm } from '../components/card-form'
+import classes from './card-form-page.module.scss'
 
 interface RouteProps extends RouteComponentProps {
   me?: QT.me_me
@@ -20,13 +21,19 @@ function ResolvedCardFormPage({ card }: { card: QT.cocardFragment }): JSX.Elemen
       {/* <Button onClick={() => { setMode('EDIT') }}>編輯</Button> */}
       {/* <Button onClick={() => { setMode('BROWSE') }}>瀏覽</Button> */}
       {mode === 'EDIT' && (
-        <CardForm
-          card={card}
-          // allowedSects={['ticker', 'topic']}
-          onFinishFn={() => {
-            navigate(`/card?${getCardUrlParam(card)}`)
-          }}
-        />
+        <div className={classes.cardOuter}>
+          <div className={classes.cardInner}>
+            <div className={classes.cardElement}>
+              <CardForm
+                card={card}
+                // allowedSects={['ticker', 'topic']}
+                onFinishFn={() => {
+                  navigate(`/card?${getCardUrlParam(card)}`)
+                }}
+              />
+            </div>
+          </div>
+        </div>
       )}
       {mode === 'BROWSE' && <CardBody card={card} />}
     </Layout.Content>

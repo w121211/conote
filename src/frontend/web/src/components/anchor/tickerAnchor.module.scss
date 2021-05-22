@@ -18,3 +18,11 @@
     font-size: $font-sm;
   }
 }
+.anchor {
+  flex-shrink: 0;
+  width: 120px;
+  margin-top: 30px;
+  div {
+    cursor: pointer;
+  }
+}

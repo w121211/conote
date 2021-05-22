@@ -9,6 +9,10 @@ import { AnchorPanel } from './tile-panel'
 import { QueryCommentModal } from './tile'
 import { toUrlParams } from '../helper'
 import { RenderCardBody } from './card'
+import Preview from './preview/preview'
+import classes from './card-form.module.scss'
+// import classes from '../pages/card-page.module.scss'
+import { ReactComponent as SaveIcon } from '../assets/save.svg'
 
 function CardInput() {
   /**
@@ -157,22 +161,50 @@ export function CardForm({ card, onFinishFn }: { card: QT.cocardFragment; onFini
     }
   }
 
+  const [preview, setPreview] = useState(false)
+  const showPreview = () => {
+    setPreview(true)
+  }
+  const handleCancel = () => {
+    setPreview(false)
+  }
+  const [form] = Form.useForm()
+  const onSubmit = () => {
+    form.submit()
+  }
+
   if (card.body === null) return <p>[Error]: null body</p>
 
   return (
     <div>
       {/* {symbolTokens.map((e, i) => <RenderToken key={i} token={e} />)} */}
-      <Form onFinish={onFinish} initialValues={{ input: editor.getBody() }} onValuesChange={onValuesChange}>
-        <Form.Item name="input">
-          <Input.TextArea rows={10} autoSize />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            儲存
-          </Button>
-        </Form.Item>
+      <Form
+        form={form}
+        className={classes.formContainer}
+        onFinish={onFinish}
+        initialValues={{ input: editor.getBody() }}
+        onValuesChange={onValuesChange}
+      >
+        {/* <div className={classesCard.cardOuter}>
+          <div className={classesCard.cardInner}>
+            <div className={classesCard.cardElement}> */}
+        <div className={classes.formItemWrapper}>
+          <Form.Item name="input" className={classes.textAreaContainer}>
+            <Input.TextArea rows={20} />
+          </Form.Item>
+          {/* </div>
+          </div>
+        </div> */}
+        </div>
       </Form>
-      <RenderCardBody sects={sects} />
+      <Form.Item className={classes.buttonContainer}>
+        <Button className={classes.button} type="primary" onClick={showPreview}>
+          <SaveIcon className={classes.saveIcon} />
+        </Button>
+      </Form.Item>
+      <Preview previewVisible={preview} handleCancel={handleCancel} onSubmit={onSubmit}>
+        <RenderCardBody sects={sects} />
+      </Preview>
     </div>
   )
 }

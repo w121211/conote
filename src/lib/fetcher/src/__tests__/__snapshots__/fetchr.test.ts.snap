@@ -1,6 +1,64 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+<<<<<<< HEAD
+exports[`Fetch youtube get meta info 1`] = `
+Object {
+  "authorId": "UCeTEWFsNC3eeUsn9hvsDALQ",
+  "authorName": "老汤美股财经",
+  "description": "会员加入链接 (福利VIP群)：https://www.youtube.com/channel/UCeTEWFsNC3eeUsn9hvsDALQ/join 
+会员福利：
+1）日常更新我的交易和【微牛1万投资挑战】
+2）每日会员社区总结
+3）每月一期Q&A 会员VIP视频
+4）VIP 电报群（回答问题）
+5）股票分析（股票提示）
+
+老李，小楠，番茄和老汤的「终身学习读书会」终于和大家见面啦！
+我们4人会带大家一起读书，一起学习哦～
+「终身学习读书会」= 一年100本经典好书+15-20分钟读书音频+干货总结思维导图！
+通过微信加入：https://pay.weread.com.tw/redirect/bypass/zhongshenxuexi-wx/
+通过网页版加入：https://pay.weread.com.tw/redirect/bypass/zhongshenxuexidushuhui/
+通过FB Messenger加入：https://pay.weread.com.tw/redirect/bypass/zhongshenxuexi-fb/
+** 加入读书会的用户还可以加入到我们的专属读书会Facebook群组 **
+如果遇到任何读书会的问题，可以发邮件到service@vip.weread.tw，客服会尽快为大家解决。
+
+Telegram电报群：https://t.me/joinchat/rJoh6OlfXSIyOWUx
+QQ群：519929958
+工作邮箱：iamlaotang@gmail.com
+
+微牛证券Webull（美国版需要SSN）：https://act.webull.com/kol-us/share.html?hl=eninviteCode=v7cukN9CV8Zj
+用我的链接开户后可获得一支价值在$2.5到$250之间的股票。入金$100后，还可以获得第二支价值$12到$1400的股票哦～
+
+（老虎可以打新哦！）老虎TradeUP（美国版需要SSN）：https://tradeup.marsco.com/accounts?invite=LAOTANG
+开户入金任意金额就可获得抽股票机会2次，价值在$2.50 - $1,000之间。入金最高返现200刀哦～
+
+*免责声明*
+我（老汤）的全部视频都只是我的个人观点，不是投资建议，我的观点可能是错的，大家在做决定前一定要独立思考。我无法为大家的盈利或损失负责。投资有风险，投资需谨慎！
+
+*Disclaimer*
+All my videos are just my own opinions, my opinions could be wrong, my videos are not investment advice, so please make your own decision on any investment, trade, or choice. I am not responsible for your gains or losses. Stock market is risky, so please think twice before you invest.",
+  "domain": "youtube",
+  "keywords": Array [
+    "股票",
+    "美股",
+    "股市",
+    "板块轮动",
+    "传统股",
+    "价值股",
+    "国债收益率",
+  ],
+  "resolvedUrl": "https://www.youtube.com/watch?v=9KUj1174V8w",
+  "srcId": "9KUj1174V8w",
+  "srcPublishDate": "2021-03-21T00:00:00.000Z",
+  "srcTitle": "【新手系列09】板块轮动买什么股票? 10年期美债收益率为何上涨? 换股前必看!【美股分析】(字幕请点CC)",
+  "srcType": "VIDEO",
+}
+`;
+
+exports[`fetch function get fetch url 1`] = `
+=======
 exports[`domain fetch general 1`] = `
+>>>>>>> backend-dev
 Object {
   "domain": "test.com",
   "resolvedUrl": "https://test.com",
@@ -8,7 +66,11 @@ Object {
 }
 `;
 
+<<<<<<< HEAD
+exports[`fetch youtube get meta info 1`] = `
+=======
 exports[`domain fetch youtube 1`] = `
+>>>>>>> backend-dev
 Object {
   "authorId": "UCeTEWFsNC3eeUsn9hvsDALQ",
   "authorName": "老汤美股财经",

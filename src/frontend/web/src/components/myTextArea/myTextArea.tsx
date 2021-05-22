@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, forwardRef, LegacyRef } from 'react'
 import { Input, Button } from 'antd'
 
 import classes from './myTextArea.module.scss'
+import { TextAreaRef } from 'antd/lib/input/TextArea'
 
 const { TextArea } = Input
 
@@ -10,16 +11,16 @@ interface props {
   placeHolder?: string
 }
 
-const MyTextArea: React.FC<props> = (props) => {
+const MyTextArea = (props: props) => {
   const [commentValue, setValue] = useState('')
 
   const [buttonDisable, setButtonState] = useState(true)
 
-  const onChangeHandler = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    let texts = event.target.value
-    setValue(texts)
-    buttonStateHandler(texts)
-  }
+  // const onChangeHandler = () => {
+  //   let texts = event.target.value
+  //   setValue(texts)
+  //   buttonStateHandler(texts)
+  // }
   const buttonStateHandler = (value: string) => {
     if (value == '') {
       setButtonState(true)
@@ -37,9 +38,8 @@ const MyTextArea: React.FC<props> = (props) => {
   const classLister = (oldClass: string) => {
     const classname = [oldClass]
 
-    if (props.size == "sm") classname.push(classes.small)
+    if (props.size == 'sm') classname.push(classes.small)
     return classname.join(' ')
-
   }
 
   return (
@@ -48,8 +48,8 @@ const MyTextArea: React.FC<props> = (props) => {
         className={classes.TextArea}
         placeholder={props.placeHolder ? props.placeHolder : '留言...'}
         autoSize
-        onChange={onChangeHandler}
-
+        // onChange={onChangeHandler}
+        id="commentTextArea"
       />
       <Button type="text" disabled={buttonDisable}>
         送出
@@ -57,7 +57,4 @@ const MyTextArea: React.FC<props> = (props) => {
     </div>
   )
 }
-
 export default MyTextArea
-
-

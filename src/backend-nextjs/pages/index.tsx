@@ -5,6 +5,11 @@ import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
 import { getCardUrlParam } from '../lib/helper'
 import { useLatestCardsQuery, useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
+// import { SearchAllForm } from '../components/search-all-form'
+import SideBar from '../components/sidebar/sidebar'
+import Layout from '../components/layout/layout'
+import useMe from '../components/use-me'
+import classes from './index.module.scss'
 
 function LatestCards(): JSX.Element | null {
   const { data, loading, error, fetchMore } = useLatestCardsQuery({ fetchPolicy: 'cache-and-network' })
@@ -23,34 +28,36 @@ function LatestCards(): JSX.Element | null {
   // }
 
   return (
-    <div>
-      {data.latestCards &&
-        data.latestCards.map((e, i) => (
-          <div key={i}>
-            <Link href={`/card?${getCardUrlParam(e)}`}>{e.link.url.substring(0, 50)}</Link>
+    <>
+      <div>
+        {data.latestCards &&
+          data.latestCards.map((e, i) => (
+            <div key={i}>
+              <Link href={`/card?${getCardUrlParam(e)}`}>{e.link.url.substring(0, 50)}</Link>
+            </div>
+          ))}
+        {hasMore ? (
+          <div>
+            {loading ? (
+              <div>Loading</div>
+            ) : (
+              <button
+                onClick={async () => {
+                  const result = await fetchMore({ variables: { afterId } })
+                  if (result.data.latestCards.length === 0) {
+                    setHasMore(false)
+                  }
+                }}
+              >
+                更多
+              </button>
+            )}
           </div>
-        ))}
-      {hasMore ? (
-        <div>
-          {loading ? (
-            <div>Loading</div>
-          ) : (
-            <button
-              onClick={async () => {
-                const result = await fetchMore({ variables: { afterId } })
-                if (result.data.latestCards.length === 0) {
-                  setHasMore(false)
-                }
-              }}
-            >
-              更多
-            </button>
-          )}
-        </div>
-      ) : (
-        <div>已經到底</div>
-      )}
-    </div>
+        ) : (
+          <div>已經到底</div>
+        )}
+      </div>
+    </>
   )
 }
 
@@ -70,6 +77,17 @@ function HomePage(): JSX.Element {
   }
 
   return <a href="/api/auth/login">Login</a>
+  // return (
+  //   <>
+  //     {/* <SideBar /> */}
+  //     {/* <SearchAllForm /> */}
+  //     {/* <Layout> */}
+  //     <div className={classes.routerPage}>
+  //       <LatestCards />
+  //     </div>
+  //     {/* </Layout> */}
+  //   </>
+  // )
 }
 
 export default HomePage

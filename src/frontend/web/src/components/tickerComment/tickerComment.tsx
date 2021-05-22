@@ -18,13 +18,13 @@ const TickerComment = () => {
     { q: '優劣勢(非必填)', a: ['優勢', '劣勢'] },
   ]
 
-  const radioList = data.map((radio, index) => (
-    <Radio key={index} title={radio.q} buttonText={radio.a} />
-  ))
+  // const radioList = data.map((radio, index) => (
+  //   // <Radio key={index} title={radio.q} buttonText={radio.a} />
+  // ))
 
   return (
     <Block title="對公司的看法">
-      {radioList}
+      {/* {radioList} */}
       <MyTextArea />
       <CommentList />
     </Block>

@@ -9,7 +9,9 @@ import {
   CocardQueryVariables,
 } from '../apollo/query.graphql'
 import { RenderCardBody } from './card'
-
+import Preview from './preview/preview'
+import SaveIcon from '../assets/svg/save.svg'
+import classes from './card-form.module.scss'
 function CardInput() {
   /**
    * 理想（類code-editor）：
@@ -158,22 +160,65 @@ export function CardForm({ card, onFinish }: { card: Cocard; onFinish?: () => vo
     }
   }
 
+  const [preview, setPreview] = useState(false)
+  const showPreview = () => {
+    setPreview(true)
+  }
+  const handleCancel = () => {
+    setPreview(false)
+  }
+  const [form] = Form.useForm()
+  const onSubmit = () => {
+    form.submit()
+  }
+
   if (card.body === null) return <p>[Error]: null body</p>
 
   return (
-    <div>
+    <div className={classes.container}>
       {/* {symbolTokens.map((e, i) => <RenderToken key={i} token={e} />)} */}
-      <Form onFinish={_onFinish} initialValues={{ input: editor.getText() }} onValuesChange={onValuesChange}>
-        <Form.Item name="input">
-          <Input.TextArea rows={10} autoSize />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            儲存
+      <Form
+        form={form}
+        className={classes.formContainer}
+        onFinish={_onFinish}
+        initialValues={{ input: editor.getText() }}
+        onValuesChange={onValuesChange}
+        layout="inline"
+      >
+        {/* <div className={classesCard.cardOuter}>
+          <div className={classesCard.cardInner}>
+            <div className={classesCard.cardElement}> */}
+        <div className={classes.formItemWrapper}>
+          <Form.Item name="input" className={classes.textAreaContainer}>
+            <Input.TextArea rows={20} />
+          </Form.Item>
+          {/* </div>
+          </div>
+        </div> */}
+        </div>
+        <Form.Item className={classes.buttonContainer}>
+          <Button className={classes.button} type="primary" onClick={showPreview}>
+            <SaveIcon className={classes.saveIcon} />
           </Button>
         </Form.Item>
       </Form>
-      <RenderCardBody sects={sects} />
+      <Preview previewVisible={preview} handleCancel={handleCancel} onSubmit={onSubmit}>
+        <RenderCardBody sects={sects} />
+      </Preview>
     </div>
+    // <div>
+    //   {/* {symbolTokens.map((e, i) => <RenderToken key={i} token={e} />)} */}
+    //   <Form onFinish={_onFinish} initialValues={{ input: editor.getText() }} onValuesChange={onValuesChange}>
+    //     <Form.Item name="input">
+    //       <Input.TextArea rows={10} autoSize />
+    //     </Form.Item>
+    //     <Form.Item>
+    //       <Button type="primary" htmlType="submit">
+    //         儲存
+    //       </Button>
+    //     </Form.Item>
+    //   </Form>
+    //   <RenderCardBody sects={sects} />
+    // </div>
   )
 }

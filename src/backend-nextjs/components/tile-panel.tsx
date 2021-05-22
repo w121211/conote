@@ -23,8 +23,24 @@ import {
   useUpdateReplyLikeMutation,
 } from '../apollo/query.graphql'
 import { AnchorLike, AnchorDislike, ReplyLike, ReplyDislike, CommentLike, CommentDislike } from './tile-upndown'
+import classes from './tile-panel.module.scss'
+import CommentIcon from '../assets/svg/message.svg'
 
-export function AnchorPanel({ anchorId, meAuthor }: { anchorId: string; meAuthor: boolean }): JSX.Element {
+export function AnchorPanel({
+  anchorId,
+  anchorIdHandler,
+  commentId,
+  meAuthor,
+  showDiscuss,
+}: // onClickHandler,
+{
+  anchorId: string
+  anchorIdHandler: (anchorId: string) => void
+  commentId?: string
+  meAuthor: boolean
+  showDiscuss: () => void
+  // onClickHandler: (commentId: string | undefined) => void
+}): JSX.Element {
   const [count, setCount] = useState<AnchorCountFragment | null>(null)
   const [createLike] = useCreateAnchorLikeMutation({
     update(cache, { data }) {
@@ -55,12 +71,26 @@ export function AnchorPanel({ anchorId, meAuthor }: { anchorId: string; meAuthor
     },
   })
   const myAnchorLikes = useMyAnchorLikesQuery({ fetchPolicy: 'cache-only' })
+  const commentClickHandler = () => {
+    // setPanel(true)
+    // setCommentTextArea([classes.inlineValue, classes.inlineValueComment])
+    // inlineValueArr.push(classes.inlineValueComment)
+    showDiscuss()
+    anchorIdHandler(anchorId)
+    // const inputElement = document.getElementById('commentTextArea') as HTMLInputElement
+
+    // inputElement.focus()
+    // onClickHandler(commentId)
+    // console.log(commentId)
+  }
 
   const meLike = myAnchorLikes.data?.myAnchorLikes.find(e => e.anchorId.toString() === anchorId)
+
   return (
-    <span>
+    <span className={classes.comment}>
       <AnchorLike {...{ anchorId, count, meLike, createLike, updateLike }} />
       <AnchorDislike {...{ anchorId, count, meLike, createLike, updateLike }} />
+      <CommentIcon className={classes.commentIcon} onClick={commentClickHandler} />
     </span>
   )
   // return (
