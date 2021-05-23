@@ -10,7 +10,7 @@ import {
 } from '../apollo/query.graphql'
 // import useSWR from 'swr'
 
-export default function useMe({
+export function useMe({
   redirectTo,
   redirectIfFound,
 }: {

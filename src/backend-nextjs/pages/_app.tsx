@@ -1,4 +1,5 @@
 import { AppProps } from 'next/app'
+import { UserProvider } from '@auth0/nextjs-auth0'
 import { ApolloProvider } from '@apollo/client'
 import { useApollo } from '../apollo/apollo-client'
 import Layout from '../components/layout/layout'
@@ -9,10 +10,12 @@ export default function App({ Component, pageProps }: AppProps): JSX.Element {
   const apolloClient = useApollo(pageProps.initialApolloState)
 
   return (
-    <ApolloProvider client={apolloClient}>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-    </ApolloProvider>
+    <UserProvider>
+      <ApolloProvider client={apolloClient}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </ApolloProvider>
+    </UserProvider>
   )
 }

@@ -1,4 +1,4 @@
-import { Descendant, BaseEditor } from 'slate'
+import { Descendant, BaseEditor, BaseRange } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
 
@@ -76,8 +76,7 @@ export type CustomText = {
   code?: true
   text: string
 
-  ticker?: true
-  "sect-ticker"?: true
+  type?: string // stream type
 }
 
 export type EmptyText = {
@@ -86,11 +85,16 @@ export type EmptyText = {
 
 export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
+export type CustomRange = BaseRange & {
+  type?: string
+}
+
 declare module 'slate' {
   interface CustomTypes {
     Editor: CustomEditor
     Element: CustomElement
     // Text: CustomText | EmptyText
     Text: CustomText
+    Range: CustomRange
   }
 }

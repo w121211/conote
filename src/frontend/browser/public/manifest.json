@@ -2,12 +2,7 @@
   "manifest_version": 2,
   "name": "Chrome Extension Starter",
   "description": "A Chrome Extension starter kit",
-  "version": "1.0.0",
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> backend-dev
+  "version": "0.1.0",
   "background": {
     "scripts": ["background-script.js"],
     "persistent": false
@@ -20,72 +15,22 @@
     "default_title": "Hello world?"
     // "default_popup": "popup.html"  // 改用bg來叫，開新視窗
   },
-<<<<<<< HEAD
-<<<<<<< HEAD
   // "content_scripts": [
   //   {
   //     "matches": ["<all_urls>"],
   //     "js": ["content-script.js"]
   //   }
   // ],
-=======
-  "browser_action": {
-    "default_icon": "icon-16.png",
-    "default_popup": "popup.html"
-  },
-=======
->>>>>>> 6e31220... add extension
-  "background": {
-    "scripts": ["background-script.js"],
-    "persistent": false
-  },
-<<<<<<< HEAD
->>>>>>> 514adbb... .
-=======
-  "browser_action": {
-    "default_icon": {
-      "16": "icon-16.png",
-      "48": "icon-48.png"
-    },
-    "default_title": "Hello world?"
-    // "default_popup": "popup.html"
-  },
-  // "content_scripts": [
-  //   {
-  //     "matches": ["<all_urls>"],
-  //     "js": ["content-script.js"]
-  //   }
-  // ],
->>>>>>> 6e31220... add extension
-=======
-=======
->>>>>>> backend-dev
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content-script.js"]
-    }
-  ],
-<<<<<<< HEAD
->>>>>>> 807dc66... add nextjs
-=======
->>>>>>> backend-dev
   "icons": {
     "16": "icon-16.png",
     "48": "icon-48.png",
     "128": "icon-128.png"
   },
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-  "permissions": ["storage", "tabs", "http://localhost:4000/"]
-=======
-  "permissions": ["tabs", "activeTab", "notifications", "http://*/", "https://*/"]
->>>>>>> 514adbb... .
-=======
-  "permissions": ["storage", "tabs", "http://localhost:4000/"]
->>>>>>> 6e31220... add extension
-=======
-  "permissions": ["storage", "tabs", "http://localhost:4000/"]
->>>>>>> backend-dev
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+    // "browser_style": true
+  },
+  // 加入api網址 -> 為了CORS
+  "permissions": ["storage", "tabs", "http://localhost:3000/"]
 }

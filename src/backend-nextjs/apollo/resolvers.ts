@@ -1,31 +1,40 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { AuthenticationError, UserInputError } from 'apollo-server-micro'
-import { compare, hash } from 'bcryptjs'
-import * as PA from '@prisma/client'
+// import { compare, hash } from 'bcryptjs'
+import { getSession, Session } from '@auth0/nextjs-auth0'
 import { ResolverContext } from './apollo-client'
 import prisma from '../lib/prisma'
 import { QueryResolvers, MutationResolvers, Cocard, CardTemplate, LikeChoice } from './type-defs.graphqls'
 import { removeTokenCookie } from '../lib/auth-cookies'
-import { setLoginSession, getLoginSession, Session } from '../lib/auth'
+import { setLoginSession, getLoginSession } from '../lib/auth'
 import { searchAllSymbols } from '../lib/search/fuzzy'
 import { urlToSymbol } from '../lib/models/symbol'
 import { getOrCreateLink } from '../lib/models/link'
 import { getOrCreateCardByLink, getOrCreateCardBySymbol } from '../lib/models/card'
 import { createWebCardBody } from '../lib/models/card-body'
 import { deltaLike } from '../lib/helper'
+import { createVote } from '../lib/models/vote'
 
 function _toStringId<T extends { id: number }>(obj: T): T & { id: string } {
   return { ...obj, id: obj.id.toString() }
 }
 
-function isAuthenticated(req: NextApiRequest, res: NextApiResponse): Session {
-  try {
-    return getLoginSession(req)
-  } catch (error) {
-    console.log(error)
-    removeTokenCookie(res)
-    throw new AuthenticationError('')
+// function isLocalAuthenticated(req: NextApiRequest, res: NextApiResponse): Session {
+//   try {
+//     return getLoginSession(req)
+//   } catch (error) {
+//     console.log(error)
+//     removeTokenCookie(res)
+//     throw new AuthenticationError('')
+//   }
+// }
+
+function isAuthenticated(req: NextApiRequest, res: NextApiResponse): { userId: string } {
+  const session = getSession(req, res)
+  if (session?.user && session.user.appUserId) {
+    return { userId: session.user.appUserId }
   }
+  throw new AuthenticationError('')
 }
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
@@ -70,24 +79,36 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     }))
   },
 
-  async cocard(_parent, { url }, _context, _info) {
-    let card: PA.Cocard & {
-      link: PA.Link
-      body: PA.CardBody
+  async link(_parent, { url }, _context, _info) {
+    const link = await prisma.link.findUnique({
+      where: { url },
+    })
+    if (link) return _toStringId(link)
+    return null
+  },
+
+  async cocard(_parent, { url, symbol }, _context, _info) {
+    if (symbol) {
+      const card = await getOrCreateCardBySymbol(symbol)
+      return {
+        ..._toStringId(card),
+        template: card.template as CardTemplate,
+        link: _toStringId(card.link),
+        body: _toStringId(card.body),
+      }
     }
-    const symbol = urlToSymbol(url)
-    if (symbol !== null) {
-      card = await getOrCreateCardBySymbol(symbol)
-    } else {
+    if (url) {
+      // 找不到即創新cocard
       const [link] = await getOrCreateLink(url)
-      card = await getOrCreateCardByLink(link)
+      const card = await getOrCreateCardByLink(link)
+      return {
+        ..._toStringId(card),
+        template: card.template as CardTemplate,
+        link: _toStringId(card.link),
+        body: _toStringId(card.body),
+      }
     }
-    return {
-      ..._toStringId(card),
-      template: card.template as CardTemplate,
-      link: _toStringId(card.link),
-      body: _toStringId(card.body),
-    }
+    throw new Error('Not found')
   },
 
   selfcard(_parent, _args, _context, _info) {
@@ -162,7 +183,10 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   async comment(_parent, { id }, _context, _info) {
     const comment = await prisma.comment.findUnique({
       where: { id: parseInt(id) },
-      include: { count: true, poll: { include: { count: true } } },
+      include: {
+        count: true,
+        poll: { include: { count: true } },
+      },
     })
     if (comment && comment.count && comment.poll && comment.poll.count) {
       return {
@@ -187,7 +211,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       orderBy: { createdAt: 'desc' },
       include: { count: true },
       cursor: afterId ? { id: parseInt(afterId) } : undefined,
-      take: 20,
+      take: 100,
     })
     return replies.map(e => {
       if (e.count) {
@@ -338,10 +362,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   async me(_parent, _args, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
     const user = await prisma.user.findUnique({ where: { id: userId } })
-    if (user) {
-      return user
-    }
-    throw new AuthenticationError('')
+    return user
   },
 
   async myAnchorLikes(_parent, { after }, { req, res }, _info) {
@@ -650,60 +671,54 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   async createVote(_parent, { pollId, choiceIdx }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const vote = await prisma.vote.create({
-      data: {
-        user: { connect: { id: userId } },
-        poll: { connect: { id: parseInt(pollId) } },
-        choiceIdx,
-      },
-    })
+    const vote = await createVote({ choiceIdx, pollId: parseInt(pollId), userId })
     return _toStringId(vote)
   },
 
-  async signIn(_parent, { email, password }, { res }, _info) {
-    console.log(res)
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
-    if (user && (await compare(password, user.password))) {
-      setLoginSession(res, { userId: user.id })
+  // async signIn(_parent, { email, password }, { res }, _info) {
+  //   console.log(res)
+  //   const user = await prisma.user.findUnique({
+  //     where: { email },
+  //   })
+  //   if (user && (await compare(password, user.password))) {
+  //     setLoginSession(res, { userId: user.id })
 
-      console.log(`User ${user.email} sign in succeess`)
+  //     console.log(`User ${user.email} sign in succeess`)
 
-      return { token: 'false-token', user }
-    }
+  //     return { token: 'false-token', user }
+  //   }
 
-    throw new UserInputError('Could not find a match for username and password')
-    // const valid = await compare(password, user.password)
-    // if (!valid) throw new UserInputError('Could not find a match for username and password')
+  //   throw new UserInputError('Could not find a match for username and password')
+  //   // const valid = await compare(password, user.password)
+  //   // if (!valid) throw new UserInputError('Could not find a match for username and password')
 
-    // const token = sign({ userId: user.id }, APP_SECRET)
-    // res.cookie('token', `Bearer ${token}`, {
-    //   httpOnly: true,
-    //   maxAge: 1000 * 60 * 60 * 24,
-    //   // secure: true,  // https only
-    // })
-    // const token = sign({ id: user.id }, APP_SECRET, { algorithm: 'HS256', expiresIn: '1d' })
-  },
+  //   // const token = sign({ userId: user.id }, APP_SECRET)
+  //   // res.cookie('token', `Bearer ${token}`, {
+  //   //   httpOnly: true,
+  //   //   maxAge: 1000 * 60 * 60 * 24,
+  //   //   // secure: true,  // https only
+  //   // })
+  //   // const token = sign({ id: user.id }, APP_SECRET, { algorithm: 'HS256', expiresIn: '1d' })
+  // },
 
-  async signUp(_parent, { email, password }, { res }, _info) {
-    removeTokenCookie(res)
+  // async signUp(_parent, { email, password }, { res }, _info) {
+  //   removeTokenCookie(res)
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: await hash(password, 10),
-        // profile: { create: {} },
-        // dailyProfile: { create: {} },
-      },
-    })
-    return user
-  },
+  //   const user = await prisma.user.create({
+  //     data: {
+  //       email,
+  //       password: await hash(password, 10),
+  //       // profile: { create: {} },
+  //       // dailyProfile: { create: {} },
+  //     },
+  //   })
+  //   return user
+  // },
 
-  signOut(_parent, _args, { res }, _info) {
-    removeTokenCookie(res)
-    return true
-  },
+  // signOut(_parent, _args, { res }, _info) {
+  //   removeTokenCookie(res)
+  //   return true
+  // },
 
   // ------
 

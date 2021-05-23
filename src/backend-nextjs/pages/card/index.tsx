@@ -6,13 +6,12 @@ import { Button } from 'antd'
 import TickerAnchor from '../../components/anchor/tickerAnchor'
 import { CardBody, CardHead } from '../../components/card'
 import Discuss from '../../components/discuss/discuss'
-import useMe from '../../components/use-me'
 import EditIcon from '../../assets/svg/edit.svg'
 import classes from './card-page.module.scss'
 import React, { useEffect, useState, useRef } from 'react'
 
 function CardPage(): JSX.Element {
-  const me = useMe({ redirectTo: '/signin' })
+  // const me = useMe({ redirectTo: '/signin' })
   const router = useRouter()
   const { u, s } = router.query
   const url = u as string

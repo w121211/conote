@@ -1,8 +1,10 @@
 // Ref: https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
 import { useState } from 'react'
 import Link from 'next/link'
+import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
 import { getCardUrlParam } from '../lib/helper'
-import { useLatestCardsQuery } from '../apollo/query.graphql'
+import { useLatestCardsQuery, useMeQuery } from '../apollo/query.graphql'
+import { SearchAllForm } from '../components/search-all-form'
 // import { SearchAllForm } from '../components/search-all-form'
 import SideBar from '../components/sidebar/sidebar'
 import Layout from '../components/layout/layout'
@@ -60,21 +62,34 @@ function LatestCards(): JSX.Element | null {
 }
 
 function HomePage(): JSX.Element {
-  const me = useMe({ redirectTo: '/signin' })
-  if (!me) {
-    return <p>Loading...</p>
-  }
-  return (
-    <>
-      {/* <SideBar /> */}
-      {/* <SearchAllForm /> */}
-      {/* <Layout> */}
-      <div className={classes.routerPage}>
+  const { user, error, isLoading } = useUser()
+  const { data, loading } = useMeQuery()
+
+  if (loading || isLoading) return <h1>Loading</h1>
+
+  if (user && data) {
+    return (
+      <div>
+        Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
         <LatestCards />
       </div>
-      {/* </Layout> */}
-    </>
-  )
+    )
+  }
+
+  return <a href="/api/auth/login">Login</a>
+  // return (
+  //   <>
+  //     {/* <SideBar /> */}
+  //     {/* <SearchAllForm /> */}
+  //     {/* <Layout> */}
+  //     <div className={classes.routerPage}>
+  //       <LatestCards />
+  //     </div>
+  //     {/* </Layout> */}
+  //   </>
+  // )
 }
 
 export default HomePage
+
+// export const getServerSideProps = withPageAuthRequired()

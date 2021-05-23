@@ -3,6 +3,8 @@ import { hash, hashSync } from 'bcryptjs'
 import { PrismaClient, SymbolCat } from '@prisma/client'
 // import omitDeep from 'omit-deep-lodash'
 import { omitUndefined } from '../../lib/editor/src/test-helper'
+import { getBotEmail } from './models/user'
+
 /**
  * See: https://github.com/lodash/lodash/issues/723
  * Recursively remove keys from an object
@@ -40,15 +42,7 @@ export function clean(obj: Record<string, unknown> | null): Record<string, unkno
   return obj === null ? obj : omitUndefined(omitDeep(obj, ['createdAt', 'updatedAt']))
 }
 
-const config = dotenv.config()
-
-if (config.error) throw config.error
-
-if (!config.parsed?.BOT_EMAIL || !config.parsed?.BOT_PASSWORD) {
-  throw new Error('BOT_EMAIL or BOT_PASSWORD not found in .env')
-}
-
-export const BOT = { id: 'bot', email: config.parsed.BOT_EMAIL, password: config.parsed.BOT_PASSWORD }
+export const BOT = { id: 'bot', email: getBotEmail() }
 
 export const TESTUSERS = [
   { id: 'test-user-1', email: 'aaa@aaa.com', password: 'aaa' },
@@ -77,12 +71,14 @@ export const TEST_SYMBOLS = [
 
 export async function createTestUsers(prisma: PrismaClient): Promise<void> {
   await prisma.user.create({
-    data: { id: BOT.id, email: BOT.email, password: await hash(BOT.password, 10) },
+    // data: { id: BOT.id, email: BOT.email, password: await hash(BOT.password, 10) },
+    data: { id: BOT.id, email: BOT.email },
   })
   await prisma.$transaction(
     TESTUSERS.map(e =>
       prisma.user.create({
-        data: { id: e.id, email: e.email, password: hashSync(e.password, 10) },
+        // data: { id: e.id, email: e.email, password: hashSync(e.password, 10) },
+        data: { id: e.id, email: e.email },
       }),
     ),
   )

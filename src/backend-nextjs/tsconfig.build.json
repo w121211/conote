@@ -1,0 +1,40 @@
+{
+  "references": [{ "path": "../lib/editor" }, { "path": "../lib/fetcher" }],
+  "compilerOptions": {
+    // copy from nextjs example: https://github.com/vercel/next.js/blob/canary/examples/with-typescript-eslint-jest/tsconfig.json
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    // "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+
+    // Custom
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    // "module": "commonjs",
+    // "esModuleInterop": true,
+    // "target": "es6",
+    // "lib": ["esnext", "dom", "dom.iterable"],
+    // "allowJs": false,
+    "rootDir": ".",
+    "outDir": "dist"
+  },
+  "exclude": ["node_modules", ".next", "out", "prisma", "test"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+  "ts-node": {
+    // options are overrides used only by ts-node
+    "compilerOptions": {
+      "module": "commonjs",
+      "allowJs": false
+    }
+  }
+}

@@ -72,3 +72,92 @@ export function useApollo(initialState: any): ApolloClient<NormalizedCacheObject
   const store = useMemo(() => initializeApollo(initialState), [initialState])
   return store
 }
+
+// import React from 'react';
+// import { render } from 'react-dom';
+// import { ApolloProvider } from 'react-apollo';
+// import { ApolloClient } from 'apollo-client';
+// import { ApolloLink } from 'apollo-link';
+// import { InMemoryCache } from 'apollo-cache-inmemory';
+// import { HttpLink } from 'apollo-link-http';
+// import { setContext } from 'apollo-link-context';
+// import { CachePersistor } from 'apollo-cache-persist';
+// import createAuth0Client from '@auth0/auth0-spa-js';
+
+// /* Make sure auth0 client is available before AuthProvider gets assigned */
+// createAuth0Client({
+//   domain: /* YOUR DOMAIN */,
+//   client_id:  /* YOUR CLIENT ID */,
+//   audience: /* YOUR AUDIENCE */,
+//   redirect_uri: /* YOUR CALLBACK URL */,
+// }).then((auth0) => {
+//   const auth0Client = auth0;
+
+//   /* Set URI for all Apollo GraphQL requests (backend api) */
+//   const httpLink = new HttpLink({
+//     uri: /* BACKEND API URL */
+//     fetchOptions: { credentials: 'same-origin' },
+//   });
+
+//   /* Set in-memory token to reduce async requests */
+//   let token;
+
+//   /* Create Apollo Link to supply token with either
+//    * in-memory ref or auth0 req'ed token or redirect (built into
+//    * getTokenSilently
+//   */
+//   const withTokenLink = setContext(async () => {
+//     // return token if there
+//     if (token) return { auth0Token: token };
+//     // else check if valid token exists with client already and set if so
+//     const newToken = await auth0Client.getTokenSilently();
+//     token = newToken;
+//     return { auth0Token: newToken };
+//   });
+
+//   /* Create Apollo Link to supply token in auth header with every gql request */
+//   const authLink = setContext((_, { headers, auth0Token }) => ({
+//     headers: {
+//       ...headers,
+//       ...(auth0Token ? { authorization: `Bearer ${auth0Token}` } : {}),
+//     },
+//   }));
+
+//   /* Create Apollo Link array to pass to Apollo Client */
+//   const link = ApolloLink.from([withTokenLink, authLink, httpLink]);
+
+//   /* Set up local cache */
+//   const cache = new InMemoryCache({ fragmentMatcher });
+
+//   /* Create Apollo Client */
+//   const client = new ApolloClient({
+//     link,
+//     cache,
+//   });
+
+//   /* Create persistor to handle persisting data from local storage on refresh, etc */
+//   const persistor = new CachePersistor({ cache, storage: window.localStorage });
+
+//   /* Create root render function */
+//   const renderApp = (Component) => {
+//     render(
+//         <ApolloProvider client={client}>
+//           <AuthenticationProvider
+//             domain="YOUR DOMAIN"
+//             clientId="YOUR CLIENT ID"
+//             audience="YOUR AUDIENCE"
+//             redirectUri="YOUR REDIRECT URI"
+//             auth0Client="AUTH 0 CLIENT CREATED ABOVE"
+//           >
+//             <Component />
+//           </AuthenticationProvider>
+//         </ApolloProvider>,
+//       document.getElementById('root'),
+//     );
+//   };
+
+//   /* Render React App after hydrating from local storage */
+//   persistor.restore().then(() => {
+//     renderApp(App);
+//   });
+// });

@@ -4,9 +4,10 @@
 import * as PA from '@prisma/client'
 import { Editor, DBLinker, Markerline } from '../../../lib/editor/src'
 import prisma from '../prisma'
-import { getBotId } from './user'
 import { getOrCreateCardBySymbol } from './card'
-import { CommentMeta } from './comment'
+import { createComment, CommentMeta } from './comment'
+import { getBotId } from './user'
+import { createOauthorVote } from './vote'
 
 export type CardBodyMeta = Markerline[]
 
@@ -29,7 +30,10 @@ async function createNeatReply(mkln: Markerline, userId: string): Promise<PA.Rep
   const choice = mkln.pollChoices[0]
   let choiceIdx
   for (const e of NEAT_REPLY_CHOICE) {
-    if (e.options.indexOf(choice)) choiceIdx = e.choiceIdx
+    if (e.options.indexOf(choice)) {
+      choiceIdx = e.choiceIdx
+      break
+    }
   }
   if (choiceIdx === undefined) {
     throw new Error('所給的vote-choice非預設的那幾個')
@@ -39,19 +43,19 @@ async function createNeatReply(mkln: Markerline, userId: string): Promise<PA.Rep
   const card = await getOrCreateCardBySymbol(mkln.nestedCard.symbol)
   const editor = new Editor(card.body.text, (card.body.meta as unknown) as Markerline[])
 
-  // TODO: 這裡適用botId找預設的poll ie botId只建立了一個poll
+  // TODO: 這裡用botId找預設的poll <- 因為botId只建立了一個poll => 需要更好的檢查法
   const botId = await getBotId()
   const pollMkln = editor.getMarkerlines().find(e => e.pollId && e.commentId && e.createrId === botId)
-  // .find(async e => e.pollId && e.commentId && e.createrId === (await getBotId()))
-  if (pollMkln === undefined || pollMkln.commentId === undefined) {
+
+  if (pollMkln === undefined || pollMkln.commentId === undefined || pollMkln.pollId === undefined) {
     // console.log(card)
     // console.log(card.body.meta)
-    console.log(editor.getMarkerlines())
+    // console.log(editor.getMarkerlines())
     throw new Error('卡片中找不到預設poll')
   }
 
   // 創reply
-  return await prisma.reply.create({
+  const reply = await prisma.reply.create({
     data: {
       text: `${mkln.str} ^[[${mkln.src}:${mkln.stampId}]]`,
       user: { connect: { id: userId } },
@@ -61,8 +65,15 @@ async function createNeatReply(mkln: Markerline, userId: string): Promise<PA.Rep
     },
   })
 
-  // TODO: 創vote
-  // prisma.vote.create()
+  // 創vote
+  createOauthorVote({
+    choiceIdx,
+    pollId: pollMkln.pollId,
+    oauthorName: mkln.oauthor,
+    userId,
+  })
+
+  return reply
 }
 
 export async function createCardBody(
@@ -80,11 +91,8 @@ export async function createCardBody(
       // 創anchor
       const anchor = await prisma.anchor.create({
         data: {
-          // user: { connect: { email: userEmail } },
           user: { connect: { id: userId } },
           cocard: { connect: { id: card.id } },
-          // cocard: isOcard(card) ? undefined : { connect: { id: card.id } },
-          // ocard: isOcard(card) ? { connect: { id: card.id } } : undefined,
           count: { create: {} },
           path: e.stampId,
         },
@@ -92,38 +100,24 @@ export async function createCardBody(
 
       // 創comment, poll, reply, shortcut-reply
       let commentId, pollId, replyId
-      if (e.poll && e.pollChoices && e.marker?.value) {
-        const comment = await prisma.comment.create({
-          data: {
-            meta: ({ inCardIds: [card.id] } as CommentMeta) as any,
-            text: e.marker?.value,
-            user: { connect: { id: userId } },
-            count: { create: {} },
-            poll: {
-              create: {
-                choices: e.pollChoices,
-                user: { connect: { id: userId } },
-                count: { create: {} },
-              },
-            },
-          },
-          include: { poll: true },
-        })
-        commentId = comment.id
-        pollId = comment.poll?.id
-      } else if (e.comment && e.marker?.value) {
-        const comment = await prisma.comment.create({
-          data: {
-            meta: ({ inCardIds: [card.id] } as CommentMeta) as any,
-            text: e.marker?.value,
-            user: { connect: { id: userId } },
-            count: { create: {} },
-          },
-        })
-        commentId = comment.id
-      } else if (e.neatReply) {
+
+      if (e.neatReply) {
         const reply = await createNeatReply(e, userId)
         replyId = reply.id
+      } else {
+        // Checking value
+        if (!e.marker?.value) throw new Error()
+        if (e.poll && !e.pollChoices) throw new Error()
+
+        const comment = await createComment(
+          userId,
+          e.marker?.value,
+          { inCardIds: [card.id] } as CommentMeta,
+          e.pollChoices,
+        )
+
+        commentId = comment.id
+        if ('poll' in comment) pollId = comment.poll?.id
       }
 
       dict[e.stampId] = { createrId: userId, anchorId: anchor.id, commentId, pollId, replyId }

@@ -41,14 +41,14 @@ export function symbolToUrl(symbolName: string): string {
   return `//${parsed.name}`
 }
 
-export function encodeSymbol(symbol: string, cat: QT.SymbolCat) {
-  if (cat === SymbolCat.Ticker) {
-    return symbol
-  }
-  if (cat === SymbolCat.Topic) {
-    return `[[${symbol.replace(' ', '_')}]]`
-  }
-}
+// export function encodeSymbol(symbol: string, cat: QT.SymbolCat) {
+//   if (cat === SymbolCat.Ticker) {
+//     return symbol
+//   }
+//   if (cat === SymbolCat.Topic) {
+//     return `[[${symbol.replace(' ', '_')}]]`
+//   }
+// }
 
 export function getCardUrlParam(card: CocardFragment): string {
   let params: string

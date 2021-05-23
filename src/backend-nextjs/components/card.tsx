@@ -106,7 +106,7 @@ const RenderTokenStream = forwardRef(
                     // pollCommentIdHandler={pollCommentIdHandler}
                     clickPoll={clickPoll}
                     showDiscuss={showDiscuss}
-                    // commentId={commentId}
+                  // commentId={commentId}
                   />
                 )
               })}
@@ -126,7 +126,7 @@ const RenderTokenStream = forwardRef(
                   // pollCommentIdHandler={pollCommentIdHandler}
                   clickPoll={clickPoll}
                   showDiscuss={showDiscuss}
-                  // commentId={commentId}
+                // commentId={commentId}
                 />
               )
             })
@@ -316,7 +316,7 @@ const RenderTokenStream = forwardRef(
               anchorIdHandler={anchorIdHandler}
               meAuthor={false}
               showDiscuss={showDiscuss}
-              // commentMouseUpHandler={commentMouseUpHandler}
+            // commentMouseUpHandler={commentMouseUpHandler}
             />
           ) : null
         const src =
@@ -366,17 +366,17 @@ const RenderSection = forwardRef(
       clickPoll,
       showDiscuss,
     }: // commentId
-    {
-      sect: Section
-      titleRef?: (arr: any[]) => void
-      showQuestion?: () => void
-      commentIdHandler?: (commentId: string) => void
-      pollCommentIdHandler: (commentId: string) => void
-      clickPoll: (commentId: string) => void
-      anchorIdHandler: (anchorId: string) => void
-      showDiscuss: () => void
-      // commentId:string
-    },
+      {
+        sect: Section
+        titleRef?: (arr: any[]) => void
+        showQuestion?: () => void
+        commentIdHandler?: (commentId: string) => void
+        pollCommentIdHandler: (commentId: string) => void
+        clickPoll: (commentId: string) => void
+        anchorIdHandler: (anchorId: string) => void
+        showDiscuss: () => void
+        // commentId:string
+      },
     ref,
   ): JSX.Element | null => {
     const titleRefArr: any[] = []
@@ -398,8 +398,8 @@ const RenderSection = forwardRef(
             anchorIdHandler={anchorIdHandler}
             // pollCommentIdHandler={pollCommentIdHandler}
             clickPoll={clickPoll}
-            // pushTitle={pushTitle}
-            // titleRef={titleRef ? titleRef(titleRefArr) : null}
+          // pushTitle={pushTitle}
+          // titleRef={titleRef ? titleRef(titleRefArr) : null}
           />
           {/* {console.log(sect)} */}
         </div>

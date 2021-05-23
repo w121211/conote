@@ -1,17 +1,198 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Parser tokenize to sections 1`] = `
+exports[`Card grammar tokenize list 1`] = `
 Array [
   Object {
-    "breaker": undefined,
-    "nestedCard": undefined,
+    "content": Array [
+      Object {
+        "content": "[111]",
+        "length": 5,
+        "type": "line-mark",
+      },
+      "
+",
+      Object {
+        "content": "aaa
+- bbb
+- ccc
+",
+        "length": 16,
+        "type": "list-value",
+      },
+      Object {
+        "content": Array [
+          "ddd",
+        ],
+        "length": 3,
+        "type": "line-value",
+      },
+      "
+",
+      Object {
+        "content": "eee
+- fff
+- ggg",
+        "length": 15,
+        "type": "list-value",
+      },
+    ],
+    "length": 41,
+    "type": "multiline-marker",
+  },
+  "
+
+",
+  Object {
+    "content": Array [
+      Object {
+        "content": "[222]",
+        "length": 5,
+        "type": "line-mark",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          "- hhh",
+        ],
+        "length": 5,
+        "type": "line-value",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          "- iii",
+        ],
+        "length": 5,
+        "type": "line-value",
+      },
+      "
+",
+      Object {
+        "content": "jjj
+- kkk",
+        "length": 9,
+        "type": "list-value",
+      },
+    ],
+    "length": 27,
+    "type": "multiline-marker",
+  },
+  "
+",
+]
+`;
+
+exports[`Card grammar tokenize vote-choice 1`] = `
+Array [
+  Object {
+    "content": Array [
+      Object {
+        "content": "[111]",
+        "length": 5,
+        "type": "inline-mark",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "content": "<AAA>",
+            "length": 5,
+            "type": "vote-chocie",
+          },
+          Object {
+            "content": "<BBB>",
+            "length": 5,
+            "type": "vote-chocie",
+          },
+        ],
+        "length": 10,
+        "type": "inline-value",
+      },
+    ],
+    "length": 15,
+    "type": "inline-marker",
+  },
+]
+`;
+
+exports[`Card grammar tokenize vote-choice 2`] = `
+Array [
+  Object {
+    "content": Array [
+      Object {
+        "content": "[111]",
+        "length": 5,
+        "type": "inline-mark",
+      },
+      Object {
+        "content": Array [
+          " ",
+          Object {
+            "content": "<AAA>",
+            "length": 5,
+            "type": "vote-chocie",
+          },
+          " ",
+          Object {
+            "content": "<BBB>",
+            "length": 5,
+            "type": "vote-chocie",
+          },
+        ],
+        "length": 12,
+        "type": "inline-value",
+      },
+    ],
+    "length": 17,
+    "type": "inline-marker",
+  },
+]
+`;
+
+exports[`Card grammar tokenize vote-choice 3`] = `
+Array [
+  Object {
+    "content": Array [
+      Object {
+        "content": "[111]",
+        "length": 5,
+        "type": "inline-mark",
+      },
+      Object {
+        "content": Array [
+          " ",
+          Object {
+            "content": "<AAA>",
+            "length": 5,
+            "type": "vote-chocie",
+          },
+          " ",
+          Object {
+            "content": "<BBB>",
+            "length": 5,
+            "type": "vote-chocie",
+          },
+          " CCC",
+        ],
+        "length": 16,
+        "type": "inline-value",
+      },
+    ],
+    "length": 21,
+    "type": "inline-marker",
+  },
+]
+`;
+
+exports[`Parser tokenizeSection() 1`] = `
+Array [
+  Object {
     "root": true,
     "stream": Array [
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[~]",
             "length": 3,
             "linenumber": 0,
@@ -21,7 +202,6 @@ Array [
             "type": "inline-mark",
           },
           Object {
-            "alias": undefined,
             "content": Array [
               " aaa",
             ],
@@ -41,10 +221,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[?]",
             "length": 3,
             "linenumber": 1,
@@ -56,10 +234,8 @@ Array [
           "
 ",
           Object {
-            "alias": undefined,
             "content": Array [
               Object {
-                "alias": undefined,
                 "content": "<買>",
                 "length": 3,
                 "linenumber": 2,
@@ -67,7 +243,6 @@ Array [
               },
               " vs ",
               Object {
-                "alias": undefined,
                 "content": "<賣>",
                 "length": 3,
                 "linenumber": 2,
@@ -90,10 +265,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[+]",
             "length": 3,
             "linenumber": 3,
@@ -110,10 +283,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[-]",
             "length": 3,
             "linenumber": 4,
@@ -128,35 +299,24 @@ Array [
         "type": "inline-marker",
       },
     ],
-    "ticker": undefined,
-    "topic": undefined,
   },
 ]
 `;
 
-exports[`Parser tokenize to sections 2`] = `
+exports[`Parser tokenizeSection() 2`] = `
 Array [
   Object {
-    "breaker": undefined,
-    "nestedCard": undefined,
-    "root": undefined,
     "stream": Array [],
-    "ticker": undefined,
-    "topic": undefined,
   },
   Object {
-    "breaker": undefined,
     "nestedCard": Object {
-      "oauthor": undefined,
       "symbol": "$AAA",
     },
-    "root": undefined,
     "stream": Array [
       Object {
         "alias": "sect-ticker",
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "$AAA",
             "length": 4,
             "linenumber": 0,
@@ -170,10 +330,8 @@ Array [
         "type": "sect-ticker-begin-line",
       },
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[=]",
             "length": 3,
             "linenumber": 1,
@@ -190,10 +348,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[?]",
             "length": 3,
             "linenumber": 2,
@@ -205,11 +361,9 @@ Array [
           "
 ",
           Object {
-            "alias": undefined,
             "content": Array [
               "- ",
               Object {
-                "alias": undefined,
                 "content": "<買>",
                 "length": 3,
                 "linenumber": 3,
@@ -217,7 +371,6 @@ Array [
               },
               " vs ",
               Object {
-                "alias": undefined,
                 "content": "<賣>",
                 "length": 3,
                 "linenumber": 3,
@@ -240,10 +393,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[+]",
             "length": 3,
             "linenumber": 4,
@@ -260,10 +411,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[-]",
             "length": 3,
             "linenumber": 5,
@@ -281,21 +430,16 @@ Array [
 ",
     ],
     "ticker": true,
-    "topic": undefined,
   },
   Object {
-    "breaker": undefined,
     "nestedCard": Object {
-      "oauthor": undefined,
       "symbol": "[[TOPIC]]",
     },
-    "root": undefined,
     "stream": Array [
       Object {
         "alias": "sect-topic",
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "
 [[TOPIC]]",
             "length": 10,
@@ -310,10 +454,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[=]",
             "length": 3,
             "linenumber": 8,
@@ -330,10 +472,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[?]",
             "length": 3,
             "linenumber": 9,
@@ -343,7 +483,6 @@ Array [
             "type": "inline-mark",
           },
           Object {
-            "alias": undefined,
             "content": Array [
               "買 vs 賣？",
             ],
@@ -363,10 +502,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[+]",
             "length": 3,
             "linenumber": 10,
@@ -383,10 +520,8 @@ Array [
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[-]",
             "length": 3,
             "linenumber": 11,
@@ -403,22 +538,17 @@ Array [
       "
 ",
     ],
-    "ticker": undefined,
     "topic": true,
   },
   Object {
-    "breaker": undefined,
     "nestedCard": Object {
-      "oauthor": undefined,
       "symbol": "$BBB",
     },
-    "root": undefined,
     "stream": Array [
       Object {
         "alias": "sect-ticker",
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "
 $BBB",
             "length": 5,
@@ -433,10 +563,8 @@ $BBB",
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[=]",
             "length": 3,
             "linenumber": 14,
@@ -453,10 +581,8 @@ $BBB",
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[?]",
             "length": 3,
             "linenumber": 15,
@@ -466,7 +592,6 @@ $BBB",
             "type": "inline-mark",
           },
           Object {
-            "alias": undefined,
             "content": Array [
               "買 vs 賣？",
             ],
@@ -486,10 +611,8 @@ $BBB",
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[+]",
             "length": 3,
             "linenumber": 16,
@@ -506,10 +629,8 @@ $BBB",
       "
 ",
       Object {
-        "alias": undefined,
         "content": Array [
           Object {
-            "alias": undefined,
             "content": "[-]",
             "length": 3,
             "linenumber": 17,
@@ -525,7 +646,947 @@ $BBB",
       },
     ],
     "ticker": true,
-    "topic": undefined,
+  },
+]
+`;
+
+exports[`Parser tokenizeSection() 3`] = `
+Array [
+  Object {
+    "stream": Array [],
+  },
+  Object {
+    "nestedCard": Object {
+      "symbol": "$IPOE",
+    },
+    "stream": Array [
+      Object {
+        "alias": "sect-ticker",
+        "content": Array [
+          Object {
+            "content": "$IPOE",
+            "length": 5,
+            "linenumber": 0,
+            "type": "sect-symbol",
+          },
+          "
+",
+        ],
+        "length": 6,
+        "linenumber": 0,
+        "type": "sect-ticker-begin-line",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "content": "[*]",
+            "length": 3,
+            "linenumber": 1,
+            "marker": Object {
+              "key": "[*]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[SPAC]]",
+                "length": 8,
+                "linenumber": 2,
+                "type": "topic",
+              },
+            ],
+            "length": 8,
+            "linenumber": 2,
+            "marker": Object {
+              "key": "[*]",
+              "value": "[[SPAC]]",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "預計合併對象：",
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 3,
+                "type": "topic",
+              },
+              "，合併日未定",
+            ],
+            "length": 21,
+            "linenumber": 3,
+            "marker": Object {
+              "key": "[*]",
+              "value": "預計合併對象：[[SoFi]]，合併日未定",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 34,
+        "linenumber": 1,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 4,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "inline-mark",
+          },
+          Object {
+            "content": Array [
+              Object {
+                "content": "<買>",
+                "length": 3,
+                "linenumber": 4,
+                "type": "vote-chocie",
+              },
+              " 看好",
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 4,
+                "type": "topic",
+              },
+              "，但對投資",
+              Object {
+                "content": "$IPOE",
+                "length": 5,
+                "linenumber": 4,
+                "type": "ticker",
+              },
+              "仍要小心合併失敗風險",
+            ],
+            "length": 34,
+            "linenumber": 4,
+            "marker": Object {
+              "key": "[?]",
+              "value": "<買> 看好[[SoFi]]，但對投資$IPOE仍要小心合併失敗風險",
+            },
+            "type": "inline-value",
+          },
+        ],
+        "length": 37,
+        "linenumber": 4,
+        "type": "inline-marker",
+      },
+      "
+",
+    ],
+    "ticker": true,
+  },
+  Object {
+    "nestedCard": Object {
+      "symbol": "[[SoFi]]",
+    },
+    "stream": Array [
+      Object {
+        "alias": "sect-topic",
+        "content": Array [
+          Object {
+            "content": "
+[[SoFi]]",
+            "length": 9,
+            "linenumber": 5,
+            "type": "sect-symbol",
+          },
+        ],
+        "length": 9,
+        "linenumber": 5,
+        "type": "sect-topic",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[*]",
+            "length": 3,
+            "linenumber": 7,
+            "marker": Object {
+              "key": "[*]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[Social Finance]]",
+                "length": 18,
+                "linenumber": 8,
+                "type": "topic",
+              },
+            ],
+            "length": 18,
+            "linenumber": 8,
+            "marker": Object {
+              "key": "[*]",
+              "value": "[[Social Finance]]",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "2011創立，資金來源是史丹佛校友提供",
+            ],
+            "length": 19,
+            "linenumber": 9,
+            "marker": Object {
+              "key": "[*]",
+              "value": "2011創立，資金來源是史丹佛校友提供",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 42,
+        "linenumber": 7,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[業務]",
+            "length": 4,
+            "linenumber": 10,
+            "marker": Object {
+              "key": "[業務]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "本來的業務是線上",
+              Object {
+                "content": "[[學生貸款]]",
+                "length": 8,
+                "linenumber": 11,
+                "type": "topic",
+              },
+              Object {
+                "content": "[[轉貸]]",
+                "length": 6,
+                "linenumber": 11,
+                "type": "topic",
+              },
+              "：以較市場低的利率放貸給史丹佛的學生(",
+              Object {
+                "content": "[[P2P]]",
+                "length": 7,
+                "linenumber": 11,
+                "type": "topic",
+              },
+              "的",
+              Object {
+                "content": "[[貸款]]",
+                "length": 6,
+                "linenumber": 11,
+                "type": "topic",
+              },
+              "業務)",
+            ],
+            "length": 58,
+            "linenumber": 11,
+            "marker": Object {
+              "key": "[業務]",
+              "value": "本來的業務是線上[[學生貸款]][[轉貸]]：以較市場低的利率放貸給史丹佛的學生([[P2P]]的[[貸款]]業務)",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "衍伸業務涵蓋一般商銀的",
+              Object {
+                "content": "[[個人金融業務]]",
+                "length": 10,
+                "linenumber": 12,
+                "type": "topic",
+              },
+            ],
+            "length": 21,
+            "linenumber": 12,
+            "marker": Object {
+              "key": "[業務]",
+              "value": "衍伸業務涵蓋一般商銀的[[個人金融業務]]",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "居於中間人：連接銀行、清算公司和終端消費者，以收取交易服務費",
+            ],
+            "length": 30,
+            "linenumber": 13,
+            "marker": Object {
+              "key": "[業務]",
+              "value": "居於中間人：連接銀行、清算公司和終端消費者，以收取交易服務費",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "提供金融相關的基礎建設給其他",
+              Object {
+                "content": "[[fintech]]",
+                "length": 11,
+                "linenumber": 14,
+                "type": "topic",
+              },
+              "公司",
+            ],
+            "length": 27,
+            "linenumber": 14,
+            "marker": Object {
+              "key": "[業務]",
+              "value": "提供金融相關的基礎建設給其他[[fintech]]公司",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 144,
+        "linenumber": 10,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[最新]",
+            "length": 4,
+            "linenumber": 15,
+            "marker": Object {
+              "key": "[最新]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "2021/3宣布併購區域性銀行",
+            ],
+            "length": 15,
+            "linenumber": 16,
+            "marker": Object {
+              "key": "[最新]",
+              "value": "2021/3宣布併購區域性銀行",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "預計與",
+              Object {
+                "content": "[[SPAC]]",
+                "length": 8,
+                "linenumber": 17,
+                "type": "topic",
+              },
+              Object {
+                "content": "$IPOE",
+                "length": 5,
+                "linenumber": 17,
+                "type": "ticker",
+              },
+              "合併上市，合併日未定",
+            ],
+            "length": 26,
+            "linenumber": 17,
+            "marker": Object {
+              "key": "[最新]",
+              "value": "預計與[[SPAC]]$IPOE合併上市，合併日未定",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 47,
+        "linenumber": 15,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[+]",
+            "length": 3,
+            "linenumber": 18,
+            "marker": Object {
+              "key": "[+]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "和其他",
+              Object {
+                "content": "[[金融科技]]",
+                "length": 8,
+                "linenumber": 19,
+                "type": "topic",
+              },
+              "公司相比，產品線完整許多",
+            ],
+            "length": 23,
+            "linenumber": 19,
+            "marker": Object {
+              "key": "[+]",
+              "value": "和其他[[金融科技]]公司相比，產品線完整許多",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "併購區域性銀行後，加速銀行牌照申請 -> 瓜分銀行本體業務(金融服務) -> 可直接賺取存貸利差 -> 幫助獲利成長",
+            ],
+            "length": 58,
+            "linenumber": 20,
+            "marker": Object {
+              "key": "[+]",
+              "value": "併購區域性銀行後，加速銀行牌照申請 -> 瓜分銀行本體業務(金融服務) -> 可直接賺取存貸利差 -> 幫助獲利成長",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "會員人數維持高度增長",
+            ],
+            "length": 10,
+            "linenumber": 21,
+            "marker": Object {
+              "key": "[+]",
+              "value": "會員人數維持高度增長",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "大環境的[數位錢包]]趨勢快速成長",
+            ],
+            "length": 17,
+            "linenumber": 22,
+            "marker": Object {
+              "key": "[+]",
+              "value": "大環境的[數位錢包]]趨勢快速成長",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "一站式服務 -> 會員黏著度高 -> 有效提高會員單位營收貢獻",
+            ],
+            "length": 31,
+            "linenumber": 23,
+            "marker": Object {
+              "key": "[+]",
+              "value": "一站式服務 -> 會員黏著度高 -> 有效提高會員單位營收貢獻",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 147,
+        "linenumber": 18,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 24,
+            "marker": Object {
+              "key": "[-]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "超過80%營收來自",
+              Object {
+                "content": "[[貸款]]",
+                "length": 6,
+                "linenumber": 25,
+                "type": "topic",
+              },
+              "相關業務，但美國持續處低",
+              Object {
+                "content": "[[利率]]",
+                "length": 6,
+                "linenumber": 25,
+                "type": "topic",
+              },
+            ],
+            "length": 33,
+            "linenumber": 25,
+            "marker": Object {
+              "key": "[-]",
+              "value": "超過80%營收來自[[貸款]]相關業務，但美國持續處低[[利率]]",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 26,
+                "type": "topic",
+              },
+              "宣稱2021會員可帶來交叉銷售，提高",
+              Object {
+                "content": "[[金融服務]]",
+                "length": 8,
+                "linenumber": 26,
+                "type": "topic",
+              },
+              "和",
+              Object {
+                "content": "[[金融基礎建設]]",
+                "length": 10,
+                "linenumber": 26,
+                "type": "topic",
+              },
+              "的收入比重",
+            ],
+            "length": 50,
+            "linenumber": 26,
+            "marker": Object {
+              "key": "[-]",
+              "value": "[[SoFi]]宣稱2021會員可帶來交叉銷售，提高[[金融服務]]和[[金融基礎建設]]的收入比重",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "競爭激烈",
+            ],
+            "length": 4,
+            "linenumber": 27,
+            "marker": Object {
+              "key": "[-]",
+              "value": "競爭激烈",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "$PYPL",
+                "length": 5,
+                "linenumber": 28,
+                "type": "ticker",
+              },
+              ", ",
+              Object {
+                "content": "$SQ",
+                "length": 3,
+                "linenumber": 28,
+                "type": "ticker",
+              },
+              "為市場領導者",
+            ],
+            "length": 16,
+            "linenumber": 28,
+            "marker": Object {
+              "key": "[-]",
+              "value": "$PYPL, $SQ為市場領導者",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "投資平台",
+              Object {
+                "content": "[[robin hood]]",
+                "length": 14,
+                "linenumber": 29,
+                "type": "topic",
+              },
+              "、",
+              Object {
+                "content": "[[eToro]]",
+                "length": 9,
+                "linenumber": 29,
+                "type": "topic",
+              },
+              "最近也要上市",
+            ],
+            "length": 34,
+            "linenumber": 29,
+            "marker": Object {
+              "key": "[-]",
+              "value": "投資平台[[robin hood]]、[[eToro]]最近也要上市",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 145,
+        "linenumber": 24,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 30,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 31,
+                "type": "topic",
+              },
+              "是否能靠以貸款為基礎的生態圈突破重圍?",
+            ],
+            "length": 27,
+            "linenumber": 31,
+            "marker": Object {
+              "key": "[?]",
+              "value": "[[SoFi]]是否能靠以貸款為基礎的生態圈突破重圍?",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 31,
+        "linenumber": 30,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[vs]",
+            "length": 4,
+            "linenumber": 32,
+            "marker": Object {
+              "key": "[vs]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[Cash App]]",
+                "length": 12,
+                "linenumber": 33,
+                "type": "topic",
+              },
+              "、",
+              Object {
+                "content": "[[Venmo]]",
+                "length": 9,
+                "linenumber": 33,
+                "type": "topic",
+              },
+            ],
+            "length": 22,
+            "linenumber": 33,
+            "marker": Object {
+              "key": "[vs]",
+              "value": "[[Cash App]]、[[Venmo]]",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 34,
+                "type": "topic",
+              },
+              "商業模式聚焦在提供個人",
+              Object {
+                "content": "[[金融服務]]",
+                "length": 8,
+                "linenumber": 34,
+                "type": "topic",
+              },
+              "的封閉圈{{以會員為中心，完整的金融商品如：房貸、信貸、車貸、信用卡、存款、投資}}",
+            ],
+            "length": 69,
+            "linenumber": 34,
+            "marker": Object {
+              "key": "[vs]",
+              "value": "[[SoFi]]商業模式聚焦在提供個人[[金融服務]]的封閉圈{{以會員為中心，完整的金融商品如：房貸、信貸、車貸、信用卡、存款、投資}}",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "$SQ",
+                "length": 3,
+                "linenumber": 35,
+                "type": "ticker",
+              },
+            ],
+            "length": 3,
+            "linenumber": 35,
+            "marker": Object {
+              "key": "[vs]",
+              "value": "$SQ",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 36,
+                "type": "topic",
+              },
+              "和",
+              Object {
+                "content": "$SQ",
+                "length": 3,
+                "linenumber": 36,
+                "type": "ticker",
+              },
+              "的商業模式相像，都以創造封閉式生態提高會員黏著度，也都朝",
+              Object {
+                "content": "[[數位銀行]]",
+                "length": 8,
+                "linenumber": 36,
+                "type": "topic",
+              },
+              "發展",
+            ],
+            "length": 50,
+            "linenumber": 36,
+            "marker": Object {
+              "key": "[vs]",
+              "value": "[[SoFi]]和$SQ的商業模式相像，都以創造封閉式生態提高會員黏著度，也都朝[[數位銀行]]發展",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "目標市場有些許差別：",
+              Object {
+                "content": "$SQ",
+                "length": 3,
+                "linenumber": 37,
+                "type": "ticker",
+              },
+              "以小企業金融服務為主 vs ",
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 37,
+                "type": "topic",
+              },
+              "以個人金融服務為主",
+            ],
+            "length": 44,
+            "linenumber": 37,
+            "marker": Object {
+              "key": "[vs]",
+              "value": "目標市場有些許差別：$SQ以小企業金融服務為主 vs [[SoFi]]以個人金融服務為主",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "規模：",
+              Object {
+                "content": "$SQ",
+                "length": 3,
+                "linenumber": 38,
+                "type": "ticker",
+              },
+              "會員人數6,000萬人 vs ",
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 38,
+                "type": "topic",
+              },
+              "180萬",
+            ],
+            "length": 33,
+            "linenumber": 38,
+            "marker": Object {
+              "key": "[vs]",
+              "value": "規模：$SQ會員人數6,000萬人 vs [[SoFi]]180萬",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "管理層：",
+              Object {
+                "content": "$SQ",
+                "length": 3,
+                "linenumber": 39,
+                "type": "ticker",
+              },
+              "的Jack Dorsey (",
+              Object {
+                "content": "$TWTR",
+                "length": 5,
+                "linenumber": 39,
+                "type": "ticker",
+              },
+              "的CEO) vs ",
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 39,
+                "type": "topic",
+              },
+              "的Anthony Noto (",
+              Object {
+                "content": "$TWTR",
+                "length": 5,
+                "linenumber": 39,
+                "type": "ticker",
+              },
+              "的前COO)",
+            ],
+            "length": 69,
+            "linenumber": 39,
+            "marker": Object {
+              "key": "[vs]",
+              "value": "管理層：$SQ的Jack Dorsey ($TWTR的CEO) vs [[SoFi]]的Anthony Noto ($TWTR的前COO)",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 301,
+        "linenumber": 32,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 40,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "inline-mark",
+          },
+          Object {
+            "content": Array [
+              " ",
+              Object {
+                "content": "<多>",
+                "length": 3,
+                "linenumber": 40,
+                "type": "vote-chocie",
+              },
+              " ",
+              Object {
+                "content": "[[SoFi]]",
+                "length": 8,
+                "linenumber": 40,
+                "type": "topic",
+              },
+              "但對投資",
+              Object {
+                "content": "$IPOE",
+                "length": 5,
+                "linenumber": 40,
+                "type": "ticker",
+              },
+              "仍要小心合併失敗風險",
+            ],
+            "length": 32,
+            "linenumber": 40,
+            "marker": Object {
+              "key": "[?]",
+              "value": "<多> [[SoFi]]但對投資$IPOE仍要小心合併失敗風險",
+            },
+            "type": "inline-value",
+          },
+        ],
+        "length": 35,
+        "linenumber": 40,
+        "type": "inline-marker",
+      },
+    ],
+    "topic": true,
   },
 ]
 `;
