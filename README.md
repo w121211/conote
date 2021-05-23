@@ -26,8 +26,6 @@ kubectl describe ingress
 # 如果出現 <error: endpoints "default-http-backend" not found>，表示沒安裝
 # 用helm安裝ingress
 helm install --namespace kube-system nginx ingress-nginx --repo https://kubernetes.github.io/ingress-nginx
-
-
 ```
 
 Okteto: deploy k8s online

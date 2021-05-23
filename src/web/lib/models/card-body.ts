@@ -84,6 +84,7 @@ export async function createCardBody(
 ): Promise<PA.CardBody> {
   const dict: Record<string, DBLinker> = {} // { [marker]: DBLinker }
 
+  // TODO: 要用batch
   for (const e of editor.getMarkerlines()) {
     // TODO: 對於編輯過的marker也需要處理（？）
     if (e.new && e.stampId) {
@@ -104,7 +105,7 @@ export async function createCardBody(
       if (e.neatReply) {
         const reply = await createNeatReply(e, userId)
         replyId = reply.id
-      } else {
+      } else if (e.poll) {
         // Checking value
         if (!e.marker?.value) throw new Error()
         if (e.poll && !e.pollChoices) throw new Error()
@@ -117,10 +118,14 @@ export async function createCardBody(
         )
 
         commentId = comment.id
-        if ('poll' in comment) pollId = comment.poll?.id
+        if ('poll' in comment) {
+          pollId = comment.poll?.id
+        }
       }
 
       dict[e.stampId] = { createrId: userId, anchorId: anchor.id, commentId, pollId, replyId }
+
+      console.log('markerline created')
     }
   }
 
@@ -180,9 +185,4 @@ export async function createWebCardBody(cocardId: number, text: string, userId: 
 
   // 必須在最後才創root-card，不然markerlines的new標記會被刪除，因為已經儲存
   return await createCardBody(card, editor, userId)
-  // try {
-  //   return await createCardBody(card, editor, userId)
-  // } catch (err) {
-  //   console.error(err)
-  // }
 }

@@ -9,5 +9,5 @@ deploy:
   - cd k8s && kustomize edit set image conote-backend=okteto.dev/conote-backend:${OKTETO_GIT_COMMIT}
   - kubectl apply -k k8s
 devs:
-  - frontend/web/okteto.yml
-  - backend/okteto.yml
+  - web/okteto.yml
+  # - backend/okteto.yml

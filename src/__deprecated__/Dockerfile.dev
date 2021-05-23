@@ -18,14 +18,15 @@ WORKDIR /workspace/lib/editor
 # COPY package.json package-lock.json ./client/
 RUN yarn
 
-FROM base AS web-dev
+FROM base AS backend-dev
 
-WORKDIR /workspace/web
+WORKDIR /workspace/backend
 RUN yarn
 
-# FROM base AS frontend-dev
-# WORKDIR /workspace/frontend/web
-# RUN yarn
+FROM base AS frontend-dev
+
+WORKDIR /workspace/frontend/web
+RUN yarn
 
 FROM frontend-dev AS frontend-build
 

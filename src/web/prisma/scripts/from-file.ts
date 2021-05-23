@@ -8,8 +8,8 @@ import { PrismaClient } from '@prisma/client'
 import { splitByUrl, Editor, Markerline } from '../../../lib/editor/src'
 import { FetchClient } from '../../../lib/fetcher/src'
 import { getOrCreateLink } from '../../lib/models/link'
-import { getOrCreateCardBySymbol, getOrCreateCardByLink } from '../../lib/models/card'
-import { createCardBody, createWebCardBody } from '../../lib/models/card-body'
+import { getOrCreateCardByLink } from '../../lib/models/card'
+import { createWebCardBody } from '../../lib/models/card-body'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
 
 // const config = dotenv.config({ path: resolve(process.cwd(), '.env.local') })
