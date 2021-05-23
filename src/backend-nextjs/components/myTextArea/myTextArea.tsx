@@ -19,7 +19,7 @@ const MyTextArea = forwardRef((props: props, ref) => {
 
   const [buttonDisable, setButtonState] = useState(true)
   const textAreaRef = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
-  console.log(textAreaRef)
+  // console.log(textAreaRef)
   useImperativeHandle(ref, () => ({
     focus: () => textAreaRef?.current?.focus(),
   }))

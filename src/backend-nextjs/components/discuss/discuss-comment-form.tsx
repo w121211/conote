@@ -41,6 +41,7 @@ export const CommentForm = forwardRef(
     const meCommentId = switchTab ? commentId : pollCommentId
     const { data: commentsData, loading: commentsLoading, error: commentsError } = useCommentQuery({
       variables: { id: meCommentId },
+      fetchPolicy: 'cache-first',
     })
     //   const { data: myVotesData, loading, error } = useMyVotesQuery({ fetchPolicy: 'cache-only' })
     //   const meVote = myVotesData?.myVotes.find(e => e.pollId === Number(commentsData?.comment?.poll?.id))

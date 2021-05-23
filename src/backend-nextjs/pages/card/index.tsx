@@ -70,7 +70,7 @@ function CardPage(): JSX.Element {
 
   const showDiscuss = () => {
     setDiscuss(true)
-    console.log(textRef.current)
+    // console.log(textRef.current)
     if (textRef) textRef.current?.focus()
   }
 
@@ -110,7 +110,7 @@ function CardPage(): JSX.Element {
                       router.push(url)
                     }}
                   >
-                    {console.log(url)}
+                    {/* {console.log(url)} */}
                     <EditIcon className={classes.editIcon} />
                   </Button>
                   {/* <button

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { SubmitErrorHandler, SubmitHandler, useForm, useFieldArray } from 'react-hook-form'
-import { useRepliesQuery, Reply, useCommentQuery } from '../../apollo/query.graphql'
+import { useRepliesQuery, Reply, useCommentQuery, ReplyFragment } from '../../apollo/query.graphql'
 import { List } from 'antd'
 // import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
 // import * as QT from '../../graphql/query-types'
@@ -40,33 +40,42 @@ const CommentList = ({
   type,
   commentId,
   pollCommentId,
+  switchTab,
 }: {
   type?: string
   commentId: string
-  pollCommentId?: string
+  pollCommentId: string
+  switchTab: boolean
 }) => {
-  //如果有poll的commentid replies query 的 variable 要輸入pollCommentId
-
-  const { data: commentsData, loading: commentsLoading, error: commentsError } = useCommentQuery({
-    variables: { id: commentId },
-  })
+  //   const [repliesList,setRepliesList]=useState<Array<({
+  //     __typename?: 'Reply';
+  // } & ReplyFragment)>>()
+  const meCommentId = switchTab ? commentId : pollCommentId
 
   const { data: repliesData, loading: repliesLoading, error: repliesError } = useRepliesQuery({
     // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
-    variables: { commentId },
+    variables: { commentId: meCommentId },
+    fetchPolicy: 'cache-first',
   })
+  // useEffect(() => {
+  //   if(repliesData&&!repliesLoading){
+  //     setRepliesList(repliesData.replies)
+  //   }
+  // },[])
 
-  const { register, handleSubmit } = useForm<FormValues>()
-  // const {fields}=useFieldArray()
+  // const { register, handleSubmit } = useForm<FormValues>()
+  // // const {fields}=useFieldArray()
 
-  const onSubmit: SubmitHandler<FormValues> = (data, e) => {
-    console.log(data, e)
-  }
-  const onError: SubmitErrorHandler<FormValues> = (data, e) => {
-    console.log(data, e)
-  }
+  // const onSubmit: SubmitHandler<FormValues> = (data, e) => {
+  //   console.log(data, e)
+  // }
+  // const onError: SubmitErrorHandler<FormValues> = (data, e) => {
+  //   console.log(data, e)
+  // }
 
   const repliesLength = repliesData?.replies.length
+
+  // const loadMore = () => {}
 
   return (
     // <>
@@ -89,13 +98,7 @@ const CommentList = ({
       className={classes.List}
       size="small"
       itemLayout="vertical"
-      // header={`討論`}
-      // pagination={{
-      //   onChange: page => {
-      //     // console.log(page)
-      //   },
-      //   pageSize: 5,
-      // }}
+      // loadMore={loadMore}
       rowKey={item => item.id}
       dataSource={repliesData?.replies}
       // footer={
@@ -123,7 +126,7 @@ const CommentList = ({
           //   </li>
           // </>
           // ) : (
-          <li className={classes.commentRoot}>
+          <li className={classes.commentRoot} onClick={}>
             <CommentTemplate
               id={item.id}
               content={item.text}
