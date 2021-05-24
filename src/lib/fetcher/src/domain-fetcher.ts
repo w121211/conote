@@ -16,6 +16,7 @@ export const youtube: DomainFetchFunction = async function (url) {
   // } catch (error) {
   //     console.log(error.response.body)
   // }
+  console.log('~~~')
   const resp = await got.get('https://youtube.com/get_video_info', {
     searchParams: { video_id: vid },
     // cache: keyv,

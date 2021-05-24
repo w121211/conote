@@ -40,11 +40,12 @@ export async function fetch(url: string): Promise<FetchResult> {
   const parsed = parseUrl(url)
 
   let fetched: FetchResult
-  if (parsed.domain === 'www.youtube.com') {
-    fetched = await domainFetcher.youtube(parsed.url)
-  } else {
-    fetched = await domainFetcher.general(parsed.url, parsed.domain)
-  }
+  // if (parsed.domain === 'www.youtube.com') {
+  //   fetched = await domainFetcher.youtube(parsed.url)
+  // } else {
+  //   fetched = await domainFetcher.general(parsed.url, parsed.domain)
+  // }
+  fetched = await domainFetcher.general(parsed.url, parsed.domain)
   return fetched
 }
 

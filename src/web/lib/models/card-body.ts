@@ -19,12 +19,12 @@ const NEAT_REPLY_CHOICE = [
 async function createNeatReply(mkln: Markerline, userId: string): Promise<PA.Reply> {
   // 適用條件：在webcard裡幫oauther針對某個symbol的快速投票 -> 必須有投票
   if (!mkln.neatReply) throw new Error('非neatReply')
-  if (!mkln.src) throw new Error('缺src')
-  if (!mkln.stampId) throw new Error('缺stampId')
-  if (!mkln.pollChoices) throw new Error('缺pollChoices')
-  if (mkln.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1')
-  if (!mkln.nestedCard) throw new Error('缺nestedCard')
-  if (!mkln.oauthor) throw new Error('缺oauthor')
+  if (!mkln.src) throw new Error('缺src，無法創neat-reply')
+  if (!mkln.stampId) throw new Error('缺stampId，無法創neat-reply')
+  if (!mkln.pollChoices) throw new Error('缺pollChoices，無法創neat-reply')
+  if (mkln.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1，無法創neat-reply')
+  if (!mkln.nestedCard) throw new Error('缺nestedCard，無法創neat-reply')
+  if (!mkln.oauthor) throw new Error('缺oauthor，無法創neat-reply')
 
   // neat-reply的choice需是預設的幾個
   const choice = mkln.pollChoices[0]
@@ -41,7 +41,7 @@ async function createNeatReply(mkln: Markerline, userId: string): Promise<PA.Rep
 
   // 取得卡片，找到對應的comment-id, poll-id
   const card = await getOrCreateCardBySymbol(mkln.nestedCard.symbol)
-  const editor = new Editor(card.body.text, (card.body.meta as unknown) as Markerline[])
+  const editor = new Editor(card.body.text, card.body.meta as unknown as Markerline[])
 
   // TODO: 這裡用botId找預設的poll <- 因為botId只建立了一個poll => 需要更好的檢查法
   const botId = await getBotId()
@@ -136,7 +136,7 @@ export async function createCardBody(
   if (cardBodyId) {
     return await prisma.cardBody.update({
       data: {
-        meta: (editor.getMarkerlines() as CardBodyMeta) as any,
+        meta: editor.getMarkerlines() as CardBodyMeta as any,
         text: editor.getText(),
       },
       where: { id: cardBodyId },
@@ -144,7 +144,7 @@ export async function createCardBody(
   } else {
     return await prisma.cardBody.create({
       data: {
-        meta: (editor.getMarkerlines() as CardBodyMeta) as any,
+        meta: editor.getMarkerlines() as CardBodyMeta as any,
         text: editor.getText(),
         user: { connect: { id: userId } },
         cocard: { connect: { id: card.id } },
@@ -155,16 +155,17 @@ export async function createCardBody(
 }
 
 export async function createWebCardBody(cocardId: number, text: string, userId: string): Promise<PA.CardBody> {
-  // 創web-card
+  /** 創web-card */
   const card = await prisma.cocard.findUnique({ where: { id: cocardId }, include: { body: true, link: true } })
-  if (card === null) throw new Error(`找不到cocard: id=${cocardId}`)
-  if (card.link.oauthorName === null) throw new Error(`web-card需要有oauthor`)
+
+  if (card === null) throw new Error(`找不到cocard: where id=${cocardId}`)
+  // if (card.link.oauthorName === null) throw new Error(`web-card需要有oauthor`)
 
   const editor = new Editor(
     card.body.text,
-    (card.body.meta as unknown) as Markerline[],
+    card.body.meta as unknown as Markerline[],
     card.linkUrl,
-    card.link.oauthorName,
+    card.link.oauthorName ?? undefined,
   )
   editor.setText(text)
   editor.flush()
@@ -174,7 +175,7 @@ export async function createWebCardBody(cocardId: number, text: string, userId: 
     const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
     const nestedEditor = new Editor(
       nestedCard.body.text,
-      (nestedCard.body.meta as unknown) as Markerline[],
+      nestedCard.body.meta as unknown as Markerline[],
       // card.linkUrl,
       // card.link.oauthorName,
     )

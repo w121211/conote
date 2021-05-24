@@ -1,14 +1,14 @@
+import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/router'
+import { Button } from 'antd'
 import { symbolToUrl, getCardUrlParam } from '../../lib/helper'
 import { CocardQuery, useCocardQuery } from '../../apollo/query.graphql'
 import { QueryDataProvider } from '../../components/data-provider'
-import { Button } from 'antd'
 import TickerAnchor from '../../components/anchor/tickerAnchor'
 import { CardBody, CardHead } from '../../components/card'
 import Discuss from '../../components/discuss/discuss'
 import EditIcon from '../../assets/svg/edit.svg'
 import classes from './card-page.module.scss'
-import React, { useEffect, useState, useRef } from 'react'
 
 function CardPage(): JSX.Element {
   // const me = useMe({ redirectTo: '/signin' })
@@ -16,6 +16,7 @@ function CardPage(): JSX.Element {
   const { u, s } = router.query
   const url = u as string
   const symbol = s as string
+
   const [Question, setQuestion] = useState(false)
   const [discuss, setDiscuss] = useState(true)
   const [cardCommentId, setCardCommentId] = useState('')
@@ -73,10 +74,10 @@ function CardPage(): JSX.Element {
     if (textRef) textRef.current?.focus()
   }
 
-  function _render(url: string): JSX.Element {
+  function _render({ url, symbol }: { url?: string; symbol?: string }): JSX.Element {
     return (
       <QueryDataProvider
-        useQuery={() => useCocardQuery({ variables: { url } })}
+        useQuery={() => useCocardQuery({ variables: { url, symbol } })}
         render={(data: CocardQuery) => {
           if (data && data.cocard) {
             const url = `/card/form?${getCardUrlParam(data.cocard)}`
@@ -141,11 +142,11 @@ function CardPage(): JSX.Element {
   }
 
   if (url) {
-    return _render(url)
+    return _render({ url })
   }
   if (symbol) {
     try {
-      return _render(symbolToUrl(symbol))
+      return _render({ symbol })
     } catch {
       return <h1>Symbol format error</h1>
     }
