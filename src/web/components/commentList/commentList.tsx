@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { SubmitErrorHandler, SubmitHandler, useForm, useFieldArray } from 'react-hook-form'
 import { useRepliesQuery, Reply, useCommentQuery, ReplyFragment } from '../../apollo/query.graphql'
 import { List } from 'antd'
@@ -41,41 +41,15 @@ const CommentList = ({
   commentId,
   pollCommentId,
   switchTab,
-  anchorHLHandler,
-  myScrollIntoView,
 }: {
   type?: string
   commentId: string
   pollCommentId: string
   switchTab: boolean
-  anchorHLHandler: (anchorId: string) => void
-  myScrollIntoView: () => void
 }) => {
   //   const [repliesList,setRepliesList]=useState<Array<({
   //     __typename?: 'Reply';
   // } & ReplyFragment)>>()
-  const myRef = useRef<HTMLLIElement>(null)
-
-  const onClickHandler = (e: any, anchorId: string) => {
-    anchorHLHandler(anchorId)
-    myScrollIntoView()
-
-    // const highLight = document.getElementsByClassName('highLight')
-    // highLight && highLight[0].scrollIntoView()
-  }
-
-  const handleClickOutside = (e: any) => {
-    if (myRef.current && !myRef.current.contains(e.target)) {
-      anchorHLHandler('')
-    }
-  }
-
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside, true)
-    return () => {
-      document.removeEventListener('click', handleClickOutside, true)
-    }
-  })
   const meCommentId = switchTab ? commentId : pollCommentId
 
   const { data: repliesData, loading: repliesLoading, error: repliesError } = useRepliesQuery({
@@ -83,8 +57,6 @@ const CommentList = ({
     variables: { commentId: meCommentId },
     fetchPolicy: 'cache-first',
   })
-
-  const repliesLength = repliesData?.replies.length
   // useEffect(() => {
   //   if(repliesData&&!repliesLoading){
   //     setRepliesList(repliesData.replies)
@@ -100,6 +72,8 @@ const CommentList = ({
   // const onError: SubmitErrorHandler<FormValues> = (data, e) => {
   //   console.log(data, e)
   // }
+
+  const repliesLength = repliesData?.replies.length
 
   // const loadMore = () => {}
 
@@ -152,7 +126,7 @@ const CommentList = ({
           //   </li>
           // </>
           // ) : (
-          <li className={classes.commentRoot} ref={myRef} onClick={e => onClickHandler(e, item.text.slice(0, 3))}>
+          <li className={classes.commentRoot} onClick={}>
             <CommentTemplate
               id={item.id}
               content={item.text}
