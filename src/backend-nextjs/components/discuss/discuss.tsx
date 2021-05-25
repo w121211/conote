@@ -24,6 +24,8 @@ const Discuss = forwardRef(
       pollClick,
       discussClickLHandler,
       discussClickRHandler,
+      anchorHLHandler,
+      myScrollIntoView,
     }: {
       switchTab: boolean
       commentId: string
@@ -33,6 +35,8 @@ const Discuss = forwardRef(
       pollClick: string
       discussClickLHandler: () => void
       discussClickRHandler: () => void
+      anchorHLHandler: (clickedAnchorId: string) => void
+      myScrollIntoView: () => void
     },
     ref,
   ) => {
@@ -88,7 +92,13 @@ const Discuss = forwardRef(
         <div className={classes.outer} style={{ height: `calc(100vh - ${bounds.height}px)` }}>
           <div className={classes.inner}>
             <div className={classes.element} style={{ height: `calc(100vh - ${bounds.height}px)` }}>
-              <CommentList commentId={cardCommentId} pollCommentId={pollClick} switchTab={switchTab} />
+              <CommentList
+                commentId={cardCommentId}
+                pollCommentId={pollClick}
+                switchTab={switchTab}
+                anchorHLHandler={anchorHLHandler}
+                myScrollIntoView={myScrollIntoView}
+              />
             </div>
           </div>
         </div>
