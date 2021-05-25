@@ -8,11 +8,11 @@ spec:
   rules:
     - http:
         paths:
+          - path: /api
+            backend:
+              serviceName: conote-backend
+              servicePort: 4000
           - path: /
             backend:
-              serviceName: conote-nextjs
-              servicePort: 3000
-          # - path: /
-          #   backend:
-          #     serviceName: conote-frontend
-          #     servicePort: 80
+              serviceName: conote-frontend
+              servicePort: 80
