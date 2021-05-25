@@ -4,16 +4,16 @@ metadata:
   name: conote
 build:
   artifacts:
-    - image: conote-web
+    - image: conote-frontend
       context: .
       docker:
         dockerfile: Dockerfile
-        target: web
-    # - image: conote-backend
-    #   context: .
-    #   docker:
-    #     dockerfile: Dockerfile
-    #     target: backend
+        target: frontend
+    - image: conote-backend
+      context: .
+      docker:
+        dockerfile: Dockerfile
+        target: backend
 deploy:
   # helm:
   #   releases:

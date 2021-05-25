@@ -1,8 +1,0 @@
-import React, { forwardRef, useRef, useState } from 'react'
-import useMeasure from 'react-use-measure'
-import CommentList from '../components/commentList/commentList'
-import MyTextArea from '../components/myTextArea/myTextArea'
-import classes from './discuss-page.module.scss'
-
-const Discuss = () => {
-  const [discuss, setDiscuss] = useState('l
