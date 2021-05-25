@@ -75,6 +75,7 @@ function CardPage(): JSX.Element {
   }
 
 <<<<<<< HEAD:src/web/pages/card/index.tsx
+<<<<<<< HEAD:src/web/pages/card/index.tsx
   const anchorHLHandler = (clickedAnchorId: string) => {
     setAnchorIdHL(clickedAnchorId)
     // console.log(clickedAnchorId)
@@ -93,6 +94,8 @@ function CardPage(): JSX.Element {
   
   function _render({ url, symbol }: { url?: string; symbol?: string }): JSX.Element {
 =======
+=======
+>>>>>>> parent of acc302c (5/25):src/backend-nextjs/pages/card/index.tsx
   function _render(url: string): JSX.Element {
 >>>>>>> parent of acc302c (5/25):src/backend-nextjs/pages/card/index.tsx
     return (
