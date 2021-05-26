@@ -10,6 +10,8 @@
 // }
 
 .black {
+  scroll-margin: 150px;
+
   margin: 0;
   /* display: inline-block; */
   color: #2c4460;
@@ -264,11 +266,13 @@ h1.tickerTitle {
       visibility: visible;
     }
   }
+  // &:before {
+  //   content: '\2202';
+  // }
   // a {
   //   color: black;
   // }
   :global(.highLight) {
-    scroll-margin: 150px;
     background-color: #ffd036;
   }
 }

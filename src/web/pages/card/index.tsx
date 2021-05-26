@@ -9,6 +9,7 @@ import { CardBody, CardHead } from '../../components/card'
 import Discuss from '../../components/discuss/discuss'
 import EditIcon from '../../assets/svg/edit.svg'
 import classes from './card-page.module.scss'
+import { CardMeta } from '../../lib/models/card'
 
 function CardPage(): JSX.Element {
   // const me = useMe({ redirectTo: '/signin' })
@@ -93,7 +94,11 @@ function CardPage(): JSX.Element {
 
   // cardRef && console.log(cardRef)
 
+<<<<<<< HEAD
   
+=======
+  // function _render(url: string): JSX.Element {
+>>>>>>> frontend-dev2
   function _render({ url, symbol }: { url?: string; symbol?: string }): JSX.Element {
     return (
       <QueryDataProvider
@@ -101,7 +106,7 @@ function CardPage(): JSX.Element {
         render={(data: CocardQuery) => {
           if (data && data.cocard) {
             const url = `/card/form?${getCardUrlParam(data.cocard)}`
-
+            // console.log((data.cocard.meta as CardMeta).commentId)
             return (
               <div className={classes.main}>
                 <div className={classes.mainInner}>
@@ -148,7 +153,7 @@ function CardPage(): JSX.Element {
                   switchTab={discuss}
                   discussClickLHandler={discussClickLHandler}
                   discussClickRHandler={discussClickRHandler}
-                  cardCommentId={cardCommentId}
+                  cardCommentId={(data.cocard.meta as CardMeta).commentId.toString()}
                   commentId={commentId}
                   anchorId={anchorId}
                   pollCommentId={pollCommentId}

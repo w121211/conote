@@ -119,16 +119,12 @@ export const CommentForm = forwardRef(
         })
       }
 
-      if (values.text && switchTab === false) {
+      if (values.text && !switchTab) {
         createReply({
           variables: {
             commentId: meCommentId,
             data: {
-              text: `${
-                commentsData?.comment?.poll?.choices[values.votes]
-                  ? commentsData?.comment?.poll?.choices[values.votes]
-                  : ''
-              }${values.text}`,
+              text: `${commentsData?.comment?.poll?.choices[values.votes]}${values.text}`,
             },
           },
         })
