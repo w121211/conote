@@ -170,7 +170,8 @@ const RenderTokenStream = forwardRef(
       // }
       case 'vote-chocie':
         return (
-          <button>
+          // <button>
+          <>
             {/* {console.log(stream)} */}
             {stream.content}
             {/* <RenderTokenStream
@@ -179,7 +180,8 @@ const RenderTokenStream = forwardRef(
               showQuestion={showQuestion}
               commentIdHandler={commentIdHandler}
             /> */}
-          </button>
+          </>
+          // </button>
         )
 
       case 'sect-symbol':
@@ -233,7 +235,7 @@ const RenderTokenStream = forwardRef(
         )
       case 'inline-value':
       case 'line-value': {
-        if (stream.markerline?.poll && !stream.markerline.commentId) {
+        if (stream.markerline?.poll && stream.markerline.commentId) {
           return (
             // <QueryCommentModal commentId={stream.markerline.commentId.toString()}>
             // <button onClick={showQuestion}>
@@ -271,7 +273,7 @@ const RenderTokenStream = forwardRef(
           // return <PollChoices pollId={'10'} choices={['aaa', 'bbb']} />
           return (
             // <QueryCommentModal id={stream.markerline.commentId.toString()}>
-            <>
+            <li className={classes.inlineValue}>
               <RenderTokenStream
                 stream={stream.content}
                 ref={ref}
@@ -287,7 +289,7 @@ const RenderTokenStream = forwardRef(
               />
               {/* {stream.markerline && commentIdHandler(stream.markerline.commentId.toString())} */}
               {/* {stream.markerline && anchorIdHandler(stream.markerline.anchorId.toString())} */}
-            </>
+            </li>
             // {/* </QueryCommentModal> */}
           )
         }
@@ -309,22 +311,20 @@ const RenderTokenStream = forwardRef(
           )
         }
         return (
-          <li className={classes.inlineValue}>
-            {console.log(stream.content)}
-            <RenderTokenStream
-              stream={stream.content}
-              ref={ref}
-              showQuestion={showQuestion}
-              commentIdHandler={commentIdHandler}
-              anchorIdHandler={anchorIdHandler}
-              // pollCommentIdHandler={pollCommentIdHandler}
-              clickPoll={clickPoll}
-              showDiscuss={showDiscuss}
-              anchorIdHL={anchorIdHL}
-              highLightClassName={highLightClassName}
-              hlElementHandler={hlElementHandler}
-            />
-          </li>
+          // {/* {console.log(stream.content)} */}
+          <RenderTokenStream
+            stream={stream.content}
+            ref={ref}
+            showQuestion={showQuestion}
+            commentIdHandler={commentIdHandler}
+            anchorIdHandler={anchorIdHandler}
+            // pollCommentIdHandler={pollCommentIdHandler}
+            clickPoll={clickPoll}
+            showDiscuss={showDiscuss}
+            anchorIdHL={anchorIdHL}
+            highLightClassName={highLightClassName}
+            hlElementHandler={hlElementHandler}
+          />
         )
       }
 
@@ -523,7 +523,10 @@ export const RenderCardBody = forwardRef(
             key={i}
             sect={e}
             // ref={el => {return (myRef?.current?.anchorRef[i] = el.anchorRef)}}
-            ref={el => (myRef.current[i] = el)}
+            ref={el => {
+              console.log(el)
+              myRef.current[i] = el
+            }}
             showQuestion={showQuestion}
             // commentIdHandler={commentIdHandler}
             anchorIdHandler={anchorIdHandler}
@@ -607,6 +610,7 @@ export const CardBody = forwardRef(
     )
   },
 )
+CardBody.displayName = 'CardBody'
 
 export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
   // const title = findOneComment(MARKER_FORMAT.srcTitle.mark, card.comments)

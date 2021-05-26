@@ -17,7 +17,7 @@
     "jsx": "preserve"
   },
   "exclude": ["node_modules", ".next", "out", "prisma", "test"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "components/discuss/.discuss-poll-form.tsx"],
   "ts-node": {
     // options are overrides used only by ts-node
     "compilerOptions": {

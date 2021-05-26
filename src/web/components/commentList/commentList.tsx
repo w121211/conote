@@ -76,7 +76,7 @@ const CommentList = ({
       document.removeEventListener('click', handleClickOutside, true)
     }
   })
-  const meCommentId = switchTab ? commentId : pollCommentId
+  const meCommentId = switchTab && commentId ? commentId : pollCommentId
 
   const { data: repliesData, loading: repliesLoading, error: repliesError } = useRepliesQuery({
     // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
