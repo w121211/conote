@@ -584,10 +584,6 @@ export const CardBody = forwardRef(
     const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
     editor.flush({ attachMarkerlinesToTokens: true })
 
-    useEffect(() => {
-      cardCommentIdHandler(card.meta?.commentId)
-    })
-
     return (
       // <>
       //   <QueryCommentModal commentId={card.meta.commentId.toString()}>
