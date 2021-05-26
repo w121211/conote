@@ -12,32 +12,34 @@ export const fetcher: Record<string, (url: string, domain?: string) => Promise<F
     const domain = 'youtube'
     const u = new URL(url)
     const vid = new URLSearchParams(u.search).get('v')
-    // try {
-    // const resp = await got.get('https://youtube.com/get_video_info', { searchParams: { video_id: vid } })
-    // } catch (error) {
-    //     console.log(error.response.body)
-    // }
-    const resp = await got.get('https://youtube.com/get_video_info', {
-      searchParams: { video_id: vid },
-      // cache: keyv,
-    })
-    const p = new URLSearchParams(resp.body).get('player_response')
-    if (p) {
-      const j = JSON.parse(p)
-      return {
-        domain,
-        // TODO: 可能會有redirect, short-url
-        resolvedUrl: url,
-        srcType: SrcType.VIDEO,
-        srcId: vid ?? '',
-        srcTitle: j.microformat.playerMicroformatRenderer.title.simpleText,
-        srcPublishDate: new Date(j.microformat.playerMicroformatRenderer.publishDate).toISOString(),
-        authorId: j.microformat.playerMicroformatRenderer.externalChannelId,
-        authorName: j.microformat.playerMicroformatRenderer.ownerChannelName,
-        keywords: j.videoDetails.keywords,
-        description: j.videoDetails.shortDescription,
-      }
+
+    try {
+      const resp = await got.get('https://youtube.com/get_video_info', { searchParams: { video_id: vid } })
+    } catch (error) {
+      console.log(error.response.body)
     }
+
+    // const resp = await got.get('https://youtube.com/get_video_info', {
+    //   searchParams: { video_id: vid },
+    //   // cache: keyv,
+    // })
+    // const p = new URLSearchParams(resp.body).get('player_response')
+    // if (p) {
+    //   const j = JSON.parse(p)
+    //   return {
+    //     domain,
+    //     // TODO: 可能會有redirect, short-url
+    //     resolvedUrl: url,
+    //     srcType: SrcType.VIDEO,
+    //     srcId: vid ?? '',
+    //     srcTitle: j.microformat.playerMicroformatRenderer.title.simpleText,
+    //     srcPublishDate: new Date(j.microformat.playerMicroformatRenderer.publishDate).toISOString(),
+    //     authorId: j.microformat.playerMicroformatRenderer.externalChannelId,
+    //     authorName: j.microformat.playerMicroformatRenderer.ownerChannelName,
+    //     keywords: j.videoDetails.keywords,
+    //     description: j.videoDetails.shortDescription,
+    //   }
+    // }
     throw new Error(`youtube fetcher failed: ${url}`)
   },
 

@@ -46,6 +46,8 @@ export function CardPage(): JSX.Element {
                     clickPoll={() => {}}
                     anchorIdHandler={() => {}}
                     showDiscuss={() => {}}
+                    anchorIdHL={''}
+                    hlElementHandler={() => {}}
                   />
                 ) : (
                   <CardForm card={data.cocard} />

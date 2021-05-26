@@ -21,7 +21,7 @@ const Radios = (props: Props) => {
   const [value, setValue] = useState<number | null>(null)
   // const [countsArr,setCountsArr]=useState(props.counts)
   const totalArr: number[] = []
-  props.data.forEach(el => totalArr.push(el.counts))
+  // props.data.forEach(el => totalArr.push(el.counts))
   const onChange = (e: any) => {
     console.log('radio checked', e.target.value)
     props.countsHandler && props.countsHandler(value, e.target.value)
@@ -40,7 +40,7 @@ const Radios = (props: Props) => {
                 {/* {el.label} */}
                 {/* {el.counts} */}
               </Radio>
-              <BarChart total={totalArr.reduce((a, b) => a + b)} count={el.counts} />
+              {/* <BarChart total={totalArr.reduce((a, b) => a + b)} count={el.counts} /> */}
             </>
           ))}
           <div style={{ fontSize: '10px', color: '#75848f' }}>{`共${totalArr.reduce((a, b) => a + b)}人參與投票`}</div>
