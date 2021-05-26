@@ -37,6 +37,5 @@ yarn-error.log*
 *.graphql.d.ts
 *.graphqls.d.ts
 
-/prisma/seeds
 /lib/models/__tests__/local-cache.dump.json
 .out
