@@ -1,6 +1,6 @@
 import { browser, Tabs } from 'webextension-polyfill-ts'
 import { ApolloClient, InMemoryCache } from '@apollo/client'
-import { LinkDocument, LinkQuery, LinkQueryVariables } from '../../../../backend-nextjs/apollo/query.graphql'
+import { LinkDocument, LinkQuery, LinkQueryVariables } from '../../../web/apollo/query.graphql'
 
 const cache = new InMemoryCache()
 

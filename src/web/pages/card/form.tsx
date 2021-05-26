@@ -6,7 +6,7 @@ import { CocardFragment, CocardQuery, useCocardQuery } from '../../apollo/query.
 import { CardBody } from '../../components/card'
 import { CardForm } from '../../components/card-form'
 import { QueryDataProvider } from '../../components/data-provider'
-import useMe from '../../components/use-me'
+import { useMe } from '../../components/use-me'
 import classes from './card-page.module.scss'
 
 // interface RouteProps extends RouteComponentProps {

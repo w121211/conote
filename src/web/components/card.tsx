@@ -667,7 +667,7 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
           <span className={classes.flexContainer}>
             <ClockIcon className={classes.clockIcon} />
             {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}
-            <a className={classes.link} href={cardTitle} target="_blank">
+            <a className={classes.link} href={cardTitle} target="_blank" rel="noreferrer">
               <span className={classes.date}>2021-4-9</span>
               <LinkIcon className={classes.linkIcon} />
               連結{'\n'}

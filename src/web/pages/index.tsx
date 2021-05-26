@@ -8,7 +8,6 @@ import { SearchAllForm } from '../components/search-all-form'
 // import { SearchAllForm } from '../components/search-all-form'
 import SideBar from '../components/sidebar/sidebar'
 import Layout from '../components/layout/layout'
-import useMe from '../components/use-me'
 import classes from './index.module.scss'
 
 function LatestCards(): JSX.Element | null {

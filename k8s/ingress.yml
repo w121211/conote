@@ -10,7 +10,7 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: conote-nextjs
+              serviceName: conote-backend
               servicePort: 3000
           # - path: /
           #   backend:

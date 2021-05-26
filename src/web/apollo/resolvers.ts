@@ -5,15 +5,13 @@ import { getSession, Session } from '@auth0/nextjs-auth0'
 import { ResolverContext } from './apollo-client'
 import prisma from '../lib/prisma'
 import { QueryResolvers, MutationResolvers, Cocard, CardTemplate, LikeChoice } from './type-defs.graphqls'
-import { removeTokenCookie } from '../lib/auth-cookies'
-import { setLoginSession, getLoginSession } from '../lib/auth'
 import { searchAllSymbols } from '../lib/search/fuzzy'
-import { urlToSymbol } from '../lib/models/symbol'
 import { getOrCreateLink } from '../lib/models/link'
 import { getOrCreateCardByLink, getOrCreateCardBySymbol } from '../lib/models/card'
 import { createWebCardBody } from '../lib/models/card-body'
-import { deltaLike } from '../lib/helper'
+import { getOrCreateUser } from '../lib/models/user'
 import { createVote } from '../lib/models/vote'
+import { deltaLike } from '../lib/helper'
 
 function _toStringId<T extends { id: number }>(obj: T): T & { id: string } {
   return { ...obj, id: obj.id.toString() }
@@ -29,10 +27,10 @@ function _toStringId<T extends { id: number }>(obj: T): T & { id: string } {
 //   }
 // }
 
-function isAuthenticated(req: NextApiRequest, res: NextApiResponse): { userId: string } {
+function isAuthenticated(req: NextApiRequest, res: NextApiResponse): { userId: string; email: string } {
   const session = getSession(req, res)
   if (session?.user && session.user.appUserId) {
-    return { userId: session.user.appUserId }
+    return { userId: session.user.appUserId, email: session.user.email }
   }
   throw new AuthenticationError('')
 }
@@ -362,8 +360,9 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   // },
 
   async me(_parent, _args, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const user = await prisma.user.findUnique({ where: { id: userId } })
+    const { email } = isAuthenticated(req, res)
+    const user = await getOrCreateUser(email)
+    // await prisma.user.findUnique({ where: { id: userId } })
     return user
   },
 

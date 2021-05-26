@@ -11,7 +11,7 @@ spec:
     app: conote
     tier: backend
   ports:
-    - port: 4000
+    - port: 3000
       targetPort: http-server
 ---
 apiVersion: apps/v1
@@ -55,10 +55,10 @@ spec:
         - name: backend
           image: conote-backend
           command: ['/bin/sh', '-c']
-          args: ['yarn run migrate:deploy && yarn run seed:fromfile && yarn run start']
+          args: ['yarn run migrate && yarn run seed:fromfile && yarn run start']
           ports:
             - name: http-server
-              containerPort: 4000 # The port that the container exposes
+              containerPort: 3000 # The port that the container exposes
           env:
             - name: DATABASE_URL
               valueFrom:

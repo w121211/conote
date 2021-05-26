@@ -1,6 +1,6 @@
 name: web
 image:
-  name: okteto.dev/conote-web:dev
+  name: okteto.dev/conote-backend:dev
   context: ../
   dockerfile: ../Dockerfile.dev
   target: web-dev

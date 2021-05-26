@@ -39,7 +39,11 @@ export const CommentForm = forwardRef(
     }
 
     const meCommentId = switchTab ? commentId : pollCommentId
-    const { data: commentsData, loading: commentsLoading, error: commentsError } = useCommentQuery({
+    const {
+      data: commentsData,
+      loading: commentsLoading,
+      error: commentsError,
+    } = useCommentQuery({
       variables: { id: meCommentId },
       fetchPolicy: 'cache-first',
     })
@@ -161,7 +165,7 @@ export const CommentForm = forwardRef(
                 {commentsData.comment?.poll?.choices[i]}
               </label>
              </div> */}
-                  <BarChart count={e} total={total && total} />
+                  <BarChart count={e} total={total ?? 0} />
                 </div>
               ))}
             </Radio.Group>

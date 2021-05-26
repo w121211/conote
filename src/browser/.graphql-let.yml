@@ -1,5 +1,5 @@
-schema: ../../backend-nextjs/apollo/type-defs.graphqls
-schemaEntrypoint: ../../backend-nextjs/apollo/type-defs.graphqls
+schema: ../web/apollo/type-defs.graphqls
+schemaEntrypoint: ../web/apollo/type-defs.graphqls
 documents: '**/*.graphql'
 cacheDir: __generated__/__generated__/__generated__ # 避免生成的檔案在parent folder
 plugins:
