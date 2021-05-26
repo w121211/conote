@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { Comment, Tooltip } from 'antd'
+import { Comment } from 'antd'
 import { DislikeOutlined, LikeOutlined, DislikeFilled, LikeFilled } from '@ant-design/icons'
 import moment from 'moment'
-
+import { MyTooltip } from '../my-tooltip/my-tooltip'
 import MyTextArea from '../myTextArea/myTextArea'
 import classes from './commentTemplate.module.scss'
 
@@ -45,36 +45,36 @@ const CommenTemplate = ({ id, content, floor, className, clicked, updatedAt }: c
     e.stopPropagation()
   }
 
-  const actions = [
-    <Tooltip key="comment-basic-like" title="Like">
-      <span onClick={like}>
-        {React.createElement(action === 'liked' ? LikeFilled : LikeOutlined)}
-        <span className="comment-action">{likes}</span>
-      </span>
-    </Tooltip>,
-    <Tooltip key="comment-basic-dislike" title="Dislike">
-      <span onClick={dislike}>
-        {React.createElement(action === 'disliked' ? DislikeFilled : DislikeOutlined)}
-        <span className="comment-action">{dislikes}</span>
-      </span>
-    </Tooltip>,
-    // parent ? (
-    //   <span id={`1`} key="comment-basic-reply-to" onClick={toggleTextAreaHandler}>
-    //     回覆
-    //   </span>
-    // ) : null,
-  ]
+  // const actions = [
+  //   <Tooltip key="comment-basic-like" title="Like">
+  //     <span onClick={like}>
+  //       {React.createElement(action === 'liked' ? LikeFilled : LikeOutlined)}
+  //       <span className="comment-action">{likes}</span>
+  //     </span>
+  //   </Tooltip>,
+  //   <Tooltip key="comment-basic-dislike" title="Dislike">
+  //     <span onClick={dislike}>
+  //       {React.createElement(action === 'disliked' ? DislikeFilled : DislikeOutlined)}
+  //       <span className="comment-action">{dislikes}</span>
+  //     </span>
+  //   </Tooltip>,
+  //   // parent ? (
+  //   //   <span id={`1`} key="comment-basic-reply-to" onClick={toggleTextAreaHandler}>
+  //   //     回覆
+  //   //   </span>
+  //   // ) : null,
+  // ]
 
   return (
-    <Tooltip title="點擊回覆" overlayClassName={classes.tooltip}>
+    <MyTooltip title="點擊回覆">
       <Comment
         className={classes.comment}
         author={floor}
-        actions={actions}
+        // actions={actions}
         content={content}
         datetime={moment(updatedAt).format('YYYY-MM-DD')}
       />
-    </Tooltip>
+    </MyTooltip>
   )
 }
 export default CommenTemplate

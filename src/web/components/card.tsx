@@ -10,6 +10,7 @@ import { QueryCommentModal } from './tile'
 import { toUrlParams } from '../lib/helper'
 import { PollChoices } from './poll-form'
 import { Link } from './link'
+import { MyTooltip } from '../components/my-tooltip/my-tooltip'
 import classes from './card.module.scss'
 import ClockIcon from '../assets/svg/clock.svg'
 import LinkIcon from '../assets/svg/link.svg'
@@ -641,6 +642,11 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
   if (cardDomain === '_') {
     cardTitle = cardTitle.slice(2)
   }
+  const [titleClick, setTitleClick] = useState(false)
+  const titleClickedHandler = () => {
+    setTitleClick(prev => !prev)
+  }
+
   return (
     <div className={classes.header}>
       {cardDomain === '_' ? (
@@ -649,10 +655,15 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
         <>
           <span className={classes.author}>author</span>
           <span className={classes.webName}>{' • ' + 'Youtube' + '\n'}</span>
-          <span className={classes.title}>
+          {/* <MyTooltip
+            title="ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
+            蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资"
+          > */}
+          <span className={`${classes.title} ${titleClick ? classes.titleExpand : ''}`} onClick={titleClickedHandler}>
             ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
             蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
           </span>
+          {/* </MyTooltip> */}
           <span className={classes.flexContainer}>
             <ClockIcon className={classes.clockIcon} />
             {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}

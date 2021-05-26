@@ -285,6 +285,9 @@ h1.tickerTitle {
     display: -webkit-box;
     -webkit-box-orient: vertical;
   }
+  .titleExpand {
+    display: inline-block;
+  }
 
   .date {
     @extend %Round_sm_gray_en;
