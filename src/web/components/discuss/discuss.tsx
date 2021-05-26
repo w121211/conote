@@ -10,7 +10,7 @@ import {
 } from '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
 import { CommentForm } from './discuss-comment-form'
-import { PollForm } from './.discuss-poll-form'
+// import { PollForm } from './.discuss-poll-form'
 import classes from './discuss-page.module.scss'
 
 const Discuss = forwardRef(

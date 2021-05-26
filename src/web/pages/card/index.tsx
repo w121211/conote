@@ -94,11 +94,6 @@ function CardPage(): JSX.Element {
 
   // cardRef && console.log(cardRef)
 
-<<<<<<< HEAD
-  
-=======
-  // function _render(url: string): JSX.Element {
->>>>>>> frontend-dev2
   function _render({ url, symbol }: { url?: string; symbol?: string }): JSX.Element {
     return (
       <QueryDataProvider
