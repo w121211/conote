@@ -25,7 +25,7 @@ const RenderTokenStream = forwardRef(
   (
     {
       stream,
-      showPanel,
+      // showPanel,
       // pushTitle,
       titleRef,
       showQuestion,
@@ -42,20 +42,20 @@ const RenderTokenStream = forwardRef(
     }: {
       stream: ExtTokenStream
       className?: string
-      showPanel?: boolean
+      // showPanel?: boolean
       // pushTitle?: (el: HTMLSpanElement | null) => void
       titleRef?: (arr: any[]) => void
-      showQuestion: () => void
+      showQuestion?: () => void
       type?: string
       // pollCommentIdHandler: (commentId: string) => void
       commentIdHandler?: (commentId: string) => void
-      anchorIdHandler: (anchorId: string) => void
+      anchorIdHandler?: (anchorId: string) => void
       commentId?: string
-      clickPoll: (commentId: string) => void
-      showDiscuss: () => void
+      clickPoll?: (commentId: string) => void
+      showDiscuss?: () => void
       highLightClassName?: boolean
       anchorIdHL?: string
-      hlElementHandler: (el: HTMLSpanElement) => void
+      hlElementHandler?: (el: HTMLSpanElement) => void
     },
     ref: any,
   ): JSX.Element | null => {
@@ -91,7 +91,7 @@ const RenderTokenStream = forwardRef(
           <span className={`${classes.black} ${highLightClassName ? 'highLight' : ''}`} ref={highLightRef}>
             {stream.replace(/^ +/g, '').replace(/ +$/g, '')}
             {/* {console.log(hlRef)} */}
-            {highLightClassName && highLightRef.current && hlElementHandler(highLightRef?.current)}
+            {highLightClassName && highLightRef.current && hlElementHandler && hlElementHandler(highLightRef?.current)}
             {/* {children} */}
           </span>
         </>
@@ -257,9 +257,11 @@ const RenderTokenStream = forwardRef(
 
               <button
                 onClick={() => {
-                  stream.markerline?.commentId !== undefined && clickPoll(stream.markerline.commentId.toString())
-                  stream.markerline?.anchorId !== undefined && anchorIdHandler(stream.markerline.anchorId.toString())
-                  showQuestion()
+                  stream.markerline?.commentId && clickPoll && clickPoll(stream.markerline.commentId.toString())
+                  stream.markerline?.anchorId &&
+                    anchorIdHandler &&
+                    anchorIdHandler(stream.markerline.anchorId.toString())
+                  showQuestion && showQuestion()
                 }}
               >
                 參與投票
@@ -414,14 +416,14 @@ const RenderSection = forwardRef(
     {
       sect: Section
       titleRef?: (arr: any[]) => void
-      showQuestion: () => void
+      showQuestion?: () => void
       commentIdHandler?: (commentId: string) => void
-      pollCommentIdHandler: (commentId: string) => void
-      clickPoll: (commentId: string) => void
-      anchorIdHandler: (anchorId: string) => void
-      showDiscuss: () => void
-      anchorIdHL: string
-      hlElementHandler: (el: HTMLSpanElement) => void
+      pollCommentIdHandler?: (commentId: string) => void
+      clickPoll?: (commentId: string) => void
+      anchorIdHandler?: (anchorId: string) => void
+      showDiscuss?: () => void
+      anchorIdHL?: string
+      hlElementHandler?: (el: HTMLSpanElement) => void
       // commentId:string
     },
     ref,
@@ -472,14 +474,14 @@ export const RenderCardBody = forwardRef(
     }: {
       sects: Section[]
       titleRef?: (arr: any[]) => void
-      showQuestion: () => void
+      showQuestion?: () => void
       commentIdHandler?: (commentId: string) => void
-      pollCommentIdHandler: (commentId: string) => void
-      anchorIdHandler: (anchorId: string) => void
-      clickPoll: (commentId: string) => void
-      showDiscuss: () => void
-      anchorIdHL: string
-      hlElementHandler: (el: HTMLSpanElement) => void
+      pollCommentIdHandler?: (commentId: string) => void
+      anchorIdHandler?: (anchorId: string) => void
+      clickPoll?: (commentId: string) => void
+      showDiscuss?: () => void
+      anchorIdHL?: string
+      hlElementHandler?: (el: HTMLSpanElement) => void
     },
     ref,
   ): JSX.Element => {
@@ -620,8 +622,8 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
     selfcardId: null,
     isTop: false,
     text: 'Buy vs Sell',
-    replies: [],
-    topReplies: null,
+    // replies: [],
+    // topReplies: null,
     poll: null,
     count: {
       __typename: 'CommentCount',
@@ -647,7 +649,10 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
         <>
           <span className={classes.author}>author</span>
           <span className={classes.webName}>{' • ' + 'Youtube' + '\n'}</span>
-          <span className={classes.title}>Title</span>
+          <span className={classes.title}>
+            ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
+            蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
+          </span>
           <span className={classes.flexContainer}>
             <ClockIcon className={classes.clockIcon} />
             {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}
