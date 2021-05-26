@@ -10,11 +10,11 @@ secretGenerator:
     name: postgres-database-url
 resources:
   - backend.yml
-  - frontend.yml
+  # - frontend.yml
   - postgres.yml
   - ingress.yml
 images:
-  - name: conote-frontend
+  # - name: conote-frontend
   - name: conote-backend
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization

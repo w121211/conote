@@ -4,13 +4,13 @@ const withReactSvg = require('next-react-svg')
 const path = require('path')
 
 module.exports = withReactSvg({
+  include: path.resolve(__dirname, 'assets/svg'),
   future: {
     webpack5: true,
   },
   experimental: {
     externalDir: true,
   },
-  include: path.resolve(__dirname, 'assets/svg'),
   sassOptions: {
     includePaths: ['./src'],
     prependData: `@import "style/variables.scss";`,
@@ -21,13 +21,11 @@ module.exports = withReactSvg({
       exclude: /node_modules/,
       use: [options.defaultLoaders.babel, { loader: 'graphql-let/loader' }],
     })
-
     config.module.rules.push({
       test: /\.graphqls$/,
       exclude: /node_modules/,
       use: ['graphql-let/schema/loader'],
     })
-
     return config
   },
 })

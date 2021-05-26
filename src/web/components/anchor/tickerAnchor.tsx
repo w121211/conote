@@ -1,6 +1,7 @@
 import React from 'react'
 // import { Anchor } from 'antd'
 import { Editor, Section, ExtTokenStream, streamToStr } from '../../../lib/editor/src/index'
+import { CocardFragment } from '../../apollo/query.graphql'
 import classes from './tickerAnchor.module.scss'
 
 // const { Link } = Anchor
@@ -34,12 +35,12 @@ const TickerAnchor = ({
   data,
   clickHandler,
 }: {
-  data: QT.cocardFragment
+  data: CocardFragment
   clickHandler: (e: any, index: number) => void
 }) => {
   if (data.body === null) return <p>[Error]: null body</p>
 
-  const editor = new Editor(data.body.text, data.link.url, data.link.oauthorName ?? undefined)
+  const editor = new Editor(data.body?.text, data.body?.meta, data.link?.url, data.link.oauthorName ?? undefined)
   editor.flush({ attachMarkerlinesToTokens: true })
   const sect = editor.getSections()
   const anchArr: dataObj[] = []

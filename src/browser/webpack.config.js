@@ -72,21 +72,38 @@ module.exports = {
       //     },
       //   ].filter(Boolean),
       // },
-      // {
-      //   exclude: /node_modules/,
-      //   test: /\.scss$/,
-      //   use: [
-      //     {
-      //       loader: 'style-loader', // Creates style nodes from JS strings
-      //     },
-      //     {
-      //       loader: 'css-loader', // Translates CSS into CommonJS
-      //     },
-      //     {
-      //       loader: 'sass-loader', // Compiles Sass to CSS
-      //     },
-      //   ],
-      // },
+      {
+        exclude: /node_modules/,
+        test: /\.scss$/,
+        use: [
+          {
+            loader: 'style-loader', // Creates style nodes from JS strings
+          },
+          {
+            loader: 'css-loader', // Translates CSS into CommonJS
+          },
+          {
+            loader: 'sass-loader', // Compiles Sass to CSS
+            options: {
+              additionalData: `@import "../web/style/variables.scss";`,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.svg$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'svg-react-loader',
+          // options: {
+          //   tag: 'symbol',
+          //   attrs: {
+          //     title: 'example',
+          //   },
+          //   name: 'MyIcon',
+          // },
+        },
+      },
     ],
   },
   // devServer: {
@@ -123,7 +140,6 @@ module.exports = {
         },
       ],
     }),
-
     // new HtmlWebpackPlugin({
     //   filename: './index.html',
     //   template: './public/index.html',

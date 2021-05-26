@@ -50,21 +50,6 @@ import { InMemoryCache, Reference } from '@apollo/client'
 //   },
 // })
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-// browser.storage
-
-=======
->>>>>>> 514adbb... .
-=======
-// browser.storage
-
->>>>>>> 6e31220... add extension
-=======
-// browser.storage
-
->>>>>>> backend-dev
 export const cache: InMemoryCache = new InMemoryCache({
   typePolicies: {
     Query: {

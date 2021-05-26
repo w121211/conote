@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import React, { useState } from 'react'
-import { QueryDataProvider } from '../../../../backend-nextjs/components/data-provider'
-import { CardHead, CardBody } from '../../../../backend-nextjs/components/card'
-import { CardForm } from '../../../../backend-nextjs/components/card-form'
-import { useCocardQuery, CocardQuery } from '../../../../backend-nextjs/apollo/query.graphql'
+import { QueryDataProvider } from '../../../web/components/data-provider'
+import { CardHead, CardBody } from '../../../web/components/card'
+import { CardForm } from '../../../web/components/card-form'
+import { useCocardQuery, CocardQuery } from '../../../web/apollo/query.graphql'
 
 function getTabUrl(): string | null {
   // popup的情況
@@ -37,7 +38,18 @@ export function CardPage(): JSX.Element {
                   編輯
                 </button>
                 <CardHead card={data.cocard} />
-                {edit ? <CardBody card={data.cocard} /> : <CardForm card={data.cocard} />}
+                {edit ? (
+                  <CardBody
+                    card={data.cocard}
+                    cardCommentIdHandler={() => {}}
+                    pollCommentIdHandler={() => {}}
+                    clickPoll={() => {}}
+                    anchorIdHandler={() => {}}
+                    showDiscuss={() => {}}
+                  />
+                ) : (
+                  <CardForm card={data.cocard} />
+                )}
               </div>
             )
           }
