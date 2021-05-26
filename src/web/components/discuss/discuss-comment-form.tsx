@@ -41,6 +41,7 @@ export const CommentForm = forwardRef(
     const meCommentId = switchTab ? commentId : pollCommentId
     const { data: commentsData, loading: commentsLoading, error: commentsError } = useCommentQuery({
       variables: { id: meCommentId },
+      fetchPolicy: 'cache-first',
     })
     //   const { data: myVotesData, loading, error } = useMyVotesQuery({ fetchPolicy: 'cache-only' })
     //   const meVote = myVotesData?.myVotes.find(e => e.pollId === Number(commentsData?.comment?.poll?.id))
@@ -118,16 +119,12 @@ export const CommentForm = forwardRef(
         })
       }
 
-      if (values.text && switchTab === false) {
+      if (values.text && !switchTab) {
         createReply({
           variables: {
             commentId: meCommentId,
             data: {
-              text: `${
-                commentsData?.comment?.poll?.choices[values.votes]
-                  ? commentsData?.comment?.poll?.choices[values.votes]
-                  : ''
-              }${values.text}`,
+              text: `${commentsData?.comment?.poll?.choices[values.votes]}${values.text}`,
             },
           },
         })

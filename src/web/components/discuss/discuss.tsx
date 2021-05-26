@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useState } from 'react'
+import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import { Form } from 'antd'
 import useMeasure from 'react-use-measure'
 import {
@@ -10,7 +10,7 @@ import {
 } from '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
 import { CommentForm } from './discuss-comment-form'
-import { PollForm } from './discuss-poll-form'
+// import { PollForm } from './.discuss-poll-form'
 import classes from './discuss-page.module.scss'
 
 const Discuss = forwardRef(
@@ -24,6 +24,8 @@ const Discuss = forwardRef(
       pollClick,
       discussClickLHandler,
       discussClickRHandler,
+      anchorHLHandler,
+      myScrollIntoView,
     }: {
       switchTab: boolean
       commentId: string
@@ -33,6 +35,8 @@ const Discuss = forwardRef(
       pollClick: string
       discussClickLHandler: () => void
       discussClickRHandler: () => void
+      anchorHLHandler: (clickedAnchorId: string) => void
+      myScrollIntoView: () => void
     },
     ref,
   ) => {
@@ -88,8 +92,13 @@ const Discuss = forwardRef(
         <div className={classes.outer} style={{ height: `calc(100vh - ${bounds.height}px)` }}>
           <div className={classes.inner}>
             <div className={classes.element} style={{ height: `calc(100vh - ${bounds.height}px)` }}>
-              {switchTab && <CommentList commentId={cardCommentId} />}
-              {switchTab || <CommentList commentId={pollClick} />}
+              <CommentList
+                commentId={cardCommentId}
+                pollCommentId={pollClick}
+                switchTab={switchTab}
+                anchorHLHandler={anchorHLHandler}
+                myScrollIntoView={myScrollIntoView}
+              />
             </div>
           </div>
         </div>
@@ -97,5 +106,6 @@ const Discuss = forwardRef(
     )
   },
 )
+Discuss.displayName = 'Discuss'
 // Discuss.displayName = 'Discuss'
 export default Discuss

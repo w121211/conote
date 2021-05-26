@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { SubmitErrorHandler, SubmitHandler, useForm, useFieldArray } from 'react-hook-form'
-import { useRepliesQuery, Reply, useCommentQuery } from '../../apollo/query.graphql'
+import { useRepliesQuery, Reply, useCommentQuery, ReplyFragment } from '../../apollo/query.graphql'
 import { List } from 'antd'
 // import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
 // import * as QT from '../../graphql/query-types'
@@ -40,33 +40,68 @@ const CommentList = ({
   type,
   commentId,
   pollCommentId,
+  switchTab,
+  anchorHLHandler,
+  myScrollIntoView,
 }: {
   type?: string
   commentId: string
-  pollCommentId?: string
+  pollCommentId: string
+  switchTab: boolean
+  anchorHLHandler: (anchorId: string) => void
+  myScrollIntoView: () => void
 }) => {
-  //如果有poll的commentid replies query 的 variable 要輸入pollCommentId
+  //   const [repliesList,setRepliesList]=useState<Array<({
+  //     __typename?: 'Reply';
+  // } & ReplyFragment)>>()
+  const myRef = useRef<HTMLLIElement>(null)
 
-  const { data: commentsData, loading: commentsLoading, error: commentsError } = useCommentQuery({
-    variables: { id: commentId },
+  const onClickHandler = (e: any, anchorId: string) => {
+    anchorHLHandler(anchorId)
+    myScrollIntoView()
+
+    // const highLight = document.getElementsByClassName('highLight')
+    // highLight && highLight[0].scrollIntoView()
+  }
+
+  const handleClickOutside = (e: any) => {
+    if (myRef.current && !myRef.current.contains(e.target)) {
+      anchorHLHandler('')
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside, true)
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true)
+    }
   })
+  const meCommentId = switchTab && commentId ? commentId : pollCommentId
 
   const { data: repliesData, loading: repliesLoading, error: repliesError } = useRepliesQuery({
     // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
-    variables: { commentId },
+    variables: { commentId: meCommentId },
+    fetchPolicy: 'cache-first',
   })
 
-  const { register, handleSubmit } = useForm<FormValues>()
-  // const {fields}=useFieldArray()
-
-  const onSubmit: SubmitHandler<FormValues> = (data, e) => {
-    console.log(data, e)
-  }
-  const onError: SubmitErrorHandler<FormValues> = (data, e) => {
-    console.log(data, e)
-  }
-
   const repliesLength = repliesData?.replies.length
+  // useEffect(() => {
+  //   if(repliesData&&!repliesLoading){
+  //     setRepliesList(repliesData.replies)
+  //   }
+  // },[])
+
+  // const { register, handleSubmit } = useForm<FormValues>()
+  // // const {fields}=useFieldArray()
+
+  // const onSubmit: SubmitHandler<FormValues> = (data, e) => {
+  //   console.log(data, e)
+  // }
+  // const onError: SubmitErrorHandler<FormValues> = (data, e) => {
+  //   console.log(data, e)
+  // }
+
+  // const loadMore = () => {}
 
   return (
     // <>
@@ -89,13 +124,7 @@ const CommentList = ({
       className={classes.List}
       size="small"
       itemLayout="vertical"
-      // header={`討論`}
-      // pagination={{
-      //   onChange: page => {
-      //     // console.log(page)
-      //   },
-      //   pageSize: 5,
-      // }}
+      // loadMore={loadMore}
       rowKey={item => item.id}
       dataSource={repliesData?.replies}
       // footer={
@@ -123,7 +152,7 @@ const CommentList = ({
           //   </li>
           // </>
           // ) : (
-          <li className={classes.commentRoot}>
+          <li className={classes.commentRoot} ref={myRef} onClick={e => onClickHandler(e, item.text.slice(0, 3))}>
             <CommentTemplate
               id={item.id}
               content={item.text}

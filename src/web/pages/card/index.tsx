@@ -9,6 +9,7 @@ import { CardBody, CardHead } from '../../components/card'
 import Discuss from '../../components/discuss/discuss'
 import EditIcon from '../../assets/svg/edit.svg'
 import classes from './card-page.module.scss'
+import { CardMeta } from '../../lib/models/card'
 
 function CardPage(): JSX.Element {
   // const me = useMe({ redirectTo: '/signin' })
@@ -24,7 +25,10 @@ function CardPage(): JSX.Element {
   const [pollCommentId, setPollCommentId] = useState<string[]>([])
   const [clickPollCommentId, setClickPollCommentId] = useState('')
   const [anchorId, setAnchorId] = useState('')
+  const [anchorIdHL, setAnchorIdHL] = useState('')
+  const [hlElemnt, setHlElement] = useState<HTMLSpanElement>()
   const textRef = useRef<HTMLTextAreaElement>(null)
+  const cardRef = useRef<any>(null)
 
   const discussClickLHandler = () => {
     setDiscuss(true)
@@ -37,6 +41,7 @@ function CardPage(): JSX.Element {
   const commentIdHandler = (id: string) => {
     setCommentId(id)
   }
+  console.log(commentId)
   const cardCommentIdHandler = (id: string) => {
     setCardCommentId(id)
   }
@@ -70,9 +75,24 @@ function CardPage(): JSX.Element {
 
   const showDiscuss = () => {
     setDiscuss(true)
-    console.log(textRef.current)
+    // console.log(textRef.current)
     if (textRef) textRef.current?.focus()
   }
+
+  const anchorHLHandler = (clickedAnchorId: string) => {
+    setAnchorIdHL(clickedAnchorId)
+    // console.log(clickedAnchorId)
+  }
+
+  const hlElementHandler = (el: HTMLSpanElement) => {
+    setHlElement(el)
+  }
+
+  const myScrollIntoView = () => {
+    hlElemnt?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  // cardRef && console.log(cardRef)
 
   function _render({ url, symbol }: { url?: string; symbol?: string }): JSX.Element {
     return (
@@ -81,7 +101,7 @@ function CardPage(): JSX.Element {
         render={(data: CocardQuery) => {
           if (data && data.cocard) {
             const url = `/card/form?${getCardUrlParam(data.cocard)}`
-
+            // console.log((data.cocard.meta as CardMeta).commentId)
             return (
               <div className={classes.main}>
                 <div className={classes.mainInner}>
@@ -100,6 +120,9 @@ function CardPage(): JSX.Element {
                           pollCommentIdHandler={pollCommentIdHandler}
                           clickPoll={clickPoll}
                           showDiscuss={showDiscuss}
+                          anchorIdHL={anchorIdHL}
+                          ref={cardRef}
+                          hlElementHandler={hlElementHandler}
                         />
                       </div>
                     </div>
@@ -110,7 +133,7 @@ function CardPage(): JSX.Element {
                       router.push(url)
                     }}
                   >
-                    {console.log(url)}
+                    {/* {console.log(url)} */}
                     <EditIcon className={classes.editIcon} />
                   </Button>
                   {/* <button
@@ -125,12 +148,14 @@ function CardPage(): JSX.Element {
                   switchTab={discuss}
                   discussClickLHandler={discussClickLHandler}
                   discussClickRHandler={discussClickRHandler}
-                  cardCommentId={cardCommentId}
+                  cardCommentId={(data.cocard.meta as CardMeta).commentId.toString()}
                   commentId={commentId}
                   anchorId={anchorId}
                   pollCommentId={pollCommentId}
                   pollClick={clickPollCommentId}
                   ref={textRef}
+                  anchorHLHandler={anchorHLHandler}
+                  myScrollIntoView={myScrollIntoView}
                 />
               </div>
             )

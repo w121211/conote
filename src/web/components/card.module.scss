@@ -10,6 +10,8 @@
 // }
 
 .black {
+  scroll-margin: 150px;
+
   margin: 0;
   /* display: inline-block; */
   color: #2c4460;
@@ -63,8 +65,21 @@
   // border-left: 2px solid #dad7d7;
   // overflow: hidden;
   cursor: pointer;
+  .panel {
+    display: inline-flex;
+    visibility: hidden;
+    span,
+    a {
+      margin-right: 4px;
+    }
+  }
   &:hover {
     background-color: $natualHover;
+    &:hover {
+      .panel {
+        visibility: visible;
+      }
+    }
   }
   &:focus {
     outline: none;
@@ -229,35 +244,37 @@ h1.tickerTitle {
   background-color: $primary;
 }
 
-.visible {
-  display: inline-flex;
-  visibility: visible;
-  span,
-  a {
-    margin-right: 4px;
-  }
-}
-.hidden {
-  display: inline-flex;
-  visibility: hidden;
-  span,
-  a {
-    margin-right: 4px;
-  }
-}
 .array {
   display: inline-block;
   align-items: center;
 
   width: 100%;
   // padding-left: 20px;
+  .panel {
+    display: inline-flex;
+    visibility: hidden;
+    span,
+    a {
+      margin-right: 4px;
+    }
+  }
   &:focus {
     outline: none;
   }
-
+  &:hover {
+    .panel {
+      visibility: visible;
+    }
+  }
+  // &:before {
+  //   content: '\2202';
+  // }
   // a {
   //   color: black;
   // }
+  :global(.highLight) {
+    background-color: #ffd036;
+  }
 }
 .lineValue {
   &:hover {
