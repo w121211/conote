@@ -35,10 +35,10 @@ export function AnchorPanel({
 }: // onClickHandler,
 {
   anchorId: string
-  anchorIdHandler: (anchorId: string) => void
+  anchorIdHandler?: (anchorId: string) => void
   commentId?: string
   meAuthor: boolean
-  showDiscuss: () => void
+  showDiscuss?: () => void
   // onClickHandler: (commentId: string | undefined) => void
 }): JSX.Element {
   const [count, setCount] = useState<AnchorCountFragment | null>(null)
@@ -75,8 +75,8 @@ export function AnchorPanel({
     // setPanel(true)
     // setCommentTextArea([classes.inlineValue, classes.inlineValueComment])
     // inlineValueArr.push(classes.inlineValueComment)
-    showDiscuss()
-    anchorIdHandler(anchorId)
+    showDiscuss && showDiscuss()
+    anchorIdHandler && anchorIdHandler(anchorId)
     // const inputElement = document.getElementById('commentTextArea') as HTMLInputElement
 
     // inputElement.focus()
