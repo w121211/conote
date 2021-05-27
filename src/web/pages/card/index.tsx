@@ -41,7 +41,7 @@ function CardPage(): JSX.Element {
   const commentIdHandler = (id: string) => {
     setCommentId(id)
   }
-  console.log(commentId)
+  // console.log(commentId)
   const cardCommentIdHandler = (id: string) => {
     setCardCommentId(id)
   }
@@ -89,7 +89,14 @@ function CardPage(): JSX.Element {
   }
 
   const myScrollIntoView = () => {
+    console.log(hlElemnt?.classList)
+    hlElemnt?.classList.add('highLight')
     hlElemnt?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const resetHighLight = () => {
+    // setAnchorIdHL('')
+    hlElemnt?.classList.remove('highLight')
   }
 
   // cardRef && console.log(cardRef)
@@ -112,7 +119,7 @@ function CardPage(): JSX.Element {
                         <CardHead card={data.cocard} />
                         <CardBody
                           card={data.cocard}
-                          cardCommentIdHandler={cardCommentIdHandler}
+                          // cardCommentIdHandler={cardCommentIdHandler}
                           titleRefHandler={titleRefHandler}
                           showQuestion={showQuestion}
                           // commentIdHandler={commentIdHandler}
@@ -156,6 +163,7 @@ function CardPage(): JSX.Element {
                   ref={textRef}
                   anchorHLHandler={anchorHLHandler}
                   myScrollIntoView={myScrollIntoView}
+                  resetHighLight={resetHighLight}
                 />
               </div>
             )

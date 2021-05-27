@@ -39,14 +39,13 @@ export const CommentForm = forwardRef(
     }
 
     const meCommentId = switchTab ? commentId : pollCommentId
-    const {
-      data: commentsData,
-      loading: commentsLoading,
-      error: commentsError,
-    } = useCommentQuery({
+    const { data: commentsData, loading: commentsLoading, error: commentsError } = useCommentQuery({
       variables: { id: meCommentId },
       fetchPolicy: 'cache-first',
     })
+    if (!commentsLoading && commentsData) {
+      console.log(commentsData.comment?.poll?.count.nVotes)
+    }
     //   const { data: myVotesData, loading, error } = useMyVotesQuery({ fetchPolicy: 'cache-only' })
     //   const meVote = myVotesData?.myVotes.find(e => e.pollId === Number(commentsData?.comment?.poll?.id))
     //   const { data: repliesData, loading: repliesLoading, error: repliesError } = useRepliesQuery({
@@ -135,7 +134,7 @@ export const CommentForm = forwardRef(
       }
 
       form.resetFields()
-      console.log(`finish ${meCommentId} ${anchorId} ${values.text}`)
+      console.log(`finish ${meCommentId} ${anchorId} ${values.text} ${values.votes}`)
     }
 
     const total =

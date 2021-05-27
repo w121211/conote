@@ -43,6 +43,7 @@ const CommentList = ({
   switchTab,
   anchorHLHandler,
   myScrollIntoView,
+  resetHighLight,
 }: {
   type?: string
   commentId: string
@@ -50,6 +51,7 @@ const CommentList = ({
   switchTab: boolean
   anchorHLHandler: (anchorId: string) => void
   myScrollIntoView: () => void
+  resetHighLight: () => void
 }) => {
   //   const [repliesList,setRepliesList]=useState<Array<({
   //     __typename?: 'Reply';
@@ -67,6 +69,7 @@ const CommentList = ({
   const handleClickOutside = (e: any) => {
     if (myRef.current && !myRef.current.contains(e.target)) {
       anchorHLHandler('')
+      resetHighLight()
     }
   }
 

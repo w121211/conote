@@ -89,7 +89,7 @@ const RenderTokenStream = forwardRef(
         // </>
         <>
           {/* // 一般render */}
-          <span className={`${classes.black} ${highLightClassName ? 'highLight' : ''}`} ref={highLightRef}>
+          <span className={`${classes.black} `} ref={highLightRef}>
             {stream.replace(/^ +/g, '').replace(/ +$/g, '')}
             {/* {console.log(hlRef)} */}
             {highLightClassName && highLightRef.current && hlElementHandler && hlElementHandler(highLightRef?.current)}
@@ -553,7 +553,7 @@ export const CardBody = forwardRef(
     {
       card,
       bySrc,
-      cardCommentIdHandler,
+      // cardCommentIdHandler,
       titleRefHandler,
       showQuestion,
       commentIdHandler,
@@ -566,7 +566,7 @@ export const CardBody = forwardRef(
     }: {
       card: CocardFragment
       bySrc?: string
-      cardCommentIdHandler: (cardCommentId: string) => void
+      // cardCommentIdHandler: (cardCommentId: string) => void
       titleRefHandler?: (arr: any[]) => void
       showQuestion?: () => void
       commentIdHandler?: (commentId: string) => void
