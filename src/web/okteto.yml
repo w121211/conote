@@ -1,17 +1,18 @@
-name: web
+name: conote-backend
 image:
   name: okteto.dev/conote-backend:dev
-  context: ../
-  dockerfile: ../Dockerfile.dev
-  target: web-dev
+  context: ../../
+  dockerfile: ../../Dockerfile
+  target: deps
   # args:
   #   - ENV1=dev
   #   - ENV2=$VALUE
 command: ['zsh']
-workdir: /workspace/web
+workdir: /app/src/web
 sync:
-  - .:/workspace/web
-  - ../lib/editor:/workspace/lib/editor
+  - .:/app/src/web
+  - ../lib/editor:/app/lib/editor
+  - ../lib/fetcher:/app/lib/fetcher
 resources:
   limits:
     cpu: '0.1'

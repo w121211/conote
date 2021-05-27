@@ -41,7 +41,7 @@ spec:
             - until (pg_isready -h conote-postgres -p 5432 -U postgresuser) do echo "Waiting for postgres at $DATABASE_URL"; sleep 2; done
           env:
             - name: POSTGRES_PASSWORD # postgres-image require a value
-              value: 'password'
+              value: 'a_dummy_value'
         # - name: init-db-migrate
         #   image: conote-backend
         #   command: ['yarn', 'migrate']
@@ -55,7 +55,7 @@ spec:
         - name: backend
           image: conote-backend
           command: ['/bin/sh', '-c']
-          args: ['yarn run migrate && yarn run seed:fromfile && yarn run start']
+          args: ['yarn run migrate && yarn run seed && yarn run start']
           ports:
             - name: http-server
               containerPort: 3000 # The port that the container exposes

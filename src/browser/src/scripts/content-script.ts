@@ -28,7 +28,6 @@ function injectExtensionMarker(): void {
 
 async function main(): Promise<void> {
   injectExtensionMarker()
-
   browser.runtime.onMessage.addListener(injectExtensionMarker)
 }
 

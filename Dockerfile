@@ -31,10 +31,11 @@
 
 
 # Install dependencies only when needed
-FROM node:14-alpine AS deps
+FROM node:14-alpine AS lib-deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 COPY tsconfig.base.json /app/
+
 WORKDIR /app/src/lib/editor
 COPY src/lib/editor ./
 # COPY src/lib/editor/package.json src/lib/editor/yarn.lock ./
@@ -46,20 +47,21 @@ COPY src/lib/fetcher ./
 RUN yarn install --frozen-lockfile
 RUN yarn build
 
-WORKDIR /app/src/web
-COPY src/web/package.json src/web/yarn.lock ./
-RUN yarn install --frozen-lockfile
+# WORKDIR /app/src/web
+# COPY src/web/package.json src/web/yarn.lock ./
+# RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
-FROM node:14-alpine AS builder
-# WORKDIR /app
-# COPY . .
-# COPY --from=deps /app/node_modules ./node_modules
-# RUN yarn build
+FROM node:14-alpine AS deps
 COPY tsconfig.base.json /app/
+COPY --from=lib-deps /app/src/lib/editor /app/src/lib/editor
+COPY --from=lib-deps /app/src/lib/fetcher /app/src/lib/fetcher
 WORKDIR /app/src/web
 COPY src/web ./
-COPY --from=deps /app/src/web/node_modules ./node_modules
+RUN yarn install --frozen-lockfile
+
+FROM deps AS builder
+WORKDIR /app/src/web
 RUN yarn build
 
 # Production image, copy all the files and run next

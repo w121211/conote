@@ -5,6 +5,7 @@ import { setContext } from '@apollo/client/link/context'
 import { CachePersistor, PersistentStorage, LocalStorageWrapper } from 'apollo3-cache-persist'
 import { Auth0Provider, AppState, useAuth0 } from '@auth0/auth0-react'
 import { cache } from './cache'
+import { useMeQuery, MeQuery } from '../../../web/apollo/query.graphql'
 import { CardPage } from './card-page'
 import './app.css'
 
@@ -35,6 +36,19 @@ const onRedirectCallback = (appState: AppState) => {
   // remove the `code` and `state` query parameters from the callback url.
   window.history.replaceState({}, document.title, window.location.pathname)
   // history.replace((appState && appState.returnTo) || window.location.pathname)
+}
+
+function Protected({ children }: { children: React.ReactNode }): JSX.Element | null {
+  const { data } = useMeQuery()
+  if (data?.me) {
+    console.log(data)
+    return <>{children}</>
+  }
+  return (
+    <div>
+      <a href="http://localhost:3000">Login</a> Required
+    </div>
+  )
 }
 
 export function App(): JSX.Element {
@@ -110,7 +124,9 @@ export function App(): JSX.Element {
   }
   return (
     <ApolloProvider client={client}>
-      <CardPage />
+      <Protected>
+        <CardPage />
+      </Protected>
     </ApolloProvider>
   )
   // <Auth0Provider

@@ -3,12 +3,10 @@ import { ApolloClient, InMemoryCache } from '@apollo/client'
 import { LinkDocument, LinkQuery, LinkQueryVariables } from '../../../web/apollo/query.graphql'
 
 const cache = new InMemoryCache()
-
 const client = new ApolloClient({
   // Provide required constructor fields
   cache: cache,
   uri: 'http://localhost:4000/',
-
   // Provide some optional constructor fields
   name: 'react-web-client',
   version: '1.3',
@@ -61,7 +59,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   }
 })
 
-// 點擊icon後，開啟一個新視窗，並載入對應的卡片
+// --- 點擊icon後，開啟一個新視窗，並載入對應的卡片
 
 browser.browserAction.onClicked.addListener(async tab => {
   browser.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
@@ -82,7 +80,7 @@ browser.browserAction.onClicked.addListener(async tab => {
   console.log('The normal window has been created')
 })
 
-// 相互溝通
+// --- 相互溝通
 
 // Listen for messages sent from other parts of the extension
 browser.runtime.onMessage.addListener((request: { popupMounted: boolean }) => {

@@ -1,4 +1,4 @@
-apiVersion: skaffold/v2beta12
+apiVersion: skaffold/v2beta16
 kind: Config
 metadata:
   name: conote
@@ -8,7 +8,7 @@ build:
       context: .
       docker:
         dockerfile: Dockerfile
-        target: web
+        target: builder
     # - image: conote-backend
     #   context: .
     #   docker:
