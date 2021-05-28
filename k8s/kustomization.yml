@@ -11,7 +11,7 @@ images:
   - name: conote-backend
 
 patchesStrategicMerge:
-  - env.yaml
+  - env.yml
 
 # The secrets file should not be checked into Git. It's published only for demonstration purpose.
 secretGenerator:
