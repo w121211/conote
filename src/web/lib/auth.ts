@@ -4,7 +4,7 @@ import { sign, verify } from 'jsonwebtoken'
 import { setTokenCookie, getTokenCookie } from './auth-cookies'
 
 if (process.env.TOKEN_SECRET === undefined) {
-  throw new Error()
+  throw new Error('TOKEN_SECRET not found')
 }
 
 const TOKEN_SECRET = process.env.TOKEN_SECRET

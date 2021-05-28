@@ -6,4 +6,3 @@ deploy:
   - kubectl apply -k k8s
 devs:
   - src/web/okteto.yml
-  # - backend/okteto.yml
