@@ -5,7 +5,7 @@ import { User } from '@prisma/client'
 import prisma from '../prisma'
 
 if (process.env.APP_BOT_EMAIL === undefined) {
-  console.log('Loading env variables from local .env')
+  console.log('Not found APP_BOT_EMAIL, try loading from local .env')
   const config = dotenv.config({ path: resolve(process.cwd(), '.env') })
   if (config.error) throw config.error
   if (!config.parsed?.APP_BOT_EMAIL) throw new Error('APP_BOT_EMAIL not found in .env')
