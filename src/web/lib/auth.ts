@@ -3,11 +3,11 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { sign, verify } from 'jsonwebtoken'
 import { setTokenCookie, getTokenCookie } from './auth-cookies'
 
-if (process.env.TOKEN_SECRET === undefined) {
+if (process.env.APP_TOKEN_SECRET === undefined) {
   throw new Error('TOKEN_SECRET not found')
 }
 
-const TOKEN_SECRET = process.env.TOKEN_SECRET
+const TOKEN_SECRET = process.env.APP_TOKEN_SECRET
 
 export interface Session {
   userId: string

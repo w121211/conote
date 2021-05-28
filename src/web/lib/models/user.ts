@@ -4,20 +4,21 @@ import dotenv from 'dotenv'
 import { User } from '@prisma/client'
 import prisma from '../prisma'
 
-if (!process.env.BOT_EMAIL) {
+if (process.env.APP_BOT_EMAIL === undefined) {
   console.log('Loading env variables from local .env')
   const config = dotenv.config({ path: resolve(process.cwd(), '.env') })
   if (config.error) throw config.error
-  if (!config.parsed?.BOT_EMAIL) throw new Error('BOT_EMAIL not found in .env')
+  if (!config.parsed?.APP_BOT_EMAIL) throw new Error('APP_BOT_EMAIL not found in .env')
+
+  process.env.APP_BOT_EMAIL = config.parsed.APP_BOT_EMAIL
 }
 
-const BOT_EMAIL = process.env.BOT_EMAIL
+const BOT_EMAIL = process.env.APP_BOT_EMAIL
 
 let _botId: string | undefined
 
 export function getBotEmail(): string {
-  if (BOT_EMAIL) return BOT_EMAIL
-  throw new Error('bot email not found')
+  return BOT_EMAIL
 }
 
 export async function getBotId(): Promise<string> {
