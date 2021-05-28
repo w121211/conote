@@ -9,6 +9,10 @@ resources:
 images:
   # - name: conote-frontend
   - name: conote-backend
+
+patchesStrategicMerge:
+  - env.yaml
+
 # The secrets file should not be checked into Git. It's published only for demonstration purpose.
 secretGenerator:
   - literals:
@@ -18,3 +22,7 @@ secretGenerator:
   - literals:
       - url=postgresql://postgresuser:postgrespassword@conote-postgres/prisma?schema=public
     name: postgres-database-url
+# configMapGenerator:
+#   - name: conote-configmap
+#     envs:
+#       - .env

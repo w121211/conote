@@ -65,6 +65,17 @@ spec:
                 secretKeyRef:
                   name: postgres-database-url
                   key: url
+          #   - name: ALT_GREETING
+          #     valueFrom:
+          #       configMapKeyRef:
+          #         name: conote-configmap
+          #         key: ALT_GREETING
+          #   - name: ENABLE_RISKY
+          #       valueFrom:
+          #         configMapKeyRef:
+          #           name: conote-configmap
+          #           key: ENABLE_RISKY
+
           #   - name: SPRING_DATASOURCE_USERNAME # Name of the environment variable
           #     valueFrom: # Get the value of environment variable from kubernetes secrets
           #       secretKeyRef:
