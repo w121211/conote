@@ -3,7 +3,7 @@
 // import { Link, navigate, redirectTo } from '@reach/router'
 // import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input } from 'antd'
 import React, { useState, useRef, forwardRef, useEffect, useImperativeHandle } from 'react'
-import { Editor, Section, ExtTokenStream, streamToStr } from '../../lib/editor/src/index'
+import { Editor, Section, ExtTokenStream, streamToStr } from '../../packages/editor/src/index'
 import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
 import { AnchorPanel } from './tile-panel'
 import { QueryCommentModal } from './tile'

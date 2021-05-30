@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import { hash, hashSync } from 'bcryptjs'
 import { PrismaClient, SymbolCat } from '@prisma/client'
 // import omitDeep from 'omit-deep-lodash'
-import { omitUndefined } from '../../lib/editor/src/test-helper'
+import { omitUndefined } from '../../packages/editor/src/test-helper'
 import { getBotEmail } from './models/user'
 
 /**

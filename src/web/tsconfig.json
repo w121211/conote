@@ -1,5 +1,5 @@
 {
-  "references": [{ "path": "../lib/editor" }, { "path": "../lib/fetcher" }],
+  "references": [{ "path": "../packages/editor" }, { "path": "../packages/fetcher" }],
   "compilerOptions": {
     // copy from nextjs example: https://github.com/vercel/next.js/blob/canary/examples/with-typescript-eslint-jest/tsconfig.json
     "target": "es5",

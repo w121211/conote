@@ -6,7 +6,7 @@
     "clean": "rm -rf dist && rm -rf reports",
     "build-ts": "tsc --build",
     "build": "yarn run clean && yarn run build-ts",
-    "test": "jest --verbose --watchAll"
+    "test": "env-cmd -f ../../web/.env.local jest --verbose --watchAll"
   },
   "main": "./dist/src/index.js",
   "module": "./dist/src/index.js",
@@ -18,6 +18,8 @@
     "@types/node": "^13.13.21",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
+    "encoding": "^0.1.13",
+    "env-cmd": "^10.1.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",
@@ -30,6 +32,7 @@
   },
   "dependencies": {
     "@keyv/redis": "^2.1.2",
+    "googleapis": "^74.2.0",
     "got": "^11.8.2",
     "keyv": "^4.0.3"
   },

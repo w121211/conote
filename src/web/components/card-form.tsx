@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { AutoComplete, Button, Form, Input } from 'antd'
-import { Editor, Section } from '../../lib/editor/src/index'
+import { Editor, Section } from '../../packages/editor/src/index'
 import {
   useCreateWebCardBodyMutation,
   Cocard,

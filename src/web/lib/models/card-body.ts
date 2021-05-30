@@ -2,7 +2,7 @@
 // import * as _ from 'lodash';
 // import dayjs from 'dayjs';
 import * as PA from '@prisma/client'
-import { Editor, DBLinker, Markerline } from '../../../lib/editor/src'
+import { Editor, DBLinker, Markerline } from '../../../packages/editor/src'
 import prisma from '../prisma'
 import { getOrCreateCardBySymbol } from './card'
 import { createComment, CommentMeta } from './comment'
