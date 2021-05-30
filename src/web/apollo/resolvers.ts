@@ -179,7 +179,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async comment(_parent, { id }, _context, _info) {
-    console.log(id, parseInt(id))
     const comment = await prisma.comment.findUnique({
       where: { id: parseInt(id) },
       include: {
@@ -205,7 +204,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async replies(_parent, { commentId, afterId }, _context, _info) {
-    console.log(commentId)
     const replies = await prisma.reply.findMany({
       where: { commentId: parseInt(commentId) },
       orderBy: { createdAt: 'desc' },
@@ -672,7 +670,6 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   async createVote(_parent, { pollId, choiceIdx }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    console.log({ choiceIdx, pollId: parseInt(pollId), userId })
     const vote = await createVote({ choiceIdx, pollId: parseInt(pollId), userId })
     return _toStringId(vote)
   },

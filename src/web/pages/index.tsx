@@ -75,7 +75,11 @@ function HomePage(): JSX.Element {
     )
   }
 
-  return <a href="/api/auth/login">Login</a>
+  return (
+    <>
+      <a href="/api/auth/login">Login</a>
+    </>
+  )
   // return (
   //   <>
   //     {/* <SideBar /> */}
