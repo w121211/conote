@@ -1,7 +1,8 @@
 .DS_Store
-**/node_modules
-**/dist
-**/build
-**/.nextjs
-**/__deprecated__
-**/__generated__
+node_modules
+dist
+build
+.next
+__deprecated__
+__generated__
+.docker-sync

@@ -42,7 +42,10 @@ Okteto: deploy k8s online
 
 # dev
 cd .../conote/src/web
-okteto up
+okteto up --build
+
+# in terminal
+yarn run start:okteto
 
 # access
 kubectl get pods

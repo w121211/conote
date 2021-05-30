@@ -27,9 +27,10 @@ services:
     #   - default
     # - twint_default
 
-  postgres:
+  postgresql:
     image: postgres:13.2-alpine
     environment:
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgresuser
       POSTGRES_PASSWORD: postgrespassword
 

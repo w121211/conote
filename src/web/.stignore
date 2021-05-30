@@ -56,3 +56,7 @@ jspm_packages
 
 dist
 __generated__
+
+.env
+.DS_Store
+
