@@ -1,12 +1,10 @@
 deploy:
-  - okteto build -t=okteto.dev/conote-backend:${OKTETO_GIT_COMMIT} --target=backend .
+  - okteto build -t=okteto.dev/conote-backend:${OKTETO_GIT_COMMIT} --target=builder .
   # - okteto build -t okteto.dev/conote-frontend:${OKTETO_GIT_COMMIT} .
-  # - okteto build -t okteto.dev/api:${OKTETO_GIT_COMMIT} api
-  # - cd k8s && kustomize edit set image frontend=okteto.dev/conote-frontend:${OKTETO_GIT_COMMIT}
-  # - cd k8s && kustomize edit set image api=okteto.dev/api:${OKTETO_GIT_COMMIT}
   # - cd k8s && kustomize edit set image conote-frontend=okteto.dev/conote-frontend:${OKTETO_GIT_COMMIT}
   - cd k8s && kustomize edit set image conote-backend=okteto.dev/conote-backend:${OKTETO_GIT_COMMIT}
+  - envsubst < "k8s/env.template.yml" > "k8s/env.yml"
+  - cat "k8s/env.yml"
   - kubectl apply -k k8s
 devs:
-  - web/okteto.yml
-  # - backend/okteto.yml
+  - src/web/okteto.yml

@@ -9,10 +9,10 @@ import { getOrCreateLink } from '../link'
 import { getOrCreateCardBySymbol, getOrCreateCardByLink, CardMeta } from '../card'
 import { createCardBody, createWebCardBody } from '../card-body'
 // import { Editor, Markerline } from '../../../lib/editor/src'
-import { Editor, Markerline, splitByUrl } from '../../../../lib/editor/src'
+import { Editor, Markerline, splitByUrl } from '../../../../packages/editor/src'
 import prisma from '../../prisma'
 import { clean, createTestSymbols, createTestUsers, TESTUSERS, TESTOAUTHORS } from '../../test-helper'
-import { FetchClient } from '../../../../lib/fetcher/src'
+import { FetchClient } from '../../../../packages/fetcher/src'
 
 const sampleFilepath = resolve(__dirname, '__samples__', '20210425-josie.txt')
 
@@ -57,7 +57,7 @@ afterAll(async () => {
 test('create a symbol card', async () => {
   const card = await getOrCreateCardBySymbol('$AA')
   const discussBoard = await prisma.comment.findUnique({
-    where: { id: ((card.meta as unknown) as CardMeta).commentId },
+    where: { id: (card.meta as unknown as CardMeta).commentId },
   })
   expect(clean(card)).toMatchSnapshot()
   expect(clean(discussBoard)).toMatchSnapshot()
@@ -110,12 +110,12 @@ test('edit a web card', async () => {
 })
 
 test('create a nested web-card', async () => {
-  const [link, { fetched }] = await getOrCreateLink('http://test2.com')
+  const [link, { fetchResult }] = await getOrCreateLink('http://test2.com')
   const card = await getOrCreateCardByLink(link)
 
   const editor = new Editor(
     card.body.text,
-    (card.body.meta as unknown) as Markerline[],
+    card.body.meta as unknown as Markerline[],
     'http://test2.com',
     TESTOAUTHORS[0].name,
   )
@@ -133,7 +133,7 @@ $DD
     const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
     const nestedEditor = new Editor(
       nestedCard.body.text,
-      (nestedCard.body.meta as unknown) as Markerline[],
+      nestedCard.body.meta as unknown as Markerline[],
       link.url,
       TESTOAUTHORS[0].name,
     )
@@ -148,14 +148,14 @@ $DD
   await createCardBody(card, editor, TESTUSERS[1].id)
 
   expect((await getOrCreateCardByLink(link)).body.text).toMatchSnapshot()
-  expect(clean(((await getOrCreateCardByLink(link)).body.meta as unknown) as Record<string, unknown>)).toMatchSnapshot()
+  expect(clean((await getOrCreateCardByLink(link)).body.meta as unknown as Record<string, unknown>)).toMatchSnapshot()
   expect((await getOrCreateCardBySymbol('$CC')).body.text).toMatchSnapshot()
   expect(
-    clean(((await getOrCreateCardBySymbol('$CC')).body.meta as unknown) as Record<string, unknown>),
+    clean((await getOrCreateCardBySymbol('$CC')).body.meta as unknown as Record<string, unknown>),
   ).toMatchSnapshot()
   expect((await getOrCreateCardBySymbol('$DD')).body.text).toMatchSnapshot()
   expect(
-    clean(((await getOrCreateCardBySymbol('$DD')).body.meta as unknown) as Record<string, unknown>),
+    clean((await getOrCreateCardBySymbol('$DD')).body.meta as unknown as Record<string, unknown>),
   ).toMatchSnapshot()
 
   // await createCardBody(card, editor, TESTUSERS[1].id)

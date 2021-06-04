@@ -1,21 +1,24 @@
-name: web
+name: conote-backend
 image:
-  name: okteto.dev/conote-backend:dev
-  context: ../
-  dockerfile: ../Dockerfile.dev
-  target: web-dev
-  # args:
-  #   - ENV1=dev
+  name: registry.cloud.okteto.net/w121211/conote-backend:dev
+  context: ../../
+  dockerfile: ../../Dockerfile
+  target: builder
+  args:
+    - AUTH0_BASE_URL='https://okteto.com/'
   #   - ENV2=$VALUE
-command: ['zsh']
-workdir: /workspace/web
-sync:
-  - .:/workspace/web
-  - ../lib/editor:/workspace/lib/editor
+workdir: /app/src/web
+command: ['sh']
+# forward:
+#   - 8080:3000
+# sync:
+#   - .:/app/src/web
+#   - ../lib/editor:/app/lib/editor
+#   - ../lib/fetcher:/app/lib/fetcher
 resources:
   limits:
-    cpu: '0.1'
-    memory: 1Gi
+    cpu: '1'
+    memory: '3Gi'
 persistentVolume:
   enabled: false # must set false, otherwise node_modules will not exist in dev-container (bug?)
 autocreate: true

@@ -18,6 +18,12 @@ sudo docker exec -it <container_app> zsh
 Skafford: deploy k8s locally
 
 ```
+# install
+brew install skaffold
+
+# first test dockerfile works
+docker build .
+
 # from project root folder
 skaffold dev --port-forward
 
@@ -31,8 +37,24 @@ helm install --namespace kube-system nginx ingress-nginx --repo https://kubernet
 Okteto: deploy k8s online
 
 ```
+# install okteto, see: https://okteto.com/docs/getting-started
+...
+
+# dev
+cd .../conote/src/web
+okteto up --build
+
+# in terminal
+yarn run start:okteto
+
+# access
+kubectl get pods
+kubectl exec -it conote-backend-7875dc7fd8-tzdvl zsh
+
 # from project root folder
-okteto pipeline
+cd .../conote
+okteto pipeline deploy
+okteto pipeline destroy
 ```
 
 # Useful hints

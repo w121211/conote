@@ -68,14 +68,14 @@ export async function createVote({
   userId: string
 }): Promise<Vote> {
   // Naive vote: 不可重複vote、不可更新
-  //
+
   // TODO:
   const prevVote = await prisma.vote.findFirst({ where: { userId, pollId } })
   if (prevVote) throw new Error('User has voted')
 
   const poll = await prisma.poll.findUnique({ where: { id: pollId }, include: { count: true } })
   if (!poll || !poll.count) throw new Error('Poll not found')
-  if (choiceIdx < 0 || choiceIdx >= poll.choices.length) throw new Error('Choice Index not valid')
+  if (choiceIdx < 0 || choiceIdx >= poll.choices.length) throw new Error('Choice index not valid')
 
   const vote = await prisma.vote.create({
     data: {

@@ -1,5 +1,7 @@
 // See: https://github.com/auth0/nextjs-auth0/issues/45
 //      https://auth0.github.io/nextjs-auth0/modules/handlers_callback.html#modify-the-session-after-login
+// import { handleAuth, handleCallback, AfterCallback } from '@auth0/nextjs-auth0'
+// import env from '@beam-australia/react-env'
 import { handleAuth, handleCallback, AfterCallback } from '@auth0/nextjs-auth0'
 import { getOrCreateUser } from '../../../lib/models/user'
 

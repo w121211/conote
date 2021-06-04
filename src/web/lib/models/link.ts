@@ -1,6 +1,6 @@
 import * as PA from '@prisma/client'
 import prisma from '../prisma'
-import { parseUrl, fetch, FetchClient, FetchResult } from '../../../lib/fetcher/src/index'
+import { parseUrl, tryFetch, FetchClient, FetchResult } from '../../../packages/fetcher/src/index'
 
 interface ExtFetchResult extends FetchResult {
   oauthorName?: string
@@ -13,47 +13,47 @@ function toOauthorName(domain: string, domainAuthorName: string) {
 export async function getOrCreateLink(
   url: string,
   fetcher?: FetchClient,
-): Promise<[PA.Link, { fetched: ExtFetchResult }]> {
+): Promise<[PA.Link, { fetchResult: ExtFetchResult }]> {
   /**
    * 給予一個URL，從資料庫中返回該URL對應的link
    * 若link未存在，建立link，同時建立oauthor
    */
   // TODO: 這個url尚未resolved, 需要考慮redirect、不同url指向同一個頁面的情況
   const parsed = parseUrl(url)
-  const found = await prisma.link.findUnique({ where: { url: parsed.url } })
+  const found = await prisma.link.findUnique({ where: { url: parsed.resolvedUrl } })
 
   if (found !== null) {
-    return [found, { fetched: (found.meta as unknown) as ExtFetchResult }]
+    return [found, { fetchResult: found.meta as unknown as ExtFetchResult }]
   }
 
   // Link未存在，嘗試fetch取得來源資訊，建立link, cocard, oauthor後返回
   // TODO: 可能在fetch後發現resolved-url已經存在
-  let fetched: ExtFetchResult = fetcher ? await fetcher.fetch(url) : await fetch(url)
+  let res: ExtFetchResult = fetcher ? await fetcher.fetch(url) : await tryFetch(url)
 
   // TODO: Oauthor的辨識太低，而且沒有統一
   let oauthor: PA.Oauthor | undefined
-  if (fetched.authorName) {
-    const oauthorName = toOauthorName(fetched.domain, fetched.authorName)
+  if (res.authorName) {
+    const oauthorName = toOauthorName(res.domain, res.authorName)
     oauthor = await prisma.oauthor.upsert({
       where: { name: oauthorName },
       create: { name: oauthorName },
       update: {},
     })
-    fetched = { ...fetched, oauthorName }
+    res = { ...res, oauthorName }
   }
 
   const link = await prisma.link.create({
     data: {
-      url: fetched.resolvedUrl,
-      domain: fetched.domain,
-      srcId: fetched.srcId,
-      srcType: fetched.srcType as any,
-      meta: fetched as any,
+      url: res.resolvedUrl,
+      domain: res.domain,
+      srcId: res.srcId,
+      srcType: res.srcType as any,
+      meta: res as any,
       oauthor: oauthor ? { connect: { id: oauthor.id } } : undefined,
     },
   })
 
-  return [link, { fetched }]
+  return [link, { fetchResult: res }]
 }
 
 // export async function createLink(

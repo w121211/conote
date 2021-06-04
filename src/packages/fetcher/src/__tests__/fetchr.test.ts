@@ -1,31 +1,15 @@
-// import _ from 'lodash'
-// import { hash, hashSync } from 'bcryptjs'
-// import { PrismaClient } from '@prisma/client'
-// import { prisma, foo } from '../context'
 import { existsSync, readFileSync, unlinkSync } from 'fs'
 import { resolve } from 'path'
-import { fetch, FetchClient } from '../index'
-import * as domainFetchers from '../domain-fetcher'
-// import { _clean, BOT, TESTUSERS } from '../test-helper'
+import { FetchClient } from '../index'
+import { tryFetch } from '../domain/index'
 
-// describe('function fetch', () => {
-//   it('resolves url', async () => {
-//     expect(await fetch('https://test.com')).toMatchSnapshot()
-//   })
-
-//   it('use domain fetch', async () => {
-//     expect(await fetch('https://test.com')).toEqual(await domainFetchers.general('https://test.com'))
-//     expect(await fetch('https://test.com')).toEqual(await domainFetchers.general('https://test.com'))
-//   })
-// })
-
-describe('domain fetch', () => {
-  it('youtube', async () => {
-    expect(await domainFetchers.youtube('https://www.youtube.com/watch?v=9KUj1174V8w')).toMatchSnapshot()
+describe('function tryFetch', () => {
+  it('fetch youtube', async () => {
+    expect(await tryFetch('https://www.youtube.com/watch?v=CKljNQ5xe2w')).toMatchSnapshot()
   })
 
-  it('general', async () => {
-    expect(await domainFetchers.general('https://test.com', 'test.com')).toMatchSnapshot()
+  it('fetch general', async () => {
+    expect(await tryFetch('https://test.com')).toMatchSnapshot()
   })
 })
 

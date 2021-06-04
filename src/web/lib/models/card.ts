@@ -2,7 +2,7 @@
 // import * as _ from 'lodash';
 // import dayjs from 'dayjs';
 import { CardBody, CardTemplate, Cocard, Link, Symbol as PrismaSymbol, SymbolCat } from '@prisma/client'
-import { Editor } from '../../../lib/editor/src'
+import { Editor } from '../../../packages/editor/src'
 import prisma from '../prisma'
 import { getBotId } from './user'
 import { getOrCreateSymbol, symbolToUrl, SYMBOL_DOMAIN } from './symbol'
@@ -73,10 +73,10 @@ async function createCard(
   // 創card專屬的comment, ie discuss-board
   const discussBoard = await prisma.comment.create({
     data: {
-      meta: ({
+      meta: {
         cardId: card.id,
         inCardIds: [],
-      } as CommentMeta) as Record<string, any>,
+      } as CommentMeta as Record<string, any>,
       text: '',
       user: { connect: { id: botId } },
       count: { create: {} },
@@ -86,10 +86,10 @@ async function createCard(
   // 更新card-meta
   return prisma.cocard.update({
     data: {
-      meta: ({
+      meta: {
         symbol: symbol ? symbol.name : undefined,
         commentId: discussBoard.id,
-      } as CardMeta) as Record<string, any>,
+      } as CardMeta as Record<string, any>,
     },
     where: { id: card.id },
     include: {
@@ -99,9 +99,7 @@ async function createCard(
   })
 }
 
-export async function getOrCreateCardBySymbol(
-  symbolName: string,
-): Promise<
+export async function getOrCreateCardBySymbol(symbolName: string): Promise<
   Cocard & {
     link: Link
     body: CardBody
@@ -122,9 +120,7 @@ export async function getOrCreateCardBySymbol(
   return await createCard(SYMBOL_TO_TEMPLATE[symbol.cat], symbol)
 }
 
-export async function getOrCreateCardByLink(
-  link: Link,
-): Promise<
+export async function getOrCreateCardByLink(link: Link): Promise<
   Cocard & {
     link: Link
     body: CardBody

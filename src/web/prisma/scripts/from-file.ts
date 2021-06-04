@@ -2,11 +2,9 @@
 /** Run: npx|yarn ts-node prisma/script/fromfile.ts */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 import { resolve, basename, dirname, join } from 'path'
-import dotenv from 'dotenv'
-import { hash, hashSync } from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
-import { splitByUrl, Editor, Markerline } from '../../../lib/editor/src'
-import { FetchClient } from '../../../lib/fetcher/src'
+import { splitByUrl, Editor, Markerline } from '../../../packages/editor/src'
+import { FetchClient } from '../../../packages/fetcher/src'
 import { getOrCreateLink } from '../../lib/models/link'
 import { getOrCreateCardByLink } from '../../lib/models/card'
 import { createWebCardBody } from '../../lib/models/card-body'

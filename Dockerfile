@@ -1,66 +1,37 @@
-# FROM node:14-buster AS base
-# COPY ./tsconfig.base.json /workspace/
-# WORKDIR /workspace/src/lib/editor
-# COPY ./src/lib/editor/package.json ./src/lib/editor/yarn.lock ./
-# RUN yarn
-# COPY ./src/lib/editor ./
-# RUN yarn build
-
-# FROM base AS web
-# WORKDIR /workspace/src/web
-# COPY ./src/web/package.json ./src/web/yarn.lock ./
-# RUN yarn
-# COPY ./src/backend ./
-# RUN yarn build
-# ENTRYPOINT ["yarn", "start"]
-
-# # FROM base AS frontend-build
-# # WORKDIR /workspace/src/frontend/web
-# # COPY ./src/frontend/web/package.json ./src/frontend/web/yarn.lock ./
-# # RUN yarn
-# # COPY ./src/frontend/web ./
-# # RUN yarn build
-
-# FROM nginx:1.17.0-alpine AS frontend
-# COPY --from=frontend-build /workspace/src/frontend/web/build /var/www/
-# COPY ./src/frontend/web/configs/nginx.conf /etc/nginx/nginx.conf
-# # Expose port 80
-# EXPOSE 80
-# # Entry point for target:frontend
-# ENTRYPOINT ["nginx","-g","daemon off;"]
-
-
 # Install dependencies only when needed
-FROM node:14-alpine AS deps
+FROM node:14-alpine AS packages-deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat gettext
 COPY tsconfig.base.json /app/
-WORKDIR /app/src/lib/editor
-COPY src/lib/editor ./
+
+WORKDIR /app/src/packages/editor
+COPY src/packages/editor ./
 # COPY src/lib/editor/package.json src/lib/editor/yarn.lock ./
 RUN yarn install --frozen-lockfile
 RUN yarn build
 
-WORKDIR /app/src/lib/fetcher
-COPY src/lib/fetcher ./
+WORKDIR /app/src/packages/fetcher
+COPY src/packages/fetcher ./
 RUN yarn install --frozen-lockfile
 RUN yarn build
-
-WORKDIR /app/src/web
-COPY src/web/package.json src/web/yarn.lock ./
-RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
-FROM node:14-alpine AS builder
-# WORKDIR /app
-# COPY . .
-# COPY --from=deps /app/node_modules ./node_modules
-# RUN yarn build
+FROM node:14-alpine AS deps
 COPY tsconfig.base.json /app/
+COPY --from=packages-deps /app/src/packages/editor /app/src/packages/editor
+COPY --from=packages-deps /app/src/packages/fetcher /app/src/packages/fetcher
 WORKDIR /app/src/web
 COPY src/web ./
-COPY --from=deps /app/src/web/node_modules ./node_modules
+RUN yarn install --frozen-lockfile
+
+FROM deps AS builder
+WORKDIR /app/src/web
 RUN yarn build
+
+# Only use for okteto dev
+# FROM deps AS okteto-builder
+# WORKDIR /app/src/web
+# RUN envsubst < ".env.template" > ".env"  
 
 # Production image, copy all the files and run next
 FROM node:14-alpine AS runner
