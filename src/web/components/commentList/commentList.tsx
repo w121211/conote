@@ -58,9 +58,13 @@ const CommentList = ({
   // } & ReplyFragment)>>()
   const myRef = useRef<HTMLLIElement>(null)
 
-  const onClickHandler = (e: any, anchorId: string) => {
-    anchorHLHandler(anchorId)
-    myScrollIntoView()
+  const onClickHandler = (e: any, anchorId: any | null) => {
+    // const arr = [...anchorId]
+    // console.log(arr)
+    // ...anchorId
+
+    anchorId && anchorHLHandler([...anchorId][0][1].trimEnd())
+    // myScrollIntoView()
 
     // const highLight = document.getElementsByClassName('highLight')
     // highLight && highLight[0].scrollIntoView()
@@ -155,11 +159,15 @@ const CommentList = ({
           //   </li>
           // </>
           // ) : (
-          <li className={classes.commentRoot} ref={myRef} onClick={e => onClickHandler(e, item.text.slice(0, 3))}>
+          <li
+            className={classes.commentRoot}
+            ref={myRef}
+            onClick={e => onClickHandler(e, item.text.matchAll(/(^\d+ )(.+$)/g))}
+          >
             <CommentTemplate
               id={item.id}
-              content={item.text}
-              updatedAt={item.updatedAt}
+              content={item.text.replace(/(^\d+ )(.+$)/g, '$2')}
+              // updatedAt={item.updatedAt}
               floor={`#${repliesLength && repliesLength - idx}`}
             />
           </li>

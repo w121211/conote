@@ -13,7 +13,7 @@ interface commentTemplate {
   floor?: string
   className?: string
   clicked?: boolean
-  updatedAt: any
+  updatedAt?: any
   // type?: string | undefined
 }
 
@@ -45,34 +45,36 @@ const CommenTemplate = ({ id, content, floor, className, clicked, updatedAt }: c
     e.stopPropagation()
   }
 
-  // const actions = [
-  //   <Tooltip key="comment-basic-like" title="Like">
-  //     <span onClick={like}>
-  //       {React.createElement(action === 'liked' ? LikeFilled : LikeOutlined)}
-  //       <span className="comment-action">{likes}</span>
-  //     </span>
-  //   </Tooltip>,
-  //   <Tooltip key="comment-basic-dislike" title="Dislike">
-  //     <span onClick={dislike}>
-  //       {React.createElement(action === 'disliked' ? DislikeFilled : DislikeOutlined)}
-  //       <span className="comment-action">{dislikes}</span>
-  //     </span>
-  //   </Tooltip>,
-  //   // parent ? (
-  //   //   <span id={`1`} key="comment-basic-reply-to" onClick={toggleTextAreaHandler}>
-  //   //     回覆
-  //   //   </span>
-  //   // ) : null,
-  // ]
+  const actions = [
+    // <MyTooltip key="comment-basic-like" title="Like">
+    <>
+      <span onClick={like}>
+        {React.createElement(action === 'liked' ? LikeFilled : LikeOutlined)}
+        <span className="comment-action">{likes}</span>
+      </span>
+      {/* // </MyTooltip>, */}
+      {/* // <MyTooltip key="comment-basic-dislike" title="Dislike"> */}
+      <span onClick={dislike}>
+        {React.createElement(action === 'disliked' ? DislikeFilled : DislikeOutlined)}
+        <span className="comment-action">{dislikes}</span>
+      </span>
+    </>,
+    // </MyTooltip>,
+    // parent ? (
+    //   <span id={`1`} key="comment-basic-reply-to" onClick={toggleTextAreaHandler}>
+    //     回覆
+    //   </span>
+    // ) : null,
+  ]
 
   return (
     <MyTooltip title="點擊回覆">
       <Comment
         className={classes.comment}
         author={floor}
-        // actions={actions}
+        actions={actions}
         content={content}
-        datetime={moment(updatedAt).format('YYYY-MM-DD')}
+        // datetime={moment(updatedAt).format('YYYY-MM-DD')}
       />
     </MyTooltip>
   )

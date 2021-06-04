@@ -66,16 +66,27 @@ function HomePage(): JSX.Element {
 
   if (loading || isLoading) return <h1>Loading</h1>
 
-  if (user && data) {
-    return (
-      <div>
-        Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
-        <LatestCards />
+  return (
+    // <Layout>
+    <div className={classes.container}>
+      <div className={classes.inner}>
+        <div className={classes.search}>
+          <h1>Search</h1>
+          <SearchAllForm />
+        </div>
+        {user && data ? (
+          <div>
+            <h3>最新</h3>
+            <LatestCards />
+          </div>
+        ) : (
+          <a href="/api/auth/login">Login</a>
+        )}
       </div>
-    )
-  }
+    </div>
+    // {/* </Layout> */}
+  )
 
-  return <a href="/api/auth/login">Login</a>
   // return (
   //   <>
   //     {/* <SideBar /> */}

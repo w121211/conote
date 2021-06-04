@@ -8,7 +8,7 @@
   display: flex;
   width: 100%;
   height: 100vh;
-  background-color: $bg;
+  // background-color: $bg;
 }
 .mainInner {
   display: flex;
@@ -17,18 +17,19 @@
 }
 .header {
   // width: 90%;
-  line-height: 1.6em;
-  letter-spacing: 1px;
-  .title {
-    // font-family: "Noto Sans TC";
-    display: block;
-    margin: 10px 0;
-    line-height: 1.8em;
-    white-space: pre-line;
-    font-weight: 500;
-    font-size: 18px;
-    color: $black;
-  }
+  // // line-height: 1.6em;
+  // // letter-spacing: 1px;
+  // padding-bottom: 10px;
+  // .title {
+  //   // font-family: "Noto Sans TC";
+  //   display: block;
+  //   margin: 10px 0;
+  //   line-height: 1.5;
+  //   white-space: pre-line;
+  //   font-weight: 500;
+  //   font-size: 18px;
+  //   color: $black;
+  // }
   .date {
     @extend %Round_sm_gray_en;
     display: inline-block;
@@ -90,10 +91,10 @@ a {
   // height: calc(100vh - 60px);
 
   width: 88%;
-  margin: 30px auto;
-  background: #fff;
-  margin-bottom: 60px;
-  padding: 18px 40px;
+  margin: 0px auto;
+  // background: #fff;
+  // margin-bottom: 60px;
+  padding: 30px 40px;
 }
 .cardOuter {
   height: 100vh;

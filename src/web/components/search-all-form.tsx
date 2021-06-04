@@ -8,6 +8,7 @@ export function SearchAllForm(): JSX.Element {
   const router = useRouter()
   const [searchAll, { loading, data }] = useSearchAllLazyQuery()
   const [options, setOptions] = useState<{ value: string }[]>([])
+  const [inputValue, setInputValue] = useState('')
 
   useEffect(() => {
     if (data && data.searchAll) {
@@ -34,9 +35,21 @@ export function SearchAllForm(): JSX.Element {
           searchAll({ variables: { term } })
         }
       }}
+      filterOption={(inputValue, option) => option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1}
       // placeholder="input here"
     >
-      <Input.Search placeholder="搜尋全站: $BA, Google, 自動駕駛" loading={loading} />
+      <Input
+        placeholder="搜尋全站: $BA, Google, 自動駕駛"
+        onChange={e => setInputValue(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            if (inputValue.startsWith('$') || inputValue.startsWith('[')) {
+              // navigate(`/card?${toUrlParams({ s: value })}`)
+              router.push(`/card?${toUrlParams({ s: inputValue.toUpperCase() })}`)
+            }
+          }
+        }}
+      />
     </AutoComplete>
   )
 }

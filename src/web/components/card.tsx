@@ -5,11 +5,12 @@
 import React, { useState, useRef, forwardRef, useEffect, useImperativeHandle } from 'react'
 import { Editor, Section, ExtTokenStream, streamToStr } from '../../lib/editor/src/index'
 import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
+import Link from 'next/link'
 import { AnchorPanel } from './tile-panel'
 import { QueryCommentModal } from './tile'
 import { toUrlParams } from '../lib/helper'
 import { PollChoices } from './poll-form'
-import { Link } from './link'
+// import { Link } from './link'
 import { MyTooltip } from '../components/my-tooltip/my-tooltip'
 import classes from './card.module.scss'
 import ClockIcon from '../assets/svg/clock.svg'
@@ -40,6 +41,7 @@ const RenderTokenStream = forwardRef(
       showDiscuss,
       anchorIdHL,
       hlElementHandler,
+      meAnchor,
     }: {
       stream: ExtTokenStream
       className?: string
@@ -57,10 +59,11 @@ const RenderTokenStream = forwardRef(
       highLightClassName?: boolean
       anchorIdHL?: string
       hlElementHandler?: (el: HTMLSpanElement) => void
+      meAnchor?: string
     },
     ref: any,
   ): JSX.Element | null => {
-    const inlineValueArr: string[] = [classes.inlineValue]
+    // const inlineValueArr: string[] = [classes.inlineValue]
     // const [Panel, setPanel] = useState(false)
     const highLightRef = useRef<HTMLSpanElement>(null)
     // const [commentTextArea, setCommentTextArea] = useState(inlineValueArr)
@@ -87,15 +90,25 @@ const RenderTokenStream = forwardRef(
         //   {stream}
         //   {/* {console.log(stream)} */}
         // </>
-        <>
-          {/* // 一般render */}
-          <span className={`${classes.black} `} ref={highLightRef}>
-            {stream.replace(/^ +/g, '').replace(/ +$/g, '')}
-            {/* {console.log(hlRef)} */}
-            {highLightClassName && highLightRef.current && hlElementHandler && hlElementHandler(highLightRef?.current)}
-            {/* {children} */}
-          </span>
-        </>
+        // 一般render
+        <span
+          // id={`${meAnchor}`}
+          className={`${classes.text} }`}
+          // ref={el => {
+          //   if (meAnchor === anchorIdHL && hlElementHandler && el) {
+          //     hlElementHandler(el)
+          //     el.scrollIntoView({ behavior: 'smooth' })
+          //   }
+          // }}
+        >
+          {stream.replace(/^ +/g, '').replace(/ +$/g, '')}
+          {/* {console.log(meAnchor)} */}
+          {/* {console.log(hlRef)} */}
+          {/* {highLightClassName && highLightRef.current && hlElementHandler
+              ? hlElementHandler(highLightRef?.current)
+              : null} */}
+          {/* {children} */}
+        </span>
       )
     }
     if (Array.isArray(stream)) {
@@ -109,7 +122,16 @@ const RenderTokenStream = forwardRef(
           {hasStr && noReturn ? (
             //包含hover效果
             // <div className={classes.array} onClick={onFocusHandler} onBlur={onBlurHandler} tabIndex={0}>
-            <div className={classes.array}>
+            <span
+              id={`${meAnchor}`}
+              className={`${classes.array} ${meAnchor === anchorIdHL ? 'highLight' : ''}`}
+              ref={el => {
+                if (meAnchor === anchorIdHL && hlElementHandler && el) {
+                  hlElementHandler(el)
+                  el.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
+            >
               {stream.map((e, i) => {
                 return (
                   <RenderTokenStream
@@ -124,13 +146,14 @@ const RenderTokenStream = forwardRef(
                     clickPoll={clickPoll}
                     showDiscuss={showDiscuss}
                     anchorIdHL={anchorIdHL}
-                    highLightClassName={highLightClassName}
+                    // highLightClassName={highLightClassName}
                     hlElementHandler={hlElementHandler}
+                    meAnchor={meAnchor}
                     // commentId={commentId}
                   />
                 )
               })}
-            </div>
+            </span>
           ) : (
             //一般render
             stream.map((e, i) => {
@@ -147,8 +170,9 @@ const RenderTokenStream = forwardRef(
                   clickPoll={clickPoll}
                   showDiscuss={showDiscuss}
                   anchorIdHL={anchorIdHL}
-                  highLightClassName={highLightClassName}
+                  // highLightClassName={highLightClassName}
                   hlElementHandler={hlElementHandler}
+                  meAnchor={meAnchor}
                   // commentId={commentId}
                 />
               )
@@ -196,7 +220,7 @@ const RenderTokenStream = forwardRef(
               // console.log(el)
             }
           >
-            <Link to={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link>
+            <Link href={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link>
           </span>
         )
 
@@ -213,7 +237,7 @@ const RenderTokenStream = forwardRef(
               clickPoll={clickPoll}
               showDiscuss={showDiscuss}
               anchorIdHL={anchorIdHL}
-              highLightClassName={highLightClassName}
+              // highLightClassName={highLightClassName}
               hlElementHandler={hlElementHandler}
             />
           </ul>
@@ -230,7 +254,7 @@ const RenderTokenStream = forwardRef(
             clickPoll={clickPoll}
             showDiscuss={showDiscuss}
             anchorIdHL={anchorIdHL}
-            highLightClassName={highLightClassName}
+            // highLightClassName={highLightClassName}
             hlElementHandler={hlElementHandler}
           />
         )
@@ -252,7 +276,7 @@ const RenderTokenStream = forwardRef(
                 clickPoll={clickPoll}
                 showDiscuss={showDiscuss}
                 anchorIdHL={anchorIdHL}
-                highLightClassName={highLightClassName}
+                // highLightClassName={highLightClassName}
                 hlElementHandler={hlElementHandler}
               />
 
@@ -277,6 +301,9 @@ const RenderTokenStream = forwardRef(
           return (
             // <QueryCommentModal id={stream.markerline.commentId.toString()}>
             <li className={classes.inlineValue}>
+              <svg viewBox="0 0 18 18" className={classes.bullet}>
+                <circle cx="9" cy="9" r="3.5"></circle>
+              </svg>
               <RenderTokenStream
                 stream={stream.content}
                 ref={ref}
@@ -287,7 +314,8 @@ const RenderTokenStream = forwardRef(
                 clickPoll={clickPoll}
                 showDiscuss={showDiscuss}
                 anchorIdHL={anchorIdHL}
-                highLightClassName={anchorIdHL === stream.markerline.anchorId.toString()}
+                meAnchor={stream.markerline.anchorId.toString()}
+                // highLightClassName={anchorIdHL === stream.markerline.anchorId.toString()}
                 hlElementHandler={hlElementHandler}
               />
               {/* {stream.markerline && commentIdHandler(stream.markerline.commentId.toString())} */}
@@ -308,7 +336,7 @@ const RenderTokenStream = forwardRef(
               clickPoll={clickPoll}
               showDiscuss={showDiscuss}
               anchorIdHL={anchorIdHL}
-              highLightClassName={highLightClassName}
+              // highLightClassName={highLightClassName}
               hlElementHandler={hlElementHandler}
             />
           )
@@ -325,7 +353,7 @@ const RenderTokenStream = forwardRef(
             clickPoll={clickPoll}
             showDiscuss={showDiscuss}
             anchorIdHL={anchorIdHL}
-            highLightClassName={highLightClassName}
+            // highLightClassName={highLightClassName}
             hlElementHandler={hlElementHandler}
           />
         )
@@ -334,9 +362,28 @@ const RenderTokenStream = forwardRef(
       case 'line-mark':
       case 'inline-mark':
         return (
-          <span className={classes.marker}>
-            {content.replace('[+]', '優勢').replace('[-]', '劣勢').replace('[?]', '問題').replace('[key]', '關鍵字')}
-          </span>
+          <>
+            {content === '[+]' && (
+              <span className={classes.marker}>
+                優勢<span className={classes.markerSyntax}>{content}</span>
+              </span>
+            )}
+            {content === '[-]' && (
+              <span className={classes.marker}>
+                劣勢<span className={classes.markerSyntax}>{content}</span>
+              </span>
+            )}
+            {content === '[?]' && (
+              <span className={classes.marker}>
+                Q&A<span className={classes.markerSyntax}>{content}</span>
+              </span>
+            )}
+            {content === '[key]' && (
+              <span className={classes.marker}>
+                關鍵字<span className={classes.markerSyntax}>{content}</span>
+              </span>
+            )}
+          </>
         )
       // return <span className={classes.marker}>{content}</span>
       case 'ticker':
@@ -344,7 +391,7 @@ const RenderTokenStream = forwardRef(
         // console.log(`symbol: ${content}`)
         return (
           <span className={classes.keyword}>
-            <Link to={`/card?${toUrlParams({ s: content })}`}>
+            <Link href={`/card?${toUrlParams({ s: content })}`}>
               {content.replace('[[', '').replace(']]', '')}
               {/* {console.log(stream)} */}
             </Link>
@@ -364,7 +411,7 @@ const RenderTokenStream = forwardRef(
           ) : null
         const src =
           stream.markerline && stream.markerline.src ? (
-            <Link to={`/card?${toUrlParams({ u: stream.markerline.src })}`}>src</Link>
+            <Link href={`/card?${toUrlParams({ u: stream.markerline.src })}`}>src</Link>
           ) : null
 
         if (panel || src)
@@ -391,7 +438,7 @@ const RenderTokenStream = forwardRef(
             clickPoll={clickPoll}
             showDiscuss={showDiscuss}
             anchorIdHL={anchorIdHL}
-            highLightClassName={highLightClassName}
+            // highLightClassName={highLightClassName}
             hlElementHandler={hlElementHandler}
           />
         )
@@ -407,7 +454,7 @@ const RenderSection = forwardRef(
       titleRef,
       showQuestion,
       commentIdHandler,
-      pollCommentIdHandler,
+      // pollCommentIdHandler,
       anchorIdHandler,
       clickPoll,
       showDiscuss,
@@ -419,7 +466,7 @@ const RenderSection = forwardRef(
       titleRef?: (arr: any[]) => void
       showQuestion?: () => void
       commentIdHandler?: (commentId: string) => void
-      pollCommentIdHandler?: (commentId: string) => void
+      // pollCommentIdHandler?: (commentId: string) => void
       clickPoll?: (commentId: string) => void
       anchorIdHandler?: (anchorId: string) => void
       showDiscuss?: () => void
@@ -466,7 +513,7 @@ export const RenderCardBody = forwardRef(
       titleRef,
       showQuestion,
       commentIdHandler,
-      pollCommentIdHandler,
+      // pollCommentIdHandler,
       anchorIdHandler,
       clickPoll,
       showDiscuss,
@@ -477,7 +524,7 @@ export const RenderCardBody = forwardRef(
       titleRef?: (arr: any[]) => void
       showQuestion?: () => void
       commentIdHandler?: (commentId: string) => void
-      pollCommentIdHandler?: (commentId: string) => void
+      // pollCommentIdHandler?: (commentId: string) => void
       anchorIdHandler?: (anchorId: string) => void
       clickPoll?: (commentId: string) => void
       showDiscuss?: () => void
@@ -533,7 +580,7 @@ export const RenderCardBody = forwardRef(
             showQuestion={showQuestion}
             // commentIdHandler={commentIdHandler}
             anchorIdHandler={anchorIdHandler}
-            pollCommentIdHandler={pollCommentIdHandler}
+            // pollCommentIdHandler={pollCommentIdHandler}
             clickPoll={clickPoll}
             showDiscuss={showDiscuss}
             anchorIdHL={anchorIdHL}
@@ -548,68 +595,62 @@ export const RenderCardBody = forwardRef(
 )
 RenderCardBody.displayName = 'RenderCardBody'
 
-export const CardBody = forwardRef(
-  (
-    {
-      card,
-      bySrc,
-      // cardCommentIdHandler,
-      titleRefHandler,
-      showQuestion,
-      commentIdHandler,
-      pollCommentIdHandler,
-      anchorIdHandler,
-      clickPoll,
-      showDiscuss,
-      anchorIdHL,
-      hlElementHandler,
-    }: {
-      card: CocardFragment
-      bySrc?: string
-      // cardCommentIdHandler: (cardCommentId: string) => void
-      titleRefHandler?: (arr: any[]) => void
-      showQuestion?: () => void
-      commentIdHandler?: (commentId: string) => void
-      pollCommentIdHandler: (commentId: string) => void
-      clickPoll: (commentId: string) => void
-      anchorIdHandler: (anchorId: string) => void
-      showDiscuss: () => void
-      anchorIdHL: string
-      hlElementHandler: (el: HTMLSpanElement) => void
-    },
-    ref,
-  ): JSX.Element => {
-    // console.log(card)
+export const CardBody = ({
+  card,
+  bySrc,
+  // cardCommentIdHandler,
+  titleRefHandler,
+  showQuestion,
+  commentIdHandler,
+  // pollCommentIdHandler,
+  anchorIdHandler,
+  clickPoll,
+  showDiscuss,
+  anchorIdHL,
+  hlElementHandler,
+}: {
+  card: CocardFragment
+  bySrc?: string
+  // cardCommentIdHandler: (cardCommentId: string) => void
+  titleRefHandler?: (arr: any[]) => void
+  showQuestion?: () => void
+  commentIdHandler?: (commentId: string) => void
+  // pollCommentIdHandler: (commentId: string) => void
+  clickPoll: (commentId: string) => void
+  anchorIdHandler: (anchorId: string) => void
+  showDiscuss: () => void
+  anchorIdHL: string
+  hlElementHandler: (el: HTMLSpanElement) => void
+}): JSX.Element => {
+  // console.log(card)
 
-    if (card.body === null) return <p>[Error]: null body</p>
+  if (card.body === null) return <p>[Error]: null body</p>
 
-    // const meta: CardMeta | undefined = card.meta ? (JSON.parse(card.meta) as CardMeta) : undefined
-    const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
-    editor.flush({ attachMarkerlinesToTokens: true })
+  // const meta: CardMeta | undefined = card.meta ? (JSON.parse(card.meta) as CardMeta) : undefined
+  const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
+  editor.flush({ attachMarkerlinesToTokens: true })
 
-    return (
-      // <>
-      //   <QueryCommentModal commentId={card.meta.commentId.toString()}>
-      //     <div>discuss</div>
-      // </QueryCommentModal>
-      <RenderCardBody
-        sects={editor.getSections()}
-        titleRef={titleRefHandler}
-        showQuestion={showQuestion}
-        // commentIdHandler={commentIdHandler}
-        anchorIdHandler={anchorIdHandler}
-        pollCommentIdHandler={pollCommentIdHandler}
-        clickPoll={clickPoll}
-        showDiscuss={showDiscuss}
-        anchorIdHL={anchorIdHL}
-        // ref={ref}
-        hlElementHandler={hlElementHandler}
-      />
-      // </>
-    )
-  },
-)
-CardBody.displayName = 'CardBody'
+  return (
+    // <>
+    //   <QueryCommentModal commentId={card.meta.commentId.toString()}>
+    //     <div>discuss</div>
+    // </QueryCommentModal>
+    <RenderCardBody
+      sects={editor.getSections()}
+      titleRef={titleRefHandler}
+      showQuestion={showQuestion}
+      // commentIdHandler={commentIdHandler}
+      anchorIdHandler={anchorIdHandler}
+      // pollCommentIdHandler={pollCommentIdHandler}
+      clickPoll={clickPoll}
+      showDiscuss={showDiscuss}
+      anchorIdHL={anchorIdHL}
+      // ref={ref}
+      hlElementHandler={hlElementHandler}
+    />
+    // </>
+  )
+}
 
 export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
   // const title = findOneComment(MARKER_FORMAT.srcTitle.mark, card.comments)
@@ -650,7 +691,7 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
   return (
     <div className={classes.header}>
       {cardDomain === '_' ? (
-        <h1 className={classes.tickerTitle}>{cardTitle}</h1>
+        <h1 className={classes.tickerTitle}>{cardTitle.replace('[[', '').replace(']]', '')}</h1>
       ) : (
         <>
           <span className={classes.author}>author</span>

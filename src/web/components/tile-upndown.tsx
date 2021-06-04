@@ -2,7 +2,7 @@
  * TODO:
  * - 應該可以簡化，目前重複的部分太多
  */
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { LikeOutlined, DislikeOutlined, LikeFilled, DislikeFilled } from '@ant-design/icons'
 import {
   AnchorCountFragment,
@@ -39,6 +39,7 @@ interface AnchorLikeProps {
   createLike: (a: { variables: CreateAnchorLikeMutationVariables }) => void
   updateLike: (a: { variables: UpdateAnchorLikeMutationVariables }) => void
   showCount?: boolean
+  // myAnchorLikeRefetch: any
 }
 
 export function AnchorLike({
@@ -48,29 +49,40 @@ export function AnchorLike({
   createLike,
   updateLike,
   showCount = false,
-}: AnchorLikeProps): JSX.Element {
+}: // myAnchorLikeRefetch,
+AnchorLikeProps): JSX.Element {
   let onClick: () => void
-  let liked = false
-
+  const [liked, setLiked] = useState(false)
+  useEffect(() => {
+    if (meLike) setLiked(meLike && meLike.choice === LikeChoice.Up)
+    console.log('liked true')
+  })
   if (meLike && meLike.choice !== LikeChoice.Up) {
     onClick = function () {
       updateLike({ variables: { id: meLike.id, data: { choice: LikeChoice.Up } } })
+      setLiked(true)
     }
   } else if (meLike && meLike.choice === LikeChoice.Up) {
     onClick = function () {
       updateLike({ variables: { id: meLike.id, data: { choice: LikeChoice.Neutral } } })
+      setLiked(false)
     }
-    liked = true
+    // setLiked(true)
   } else {
     onClick = function () {
       createLike({ variables: { anchorId, data: { choice: LikeChoice.Up } } })
+      // myAnchorLikeRefetch()
+      setLiked(true)
+      console.log('like true')
     }
   }
 
   return (
     <span onClick={onClick}>
       {liked ? <LikeFilled /> : <LikeOutlined />}
-      {showCount && count && count.nUps}
+      {count ? count.nUps : 0}
+
+      {/* {console.log('count', count)} */}
     </span>
   )
 }
