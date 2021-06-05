@@ -4,7 +4,7 @@ import { streamToStr } from './helper'
 
 export const LINE_VALUE_GRAMMAR = {
   ticker: { pattern: /\$[A-Z-]+/ },
-  topic: { pattern: /\[\[[^\]]+\]\]/u },
+  topic: { pattern: /\[\[[^\]\n]+\]\]/u },
   stamp: { pattern: /(?<=\s)%[a-zA-Z0-9]{3}$/ },
   'vote-chocie': { pattern: /<[^>\s]+>/u },
 }
@@ -64,17 +64,17 @@ export const SECTION_GRAMMAR = {
   },
   'sect-topic': {
     alias: 'sect-topic',
-    pattern: /^\n\[\[[^\]]+\]\](@\w+)?$/m,
+    pattern: /^\n\[\[[^\]\n]+\]\](@\w+)?$/m,
     inside: {
-      'sect-symbol': { pattern: /^\n\[\[[^\]]+\]\]/u },
+      'sect-symbol': { pattern: /^\n\[\[[^\]\n]+\]\]/u },
       'sect-user': { pattern: /@\w+/ },
     },
   },
   'sect-topic-begin-line': {
     alias: 'sect-topic',
-    pattern: /^\[\[[^\]]+\]\](@\w+)?\n/,
+    pattern: /^\[\[[^\]\n]+\]\](@\w+)?\n/,
     inside: {
-      'sect-symbol': { pattern: /^\[\[[^\]]+\]\]/u },
+      'sect-symbol': { pattern: /^\[\[[^\]\n]+\]\]/u },
       'sect-user': { pattern: /@\w+/ },
     },
   },

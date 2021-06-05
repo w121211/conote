@@ -39,6 +39,8 @@ export function CardPage(): JSX.Element {
                 </button>
                 <CardHead card={data.cocard} />
                 {edit ? (
+                  <CardForm card={data.cocard} />
+                ) : (
                   <CardBody
                     card={data.cocard}
                     cardCommentIdHandler={() => {}}
@@ -49,8 +51,6 @@ export function CardPage(): JSX.Element {
                     anchorIdHL={''}
                     hlElementHandler={() => {}}
                   />
-                ) : (
-                  <CardForm card={data.cocard} />
                 )}
               </div>
             )

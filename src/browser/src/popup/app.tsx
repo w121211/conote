@@ -40,10 +40,7 @@ const onRedirectCallback = (appState: AppState) => {
 
 function Protected({ children }: { children: React.ReactNode }): JSX.Element | null {
   const { data } = useMeQuery()
-  if (data?.me) {
-    console.log(data)
-    return <>{children}</>
-  }
+  if (data?.me) return <>{children}</>
   return (
     <div>
       <a href="http://localhost:3000">Login</a> Required
