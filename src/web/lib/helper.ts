@@ -7,6 +7,7 @@ export function toUrlParams(params: Record<string, string>): string {
   for (const k in params) {
     sp.set(k, params[k])
   }
+  // console.log(params)
   return sp.toString()
 }
 
@@ -16,12 +17,14 @@ const reTopic = /^\[\[[^\]]+\]\]$/
 function parse(symbolName: string): { name: string; cat: SymbolCat; oauthoName?: string } {
   let cat: SymbolCat
   let oauthoName: string | undefined
-
+  // const mySymbolName = '//' + symbolName
+  // console.log(mySymbolName)
   if (symbolName.match(reTicker) !== null) {
     cat = SymbolCat.Ticker
   } else if (symbolName.match(reTopic) !== null) {
     cat = SymbolCat.Topic
   } else {
+    // console.log(symbolName)
     throw new Error(`尚未支援的symbol format${symbolName}`)
   }
   return { name: symbolName, cat, oauthoName }
@@ -38,6 +41,7 @@ export function urlToSymbol(url: string): string | null {
 
 export function symbolToUrl(symbolName: string): string {
   const parsed = parse(symbolName)
+  console.log(parsed)
   return `//${parsed.name}`
 }
 
@@ -52,6 +56,7 @@ export function symbolToUrl(symbolName: string): string {
 
 export function getCardUrlParam(card: CocardFragment): string {
   let params: string
+  // console.log(card)
   if (card.template === CardTemplate.Webpage) {
     params = toUrlParams({ u: card.link.url })
   } else {

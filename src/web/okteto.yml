@@ -1,6 +1,6 @@
 name: conote-backend
 image:
-  name: registry.cloud.okteto.net/w121211/conote-backend:dev
+  name: registry.cloud.okteto.net/piniyu/conote-backend:dev
   context: ../../
   dockerfile: ../../Dockerfile
   target: builder

@@ -26,6 +26,7 @@ const Discuss = forwardRef(
       discussClickRHandler,
       anchorHLHandler,
       myScrollIntoView,
+      resetHighLight,
     }: {
       switchTab: boolean
       commentId: string
@@ -37,6 +38,7 @@ const Discuss = forwardRef(
       discussClickRHandler: () => void
       anchorHLHandler: (clickedAnchorId: string) => void
       myScrollIntoView: () => void
+      resetHighLight: () => void
     },
     ref,
   ) => {
@@ -98,6 +100,7 @@ const Discuss = forwardRef(
                 switchTab={switchTab}
                 anchorHLHandler={anchorHLHandler}
                 myScrollIntoView={myScrollIntoView}
+                resetHighLight={resetHighLight}
               />
             </div>
           </div>

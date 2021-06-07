@@ -6,13 +6,3 @@
     background-color: #f7f8fb;
   }
 }
-.tooltip {
-  :global(.ant-tooltip-inner) {
-    min-width: auto;
-    min-height: auto;
-    padding: 2px 8px;
-    font-size: 10px;
-    box-shadow: none;
-    // letter-spacing: 0.5px;
-  }
-}

@@ -121,9 +121,10 @@ export function App(): JSX.Element {
   }
   return (
     <ApolloProvider client={client}>
-      <Protected>
-        <CardPage />
-      </Protected>
+      {/* <Protected> */}
+      <CardPage />
+      sdffdofj
+      {/* </Protected> */}
     </ApolloProvider>
   )
   // <Auth0Provider

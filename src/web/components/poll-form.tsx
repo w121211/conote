@@ -124,10 +124,10 @@ export function PollForm({ poll, setShowModal }: { poll: PollFragment; setShowMo
         query: MyVotesDocument,
       })
       if (data?.createVote && res?.myVotes) {
-        cache.writeQuery<MyVotesQuery>({
+        cache.writeQuery({
           query: MyVotesDocument,
           data: {
-            myVotes: res?.myVotes.concat([data?.createVote]),
+            myVotes: res?.myVotes.concat([data.createVote]),
           },
         })
       }

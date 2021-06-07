@@ -1,5 +1,5 @@
 // import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
   AnchorCountFragment,
   CommentFragment,
@@ -21,6 +21,8 @@ import {
   useUpdateAnchorLikeMutation,
   useUpdateCommentLikeMutation,
   useUpdateReplyLikeMutation,
+  useAnchorQuery,
+  AnchorFragmentDoc,
 } from '../apollo/query.graphql'
 import { AnchorLike, AnchorDislike, ReplyLike, ReplyDislike, CommentLike, CommentDislike } from './tile-upndown'
 import classes from './tile-panel.module.scss'
@@ -42,6 +44,18 @@ export function AnchorPanel({
   // onClickHandler: (commentId: string | undefined) => void
 }): JSX.Element {
   const [count, setCount] = useState<AnchorCountFragment | null>(null)
+  const { data: myAnchorData, loading: myAnchorLoading } = useAnchorQuery({
+    query: AnchorFragmentDoc,
+    variables: { id: anchorId },
+    fetchPolicy: 'cache-first',
+  })
+  useEffect(() => {
+    if (!myAnchorLoading && myAnchorData && myAnchorData.anchor) {
+      setCount(myAnchorData.anchor.count)
+    }
+    // console.log(myAnchorData?.anchor)
+  }, [myAnchorLoading, myAnchorData])
+
   const [createLike] = useCreateAnchorLikeMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyAnchorLikesQuery>({ query: MyAnchorLikesDocument })
@@ -50,6 +64,7 @@ export function AnchorPanel({
           query: MyAnchorLikesDocument,
           data: { myAnchorLikes: res?.myAnchorLikes.concat([data?.createAnchorLike.like]) },
         })
+
         setCount(data.createAnchorLike.count)
       }
     },
@@ -70,27 +85,45 @@ export function AnchorPanel({
       }
     },
   })
-  const myAnchorLikes = useMyAnchorLikesQuery({ fetchPolicy: 'cache-only' })
+  const { data: myAnchorLikes } = useMyAnchorLikesQuery({ fetchPolicy: 'cache-first' })
+
   const commentClickHandler = () => {
-    // setPanel(true)
-    // setCommentTextArea([classes.inlineValue, classes.inlineValueComment])
-    // inlineValueArr.push(classes.inlineValueComment)
+    const hlElement = document.getElementById(anchorId) as HTMLSpanElement
+    hlElement.classList.add('highLight')
     showDiscuss && showDiscuss()
     anchorIdHandler && anchorIdHandler(anchorId)
-    // const inputElement = document.getElementById('commentTextArea') as HTMLInputElement
-
-    // inputElement.focus()
-    // onClickHandler(commentId)
-    // console.log(commentId)
   }
 
-  const meLike = myAnchorLikes.data?.myAnchorLikes.find(e => e.anchorId.toString() === anchorId)
+  const meLike = myAnchorLikes?.myAnchorLikes.find(e => e.anchorId.toString() === anchorId)
+  // console.log(myAnchorLikes?.myAnchorLikes)
+  const myRef = useRef<HTMLSpanElement>(null)
 
+  const handleClickOutside = (e: any) => {
+    if (
+      myRef.current &&
+      !myRef.current?.contains(e.target) &&
+      document.getElementById('text') !== e.target &&
+      document.getElementById('submitButton') !== e.target
+    ) {
+      const hlElement = document.getElementById(anchorId.toString()) as HTMLSpanElement
+      hlElement && hlElement.classList.remove('highLight')
+      // anchorIdHandler && anchorIdHandler('')
+      // console.log(e.target)
+    }
+  }
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside, true)
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true)
+    }
+  })
   return (
     <span className={classes.comment}>
       <AnchorLike {...{ anchorId, count, meLike, createLike, updateLike }} />
       <AnchorDislike {...{ anchorId, count, meLike, createLike, updateLike }} />
-      <CommentIcon className={classes.commentIcon} onClick={commentClickHandler} />
+      <span ref={myRef}>
+        <CommentIcon className={classes.commentIcon} onClick={commentClickHandler} />
+      </span>
     </span>
   )
   // return (

@@ -43,6 +43,7 @@ const CommentList = ({
   switchTab,
   anchorHLHandler,
   myScrollIntoView,
+  resetHighLight,
 }: {
   type?: string
   commentId: string
@@ -50,15 +51,20 @@ const CommentList = ({
   switchTab: boolean
   anchorHLHandler: (anchorId: string) => void
   myScrollIntoView: () => void
+  resetHighLight: () => void
 }) => {
   //   const [repliesList,setRepliesList]=useState<Array<({
   //     __typename?: 'Reply';
   // } & ReplyFragment)>>()
   const myRef = useRef<HTMLLIElement>(null)
 
-  const onClickHandler = (e: any, anchorId: string) => {
-    anchorHLHandler(anchorId)
-    myScrollIntoView()
+  const onClickHandler = (e: any, anchorId: string[] | null) => {
+    // const arr = [...anchorId]
+    // console.log(arr)
+    // ...anchorId
+    // console.log(anchorId)
+    anchorId && anchorId[0] && anchorHLHandler([...anchorId][0][1].trimEnd())
+    // myScrollIntoView()
 
     // const highLight = document.getElementsByClassName('highLight')
     // highLight && highLight[0].scrollIntoView()
@@ -67,18 +73,23 @@ const CommentList = ({
   const handleClickOutside = (e: any) => {
     if (myRef.current && !myRef.current.contains(e.target)) {
       anchorHLHandler('')
+      resetHighLight()
     }
   }
 
   useEffect(() => {
-    document.addEventListener('click', handleClickOutside, true)
+    document.body.addEventListener('click', handleClickOutside, true)
     return () => {
-      document.removeEventListener('click', handleClickOutside, true)
+      document.body.removeEventListener('click', handleClickOutside, true)
     }
   })
   const meCommentId = switchTab && commentId ? commentId : pollCommentId
 
-  const { data: repliesData, loading: repliesLoading, error: repliesError } = useRepliesQuery({
+  const {
+    data: repliesData,
+    loading: repliesLoading,
+    error: repliesError,
+  } = useRepliesQuery({
     // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
     variables: { commentId: meCommentId },
     fetchPolicy: 'cache-first',
@@ -152,11 +163,15 @@ const CommentList = ({
           //   </li>
           // </>
           // ) : (
-          <li className={classes.commentRoot} ref={myRef} onClick={e => onClickHandler(e, item.text.slice(0, 3))}>
+          <li
+            className={classes.commentRoot}
+            ref={myRef}
+            onClick={e => onClickHandler(e, item.text.matchAll(/(^\d+ )(.+$)/g))}
+          >
             <CommentTemplate
               id={item.id}
-              content={item.text}
-              updatedAt={item.updatedAt}
+              content={item.text.replace(/(^\d+ )(.+$)/g, '$2')}
+              // updatedAt={item.updatedAt}
               floor={`#${repliesLength && repliesLength - idx}`}
             />
           </li>

@@ -5,18 +5,26 @@ import HomeIcon from '../../assets/svg/home.svg'
 import CocardIcon from '../../assets/svg/app.svg'
 import HeartIcon from '../../assets/svg/heart.svg'
 import classes from './sidebar.module.scss'
+import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
+import { useMeQuery } from '../../apollo/query.graphql'
 
 const SideBar = () => {
   const [sidebar, setSidebar] = useState(false)
   const toggleSidebar = () => {
     setSidebar(prev => !prev)
   }
-
+  const { user, error, isLoading } = useUser()
+  const { data, loading } = useMeQuery()
   return (
     <div className={classes.sidebar}>
-      <span className="logo">
-        <Link href="/">COCARD</Link>
-      </span>
+      {data && user ? (
+        <>
+          Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
+        </>
+      ) : (
+        <a href="/api/auth/login">Login</a>
+      )}
+
       {/* <Arrow className="arrowIcon" /> */}
       <div className="arrowIcon" onClick={toggleSidebar}></div>
       <div className="searchBar">
@@ -45,7 +53,9 @@ const SideBar = () => {
           <a href="https://www.notion.so/Work-Log-491e5e9bdff942cf96ab0e9dfbf86c4e">測試說明: 3/4 上線測試A1</a>
         </li>
       </ul>
-
+      <span className="logo">
+        <Link href="/">COCARD</Link>
+      </span>
       {/* <Search
           className="search"
           placeholder="Search..."

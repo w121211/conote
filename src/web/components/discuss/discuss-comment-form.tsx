@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react'
+import { useState, forwardRef, useEffect } from 'react'
 import {
   useCreateReplyMutation,
   useCommentQuery,
@@ -13,11 +13,16 @@ import {
   MyVotesDocument,
   MyVotesQuery,
   useMyVotesQuery,
+  MyVotesQueryResult,
+  Vote,
 } from '../../apollo/query.graphql'
 import { Form, Button, Radio } from 'antd'
 import Radios from '../radios/radios'
 import MyTextArea from '../myTextArea/myTextArea'
 import BarChart from '../bar/bar'
+import classes from './discuss-page.module.scss'
+// import { setUncaughtExceptionCaptureCallback } from 'node:process'
+// import { useSubscription } from '@apollo/client'
 
 export const CommentForm = forwardRef(
   (
@@ -32,31 +37,51 @@ export const CommentForm = forwardRef(
     const [buttonDisable, setButtonState] = useState(true)
     const [commentValue, setValue] = useState('')
     const [voteValue, setVoteValue] = useState<number>()
+    const [voteCount, setVoteCount] = useState<number[]>([])
+    // const [votedIdx, setVotedIdx] = useState<number>()
+    const [total, setTotal] = useState(0)
+    const [meCommentId, setMeCommentId] = useState<string>(commentId)
+    const [rerender, setRerender] = useState(false)
 
     const [form] = Form.useForm()
-    const onSubmit = () => {
+    const onSubmit = (value: number | undefined) => {
       form.submit()
     }
+    useEffect(() => {
+      if (switchTab) {
+        setMeCommentId(commentId)
+      } else {
+        setMeCommentId(pollCommentId)
+      }
+    }, [switchTab])
 
-    const meCommentId = switchTab ? commentId : pollCommentId
     const {
       data: commentsData,
       loading: commentsLoading,
       error: commentsError,
+      refetch: refetchComment,
     } = useCommentQuery({
       variables: { id: meCommentId },
       fetchPolicy: 'cache-first',
     })
-    //   const { data: myVotesData, loading, error } = useMyVotesQuery({ fetchPolicy: 'cache-only' })
-    //   const meVote = myVotesData?.myVotes.find(e => e.pollId === Number(commentsData?.comment?.poll?.id))
-    //   const { data: repliesData, loading: repliesLoading, error: repliesError } = useRepliesQuery({
-    //     // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
-    //     variables: { commentId },
-    //   })
 
-    //   const { data, loading, error } = useCommentQuery({
-    //     variables: { id: commentId },
-    //   })
+    const {
+      data: myVotesData,
+      loading: myVotesLoading,
+      error: myVotesError,
+    } = useMyVotesQuery({
+      fetchPolicy: 'cache-first',
+    })
+    // if(commentsData&&!commentsLoading&&!myVotesLoading&&!commentsError&&!myVotesError){
+    useEffect(() => {
+      if (!commentsLoading && commentsData?.comment?.poll) {
+        setTotal(commentsData.comment?.poll?.count.nVotes.reduce((a, b) => a + b))
+        setVoteCount(commentsData.comment.poll.count.nVotes)
+      }
+    }, [commentsData, commentsLoading])
+    const pollId = commentsData?.comment?.poll?.id
+    const meVote = pollId && myVotesData?.myVotes.find((e, i) => e.pollId === parseInt(pollId))
+
     const [createReply] = useCreateReplyMutation({
       update(cache, { data }) {
         const res = cache.readQuery<RepliesQuery, RepliesQueryVariables>({
@@ -70,6 +95,7 @@ export const CommentForm = forwardRef(
             data: { replies: [data?.createReply].concat(res.replies) },
           })
           // addReplyCountByOne()
+
           form.resetFields()
         }
       },
@@ -85,6 +111,7 @@ export const CommentForm = forwardRef(
             query: MyVotesDocument,
             data: { myVotes: res.myVotes.concat([data.createVote]) },
           })
+          refetchComment()
         }
       },
     })
@@ -104,20 +131,22 @@ export const CommentForm = forwardRef(
     //   }
 
     const onFinish = (values: any) => {
-      if (values.votes) {
+      if (values.votes !== undefined) {
         createVote({
           variables: {
             pollId: `${commentsData?.comment?.poll?.id}`,
             choiceIdx: values.votes,
           },
         })
+
+        // setVotedIdx(values.votes)
       }
       if (values.text && switchTab) {
         createReply({
           variables: {
             commentId: meCommentId,
             data: {
-              text: `${anchorId}${values.text}`,
+              text: `${anchorId} ${values.text}`,
             },
           },
         })
@@ -128,51 +157,72 @@ export const CommentForm = forwardRef(
           variables: {
             commentId: meCommentId,
             data: {
-              text: `${commentsData?.comment?.poll?.choices[values.votes]}${values.text}`,
+              text: `${commentsData?.comment?.poll?.choices[values.votes] ?? ''} ${values.text}`,
             },
           },
         })
       }
+      // console.log(total)
 
       form.resetFields()
-      console.log(`finish ${meCommentId} ${anchorId} ${values.text}`)
+      setButtonState(true)
+
+      console.log('values:' + values)
+      console.log(
+        `finish commentId:${meCommentId} pollId:${commentsData?.comment?.poll?.id} anchorId:${anchorId} ${values.text} ${values.votes}`,
+      )
     }
-
-    const total =
-      commentsData?.comment?.poll?.count.nVotes.length === 0
-        ? 0
-        : commentsData?.comment?.poll?.count.nVotes.reduce((a, b) => a + b)
-    const count =
-      commentsData?.comment?.poll?.count.nVotes.length === 0
-        ? Array(commentsData.comment.poll.choices.length).fill(0)
-        : commentsData?.comment?.poll?.count.nVotes
-
+    // const total = commentsData?.comment?.poll?.count.nVotes.reduce((a, b) => a + b)
     return (
       <Form form={form} onFinish={onFinish} onValuesChange={onTextChange}>
         <MyTextArea ref={ref} />
-        {switchTab || (
-          <Form.Item name="votes">
-            {/* {commentsData.comment.poll.choices.map((e, i) => (
+
+        {!switchTab && voteCount && (
+          <>
+            <div>共{total}人參與投票</div>
+            {meVote ? (
+              <div className={classes.radioGroup}>
+                {voteCount.map((e, i) => (
+                  <div key={i}>
+                    {meVote.choiceIdx === i ? (
+                      <b>{commentsData?.comment?.poll?.choices[i].replace(/^<(.+)>$/g, '$1')}</b>
+                    ) : (
+                      <span>{commentsData?.comment?.poll?.choices[i].replace(/^<(.+)>$/g, '$1')}</span>
+                    )}
+
+                    <BarChart count={e} total={total ?? 0} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Form.Item name="votes">
+                {/* {commentsData.comment.poll.choices.map((e, i) => (
             ))} */}
-            <Radio.Group value={voteValue}>
-              {count?.map((e, i) => (
-                <div key={i}>
-                  <Radio value={i}>{commentsData?.comment?.poll?.choices[i]}</Radio>
-                  {/* <div key={i}> */}
-                  {/* <Radios data={commentsData.comment?.poll?.choices} countsHandler={countsHandler} /> */}
-                  {/* <label>
+                <Radio.Group value={voteValue} className={classes.radioGroup}>
+                  {voteCount &&
+                    voteCount.map((e, i) => (
+                      <div key={i}>
+                        <Radio value={i}>{commentsData?.comment?.poll?.choices[i].replace(/^<(.+)>$/g, '$1')}</Radio>
+
+                        {/* <div key={i}> */}
+                        {/* <Radios data={commentsData.comment?.poll?.choices} countsHandler={countsHandler} /> */}
+                        {/* <label>
                 <input type="radio" value={i} onChange={radioChangeHandler} checked={option === `${i}`} />
                 {commentsData.comment?.poll?.choices[i]}
               </label>
              </div> */}
-                  <BarChart count={e} total={total ?? 0} />
-                </div>
-              ))}
-            </Radio.Group>
-            {/* <button type="submit">送出</button> */}
-          </Form.Item>
+                        {/* {console.log(e)} */}
+                        <BarChart count={e} total={total ?? 0} />
+                      </div>
+                    ))}
+                </Radio.Group>
+                {/* <button type="submit">送出</button> */}
+              </Form.Item>
+            )}
+          </>
         )}
-        <Button type="text" disabled={buttonDisable} onClick={onSubmit}>
+
+        <Button id="submitButton" type="text" disabled={buttonDisable} onClick={() => onSubmit(voteValue)}>
           送出
         </Button>
       </Form>

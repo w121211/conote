@@ -670,6 +670,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   async createVote(_parent, { pollId, choiceIdx }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
+    console.log({ choiceIdx, pollId: parseInt(pollId), userId })
     const vote = await createVote({ choiceIdx, pollId: parseInt(pollId), userId })
     return _toStringId(vote)
   },
