@@ -124,7 +124,8 @@ const RenderTokenStream = forwardRef(
             // <div className={classes.array} onClick={onFocusHandler} onBlur={onBlurHandler} tabIndex={0}>
             <span
               id={`${meAnchor}`}
-              className={`${classes.array} ${meAnchor === anchorIdHL ? 'highLight' : ''}`}
+              className={`${classes.array} ${meAnchor === anchorIdHL && meAnchor !== undefined ? 'highLight' : ''}`}
+              // className={`${classes.array} `}
               ref={el => {
                 if (meAnchor === anchorIdHL && hlElementHandler && el) {
                   hlElementHandler(el)
@@ -301,9 +302,10 @@ const RenderTokenStream = forwardRef(
           return (
             // <QueryCommentModal id={stream.markerline.commentId.toString()}>
             <li className={classes.inlineValue}>
-              <svg viewBox="0 0 18 18" className={classes.bullet}>
+              <span className={classes.bullet}>•</span>
+              {/* <svg viewBox="0 0 18 18" className={classes.bullet}>
                 <circle cx="9" cy="9" r="3.5"></circle>
-              </svg>
+              </svg> */}
               <RenderTokenStream
                 stream={stream.content}
                 ref={ref}
@@ -391,10 +393,8 @@ const RenderTokenStream = forwardRef(
         // console.log(`symbol: ${content}`)
         return (
           <span className={classes.keyword}>
-            <Link href={`/card?${toUrlParams({ s: content })}`}>
-              {content.replace('[[', '').replace(']]', '')}
-              {/* {console.log(stream)} */}
-            </Link>
+            {/* {console.log(content)} */}
+            <Link href={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link>
           </span>
         )
       }
@@ -574,7 +574,7 @@ export const RenderCardBody = forwardRef(
             sect={e}
             // ref={el => {return (myRef?.current?.anchorRef[i] = el.anchorRef)}}
             ref={el => {
-              console.log(el)
+              // console.log(el)
               myRef.current[i] = el
             }}
             showQuestion={showQuestion}

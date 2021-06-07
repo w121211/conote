@@ -58,12 +58,12 @@ const CommentList = ({
   // } & ReplyFragment)>>()
   const myRef = useRef<HTMLLIElement>(null)
 
-  const onClickHandler = (e: any, anchorId: any | null) => {
+  const onClickHandler = (e: any, anchorId: string[] | null) => {
     // const arr = [...anchorId]
     // console.log(arr)
     // ...anchorId
-
-    anchorId && anchorHLHandler([...anchorId][0][1].trimEnd())
+    // console.log(anchorId)
+    anchorId && anchorId[0] && anchorHLHandler([...anchorId][0][1].trimEnd())
     // myScrollIntoView()
 
     // const highLight = document.getElementsByClassName('highLight')
@@ -78,14 +78,18 @@ const CommentList = ({
   }
 
   useEffect(() => {
-    document.addEventListener('click', handleClickOutside, true)
+    document.body.addEventListener('click', handleClickOutside, true)
     return () => {
-      document.removeEventListener('click', handleClickOutside, true)
+      document.body.removeEventListener('click', handleClickOutside, true)
     }
   })
   const meCommentId = switchTab && commentId ? commentId : pollCommentId
 
-  const { data: repliesData, loading: repliesLoading, error: repliesError } = useRepliesQuery({
+  const {
+    data: repliesData,
+    loading: repliesLoading,
+    error: repliesError,
+  } = useRepliesQuery({
     // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
     variables: { commentId: meCommentId },
     fetchPolicy: 'cache-first',

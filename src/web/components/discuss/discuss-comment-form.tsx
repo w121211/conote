@@ -21,8 +21,8 @@ import Radios from '../radios/radios'
 import MyTextArea from '../myTextArea/myTextArea'
 import BarChart from '../bar/bar'
 import classes from './discuss-page.module.scss'
-import { setUncaughtExceptionCaptureCallback } from 'node:process'
-import { useSubscription } from '@apollo/client'
+// import { setUncaughtExceptionCaptureCallback } from 'node:process'
+// import { useSubscription } from '@apollo/client'
 
 export const CommentForm = forwardRef(
   (
@@ -65,7 +65,11 @@ export const CommentForm = forwardRef(
       fetchPolicy: 'cache-first',
     })
 
-    const { data: myVotesData, loading: myVotesLoading, error: myVotesError } = useMyVotesQuery({
+    const {
+      data: myVotesData,
+      loading: myVotesLoading,
+      error: myVotesError,
+    } = useMyVotesQuery({
       fetchPolicy: 'cache-first',
     })
     // if(commentsData&&!commentsLoading&&!myVotesLoading&&!commentsError&&!myVotesError){

@@ -33,10 +33,10 @@ export function CardFormPage(): JSX.Element | null {
   const url = u as string
   const symbol = s as string
 
-  function _render(url: string): JSX.Element {
+  function _render({ url, symbol }: { url?: string; symbol?: string }): JSX.Element {
     return (
       <QueryDataProvider
-        useQuery={() => useCocardQuery({ variables: { url } })}
+        useQuery={() => useCocardQuery({ variables: { url, symbol } })}
         render={(data: CocardQuery) => {
           if (data && data.cocard) {
             const url = `/card?${getCardUrlParam(data.cocard)}`
@@ -61,11 +61,11 @@ export function CardFormPage(): JSX.Element | null {
     return <p>Loading...</p>
   }
   if (url) {
-    return _render(url)
+    return _render({ url })
   }
   if (symbol) {
     try {
-      return _render(symbolToUrl(symbol))
+      return _render({ symbol })
     } catch {
       return <h1>Symbol format error</h1>
     }

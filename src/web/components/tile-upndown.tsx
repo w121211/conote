@@ -48,19 +48,22 @@ export function AnchorLike({
   meLike,
   createLike,
   updateLike,
-  showCount = false,
-}: // myAnchorLikeRefetch,
+}: // showCount = false,
+// myAnchorLikeRefetch,
 AnchorLikeProps): JSX.Element {
   let onClick: () => void
   const [liked, setLiked] = useState(false)
+  const [showCount, setShowCount] = useState(false)
   useEffect(() => {
     if (meLike) setLiked(meLike && meLike.choice === LikeChoice.Up)
-    console.log('liked true')
+    // console.log('liked true')
+    setShowCount(true)
   })
   if (meLike && meLike.choice !== LikeChoice.Up) {
     onClick = function () {
       updateLike({ variables: { id: meLike.id, data: { choice: LikeChoice.Up } } })
       setLiked(true)
+      setShowCount(true)
     }
   } else if (meLike && meLike.choice === LikeChoice.Up) {
     onClick = function () {
@@ -73,6 +76,7 @@ AnchorLikeProps): JSX.Element {
       createLike({ variables: { anchorId, data: { choice: LikeChoice.Up } } })
       // myAnchorLikeRefetch()
       setLiked(true)
+      setShowCount(true)
       console.log('like true')
     }
   }
@@ -80,7 +84,7 @@ AnchorLikeProps): JSX.Element {
   return (
     <span onClick={onClick}>
       {liked ? <LikeFilled /> : <LikeOutlined />}
-      {count ? count.nUps : 0}
+      {showCount && count && count.nUps}
 
       {/* {console.log('count', count)} */}
     </span>

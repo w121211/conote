@@ -41,8 +41,6 @@ export function CardPage(): JSX.Element {
                 {edit ? (
                   <CardBody
                     card={data.cocard}
-                    cardCommentIdHandler={() => {}}
-                    pollCommentIdHandler={() => {}}
                     clickPoll={() => {}}
                     anchorIdHandler={() => {}}
                     showDiscuss={() => {}}

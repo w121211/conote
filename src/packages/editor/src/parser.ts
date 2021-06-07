@@ -66,7 +66,7 @@ export const SECTION_GRAMMAR = {
     alias: 'sect-topic',
     pattern: /^\n\[\[[^\]]+\]\](@\w+)?$/m,
     inside: {
-      'sect-symbol': { pattern: /^\n\[\[[^\]]+\]\]/u },
+      'sect-symbol': { pattern: /^\[\[[^\]]+\]\]/m },
       'sect-user': { pattern: /@\w+/ },
     },
   },

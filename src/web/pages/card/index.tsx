@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../../lib/editor/src/index'
+import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../../packages/editor/src/index'
 import { useRouter } from 'next/router'
 import { Button } from 'antd'
 import { symbolToUrl, getCardUrlParam } from '../../lib/helper'
@@ -123,7 +123,7 @@ function CardPage(): JSX.Element {
         render={(data: CocardQuery) => {
           if (data && data.cocard) {
             const url = `/card/form?${getCardUrlParam(data.cocard)}`
-
+            // console.log(data.cocard.link)
             const cardCommentId = (data.cocard.meta as CardMeta).commentId
 
             // .forEach(sc => sc.stream && (sc.stream as ExtTokenStream[]).filter(e => e !== '\n'))
@@ -147,9 +147,9 @@ function CardPage(): JSX.Element {
                   })
                 })
             })
-            console.log(sect)
+            // console.log(sect)
 
-            console.log('sectStreamFilterArr', sectStreamFilterArr)
+            // console.log('sectStreamFilterArr', sectStreamFilterArr)
 
             // const contentResolver = (sectData: any) => {
             //   const data: SectData[] = []
