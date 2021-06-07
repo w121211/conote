@@ -151,7 +151,7 @@ describe('Editor use sample data', () => {
   // )
 
   it('edit text from previous stored text', () => {
-    const prevCases = load(resolve(__dirname, '__samples', 'edit-previous.txt'))
+    const prevCases = load(resolve(__dirname, '__samples__', 'edit-previous.txt'))
 
     let prev: string | undefined
     for (const [url, body] of prevCases) {
@@ -174,7 +174,7 @@ describe('Editor use sample data', () => {
   //   }
   // })
 
-  it.each<[string, string]>(load(resolve(__dirname, '__samples', 'generate-markerlines.txt')))(
+  it.each<[string, string]>(load(resolve(__dirname, '__samples__', 'generate-markerlines.txt')))(
     'generate markerline',
     (url: string, body: string) => {
       const editor = new Editor(undefined, undefined, url, '@oauthor')
@@ -187,7 +187,7 @@ describe('Editor use sample data', () => {
 
   it('insert markerlines', () => {
     let blank = new Editor()
-    for (const [url, body] of load(resolve(__dirname, '__samples', 'insert-markerlines.txt'))) {
+    for (const [url, body] of load(resolve(__dirname, '__samples__', 'insert-markerlines.txt'))) {
       const cur = new Editor(undefined, undefined, url, undefined)
       cur.setText(body)
       cur.flush()
@@ -202,8 +202,8 @@ describe('Editor use sample data', () => {
     expect(blank.getMarkerlines()).toMatchSnapshot()
   })
 
-  it.each<[string, string]>(load(resolve(__dirname, '__samples', 'common.txt')))(
-    'handle common cases',
+  it.each<[string, string]>(load(resolve(__dirname, '__samples__', 'common.txt')))(
+    'handle common caeses',
     (url: string, body: string) => {
       const editor = new Editor(undefined, undefined, url)
       editor.setText(body)

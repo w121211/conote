@@ -63,8 +63,9 @@ export function insertMarkerlinesToText(
     if (e.marker && e.marker.key && e.marker.value) {
       _insert(e)
     } else {
-      console.error(`想插入的markerline不符合格式\n${e}`)
-      // throw new Error('想插入的markerline不符合格式')
+      console.error(e)
+      // console.error(`想插入的markerline不符合格式`)
+      throw new Error('想插入的markerline不符合格式')
     }
   }
 

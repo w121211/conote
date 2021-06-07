@@ -79,8 +79,6 @@ Array [
     "length": 27,
     "type": "multiline-marker",
   },
-  "
-",
 ]
 `;
 
@@ -548,11 +546,12 @@ Array [
       Object {
         "alias": "sect-ticker",
         "content": Array [
+          "
+",
           Object {
-            "content": "
-$BBB",
-            "length": 5,
-            "linenumber": 12,
+            "content": "$BBB",
+            "length": 4,
+            "linenumber": 13,
             "type": "sect-symbol",
           },
         ],
@@ -1584,6 +1583,1350 @@ Array [
         "length": 35,
         "linenumber": 40,
         "type": "inline-marker",
+      },
+    ],
+    "topic": true,
+  },
+]
+`;
+
+exports[`Parser tokenizeSection() 4`] = `
+Array [
+  Object {
+    "stream": Array [],
+  },
+  Object {
+    "nestedCard": Object {
+      "symbol": "$BTC",
+    },
+    "stream": Array [
+      Object {
+        "alias": "sect-ticker",
+        "content": Array [
+          Object {
+            "content": "$BTC",
+            "length": 4,
+            "linenumber": 0,
+            "type": "sect-symbol",
+          },
+          "
+",
+        ],
+        "length": 5,
+        "linenumber": 0,
+        "type": "sect-ticker-begin-line",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "content": "[最新]",
+            "length": 4,
+            "linenumber": 1,
+            "marker": Object {
+              "key": "[最新]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "[[",
+              Object {
+                "content": "$TSLA",
+                "length": 5,
+                "linenumber": 2,
+                "type": "ticker",
+              },
+              "購入15億美元比特幣]] -> 當日",
+              Object {
+                "content": "$TSLA",
+                "length": 5,
+                "linenumber": 2,
+                "type": "ticker",
+              },
+              "股價爆漲20%",
+            ],
+            "length": 37,
+            "linenumber": 2,
+            "marker": Object {
+              "key": "[最新]",
+              "value": "[[$TSLA購入15億美元比特幣]] -> 當日$TSLA股價爆漲20%",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 42,
+        "linenumber": 1,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[*]",
+            "length": 3,
+            "linenumber": 3,
+            "marker": Object {
+              "key": "[*]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "無基本面 -> 無法估值",
+            ],
+            "length": 12,
+            "linenumber": 4,
+            "marker": Object {
+              "key": "[*]",
+              "value": "無基本面 -> 無法估值",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "非官方發行，應用",
+              Object {
+                "content": "[[區塊鍊]]",
+                "length": 7,
+                "linenumber": 5,
+                "type": "topic",
+              },
+              "技術的",
+              Object {
+                "content": "[[數字貨幣]]",
+                "length": 8,
+                "linenumber": 5,
+                "type": "topic",
+              },
+            ],
+            "length": 26,
+            "linenumber": 5,
+            "marker": Object {
+              "key": "[*]",
+              "value": "非官方發行，應用[[區塊鍊]]技術的[[數字貨幣]]",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "不可篡改、不可偽造",
+            ],
+            "length": 9,
+            "linenumber": 6,
+            "marker": Object {
+              "key": "[*]",
+              "value": "不可篡改、不可偽造",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "沒有人可控制",
+              Object {
+                "content": "[[比特幣]]",
+                "length": 7,
+                "linenumber": 7,
+                "type": "topic",
+              },
+              "的發行量和流通量",
+            ],
+            "length": 21,
+            "linenumber": 7,
+            "marker": Object {
+              "key": "[*]",
+              "value": "沒有人可控制[[比特幣]]的發行量和流通量",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "發行數量固定為2,100萬個單位",
+            ],
+            "length": 16,
+            "linenumber": 8,
+            "marker": Object {
+              "key": "[*]",
+              "value": "發行數量固定為2,100萬個單位",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "存在數量可能下降",
+            ],
+            "length": 8,
+            "linenumber": 9,
+            "marker": Object {
+              "key": "[*]",
+              "value": "存在數量可能下降",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "* 20%因忘記密碼而消失",
+            ],
+            "length": 13,
+            "linenumber": 10,
+            "marker": Object {
+              "key": "[*]",
+              "value": "* 20%因忘記密碼而消失",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "* 預計2-4%逐年消失 -> 具天然",
+              Object {
+                "content": "[[通縮]]",
+                "length": 6,
+                "linenumber": 11,
+                "type": "topic",
+              },
+              "性質",
+            ],
+            "length": 27,
+            "linenumber": 11,
+            "marker": Object {
+              "key": "[*]",
+              "value": "* 預計2-4%逐年消失 -> 具天然[[通縮]]性質",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 143,
+        "linenumber": 3,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[+]",
+            "length": 3,
+            "linenumber": 12,
+            "marker": Object {
+              "key": "[+]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "$PYPL",
+                "length": 5,
+                "linenumber": 13,
+                "type": "ticker",
+              },
+              ", ",
+              Object {
+                "content": "$SQ",
+                "length": 3,
+                "linenumber": 13,
+                "type": "ticker",
+              },
+              ", ",
+              Object {
+                "content": "$MA",
+                "length": 3,
+                "linenumber": 13,
+                "type": "ticker",
+              },
+              " 陸續開通",
+              Object {
+                "content": "[[加密貨幣]]",
+                "length": 8,
+                "linenumber": 13,
+                "type": "topic",
+              },
+              "支付功能",
+            ],
+            "length": 32,
+            "linenumber": 13,
+            "marker": Object {
+              "key": "[+]",
+              "value": "$PYPL, $SQ, $MA 陸續開通[[加密貨幣]]支付功能",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[Cathie Wood]]",
+                "length": 15,
+                "linenumber": 14,
+                "type": "topic",
+              },
+              " 認為",
+              Object {
+                "content": "[[比特幣]]",
+                "length": 7,
+                "linenumber": 14,
+                "type": "topic",
+              },
+              "可達$50萬一幣",
+            ],
+            "length": 33,
+            "linenumber": 14,
+            "marker": Object {
+              "key": "[+]",
+              "value": "[[Cathie Wood]] 認為[[比特幣]]可達$50萬一幣",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[避險]]",
+                "length": 6,
+                "linenumber": 15,
+                "type": "topic",
+              },
+              "性質優於傳統避險產品(",
+              Object {
+                "content": "[[黃金]]",
+                "length": 6,
+                "linenumber": 15,
+                "type": "topic",
+              },
+              "、藝術品、",
+              Object {
+                "content": "[[房地產]]",
+                "length": 7,
+                "linenumber": 15,
+                "type": "topic",
+              },
+              ")",
+            ],
+            "length": 36,
+            "linenumber": 15,
+            "marker": Object {
+              "key": "[+]",
+              "value": "[[避險]]性質優於傳統避險產品([[黃金]]、藝術品、[[房地產]])",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "* 流通性強",
+            ],
+            "length": 6,
+            "linenumber": 16,
+            "marker": Object {
+              "key": "[+]",
+              "value": "* 流通性強",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "* 轉帳交易便利",
+            ],
+            "length": 8,
+            "linenumber": 17,
+            "marker": Object {
+              "key": "[+]",
+              "value": "* 轉帳交易便利",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "近十年的接受度增加",
+            ],
+            "length": 9,
+            "linenumber": 18,
+            "marker": Object {
+              "key": "[+]",
+              "value": "近十年的接受度增加",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "部分發展中國家考慮將",
+              Object {
+                "content": "[[比特幣]]",
+                "length": 7,
+                "linenumber": 19,
+                "type": "topic",
+              },
+              "加入",
+              Object {
+                "content": "[[外匯儲備]]",
+                "length": 8,
+                "linenumber": 19,
+                "type": "topic",
+              },
+            ],
+            "length": 27,
+            "linenumber": 19,
+            "marker": Object {
+              "key": "[+]",
+              "value": "部分發展中國家考慮將[[比特幣]]加入[[外匯儲備]]",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "比",
+              Object {
+                "content": "[[主權貨幣]]",
+                "length": 8,
+                "linenumber": 20,
+                "type": "topic",
+              },
+              "更安全及更方便流通",
+            ],
+            "length": 18,
+            "linenumber": 20,
+            "marker": Object {
+              "key": "[+]",
+              "value": "比[[主權貨幣]]更安全及更方便流通",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[機構投資者]]",
+                "length": 9,
+                "linenumber": 21,
+                "type": "topic",
+              },
+              "陸續引入 <- 機構比散戶更需要避險",
+            ],
+            "length": 27,
+            "linenumber": 21,
+            "marker": Object {
+              "key": "[+]",
+              "value": "[[機構投資者]]陸續引入 <- 機構比散戶更需要避險",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "生活中應用的可能性增加",
+            ],
+            "length": 11,
+            "linenumber": 22,
+            "marker": Object {
+              "key": "[+]",
+              "value": "生活中應用的可能性增加",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "被視為電子黃金 <- 2021年市場最大風險是",
+              Object {
+                "content": "[[通貨膨脹]]",
+                "length": 8,
+                "linenumber": 23,
+                "type": "topic",
+              },
+              "，疫情下各主要經濟體的",
+              Object {
+                "content": "[[央行]]",
+                "length": 6,
+                "linenumber": 23,
+                "type": "topic",
+              },
+              "放水，長期",
+              Object {
+                "content": "[[實質利率]]",
+                "length": 8,
+                "linenumber": 23,
+                "type": "topic",
+              },
+              "、",
+              Object {
+                "content": "[[債券收益率]]",
+                "length": 9,
+                "linenumber": 23,
+                "type": "topic",
+              },
+              "低 -> 主權貨幣",
+              Object {
+                "content": "[[貶值]]",
+                "length": 6,
+                "linenumber": 23,
+                "type": "topic",
+              },
+              "風險，投資人尋找投資替代品",
+            ],
+            "length": 99,
+            "linenumber": 23,
+            "marker": Object {
+              "key": "[+]",
+              "value": "被視為電子黃金 <- 2021年市場最大風險是[[通貨膨脹]]，疫情下各主要經濟體的[[央行]]放水，長期[[實質利率]]、[[債券收益率]]低 -> 主權貨幣[[貶值]]風險，投資人尋找投資替代品",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 320,
+        "linenumber": 12,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 24,
+            "marker": Object {
+              "key": "[-]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[散戶]]",
+                "length": 6,
+                "linenumber": 25,
+                "type": "topic",
+              },
+              "占大多數(機構占比小於1%)，價格受投資者情緒波動 -> 散戶過多容易出現價格背離價值",
+            ],
+            "length": 49,
+            "linenumber": 25,
+            "marker": Object {
+              "key": "[-]",
+              "value": "[[散戶]]占大多數(機構占比小於1%)，價格受投資者情緒波動 -> 散戶過多容易出現價格背離價值",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "漲幅大但行業發展速度慢",
+            ],
+            "length": 11,
+            "linenumber": 26,
+            "marker": Object {
+              "key": "[-]",
+              "value": "漲幅大但行業發展速度慢",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[區塊鍊]]",
+                "length": 7,
+                "linenumber": 27,
+                "type": "topic",
+              },
+              "行業門檻高、用戶數量少",
+            ],
+            "length": 18,
+            "linenumber": 27,
+            "marker": Object {
+              "key": "[-]",
+              "value": "[[區塊鍊]]行業門檻高、用戶數量少",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "提供",
+              Object {
+                "content": "[[數字貨幣]]",
+                "length": 8,
+                "linenumber": 28,
+                "type": "topic",
+              },
+              "交易服務的公司並未賺錢",
+            ],
+            "length": 21,
+            "linenumber": 28,
+            "marker": Object {
+              "key": "[-]",
+              "value": "提供[[數字貨幣]]交易服務的公司並未賺錢",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "缺少配套措施",
+            ],
+            "length": 6,
+            "linenumber": 29,
+            "marker": Object {
+              "key": "[-]",
+              "value": "缺少配套措施",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 113,
+        "linenumber": 24,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[未來發展]",
+            "length": 6,
+            "linenumber": 30,
+            "marker": Object {
+              "key": "[未來發展]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "長期價值高但過程慢",
+            ],
+            "length": 9,
+            "linenumber": 31,
+            "marker": Object {
+              "key": "[未來發展]",
+              "value": "長期價值高但過程慢",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 16,
+        "linenumber": 30,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 32,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "保密性和交易流通性值得懷疑(保密性衝擊各國監管系統，可能無法大量流通)",
+            ],
+            "length": 35,
+            "linenumber": 33,
+            "marker": Object {
+              "key": "[?]",
+              "value": "保密性和交易流通性值得懷疑(保密性衝擊各國監管系統，可能無法大量流通)",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 39,
+        "linenumber": 32,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 34,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "inline-mark",
+          },
+          Object {
+            "content": Array [
+              Object {
+                "content": "<買>",
+                "length": 3,
+                "linenumber": 34,
+                "type": "vote-chocie",
+              },
+              " 少量買入，做好短期回調的準備，看好長期",
+            ],
+            "length": 23,
+            "linenumber": 34,
+            "marker": Object {
+              "key": "[?]",
+              "value": "<買> 少量買入，做好短期回調的準備，看好長期",
+            },
+            "type": "inline-value",
+          },
+        ],
+        "length": 26,
+        "linenumber": 34,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[如何投資]",
+            "length": 6,
+            "linenumber": 35,
+            "marker": Object {
+              "key": "[如何投資]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "直接購買比特幣",
+            ],
+            "length": 7,
+            "linenumber": 36,
+            "marker": Object {
+              "key": "[如何投資]",
+              "value": "直接購買比特幣",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "* 券商：",
+              Object {
+                "content": "[[Roinhood]]",
+                "length": 12,
+                "linenumber": 37,
+                "type": "topic",
+              },
+            ],
+            "length": 17,
+            "linenumber": 37,
+            "marker": Object {
+              "key": "[如何投資]",
+              "value": "* 券商：[[Roinhood]]",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "* 支付平台：",
+              Object {
+                "content": "$PYPL",
+                "length": 5,
+                "linenumber": 38,
+                "type": "ticker",
+              },
+            ],
+            "length": 12,
+            "linenumber": 38,
+            "marker": Object {
+              "key": "[如何投資]",
+              "value": "* 支付平台：$PYPL",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "* 專業數字貨幣平台：",
+              Object {
+                "content": "$COIN",
+                "length": 5,
+                "linenumber": 39,
+                "type": "ticker",
+              },
+            ],
+            "length": 16,
+            "linenumber": 39,
+            "marker": Object {
+              "key": "[如何投資]",
+              "value": "* 專業數字貨幣平台：$COIN",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "投資",
+              Object {
+                "content": "[[信託基金]]",
+                "length": 8,
+                "linenumber": 40,
+                "type": "topic",
+              },
+              Object {
+                "content": "$GBTC",
+                "length": 5,
+                "linenumber": 40,
+                "type": "ticker",
+              },
+              " (",
+              Object {
+                "content": "$GBTC",
+                "length": 5,
+                "linenumber": 40,
+                "type": "ticker",
+              },
+              "是唯一合法跟蹤",
+              Object {
+                "content": "[[比特幣]]",
+                "length": 7,
+                "linenumber": 40,
+                "type": "topic",
+              },
+              "的被動投資機構，存在議價風險)",
+            ],
+            "length": 51,
+            "linenumber": 40,
+            "marker": Object {
+              "key": "[如何投資]",
+              "value": "投資[[信託基金]]$GBTC ($GBTC是唯一合法跟蹤[[比特幣]]的被動投資機構，存在議價風險)",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "投資持有",
+              Object {
+                "content": "[[比特幣]]",
+                "length": 7,
+                "linenumber": 41,
+                "type": "topic",
+              },
+              "的公司",
+            ],
+            "length": 14,
+            "linenumber": 41,
+            "marker": Object {
+              "key": "[如何投資]",
+              "value": "投資持有[[比特幣]]的公司",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 129,
+        "linenumber": 35,
+        "type": "multiline-marker",
+      },
+    ],
+    "ticker": true,
+  },
+]
+`;
+
+exports[`Parser tokenizeSection() 5`] = `
+Array [
+  Object {
+    "stream": Array [],
+  },
+  Object {
+    "nestedCard": Object {
+      "symbol": "$NQ",
+    },
+    "stream": Array [
+      Object {
+        "alias": "sect-ticker",
+        "content": Array [
+          Object {
+            "content": "$NQ",
+            "length": 3,
+            "linenumber": 0,
+            "type": "sect-symbol",
+          },
+          "=F
+",
+        ],
+        "length": 6,
+        "linenumber": 0,
+        "type": "sect-ticker-begin-line",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "content": "[最新]",
+            "length": 4,
+            "linenumber": 1,
+            "marker": Object {
+              "key": "[最新]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "華爾街投行皆看空未來走勢",
+            ],
+            "length": 12,
+            "linenumber": 2,
+            "marker": Object {
+              "key": "[最新]",
+              "value": "華爾街投行皆看空未來走勢",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 17,
+        "linenumber": 1,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[?]",
+            "length": 3,
+            "linenumber": 3,
+            "marker": Object {
+              "key": "[?]",
+            },
+            "type": "inline-mark",
+          },
+          Object {
+            "content": Array [
+              Object {
+                "content": "<買>",
+                "length": 3,
+                "linenumber": 3,
+                "type": "vote-chocie",
+              },
+              " 已大跌兩個月的科技成長股跌勢會暫時停止，可進場抄底搶反彈",
+            ],
+            "length": 32,
+            "linenumber": 3,
+            "marker": Object {
+              "key": "[?]",
+              "value": "<買> 已大跌兩個月的科技成長股跌勢會暫時停止，可進場抄底搶反彈",
+            },
+            "type": "inline-value",
+          },
+        ],
+        "length": 35,
+        "linenumber": 3,
+        "type": "inline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 4,
+            "marker": Object {
+              "key": "[-]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "全球量化寬鬆已開始縮減",
+            ],
+            "length": 11,
+            "linenumber": 5,
+            "marker": Object {
+              "key": "[-]",
+              "value": "全球量化寬鬆已開始縮減",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "通脹開始上升",
+            ],
+            "length": 6,
+            "linenumber": 6,
+            "marker": Object {
+              "key": "[-]",
+              "value": "通脹開始上升",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 22,
+        "linenumber": 4,
+        "type": "multiline-marker",
+      },
+    ],
+    "ticker": true,
+  },
+]
+`;
+
+exports[`Parser tokenizeSection() 6`] = `
+Array [
+  Object {
+    "stream": Array [],
+  },
+  Object {
+    "nestedCard": Object {
+      "symbol": "[[中概股]]",
+    },
+    "stream": Array [
+      Object {
+        "alias": "sect-topic",
+        "content": Array [
+          Object {
+            "content": "[[中概股]]",
+            "length": 7,
+            "linenumber": 0,
+            "type": "sect-symbol",
+          },
+          "
+",
+        ],
+        "length": 8,
+        "linenumber": 0,
+        "type": "sect-topic-begin-line",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "content": "[近期]",
+            "length": 4,
+            "linenumber": 1,
+            "marker": Object {
+              "key": "[近期]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "距離二月份高點跌幅20%",
+            ],
+            "length": 12,
+            "linenumber": 2,
+            "marker": Object {
+              "key": "[近期]",
+              "value": "距離二月份高點跌幅20%",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              Object {
+                "content": "[[Archegos爆倉事件]]",
+                "length": 16,
+                "linenumber": 3,
+                "type": "topic",
+              },
+              "，",
+              Object {
+                "content": "$GSX",
+                "length": 4,
+                "linenumber": 3,
+                "type": "ticker",
+              },
+              " (跟誰學 )、",
+              Object {
+                "content": "$VIPS",
+                "length": 5,
+                "linenumber": 3,
+                "type": "ticker",
+              },
+              " (唯品會)、",
+              Object {
+                "content": "$IQ",
+                "length": 3,
+                "linenumber": 3,
+                "type": "ticker",
+              },
+              " (愛奇藝)、",
+              Object {
+                "content": "$BIDU",
+                "length": 5,
+                "linenumber": 3,
+                "type": "ticker",
+              },
+              "、",
+              Object {
+                "content": "$TCEHY",
+                "length": 6,
+                "linenumber": 3,
+                "type": "ticker",
+              },
+              "遭大量拋售",
+            ],
+            "length": 68,
+            "linenumber": 3,
+            "marker": Object {
+              "key": "[近期]",
+              "value": "[[Archegos爆倉事件]]，$GSX (跟誰學 )、$VIPS (唯品會)、$IQ (愛奇藝)、$BIDU、$TCEHY遭大量拋售",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 86,
+        "linenumber": 1,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[+]",
+            "length": 3,
+            "linenumber": 4,
+            "marker": Object {
+              "key": "[+]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "習慣性被低估",
+            ],
+            "length": 6,
+            "linenumber": 5,
+            "marker": Object {
+              "key": "[+]",
+              "value": "習慣性被低估",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "中國經濟好，市場規模持續擴大，有發展空間",
+            ],
+            "length": 20,
+            "linenumber": 6,
+            "marker": Object {
+              "key": "[+]",
+              "value": "中國經濟好，市場規模持續擴大，有發展空間",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "市盈率低，來到一年來的低點19",
+            ],
+            "length": 15,
+            "linenumber": 7,
+            "marker": Object {
+              "key": "[+]",
+              "value": "市盈率低，來到一年來的低點19",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "大摩對2021年中國經濟增速預期為8.7%",
+            ],
+            "length": 21,
+            "linenumber": 8,
+            "marker": Object {
+              "key": "[+]",
+              "value": "大摩對2021年中國經濟增速預期為8.7%",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 69,
+        "linenumber": 4,
+        "type": "multiline-marker",
+      },
+      "
+",
+      Object {
+        "content": Array [
+          Object {
+            "content": "[-]",
+            "length": 3,
+            "linenumber": 9,
+            "marker": Object {
+              "key": "[-]",
+            },
+            "type": "line-mark",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "財務造假新聞：",
+              Object {
+                "content": "$LKNCY",
+                "length": 6,
+                "linenumber": 10,
+                "type": "ticker",
+              },
+              "、",
+              Object {
+                "content": "$IQ",
+                "length": 3,
+                "linenumber": 10,
+                "type": "ticker",
+              },
+            ],
+            "length": 17,
+            "linenumber": 10,
+            "marker": Object {
+              "key": "[-]",
+              "value": "財務造假新聞：$LKNCY、$IQ",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "中美關係緊張",
+            ],
+            "length": 6,
+            "linenumber": 11,
+            "marker": Object {
+              "key": "[-]",
+              "value": "中美關係緊張",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "仍會受美國環境影響",
+            ],
+            "length": 9,
+            "linenumber": 12,
+            "marker": Object {
+              "key": "[-]",
+              "value": "仍會受美國環境影響",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "風險無法估計",
+            ],
+            "length": 6,
+            "linenumber": 13,
+            "marker": Object {
+              "key": "[-]",
+              "value": "風險無法估計",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "美國提出",
+              Object {
+                "content": "[[外國公司問責法案]]",
+                "length": 12,
+                "linenumber": 14,
+                "type": "topic",
+              },
+              "，中概股因涉及國家安全，無法接受審計，故將面臨退市的風險",
+            ],
+            "length": 44,
+            "linenumber": 14,
+            "marker": Object {
+              "key": "[-]",
+              "value": "美國提出[[外國公司問責法案]]，中概股因涉及國家安全，無法接受審計，故將面臨退市的風險",
+            },
+            "type": "line-value",
+          },
+          "
+",
+          Object {
+            "content": Array [
+              "中國監管政策、法規風險，變化大，無法量化",
+            ],
+            "length": 20,
+            "linenumber": 15,
+            "marker": Object {
+              "key": "[-]",
+              "value": "中國監管政策、法規風險，變化大，無法量化",
+            },
+            "type": "line-value",
+          },
+        ],
+        "length": 111,
+        "linenumber": 9,
+        "type": "multiline-marker",
       },
     ],
     "topic": true,

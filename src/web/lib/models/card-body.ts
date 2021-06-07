@@ -103,8 +103,13 @@ export async function createCardBody(
       let commentId, pollId, replyId
 
       if (e.neatReply) {
-        const reply = await createNeatReply(e, userId)
-        replyId = reply.id
+        try {
+          const reply = await createNeatReply(e, userId)
+          replyId = reply.id
+        } catch (err) {
+          console.error(e)
+          throw new Error(err)
+        }
       } else if (e.poll) {
         // Checking value
         if (!e.marker?.value) throw new Error()
@@ -125,7 +130,7 @@ export async function createCardBody(
 
       dict[e.stampId] = { createrId: userId, anchorId: anchor.id, commentId, pollId, replyId }
 
-      console.log('markerline created')
+      // console.log('markerline created')
     }
   }
 

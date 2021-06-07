@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "lint": "eslint . --ext ts --ext tsx --ext js",
     "test": "jest",
-    "test:server": "jest -c=jest-server.config.js --watch",
+    "test:server": "dotenv -e .env.local -- jest -c=jest-server.config.js --watch",
     "test-all": "yarn lint && yarn type-check && yarn test",
     "migrate": "dotenv -e .env.local -- yarn run prisma migrate dev --preview-feature",
     "seed": "dotenv -e .env.local -- ts-node prisma/scripts/from-file.ts ./prisma/seeds",

@@ -14,7 +14,7 @@ import prisma from '../../prisma'
 import { clean, createTestSymbols, createTestUsers, TESTUSERS, TESTOAUTHORS } from '../../test-helper'
 import { FetchClient } from '../../../../packages/fetcher/src'
 
-const sampleFilepath = resolve(__dirname, '__samples__', '20210425-josie.txt')
+const sampleFilepath = resolve(__dirname, '__samples__', 'common.txt')
 
 let fetcher: FetchClient
 
@@ -181,12 +181,11 @@ test.each(
   splitByUrl(readFileSync(sampleFilepath, { encoding: 'utf8' }))
     .filter((e): e is [string, string] => e[0] !== undefined)
     .map(e => [e[0].trim(), e[1].trim()]),
-)('Create web card use real world sample', async (url: string, body: string) => {
+)('Create web card from common.txt', async (url: string, body: string) => {
   if (url === undefined) return
 
   const [link] = await getOrCreateLink(url, fetcher)
   const card = await getOrCreateCardByLink(link)
-
   expect((await createWebCardBody(card.id, body, TESTUSERS[0].id)).text).toMatchSnapshot()
   // expect((await createWebCardBody(card.id, body, TESTUSERS[0].id)).meta).toMatchSnapshot()
 })
