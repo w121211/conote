@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { AutoComplete, Button, Form, Input } from 'antd'
+import { SlateEditorPage } from '../pages/lab/editor'
 import { Editor, Section } from '../../packages/editor/src/index'
 import {
   useCreateWebCardBodyMutation,
@@ -142,6 +143,7 @@ export function CardForm({ card, onFinish }: { card: Cocard; onFinish?: () => vo
   // const symbolTokens = symbols.reduce<Array<string | PrismToken>>((acc, cur) => acc.concat(MK.tokenizeSymbol(cur)), [])
 
   function onValuesChange(changedValues: { input: string }) {
+    console.log(changedValues.input)
     if (changedValues['input']) {
       const editor = new Editor(undefined, undefined, card.link.url, card.link.oauthorName ?? undefined)
       editor.setText(changedValues['input'])
@@ -181,16 +183,19 @@ export function CardForm({ card, onFinish }: { card: Cocard; onFinish?: () => vo
         form={form}
         className={classes.formContainer}
         onFinish={_onFinish}
-        initialValues={{ input: editor.getText() }}
-        onValuesChange={onValuesChange}
+        // initialValues={{ input: editor.getText() }}
+        // onValuesChange={onValuesChange}
         layout="inline"
       >
         {/* <div className={classesCard.cardOuter}>
           <div className={classesCard.cardInner}>
             <div className={classesCard.cardElement}> */}
         <div className={classes.formItemWrapper}>
-          <Form.Item name="input" className={classes.textAreaContainer}>
+          {/* <Form.Item name="input" className={classes.textAreaContainer}>
             <Input.TextArea rows={20} />
+          </Form.Item> */}
+          <Form.Item name="input" className={classes.textAreaContainer}>
+            <SlateEditorPage card={card} />
           </Form.Item>
           {/* </div>
           </div>

@@ -51,7 +51,7 @@
     position: absolute;
     visibility: hidden;
     right: 0;
-    top: 0px;
+    // top: 0px;
     span,
     a :not(:last-child) {
       margin-right: 3px;
@@ -110,7 +110,7 @@
 .marker {
   color: #353535;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 17px;
   margin-top: 2em;
   /* margin-left: 10px; */
   /* font-family: 'Noto Sans'; */
@@ -231,7 +231,7 @@ h1.tickerTitle {
     position: absolute;
     visibility: hidden;
     right: 0;
-    top: 0px;
+    top: 3px;
     span,
     a:not(:last-child) {
       margin-right: 3px;

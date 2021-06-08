@@ -11,7 +11,14 @@ import { createEditor, Descendant, Text, NodeEntry, Range, Editor, Transforms } 
 import { withHistory } from 'slate-history'
 import { Editor as CardEditor, ExtTokenStream, streamToStr } from '../../../packages/editor/src/index'
 import { CustomEditor, CustomText } from '../../types/slate-custom-types'
-import { useSearchAllLazyQuery } from '../../apollo/query.graphql'
+import {
+  useSearchAllLazyQuery,
+  useCreateWebCardBodyMutation,
+  Cocard,
+  CocardDocument,
+  CocardQuery,
+  CocardQueryVariables,
+} from '../../apollo/query.graphql'
 
 function Leaf({ attributes, children, leaf }: { attributes: any; children: any; leaf: CustomText }): JSX.Element {
   let style: CSSProperties = {}
@@ -76,13 +83,13 @@ function insertSuggest(editor: CustomEditor, character: string): void {
   // Transforms.move(editor)
 }
 
-const initialValue: Descendant[] = [
-  {
-    type: 'paragraph',
-    // children: [{ text: '$AAA\n[a]some words with [[BBB]]...' }],
-    children: [{ text: '[[BBB\nCCC]]\n...' }],
-  },
-]
+// const initialValue: Descendant[] = [
+//   {
+//     type: 'paragraph',
+//     // children: [{ text: '$AAA\n[a]some words with [[BBB]]...' }],
+//     children: [{ text: '[[BBB\nCCC]]\n...' }],
+//   },
+// ]
 
 function Portal({ children }: { children: ReactNode }): JSX.Element | null {
   return typeof document === 'object' ? createPortal(children, document.body) : null
@@ -212,9 +219,14 @@ function decorate([node, path]: NodeEntry): Range[] {
   return ranges
 }
 
-function EditorWithAutoSuggest(): JSX.Element {
+function EditorWithAutoSuggest({ card, onSubmit }: { card: Cocard; onSubmit: (a: Descendant[]) => void }): JSX.Element {
+  // console.log(card)
+
   const editor = useMemo(() => withShiftBreak(withHistory(withReact(createEditor()))), [])
-  const [value, setValue] = useState<Descendant[]>(initialValue)
+  const [value, setValue] = useState<Descendant[]>(
+    // { type: 'paragraph', children: [{ text: `${card.body ? card.body.text : ''}` }] },
+    [{ type: 'paragraph', children: [{ text: '' }] }],
+  )
 
   const [search, setSearch] = useState<{ trigger: '@' | '[[' | '$'; term: string; range: Range } | null>(null)
   const [suggestions, setSuggestions] = useState<string[] | null>(null)
@@ -296,6 +308,18 @@ function EditorWithAutoSuggest(): JSX.Element {
     // [selectedIdx, search, target]
     [suggestions, selectedIdx, search],
   )
+  useEffect(() => {
+    if (card.body) {
+      const editorData = JSON.stringify([{ type: 'paragraph', children: [{ text: card.body?.text }] }])
+      // console.log(editorData)
+      setValue(JSON.parse(editorData))
+      // localStorage.setItem('editorContent', editorData)
+    }
+    return () => {
+      // localStorage.removeItem('editorContent')
+      console.log('removeItem editorContent')
+    }
+  }, [card])
 
   useEffect(() => {
     if (search) {
@@ -329,13 +353,14 @@ function EditorWithAutoSuggest(): JSX.Element {
       setSuggestions(null)
     }
   }, [searchAllResult])
-
+  // console.log('value', value)
   return (
     <Slate
       editor={editor}
       value={value}
       onChange={value => {
         setValue(value)
+        console.log('onchange', value)
         const { selection } = editor
 
         if (selection && Range.isCollapsed(selection)) {
@@ -404,14 +429,40 @@ function EditorWithAutoSuggest(): JSX.Element {
           />
         </Portal>
       )}
+      <button onClick={e => onSubmit(value)}>送出</button>
     </Slate>
   )
 }
 
-export function SlateEditorPage(): JSX.Element {
+export function SlateEditorPage({ card, onFinish }: { card: Cocard; onFinish: () => void }): JSX.Element {
+  const [createWebCardBody] = useCreateWebCardBodyMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<CocardQuery, CocardQueryVariables>({
+        query: CocardDocument,
+        variables: { url: card.link.url },
+      })
+      if (data?.createWebCardBody && res?.cocard) {
+        cache.writeQuery<CocardQuery, CocardQueryVariables>({
+          query: CocardDocument,
+          variables: { url: card.link.url },
+          data: { cocard: { ...res.cocard, body: data.createWebCardBody } },
+        })
+      }
+    },
+  })
+
+  async function onSubmit(editorValue: Descendant[]) {
+    console.log(editorValue)
+    const stringValue = JSON.stringify(editorValue)
+    const parseValue = JSON.parse(stringValue)
+    await createWebCardBody({
+      variables: { cardId: card.id, data: { text: parseValue[0].children[0].text } },
+    })
+    onFinish()
+  }
   return (
     <div>
-      <EditorWithAutoSuggest />
+      <EditorWithAutoSuggest card={card} onSubmit={onSubmit} />
     </div>
   )
 }
