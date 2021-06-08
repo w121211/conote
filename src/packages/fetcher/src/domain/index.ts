@@ -24,5 +24,5 @@ export async function tryFetch(url: string): Promise<FetchResult> {
       else break
     }
   }
-  throw new Error()
+  throw new Error(`Fetch error: ${url}`)
 }

@@ -45,11 +45,11 @@
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/lib/editor",
+      "directory": "./src/packages/editor",
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/lib/fetcher",
+      "directory": "./src/packages/fetcher",
       "changeProcessCWD": true
     }
   ],

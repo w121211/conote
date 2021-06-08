@@ -6,7 +6,7 @@ cd .../conote/src/web
 yarn run buid:types
 
 # Start api server
-yarn run dev
+yarn run start
 
 # Output ./dist, use it to load from chrome (manually)
 cd .../conote/src/browser
@@ -24,4 +24,3 @@ https://github.com/GoogleChrome/chrome-extensions-samples
 
 https://github.com/getstation/apollo-link-webextensions-messaging
 https://github.com/vuquangit/react-typescript-apollo-client
-

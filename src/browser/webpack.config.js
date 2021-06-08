@@ -106,7 +106,7 @@ module.exports = {
   //   writeToDisk: true,
   // },
   plugins: [
-    new Dotenv(),
+    // new Dotenv(),
     // isDevelopment && new ReactRefreshPlugin(),
     new ForkTsCheckerWebpackPlugin({
       typescript: {

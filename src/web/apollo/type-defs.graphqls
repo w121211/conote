@@ -5,6 +5,7 @@ scalar JSON
 type Query {
   # 搜尋ticker, topics，近似字搜尋（ElasticSearch？）
   searchAll(term: String!): [String!]!
+  searchTicker(term: String!): [String!]!
   searchTopic(term: String!): [String!]!
   # searchTopic(term: String!): [String!]!
 

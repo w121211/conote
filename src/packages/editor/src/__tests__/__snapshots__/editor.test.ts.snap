@@ -432,25 +432,25 @@ exports[`Editor use sample data edit text from previous stored text 2`] = `
 
 exports[`Editor use sample data generate markerline 1`] = `
 "$PLTR
-[=] [[大數據]] [[SaaS]] 01m
-[?] B@23-25 小倉位 01n
+[=] [[大數據]] [[SaaS]] %01c
+[?] B@23-25 小倉位 %01d
 [*]
 產品：用大數據和人工智能幫情報局及美軍尋找目標，戰略分析、決策模擬、分析關鍵訊息等數據，反金融犯罪
 - 情報
 - 企業決策中心
-對象：各國政府，FBI、CIA、美軍等 01o
-有125個客戶，企業營收佔44%，除美國外商業營收增長低 01p
+對象：各國政府，FBI、CIA、美軍等 %01e
+有125個客戶，企業營收佔44%，除美國外商業營收增長低 %01f
 [+]
-提供政府服務 01q
-營收增長高 01r
-利潤率進步 01s
-現金充足，財務沒有問題 01t
-有炒股動力，@ARK、@WSB皆關注 01u
+提供政府服務 %01g
+營收增長高 %01h
+利潤率進步 %01i
+現金充足，財務沒有問題 %01j
+有炒股動力，@ARK、@WSB皆關注 %01k
 [-]
-至今10多年仍無法盈利 01v
-需要商業化，不僅是做政府生意 01w
-股權獎勵高，拉低盈利 01x
-很難做到像消費者級別的量，增長的想像空間不大 01y"
+至今10多年仍無法盈利 %01l
+需要商業化，不僅是做政府生意 %01m
+股權獎勵高，拉低盈利 %01n
+很難做到像消費者級別的量，增長的想像空間不大 %01o"
 `;
 
 exports[`Editor use sample data generate markerline 2`] = `
@@ -472,7 +472,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01m",
+    "stampId": "%01c",
     "str": " [[大數據]] [[SaaS]]",
   },
   Object {
@@ -492,7 +492,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01n",
+    "stampId": "%01d",
     "str": " B@23-25 小倉位",
   },
   Object {
@@ -512,7 +512,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01o",
+    "stampId": "%01e",
     "str": "對象：各國政府，FBI、CIA、美軍等",
   },
   Object {
@@ -532,7 +532,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01p",
+    "stampId": "%01f",
     "str": "有125個客戶，企業營收佔44%，除美國外商業營收增長低",
   },
   Object {
@@ -552,7 +552,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01q",
+    "stampId": "%01g",
     "str": "提供政府服務",
   },
   Object {
@@ -572,7 +572,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01r",
+    "stampId": "%01h",
     "str": "營收增長高",
   },
   Object {
@@ -592,7 +592,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01s",
+    "stampId": "%01i",
     "str": "利潤率進步",
   },
   Object {
@@ -612,7 +612,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01t",
+    "stampId": "%01j",
     "str": "現金充足，財務沒有問題",
   },
   Object {
@@ -632,7 +632,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01u",
+    "stampId": "%01k",
     "str": "有炒股動力，@ARK、@WSB皆關注",
   },
   Object {
@@ -652,7 +652,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01v",
+    "stampId": "%01l",
     "str": "至今10多年仍無法盈利",
   },
   Object {
@@ -672,7 +672,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01w",
+    "stampId": "%01m",
     "str": "需要商業化，不僅是做政府生意",
   },
   Object {
@@ -692,7 +692,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01x",
+    "stampId": "%01n",
     "str": "股權獎勵高，拉低盈利",
   },
   Object {
@@ -712,7 +712,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
-    "stampId": "01y",
+    "stampId": "%01o",
     "str": "很難做到像消費者級別的量，增長的想像空間不大",
   },
 ]
@@ -720,14 +720,14 @@ Array [
 
 exports[`Editor use sample data generate markerline 3`] = `
 "$PLTR
-[?] \\"预计该股票会有更大的波动性\\" #無幫助 01z
+[?] \\"预计该股票会有更大的波动性\\" #無幫助 %01p
 [*]
 產品：3个软件平台
 - Foundry：帮公司构建自己的SaaS来充当数据应用程序的操作系统，以获取预测，可能的结果，建议等。
 - Gotham：用于情报，执法和国防安全领域的软件平台，它可以识别模式并预测数据以帮助预防犯罪。
 - Apollo：平台背后的平台，自动监视,管理与更新Foundry和Gotham的软件。类似Microsoft，Apple或Google更新他们软件的方式。
 [+]
-\\"并不完全地依赖政府。他们还拥有18亿现金\\" 020"
+\\"并不完全地依赖政府。他们还拥有18亿现金\\" %01q"
 `;
 
 exports[`Editor use sample data generate markerline 4`] = `
@@ -749,7 +749,7 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.facebook.com/photo?fbid=252791219783086&set=a.235741574821384",
-    "stampId": "01z",
+    "stampId": "%01p",
     "str": " \\"预计该股票会有更大的波动性\\" #無幫助",
   },
   Object {
@@ -769,63 +769,152 @@ Array [
     "poll": undefined,
     "pollChoices": undefined,
     "src": "https://www.facebook.com/photo?fbid=252791219783086&set=a.235741574821384",
-    "stampId": "020",
+    "stampId": "%01q",
     "str": "\\"并不完全地依赖政府。他们还拥有18亿现金\\"",
   },
 ]
 `;
 
-exports[`Editor use sample data handle common cases 1`] = `
-"[~] aaa 040
+exports[`Editor use sample data handle common caeses 1`] = `
+"[~] aaa %000
 [?]
-<買> vs <賣> 041
+<買> vs <賣> %001
 [+]
 [-]"
 `;
 
-exports[`Editor use sample data handle common cases 2`] = `
+exports[`Editor use sample data handle common caeses 2`] = `
 "$AAA
 [=]
 [?]
-- <買> vs <賣> 042
+- <買> vs <賣> %002
 [+]
 [-]
 
 [[TOPIC]]
 [=]
-[?]買 vs 賣？ 043
+[?]買 vs 賣？ %003
 [+]
 [-]
 
 $BBB
 [=]
-[?]買 vs 賣？ 044
+[?]買 vs 賣？ %004
 [+]
 [-]"
+`;
+
+exports[`Editor use sample data handle common caeses 3`] = `
+"$IPOE
+[*]
+[[SPAC]] %005
+預計合併對象：[[SoFi]]，合併日未定 %006
+[?]<買> 看好[[SoFi]]，但對投資$IPOE仍要小心合併失敗風險 %007
+
+[[SoFi]]
+[*]
+[[Social Finance]] %008
+2011創立，資金來源是史丹佛校友提供 %009
+[業務]
+本來的業務是線上[[學生貸款]][[轉貸]]：以較市場低的利率放貸給史丹佛的學生([[P2P]]的[[貸款]]業務) %00a
+衍伸業務涵蓋一般商銀的[[個人金融業務]] %00b
+居於中間人：連接銀行、清算公司和終端消費者，以收取交易服務費 %00c
+提供金融相關的基礎建設給其他[[fintech]]公司 %00d
+[最新]
+2021/3宣布併購區域性銀行 %00e
+預計與[[SPAC]]$IPOE合併上市，合併日未定 %00f
+[+]
+和其他[[金融科技]]公司相比，產品線完整許多 %00g
+併購區域性銀行後，加速銀行牌照申請 -> 瓜分銀行本體業務(金融服務) -> 可直接賺取存貸利差 -> 幫助獲利成長 %00h
+會員人數維持高度增長 %00i
+大環境的[數位錢包]]趨勢快速成長 %00j
+一站式服務 -> 會員黏著度高 -> 有效提高會員單位營收貢獻 %00k
+[-]
+超過80%營收來自[[貸款]]相關業務，但美國持續處低[[利率]] %00l
+[[SoFi]]宣稱2021會員可帶來交叉銷售，提高[[金融服務]]和[[金融基礎建設]]的收入比重 %00m
+競爭激烈 %00n
+$PYPL, $SQ為市場領導者 %00o
+投資平台[[robin hood]]、[[eToro]]最近也要上市 %00p
+[?]
+[[SoFi]]是否能靠以貸款為基礎的生態圈突破重圍? %00q
+[vs]
+[[Cash App]]、[[Venmo]] %00r
+[[SoFi]]商業模式聚焦在提供個人[[金融服務]]的封閉圈{{以會員為中心，完整的金融商品如：房貸、信貸、車貸、信用卡、存款、投資}} %00s
+$SQ %00t
+[[SoFi]]和$SQ的商業模式相像，都以創造封閉式生態提高會員黏著度，也都朝[[數位銀行]]發展 %00u
+目標市場有些許差別：$SQ以小企業金融服務為主 vs [[SoFi]]以個人金融服務為主 %00v
+規模：$SQ會員人數6,000萬人 vs [[SoFi]]180萬 %00w
+管理層：$SQ的Jack Dorsey ($TWTR的CEO) vs [[SoFi]]的Anthony Noto ($TWTR的前COO) %00x
+[?] <多> [[SoFi]]但對投資$IPOE仍要小心合併失敗風險 %00y"
+`;
+
+exports[`Editor use sample data handle common caeses 4`] = `
+"$BTC
+[最新]
+[[$TSLA購入15億美元比特幣]] -> 當日$TSLA股價爆漲20% %00z
+[*]
+無基本面 -> 無法估值 %010
+非官方發行，應用[[區塊鍊]]技術的[[數字貨幣]] %011
+不可篡改、不可偽造 %012
+沒有人可控制[[比特幣]]的發行量和流通量 %013
+發行數量固定為2,100萬個單位 %014
+存在數量可能下降 %015
+* 20%因忘記密碼而消失 %016
+* 預計2-4%逐年消失 -> 具天然[[通縮]]性質 %017
+[+]
+$PYPL, $SQ, $MA 陸續開通[[加密貨幣]]支付功能 %018
+[[Cathie Wood]] 認為[[比特幣]]可達$50萬一幣 %019
+[[避險]]性質優於傳統避險產品([[黃金]]、藝術品、[[房地產]]) %01a
+* 流通性強 %01b
+* 轉帳交易便利 %01c
+近十年的接受度增加 %01d
+部分發展中國家考慮將[[比特幣]]加入[[外匯儲備]] %01e
+比[[主權貨幣]]更安全及更方便流通 %01f
+[[機構投資者]]陸續引入 <- 機構比散戶更需要避險 %01g
+生活中應用的可能性增加 %01h
+被視為電子黃金 <- 2021年市場最大風險是[[通貨膨脹]]，疫情下各主要經濟體的[[央行]]放水，長期[[實質利率]]、[[債券收益率]]低 -> 主權貨幣[[貶值]]風險，投資人尋找投資替代品 %01i
+[-]
+[[散戶]]占大多數(機構占比小於1%)，價格受投資者情緒波動 -> 散戶過多容易出現價格背離價值 %01j
+漲幅大但行業發展速度慢 %01k
+[[區塊鍊]]行業門檻高、用戶數量少 %01l
+提供[[數字貨幣]]交易服務的公司並未賺錢 %01m
+缺少配套措施 %01n
+[未來發展]
+長期價值高但過程慢 %01o
+[?]
+保密性和交易流通性值得懷疑(保密性衝擊各國監管系統，可能無法大量流通) %01p
+[?]<買> 少量買入，做好短期回調的準備，看好長期 %01q
+[如何投資]
+直接購買比特幣 %01r
+* 券商：[[Roinhood]] %01s
+* 支付平台：$PYPL %01t
+* 專業數字貨幣平台：$COIN %01u
+投資[[信託基金]]$GBTC ($GBTC是唯一合法跟蹤[[比特幣]]的被動投資機構，存在議價風險) %01v
+投資持有[[比特幣]]的公司 %01w"
 `;
 
 exports[`Editor use sample data insert markerlines 1`] = `
 "
 [=]
-[[大數據]] [[SaaS]] 02e 02r 03l
+[[大數據]] [[SaaS]] %024
 [?]
-\\"预计该股票会有更大的波动性\\" #無幫助 03j 03m
-B@23-25 小倉位 02f 02s 03n
+\\"预计该股票会有更大的波动性\\" #無幫助 %02j
+B@23-25 小倉位 %025
 [*]
-有125個客戶，企業營收佔44%，除美國外商業營收增長低 02h 02t 03o
-對象：各國政府，FBI、CIA、美軍等 02g 02u 03p
+有125個客戶，企業營收佔44%，除美國外商業營收增長低 %027
+對象：各國政府，FBI、CIA、美軍等 %026
 [+]
-\\"并不完全地依赖政府。他们还拥有18亿现金\\" 03k 03q
-有炒股動力，@ARK、@WSB皆關注 02m 02v 03r
-現金充足，財務沒有問題 02l 02w 03s
-利潤率進步 02k 02x 03t
-營收增長高 02j 02y 03u
-提供政府服務 02i 02z 03v
+\\"并不完全地依赖政府。他们还拥有18亿现金\\" %02k
+有炒股動力，@ARK、@WSB皆關注 %02c
+現金充足，財務沒有問題 %02b
+利潤率進步 %02a
+營收增長高 %029
+提供政府服務 %028
 [-]
-很難做到像消費者級別的量，增長的想像空間不大 02q 030 03w
-股權獎勵高，拉低盈利 02p 031 03x
-需要商業化，不僅是做政府生意 02o 032 03y
-至今10多年仍無法盈利 02n 033 03z
+很難做到像消費者級別的量，增長的想像空間不大 %02g
+股權獎勵高，拉低盈利 %02f
+需要商業化，不僅是做政府生意 %02e
+至今10多年仍無法盈利 %02d
 
 "
 `;
@@ -833,259 +922,214 @@ B@23-25 小倉位 02f 02s 03n
 exports[`Editor use sample data insert markerlines 2`] = `
 Array [
   Object {
-    "comment": undefined,
     "linenumber": 2,
     "marker": Object {
       "key": "[=]",
-      "value": "[[大數據]] [[SaaS]] 02e 02r",
+      "value": "[[大數據]] [[SaaS]]",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03l",
-    "str": "[[大數據]] [[SaaS]] 02e 02r",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%01r",
+    "stampId": "%024",
+    "str": "[[大數據]] [[SaaS]] %024",
   },
   Object {
-    "comment": true,
     "linenumber": 4,
     "marker": Object {
       "key": "[?]",
-      "value": "\\"预计该股票会有更大的波动性\\" #無幫助 03j",
+      "value": "\\"预计该股票会有更大的波动性\\" #無幫助",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03m",
-    "str": "\\"预计该股票会有更大的波动性\\" #無幫助 03j",
+    "src": "https://www.facebook.com/photo?fbid=252791219783086&set=a.235741574821384",
+    "srcStamp": "%02h",
+    "stampId": "%02j",
+    "str": "\\"预计该股票会有更大的波动性\\" #無幫助 %02j",
   },
   Object {
-    "comment": true,
     "linenumber": 5,
     "marker": Object {
       "key": "[?]",
-      "value": "B@23-25 小倉位 02f 02s",
+      "value": "B@23-25 小倉位",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03n",
-    "str": "B@23-25 小倉位 02f 02s",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%01s",
+    "stampId": "%025",
+    "str": "B@23-25 小倉位 %025",
   },
   Object {
-    "comment": undefined,
     "linenumber": 7,
     "marker": Object {
       "key": "[*]",
-      "value": "有125個客戶，企業營收佔44%，除美國外商業營收增長低 02h 02t",
+      "value": "有125個客戶，企業營收佔44%，除美國外商業營收增長低",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03o",
-    "str": "有125個客戶，企業營收佔44%，除美國外商業營收增長低 02h 02t",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%01u",
+    "stampId": "%027",
+    "str": "有125個客戶，企業營收佔44%，除美國外商業營收增長低 %027",
   },
   Object {
-    "comment": undefined,
     "linenumber": 8,
     "marker": Object {
       "key": "[*]",
-      "value": "對象：各國政府，FBI、CIA、美軍等 02g 02u",
+      "value": "對象：各國政府，FBI、CIA、美軍等",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03p",
-    "str": "對象：各國政府，FBI、CIA、美軍等 02g 02u",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%01t",
+    "stampId": "%026",
+    "str": "對象：各國政府，FBI、CIA、美軍等 %026",
   },
   Object {
-    "comment": undefined,
     "linenumber": 10,
     "marker": Object {
       "key": "[+]",
-      "value": "\\"并不完全地依赖政府。他们还拥有18亿现金\\" 03k",
+      "value": "\\"并不完全地依赖政府。他们还拥有18亿现金\\"",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03q",
-    "str": "\\"并不完全地依赖政府。他们还拥有18亿现金\\" 03k",
+    "src": "https://www.facebook.com/photo?fbid=252791219783086&set=a.235741574821384",
+    "srcStamp": "%02i",
+    "stampId": "%02k",
+    "str": "\\"并不完全地依赖政府。他们还拥有18亿现金\\" %02k",
   },
   Object {
-    "comment": undefined,
     "linenumber": 11,
     "marker": Object {
       "key": "[+]",
-      "value": "有炒股動力，@ARK、@WSB皆關注 02m 02v",
+      "value": "有炒股動力，@ARK、@WSB皆關注",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03r",
-    "str": "有炒股動力，@ARK、@WSB皆關注 02m 02v",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%01z",
+    "stampId": "%02c",
+    "str": "有炒股動力，@ARK、@WSB皆關注 %02c",
   },
   Object {
-    "comment": undefined,
     "linenumber": 12,
     "marker": Object {
       "key": "[+]",
-      "value": "現金充足，財務沒有問題 02l 02w",
+      "value": "現金充足，財務沒有問題",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03s",
-    "str": "現金充足，財務沒有問題 02l 02w",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%01y",
+    "stampId": "%02b",
+    "str": "現金充足，財務沒有問題 %02b",
   },
   Object {
-    "comment": undefined,
     "linenumber": 13,
     "marker": Object {
       "key": "[+]",
-      "value": "利潤率進步 02k 02x",
+      "value": "利潤率進步",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03t",
-    "str": "利潤率進步 02k 02x",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%01x",
+    "stampId": "%02a",
+    "str": "利潤率進步 %02a",
   },
   Object {
-    "comment": undefined,
     "linenumber": 14,
     "marker": Object {
       "key": "[+]",
-      "value": "營收增長高 02j 02y",
+      "value": "營收增長高",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03u",
-    "str": "營收增長高 02j 02y",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%01w",
+    "stampId": "%029",
+    "str": "營收增長高 %029",
   },
   Object {
-    "comment": undefined,
     "linenumber": 15,
     "marker": Object {
       "key": "[+]",
-      "value": "提供政府服務 02i 02z",
+      "value": "提供政府服務",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03v",
-    "str": "提供政府服務 02i 02z",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%01v",
+    "stampId": "%028",
+    "str": "提供政府服務 %028",
   },
   Object {
-    "comment": undefined,
     "linenumber": 17,
     "marker": Object {
       "key": "[-]",
-      "value": "很難做到像消費者級別的量，增長的想像空間不大 02q 030",
+      "value": "很難做到像消費者級別的量，增長的想像空間不大",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03w",
-    "str": "很難做到像消費者級別的量，增長的想像空間不大 02q 030",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%023",
+    "stampId": "%02g",
+    "str": "很難做到像消費者級別的量，增長的想像空間不大 %02g",
   },
   Object {
-    "comment": undefined,
     "linenumber": 18,
     "marker": Object {
       "key": "[-]",
-      "value": "股權獎勵高，拉低盈利 02p 031",
+      "value": "股權獎勵高，拉低盈利",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03x",
-    "str": "股權獎勵高，拉低盈利 02p 031",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%022",
+    "stampId": "%02f",
+    "str": "股權獎勵高，拉低盈利 %02f",
   },
   Object {
-    "comment": undefined,
     "linenumber": 19,
     "marker": Object {
       "key": "[-]",
-      "value": "需要商業化，不僅是做政府生意 02o 032",
+      "value": "需要商業化，不僅是做政府生意",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03y",
-    "str": "需要商業化，不僅是做政府生意 02o 032",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%021",
+    "stampId": "%02e",
+    "str": "需要商業化，不僅是做政府生意 %02e",
   },
   Object {
-    "comment": undefined,
     "linenumber": 20,
     "marker": Object {
       "key": "[-]",
-      "value": "至今10多年仍無法盈利 02n 033",
+      "value": "至今10多年仍無法盈利",
     },
-    "neatReply": undefined,
     "nestedCard": undefined,
     "new": true,
     "oauthor": undefined,
-    "poll": undefined,
-    "pollChoices": undefined,
-    "src": undefined,
-    "stampId": "03z",
-    "str": "至今10多年仍無法盈利 02n 033",
+    "src": "https://www.youtube.com/watch?v=qSYGlOZNUCw",
+    "srcStamp": "%020",
+    "stampId": "%02d",
+    "str": "至今10多年仍無法盈利 %02d",
   },
 ]
 `;

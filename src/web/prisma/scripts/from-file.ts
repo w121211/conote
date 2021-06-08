@@ -1,24 +1,20 @@
 /* eslint-disable no-await-in-loop */
-/** Run: npx|yarn ts-node prisma/script/fromfile.ts */
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs'
-import { resolve, basename, dirname, join } from 'path'
-import { PrismaClient } from '@prisma/client'
-import { splitByUrl, Editor, Markerline } from '../../../packages/editor/src'
+/** Run: yarn ts-node prisma/script/fromfile.ts */
+import { lstatSync, readdirSync, readFileSync } from 'fs'
+import { resolve, join } from 'path'
+import { Link, PrismaClient } from '@prisma/client'
+import { splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../../packages/fetcher/src'
 import { getOrCreateLink } from '../../lib/models/link'
 import { getOrCreateCardByLink } from '../../lib/models/card'
 import { createWebCardBody } from '../../lib/models/card-body'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
 
-// const config = dotenv.config({ path: resolve(process.cwd(), '.env.local') })
-// if (config.error) throw config.error
-// if (!config.parsed?.BOT_EMAIL) throw new Error('BOT_EMAIL not found in .env')
+const IGNORE_FILE_STARTS_WITH = '_'
 
-const prisma = new PrismaClient({
-  errorFormat: 'pretty',
-  // log: ['query', 'info', 'warn'],
-})
-const fetcher = new FetchClient(resolve(process.cwd(), process.argv[2], 'local-cache.dump.json'))
+const seedDirPath = resolve(process.cwd(), process.argv[2])
+const fetcher = new FetchClient(resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'))
+const prisma = new PrismaClient({ errorFormat: 'pretty' })
 
 async function main() {
   console.log('-- 清空Databse')
@@ -29,11 +25,8 @@ async function main() {
   console.log('-- 創test-users')
   await createTestUsers(prisma)
 
-  const seedDirPath = resolve(process.cwd(), process.argv[2])
-  console.log(`-- Load seeds from: ${seedDirPath}`)
-
   for (const filename of readdirSync(seedDirPath).sort()) {
-    if (filename.startsWith('_')) {
+    if (filename.startsWith(IGNORE_FILE_STARTS_WITH)) {
       console.log(`Skip: ${filename}`)
       continue
     }
@@ -41,14 +34,17 @@ async function main() {
     const filepath = join(seedDirPath, filename)
     console.log(`-- seed file: ${filepath}`)
 
-    for (const [url, body] of splitByUrl(readFileSync(filepath, { encoding: 'utf8' }))
-      .filter((e): e is [string, string] => e[0] !== undefined)
-      .map(e => [e[0].trim(), e[1].trim()])) {
-      if (url === undefined) continue
-
-      console.log(`--- 創web-card ${url}`)
-      const [link] = await getOrCreateLink(url, fetcher)
-      console.log(`link created`)
+    for (const [url, body] of splitByUrl(readFileSync(filepath, { encoding: 'utf8' }))) {
+      let link: Link
+      try {
+        console.log(`創web-card ${url}`)
+        const [_link] = await getOrCreateLink(url, fetcher)
+        link = _link
+        console.log(`link created`)
+      } catch (err) {
+        console.error(err)
+        continue
+      }
       const card = await getOrCreateCardByLink(link)
       console.log(`card created`)
       await createWebCardBody(card.id, body, TESTUSERS[0].id)
@@ -64,7 +60,7 @@ main()
   })
   .finally(async () => {
     console.log('finished, closing primsa')
-    // fetcher.dump()
+    fetcher.dump()
     prisma.$disconnect()
     process.exit()
   })

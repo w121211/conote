@@ -3,8 +3,8 @@ import { Marker, MarkerFormat, ExtToken, ExtTokenStream, Section } from './typin
 import { streamToStr } from './helper'
 
 export const LINE_VALUE_GRAMMAR = {
-  ticker: { pattern: /\$[A-Z-]+/ },
-  topic: { pattern: /\[\[[^\]]+\]\]/u },
+  ticker: { pattern: /\$[A-Z-=]+/ },
+  topic: { pattern: /\[\[[^\]\n]+\]\]/u },
   stamp: { pattern: /(?<=\s)%[a-zA-Z0-9]{3}$/ },
   'vote-chocie': { pattern: /<[^>\s]+>/u },
 }
@@ -45,10 +45,21 @@ export const SYMBOL_GRAMMAR = {
   topic: LINE_VALUE_GRAMMAR.topic,
 }
 
+export const URL_GRAMMAR = {
+  'sect-url-begin-line': {
+    alias: 'sect-url',
+    pattern: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi,
+  },
+  'sect-url': {
+    alias: 'sect-url',
+    pattern: /^\nhttps?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/m,
+  },
+}
+
 export const SECTION_GRAMMAR = {
   'sect-ticker': {
     alias: 'sect-ticker',
-    pattern: /^\n\$[A-Z-]+(@\w+)?$/m,
+    pattern: /^\n\$[A-Z-=]+(@\w+)?$/m,
     inside: {
       'sect-symbol': { pattern: /^\$[A-Z-]+/m },
       'sect-user': { pattern: /@\w+/ },
@@ -56,7 +67,7 @@ export const SECTION_GRAMMAR = {
   },
   'sect-ticker-begin-line': {
     alias: 'sect-ticker',
-    pattern: /^\$[A-Z-]+(@\w+)?\n/,
+    pattern: /^\$[A-Z-=]+(@\w+)?\n/,
     inside: {
       'sect-symbol': { pattern: /^\$[A-Z-]+/ },
       'sect-user': { pattern: /@\w+/ },
@@ -64,7 +75,7 @@ export const SECTION_GRAMMAR = {
   },
   'sect-topic': {
     alias: 'sect-topic',
-    pattern: /^\n\[\[[^\]]+\]\](@\w+)?$/m,
+    pattern: /^\n\[\[[^\]\n]+\]\](@\w+)?$/m,
     inside: {
       'sect-symbol': { pattern: /^\[\[[^\]]+\]\]/m },
       'sect-user': { pattern: /@\w+/ },
@@ -72,19 +83,15 @@ export const SECTION_GRAMMAR = {
   },
   'sect-topic-begin-line': {
     alias: 'sect-topic',
-    pattern: /^\[\[[^\]]+\]\](@\w+)?\n/,
+    pattern: /^\[\[[^\]\n]+\]\](@\w+)?\n/,
     inside: {
-      'sect-symbol': { pattern: /^\[\[[^\]]+\]\]/u },
+      'sect-symbol': { pattern: /^\[\[[^\]\n]+\]\]/u },
       'sect-user': { pattern: /@\w+/ },
     },
   },
   'sect-breaker': {
     alias: 'sect-breaker',
     pattern: /^\n\/{3,}.+$/m,
-  },
-  'sect-url': {
-    alias: 'sect-url',
-    pattern: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/m,
   },
 }
 
@@ -147,15 +154,16 @@ export function findUrl(text: string): { url: string | undefined; textAfterUrl: 
   return { url, textAfterUrl: 'tokensToText(_tokensAfterUrl)' }
 }
 
-export function splitByUrl(text: string): [string | undefined, string][] {
+export function splitByUrl(text: string): [string, string][] {
   /** 以text中的單行URL做split，返回:[url, part-text][] */
-  const tokens = Prism.tokenize(text, SECTION_GRAMMAR)
+  const tokens = Prism.tokenize(text, URL_GRAMMAR)
+
   let buffer: (string | Prism.Token)[] = []
   let url: string | undefined
   const splits: [string | undefined, string][] = []
 
   for (const e of tokens) {
-    if (typeof e !== 'string' && e.type === 'sect-url') {
+    if (typeof e !== 'string' && e.alias === 'sect-url') {
       // 儲存前一個buffer後清空
       splits.push([url, streamToStr(buffer)])
       buffer = []
@@ -168,7 +176,7 @@ export function splitByUrl(text: string): [string | undefined, string][] {
   // 儲存最後一個
   splits.push([url, streamToStr(buffer)])
 
-  return splits
+  return splits.filter((e): e is [string, string] => e[0] !== undefined).map(([url, text]) => [url.trim(), text.trim()])
 }
 
 export function tokenizeSymbol(text: string): Array<string | Prism.Token> {

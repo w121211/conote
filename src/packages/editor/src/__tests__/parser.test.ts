@@ -1,11 +1,13 @@
-import { resolve } from 'path'
+import { readFileSync } from 'fs'
+import { resolve, join } from 'path'
 import Prism from 'prismjs'
 import { splitByUrl, tokenizeSection, GRAMMAR } from '../parser'
 import { load, omitUndefined } from '../test-helper'
 
 describe('Card grammar', () => {
   it('tokenize list', () => {
-    const t = `[111]
+    const t = `
+[111]
 aaa
 - bbb
 - ccc
@@ -18,8 +20,7 @@ eee
 - hhh
 - iii
 jjj
-- kkk
-`
+- kkk`.trim()
     // kkk 不會被識別出來
     expect(omitUndefined(Prism.tokenize(t, GRAMMAR))).toMatchSnapshot()
   })
@@ -30,19 +31,36 @@ jjj
 })
 
 describe('Parser', () => {
-  // it('use url to split text to sections', () => {
-  //   const text = [
-  //     'https://www.youtube.com/watch?v=qSYGlOZNUCw\n',
-  //     '$AAAA\n\n',
-  //     'https://www.youtube.com/watch?v=kprnW5VadnY&list=WL&index=53\n',
-  //     '$BBBB\n',
-  //   ].join('')
-  //   expect(splitByUrl(text)).toEqual([
-  //     [undefined, ''],
-  //     ['https://www.youtube.com/watch?v=qSYGlOZNUCw', '\n$AAAA\n\n'],
-  //     ['https://www.youtube.com/watch?v=kprnW5VadnY&list=WL&index=53', '\n$BBBB\n'],
-  //   ])
-  // })
+  it('splitByUrl()', () => {
+    expect(
+      splitByUrl(
+        [
+          'https://www.youtube.com/watch?v=qSYGlOZNUCw\n\n\n',
+          '$AAAA\n\nBBB\nCCC\n\n',
+          'https://www.youtube.com/watch?v=kprnW5VadnY&list=WL&index=53\n',
+          '$BBBB\nCCC\nDDD\n\n',
+        ].join(''),
+      ),
+    ).toEqual([
+      ['https://www.youtube.com/watch?v=qSYGlOZNUCw', '$AAAA\n\nBBB\nCCC'],
+      ['https://www.youtube.com/watch?v=kprnW5VadnY&list=WL&index=53', '$BBBB\nCCC\nDDD'],
+    ])
+
+    expect(
+      splitByUrl(
+        [
+          '\n\n',
+          'https://www.youtube.com/watch?v=qSYGlOZNUCw\n\n\n',
+          '$AAAA\n\n',
+          'https://www.youtube.com/watch?v=kprnW5VadnY&list=WL&index=53\n',
+          '$BBBB\nCCC\nDDD\n\n',
+        ].join(''),
+      ),
+    ).toEqual([
+      ['https://www.youtube.com/watch?v=qSYGlOZNUCw', '$AAAA'],
+      ['https://www.youtube.com/watch?v=kprnW5VadnY&list=WL&index=53', '$BBBB\nCCC\nDDD'],
+    ])
+  })
 
   // it('tokenize inline-marker', () => {
   //   const a = '[=] [[大數據]] [[SaaS]]'

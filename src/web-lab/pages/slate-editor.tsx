@@ -11,7 +11,6 @@ import React, {
   CSSProperties,
   useEffect,
   KeyboardEvent,
-  useRef,
   ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -30,7 +29,7 @@ import {
   Editor as CardEditor,
   ExtTokenStream,
   streamToStr,
-} from '../../../lib/editor/src/index'
+} from '../../packages/editor/src/index'
 import { CustomEditor, CustomText } from './custom-types'
 
 const CHARACTERS = [
@@ -439,6 +438,8 @@ const CHARACTERS = [
   'Zuckuss',
 ]
 
+const autoSuggestMatcher = /(@|\[\[|\$)([\p{Letter}\d]*)$/u
+
 function Leaf({
   attributes,
   children,
@@ -464,7 +465,7 @@ function Leaf({
     }
     case 'inline-value':
     case 'line-value': {
-      style = { color: 'blud' }
+      style = { color: 'blue' }
       break
     }
     case 'line-mark':
@@ -474,7 +475,7 @@ function Leaf({
     }
     case 'ticker':
     case 'topic': {
-      style = { color: 'yellow' }
+      style = { color: 'brown' }
       break
     }
     case 'stamp': {
@@ -489,97 +490,6 @@ function Leaf({
     </span>
   )
 }
-
-// function withShortcuts(editor: CustomEditor): CustomEditor {
-//   const { deleteBackward, insertText } = editor
-
-// editor.insertText = function (text) {
-//   const { selection } = editor
-
-//   if (text === ' ' && selection && Range.isCollapsed(selection)) {
-//     const { anchor } = selection
-//     const block = Editor.above(editor, {
-//       match: (n) => Editor.isBlock(editor, n),
-//     })
-//     const path = block ? block[1] : []
-//     const start = Editor.start(editor, path)
-//     const range = { anchor, focus: start }
-//     const beforeText = Editor.string(editor, range)
-//     const type = SHORTCUTS[beforeText]
-
-//     if (type) {
-//       Transforms.select(editor, range)
-//       Transforms.delete(editor)
-//       const newProperties: Partial<SlateElement> = {
-//         type,
-//       }
-//       Transforms.setNodes(editor, newProperties, {
-//         match: (n) => Editor.isBlock(editor, n),
-//       })
-
-//       if (type === 'list-item') {
-//         const list: BulletedListElement = {
-//           type: 'bulleted-list',
-//           children: [],
-//         }
-//         Transforms.wrapNodes(editor, list, {
-//           match: (n) =>
-//             !Editor.isEditor(n) &&
-//             SlateElement.isElement(n) &&
-//             n.type === 'list-item',
-//         })
-//       }
-
-//       return
-//     }
-//   }
-
-//   insertText(text)
-// }
-
-// editor.deleteBackward = function (...args) {
-//   const { selection } = editor
-
-//   if (selection && Range.isCollapsed(selection)) {
-//     const match = Editor.above(editor, {
-//       match: (n) => Editor.isBlock(editor, n),
-//     })
-
-//     if (match) {
-//       const [block, path] = match
-//       const start = Editor.start(editor, path)
-
-//       if (
-//         !Editor.isEditor(block) &&
-//         SlateElement.isElement(block) &&
-//         block.type !== 'paragraph' &&
-//         Point.equals(selection.anchor, start)
-//       ) {
-//         const newProperties: Partial<SlateElement> = {
-//           type: 'paragraph',
-//         }
-//         Transforms.setNodes(editor, newProperties)
-
-//         if (block.type === 'list-item') {
-//           Transforms.unwrapNodes(editor, {
-//             match: (n) =>
-//               !Editor.isEditor(n) &&
-//               SlateElement.isElement(n) &&
-//               n.type === 'bulleted-list',
-//             split: true,
-//           })
-//         }
-
-//         return
-//       }
-//     }
-
-//     deleteBackward(...args)
-//   }
-// }
-
-//   return editor
-// }
 
 function withShiftBreak(editor: CustomEditor) {
   /** 原本slate在換行時會創一個新node，改成以`\n`取代 */
@@ -598,20 +508,150 @@ function insertMention(editor: CustomEditor, character: string): void {
   // Transforms.insertNodes(editor, mention)
   // Transforms.move(editor)
   Transforms.insertText(editor, character)
-  Transforms.move(editor)
+  // Transforms.move(editor)
 }
 
 const initialValue: Descendant[] = [
   {
     type: 'paragraph',
-    children: [{ text: '$AAA\n[a]some words with [[BBB]]...' }],
+    // children: [{ text: '$AAA\n[a]some words with [[BBB]]...' }],
+    children: [{ text: '[[BBB\nCCC]]\n...' }],
   },
 ]
+
+function fuzzySearch(term: string): string[] {
+  const chars = CHARACTERS.filter((c) =>
+    c.toLowerCase().startsWith(term.toLowerCase())
+  ).slice(0, 10)
+
+  return chars
+}
 
 function Portal({ children }: { children: ReactNode }): JSX.Element | null {
   return typeof document === 'object'
     ? createPortal(children, document.body)
     : null
+}
+
+function AutoSuggest({
+  // ref,
+  // top,
+  // left,
+  corner,
+  suggestions,
+  selectedIdx,
+  setSelectedIdx,
+  onSelected,
+}: {
+  // ref: React.RefObject<HTMLDivElement>
+  // top?: string
+  // left?: string
+  corner?: { top: string; left: string }
+  suggestions: string[] | null
+  selectedIdx: number | null
+  setSelectedIdx: (a: number | null) => void
+  onSelected: (
+    event: React.KeyboardEvent | React.MouseEvent,
+    selectedTerm: string
+  ) => void
+}): JSX.Element | null {
+  if (suggestions === null) return null
+  return (
+    <div
+      // ref={ref}
+      style={{
+        top: corner?.top ?? '-9999px',
+        left: corner?.left ?? '-9999px',
+        position: 'absolute',
+        zIndex: 1,
+        padding: '3px',
+        background: 'white',
+        borderRadius: '4px',
+        boxShadow: '0 1px 5px rgba(0,0,0,.2)',
+      }}
+    >
+      {suggestions.map((e, i) => (
+        <div
+          key={i}
+          style={{
+            padding: '1px 3px',
+            borderRadius: '3px',
+            background: i === selectedIdx ? '#B4D5FF' : 'transparent',
+          }}
+          onMouseEnter={(event) => {
+            event.preventDefault()
+            setSelectedIdx(i)
+          }}
+          onMouseLeave={(event) => {
+            event.preventDefault()
+            setSelectedIdx(0)
+          }}
+          onMouseDown={(event) => {
+            event.preventDefault()
+          }}
+          onMouseUp={(event) => {
+            onSelected(event, e)
+          }}
+        >
+          {e}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function decorate([node, path]: NodeEntry): Range[] {
+  const ranges: Range[] = []
+
+  if (!Text.isText(node)) return ranges
+
+  const cardEditor = new CardEditor(
+    undefined,
+    undefined,
+    'http://test2.com',
+    'test-oauther'
+  )
+  cardEditor.setText(node.text)
+  cardEditor.flush()
+  const sections = cardEditor.getSections()
+
+  function pushStream(stream: ExtTokenStream, start: number): number {
+    let length = 0
+    if (typeof stream === 'string') {
+      length = stream.length
+    } else if (Array.isArray(stream)) {
+      for (const e of stream) {
+        const l = pushStream(e, start)
+        start += l
+        length += l
+      }
+    } else {
+      // length = getLength(stream)
+      // length = pushStream(stream, start)
+      // stream.content
+      const content = streamToStr(stream.content)
+      length = content.length
+      ranges.push({
+        type: stream.type,
+        anchor: { path, offset: start },
+        focus: { path, offset: start + length },
+      })
+      pushStream(stream.content, start)
+    }
+
+    return length
+  }
+
+  let start = 0
+
+  for (const sect of sections) {
+    if (sect.stream) {
+      const length = pushStream(sect.stream, start)
+      start += length
+    }
+  }
+
+  return ranges
 }
 
 function SlateEditor(): JSX.Element {
@@ -621,118 +661,94 @@ function SlateEditor(): JSX.Element {
   )
   const [value, setValue] = useState<Descendant[]>(initialValue)
 
-  // syntax highlight
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, [])
-  const decorate = useCallback(([node, path]: NodeEntry): Range[] => {
-    const ranges: Range[] = []
-
-    if (!Text.isText(node)) {
-      return ranges
-    }
-
-    const cardEditor = new CardEditor(
-      undefined,
-      undefined,
-      'http://test2.com',
-      'test-oauther'
-    )
-
-    cardEditor.setText(node.text)
-    cardEditor.flush()
-    const sections = cardEditor.getSections()
-
-    function pushStream(stream: ExtTokenStream, start: number): number {
-      let length = 0
-      if (typeof stream === 'string') {
-        length = stream.length
-      } else if (Array.isArray(stream)) {
-        for (const e of stream) {
-          const l = pushStream(e, start)
-          start += l
-          length += l
-        }
-      } else {
-        // length = getLength(stream)
-        // length = pushStream(stream, start)
-        // stream.content
-        const content = streamToStr(stream.content)
-        length = content.length
-        ranges.push({
-          type: stream.type,
-          anchor: { path, offset: start },
-          focus: { path, offset: start + length },
-        })
-        pushStream(stream.content, start)
-      }
-
-      return length
-    }
-
-    let start = 0
-
-    for (const sect of sections) {
-      if (sect.stream) {
-        const length = pushStream(sect.stream, start)
-        start += length
-      }
-    }
-
-    return ranges
-  }, [])
-
   // auto complete
-  const ref = useRef<HTMLDivElement>(null)
-  const [target, setTarget] = useState<Range | undefined | null>()
-  const [index, setIndex] = useState(0)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] =
+    useState<{ trigger: '@' | '[[' | '$'; term: string; range: Range } | null>(
+      null
+    )
+  const [suggestions, setSuggestions] = useState<string[] | null>(null)
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
+  const [corner, setCorner] = useState<{ top: string; left: string }>()
 
-  const chars = CHARACTERS.filter((c) =>
-    c.toLowerCase().startsWith(search.toLowerCase())
-  ).slice(0, 10)
+  const onSelected = useCallback(
+    (event: React.KeyboardEvent | React.MouseEvent, selectedTerm: string) => {
+      console.log('onSelected')
+      console.log(search)
+      if (search) {
+        event.preventDefault()
+        Transforms.select(editor, search.range)
+        // insertMention(editor, chars[index])
+        insertMention(editor, `${search.trigger}${selectedTerm}`)
+        setSearch(null)
+      } else {
+        setSearch(null)
+      }
+    },
+    [search]
+  )
 
   const onKeyDown = useCallback(
-    function (event: KeyboardEvent): void {
-      if (target) {
+    (event: KeyboardEvent) => {
+      if (search) {
         switch (event.key) {
           case 'ArrowDown': {
             event.preventDefault()
-            const prevIndex = index >= chars.length - 1 ? 0 : index + 1
-            setIndex(prevIndex)
+            if (selectedIdx !== null) {
+              // const prevIndex = selectedIdx >= chars.length - 1 ? 0 : selectedIdx + 1
+              setSelectedIdx(selectedIdx + 1)
+            } else {
+              setSelectedIdx(0)
+            }
             break
           }
           case 'ArrowUp': {
             event.preventDefault()
-            const nextIndex = index <= 0 ? chars.length - 1 : index - 1
-            setIndex(nextIndex)
+            // const nextIndex =
+            //   selectedIdx <= 0 ? chars.length - 1 : selectedIdx - 1
+            // setSelectedIdx(nextIndex)
+            if (selectedIdx !== null) {
+              setSelectedIdx(selectedIdx - 1)
+            } else {
+              setSelectedIdx(0)
+            }
             break
           }
           case 'Tab':
-          case 'Enter':
-            event.preventDefault()
-            Transforms.select(editor, target)
-            insertMention(editor, chars[index])
-            setTarget(null)
+            // case 'Enter':
+            console.log(suggestions, selectedIdx)
+            if (suggestions !== null && selectedIdx !== null) {
+              onSelected(event, suggestions[selectedIdx])
+            }
+            // if (searchTerm) {
+            //   onSelected(event, searchTerm)
+            // }
+            // event.preventDefault()
+            // Transforms.select(editor, target)
+            // insertMention(editor, chars[index])
+            // setTarget(null)
             break
           case 'Escape':
             event.preventDefault()
-            setTarget(null)
+            setSearch(null)
             break
         }
       }
     },
-    [index, search, target]
+    // [selectedIdx, search, target]
+    [selectedIdx, search]
   )
 
   useEffect(() => {
-    const el = ref.current
-    if (target && chars.length > 0 && el !== null) {
-      // const el = ref.current
-      const domRange = ReactEditor.toDOMRange(editor, target)
+    if (search) {
+      const domRange = ReactEditor.toDOMRange(editor, search.range)
       const rect = domRange.getBoundingClientRect()
-      el.style.top = `${rect.top + window.pageYOffset + 24}px`
-      el.style.left = `${rect.left + window.pageXOffset}px`
+      setCorner({
+        top: `${rect.top + window.pageYOffset + 24}px`,
+        left: `${rect.left + window.pageXOffset}px`,
+      })
+      setSuggestions(fuzzySearch(search.term))
     }
-  }, [chars.length, editor, index, search, target])
+  }, [editor, search])
 
   return (
     <Slate
@@ -743,73 +759,76 @@ function SlateEditor(): JSX.Element {
         const { selection } = editor
 
         if (selection && Range.isCollapsed(selection)) {
-          const [start] = Range.edges(selection)
-          const wordBefore = Editor.before(editor, start, { unit: 'word' })
-          const before = wordBefore && Editor.before(editor, wordBefore)
-          const beforeRange = before && Editor.range(editor, before, start)
-          const beforeText = beforeRange && Editor.string(editor, beforeRange)
-          const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
-          const after = Editor.after(editor, start)
-          const afterRange = Editor.range(editor, start, after)
-          const afterText = Editor.string(editor, afterRange)
-          const afterMatch = afterText.match(/^(\s|$)/)
+          const [cur] = Range.edges(selection)
 
-          // console.log(wordBefore, before, beforeRange, beforeText, beforeMatch)
-          // console.log(after, afterRange, afterText, afterMatch)
+          // 從目前輸入點的行頭至輸入點之間，搜尋最後一個trigger符號
+          // const wordBefore = Editor.before(editor, start, { unit: 'word' })
+          // const before = wordBefore && Editor.before(editor, wordBefore)
+          const start = Editor.before(editor, cur, { unit: 'block' })
+          const startRange = start && Editor.range(editor, start, cur)
+          const startText = startRange && Editor.string(editor, startRange)
+          const startMatch =
+            startText && startText.split('\n').pop()?.match(autoSuggestMatcher)
+          // const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
 
-          if (beforeMatch && afterMatch) {
-            setTarget(beforeRange)
-            setSearch(beforeMatch[1])
-            setIndex(0)
+          // 若是在句中插入的情況，需要找break-point
+          // const after = Editor.after(editor, start)
+          // const afterRange = Editor.range(editor, start, after)
+          // const afterText = Editor.string(editor, afterRange)
+          // const afterMatch = afterText.match(/^(\s|$)/)
+
+          // console.log('-------')
+          // console.log(before, beforeRange, beforeText, beforeMatch)
+          // console.log(after, afterRange, afterText)
+          // console.log(beforeMatch, afterMatch)
+
+          if (startMatch && ['$', '[[', '@'].includes(startMatch[1])) {
+            const searchStart = Editor.before(editor, cur, {
+              distance: startMatch[0].length,
+              unit: 'offset',
+            })
+            const searchRange =
+              searchStart && Editor.range(editor, searchStart, cur)
+            console.log(searchRange)
+            if (searchRange) {
+              setSearch({
+                trigger: startMatch[1] as '$' | '[[' | '@',
+                term: startMatch[2],
+                range: searchRange,
+              })
+              setSelectedIdx(0)
+            }
+
             return
           }
         }
 
-        setTarget(null)
+        setSearch(null)
       }}
     >
       <Editable
-        autoCorrect={'null'}
+        autoCorrect="false"
         decorate={decorate}
         onKeyDown={onKeyDown}
         placeholder="Write some markdown..."
-        renderLeaf={renderLeaf}
+        renderLeaf={(props) => <Leaf {...props} />}
       />
-      {target && chars.length > 0 && (
+      {search && (
         <Portal>
-          <div
-            ref={ref}
-            style={{
-              top: '-9999px',
-              left: '-9999px',
-              position: 'absolute',
-              zIndex: 1,
-              padding: '3px',
-              background: 'white',
-              borderRadius: '4px',
-              boxShadow: '0 1px 5px rgba(0,0,0,.2)',
-            }}
-          >
-            {chars.map((char, i) => (
-              <div
-                key={char}
-                style={{
-                  padding: '1px 3px',
-                  borderRadius: '3px',
-                  background: i === index ? '#B4D5FF' : 'transparent',
-                }}
-              >
-                {char}
-              </div>
-            ))}
-          </div>
+          <AutoSuggest
+            corner={corner}
+            suggestions={suggestions}
+            selectedIdx={selectedIdx}
+            setSelectedIdx={setSelectedIdx}
+            onSelected={onSelected}
+          />
         </Portal>
       )}
     </Slate>
   )
 }
 
-export function SlateEditorPage(): JSX.Element {
+export function EditorPage(): JSX.Element {
   return (
     <div>
       <SlateEditor />
@@ -817,4 +836,4 @@ export function SlateEditorPage(): JSX.Element {
   )
 }
 
-export default SlateEditorPage
+export default EditorPage
