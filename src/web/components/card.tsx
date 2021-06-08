@@ -385,6 +385,9 @@ const RenderTokenStream = forwardRef(
                 關鍵字<span className={classes.markerSyntax}>{content}</span>
               </span>
             )}
+            {content !== ('[+]' || '[-]' || '[?]' || '[key]') && (
+              <span className={classes.marker}>{content.replace('[', '').replace(']', '')}</span>
+            )}
           </>
         )
       // return <span className={classes.marker}>{content}</span>
@@ -478,9 +481,9 @@ const RenderSection = forwardRef(
   ): JSX.Element | null => {
     const titleRefArr: any[] = []
 
-    if (sect.stream) {
+    if (sect.stream && sect.stream.length !== 0) {
       return (
-        <div>
+        <div className={classes.cardSection}>
           {/* {console.log(sect.stream)} */}
           <RenderTokenStream
             stream={sect.stream}

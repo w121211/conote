@@ -292,7 +292,7 @@ function CardPage(): JSX.Element {
                     編輯
                   </button> */}
                 </div>
-                <Discuss
+                {/* <Discuss
                   switchTab={discuss}
                   discussClickLHandler={discussClickLHandler}
                   discussClickRHandler={discussClickRHandler}
@@ -305,7 +305,7 @@ function CardPage(): JSX.Element {
                   anchorHLHandler={anchorHLHandler}
                   myScrollIntoView={myScrollIntoView}
                   resetHighLight={resetHighLight}
-                />
+                /> */}
               </div>
             )
           }

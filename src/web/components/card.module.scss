@@ -43,7 +43,7 @@
   // margin-left: 18px;
   padding: 3px 0;
   align-items: center;
-  font-size: 15px;
+  font-size: 14px;
   // line-height: 24px;
 
   .panel {
@@ -110,15 +110,15 @@
 .marker {
   color: #353535;
   font-weight: 700;
-  font-size: 19px;
-  margin-top: 1em;
+  font-size: 18px;
+  margin-top: 2em;
   /* margin-left: 10px; */
   /* font-family: 'Noto Sans'; */
   /* border-bottom: 1px solid; */
   /* display: inline-block; */
   /* width: fit-content; */
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 
   .markerSyntax {
     font-weight: 400;
@@ -181,11 +181,9 @@
   scroll-margin: 20px;
   position: relative;
   display: block;
-  margin-top: 1em;
-  // margin-bottom: 10px;
-  /* line-height: 1.2; */
+  // margin-top: 1em;
   font-weight: 700;
-  font-size: 23px;
+  font-size: 24px;
   a {
     display: block;
     color: $black;
@@ -379,4 +377,12 @@ a {
   align-items: center;
   justify-content: center;
   margin-right: 4px;
+}
+.cardSection {
+  background: #fff;
+  border-bottom: 1px solid #c2c2da;
+  border-radius: 8px;
+  padding: 19px 30px;
+  /* height: min-content; */
+  margin: 30px 0 0;
 }
