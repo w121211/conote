@@ -1,8 +1,8 @@
 name: conote-backend
 image:
   name: registry.cloud.okteto.net/piniyu/conote-backend:dev
-  context: ../../
-  dockerfile: ../../Dockerfile
+  context: ../..
+  # dockerfile: ../../Dockerfile
   target: builder
   args:
     - AUTH0_BASE_URL='https://okteto.com/'

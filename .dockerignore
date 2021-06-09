@@ -6,3 +6,4 @@ build
 __deprecated__
 __generated__
 .docker-sync
+.git

@@ -50,8 +50,12 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return searchAllSymbols(term)
   },
 
+  searchTicker(_parent, { term }, _context, _info) {
+    throw new Error('Not implemented')
+  },
+
   searchTopic(_parent, { term }, _context, _info) {
-    return searchAllSymbols(term)
+    throw new Error('Not implemented')
   },
 
   async latestCards(_parent, { afterId }, _context, _info) {
