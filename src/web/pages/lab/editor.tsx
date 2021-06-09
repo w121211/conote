@@ -222,12 +222,16 @@ function decorate([node, path]: NodeEntry): Range[] {
 function EditorWithAutoSuggest({ card, onSubmit }: { card: Cocard; onSubmit: (a: Descendant[]) => void }): JSX.Element {
   // console.log(card)
 
-  const valueString = JSON.stringify(card.body?.text)
+  const editorContent = JSON.stringify([{ type: 'paragraph', children: [{ text: card.body?.text }] }])
+  // localStorage.setItem('editorContent', editorContent)
 
   const editor = useMemo(() => withShiftBreak(withHistory(withReact(createEditor()))), [])
-  const [value, setValue] = useState<Descendant[]>([
-    { type: 'paragraph', children: [{ text: valueString.replace(/^"(.+)"$/g, '$1') }] },
-  ])
+  const [value, setValue] = useState<Descendant[]>(
+    // [
+    // { type: 'paragraph', children: [{ text: valueString.replace(/^"(.+)"$/g, '$1') }] },
+    // ]
+    JSON.parse(editorContent),
+  )
 
   const [search, setSearch] = useState<{ trigger: '@' | '[[' | '$'; term: string; range: Range } | null>(null)
   const [suggestions, setSuggestions] = useState<string[] | null>(null)
