@@ -7,11 +7,18 @@
 import React, { useState, useCallback, useMemo, CSSProperties, useEffect, KeyboardEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react'
-import { createEditor, Descendant, Text, NodeEntry, Range, Editor, Transforms } from 'slate'
+import { createEditor, Descendant, Text, NodeEntry, Range, Editor, Transforms, Node } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editor as CardEditor, ExtTokenStream, streamToStr } from '../../../packages/editor/src/index'
 import { CustomEditor, CustomText } from '../../types/slate-custom-types'
-import { useSearchAllLazyQuery } from '../../apollo/query.graphql'
+import {
+  useSearchAllLazyQuery,
+  useCreateWebCardBodyMutation,
+  Cocard,
+  CocardDocument,
+  CocardQuery,
+  CocardQueryVariables,
+} from '../../apollo/query.graphql'
 
 function Leaf({ attributes, children, leaf }: { attributes: any; children: any; leaf: CustomText }): JSX.Element {
   let style: CSSProperties = {}
@@ -76,13 +83,13 @@ function insertSuggest(editor: CustomEditor, character: string): void {
   // Transforms.move(editor)
 }
 
-const initialValue: Descendant[] = [
-  {
-    type: 'paragraph',
-    // children: [{ text: '$AAA\n[a]some words with [[BBB]]...' }],
-    children: [{ text: '[[BBB\nCCC]]\n...' }],
-  },
-]
+// const initialValue: Descendant[] = [
+//   {
+//     type: 'paragraph',
+//     // children: [{ text: '$AAA\n[a]some words with [[BBB]]...' }],
+//     children: [{ text: '[[BBB\nCCC]]\n...' }],
+//   },
+// ]
 
 function Portal({ children }: { children: ReactNode }): JSX.Element | null {
   return typeof document === 'object' ? createPortal(children, document.body) : null
@@ -212,9 +219,19 @@ function decorate([node, path]: NodeEntry): Range[] {
   return ranges
 }
 
-function EditorWithAutoSuggest(): JSX.Element {
+function EditorWithAutoSuggest({ card, onSubmit }: { card: Cocard; onSubmit: (a: Descendant[]) => void }): JSX.Element {
+  // console.log(card)
+
+  const editorContent = JSON.stringify([{ type: 'paragraph', children: [{ text: card.body?.text }] }])
+  // localStorage.setItem('editorContent', editorContent)
+
   const editor = useMemo(() => withShiftBreak(withHistory(withReact(createEditor()))), [])
-  const [value, setValue] = useState<Descendant[]>(initialValue)
+  const [value, setValue] = useState<Descendant[]>(
+    // [
+    // { type: 'paragraph', children: [{ text: valueString.replace(/^"(.+)"$/g, '$1') }] },
+    // ]
+    JSON.parse(editorContent),
+  )
 
   const [search, setSearch] = useState<{ trigger: '@' | '[[' | '$'; term: string; range: Range } | null>(null)
   const [suggestions, setSuggestions] = useState<string[] | null>(null)
@@ -329,13 +346,13 @@ function EditorWithAutoSuggest(): JSX.Element {
       setSuggestions(null)
     }
   }, [searchAllResult])
-
   return (
     <Slate
       editor={editor}
       value={value}
       onChange={value => {
         setValue(value)
+        console.log('onchange', value)
         const { selection } = editor
 
         if (selection && Range.isCollapsed(selection)) {
@@ -404,14 +421,62 @@ function EditorWithAutoSuggest(): JSX.Element {
           />
         </Portal>
       )}
+      <button onClick={e => onSubmit(value)}>送出</button>
     </Slate>
   )
 }
 
-export function SlateEditorPage(): JSX.Element {
+export function SlateEditorPage({ card, onFinish }: { card: Cocard; onFinish: () => void }): JSX.Element {
+  // useEffect(() => {
+  //   if (card.body) {
+
+  //     const editorContent = JSON.stringify([{ type: 'paragraph', children: [{ text: card.body.text }] }])
+  //     localStorage.setItem('editorContent', editorContent)
+  //     // setValue(JSON.parse(editorContent))
+  //   }
+  //   return () => {
+  //     localStorage.removeItem('editorContent')
+  //   }
+  // }, [card])
+  useEffect(() => {
+    if (card.body) {
+      const value = card.body.text
+      const valueString = JSON.stringify(value)
+      const editorContent = JSON.stringify([{ type: 'paragraph', children: [{ text: value }] }])
+      localStorage.setItem('editorContent', editorContent)
+      // setValue(JSON.parse(editorContent))
+    }
+    return () => {
+      // localStorage.removeItem('editorContent')
+    }
+  }, [])
+  const [createWebCardBody] = useCreateWebCardBodyMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<CocardQuery, CocardQueryVariables>({
+        query: CocardDocument,
+        variables: { url: card.link.url },
+      })
+      if (data?.createWebCardBody && res?.cocard) {
+        cache.writeQuery<CocardQuery, CocardQueryVariables>({
+          query: CocardDocument,
+          variables: { url: card.link.url },
+          data: { cocard: { ...res.cocard, body: data.createWebCardBody } },
+        })
+      }
+    },
+  })
+
+  async function onSubmit(editorValue: Descendant[]) {
+    const text = editorValue.map(e => Node.string(e))
+
+    await createWebCardBody({
+      variables: { cardId: card.id, data: { text: text[0] } },
+    })
+    onFinish()
+  }
   return (
     <div>
-      <EditorWithAutoSuggest />
+      <EditorWithAutoSuggest card={card} onSubmit={onSubmit} />
     </div>
   )
 }

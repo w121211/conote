@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, EventHandler } from 'react'
 import { SubmitErrorHandler, SubmitHandler, useForm, useFieldArray } from 'react-hook-form'
 import { useRepliesQuery, Reply, useCommentQuery, ReplyFragment } from '../../apollo/query.graphql'
 import { List } from 'antd'
@@ -58,16 +58,14 @@ const CommentList = ({
   // } & ReplyFragment)>>()
   const myRef = useRef<HTMLLIElement>(null)
 
-  const onClickHandler = (e: any, anchorId: string[] | null) => {
-    // const arr = [...anchorId]
-    // console.log(arr)
-    // ...anchorId
-    // console.log(anchorId)
-    anchorId && anchorId[0] && anchorHLHandler([...anchorId][0][1].trimEnd())
-    // myScrollIntoView()
-
-    // const highLight = document.getElementsByClassName('highLight')
-    // highLight && highLight[0].scrollIntoView()
+  const onClickHandler = (
+    e: React.MouseEventHandler<HTMLLIElement>,
+    anchorId: IterableIterator<RegExpMatchArray> | null,
+  ) => {
+    if (anchorId) {
+      const anchorIdArr = Array.from(anchorId)
+      anchorIdArr[0] && anchorHLHandler([...anchorIdArr][0][1].trimEnd())
+    }
   }
 
   const handleClickOutside = (e: any) => {

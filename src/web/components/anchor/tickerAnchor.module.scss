@@ -20,8 +20,17 @@
 }
 .anchor {
   flex-shrink: 0;
-  width: 120px;
-  margin-top: 30px;
+  /* min-width: 120px; */
+  /* margin-top: 30px; */
+  /* height: fit-content; */
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  /* flex-grow: 2; */
+  width: 15em;
+  padding: 2em;
   div {
     cursor: pointer;
     padding-bottom: 10px;

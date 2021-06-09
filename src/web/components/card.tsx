@@ -365,24 +365,41 @@ const RenderTokenStream = forwardRef(
       case 'inline-mark':
         return (
           <>
+            {content === '[vs]' && (
+              <span className={classes.marker}>
+                比較<span className={classes.markerSyntax}>{content}</span>
+              </span>
+            )}
+            {content === '[*]' && (
+              <span className={classes.marker}>
+                介紹<span className={classes.markerSyntax}>{content}</span>
+              </span>
+            )}
             {content === '[+]' && (
               <span className={classes.marker}>
-                優勢<span className={classes.markerSyntax}>{content}</span>
+                優勢/機會<span className={classes.markerSyntax}>{content}</span>
               </span>
             )}
             {content === '[-]' && (
               <span className={classes.marker}>
-                劣勢<span className={classes.markerSyntax}>{content}</span>
+                劣勢/危機<span className={classes.markerSyntax}>{content}</span>
+                {/* {console.log()} */}
               </span>
             )}
             {content === '[?]' && (
               <span className={classes.marker}>
-                Q&A<span className={classes.markerSyntax}>{content}</span>
+                提問<span className={classes.markerSyntax}>{content}</span>
               </span>
             )}
             {content === '[key]' && (
               <span className={classes.marker}>
                 關鍵字<span className={classes.markerSyntax}>{content}</span>
+              </span>
+            )}
+            {['[+]', '[-]', '[?]', '[key]', '[*]', '[vs]'].includes(content) || (
+              <span className={classes.marker}>
+                {console.log(content)}
+                {content.replace('[', '').replace(']', '')}
               </span>
             )}
           </>
@@ -478,9 +495,9 @@ const RenderSection = forwardRef(
   ): JSX.Element | null => {
     const titleRefArr: any[] = []
 
-    if (sect.stream) {
+    if (sect.stream && sect.stream.length !== 0) {
       return (
-        <div>
+        <div className={classes.cardSection}>
           {/* {console.log(sect.stream)} */}
           <RenderTokenStream
             stream={sect.stream}
@@ -568,6 +585,7 @@ export const RenderCardBody = forwardRef(
     // console.log(myRef.current)
     return (
       <>
+        {console.log(sects)}
         {sects.map((e, i) => (
           <RenderSection
             key={i}

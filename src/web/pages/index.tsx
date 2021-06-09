@@ -69,15 +69,17 @@ function HomePage(): JSX.Element {
   return (
     // <Layout>
     <div className={classes.container}>
-      <div className={classes.inner}>
+      <div className={classes.outer}>
         <div className={classes.search}>
           <h1>Search</h1>
           <SearchAllForm />
         </div>
         {user && data ? (
-          <div>
+          <div className={classes.inner}>
             <h3>最新</h3>
-            <LatestCards />
+            <div className={classes.latestCards}>
+              <LatestCards />
+            </div>
           </div>
         ) : (
           <a href="/api/auth/login">Login</a>

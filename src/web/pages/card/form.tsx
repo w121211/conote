@@ -5,6 +5,7 @@ import { getCardUrlParam, symbolToUrl } from '../../lib/helper'
 import { CocardFragment, CocardQuery, useCocardQuery } from '../../apollo/query.graphql'
 import { CardBody } from '../../components/card'
 import { CardForm } from '../../components/card-form'
+import { SlateEditorPage } from '../lab/editor'
 import { QueryDataProvider } from '../../components/data-provider'
 import { useMe } from '../../components/use-me'
 import classes from './card-page.module.scss'
@@ -42,12 +43,18 @@ export function CardFormPage(): JSX.Element | null {
             const url = `/card?${getCardUrlParam(data.cocard)}`
             return (
               <div className={classes.main}>
-                <CardForm
+                <SlateEditorPage
                   card={data.cocard}
                   onFinish={() => {
                     router.push(url)
                   }}
                 />
+                {/* <CardForm
+                  card={data.cocard}
+                  onFinish={() => {
+                    router.push(url)
+                  }}
+                /> */}
               </div>
             )
           }

@@ -119,8 +119,8 @@ export function AnchorPanel({
   })
   return (
     <span className={classes.comment}>
-      <AnchorLike {...{ anchorId, count, meLike, createLike, updateLike }} />
-      <AnchorDislike {...{ anchorId, count, meLike, createLike, updateLike }} />
+      {/* <AnchorLike {...{ anchorId, count, meLike, createLike, updateLike }} />
+      <AnchorDislike {...{ anchorId, count, meLike, createLike, updateLike }} /> */}
       <span ref={myRef}>
         <CommentIcon className={classes.commentIcon} onClick={commentClickHandler} />
       </span>
