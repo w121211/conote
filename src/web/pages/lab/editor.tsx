@@ -7,7 +7,7 @@
 import React, { useState, useCallback, useMemo, CSSProperties, useEffect, KeyboardEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react'
-import { createEditor, Descendant, Text, NodeEntry, Range, Editor, Transforms } from 'slate'
+import { createEditor, Descendant, Text, NodeEntry, Range, Editor, Transforms, Node } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editor as CardEditor, ExtTokenStream, streamToStr } from '../../../packages/editor/src/index'
 import { CustomEditor, CustomText } from '../../types/slate-custom-types'
@@ -222,11 +222,12 @@ function decorate([node, path]: NodeEntry): Range[] {
 function EditorWithAutoSuggest({ card, onSubmit }: { card: Cocard; onSubmit: (a: Descendant[]) => void }): JSX.Element {
   // console.log(card)
 
+  const valueString = JSON.stringify(card.body?.text)
+
   const editor = useMemo(() => withShiftBreak(withHistory(withReact(createEditor()))), [])
-  const [value, setValue] = useState<Descendant[]>(
-    // { type: 'paragraph', children: [{ text: `${card.body ? card.body.text : ''}` }] },
-    [{ type: 'paragraph', children: [{ text: '' }] }],
-  )
+  const [value, setValue] = useState<Descendant[]>([
+    { type: 'paragraph', children: [{ text: valueString.replace(/^"(.+)"$/g, '$1') }] },
+  ])
 
   const [search, setSearch] = useState<{ trigger: '@' | '[[' | '$'; term: string; range: Range } | null>(null)
   const [suggestions, setSuggestions] = useState<string[] | null>(null)
@@ -308,18 +309,6 @@ function EditorWithAutoSuggest({ card, onSubmit }: { card: Cocard; onSubmit: (a:
     // [selectedIdx, search, target]
     [suggestions, selectedIdx, search],
   )
-  useEffect(() => {
-    if (card.body) {
-      const editorData = JSON.stringify([{ type: 'paragraph', children: [{ text: card.body?.text }] }])
-      // console.log(editorData)
-      setValue(JSON.parse(editorData))
-      // localStorage.setItem('editorContent', editorData)
-    }
-    return () => {
-      // localStorage.removeItem('editorContent')
-      console.log('removeItem editorContent')
-    }
-  }, [card])
 
   useEffect(() => {
     if (search) {
@@ -353,7 +342,6 @@ function EditorWithAutoSuggest({ card, onSubmit }: { card: Cocard; onSubmit: (a:
       setSuggestions(null)
     }
   }, [searchAllResult])
-  // console.log('value', value)
   return (
     <Slate
       editor={editor}
@@ -435,6 +423,29 @@ function EditorWithAutoSuggest({ card, onSubmit }: { card: Cocard; onSubmit: (a:
 }
 
 export function SlateEditorPage({ card, onFinish }: { card: Cocard; onFinish: () => void }): JSX.Element {
+  // useEffect(() => {
+  //   if (card.body) {
+
+  //     const editorContent = JSON.stringify([{ type: 'paragraph', children: [{ text: card.body.text }] }])
+  //     localStorage.setItem('editorContent', editorContent)
+  //     // setValue(JSON.parse(editorContent))
+  //   }
+  //   return () => {
+  //     localStorage.removeItem('editorContent')
+  //   }
+  // }, [card])
+  useEffect(() => {
+    if (card.body) {
+      const value = card.body.text
+      const valueString = JSON.stringify(value)
+      const editorContent = JSON.stringify([{ type: 'paragraph', children: [{ text: value }] }])
+      localStorage.setItem('editorContent', editorContent)
+      // setValue(JSON.parse(editorContent))
+    }
+    return () => {
+      // localStorage.removeItem('editorContent')
+    }
+  }, [])
   const [createWebCardBody] = useCreateWebCardBodyMutation({
     update(cache, { data }) {
       const res = cache.readQuery<CocardQuery, CocardQueryVariables>({
@@ -452,11 +463,10 @@ export function SlateEditorPage({ card, onFinish }: { card: Cocard; onFinish: ()
   })
 
   async function onSubmit(editorValue: Descendant[]) {
-    console.log(editorValue)
-    const stringValue = JSON.stringify(editorValue)
-    const parseValue = JSON.parse(stringValue)
+    const text = editorValue.map(e => Node.string(e))
+
     await createWebCardBody({
-      variables: { cardId: card.id, data: { text: parseValue[0].children[0].text } },
+      variables: { cardId: card.id, data: { text: text[0] } },
     })
     onFinish()
   }
