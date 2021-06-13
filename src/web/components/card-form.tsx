@@ -195,7 +195,7 @@ export function CardForm({ card, onFinish }: { card: Cocard; onFinish?: () => vo
             <Input.TextArea rows={20} />
           </Form.Item> */}
           <Form.Item name="input" className={classes.textAreaContainer}>
-            <SlateEditorPage card={card} />
+            {/* <SlateEditorPage card={card} /> */}
           </Form.Item>
           {/* </div>
           </div>

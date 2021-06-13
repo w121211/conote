@@ -2,6 +2,18 @@ import { Descendant, BaseEditor, BaseRange } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
 
+export type EmptyText = {
+  text: string
+}
+
+export type CustomText = {
+  bold?: true
+  italic?: true
+  code?: true
+  text: string
+  type?: string // stream type
+}
+
 export type BlockQuoteElement = { type: 'block-quote'; children: Descendant[] }
 
 export type BulletedListElement = {
@@ -52,6 +64,8 @@ export type TitleElement = { type: 'title'; children: Descendant[] }
 
 export type VideoElement = { type: 'video'; url: string; children: EmptyText[] }
 
+export type ListElement = { type: 'list'; children: Descendant[] }
+
 type CustomElement =
   | BlockQuoteElement
   | BulletedListElement
@@ -61,7 +75,6 @@ type CustomElement =
   | HeadingTwoElement
   | ImageElement
   | LinkElement
-  | ListItemElement
   | MentionElement
   | ParagraphElement
   | TableElement
@@ -69,19 +82,8 @@ type CustomElement =
   | TableCellElement
   | TitleElement
   | VideoElement
-
-export type CustomText = {
-  bold?: true
-  italic?: true
-  code?: true
-  text: string
-
-  type?: string // stream type
-}
-
-export type EmptyText = {
-  text: string
-}
+  | ListElement
+  | ListItemElement
 
 export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
