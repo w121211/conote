@@ -29,41 +29,38 @@ const initialValue: Descendant[] = [
     children: [
       {
         type: 'list-item',
-        children: [{ text: '111' }],
+        body: 'aaabbbccc',
+        children: [
+          { text: '111' },
+          // {
+          //   type: 'list-item-body',
+          //   children: [{ text: '111222333444555' }],
+          // },
+        ],
       },
       {
         type: 'list',
         children: [
           {
             type: 'list-item',
+            body: null,
             children: [{ text: '111' }],
           },
           {
             type: 'list-item',
+            body: null,
             children: [{ text: '111' }],
           },
         ],
       },
       {
         type: 'list-item',
+        body: null,
         children: [{ text: '111' }],
       },
     ],
   },
 ]
-
-const CustomElement = (props: RenderElementProps): JSX.Element => {
-  const { attributes, children, element } = props
-
-  switch (element.type) {
-    case 'list':
-      return <ul {...attributes}>{children}</ul>
-    case 'list-item':
-      return <li {...attributes}>{children}</li>
-    default:
-      return <p {...attributes}>{children}</p>
-  }
-}
 
 function indentListItem(editor: Editor, node: NodeEntry<Element>): void {
   const [curNode, curPath] = node
@@ -73,7 +70,6 @@ function indentListItem(editor: Editor, node: NodeEntry<Element>): void {
     console.warn('第一個list-item無法縮排')
     return
   }
-
   const [prevNode, prevPath] = prev
   const [nextNode, nextPath] = Editor.next<Element>(editor, {
     at: curPath,
@@ -149,13 +145,82 @@ function unindentListItem(editor: Editor, node: NodeEntry<Element>): void {
   })
 }
 
+function withItemBody(editor: Editor): Editor {
+  const { insertBreak } = editor
+
+  // editor.isInline = (element) => {
+  //   return element.type === 'list-item-body' ? true : isInline(element)
+  // }
+
+  // editor.insertBreak = () => {
+  // }
+
+  return editor
+}
+
+const ListItemElement = ({
+  attributes,
+  children,
+  element,
+}: RenderElementProps) => {
+  const editor = useSlateStatic()
+  // const readOnly = useReadOnly()
+  if (!('body' in element)) {
+    return null
+  }
+  const { body } = element
+  return (
+    <li {...attributes}>
+      {/* <span contentEditable={!readOnly} suppressContentEditableWarning>
+        {children}
+      </span> */}
+      <span>{children}</span>
+      {body && (
+        <div>
+          <span contentEditable={true} style={{ color: 'red' }}>
+            {body}
+          </span>
+          {/* <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => {
+          const path = ReactEditor.findPath(editor, element)
+          const newProperties: Partial<Element> = {
+            checked: event.target.checked,
+          }
+          Transforms.setNodes(editor, newProperties, { at: path })
+        }}
+      /> */}
+        </div>
+      )}
+    </li>
+  )
+}
+
 const CheckListsExample = (): JSX.Element => {
   const [value, setValue] = useState<Descendant[]>(initialValue)
-  const renderElement = useCallback(
-    (props: RenderElementProps) => <CustomElement {...props} />,
+  const renderElement = useCallback((props: RenderElementProps) => {
+    const { attributes, children, element } = props
+    switch (element.type) {
+      case 'list':
+        return <ul {...attributes}>{children}</ul>
+      case 'list-item':
+        return <ListItemElement {...props} />
+      // case 'list-item-body':
+      //   return (
+      //     <div {...attributes} style={{ color: 'red' }}>
+      //       {children}
+      //     </div>
+      //   )
+      default:
+        return <p {...attributes}>{children}</p>
+    }
+  }, [])
+  const editor = useMemo(
+    () => withHistory(withReact(createEditor())),
+    // () => withItemBody(withHistory(withReact(createEditor()))),
     []
   )
-  const editor = useMemo(() => withHistory(withReact(createEditor())), [])
 
   return (
     <Slate editor={editor} value={value} onChange={(value) => setValue(value)}>

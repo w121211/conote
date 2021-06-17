@@ -2,11 +2,14 @@ import * as Prism from 'prismjs'
 import { Marker, MarkerFormat, ExtToken, ExtTokenStream, Section } from './typing'
 import { streamToStr } from './helper'
 
+export type Token = Prism.Token
+
 export const LINE_VALUE_GRAMMAR = {
   ticker: { pattern: /\$[A-Z-=]+/ },
   topic: { pattern: /\[\[[^\]\n]+\]\]/u },
   stamp: { pattern: /(?<=\s)%[a-zA-Z0-9]{3}$/ },
   'vote-chocie': { pattern: /<[^>\s]+>/u },
+  mark: { pattern: /[$[@\]]/ },
 }
 
 export const GRAMMAR = {
@@ -179,9 +182,9 @@ export function splitByUrl(text: string): [string, string][] {
   return splits.filter((e): e is [string, string] => e[0] !== undefined).map(([url, text]) => [url.trim(), text.trim()])
 }
 
-export function tokenizeSymbol(text: string): Array<string | Prism.Token> {
-  /** 將text中的symbol($AA, [[Topic]])轉成token */
-  return Prism.tokenize(text, SYMBOL_GRAMMAR)
+export function tokenize(text: string, grammar: Prism.Grammar): Array<string | Prism.Token> {
+  /** 將text中的symbol($AA, [[Topic]])grammar */
+  return Prism.tokenize(text, grammar)
 }
 
 export function tokenizeSection(

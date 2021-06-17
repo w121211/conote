@@ -44,8 +44,6 @@ export type ImageElement = {
 
 export type LinkElement = { type: 'link'; url: string; children: Descendant[] }
 
-export type ListItemElement = { type: 'list-item'; children: Descendant[] }
-
 export type MentionElement = {
   type: 'mention'
   character: string
@@ -66,6 +64,33 @@ export type VideoElement = { type: 'video'; url: string; children: EmptyText[] }
 
 export type ListElement = { type: 'list'; children: Descendant[] }
 
+export type ListItemElement = {
+  type: 'list-item'
+  body: string | null
+  children: Descendant[]
+}
+
+export type BulletElement = {
+  type: 'bullet'
+  onEdit?: true
+  children: Descendant[]
+}
+
+export type BulletHeadElement = {
+  type: 'bullet-head'
+  children: Descendant[]
+}
+
+export type BulletBodyElement = {
+  type: 'bullet-body'
+  children: Descendant[]
+}
+
+// export type TickerElement = {
+//   type: 'bullet-body'
+//   children: Descendant[]
+// }
+
 type CustomElement =
   | BlockQuoteElement
   | BulletedListElement
@@ -84,6 +109,9 @@ type CustomElement =
   | VideoElement
   | ListElement
   | ListItemElement
+  | BulletElement
+  | BulletHeadElement
+  | BulletBodyElement
 
 export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
