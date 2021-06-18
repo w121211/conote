@@ -29,7 +29,7 @@ import {
   Editor as CardEditor,
   ExtTokenStream,
   streamToStr,
-} from '../../packages/editor/src/index'
+} from '../../../packages/editor/src/index'
 import { CustomEditor, CustomText } from './custom-types'
 
 const CHARACTERS = [

@@ -486,4 +486,8 @@ export function SlateEditorPage({ card, onFinish }: { card: Cocard; onFinish: ()
   )
 }
 
-export default SlateEditorPage
+function TempPage(): JSX.Element {
+  return <div>Temp Pagge</div>
+}
+
+export default TempPage

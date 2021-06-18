@@ -58,10 +58,7 @@ const CommentList = ({
   // } & ReplyFragment)>>()
   const myRef = useRef<HTMLLIElement>(null)
 
-  const onClickHandler = (
-    e: React.MouseEventHandler<HTMLLIElement>,
-    anchorId: IterableIterator<RegExpMatchArray> | null,
-  ) => {
+  const onClickHandler = (e: React.MouseEvent, anchorId: IterableIterator<RegExpMatchArray> | null) => {
     if (anchorId) {
       const anchorIdArr = Array.from(anchorId)
       anchorIdArr[0] && anchorHLHandler([...anchorIdArr][0][1].trimEnd())
