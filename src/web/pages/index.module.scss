@@ -5,6 +5,7 @@
   align-items: center;
   width: 100%;
   height: 100vh;
+  background: $bg;
 }
 .search {
   text-align: center;
@@ -34,4 +35,21 @@
 }
 .latestCards {
   overflow: auto;
+}
+.latestCardsListText {
+  font-family: 'jf-openhuninn-1.1';
+  color: #4f565f;
+  a {
+    color: #4f565f;
+    &:hover {
+      color: $primaryHover;
+    }
+  }
+}
+.latestCardsListIndex {
+  display: inline-flex;
+  min-width: 1.5em;
+  /* justify-items: stretch; */
+  justify-content: flex-end;
+  margin-right: 10px;
 }

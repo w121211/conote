@@ -31,8 +31,11 @@ function LatestCards(): JSX.Element | null {
       <div>
         {data.latestCards &&
           data.latestCards.map((e, i) => (
-            <div key={i}>
-              <Link href={`/card?${getCardUrlParam(e)}`}>{e.link.url.substring(0, 50)}</Link>
+            <div key={i} className={classes.latestCardsListText}>
+              <span className={classes.latestCardsListIndex}>{i + 1}. </span>
+              <Link href={`/card?${getCardUrlParam(e)}`}>
+                {e.link.url.substring(0, 50).replace('//', '').replace('[[', '').replace(']]', '')}
+              </Link>
             </div>
           ))}
         {hasMore ? (
