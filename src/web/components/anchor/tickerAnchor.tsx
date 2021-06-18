@@ -77,7 +77,9 @@ const TickerAnchor = ({
       __proto__: Object */
   sect
     // .filter(key => key.nestedCard)
+    .filter(e => e.nestedCard !== undefined)
     .forEach((key, idx) => {
+      console.log(key)
       // const obj: dataObj = { symbol: '', subtitles: [] }
       if (key.nestedCard) {
         anchArr[idx] = { symbol: key.nestedCard.symbol.replace('[[', '').replace(']]', '') }

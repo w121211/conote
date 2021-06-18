@@ -3,7 +3,7 @@
 // import { Link, navigate, redirectTo } from '@reach/router'
 // import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input } from 'antd'
 import React, { useState, useRef, forwardRef, useEffect, useImperativeHandle } from 'react'
-import { Editor, Section, ExtTokenStream, streamToStr } from '../../packages/editor/src/index'
+import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../packages/editor/src/index'
 import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
 import Link from 'next/link'
 import { AnchorPanel } from './tile-panel'
@@ -12,9 +12,12 @@ import { toUrlParams } from '../lib/helper'
 import { PollChoices } from './poll-form'
 // import { Link } from './link'
 import { MyTooltip } from '../components/my-tooltip/my-tooltip'
+import BulletEditor from './slate/bullet'
+import Question from './question/question'
 import classes from './card.module.scss'
 import ClockIcon from '../assets/svg/clock.svg'
 import LinkIcon from '../assets/svg/link.svg'
+import { CardMeta } from '../lib/models/card'
 
 type myRef = {
   spanScrollIntoview: () => void
@@ -27,16 +30,13 @@ const RenderTokenStream = forwardRef(
   (
     {
       stream,
-      // showPanel,
-      // pushTitle,
-      titleRef,
+
       showQuestion,
-      type,
+
       commentIdHandler,
       anchorIdHandler,
-      highLightClassName,
-      // pollCommentIdHandler,
-      commentId,
+      cardCommentId,
+
       clickPoll,
       showDiscuss,
       anchorIdHL,
@@ -45,12 +45,11 @@ const RenderTokenStream = forwardRef(
     }: {
       stream: ExtTokenStream
       className?: string
-      // showPanel?: boolean
-      // pushTitle?: (el: HTMLSpanElement | null) => void
+
       titleRef?: (arr: any[]) => void
       showQuestion?: () => void
       type?: string
-      // pollCommentIdHandler: (commentId: string) => void
+      cardCommentId: number
       commentIdHandler?: (commentId: string) => void
       anchorIdHandler?: (anchorId: string) => void
       commentId?: string
@@ -143,14 +142,12 @@ const RenderTokenStream = forwardRef(
                     showQuestion={showQuestion}
                     commentIdHandler={commentIdHandler}
                     anchorIdHandler={anchorIdHandler}
-                    // pollCommentIdHandler={pollCommentIdHandler}
                     clickPoll={clickPoll}
                     showDiscuss={showDiscuss}
                     anchorIdHL={anchorIdHL}
-                    // highLightClassName={highLightClassName}
                     hlElementHandler={hlElementHandler}
                     meAnchor={meAnchor}
-                    // commentId={commentId}
+                    cardCommentId={cardCommentId}
                   />
                 )
               })}
@@ -174,7 +171,7 @@ const RenderTokenStream = forwardRef(
                   // highLightClassName={highLightClassName}
                   hlElementHandler={hlElementHandler}
                   meAnchor={meAnchor}
-                  // commentId={commentId}
+                  cardCommentId={cardCommentId}
                 />
               )
             })
@@ -199,7 +196,7 @@ const RenderTokenStream = forwardRef(
           // <button>
           <>
             {/* {console.log(stream)} */}
-            {stream.content}
+            {/* {stream.content} */}
             {/* <RenderTokenStream
               stream={stream.content}
               ref={ref}
@@ -226,6 +223,27 @@ const RenderTokenStream = forwardRef(
         )
 
       case 'multiline-marker':
+        if (Array.isArray(stream.content)) {
+          if (stream.content.find(e => typeof e !== 'string' && e.content === '[?]')) {
+            return (
+              <ul>
+                <Question stream={stream.content} cardCommentId={cardCommentId} />
+                {/* <RenderTokenStream
+                  stream={stream.content}
+                  showQuestion={showQuestion}
+                  commentIdHandler={commentIdHandler}
+                  anchorIdHandler={anchorIdHandler}
+                  clickPoll={clickPoll}
+                  showDiscuss={showDiscuss}
+                  anchorIdHL={anchorIdHL}
+                  hlElementHandler={hlElementHandler}
+                /> */}
+                {/* {console.log(stream)} */}
+              </ul>
+            )
+          }
+          // const contentArr=stream.content as any[]
+        }
         return (
           <ul>
             <RenderTokenStream
@@ -240,10 +258,17 @@ const RenderTokenStream = forwardRef(
               anchorIdHL={anchorIdHL}
               // highLightClassName={highLightClassName}
               hlElementHandler={hlElementHandler}
+              cardCommentId={cardCommentId}
             />
+            {/* {console.log(stream)} */}
           </ul>
         )
       case 'inline-marker':
+        if (Array.isArray(stream.content)) {
+          if (stream.content.find(e => typeof e !== 'string' && e.content === '[?]')) {
+            return <Question stream={stream.content} cardCommentId={cardCommentId} />
+          }
+        }
         return (
           <RenderTokenStream
             stream={stream.content}
@@ -257,6 +282,7 @@ const RenderTokenStream = forwardRef(
             anchorIdHL={anchorIdHL}
             // highLightClassName={highLightClassName}
             hlElementHandler={hlElementHandler}
+            cardCommentId={cardCommentId}
           />
         )
       case 'inline-value':
@@ -279,8 +305,9 @@ const RenderTokenStream = forwardRef(
                 anchorIdHL={anchorIdHL}
                 // highLightClassName={highLightClassName}
                 hlElementHandler={hlElementHandler}
+                cardCommentId={cardCommentId}
               />
-
+              {console.log(stream)}
               <button
                 onClick={() => {
                   stream.markerline?.commentId && clickPoll && clickPoll(stream.markerline.commentId.toString())
@@ -319,6 +346,7 @@ const RenderTokenStream = forwardRef(
                 meAnchor={stream.markerline.anchorId.toString()}
                 // highLightClassName={anchorIdHL === stream.markerline.anchorId.toString()}
                 hlElementHandler={hlElementHandler}
+                cardCommentId={cardCommentId}
               />
               {/* {stream.markerline && commentIdHandler(stream.markerline.commentId.toString())} */}
               {/* {stream.markerline && anchorIdHandler(stream.markerline.anchorId.toString())} */}
@@ -340,6 +368,7 @@ const RenderTokenStream = forwardRef(
               anchorIdHL={anchorIdHL}
               // highLightClassName={highLightClassName}
               hlElementHandler={hlElementHandler}
+              cardCommentId={cardCommentId}
             />
           )
         }
@@ -357,6 +386,7 @@ const RenderTokenStream = forwardRef(
             anchorIdHL={anchorIdHL}
             // highLightClassName={highLightClassName}
             hlElementHandler={hlElementHandler}
+            cardCommentId={cardCommentId}
           />
         )
       }
@@ -398,7 +428,7 @@ const RenderTokenStream = forwardRef(
             )}
             {['[+]', '[-]', '[?]', '[key]', '[*]', '[vs]'].includes(content) || (
               <span className={classes.marker}>
-                {console.log(content)}
+                {/* {console.log(content)} */}
                 {content.replace('[', '').replace(']', '')}
               </span>
             )}
@@ -457,6 +487,7 @@ const RenderTokenStream = forwardRef(
             anchorIdHL={anchorIdHL}
             // highLightClassName={highLightClassName}
             hlElementHandler={hlElementHandler}
+            cardCommentId={cardCommentId}
           />
         )
     }
@@ -468,9 +499,9 @@ const RenderSection = forwardRef(
   (
     {
       sect,
-      titleRef,
+      text,
       showQuestion,
-      commentIdHandler,
+      cardCommentId,
       // pollCommentIdHandler,
       anchorIdHandler,
       clickPoll,
@@ -480,9 +511,9 @@ const RenderSection = forwardRef(
     }: // commentId
     {
       sect: Section
-      titleRef?: (arr: any[]) => void
+      text: string
       showQuestion?: () => void
-      commentIdHandler?: (commentId: string) => void
+      cardCommentId: number
       // pollCommentIdHandler?: (commentId: string) => void
       clickPoll?: (commentId: string) => void
       anchorIdHandler?: (anchorId: string) => void
@@ -493,28 +524,38 @@ const RenderSection = forwardRef(
     },
     ref,
   ): JSX.Element | null => {
-    const titleRefArr: any[] = []
+    const [showEditor, setShowEditor] = useState(false)
 
     if (sect.stream && sect.stream.length !== 0) {
       return (
         <div className={classes.cardSection}>
           {/* {console.log(sect.stream)} */}
-          <RenderTokenStream
-            stream={sect.stream}
-            ref={ref}
-            showQuestion={showQuestion}
-            showDiscuss={showDiscuss}
-            // commentOnClickHandler={commentOnClickHandler}
-            // commentIdHandler={commentIdHandler}
-            anchorIdHandler={anchorIdHandler}
-            // pollCommentIdHandler={pollCommentIdHandler}
-            clickPoll={clickPoll}
-            anchorIdHL={anchorIdHL}
-            hlElementHandler={hlElementHandler}
-            // pushTitle={pushTitle}
-            // titleRef={titleRef ? titleRef(titleRefArr) : null}
-          />
-          {/* {console.log(sect)} */}
+          <div className={classes.cardSectionInner}>
+            {showEditor ? (
+              <BulletEditor />
+            ) : (
+              <RenderTokenStream
+                stream={sect.stream}
+                ref={ref}
+                showQuestion={showQuestion}
+                showDiscuss={showDiscuss}
+                anchorIdHandler={anchorIdHandler}
+                clickPoll={clickPoll}
+                anchorIdHL={anchorIdHL}
+                hlElementHandler={hlElementHandler}
+                cardCommentId={cardCommentId}
+              />
+            )}
+            {/* {console.log(sect)} */}
+            <span
+              className={classes.sectionEditBtn}
+              onClick={() => {
+                setShowEditor(prev => !prev)
+              }}
+            >
+              {showEditor ? '儲存' : '編輯'}
+            </span>
+          </div>
         </div>
       )
     }
@@ -527,9 +568,10 @@ export const RenderCardBody = forwardRef(
   (
     {
       sects,
+      text,
       titleRef,
       showQuestion,
-      commentIdHandler,
+      cardCommentId,
       // pollCommentIdHandler,
       anchorIdHandler,
       clickPoll,
@@ -538,9 +580,10 @@ export const RenderCardBody = forwardRef(
       hlElementHandler,
     }: {
       sects: Section[]
+      text: string[]
       titleRef?: (arr: any[]) => void
       showQuestion?: () => void
-      commentIdHandler?: (commentId: string) => void
+      cardCommentId: number
       // pollCommentIdHandler?: (commentId: string) => void
       anchorIdHandler?: (anchorId: string) => void
       clickPoll?: (commentId: string) => void
@@ -560,51 +603,31 @@ export const RenderCardBody = forwardRef(
       content: string
       panel: boolean
     }
-    // const [showPanel,setShowPanel]=useState<PanelArr[]>()
 
-    // const showPanelArr:PanelArr[]=[]
-    // const showPanelHandler=(streamContent:string) => {
-
-    //   showPanelArr.push({content:streamContent,panel:true})
-    //   setShowPanel((prev)=>{
-    //     const prevState=prev
-
-    //     prevState?.forEach(el=>{
-
-    //       if(el.content!==streamContent){
-    //       el.panel=false
-    //       }
-
-    //     }
-
-    //     )
-    //     return
-    //   })
-    // }
-
-    // console.log(myRef.current)
     return (
       <>
         {console.log(sects)}
-        {sects.map((e, i) => (
-          <RenderSection
-            key={i}
-            sect={e}
-            // ref={el => {return (myRef?.current?.anchorRef[i] = el.anchorRef)}}
-            ref={el => {
-              // console.log(el)
-              myRef.current[i] = el
-            }}
-            showQuestion={showQuestion}
-            // commentIdHandler={commentIdHandler}
-            anchorIdHandler={anchorIdHandler}
-            // pollCommentIdHandler={pollCommentIdHandler}
-            clickPoll={clickPoll}
-            showDiscuss={showDiscuss}
-            anchorIdHL={anchorIdHL}
-            hlElementHandler={hlElementHandler}
-          />
-        ))}
+        {sects
+          .filter(e => e.nestedCard !== undefined)
+          .map((e, i) => (
+            <RenderSection
+              key={i}
+              sect={e}
+              text={text[i]}
+              ref={el => {
+                // console.log(el)
+                myRef.current[i] = el
+              }}
+              showQuestion={showQuestion}
+              cardCommentId={cardCommentId}
+              anchorIdHandler={anchorIdHandler}
+              // pollCommentIdHandler={pollCommentIdHandler}
+              clickPoll={clickPoll}
+              showDiscuss={showDiscuss}
+              anchorIdHL={anchorIdHL}
+              hlElementHandler={hlElementHandler}
+            />
+          ))}
         {/* {console.log(myRef.current)} */}
         {titleRef && titleRef(myRef.current)}
       </>
@@ -616,7 +639,7 @@ RenderCardBody.displayName = 'RenderCardBody'
 export const CardBody = ({
   card,
   bySrc,
-  // cardCommentIdHandler,
+  // cardCommentId,
   titleRefHandler,
   showQuestion,
   commentIdHandler,
@@ -629,7 +652,7 @@ export const CardBody = ({
 }: {
   card: CocardFragment
   bySrc?: string
-  // cardCommentIdHandler: (cardCommentId: string) => void
+  // cardCommentId: number
   titleRefHandler?: (arr: any[]) => void
   showQuestion?: () => void
   commentIdHandler?: (commentId: string) => void
@@ -647,17 +670,16 @@ export const CardBody = ({
   // const meta: CardMeta | undefined = card.meta ? (JSON.parse(card.meta) as CardMeta) : undefined
   const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
   editor.flush({ attachMarkerlinesToTokens: true })
-
+  console.log(editor.getText())
+  const text = editor.getText().split(/^\n/gm)
+  // console.log(text.split(/^\n/gm))
   return (
-    // <>
-    //   <QueryCommentModal commentId={card.meta.commentId.toString()}>
-    //     <div>discuss</div>
-    // </QueryCommentModal>
     <RenderCardBody
       sects={editor.getSections()}
+      text={text}
       titleRef={titleRefHandler}
       showQuestion={showQuestion}
-      // commentIdHandler={commentIdHandler}
+      cardCommentId={(card.meta as CardMeta).commentId}
       anchorIdHandler={anchorIdHandler}
       // pollCommentIdHandler={pollCommentIdHandler}
       clickPoll={clickPoll}
@@ -670,7 +692,7 @@ export const CardBody = ({
   )
 }
 
-export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
+export function CardHead({ card, sect }: { card: CocardFragment; sect: Section[] }): JSX.Element {
   // const title = findOneComment(MARKER_FORMAT.srcTitle.mark, card.comments)
   // const publishDate = findOneComment(MARKER_FORMAT.srcPublishDate.mark, card.comments);
   const _comment: CommentFragment = {
@@ -712,26 +734,43 @@ export function CardHead({ card }: { card: CocardFragment }): JSX.Element {
         <h1 className={classes.tickerTitle}>{cardTitle.replace('[[', '').replace(']]', '')}</h1>
       ) : (
         <>
-          <span className={classes.author}>author</span>
-          <span className={classes.webName}>{' • ' + 'Youtube' + '\n'}</span>
-          {/* <MyTooltip
+          <div className={classes.headerTopWrapper}>
+            <span className={classes.date}>2021-4-9</span>
+            <span className={classes.flexContainer}>
+              {/* <ClockIcon className={classes.clockIcon} /> */}
+              {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}
+            </span>
+            {/* <MyTooltip
             title="ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
             蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资"
           > */}
-          <span className={`${classes.title} ${titleClick ? classes.titleExpand : ''}`} onClick={titleClickedHandler}>
-            ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
-            蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
-          </span>
-          {/* </MyTooltip> */}
-          <span className={classes.flexContainer}>
-            <ClockIcon className={classes.clockIcon} />
-            {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}
+            <span className={`${classes.title} ${titleClick ? classes.titleExpand : ''}`} onClick={titleClickedHandler}>
+              ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
+              蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
+            </span>
+            <span className={classes.author}>author</span>
+            <span className={classes.webName}>{' • ' + 'Youtube' + '\n'}</span>
             <a className={classes.link} href={cardTitle} target="_blank" rel="noreferrer">
-              <span className={classes.date}>2021-4-9</span>
               <LinkIcon className={classes.linkIcon} />
-              連結{'\n'}
+              {/* 連結{'\n'} */}
             </a>
-          </span>
+            <div className={classes.tagContainer}>
+              {/* <span>Tags:</span> */}
+              {sect.map((e, i) => {
+                if (e.nestedCard) {
+                  return (
+                    <span key={i} className={classes.tag}>
+                      {e.nestedCard.symbol}
+                    </span>
+                  )
+                }
+              })}
+            </div>
+          </div>
+          <div>
+            <div>操作建議:</div>
+          </div>
+          {/* </MyTooltip> */}
         </>
       )}
 

@@ -17,6 +17,7 @@ const SideBar = () => {
   const { data, loading } = useMeQuery()
   return (
     <div className={classes.sidebar}>
+      <div className></div>
       {data && user ? (
         <>
           Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
@@ -39,19 +40,19 @@ const SideBar = () => {
           </li> */}
         <li>
           <a href="#">
-            <CocardIcon />
+            {/* <CocardIcon /> */}
             <span>社群卡</span>
           </a>
         </li>
         <li>
           <a href="#">
-            <HeartIcon />
+            {/* <HeartIcon /> */}
             <span>收藏</span>
           </a>
         </li>
-        <li>
+        {/* <li>
           <a href="https://www.notion.so/Work-Log-491e5e9bdff942cf96ab0e9dfbf86c4e">測試說明: 3/4 上線測試A1</a>
-        </li>
+        </li> */}
       </ul>
       <span className="logo">
         <Link href="/">COCARD</Link>

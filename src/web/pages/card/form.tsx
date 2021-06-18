@@ -5,7 +5,7 @@ import { getCardUrlParam, symbolToUrl } from '../../lib/helper'
 import { CocardFragment, CocardQuery, useCocardQuery } from '../../apollo/query.graphql'
 import { CardBody } from '../../components/card'
 import { CardForm } from '../../components/card-form'
-import { SlateEditorPage } from '../../components/lab/editor'
+import { SlateEditorPage, EditorWithAutoSuggest } from '../../components/editor/editor'
 import { QueryDataProvider } from '../../components/data-provider'
 import { useMe } from '../../components/use-me'
 import classes from './card-page.module.scss'
@@ -77,7 +77,8 @@ export function CardFormPage(): JSX.Element | null {
       return <h1>Symbol format error</h1>
     }
   }
-  return <h1>Require URL or Symbol</h1>
+  return <div className={classes.formTemplate}>{/* <EditorWithAutoSuggest /> */}</div>
+  // return <h1>Require URL or Symbol</h1>
 }
 
 // export function PlainWebcardForm() {

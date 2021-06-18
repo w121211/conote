@@ -6,7 +6,7 @@
 // import Prism from 'prismjs'
 import React, { useState, useCallback, useMemo, CSSProperties, useEffect, KeyboardEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { Slate, Editable, withReact, ReactEditor } from 'slate-react'
+import { Slate, Editable, withReact, ReactEditor, DefaultPlaceholder, RenderPlaceholderProps } from 'slate-react'
 import { createEditor, Descendant, Text, NodeEntry, Range, Editor, Transforms, Node } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editor as CardEditor, ExtTokenStream, streamToStr } from '../../../packages/editor/src/index'
@@ -220,10 +220,18 @@ function decorate([node, path]: NodeEntry): Range[] {
   return ranges
 }
 
-function EditorWithAutoSuggest({ card, onSubmit }: { card: Cocard; onSubmit: (a: Descendant[]) => void }): JSX.Element {
+export function EditorWithAutoSuggest({
+  card,
+  onSubmit,
+}: {
+  card?: Cocard
+  onSubmit: (a: Descendant[]) => void
+}): JSX.Element {
   // console.log(card)
 
-  const editorContent = JSON.stringify([{ type: 'paragraph', children: [{ text: card.body?.text }] }])
+  const editorContent = card
+    ? JSON.stringify([{ type: 'paragraph', children: [{ text: card?.body?.text }] }])
+    : JSON.stringify([{ type: 'paragraph', children: [{ text: '' }] }])
   // localStorage.setItem('editorContent', editorContent)
 
   const editor = useMemo(() => withShiftBreak(withHistory(withReact(createEditor()))), [])
@@ -412,6 +420,7 @@ function EditorWithAutoSuggest({ card, onSubmit }: { card: Cocard; onSubmit: (a:
           placeholder="Write some markdown..."
           renderLeaf={props => <Leaf {...props} />}
         />
+
         {search && (
           <Portal>
             <SuggestionPanel
@@ -486,8 +495,4 @@ export function SlateEditorPage({ card, onFinish }: { card: Cocard; onFinish: ()
   )
 }
 
-function TempPage(): JSX.Element {
-  return <div>Temp Pagge</div>
-}
-
-export default TempPage
+// export default SlateEditorPage

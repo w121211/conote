@@ -123,94 +123,14 @@ function CardPage(): JSX.Element {
         render={(data: CocardQuery) => {
           if (data && data.cocard) {
             const url = `/card/form?${getCardUrlParam(data.cocard)}`
-            // console.log(data.cocard.link)
-            const cardCommentId = (data.cocard.meta as CardMeta).commentId
-
-            // .forEach(sc => sc.stream && (sc.stream as ExtTokenStream[]).filter(e => e !== '\n'))
             const editor = new Editor(
               data.cocard.body?.text,
               data.cocard.body?.meta,
-              data.cocard.link.url,
+              data.cocard.link?.url,
               data.cocard.link.oauthorName ?? undefined,
             )
             editor.flush({ attachMarkerlinesToTokens: true })
             const sect = editor.getSections()
-            const sectStreamFilterArr = sect.map(sc => Array.isArray(sc.stream) && sc.stream.filter(e => e !== '\n'))
-            const sectData: SectData[] = []
-            sectStreamFilterArr.map(e => {
-              Array.isArray(e) &&
-                e.forEach(el => {
-                  el as ExtToken
-                  sectData.push({
-                    type: (el as ExtToken).type,
-                    content: (el as ExtToken).content,
-                  })
-                })
-            })
-            // console.log(sect)
-
-            // console.log('sectStreamFilterArr', sectStreamFilterArr)
-
-            // const contentResolver = (sectData: any) => {
-            //   const data: SectData[] = []
-            //   if (Array.isArray(sectData)) {
-            //     for (const c of sectData) {
-            //       const dataType = c.type
-            //       const dataContent = []
-
-            //       if (Array.isArray(c.content)) {
-            //         const contentArr = []
-            //         for (const ca of c.content) {
-            //           const caFilter = ca.filter(e => e !== '\n')
-            //           contentArr.push({
-            //             type: caFilter.type,
-            //             content: caFilter.content,
-            //             markerline: {
-            //               anchorId: caFilter.markerline.anchorId,
-            //               commentId: caFilter.markerline.commandId,
-            //             },
-            //           })
-            //         }
-            //         dataContent.push(...contentArr)
-            //       }
-
-            //       data.push({
-            //         type: dataType,
-            //         content: dataContent,
-            //       })
-            //     }
-            //   }
-            // }
-
-            console.log('sectData', sectData)
-            // contentResolver(sectData)
-            const dataObj = {
-              cardCommentId: (data.cocard.meta as CardMeta).commentId,
-              section: function () {
-                const editor = new Editor(
-                  data.cocard.body?.text,
-                  data.cocard.body?.meta,
-                  data.cocard.link.url,
-                  data.cocard.link.oauthorName ?? undefined,
-                )
-                editor.flush({ attachMarkerlinesToTokens: true })
-                const sect = editor.getSections()
-                const sectStreamFilterArr = sect.map(
-                  sc => Array.isArray(sc.stream) && sc.stream.filter(e => e !== '\n'),
-                )
-                const sectData: SectData[] = []
-                sectStreamFilterArr.map(e => {
-                  Array.isArray(e) &&
-                    e.forEach(el => {
-                      el as ExtToken
-                      sectData.push({
-                        type: (el as ExtToken).type,
-                        content: Array.isArray((el as ExtToken).content) && (el as ExtToken).content,
-                      })
-                    })
-                })
-              },
-            }
             return (
               <div className={classes.main}>
                 <div className={classes.mainInner}>
@@ -218,45 +138,7 @@ function CardPage(): JSX.Element {
                   <div className={classes.cardOuter}>
                     <div className={classes.cardInner}>
                       <div className={classes.cardElement}>
-                        <CardHead card={data.cocard} />
-                        {/* <CardBody1 data={sectData} />
-                        {sectData.map((e, i) => (
-                          <div className="section" key={i}>
-                            {e.type}
-                            {console.log('content', e.content)}
-                            {Array.isArray(e.content)
-                              ? e.content
-                                  .filter(ele => ele !== '\n')
-                                  .map(
-                                    (element, index) => {
-                                      element as ExtToken
-                                      if (element.type === 'line-mark') {
-                                        return <div className="line-mark">{element.content}</div>
-                                      }
-                                      if (element.type === 'line-value') {
-                                        return element.content.map((text, indx) => {
-                                          if (indx === element.content.length - 1) {
-                                            return (
-                                              <>
-                                                <span className="stamp">like</span>
-                                                <br />
-                                              </>
-                                            )
-                                          }
-                                          return (
-                                            <span key={indx} className="line-value">
-                                              {typeof text === 'string' ? text : text.content}
-                                            </span>
-                                          )
-                                        })
-                                      }
-                                    },
-
-                                    // <div key={index}> {element}</div>
-                                  )
-                              : e.content}
-                          </div>
-                        ))} */}
+                        <CardHead card={data.cocard} sect={sect} />
 
                         <CardBody
                           card={data.cocard}
@@ -275,15 +157,15 @@ function CardPage(): JSX.Element {
                       </div>
                     </div>
                   </div>
-                  <Button
+                  {/* <Button
                     className={classes.button}
                     onClick={() => {
                       router.push(url)
                     }}
-                  >
-                    {/* {console.log(url)} */}
-                    <EditIcon className={classes.editIcon} />
-                  </Button>
+                  > */}
+                  {/* {console.log(url)} */}
+                  {/* <EditIcon className={classes.editIcon} />
+                  </Button> */}
                   {/* <button
                     onClick={() => {
                       router.push(url)

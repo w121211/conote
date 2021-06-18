@@ -9,6 +9,7 @@ import { SearchAllForm } from '../components/search-all-form'
 import SideBar from '../components/sidebar/sidebar'
 import Layout from '../components/layout/layout'
 import classes from './index.module.scss'
+import { useRouter } from 'next/router'
 
 function LatestCards(): JSX.Element | null {
   const { data, loading, error, fetchMore } = useLatestCardsQuery({ fetchPolicy: 'cache-and-network' })
@@ -64,6 +65,7 @@ function LatestCards(): JSX.Element | null {
 }
 
 function HomePage(): JSX.Element {
+  const router = useRouter()
   const { user, error, isLoading } = useUser()
   const { data, loading } = useMeQuery()
 
@@ -87,6 +89,9 @@ function HomePage(): JSX.Element {
         ) : (
           <a href="/api/auth/login">Login</a>
         )}
+      </div>
+      <div className={classes.newCardBtnContainer} onClick={() => router.push('./card/template')}>
+        <span className={classes.newCardBtn}>+</span>
       </div>
     </div>
     // {/* </Layout> */}

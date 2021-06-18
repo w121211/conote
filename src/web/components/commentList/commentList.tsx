@@ -47,38 +47,38 @@ const CommentList = ({
 }: {
   type?: string
   commentId: string
-  pollCommentId: string
-  switchTab: boolean
-  anchorHLHandler: (anchorId: string) => void
-  myScrollIntoView: () => void
-  resetHighLight: () => void
+  pollCommentId?: string
+  switchTab?: boolean
+  anchorHLHandler?: (anchorId: string) => void
+  myScrollIntoView?: () => void
+  resetHighLight?: () => void
 }) => {
   //   const [repliesList,setRepliesList]=useState<Array<({
   //     __typename?: 'Reply';
   // } & ReplyFragment)>>()
   const myRef = useRef<HTMLLIElement>(null)
 
-  const onClickHandler = (e: React.MouseEvent, anchorId: IterableIterator<RegExpMatchArray> | null) => {
-    if (anchorId) {
-      const anchorIdArr = Array.from(anchorId)
-      anchorIdArr[0] && anchorHLHandler([...anchorIdArr][0][1].trimEnd())
-    }
-  }
+  // const onClickHandler = (e: React.MouseEvent, anchorId: IterableIterator<RegExpMatchArray> | null) => {
+  //   if (anchorId) {
+  //     const anchorIdArr = Array.from(anchorId)
+  //     anchorIdArr[0] && anchorHLHandler([...anchorIdArr][0][1].trimEnd())
+  //   }
+  // }
 
-  const handleClickOutside = (e: any) => {
-    if (myRef.current && !myRef.current.contains(e.target)) {
-      anchorHLHandler('')
-      resetHighLight()
-    }
-  }
+  // const handleClickOutside = (e: any) => {
+  //   if (myRef.current && !myRef.current.contains(e.target)) {
+  //     anchorHLHandler('')
+  //     resetHighLight()
+  //   }
+  // }
 
-  useEffect(() => {
-    document.body.addEventListener('click', handleClickOutside, true)
-    return () => {
-      document.body.removeEventListener('click', handleClickOutside, true)
-    }
-  })
-  const meCommentId = switchTab && commentId ? commentId : pollCommentId
+  // useEffect(() => {
+  //   document.body.addEventListener('click', handleClickOutside, true)
+  //   return () => {
+  //     document.body.removeEventListener('click', handleClickOutside, true)
+  //   }
+  // })
+  const meCommentId = commentId ? commentId : pollCommentId
 
   const {
     data: repliesData,
@@ -86,7 +86,7 @@ const CommentList = ({
     error: repliesError,
   } = useRepliesQuery({
     // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
-    variables: { commentId: meCommentId },
+    variables: { commentId: commentId },
     fetchPolicy: 'cache-first',
   })
 
@@ -161,7 +161,7 @@ const CommentList = ({
           <li
             className={classes.commentRoot}
             ref={myRef}
-            onClick={e => onClickHandler(e, item.text.matchAll(/(^\d+ )(.+$)/g))}
+            // onClick={e => onClickHandler(e, item.text.matchAll(/(^\d+ )(.+$)/g))}
           >
             <CommentTemplate
               id={item.id}

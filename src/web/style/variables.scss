@@ -1,14 +1,18 @@
-$primary: #006ef5;
-$primary50: rgba(0, 110, 245, 0.5);
-$primaryHover: #459fff;
+// $primary: #313d92;
+$primary: #464648;
+$secondary: #5c6cda;
+// $primary50: rgba(0, 110, 245, 0.5);
+$secondaryHover: #5c6ddab6;
 $gray: #4f5678;
-$black: #1d2c3e;
-$natual: #ecedf3;
-$natualHover: #f7f7fb;
-$light-blue: #e0f2ff;
+$text: #5b6571;
+$natual: #f7f7f7;
+$link: #4e575f;
+$black: #353535;
+// $natualHover: #f7f7fb;
+// $light-blue: #e0f2ff;
 $gray-natual: #8c8c8c;
 $gray-hover: #595959;
-$bg: #f3f3f3;
+$bg: #edeef1c9;
 $icon: #494d50;
 
 $white: #ffffff;
@@ -33,12 +37,14 @@ $font-md: 500;
 $font-bd: 700;
 
 %Round_sm_ch {
-  font-family: 'cwTeXYen';
+  // font-family: 'cwTeXYen';
   font-size: 15px;
+  color: $primary;
 }
 %Round_sm_gray_en {
-  font-size: 0.8em;
-  font-family: 'Varela Round';
-  color: $gray;
+  font-size: 0.9em;
+  font-weight: 500;
+  // font-family: 'Varela Round';
+  color: $text;
   text-transform: capitalize;
 }
