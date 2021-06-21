@@ -72,7 +72,7 @@ export type ListItemElement = {
 
 export type BulletElement = {
   type: 'bullet'
-  onEdit?: true
+  // onEdit?: true
   children: Descendant[]
 }
 
