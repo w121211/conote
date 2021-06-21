@@ -10,8 +10,7 @@ import { CardBody, CardHead } from '../../components/card'
 import Discuss from '../../components/discuss/discuss'
 import EditIcon from '../../assets/svg/edit.svg'
 import classes from './card-page.module.scss'
-import { CardMeta } from '../../lib/models/card'
-import { CardBody1 } from '../../components/card-body'
+import indexClasses from '../index.module.scss'
 
 export interface SectData {
   type: string
@@ -134,7 +133,6 @@ function CardPage(): JSX.Element {
             return (
               <div className={classes.main}>
                 <div className={classes.mainInner}>
-                  <TickerAnchor data={data.cocard} clickHandler={clickHandler} />
                   <div className={classes.cardOuter}>
                     <div className={classes.cardInner}>
                       <div className={classes.cardElement}>
@@ -173,6 +171,7 @@ function CardPage(): JSX.Element {
                   >
                     編輯
                   </button> */}
+                  <TickerAnchor data={data.cocard} clickHandler={clickHandler} />
                 </div>
                 {/* <Discuss
                   switchTab={discuss}
@@ -188,6 +187,9 @@ function CardPage(): JSX.Element {
                   myScrollIntoView={myScrollIntoView}
                   resetHighLight={resetHighLight}
                 /> */}
+                <div className={indexClasses.newCardBtnContainer} onClick={() => router.push('./card/template')}>
+                  <span className={indexClasses.newCardBtn}>+</span>
+                </div>
               </div>
             )
           }

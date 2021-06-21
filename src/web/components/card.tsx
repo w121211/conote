@@ -12,7 +12,7 @@ import { toUrlParams } from '../lib/helper'
 import { PollChoices } from './poll-form'
 // import { Link } from './link'
 import { MyTooltip } from '../components/my-tooltip/my-tooltip'
-import BulletEditor from './slate/bullet'
+import BulletEditor from './slate-editor/bullet'
 import Question from './question/question'
 import classes from './card.module.scss'
 import ClockIcon from '../assets/svg/clock.svg'
@@ -580,10 +580,10 @@ export const RenderCardBody = forwardRef(
       hlElementHandler,
     }: {
       sects: Section[]
-      text: string[]
+      text?: string[]
       titleRef?: (arr: any[]) => void
       showQuestion?: () => void
-      cardCommentId: number
+      cardCommentId?: number
       // pollCommentIdHandler?: (commentId: string) => void
       anchorIdHandler?: (anchorId: string) => void
       clickPoll?: (commentId: string) => void
@@ -613,13 +613,13 @@ export const RenderCardBody = forwardRef(
             <RenderSection
               key={i}
               sect={e}
-              text={text[i]}
+              text={(text && text[i]) || ''}
               ref={el => {
                 // console.log(el)
                 myRef.current[i] = el
               }}
               showQuestion={showQuestion}
-              cardCommentId={cardCommentId}
+              cardCommentId={cardCommentId || 0}
               anchorIdHandler={anchorIdHandler}
               // pollCommentIdHandler={pollCommentIdHandler}
               clickPoll={clickPoll}

@@ -1,0 +1,3 @@
+.bulletBody {
+  white-space: nowrap; // react的type會抗議這個，但需要 -> 移到css#class
+}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { forwardRef, ReactPropTypes, useState } from 'react'
 import Link from 'next/link'
 import { SearchAllForm } from '../search-all-form'
 import HomeIcon from '../../assets/svg/home.svg'
@@ -7,17 +7,23 @@ import HeartIcon from '../../assets/svg/heart.svg'
 import classes from './sidebar.module.scss'
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
 import { useMeQuery } from '../../apollo/query.graphql'
+import MenuIcon from '../../assets/svg/menu.svg'
+import layoutClasses from '../layout/layout.module.scss'
 
-const SideBar = () => {
-  const [sidebar, setSidebar] = useState(false)
-  const toggleSidebar = () => {
-    setSidebar(prev => !prev)
-  }
+const SideBar = ({ style, showMenuHandler }: { style: React.CSSProperties; showMenuHandler: () => void }) => {
   const { user, error, isLoading } = useUser()
   const { data, loading } = useMeQuery()
+
   return (
-    <div className={classes.sidebar}>
-      <div className></div>
+    <div className={classes.sidebar} style={style}>
+      <div
+        className={`${classes.menuIconWrapper}`}
+        onClick={() => {
+          showMenuHandler()
+        }}
+      >
+        <MenuIcon className={classes.menuIcon} />
+      </div>
       {data && user ? (
         <>
           Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
@@ -26,8 +32,6 @@ const SideBar = () => {
         <a href="/api/auth/login">Login</a>
       )}
 
-      {/* <Arrow className="arrowIcon" /> */}
-      <div className="arrowIcon" onClick={toggleSidebar}></div>
       <div className="searchBar">
         <SearchAllForm />
       </div>
@@ -68,4 +72,5 @@ const SideBar = () => {
     </div>
   )
 }
+
 export default SideBar

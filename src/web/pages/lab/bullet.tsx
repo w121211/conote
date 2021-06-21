@@ -181,7 +181,7 @@ const BulletBody = ({ attributes, children, element }: RenderElementProps): JSX.
           '-webkit-box-orient': 'vertical',
           // display: 'inline-block',
           width: '100px',
-          whiteSpace: 'nowrap', // react的type會抗議這個，但需要 -> 移到css#class
+          // whiteSpace: 'nowrap', // react的type會抗議這個，但需要 -> 移到css#class
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           color: 'grey',

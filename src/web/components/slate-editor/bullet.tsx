@@ -18,6 +18,7 @@ import { withHistory } from 'slate-history'
 import { tokenize, LINE_VALUE_GRAMMAR, Token } from '../../../packages/editor/src/parser'
 import { createPortal } from 'react-dom'
 import { Key } from 'slate-react/dist/utils/key'
+import classes from './bullet.module.scss'
 
 const SUGGESTIONS = {
   '@': ['@作者', '@me'],
@@ -180,7 +181,7 @@ const BulletBody = ({ attributes, children, element }: RenderElementProps): JSX.
           '-webkit-box-orient': 'vertical',
           // display: 'inline-block',
           width: '100px',
-          whiteSpace: 'nowrap', // react的type會抗議這個，但需要 -> 移到css#class
+          // whiteSpace: 'nowrap', // react的type會抗議這個，但需要 -> 移到css#class
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           color: 'grey',
@@ -188,7 +189,10 @@ const BulletBody = ({ attributes, children, element }: RenderElementProps): JSX.
 
   return (
     <div {...attributes}>
-      <span style={style}>{children}</span>
+      <span className={classes.bulletBody} style={style}>
+        {children}
+      </span>
+      {/* <span className={`${classes.bulletBody} ${selected && focused ? classes.selected : undefined}`}>{children}</span> */}
     </div>
   )
 }

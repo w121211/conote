@@ -45,7 +45,9 @@ const QuestionChildren = ({
               if (typeof e !== 'string' && (e.type === 'topic' || e.type === 'ticker'))
                 return (
                   <span className={`${classes.keyword} ${quesClasses.link}`} key={i}>
-                    <Link href={`/card?${toUrlParams({ s: e.content })}`}>{e.content}</Link>
+                    <Link href={`/card?${toUrlParams({ s: (typeof e.content === 'string' && e.content) || '' })}`}>
+                      {e.content}
+                    </Link>
                   </span>
                 )
               if (typeof e !== 'string' && e.type === 'vote-chocie') {
@@ -101,7 +103,7 @@ const QuestionParent = ({
   cardCommentId,
   type,
 }: {
-  stream: ExtToken
+  stream: ExtToken | string
   mykey: number
   cardCommentId: number
   type: string
@@ -120,7 +122,7 @@ const QuestionParent = ({
       document.body.removeEventListener('click', handleClickOutside, true)
     }
   })
-  const commentId = stream.markerline?.commentId || cardCommentId
+  const commentId = (typeof stream !== 'string' && stream.markerline?.commentId) || cardCommentId
   // if (stream.markerline?.commentId) {
   const {
     data: commentsData,
@@ -158,7 +160,7 @@ const QuestionParent = ({
         // title="d"
         title={
           <>
-            {stream.markerline?.anchorId && (
+            {typeof stream !== 'string' && stream.markerline?.anchorId && (
               <>
                 <CommentForm commentId={commentId.toString()} anchorId={stream.markerline.anchorId.toString()} />
                 <CommentList commentId={commentId.toString()} />
@@ -197,7 +199,7 @@ const QuestionParent = ({
     </span>
   )
 }
-const Question = ({ stream, cardCommentId }: { stream: ExtToken; cardCommentId: number }) => {
+const Question = ({ stream, cardCommentId }: { stream: (ExtToken | string)[]; cardCommentId: number }) => {
   return (
     <>
       {/* {console.log(stream)} */}
@@ -213,7 +215,15 @@ const Question = ({ stream, cardCommentId }: { stream: ExtToken; cardCommentId: 
               )
             }
 
-            return <QuestionParent stream={e} key={i} mykey={i} cardCommentId={cardCommentId} type={e.type} />
+            return (
+              <QuestionParent
+                stream={e}
+                key={i}
+                mykey={i}
+                cardCommentId={cardCommentId}
+                type={(typeof e !== 'string' && e.type) || ''}
+              />
+            )
           })}
     </>
   )
