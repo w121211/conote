@@ -3,26 +3,70 @@
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { hash, hashSync } from 'bcryptjs'
-import { PrismaClient } from '@prisma/client'
-// import { prisma, foo } from '../context'
+import { Card, CardType, PrismaClient, SrcType } from '@prisma/client'
 import { getOrCreateLink } from '../link'
-import { getOrCreateCardBySymbol, getOrCreateCardByLink, CardMeta } from '../card'
-import { createCardBody, createWebCardBody } from '../card-body'
-// import { Editor, Markerline } from '../../../lib/editor/src'
-import { Editor, Markerline, splitByUrl } from '../../../../packages/editor/src'
+// import { getOrCreateCardBySymbol, getOrCreateCardByLink, CardMeta } from '../card'
+import {
+  BulletInput,
+  CardTemplateParams,
+  createCard,
+  createCardBody,
+  replaceBulletInput,
+  runBulletInputOp,
+  templateTicker,
+} from '../card'
 import prisma from '../../prisma'
-import { clean, createTestSymbols, createTestUsers, TESTUSERS, TESTOAUTHORS } from '../../test-helper'
+import { clean, createTestUsers, TESTUSERS, TESTOAUTHORS, omitDeep } from '../../test-helper'
 import { FetchClient } from '../../../../packages/fetcher/src'
+import { getBotId } from '../user'
+import { symbolToUrl, SYMBOL_DOMAIN } from '../symbol'
 
 const sampleFilepath = resolve(__dirname, '__samples__', 'common.txt')
 
+const params: CardTemplateParams = {
+  name: '$AAA',
+  template: templateTicker.name,
+  title: 'AAA Company',
+  ticker: '$AAA',
+}
+
+const input0: BulletInput = {
+  head: '111',
+  body: '111-111',
+  op: 'create',
+  children: [
+    { head: '222', body: '222-222', op: 'create' },
+    {
+      head: '333',
+      op: 'create',
+      children: [
+        { head: '444', op: 'create' },
+        { head: '555', op: 'create' },
+      ],
+    },
+  ],
+}
+
 let fetcher: FetchClient
+let card: Card
 
 beforeAll(async () => {
   console.log('Writing required data into database')
   const _prisma = new PrismaClient()
   await createTestUsers(_prisma)
-  await createTestSymbols(_prisma)
+  card = await _prisma.card.create({
+    data: {
+      type: CardType.TICKER,
+      name: params.name,
+      link: {
+        create: {
+          url: symbolToUrl(params.name),
+          domain: SYMBOL_DOMAIN,
+          srcType: SrcType.OTHER,
+        },
+      },
+    },
+  })
   await _prisma.$disconnect()
 
   console.log('Setting up a fetch-client')
@@ -34,158 +78,185 @@ afterAll(async () => {
   await prisma.$disconnect()
 })
 
-// jest.mock('chance', () => {
-//   return {
-//     Chance: jest.fn().mockImplementation(() => {
-//       return {
-//         i: 0,
-//         string(): string {
-//           const str = this.i.toString(36).padStart(3, '0')
-//           this.i += 1
-//           if (this.i >= 36 * 36 * 36) {
-//             this.i = 0
-//           }
-//           return str
-//         },
-//       }
-//     }),
-//   }
-// })
-
-// --- Tests ---
-
-test('create a symbol card', async () => {
-  const card = await getOrCreateCardBySymbol('$AA')
-  const discussBoard = await prisma.comment.findUnique({
-    where: { id: (card.meta as unknown as CardMeta).commentId },
-  })
-  expect(clean(card)).toMatchSnapshot()
-  expect(clean(discussBoard)).toMatchSnapshot()
-  // expect(_clean(editor.getMarkerlines())).toMatchSnapshot()
+test('replaceBulletInput()', () => {
+  expect(clean(replaceBulletInput(templateTicker.body, params))).toMatchSnapshot()
 })
 
-test('create a symbol card body', async () => {
-  const card = await getOrCreateCardBySymbol('$AA')
-  const editor = new Editor(card.body.text)
-  editor.setText(`[?] <BUY> @30
-[+]
-111 111
-222 222`)
-  editor.flush()
-
-  await createCardBody(card, editor, TESTUSERS[0].id)
-  const temp = await prisma.cocard.findUnique({
-    where: { id: card.id },
-    include: { body: true },
+test('runBulletInputOp()', async () => {
+  const root0 = await runBulletInputOp({
+    cardId: card.id,
+    input: input0,
+    // prevDict,
+    timestamp: 111111111,
+    userId: TESTUSERS[0].id,
   })
-  expect(clean(temp)).toMatchSnapshot()
-  // expect(_clean(editor.getMarkerlines())).toMatchSnapshot()
+  expect(clean(root0)).toMatchSnapshot()
 })
 
-test('create a blank web card', async () => {
-  const [link] = await getOrCreateLink('http://test1.com')
-  const card = await getOrCreateCardByLink(link)
-  expect(clean(card)).toMatchSnapshot()
-})
+test('createCardBody()', async () => {
+  const body0 = await createCardBody({ cardId: card.id, bulletInputRoot: input0 }, TESTUSERS[0].id)
+  expect(clean({ ...body0, content: omitDeep(JSON.parse(body0.content), ['timestamp']) })).toMatchSnapshot()
 
-test('edit a web card', async () => {
-  const card = await prisma.cocard.findUnique({
-    where: { linkUrl: 'http://test1.com' },
-    include: { body: true },
-  })
-  if (card === null) throw new Error()
-
-  const editor = new Editor(card.body.text)
-  editor.setText(`[*]
-2021年會有進一步財政刺激
-歷年有1月效應，1月份呈現反彈，但不認為`)
-  editor.flush()
-
-  await createCardBody(card, editor, TESTUSERS[0].id)
-  const temp = await prisma.cocard.findUnique({
-    where: { id: card.id },
-    include: { body: true },
-  })
-  expect(clean(temp)).toMatchSnapshot()
-})
-
-test('create a nested web-card', async () => {
-  const [link, { fetchResult }] = await getOrCreateLink('http://test2.com')
-  const card = await getOrCreateCardByLink(link)
-
-  const editor = new Editor(
-    card.body.text,
-    card.body.meta as unknown as Markerline[],
-    'http://test2.com',
-    TESTOAUTHORS[0].name,
-  )
-  editor.setText(`$CC
-[?] <BUY> @30
-[+]
-111 111
-222 222
-
-$DD
-[?] <SELL> @30`)
-  editor.flush()
-
-  for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
-    const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
-    const nestedEditor = new Editor(
-      nestedCard.body.text,
-      nestedCard.body.meta as unknown as Markerline[],
-      link.url,
-      TESTOAUTHORS[0].name,
-    )
-    nestedEditor.setMarkerlinesToInsert(markerlines.filter(e => e.new && !e.neatReply))
-    nestedEditor.flush()
-    console.log(nestedEditor.getText())
-    console.log(nestedEditor.getMarkerlines())
-
-    await createCardBody(nestedCard, nestedEditor, TESTUSERS[1].id)
+  const input1: BulletInput = {
+    id: 6,
+    head: '111+++',
+    body: '111-111+++',
+    op: 'update',
+    children: [
+      { id: 7, head: '222', body: '222-222', op: 'delete' },
+      {
+        id: 8,
+        head: '333',
+        children: [{ id: 9, head: '444' }],
+      },
+      { id: 10, head: '555', op: 'move' },
+      { head: '666', op: 'create' },
+    ],
   }
 
-  await createCardBody(card, editor, TESTUSERS[1].id)
-
-  expect((await getOrCreateCardByLink(link)).body.text).toMatchSnapshot()
-  expect(clean((await getOrCreateCardByLink(link)).body.meta as unknown as Record<string, unknown>)).toMatchSnapshot()
-  expect((await getOrCreateCardBySymbol('$CC')).body.text).toMatchSnapshot()
-  expect(
-    clean((await getOrCreateCardBySymbol('$CC')).body.meta as unknown as Record<string, unknown>),
-  ).toMatchSnapshot()
-  expect((await getOrCreateCardBySymbol('$DD')).body.text).toMatchSnapshot()
-  expect(
-    clean((await getOrCreateCardBySymbol('$DD')).body.meta as unknown as Record<string, unknown>),
-  ).toMatchSnapshot()
-
-  // await createCardBody(card, editor, TESTUSERS[1].id)
-
-  // const rootCard = await prisma.cocard.findUnique({
-  //   where: { id: card.id },
-  //   include: { body: true },
-  // })
-  // expect(omitDeep(rootCard ?? {}, ['createdAt', 'updatedAt'])).toMatchSnapshot()
-
-  // const nestedCard = await prisma.cocard.findUnique({
-  //   where: { linkUrl: '//$ABBV' },
-  //   include: { body: true },
-  // })
-  // if (nestedCard === null) throw new Error()
-  // expect(omitDeep(nestedCard ?? {}, ['createdAt', 'updatedAt'])).toMatchSnapshot()
-
-  // const markerlines = new TextEditor(nestedCard.body.text).getMarkerlines()
-  // expect(markerlines).toMatchSnapshot()
+  const body1 = await createCardBody({ cardId: card.id, bulletInputRoot: input1 }, TESTUSERS[1].id)
+  console.log(body1)
+  expect(clean({ ...body1, content: omitDeep(JSON.parse(body1.content), ['timestamp']) })).toMatchSnapshot()
 })
 
-test.each(
-  splitByUrl(readFileSync(sampleFilepath, { encoding: 'utf8' }))
-    .filter((e): e is [string, string] => e[0] !== undefined)
-    .map(e => [e[0].trim(), e[1].trim()]),
-)('Create web card from common.txt', async (url: string, body: string) => {
-  if (url === undefined) return
-
-  const [link] = await getOrCreateLink(url, fetcher)
-  const card = await getOrCreateCardByLink(link)
-  expect((await createWebCardBody(card.id, body, TESTUSERS[0].id)).text).toMatchSnapshot()
-  // expect((await createWebCardBody(card.id, body, TESTUSERS[0].id)).meta).toMatchSnapshot()
+test('createCard()', async () => {
+  const { card, body } = await createCard({ name: '$BBB', template: templateTicker, title: 'BBB Company' })
+  expect(clean(card)).toMatchSnapshot()
+  expect(clean({ ...body, content: omitDeep(JSON.parse(body.content), ['timestamp']) })).toMatchSnapshot()
 })
+
+// test('create a symbol card', async () => {
+//   const card = await createCard('$AA')
+//   // const discussBoard = await prisma.comment.findUnique({
+//   //   where: { id: (card.meta as unknown as CardMeta).commentId },
+//   // })
+//   expect(clean(card)).toMatchSnapshot()
+//   // expect(clean(discussBoard)).toMatchSnapshot()
+//   // expect(_clean(editor.getMarkerlines())).toMatchSnapshot()
+// })
+
+// test('create a symbol card body', async () => {
+//   const card = await getOrCreateCardBySymbol('$AA')
+//   const editor = new Editor(card.body.text)
+//   editor.setText(`[?] <BUY> @30
+// [+]
+// 111 111
+// 222 222`)
+//   editor.flush()
+
+//   await createCardBody(card, editor, TESTUSERS[0].id)
+//   const temp = await prisma.cocard.findUnique({
+//     where: { id: card.id },
+//     include: { body: true },
+//   })
+//   expect(clean(temp)).toMatchSnapshot()
+//   // expect(_clean(editor.getMarkerlines())).toMatchSnapshot()
+// })
+
+// test('create a blank web card', async () => {
+//   const [link] = await getOrCreateLink('http://test1.com')
+//   const card = await getOrCreateCardByLink(link)
+//   expect(clean(card)).toMatchSnapshot()
+// })
+
+// test('edit a web card', async () => {
+//   const card = await prisma.cocard.findUnique({
+//     where: { linkUrl: 'http://test1.com' },
+//     include: { body: true },
+//   })
+//   if (card === null) throw new Error()
+
+//   const editor = new Editor(card.body.text)
+//   editor.setText(`[*]
+// 2021年會有進一步財政刺激
+// 歷年有1月效應，1月份呈現反彈，但不認為`)
+//   editor.flush()
+
+//   await createCardBody(card, editor, TESTUSERS[0].id)
+//   const temp = await prisma.cocard.findUnique({
+//     where: { id: card.id },
+//     include: { body: true },
+//   })
+//   expect(clean(temp)).toMatchSnapshot()
+// })
+
+// test('create a nested web-card', async () => {
+//   const [link, { fetchResult }] = await getOrCreateLink('http://test2.com')
+//   const card = await getOrCreateCardByLink(link)
+
+//   const editor = new Editor(
+//     card.body.text,
+//     card.body.meta as unknown as Markerline[],
+//     'http://test2.com',
+//     TESTOAUTHORS[0].name,
+//   )
+//   editor.setText(`$CC
+// [?] <BUY> @30
+// [+]
+// 111 111
+// 222 222
+
+// $DD
+// [?] <SELL> @30`)
+//   editor.flush()
+
+//   for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
+//     const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
+//     const nestedEditor = new Editor(
+//       nestedCard.body.text,
+//       nestedCard.body.meta as unknown as Markerline[],
+//       link.url,
+//       TESTOAUTHORS[0].name,
+//     )
+//     nestedEditor.setMarkerlinesToInsert(markerlines.filter(e => e.new && !e.neatReply))
+//     nestedEditor.flush()
+//     console.log(nestedEditor.getText())
+//     console.log(nestedEditor.getMarkerlines())
+
+//     await createCardBody(nestedCard, nestedEditor, TESTUSERS[1].id)
+//   }
+
+//   await createCardBody(card, editor, TESTUSERS[1].id)
+
+//   expect((await getOrCreateCardByLink(link)).body.text).toMatchSnapshot()
+//   expect(clean((await getOrCreateCardByLink(link)).body.meta as unknown as Record<string, unknown>)).toMatchSnapshot()
+//   expect((await getOrCreateCardBySymbol('$CC')).body.text).toMatchSnapshot()
+//   expect(
+//     clean((await getOrCreateCardBySymbol('$CC')).body.meta as unknown as Record<string, unknown>),
+//   ).toMatchSnapshot()
+//   expect((await getOrCreateCardBySymbol('$DD')).body.text).toMatchSnapshot()
+//   expect(
+//     clean((await getOrCreateCardBySymbol('$DD')).body.meta as unknown as Record<string, unknown>),
+//   ).toMatchSnapshot()
+
+//   // await createCardBody(card, editor, TESTUSERS[1].id)
+
+//   // const rootCard = await prisma.cocard.findUnique({
+//   //   where: { id: card.id },
+//   //   include: { body: true },
+//   // })
+//   // expect(omitDeep(rootCard ?? {}, ['createdAt', 'updatedAt'])).toMatchSnapshot()
+
+//   // const nestedCard = await prisma.cocard.findUnique({
+//   //   where: { linkUrl: '//$ABBV' },
+//   //   include: { body: true },
+//   // })
+//   // if (nestedCard === null) throw new Error()
+//   // expect(omitDeep(nestedCard ?? {}, ['createdAt', 'updatedAt'])).toMatchSnapshot()
+
+//   // const markerlines = new TextEditor(nestedCard.body.text).getMarkerlines()
+//   // expect(markerlines).toMatchSnapshot()
+// })
+
+// test.each(
+//   splitByUrl(readFileSync(sampleFilepath, { encoding: 'utf8' }))
+//     .filter((e): e is [string, string] => e[0] !== undefined)
+//     .map(e => [e[0].trim(), e[1].trim()]),
+// )('Create web card from common.txt', async (url: string, body: string) => {
+//   if (url === undefined) return
+
+//   const [link] = await getOrCreateLink(url, fetcher)
+//   const card = await getOrCreateCardByLink(link)
+//   expect((await createWebCardBody(card.id, body, TESTUSERS[0].id)).text).toMatchSnapshot()
+//   // expect((await createWebCardBody(card.id, body, TESTUSERS[0].id)).meta).toMatchSnapshot()
+// })

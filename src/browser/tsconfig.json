@@ -1,6 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../lib/editor" }, { "path": "../lib/fetcher" }, { "path": "../web/tsconfig.build.json" }],
+  "references": [
+    { "path": "../packages/editor" },
+    { "path": "../packages/fetcher" },
+    { "path": "../web/tsconfig.build.json" }
+  ],
   "compilerOptions": {
     // "target": "es5", // 設為es5時會有error，與gql有關
     "module": "esnext",

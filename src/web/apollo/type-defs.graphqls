@@ -7,42 +7,43 @@ type Query {
   searchAll(term: String!): [String!]!
   searchTicker(term: String!): [String!]!
   searchTopic(term: String!): [String!]!
-  # searchTopic(term: String!): [String!]!
 
-  latestCards(afterId: String): [Cocard!]!
+  latestCardEntries(afterId: String): [CardEntry!]!
 
-  # 以url查找，不fetch, resolve，若無則返回null
-  link(url: String!): Link
+  # 以symbol查找，若無返回null
+  # @cardBodyId 若給予，會返回該body，若無，返回latest-body
+  card(symbol: String!, cardBodyId: String): Card
 
-  # 以url/symbol查找，url會fetch, resolve，若無則自動創新一個
-  cocard(url: String, symbol: String): Cocard!
+  # 以url查找，若無會fetch、resolve並創新card
+  webpageCard(url: String!): Card!
 
-  # 以下card目前暫時不考慮（留在這裡只是因為都已經寫了，懶得再拿掉）
-  ocard(id: ID, oauthorName: String, symbolName: String): Ocard
-  selfcard(id: ID!): Selfcard
-  mycard(symbolName: String!): Selfcard
+  bullet(id: ID!): Bullet
 
-  # 所有的comments（含spot），幫助cache，僅含spotReplies
-  # comments(cardId: ID!, afterId: ID): [Comment!]!
-  # 用於filter comments的情形（例如：/q, /stage, ...)
-  # commentsBySymbol(pageTitle: String!, symbol: String!, afterId: ID): [Comment!]!
+  board(id: ID!): Board
+
+  comments(boardId: ID!, afterId: ID): [Comment!]!
+
+  me: User!
+
+  myVotes(after: String): [Vote!]!
+  myCommentLikes(after: String): [CommentLike!]!
+  myBoardLikes(after: String): [BoardLike!]!
+  myBulletLikes(after: String): [BulletLike!]!
+
+  # --- NEXT ---
+
+  # 以下card目前暫不考慮
+  # selfcard(id: ID!): Selfcard
+  # mycard(symbolName: String!): Selfcard
 
   # 專用於顯示
   # topComments(blockId: ID!, afterId: ID): [CommentWithReplies!]!
 
-  anchor(id: ID!): Anchor
+  # 所有的comments（含spot），幫助cache，僅含spotReplies
+  # comments(cardId: ID!, afterId: ID): [Comment!]!
 
-  comment(id: ID!): Comment
-
-  replies(commentId: ID!, afterId: ID): [Reply!]!
-
-  me: User!
-  myVotes(after: String): [Vote!]!
-  myAnchorLikes(after: String): [AnchorLike!]!
-  myCommentLikes(after: String): [CommentLike!]!
-  myReplyLikes(after: String): [ReplyLike!]!
-
-  # --- NEXT ---
+  # 用於filter comments的情形（例如：/q, /stage, ...)
+  # commentsBySymbol(pageTitle: String!, symbol: String!, afterId: ID): [Comment!]!
 
   # 自動標註可能的topic, tickers
   # automark(text: String!): String!
@@ -98,27 +99,33 @@ type Query {
 }
 
 type Mutation {
-  createWebCardBody(cardId: ID!, data: CardBodyInput!): CardBody! # 限定於web-card
-  # createCardBody(cardId: ID, data: CardBodyInput!): CardBody! # 創cardBody，同步更新nested-card
+  # 實質上是get or create，另外 webpage card 是在 query 階段創新
+  createSymbolCard(data: CardInput!): Card!
 
-  # createOcard(symbolName: String!, oauthorName: String!, data: [CommentInput!]!): Ocard!
-  # createMycard(symbolName: String!): Selfcard!
-  # createMycardBody(cardId: ID, data: CardBodyInput!): CardBody!
+  createCardHead(cardId: ID!, data: CardBulletRootInput!): CardHead!
 
-  # createComment(cardIds: [CardIdInput!]!, data: CommentInput!): Comment!
+  createCardBody(cardId: ID!, data: CardBodyInput!): CardBody!
+
+  # 等價於create hashtag
+  createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): Board!
+
+  createVote(pollId: ID!, data: VoteInput!): Vote!
+  createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
+
+  createOauthorVote(pollId: ID!, oauthorName: String!, data: VoteInput!): Vote!
+  createOauthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
+
+  # createOauthorComment(boardId: ID!, data: CommentInput!)
   # updateComment(id: ID!, data: CommentInput!): Comment!
 
-  createReply(commentId: ID!, data: ReplyInput!): Reply!
-  # updateComment(id: ID!, data: CommentInput!): Comment!
+  createBulletLike(bulletId: ID!, data: LikeInput!): BulletLikeResonse!
+  updateBulletLike(id: ID!, data: LikeInput!): BulletLikeResonse!
 
-  createVote(pollId: ID!, choiceIdx: Int!): Vote!
-
-  createAnchorLike(anchorId: ID!, data: LikeInput!): AnchorLikeResonse!
-  updateAnchorLike(id: ID!, data: LikeInput!): AnchorLikeResonse!
   createCommentLike(commentId: ID!, data: LikeInput!): CommentLikeResonse!
   updateCommentLike(id: ID!, data: LikeInput!): CommentLikeResonse!
-  createReplyLike(replyId: ID!, data: LikeInput!): ReplyLikeResonse!
-  updateReplyLike(id: ID!, data: LikeInput!): ReplyLikeResonse!
+
+  createBoardLike(boardId: ID!, data: LikeInput!): BoardLikeResonse!
+  updateBoardLike(id: ID!, data: LikeInput!): BoardLikeResonse!
 
   # signIn(email: String!, password: String!): AuthPayload!
   # signUp(email: String!, password: String!): User!
@@ -160,10 +167,10 @@ type Mutation {
   # inviteJoin(groupId: ID, criteria: String): Boolean
 }
 
-type AuthPayload {
-  token: String!
-  user: User!
-}
+# type AuthPayload {
+#   token: String!
+#   user: User!
+# }
 
 type User {
   id: ID!
@@ -189,10 +196,6 @@ type Vote {
 
 type PollCount {
   id: ID!
-  # nViews: Int!
-  # nUps: Int!
-  # nDowns: Int!
-  # nComments: Int!
   nVotes: [Int!]!
   # nJudgements: [Int]
   # judgeStartedAt: DateTime
@@ -205,9 +208,9 @@ type PollCount {
 
 type Poll {
   id: ID!
-  commentId: Int!
-  # userId: ID!
-  # cat: PollCat!
+  userId: ID!
+  boardId: Int!
+  # type: PollType!
   # status: PollStatus!
   choices: [String!]!
   # nVotes: [Int!]!
@@ -223,109 +226,7 @@ type Poll {
   # count: PollCount!
   # posts: [Post!]!
   createdAt: DateTime!
-}
-
-type AnchorLike {
-  id: ID!
-  anchorId: Int!
-  choice: LikeChoice!
-  createdAt: DateTime!
   updatedAt: DateTime!
-}
-
-type AnchorCount {
-  id: ID!
-  nViews: Int!
-  nUps: Int!
-  nDowns: Int!
-}
-
-type Anchor {
-  id: ID!
-  userId: String!
-  count: AnchorCount!
-  cocardId: Int
-  ocardId: Int
-  selfcardId: Int
-  # updatedAt: DateTime!
-}
-
-type AnchorLikeResonse {
-  like: AnchorLike!
-  count: AnchorCount!
-}
-
-type ReplyCount {
-  id: ID!
-  nViews: Int!
-  nUps: Int!
-  nDowns: Int!
-  # nComments: Int!
-  # updatedAt: DateTime!
-}
-
-type ReplyProps {
-  label: String
-  disableUpndown: Boolean
-}
-
-type Reply {
-  id: ID!
-  userId: String!
-  isTop: Boolean
-  text: String!
-  count: ReplyCount!
-  updatedAt: DateTime!
-
-  props: ReplyProps
-}
-
-type CommentCount {
-  id: ID!
-  nViews: Int!
-  nUps: Int!
-  nDowns: Int!
-  # nComments: Int!
-  # updatedAt: DateTime!
-}
-
-type CommentProps {
-  # 'TOPIC', 'TICKER', 'WEBLINK'
-  validator: String
-  # 'K_1_V', 'K_N_V', 'K_ONLY', 'CM'
-  showAs: String
-  # 'HOR', 'VER'
-  showReplyDir: String
-
-  disableReply: Boolean
-  # suggestedReplies?: string[],
-}
-
-# type CommentMeta {
-#   seq: Int
-#   mark: String
-#   src: String
-#   # commentIds: [Int!]
-# }
-
-type Comment {
-  id: ID!
-  userId: String!
-  symbols: [Symbol!]
-  # null表示無需topReplies
-  # topReplies: [Reply!]
-  # replies: [Reply!]
-  # cat: CommentCat!
-  isTop: Boolean
-  text: String
-  count: CommentCount!
-  createdAt: DateTime!
-  # updatedAt: DateTime!
-  poll: Poll
-  meta: JSON
-  cocardId: Int
-  ocardId: Int
-  selfcardId: Int
 }
 
 type CommentLike {
@@ -336,12 +237,11 @@ type CommentLike {
   updatedAt: DateTime!
 }
 
-type ReplyLike {
+type CommentCount {
   id: ID!
-  replyId: Int!
-  choice: LikeChoice!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  nViews: Int!
+  nUps: Int!
+  nDowns: Int!
 }
 
 type CommentLikeResonse {
@@ -349,89 +249,144 @@ type CommentLikeResonse {
   count: CommentCount!
 }
 
-type ReplyLikeResonse {
-  like: ReplyLike!
-  count: ReplyCount!
+type Comment {
+  id: ID!
+  userId: String!
+  oauthorName: String
+  status: CommentStatus!
+  content: String!
+
+  # 若是投票的會一起記錄
+  vote: Vote
+
+  count: CommentCount!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type BoardLike {
+  id: ID!
+  boardId: Int!
+  choice: LikeChoice!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type BoardCount {
+  id: ID!
+  nViews: Int!
+  nUps: Int!
+  nDowns: Int!
+  # nComments: Int!
+}
+
+type BoardLikeResonse {
+  like: BoardLike!
+  count: BoardCount!
+}
+
+type Board {
+  id: ID!
+  userId: String!
+  bulletId: Int
+  cardId: Int
+  status: BoardStatus!
+  hashtag: String!
+  meta: JSON!
+  content: JSON!
+  poll: Poll
+  count: BoardCount!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Link {
   id: ID!
   url: String!
   domain: String!
-  srcType: String!
-  srcId: String
+  sourceType: String!
+  sourceId: String
   oauthorName: String
 }
 
-# type corrTicker {
-#   ticker: String
-#   corr: Float
-#   createdAt: DateTime
-# }
-
-type Linemeta {
-  linenumber: Int!
+type Hashtag {
   userId: String!
-  anchorId: Int!
-  stampId: String!
-  src: String
+  boardId: Int!
+  boardStatus: BoardStatus!
+  text: String!
+  linkBullet: Boolean
+}
 
-  # new: Boolean
-  reply: Boolean
-  poll: Boolean
-  broken: Boolean
-  nested: Boolean
+type BulletLike {
+  id: ID!
+  bulletId: Int!
+  choice: LikeChoice!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
 
-  pollId: Int
-  commentId: Int
+type BulletCount {
+  id: ID!
+  nUps: Int!
+  nDowns: Int!
+}
+
+type BulletLikeResonse {
+  like: BulletLike!
+  count: BulletCount!
+}
+
+type Bullet {
+  id: ID!
+  cardId: Int!
+  count: BulletCount!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type CardHead {
+  id: ID!
+  userId: String!
+  content: JSON!
+  timestamp: Int!
+  prevId: Int
 }
 
 type CardBody {
   id: ID!
   userId: String!
-  meta: JSON!
-  text: String!
+  content: JSON!
+  timestamp: Int!
   prevId: Int
-  # linemetas: [Linemeta!]!
 }
 
-# type CardMeta {
-#   commentId: Int!
-#   symbol: String
-#   conn: String # JSON string，需要parse
-# }
-
-type Cocard {
+type Card {
   id: ID!
-  template: CardTemplate!
-  meta: JSON!
-  link: Link!
-  body: CardBody
-}
-
-type Ocard {
-  id: ID!
-  template: CardTemplate!
-  symbol: Symbol!
-  oauthorName: String!
+  type: CardType!
+  symbol: String!
+  link: Link
+  head: CardHead!
   body: CardBody!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
-type Selfcard {
+type CardEntry {
   id: ID!
-  template: CardTemplate!
-  symbol: Symbol!
-  # user: User!
-  body: CardBody!
+  type: CardType!
+  symbol: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
-input CardIdInput {
-  id: String!
-  type: String!
+# ------ Inputs ------
+
+input LikeInput {
+  choice: LikeChoice!
 }
 
-input ReplyInput {
-  text: String!
+input VoteInput {
+  choiceIdx: Int!
 }
 
 input PollInput {
@@ -440,69 +395,70 @@ input PollInput {
 }
 
 input CommentInput {
-  # status: PostStatus
-  # content: String!
-  # symbolIds: [ID!]!
-  # cat: CommentCat!
-  # symbols: [String!]!
-  mark: String!
-  src: String
-  text: String!
-  poll: PollInput
+  content: String!
+  vote: VoteInput
 }
 
-input LikeInput {
-  choice: LikeChoice!
+input BoardInput {
+  hashtag: String!
+  meta: String!
+  content: String!
 }
 
-input CardIdentifierInput {
-  symbolName: String!
+input BulletInput {
+  id: Int
+  timestamp: Int
+  userIds: [String!]
+  head: String!
+  body: String
+  # hashtags: Hashtag[]
+  placeholder: String
+  children: [BulletInput!]
+  prevHead: String
+  prevBody: String
+  op: BulletOperation
+
+  sourceUrl: String
   oauthorName: String
-}
-
-input MarkerInput {
-  mark: String!
-  value: String!
-  # error?: string
-}
-
-input LinemetaInput {
-  linenumber: Int!
-  userId: String
-  anchorId: Int
-  stampId: String!
-  src: String
-
-  new: Boolean
-  reply: Boolean
-  poll: Boolean
-  broken: Boolean
-  nested: Boolean
-
+  boardId: Int
   pollId: Int
-  commentId: Int
 
-  nestedCard: CardIdentifierInput
-  marker: MarkerInput
+  # 這些需要bot權限，一般user無法操作
+  # freeze: Boolean
+  # freezeChildren: Boolean
+  # keyvalue: Boolean
+  # valueBoolean: Boolean
+  # valueArray: Boolean
+  # pin: Boolean
+  # pinCode: PinCode
+  # childTemplate: BulletInput
+
+  headValidator: String
+  bodyValidator: String
+}
+
+input CardBulletRootInput {
+  cardId: String!
+  root: BulletInput!
 }
 
 input CardBodyInput {
-  text: String!
+  self: CardBulletRootInput
+  nested: [CardBulletRootInput!]
 }
 
-# --- NEXT ---
-
-type Symbol {
-  id: ID!
-  name: String!
-  cat: SymbolCat!
-  status: SymbolStatus!
-  body: String
-  sys: String
-  # posts: [Post!]!
-  ticks: [Tick!]!
-  # commits: [ID!]!
+input CardTemplatePropsInput {
+  template: String!
+  title: String!
+  ticker: String
 }
+
+input CardInput {
+  symbol: String!
+  templateProps: CardTemplatePropsInput!
+}
+
+# ------ NEXT ------
 
 type Tick {
   id: ID!
@@ -511,45 +467,14 @@ type Tick {
   at: DateTime!
 }
 
-# type Post {
+# type PollJudgment {
 #   id: ID!
-#   userId: ID!
-#   cat: PostCat!
-#   status: PostStatus!
-#   text: String!
-#   symbols: [Symbol!]
-#   # count: PostCount!
-#   createdAt: DateTime
-#   updatedAt: DateTime
-#   votes: [Vote!]!
-#   # voteCommits: [VoteCommit!]!
+#   pollId: Int!
+#   choice: Int!
+#   comment: Comment!
+#   createdAt: DateTime!
+#   updatedAt: DateTime!
 # }
-
-type PollLike {
-  id: ID!
-  pollId: Int!
-  choice: LikeChoice!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type PollLikeResonse {
-  like: PollLike!
-  count: PollCount!
-}
-
-input VoteInput {
-  choiceId: ID!
-}
-
-type PollJudgment {
-  id: ID!
-  pollId: Int!
-  choice: Int!
-  comment: Comment!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
 
 input PollJudgmentInput {
   choice: Int!
@@ -579,19 +504,19 @@ input PollJudgmentInput {
 #   url: String!
 # }
 
-type Follow {
-  id: ID!
-  # symbol: Symbol!
-  symbolId: Int!
-  followed: Boolean!
-  # createdAt: DateTime!
-  updatedAt: DateTime!
-}
+# type Follow {
+#   id: ID!
+#   # symbol: Symbol!
+#   symbolId: Int!
+#   followed: Boolean!
+#   # createdAt: DateTime!
+#   updatedAt: DateTime!
+# }
 
-input FollowInput {
-  symbolId: ID!
-  followed: Boolean!
-}
+# input FollowInput {
+#   symbolId: ID!
+#   followed: Boolean!
+# }
 
 # type Commit {
 #   id: ID!
@@ -627,68 +552,47 @@ input FollowInput {
 #   choice: Int!
 # }
 
-enum CommentCat {
-  TEXT
-  POLL
-  PROP
+enum SourceType {
+  VIDEO
+  POST
+  AUTHOR
+  OTHER
+}
+
+enum CardType {
+  TICKER
+  TOPIC
+  WEBPAGE
+}
+
+enum CardStatus {
+  ACTIVE
+  ARCHIVE
+  REDIRECT
+  REPORTED
+  DUPLICATED
+}
+
+enum BoardStatus {
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
 }
 
 enum CommentStatus {
   ACTIVE
   LOCK
-  DELETED
+  DELETE
+  ARCHIVE
   REPORTED
-  ARCHIVED
 }
 
-enum LikeChoice {
-  UP
-  DOWN
-  NEUTRAL
-}
-
-enum PostCat {
-  LINK
-  REPLY
-}
-
-enum PostStatus {
-  ACTIVE
-  LOCK
-  DELETED
-  REPORTED
-  ARCHIVED
-}
-
-enum PollCat {
+enum PollType {
   FIXED
   ADD
   ADD_BY_POST
-}
-
-enum SymbolCat {
-  TICKER
-  TOPIC
-}
-
-enum SymbolStatus {
-  ACTIVE
-  REPORTED
-  ARCHIVED
-  DUPLICATED
-}
-
-enum CommitStatus {
-  REVIEW
-  PASS
-  REJECT
-}
-
-enum CommitAction {
-  CREATE
-  UPDATE
-  DELETE
-  MERGE
 }
 
 enum PollStatus {
@@ -698,8 +602,29 @@ enum PollStatus {
   CLOSE_FAIL
 }
 
-enum CardTemplate {
-  TICKER
-  TOPIC
-  WEBPAGE
+enum PollFailReason {
+  MIN_VOTES
+  MIN_JUDGMENTS
+  MAJOR_VERDICT
+  VERDICT_AS_FAIL
+  OTHER
+}
+
+enum LikeChoice {
+  UP
+  DOWN
+  NEUTRAL
+}
+
+enum PinCode {
+  VS
+  BUYSELL
+}
+
+enum BulletOperation {
+  CREATE
+  MOVE
+  UPDATE
+  DELETE
+  UPDATE_MOVE
 }

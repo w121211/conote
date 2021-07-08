@@ -7,4 +7,6 @@ plugins:
   - typescript-operations
   - typescript-react-apollo
 config:
+  enumsAsTypes: true
   preResolveTypes: true # 產生flatten-type，避免Pick<...>，增加易讀性
+

@@ -3,11 +3,11 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { ApolloClient, ApolloProvider, createHttpLink, NormalizedCacheObject } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { CachePersistor, PersistentStorage, LocalStorageWrapper } from 'apollo3-cache-persist'
-import { Auth0Provider, AppState, useAuth0 } from '@auth0/auth0-react'
+import { AppState, useAuth0 } from '@auth0/auth0-react'
 import { cache } from './cache'
 import { useMeQuery, MeQuery } from '../../../web/apollo/query.graphql'
 import { CardPage } from './card-page'
-import './app.css'
+// import './app.css'
 
 class BrowserStorageWrapper implements PersistentStorage {
   // See: https://github.com/apollographql/apollo-cache-persist/blob/master/src/storageWrappers/LocalStorageWrapper.ts
@@ -38,7 +38,7 @@ const onRedirectCallback = (appState: AppState) => {
   // history.replace((appState && appState.returnTo) || window.location.pathname)
 }
 
-function Protected({ children }: { children: React.ReactNode }): JSX.Element | null {
+const Protected = ({ children }: { children: React.ReactNode }): JSX.Element | null => {
   const { data } = useMeQuery()
   if (data?.me) return <>{children}</>
   return (
@@ -48,7 +48,7 @@ function Protected({ children }: { children: React.ReactNode }): JSX.Element | n
   )
 }
 
-export function App(): JSX.Element {
+export const App = (): JSX.Element => {
   const [client, setClient] = useState<ApolloClient<NormalizedCacheObject>>()
   const [persistor, setPersistor] = useState<CachePersistor<NormalizedCacheObject>>()
 
@@ -121,10 +121,9 @@ export function App(): JSX.Element {
   }
   return (
     <ApolloProvider client={client}>
-      {/* <Protected> */}
-      <CardPage />
-      sdffdofj
-      {/* </Protected> */}
+      <Protected>
+        <CardPage />
+      </Protected>
     </ApolloProvider>
   )
   // <Auth0Provider
@@ -142,36 +141,36 @@ export function App(): JSX.Element {
   // </Auth0Provider>
 }
 
-function SignIn(): JSX.Element {
-  const { isLoading, isAuthenticated, user, loginWithRedirect, logout, getAccessTokenSilently } =
-    useAuth0<{
-      name: string
-      email: string
-    }>()
+// function SignIn(): JSX.Element {
+//   const { isLoading, isAuthenticated, user, loginWithRedirect, logout, getAccessTokenSilently } =
+//     useAuth0<{
+//       name: string
+//       email: string
+//     }>()
 
-  // getAccessTokenSilently().then(e => {
-  //   console.log(e)
-  // })
+//   // getAccessTokenSilently().then(e => {
+//   //   console.log(e)
+//   // })
 
-  if (isLoading) {
-    return <div>Loading</div>
-  }
-  return (
-    <div>
-      {isAuthenticated ? (
-        <div>
-          <span id="hello">Hello, {user?.email}!</span>{' '}
-          <button
-            onClick={() => logout({ returnTo: 'chrome-extension://cidlgggnhfkmlodkoneabjiiddokpecm/popup.html' })}
-          >
-            logout
-          </button>
-        </div>
-      ) : (
-        <button id="login" onClick={() => loginWithRedirect()}>
-          login
-        </button>
-      )}
-    </div>
-  )
-}
+//   if (isLoading) {
+//     return <div>Loading</div>
+//   }
+//   return (
+//     <div>
+//       {isAuthenticated ? (
+//         <div>
+//           <span id="hello">Hello, {user?.email}!</span>{' '}
+//           <button
+//             onClick={() => logout({ returnTo: 'chrome-extension://cidlgggnhfkmlodkoneabjiiddokpecm/popup.html' })}
+//           >
+//             logout
+//           </button>
+//         </div>
+//       ) : (
+//         <button id="login" onClick={() => loginWithRedirect()}>
+//           login
+//         </button>
+//       )}
+//     </div>
+//   )
+// }

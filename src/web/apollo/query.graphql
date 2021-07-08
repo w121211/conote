@@ -8,51 +8,15 @@ fragment vote on Vote {
 fragment poll on Poll {
   __typename
   id
-  commentId
+  userId
+  boardId
   choices
   count {
     id
     nVotes
   }
   createdAt
-}
-
-fragment anchorLike on AnchorLike {
-  __typename
-  id
-  anchorId
-  choice
-  createdAt
   updatedAt
-}
-
-fragment anchorCount on AnchorCount {
-  __typename
-  id
-  nViews
-  nUps
-  nDowns
-}
-
-fragment anchor on Anchor {
-  __typename
-  id
-  userId
-  count {
-    ...anchorCount
-  }
-  cocardId
-  ocardId
-  selfcardId
-}
-
-fragment replyCount on ReplyCount {
-  __typename
-  id
-  nViews
-  nUps
-  nDowns
-  # updatedAt
 }
 
 fragment commentCount on CommentCount {
@@ -61,50 +25,6 @@ fragment commentCount on CommentCount {
   nViews
   nUps
   nDowns
-  # updatedAt
-}
-
-fragment reply on Reply {
-  __typename
-  id
-  userId
-  isTop
-  text
-  updatedAt
-  count {
-    ...replyCount
-  }
-}
-
-fragment comment on Comment {
-  __typename
-  id
-  userId
-  cocardId
-  ocardId
-  selfcardId
-  isTop
-  text
-  # updatedAt
-  createdAt
-  # replies {
-  #   ...reply
-  # }
-  # topReplies {
-  #   ...reply
-  # }
-  poll {
-    ...poll
-  }
-  count {
-    ...commentCount
-  }
-  meta
-  # meta {
-  #   seq
-  #   mark
-  #   src
-  # }
 }
 
 fragment commentLike on CommentLike {
@@ -115,11 +35,56 @@ fragment commentLike on CommentLike {
   updatedAt
 }
 
-fragment replyLike on ReplyLike {
+fragment comment on Comment {
   __typename
   id
-  replyId
+  userId
+  oauthorName
+  status
+  content
+  vote {
+    ...vote
+  }
+  count {
+    ...commentCount
+  }
+  createdAt
+  updatedAt
+}
+
+fragment boardLike on BoardLike {
+  __typename
+  id
+  boardId
   choice
+  updatedAt
+}
+
+fragment boardCount on BoardCount {
+  __typename
+  id
+  nViews
+  nUps
+  nDowns
+}
+
+fragment board on Board {
+  __typename
+  id
+  userId
+  bulletId
+  cardId
+  status
+  hashtag
+  meta
+  content
+  poll {
+    ...poll
+  }
+  count {
+    ...boardCount
+  }
+  createdAt
   updatedAt
 }
 
@@ -128,146 +93,131 @@ fragment link on Link {
   id
   url
   domain
-  srcType
-  srcId
+  sourceType
+  sourceId
   oauthorName
+}
+
+fragment bulletLike on BulletLike {
+  __typename
+  id
+  bulletId
+  choice
+  createdAt
+  updatedAt
+}
+
+fragment bulletCount on BulletCount {
+  __typename
+  id
+  nUps
+  nDowns
+}
+
+fragment bullet on Bullet {
+  id
+  cardId
+  count {
+    ...bulletCount
+  }
+  createdAt
+  updatedAt
+}
+
+fragment cardHead on CardHead {
+  __typename
+  id
+  userId
+  content
+  timestamp
+  prevId
 }
 
 fragment cardBody on CardBody {
   __typename
   id
   userId
-  meta
-  text
+  content
+  timestamp
   prevId
 }
 
-fragment cocard on Cocard {
+fragment card on Card {
   __typename
   id
-  template
-  meta
-  # meta {
-  #   commentId
-  #   symbol
-  #   conn
-  # }
-  body {
-    ...cardBody
-  }
+  type
+  symbol
   link {
     ...link
   }
-}
-
-fragment ocard on Ocard {
-  __typename
-  id
-  template
+  head {
+    ...cardHead
+  }
   body {
     ...cardBody
   }
-  symbol {
-    name
-    cat
-  }
-  oauthorName
+  createdAt
+  updatedAt
 }
 
-fragment selfcard on Selfcard {
+fragment cardEntry on CardEntry {
   __typename
   id
-  template
-  body {
-    ...cardBody
-  }
-  symbol {
-    name
-    cat
+  type
+  symbol
+  createdAt
+  updatedAt
+}
+
+query SearchAll($term: String!) {
+  searchAll(term: $term)
+}
+
+query LatestCardEntries($afterId: String) {
+  latestCardEntries(afterId: $afterId) {
+    ...cardEntry
   }
 }
 
-query LatestCards($afterId: String) {
-  latestCards(afterId: $afterId) {
-    ...cocard
-  }
-}
-
-query Link($url: String!) {
-  link(url: $url) {
-    ...link
-  }
-}
-
-query Cocard($url: String, $symbol: String) {
-  cocard(url: $url, symbol: $symbol) {
-    ...cocard
-  }
-}
-
-query Ocard($id: ID, $oauthorName: String, $symbolName: String) {
-  ocard(id: $id, oauthorName: $oauthorName, symbolName: $symbolName) {
-    ...ocard
-  }
-}
-
-query Selfcard($id: ID!) {
-  selfcard(id: $id) {
-    ...selfcard
-  }
-}
-
-query Mycard($symbolName: String!) {
-  mycard(symbolName: $symbolName) {
-    ...selfcard
-  }
-}
-
-# query comments($cardId: ID!, $afterId: ID) {
-#   comments(cardId: $cardId, afterId: $afterId) {
-#     ...comment
+# query Link($url: String!) {
+#   link(url: $url) {
+#     ...link
 #   }
 # }
 
-# query commentsBySymbol($pageTitle: String!, $symbol: String!, $afterId: ID) {
-#   commentsBySymbol(pageTitle: $pageTitle, symbol: $symbol, afterId: $afterId) {
-#     ...comment
-#   }
-# }
-
-query Anchor($id: ID!) {
-  anchor(id: $id) {
-    ...anchor
+query Card($symbol: String!) {
+  card(symbol: $symbol) {
+    ...card
   }
 }
 
-query Comment($id: ID!) {
-  comment(id: $id) {
+query WebpageCard($url: String!) {
+  webpageCard(url: $url) {
+    ...card
+  }
+}
+
+query Bullet($id: ID!) {
+  bullet(id: $id) {
+    ...bullet
+  }
+}
+
+query Board($id: ID!) {
+  board(id: $id) {
+    ...board
+  }
+}
+
+query Comments($boardId: ID!, $afterId: ID) {
+  comments(boardId: $boardId, afterId: $afterId) {
     ...comment
   }
 }
 
-query Replies($commentId: ID!, $afterId: ID) {
-  replies(commentId: $commentId, afterId: $afterId) {
-    ...reply
-  }
-}
-
-query MyAnchorLikes {
-  myAnchorLikes {
-    ...anchorLike
-  }
-}
-
-query MyCommentLikes {
-  myCommentLikes {
-    ...commentLike
-  }
-}
-
-query MyReplyLikes {
-  myReplyLikes {
-    ...replyLike
+query Me {
+  me {
+    id
   }
 }
 
@@ -277,62 +227,90 @@ query MyVotes {
   }
 }
 
-# query IsUserLoggedIn {
-#   isLoggedIn @client
-# }
-
-query Me {
-  me {
-    id
+query MyCommentLikes {
+  myCommentLikes {
+    ...commentLike
   }
 }
 
-query SearchAll($term: String!) {
-  searchAll(term: $term)
+query MyBoardLikes {
+  myBoardLikes {
+    ...boardLike
+  }
 }
 
-mutation CreateWebCardBody($cardId: ID!, $data: CardBodyInput!) {
-  createWebCardBody(cardId: $cardId, data: $data) {
+query MyBulletLikes {
+  myBulletLikes {
+    ...bulletLike
+  }
+}
+
+mutation CreateSymbolCard($data: CardInput!) {
+  createSymbolCard(data: $data) {
+    ...card
+  }
+}
+
+mutation CreateCardHead($cardId: ID!, $data: CardBulletRootInput!) {
+  createCardHead(cardId: $cardId, data: $data) {
+    ...cardHead
+  }
+}
+
+mutation CreateCardBody($cardId: ID!, $data: CardBodyInput!) {
+  createCardBody(cardId: $cardId, data: $data) {
     ...cardBody
   }
 }
 
-# mutation createMycard($symbolName: String!) {
-#   createMycard(symbolName: $symbolName) {
-#     ...selfcardFragment
-#   }
-# }
-
-mutation CreateReply($commentId: ID!, $data: ReplyInput!) {
-  createReply(commentId: $commentId, data: $data) {
-    ...reply
+mutation CreateBoard($cardId: ID!, $bulletId: ID!, $data: BoardInput!) {
+  createBoard(cardId: $cardId, bulletId: $bulletId, data: $data) {
+    ...board
   }
 }
 
-mutation CreateVote($pollId: ID!, $choiceIdx: Int!) {
-  createVote(pollId: $pollId, choiceIdx: $choiceIdx) {
+mutation CreateVote($pollId: ID!, $data: VoteInput!) {
+  createVote(pollId: $pollId, data: $data) {
     ...vote
   }
 }
 
-mutation CreateAnchorLike($anchorId: ID!, $data: LikeInput!) {
-  createAnchorLike(anchorId: $anchorId, data: $data) {
+mutation CreateComment($boardId: ID!, $pollId: ID, $data: CommentInput!) {
+  createComment(boardId: $boardId, pollId: $pollId, data: $data) {
+    ...comment
+  }
+}
+
+mutation CreateOauthorVote($pollId: ID!, $oauthorName: String!, $data: VoteInput!) {
+  createOauthorVote(pollId: $pollId, oauthorName: $oauthorName, data: $data) {
+    ...vote
+  }
+}
+
+mutation CreateOauthorComment($boardId: ID!, $pollId: ID, $oauthorName: String!, $data: CommentInput!) {
+  createOauthorComment(boardId: $boardId, pollId: $pollId, oauthorName: $oauthorName, data: $data) {
+    ...comment
+  }
+}
+
+mutation CreateBulletLike($bulletId: ID!, $data: LikeInput!) {
+  createBulletLike(bulletId: $bulletId, data: $data) {
     like {
-      ...anchorLike
+      ...bulletLike
     }
     count {
-      ...anchorCount
+      ...bulletCount
     }
   }
 }
 
-mutation UpdateAnchorLike($id: ID!, $data: LikeInput!) {
-  updateAnchorLike(id: $id, data: $data) {
+mutation UpdateBulletLike($id: ID!, $data: LikeInput!) {
+  updateBulletLike(id: $id, data: $data) {
     like {
-      ...anchorLike
+      ...bulletLike
     }
     count {
-      ...anchorCount
+      ...bulletCount
     }
   }
 }
@@ -359,24 +337,24 @@ mutation UpdateCommentLike($id: ID!, $data: LikeInput!) {
   }
 }
 
-mutation CreateReplyLike($replyId: ID!, $data: LikeInput!) {
-  createReplyLike(replyId: $replyId, data: $data) {
+mutation CreateBoardLike($boardId: ID!, $data: LikeInput!) {
+  createBoardLike(boardId: $boardId, data: $data) {
     like {
-      ...replyLike
+      ...boardLike
     }
     count {
-      ...replyCount
+      ...boardCount
     }
   }
 }
 
-mutation UpdateReplyLike($id: ID!, $data: LikeInput!) {
-  updateReplyLike(id: $id, data: $data) {
+mutation UpdateBoardLike($id: ID!, $data: LikeInput!) {
+  updateBoardLike(id: $id, data: $data) {
     like {
-      ...replyLike
+      ...boardLike
     }
     count {
-      ...replyCount
+      ...boardCount
     }
   }
 }

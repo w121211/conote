@@ -13,7 +13,8 @@
     "doc/_resources/assets": true,
     "**/.eslintcache": true,
     "**/.next": true,
-    "**/__deprecated__/**": true
+    "**/__deprecated__/**": true,
+    "**/__generated__/**": true
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",

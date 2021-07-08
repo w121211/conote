@@ -1,379 +1,326 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Create web card from common.txt 1`] = `
-"$BTC
-[最新]
-[[$TSLA購入15億美元比特幣]] -> 當日$TSLA股價爆漲20% %eu5
-[*]
-無基本面 -> 無法估值 %Yph
-非官方發行，應用[[區塊鍊]]技術的[[數字貨幣]] %wAu
-不可篡改、不可偽造 %wJc
-沒有人可控制[[比特幣]]的發行量和流通量 %CxX
-發行數量固定為2,100萬個單位 %5q5
-存在數量可能下降 %cT6
-* 20%因忘記密碼而消失 %jax
-* 預計2-4%逐年消失 -> 具天然[[通縮]]性質 %Nso
-[+]
-$PYPL, $SQ, $MA 陸續開通[[加密貨幣]]支付功能 %Jpm
-[[Cathie Wood]] 認為[[比特幣]]可達$50萬一幣 %5gN
-[[避險]]性質優於傳統避險產品([[黃金]]、藝術品、[[房地產]]) %7mw
-* 流通性強 %Gnr
-* 轉帳交易便利 %FTV
-近十年的接受度增加 %Aer
-部分發展中國家考慮將[[比特幣]]加入[[外匯儲備]] %o9h
-比[[主權貨幣]]更安全及更方便流通 %dDJ
-[[機構投資者]]陸續引入 <- 機構比散戶更需要避險 %x8z
-生活中應用的可能性增加 %lym
-被視為電子黃金 <- 2021年市場最大風險是[[通貨膨脹]]，疫情下各主要經濟體的[[央行]]放水，長期[[實質利率]]、[[債券收益率]]低 -> 主權貨幣[[貶值]]風險，投資人尋找投資替代品 %WJ6
-[-]
-[[散戶]]占大多數(機構占比小於1%)，價格受投資者情緒波動 -> 散戶過多容易出現價格背離價值 %ZsC
-漲幅大但行業發展速度慢 %pLO
-[[區塊鍊]]行業門檻高、用戶數量少 %JRp
-提供[[數字貨幣]]交易服務的公司並未賺錢 %5n6
-缺少配套措施 %ZHI
-[未來發展]
-長期價值高但過程慢 %ujE
-[?]
-保密性和交易流通性值得懷疑(保密性衝擊各國監管系統，可能無法大量流通) %n4A
-[?]<買> 少量買入，做好短期回調的準備，看好長期 %twY
-[如何投資]
-直接購買比特幣 %k95
-* 券商：[[Roinhood]] %pmk
-* 支付平台：$PYPL %Tcm
-* 專業數字貨幣平台：$COIN %0TQ
-投資[[信託基金]]$GBTC ($GBTC是唯一合法跟蹤[[比特幣]]的被動投資機構，存在議價風險) %76d
-投資持有[[比特幣]]的公司 %MV0"
-`;
-
-exports[`Create web card use real world sample 1`] = `
-"$BTC
-[最新]
-[[$TSLA購入15億美元比特幣]] -> 當日$TSLA股價爆漲20% %ipn
-[*]
-無基本面 -> 無法估值 %YKp
-非官方發行，應用[[區塊鍊]]技術的[[數字貨幣]] %xDE
-不可篡改、不可偽造 %7Jt
-沒有人可控制[[比特幣]]的發行量和流通量 %eHb
-發行數量固定為2,100萬個單位 %rmi
-存在數量可能下降 %Yzk
-* 20%因忘記密碼而消失 %kS2
-* 預計2-4%逐年消失 -> 具天然[[通縮]]性質 %dJW
-[+]
-$PYPL, $SQ, $MA 陸續開通[[加密貨幣]]支付功能 %qg4
-[[Cathie Wood]] 認為[[比特幣]]可達$50萬一幣 %ng2
-[[避險]]性質優於傳統避險產品([[黃金]]、藝術品、[[房地產]]) %Tgn
-* 流通性強 %PPw
-* 轉帳交易便利 %qVA
-近十年的接受度增加 %mBj
-部分發展中國家考慮將[[比特幣]]加入[[外匯儲備]] %DNS
-比[[主權貨幣]]更安全及更方便流通 %CjT
-[[機構投資者]]陸續引入 <- 機構比散戶更需要避險 %g4R
-生活中應用的可能性增加 %B4S
-被視為電子黃金 <- 2021年市場最大風險是[[通貨膨脹]]，疫情下各主要經濟體的[[央行]]放水，長期[[實質利率]]、[[債券收益率]]低 -> 主權貨幣[[貶值]]風險，投資人尋找投資替代品 %knF
-[-]
-[[散戶]]占大多數(機構占比小於1%)，價格受投資者情緒波動 -> 散戶過多容易出現價格背離價值 %DFX
-漲幅大但行業發展速度慢 %F8p
-[[區塊鍊]]行業門檻高、用戶數量少 %zLL
-提供[[數字貨幣]]交易服務的公司並未賺錢 %AXz
-缺少配套措施 %lIb
-[未來發展]
-長期價值高但過程慢 %Iu0
-[?]
-保密性和交易流通性值得懷疑(保密性衝擊各國監管系統，可能無法大量流通) %w5W
-[?]<買> 少量買入，做好短期回調的準備，看好長期 %pDj
-[如何投資]
-直接購買比特幣 %FO4
-* 券商：[[Roinhood]] %CMW
-* 支付平台：$PYPL %qNN
-* 專業數字貨幣平台：$COIN %1dH
-投資[[信託基金]]$GBTC ($GBTC是唯一合法跟蹤[[比特幣]]的被動投資機構，存在議價風險) %u7w
-投資持有[[比特幣]]的公司 %TKR"
-`;
-
-exports[`create a nested web-card 1`] = `
-"$CC
-[?] <BUY> @30 %QyG
-[+]
-111 111 %GUx
-222 222 %T4q
-
-$DD
-[?] <SELL> @30 %Y3s"
-`;
-
-exports[`create a nested web-card 2`] = `
+exports[`createCard() 1`] = `
 Object {
-  "0": Object {
-    "anchorId": 9,
-    "createrId": "test-user-2",
-    "linenumber": 1,
-    "marker": Object {
-      "key": "[?]",
-      "value": "<BUY> @30",
-    },
-    "neatReply": true,
-    "nestedCard": Object {
-      "symbol": "$CC",
-    },
-    "oauthor": "test-oauthor-1",
-    "pollChoices": Array [
-      "<BUY>",
-    ],
-    "replyId": 1,
-    "src": "http://test2.com",
-    "stampId": "%QyG",
-    "str": " <BUY> @30",
-  },
-  "1": Object {
-    "anchorId": 10,
-    "createrId": "test-user-2",
-    "linenumber": 3,
-    "marker": Object {
-      "key": "[+]",
-      "value": "111 111",
-    },
-    "nestedCard": Object {
-      "symbol": "$CC",
-    },
-    "oauthor": "test-oauthor-1",
-    "src": "http://test2.com",
-    "stampId": "%GUx",
-    "str": "111 111",
-  },
-  "2": Object {
-    "anchorId": 11,
-    "createrId": "test-user-2",
-    "linenumber": 4,
-    "marker": Object {
-      "key": "[+]",
-      "value": "222 222",
-    },
-    "nestedCard": Object {
-      "symbol": "$CC",
-    },
-    "oauthor": "test-oauthor-1",
-    "src": "http://test2.com",
-    "stampId": "%T4q",
-    "str": "222 222",
-  },
-  "3": Object {
-    "anchorId": 12,
-    "createrId": "test-user-2",
-    "linenumber": 7,
-    "marker": Object {
-      "key": "[?]",
-      "value": "<SELL> @30",
-    },
-    "neatReply": true,
-    "nestedCard": Object {
-      "symbol": "$DD",
-    },
-    "oauthor": "test-oauthor-1",
-    "pollChoices": Array [
-      "<SELL>",
-    ],
-    "replyId": 2,
-    "src": "http://test2.com",
-    "stampId": "%Y3s",
-    "str": " <SELL> @30",
-  },
-}
-`;
-
-exports[`create a nested web-card 3`] = `
-"[~]
-[?]
-<BUY> <SELL> %Rvl
-[+]
-222 222 %UXw
-111 111 %tgZ
-[-]
-"
-`;
-
-exports[`create a nested web-card 4`] = `
-Object {
-  "0": Object {
-    "anchorId": 5,
-    "commentId": 5,
-    "createrId": "bot",
-    "linenumber": 2,
-    "marker": Object {
-      "key": "[?]",
-      "value": "<BUY> <SELL>",
-    },
-    "poll": true,
-    "pollChoices": Array [
-      "<BUY>",
-      "<SELL>",
-    ],
-    "pollId": 2,
-    "stampId": "%Rvl",
-    "str": "<BUY> <SELL> %Rvl",
-  },
-  "1": Object {
-    "anchorId": 6,
-    "createrId": "test-user-2",
-    "linenumber": 4,
-    "marker": Object {
-      "key": "[+]",
-      "value": "222 222",
-    },
-    "oauthor": "test-oauthor-1",
-    "src": "http://test2.com",
-    "srcStamp": "%T4q",
-    "stampId": "%UXw",
-    "str": "222 222 %UXw",
-  },
-  "2": Object {
-    "anchorId": 7,
-    "createrId": "test-user-2",
-    "linenumber": 5,
-    "marker": Object {
-      "key": "[+]",
-      "value": "111 111",
-    },
-    "oauthor": "test-oauthor-1",
-    "src": "http://test2.com",
-    "srcStamp": "%GUx",
-    "stampId": "%tgZ",
-    "str": "111 111 %tgZ",
-  },
-}
-`;
-
-exports[`create a nested web-card 5`] = `
-"[~]
-[?]
-<BUY> <SELL> %lkX
-[+]
-[-]"
-`;
-
-exports[`create a nested web-card 6`] = `
-Object {
-  "0": Object {
-    "anchorId": 8,
-    "commentId": 7,
-    "createrId": "bot",
-    "linenumber": 2,
-    "marker": Object {
-      "key": "[?]",
-      "value": "<BUY> <SELL>",
-    },
-    "poll": true,
-    "pollChoices": Array [
-      "<BUY>",
-      "<SELL>",
-    ],
-    "pollId": 3,
-    "stampId": "%lkX",
-    "str": "<BUY> <SELL> %lkX",
-  },
-}
-`;
-
-exports[`create a symbol card body 1`] = `
-Object {
-  "body": Object {
-    "id": 3,
-    "meta": Array [
-      Object {
-        "anchorId": 2,
-        "createrId": "test-user-1",
-        "linenumber": 0,
-        "marker": Object {
-          "key": "[?]",
-          "value": "<BUY> @30",
-        },
-        "neatReply": true,
-        "pollChoices": Array [
-          "<BUY>",
-        ],
-        "stampId": "%l1w",
-        "str": " <BUY> @30",
-      },
-      Object {
-        "anchorId": 3,
-        "createrId": "test-user-1",
-        "linenumber": 2,
-        "marker": Object {
-          "key": "[+]",
-          "value": "111 111",
-        },
-        "stampId": "%T06",
-        "str": "111 111",
-      },
-      Object {
-        "anchorId": 4,
-        "createrId": "test-user-1",
-        "linenumber": 3,
-        "marker": Object {
-          "key": "[+]",
-          "value": "222 222",
-        },
-        "stampId": "%gzO",
-        "str": "222 222",
-      },
-    ],
-    "prevId": 2,
-    "text": "[?] <BUY> @30 %l1w
-[+]
-111 111 %T06
-222 222 %gzO",
-    "userId": "test-user-1",
-  },
-  "bodyId": 3,
-  "id": 1,
-  "linkUrl": "//$AA",
-  "meta": Object {
-    "commentId": 2,
-    "symbol": "$AA",
-  },
-  "template": "TICKER",
-}
-`;
-
-exports[`edit a web card 1`] = `
-Object {
-  "body": Object {
-    "id": 5,
-    "meta": Array [
-      Object {
-        "anchorId": 3,
-        "createrId": "test-user-1",
-        "linenumber": 1,
-        "marker": Object {
-          "key": "[*]",
-          "value": "2021年會有進一步財政刺激",
-        },
-        "stampId": "%xKH",
-        "str": "2021年會有進一步財政刺激",
-      },
-      Object {
-        "anchorId": 4,
-        "createrId": "test-user-1",
-        "linenumber": 2,
-        "marker": Object {
-          "key": "[*]",
-          "value": "歷年有1月效應，1月份呈現反彈，但不認為",
-        },
-        "stampId": "%crU",
-        "str": "歷年有1月效應，1月份呈現反彈，但不認為",
-      },
-    ],
-    "prevId": 4,
-    "text": "[*]
-2021年會有進一步財政刺激 %xKH
-歷年有1月效應，1月份呈現反彈，但不認為 %crU",
-    "userId": "test-user-1",
-  },
-  "bodyId": 5,
   "id": 2,
-  "linkUrl": "http://test1.com",
-  "meta": Object {
-    "commentId": 3,
+  "linkUrl": "//$BBB",
+  "name": "$BBB",
+  "type": "TICKER",
+}
+`;
+
+exports[`createCard() 2`] = `
+Object {
+  "cardId": 2,
+  "content": Object {
+    "children": Array [
+      Object {
+        "children": Array [],
+        "freeze": true,
+        "head": "[!]",
+        "id": 13,
+        "op": "create",
+        "userIds": Array [
+          "bot",
+        ],
+      },
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [],
+            "freeze": true,
+            "head": "$BBB <BUY> <SELL> <WATCH>",
+            "id": 18,
+            "op": "create",
+            "pin": true,
+            "pinCode": "BUYSELL",
+            "userIds": Array [
+              "bot",
+            ],
+          },
+        ],
+        "freeze": true,
+        "head": "[?]",
+        "id": 17,
+        "op": "create",
+        "userIds": Array [
+          "bot",
+        ],
+      },
+      Object {
+        "children": Array [],
+        "freeze": true,
+        "head": "[*]",
+        "id": 14,
+        "op": "create",
+        "userIds": Array [
+          "bot",
+        ],
+      },
+      Object {
+        "children": Array [],
+        "freeze": true,
+        "head": "[+]",
+        "id": 15,
+        "op": "create",
+        "userIds": Array [
+          "bot",
+        ],
+      },
+      Object {
+        "children": Array [],
+        "freeze": true,
+        "head": "[-]",
+        "id": 16,
+        "op": "create",
+        "userIds": Array [
+          "bot",
+        ],
+      },
+    ],
+    "freeze": true,
+    "head": "$BBB",
+    "id": 12,
+    "op": "create",
+    "userIds": Array [
+      "bot",
+    ],
   },
-  "template": "WEBPAGE",
+  "id": 3,
+  "prevId": null,
+  "userId": "bot",
+}
+`;
+
+exports[`createCardBody() 1`] = `
+Object {
+  "cardId": 1,
+  "content": Object {
+    "body": "111-111",
+    "children": Array [
+      Object {
+        "body": "222-222",
+        "children": Array [],
+        "head": "222",
+        "id": 7,
+        "op": "create",
+        "userIds": Array [
+          "testuser0",
+        ],
+      },
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [],
+            "head": "444",
+            "id": 9,
+            "op": "create",
+            "userIds": Array [
+              "testuser0",
+            ],
+          },
+          Object {
+            "children": Array [],
+            "head": "555",
+            "id": 10,
+            "op": "create",
+            "userIds": Array [
+              "testuser0",
+            ],
+          },
+        ],
+        "head": "333",
+        "id": 8,
+        "op": "create",
+        "userIds": Array [
+          "testuser0",
+        ],
+      },
+    ],
+    "head": "111",
+    "id": 6,
+    "op": "create",
+    "userIds": Array [
+      "testuser0",
+    ],
+  },
+  "id": 1,
+  "prevId": null,
+  "userId": "testuser0",
+}
+`;
+
+exports[`createCardBody() 2`] = `
+Object {
+  "cardId": 1,
+  "content": Object {
+    "body": "111-111+++",
+    "children": Array [
+      Object {
+        "body": "222-222",
+        "children": Array [],
+        "head": "222",
+        "id": 7,
+        "op": "delete",
+        "prevBody": "222-222",
+        "prevHead": "222",
+        "userIds": Array [
+          "testuser0",
+          "testuser1",
+        ],
+      },
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [],
+            "head": "444",
+            "id": 9,
+            "userIds": Array [
+              "testuser0",
+              "testuser1",
+            ],
+          },
+        ],
+        "head": "333",
+        "id": 8,
+        "userIds": Array [
+          "testuser0",
+          "testuser1",
+        ],
+      },
+      Object {
+        "children": Array [],
+        "head": "555",
+        "id": 10,
+        "op": "move",
+        "userIds": Array [
+          "testuser0",
+          "testuser1",
+        ],
+      },
+      Object {
+        "children": Array [],
+        "head": "666",
+        "id": 11,
+        "op": "create",
+        "userIds": Array [
+          "testuser1",
+        ],
+      },
+    ],
+    "head": "111+++",
+    "id": 6,
+    "op": "update",
+    "prevBody": "111-111",
+    "prevHead": "111",
+    "userIds": Array [
+      "testuser0",
+      "testuser1",
+    ],
+  },
+  "id": 2,
+  "prevId": 1,
+  "userId": "testuser1",
+}
+`;
+
+exports[`replaceBulletInput() 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "freeze": true,
+      "head": "[!]",
+      "op": "create",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "freeze": true,
+          "head": "$AAA <BUY> <SELL> <WATCH>",
+          "op": "create",
+          "pin": true,
+          "pinCode": "BUYSELL",
+        },
+      ],
+      "freeze": true,
+      "head": "[?]",
+      "op": "create",
+    },
+    Object {
+      "freeze": true,
+      "head": "[*]",
+      "op": "create",
+    },
+    Object {
+      "freeze": true,
+      "head": "[+]",
+      "op": "create",
+    },
+    Object {
+      "freeze": true,
+      "head": "[-]",
+      "op": "create",
+    },
+  ],
+  "freeze": true,
+  "head": "$AAA",
+  "op": "create",
+}
+`;
+
+exports[`runBulletInputOp() 1`] = `
+Object {
+  "body": "111-111",
+  "children": Array [
+    Object {
+      "body": "222-222",
+      "children": Array [],
+      "head": "222",
+      "id": 2,
+      "op": "create",
+      "timestamp": 111111111,
+      "userIds": Array [
+        "testuser0",
+      ],
+    },
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [],
+          "head": "444",
+          "id": 4,
+          "op": "create",
+          "timestamp": 111111111,
+          "userIds": Array [
+            "testuser0",
+          ],
+        },
+        Object {
+          "children": Array [],
+          "head": "555",
+          "id": 5,
+          "op": "create",
+          "timestamp": 111111111,
+          "userIds": Array [
+            "testuser0",
+          ],
+        },
+      ],
+      "head": "333",
+      "id": 3,
+      "op": "create",
+      "timestamp": 111111111,
+      "userIds": Array [
+        "testuser0",
+      ],
+    },
+  ],
+  "head": "111",
+  "id": 1,
+  "op": "create",
+  "timestamp": 111111111,
+  "userIds": Array [
+    "testuser0",
+  ],
 }
 `;
