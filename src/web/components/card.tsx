@@ -6,6 +6,7 @@ import React, { useState, useRef, forwardRef, useEffect, useImperativeHandle } f
 import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../packages/editor/src/index'
 import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { AnchorPanel } from './tile-panel'
 import { QueryCommentModal } from './tile'
 import { toUrlParams } from '../lib/helper'
@@ -18,6 +19,10 @@ import classes from './card.module.scss'
 import ClockIcon from '../assets/svg/clock.svg'
 import LinkIcon from '../assets/svg/link.svg'
 import { CardMeta } from '../lib/models/card'
+import Linechart from './bar/lineChart'
+import HeaderForm from './header-form/header-form'
+import MyEditBtnPopover from './my-editBtn-popover/my-editBtn-popover'
+// import moduleName from 'react-router';
 
 type myRef = {
   spanScrollIntoview: () => void
@@ -42,6 +47,9 @@ const RenderTokenStream = forwardRef(
       anchorIdHL,
       hlElementHandler,
       meAnchor,
+      showHeaderForm,
+      pathPush,
+      symbolHandler,
     }: {
       stream: ExtTokenStream
       className?: string
@@ -59,6 +67,9 @@ const RenderTokenStream = forwardRef(
       anchorIdHL?: string
       hlElementHandler?: (el: HTMLSpanElement) => void
       meAnchor?: string
+      showHeaderForm: boolean
+      pathPush: (symbol: string) => void
+      symbolHandler: (symbol: string) => void
     },
     ref: any,
   ): JSX.Element | null => {
@@ -79,7 +90,7 @@ const RenderTokenStream = forwardRef(
       // setPanel(false)
       // }
     }
-
+    const router = useRouter()
     // console.log(commentTextArea)
 
     if (typeof stream === 'string') {
@@ -148,6 +159,9 @@ const RenderTokenStream = forwardRef(
                     hlElementHandler={hlElementHandler}
                     meAnchor={meAnchor}
                     cardCommentId={cardCommentId}
+                    showHeaderForm={showHeaderForm}
+                    pathPush={pathPush}
+                    symbolHandler={symbolHandler}
                   />
                 )
               })}
@@ -172,6 +186,9 @@ const RenderTokenStream = forwardRef(
                   hlElementHandler={hlElementHandler}
                   meAnchor={meAnchor}
                   cardCommentId={cardCommentId}
+                  showHeaderForm={showHeaderForm}
+                  pathPush={pathPush}
+                  symbolHandler={symbolHandler}
                 />
               )
             })
@@ -210,16 +227,64 @@ const RenderTokenStream = forwardRef(
       case 'sect-symbol':
         // console.log(`symbol: ${content}`)
         return (
-          <span
-            id={content}
-            className={classes.tickerTitle}
-            ref={
-              ref
-              // console.log(el)
-            }
-          >
-            <Link href={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link>
-          </span>
+          <>
+            {showHeaderForm ? (
+              <HeaderForm
+                initialValue={{
+                  title: content,
+                  authorChoice: 'buy',
+                  authorLines: '兩種觀點皆合理 短期注意系統化風險 看好美股的長期走勢，版塊輪動不會有大規模回調',
+                }}
+              />
+            ) : (
+              <span
+                id={content}
+                className={classes.tickerTitle}
+                onClick={() => {
+                  pathPush(content)
+                  symbolHandler(content)
+                }}
+                ref={
+                  ref
+                  // console.log(el)
+                }
+              >
+                {/* <Link href={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link> */}
+                <span>{content.replace('[[', '').replace(']]', '')}</span>
+
+                {content.search(/^\$[A-Z]+$/gm) !== -1 && (
+                  <>
+                    <span className={classes.symbolFullName}>Unity Software Inc.</span>
+                    <span className={classes.symbolPrice}>
+                      <span className={classes.price}>249.29</span>
+                      <span className={`${classes.priceChange} ${classes.green}`}>+1.00(+0.40%)</span>
+                      {/* <span className={`${classes.pricePercent} ${classes.green}`}>+0.40%</span> */}
+                    </span>
+                    {/* <span className={classes.headerChartArea}>
+                      <div className={classes.headerVote}>
+                        <div className={classes.voteHeader}>你的預測是？</div>
+                        <div className={classes.voteChoices}>
+                          <span>買</span>
+                          <span>賣</span>
+                          <span>觀望</span>
+                        </div>
+                      </div>
+                      <span className={classes.headerAuthorLines}>
+                        <Linechart />
+                        <div className={classes.authorLineWrapper}>
+                          <span className={classes.authorTagWrapper}>
+                            <span className={classes.authorTag}>@娜娜</span>
+                            <span className={classes.choiceTag}>買</span>
+                          </span>
+                          <span>兩種觀點皆合理 短期注意系統化風險 看好美股的長期走勢，版塊輪動不會有大規模回調</span>
+                        </div>
+                      </span>
+                    </span> */}
+                  </>
+                )}
+              </span>
+            )}
+          </>
         )
 
       case 'multiline-marker':
@@ -259,6 +324,9 @@ const RenderTokenStream = forwardRef(
               // highLightClassName={highLightClassName}
               hlElementHandler={hlElementHandler}
               cardCommentId={cardCommentId}
+              showHeaderForm={showHeaderForm}
+              pathPush={pathPush}
+              symbolHandler={symbolHandler}
             />
             {/* {console.log(stream)} */}
           </ul>
@@ -283,6 +351,9 @@ const RenderTokenStream = forwardRef(
             // highLightClassName={highLightClassName}
             hlElementHandler={hlElementHandler}
             cardCommentId={cardCommentId}
+            showHeaderForm={showHeaderForm}
+            pathPush={pathPush}
+            symbolHandler={symbolHandler}
           />
         )
       case 'inline-value':
@@ -306,8 +377,11 @@ const RenderTokenStream = forwardRef(
                 // highLightClassName={highLightClassName}
                 hlElementHandler={hlElementHandler}
                 cardCommentId={cardCommentId}
+                showHeaderForm={showHeaderForm}
+                pathPush={pathPush}
+                symbolHandler={symbolHandler}
               />
-              {console.log(stream)}
+              {/* {console.log(stream)} */}
               <button
                 onClick={() => {
                   stream.markerline?.commentId && clickPoll && clickPoll(stream.markerline.commentId.toString())
@@ -329,7 +403,9 @@ const RenderTokenStream = forwardRef(
           return (
             // <QueryCommentModal id={stream.markerline.commentId.toString()}>
             <li className={classes.inlineValue}>
-              <span className={classes.bullet}>•</span>
+              <span className={classes.bulletWrapper}>
+                <span className={classes.bullet}>•</span>
+              </span>
               {/* <svg viewBox="0 0 18 18" className={classes.bullet}>
                 <circle cx="9" cy="9" r="3.5"></circle>
               </svg> */}
@@ -347,6 +423,9 @@ const RenderTokenStream = forwardRef(
                 // highLightClassName={anchorIdHL === stream.markerline.anchorId.toString()}
                 hlElementHandler={hlElementHandler}
                 cardCommentId={cardCommentId}
+                showHeaderForm={showHeaderForm}
+                pathPush={pathPush}
+                symbolHandler={symbolHandler}
               />
               {/* {stream.markerline && commentIdHandler(stream.markerline.commentId.toString())} */}
               {/* {stream.markerline && anchorIdHandler(stream.markerline.anchorId.toString())} */}
@@ -369,6 +448,9 @@ const RenderTokenStream = forwardRef(
               // highLightClassName={highLightClassName}
               hlElementHandler={hlElementHandler}
               cardCommentId={cardCommentId}
+              showHeaderForm={showHeaderForm}
+              pathPush={pathPush}
+              symbolHandler={symbolHandler}
             />
           )
         }
@@ -387,6 +469,9 @@ const RenderTokenStream = forwardRef(
             // highLightClassName={highLightClassName}
             hlElementHandler={hlElementHandler}
             cardCommentId={cardCommentId}
+            showHeaderForm={showHeaderForm}
+            pathPush={pathPush}
+            symbolHandler={symbolHandler}
           />
         )
       }
@@ -439,9 +524,16 @@ const RenderTokenStream = forwardRef(
       case 'topic': {
         // console.log(`symbol: ${content}`)
         return (
-          <span className={classes.keyword}>
+          <span
+            className={classes.keyword}
+            onClick={() => {
+              pathPush(content)
+              symbolHandler(content)
+            }}
+          >
             {/* {console.log(content)} */}
-            <Link href={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link>
+            {/* <Link href={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link> */}
+            <span>{content.replace('[[', '').replace(']]', '')}</span>
           </span>
         )
       }
@@ -488,6 +580,9 @@ const RenderTokenStream = forwardRef(
             // highLightClassName={highLightClassName}
             hlElementHandler={hlElementHandler}
             cardCommentId={cardCommentId}
+            showHeaderForm={showHeaderForm}
+            pathPush={pathPush}
+            symbolHandler={symbolHandler}
           />
         )
     }
@@ -508,6 +603,8 @@ const RenderSection = forwardRef(
       showDiscuss,
       anchorIdHL,
       hlElementHandler,
+      pathPush,
+      symbolHandler,
     }: // commentId
     {
       sect: Section
@@ -521,10 +618,18 @@ const RenderSection = forwardRef(
       anchorIdHL?: string
       hlElementHandler?: (el: HTMLSpanElement) => void
       // commentId:string
+      pathPush: (symbol: string) => void
+      symbolHandler: (symbol: string) => void
     },
     ref,
   ): JSX.Element | null => {
     const [showEditor, setShowEditor] = useState(false)
+    const [showHeaderForm, setShowHeaderForm] = useState(false)
+    const [showPopover, setShowPopover] = useState(false)
+
+    const showHeaderFormHandler = () => {
+      setShowHeaderForm(true)
+    }
 
     if (sect.stream && sect.stream.length !== 0) {
       return (
@@ -532,7 +637,23 @@ const RenderSection = forwardRef(
           {/* {console.log(sect.stream)} */}
           <div className={classes.cardSectionInner}>
             {showEditor ? (
-              <BulletEditor />
+              <>
+                <RenderTokenStream
+                  stream={sect.stream}
+                  ref={ref}
+                  showQuestion={showQuestion}
+                  showDiscuss={showDiscuss}
+                  anchorIdHandler={anchorIdHandler}
+                  clickPoll={clickPoll}
+                  anchorIdHL={anchorIdHL}
+                  hlElementHandler={hlElementHandler}
+                  cardCommentId={cardCommentId}
+                  showHeaderForm={showHeaderForm}
+                  pathPush={pathPush}
+                  symbolHandler={symbolHandler}
+                />
+                <BulletEditor />
+              </>
             ) : (
               <RenderTokenStream
                 stream={sect.stream}
@@ -544,6 +665,9 @@ const RenderSection = forwardRef(
                 anchorIdHL={anchorIdHL}
                 hlElementHandler={hlElementHandler}
                 cardCommentId={cardCommentId}
+                showHeaderForm={showHeaderForm}
+                pathPush={pathPush}
+                symbolHandler={symbolHandler}
               />
             )}
             {/* {console.log(sect)} */}
@@ -551,9 +675,18 @@ const RenderSection = forwardRef(
               className={classes.sectionEditBtn}
               onClick={() => {
                 setShowEditor(prev => !prev)
+                setShowHeaderForm(prev => !prev)
+                // setShowEditor(prev => !prev)
+                // setShowHeaderForm(prev => !prev)
               }}
             >
-              {showEditor ? '儲存' : '編輯'}
+              <span className={classes.sectionEditBtnText}>{showEditor ? '儲存' : '編輯'}</span>
+              {/* {!showEditor && !showHeaderForm && showPopover && (
+                <MyEditBtnPopover showHeaderFormHandler={showHeaderFormHandler} />
+              )} */}
+              {/* <svg width="30" height="30" viewBox="0 0 30 30" preserveAspectRatio="xMinYMin meet">
+                <path d="M 3 10 L 15 24 L 27 10" fill="transparent" /> */}
+              {/* </svg> */}
             </span>
           </div>
         </div>
@@ -578,6 +711,8 @@ export const RenderCardBody = forwardRef(
       showDiscuss,
       anchorIdHL,
       hlElementHandler,
+      pathPush,
+      symbolHandler,
     }: {
       sects: Section[]
       text?: string[]
@@ -590,9 +725,17 @@ export const RenderCardBody = forwardRef(
       showDiscuss?: () => void
       anchorIdHL?: string
       hlElementHandler?: (el: HTMLSpanElement) => void
+      pathPush: (symbol: string) => void
+      symbolHandler: (symbol: string) => void
     },
     ref,
   ): JSX.Element => {
+    const sectsFilter: (Section | string)[] = [
+      ...sects.filter(e => e.nestedCard !== undefined || e.stream?.length !== 0),
+    ]
+    sectsFilter[sectsFilter.length] = 'newcard'
+    const [sectArr, setSectArr] = useState(sectsFilter)
+    // console.log(sectArr)
     type MyRef = {
       spanRef: any[]
       anchorRef: any[]
@@ -606,30 +749,46 @@ export const RenderCardBody = forwardRef(
 
     return (
       <>
-        {console.log(sects)}
-        {sects
-          .filter(e => e.nestedCard !== undefined)
-          .map((e, i) => (
-            <RenderSection
-              key={i}
-              sect={e}
-              text={(text && text[i]) || ''}
-              ref={el => {
-                // console.log(el)
-                myRef.current[i] = el
-              }}
-              showQuestion={showQuestion}
-              cardCommentId={cardCommentId || 0}
-              anchorIdHandler={anchorIdHandler}
-              // pollCommentIdHandler={pollCommentIdHandler}
-              clickPoll={clickPoll}
-              showDiscuss={showDiscuss}
-              anchorIdHL={anchorIdHL}
-              hlElementHandler={hlElementHandler}
-            />
-          ))}
+        {/* {console.log(sects)} */}
+        {sectsFilter
+          // {sects
+          //   .filter(e => e.nestedCard !== undefined || e.stream?.length !== 0)
+          .map((e, i) => {
+            if (typeof e === 'string') {
+              return (
+                <div className={`${classes.cardSection} ${classes.opacity50}`}>
+                  <div className={classes.cardSectionInner}>
+                    <HeaderForm initialValue={{ authorChoice: '', authorLines: '', title: '' }} />
+                    <BulletEditor />
+                  </div>
+                </div>
+              )
+            }
+            return (
+              <RenderSection
+                key={i}
+                sect={e}
+                text={(text && text[i]) || ''}
+                ref={el => {
+                  // console.log(el)
+                  myRef.current[i] = el
+                }}
+                showQuestion={showQuestion}
+                cardCommentId={cardCommentId || 0}
+                anchorIdHandler={anchorIdHandler}
+                // pollCommentIdHandler={pollCommentIdHandler}
+                clickPoll={clickPoll}
+                showDiscuss={showDiscuss}
+                anchorIdHL={anchorIdHL}
+                hlElementHandler={hlElementHandler}
+                pathPush={pathPush}
+                symbolHandler={symbolHandler}
+              />
+            )
+          })}
         {/* {console.log(myRef.current)} */}
         {titleRef && titleRef(myRef.current)}
+        {/* <div>newCard</div> */}
       </>
     )
   },
@@ -649,6 +808,8 @@ export const CardBody = ({
   showDiscuss,
   anchorIdHL,
   hlElementHandler,
+  pathPush,
+  symbolHandler,
 }: {
   card: CocardFragment
   bySrc?: string
@@ -662,6 +823,8 @@ export const CardBody = ({
   showDiscuss: () => void
   anchorIdHL: string
   hlElementHandler: (el: HTMLSpanElement) => void
+  pathPush: (symbol: string) => void
+  symbolHandler?: (symbol: string) => void
 }): JSX.Element => {
   // console.log(card)
 
@@ -670,7 +833,7 @@ export const CardBody = ({
   // const meta: CardMeta | undefined = card.meta ? (JSON.parse(card.meta) as CardMeta) : undefined
   const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
   editor.flush({ attachMarkerlinesToTokens: true })
-  console.log(editor.getText())
+  // console.log(editor.getText())
   const text = editor.getText().split(/^\n/gm)
   // console.log(text.split(/^\n/gm))
   return (
@@ -687,12 +850,37 @@ export const CardBody = ({
       anchorIdHL={anchorIdHL}
       // ref={ref}
       hlElementHandler={hlElementHandler}
+      pathPush={pathPush}
+      symbolHandler={symbolHandler}
     />
     // </>
   )
 }
 
-export function CardHead({ card, sect }: { card: CocardFragment; sect: Section[] }): JSX.Element {
+export function CardHead({
+  card,
+  sect,
+  height,
+}: {
+  card: CocardFragment
+  sect: Section[]
+  height: number
+}): JSX.Element {
+  const headerRef = useRef<HTMLDivElement>(null)
+  const titleRef = useRef<HTMLSpanElement>(null)
+  const hasWindow = typeof window !== undefined
+  const [windowWidth, setWindowWidth] = useState(hasWindow ? window.innerWidth : null)
+  useEffect(() => {
+    if (hasWindow) {
+      window.addEventListener('resize', () => {
+        setWindowWidth(window.innerWidth)
+      })
+      return () =>
+        window.removeEventListener('resize', () => {
+          // setWindowWidth(window.innerWidth)
+        })
+    }
+  }, [hasWindow])
   // const title = findOneComment(MARKER_FORMAT.srcTitle.mark, card.comments)
   // const publishDate = findOneComment(MARKER_FORMAT.srcPublishDate.mark, card.comments);
   const _comment: CommentFragment = {
@@ -717,6 +905,7 @@ export function CardHead({ card, sect }: { card: CocardFragment; sect: Section[]
     meta: null,
     createdAt: null,
   }
+
   let cardTitle = card.link.url
   // ticker的title
   const cardDomain = card.link.domain
@@ -727,52 +916,83 @@ export function CardHead({ card, sect }: { card: CocardFragment; sect: Section[]
   const titleClickedHandler = () => {
     setTitleClick(prev => !prev)
   }
+  // console.log(height)
 
   return (
-    <div className={classes.header}>
-      {cardDomain === '_' ? (
-        <h1 className={classes.tickerTitle}>{cardTitle.replace('[[', '').replace(']]', '')}</h1>
-      ) : (
-        <>
-          <div className={classes.headerTopWrapper}>
-            <span className={classes.date}>2021-4-9</span>
-            <span className={classes.flexContainer}>
+    <div
+      className={classes.header}
+      ref={headerRef}
+      style={{
+        top: `-${
+          headerRef.current &&
+          windowWidth &&
+          (windowWidth < 500 ? headerRef.current.clientHeight - 80 : headerRef.current.clientHeight - 45)
+        }px`,
+      }}
+    >
+      <div>
+        {cardDomain === '_' ? (
+          <h1 className={classes.tickerTitle}>{cardTitle.replace('[[', '').replace(']]', '')}</h1>
+        ) : (
+          <>
+            <div className={classes.headerTopWrapper}>
+              <span className={classes.flexContainer}>
+                <span className={classes.author}>
+                  {/* <a href={cardTitle} target="_blank" rel="noreferrer"> */}
+                  {card.link.oauthorName?.replace(/(.+):.+/gm, '$1')}
+                  {/* <LinkIcon className={classes.linkIcon} /> */}
+                  {/* </a> */}
+                </span>
+                {/* <span className={classes.webName}></span> */}
+                <span className={classes.date}>2021 / 4 / 9</span>
+              </span>
               {/* <ClockIcon className={classes.clockIcon} /> */}
               {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}
-            </span>
-            {/* <MyTooltip
+              {/* <MyTooltip
             title="ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
             蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资"
           > */}
-            <span className={`${classes.title} ${titleClick ? classes.titleExpand : ''}`} onClick={titleClickedHandler}>
-              ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
-              蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
-            </span>
-            <span className={classes.author}>author</span>
-            <span className={classes.webName}>{' • ' + 'Youtube' + '\n'}</span>
-            <a className={classes.link} href={cardTitle} target="_blank" rel="noreferrer">
-              <LinkIcon className={classes.linkIcon} />
-              {/* 連結{'\n'} */}
-            </a>
-            <div className={classes.tagContainer}>
+              <a className={classes.link} href={cardTitle} target="_blank" rel="noreferrer">
+                <span
+                  className={`${classes.title} ${titleClick ? classes.titleExpand : ''} ${
+                    height > 90 && classes.scroll
+                  } `}
+                  onClick={titleClickedHandler}
+                  ref={titleRef}
+                >
+                  {/* {console.log(headerRef.current?.offsetTop - height)} */}
+                  ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
+                  蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
+                </span>
+                {/* <LinkIcon className={classes.linkIcon} /> */}
+                {/* 連結{'\n'} */}
+              </a>
+            </div>
+            <div className={`${classes.symbolContainer} ${height > 90 && classes.scroll && classes.scroll}`}>
               {/* <span>Tags:</span> */}
               {sect.map((e, i) => {
                 if (e.nestedCard) {
                   return (
-                    <span key={i} className={classes.tag}>
+                    <span key={i} className={classes.symbol}>
                       {e.nestedCard.symbol}
                     </span>
                   )
                 }
               })}
             </div>
-          </div>
-          <div>
-            <div>操作建議:</div>
-          </div>
-          {/* </MyTooltip> */}
-        </>
-      )}
+            <span
+              className={`${classes.title} ${classes.titleShort} ${height > 91 && classes.scroll}`}
+              // onClick={titleClickedHandler}
+              // ref={titleRef}
+            >
+              {/* {console.log(headerRef.current?.offsetTop - height)} */}
+              ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
+              蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
+            </span>
+            {/* </MyTooltip> */}
+          </>
+        )}
+      </div>
 
       {/* <div><Comment comment={comment} /></div> */}
       {/* {console.log(card)} */}

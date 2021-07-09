@@ -14,7 +14,7 @@
   &:global(.ant-input) {
     resize: none;
     line-height: inherit;
-    background-color: $natual-hover;
+    // background-color: $natual-hover;
     border: none;
     padding-bottom: 0;
     font-size: inherit;
@@ -41,7 +41,7 @@
       left: none;
       right: none;
       top: none;
-      bottom: 1px solid $natual2;
+      // bottom: 1px solid $natual2;
       radius: 0;
     }
     &:hover {

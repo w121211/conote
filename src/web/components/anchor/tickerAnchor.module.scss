@@ -5,7 +5,7 @@
     background-color: transparent;
     :global(.ant-anchor-ink) {
       &::before {
-        background-color: $natual2;
+        // background-color: $natual2;
       }
       :global(.ant-anchor-ink-ball) {
         width: 2px;
@@ -15,7 +15,7 @@
     }
   }
   :global(.ant-anchor) {
-    font-size: $font-sm;
+    // font-size: $font-sm;
   }
 }
 .anchor {
@@ -27,7 +27,7 @@
   flex-direction: column;
 
   margin: 2em;
-  max-width: 25vw;
+  max-width: 13vw;
   padding-left: 0;
   margin-left: 10vw;
   @media screen and (max-width: 500px) {
@@ -36,6 +36,10 @@
   }
   div {
     cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    line-clamp: 1;
+    text-overflow: ellipsis;
     // padding-bottom: 10px;
     // line-height: 1.3;
   }

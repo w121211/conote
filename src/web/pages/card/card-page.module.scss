@@ -16,8 +16,13 @@
   // padding: 3em 0;
 }
 .mainInner {
-  display: flex;
+  // display: flex;
   flex: auto;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: $bg;
   // padding: 0 24px;
 }
 .header {
@@ -94,10 +99,11 @@ a {
 }
 .cardElement {
   width: 50%;
-  margin: 2em auto 4em;
+  margin: 0 auto 4em;
+  order: 2;
   @media screen and(max-width:500px) {
     width: 94vw;
-    margin: 36px auto 1em;
+    margin: 0px auto 1em;
   }
 }
 .cardOuter {

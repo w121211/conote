@@ -1,0 +1,71 @@
+.formContainer {
+  border-bottom: 1px solid $natual;
+}
+.form {
+  display: block;
+  margin: 1em 0 2em;
+  width: 70%;
+  //   font-size: 14px;
+  label {
+    display: inline-block;
+    margin-right: 1em;
+    font-weight: 700;
+  }
+  input {
+    &[type='text'] {
+      border: 0;
+      border-bottom: 1px solid $primary;
+      display: block;
+      width: 100%;
+      color: $text;
+      &:focus-visible {
+        outline: 0;
+        border-bottom-width: 2px;
+      }
+    }
+  }
+  .radioLabel {
+    position: relative;
+    display: inline-flex;
+    font-weight: 400;
+
+    align-items: center;
+    margin-right: 20px;
+    // border: 1px solid $primary;
+    svg {
+      width: 1em;
+      height: 1em;
+      stroke: $primary;
+      margin-right: 3px;
+    }
+    input {
+      position: absolute;
+      margin: 0;
+      opacity: 0;
+
+      //   visibility: hidden;
+      &:checked + svg {
+        .checkBg {
+          fill: $primary;
+          stroke: $primary;
+        }
+        .checkMark {
+          stroke: white;
+        }
+      }
+    }
+    span {
+      color: $text;
+      font-weight: 500;
+    }
+  }
+}
+.radioWrapper {
+  display: inline-flex;
+}
+.section:not(:last-child) {
+  margin-bottom: 2em;
+}
+.choiceWrapper {
+  display: flex;
+}

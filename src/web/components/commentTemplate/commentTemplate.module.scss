@@ -6,3 +6,18 @@
     background-color: #f7f8fb;
   }
 }
+.arrowUpIcon {
+  // width: 16px;
+  // height: 16px;
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+.arrowDownIcon {
+  svg {
+    width: 16px;
+    height: 16px;
+    transform: rotate(180deg);
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, EventHandler } from 'react'
 import { SubmitErrorHandler, SubmitHandler, useForm, useFieldArray } from 'react-hook-form'
 import { useRepliesQuery, Reply, useCommentQuery, ReplyFragment } from '../../apollo/query.graphql'
-import { List } from 'antd'
+// import { List } from 'antd'
 // import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
 // import * as QT from '../../graphql/query-types'
 import CommentTemplate from '../commentTemplate/commentTemplate'
@@ -37,21 +37,22 @@ type FormValues = {
 }
 
 const CommentList = ({
-  type,
-  commentId,
-  pollCommentId,
-  switchTab,
-  anchorHLHandler,
-  myScrollIntoView,
-  resetHighLight,
-}: {
-  type?: string
-  commentId: string
-  pollCommentId?: string
-  switchTab?: boolean
-  anchorHLHandler?: (anchorId: string) => void
-  myScrollIntoView?: () => void
-  resetHighLight?: () => void
+  // type,
+  boardId,
+}: // pollCommentId,
+// switchTab,
+// anchorHLHandler,
+// myScrollIntoView,
+// resetHighLight,
+{
+  boardId: string
+  // type?: string
+  // commentId: string
+  // pollCommentId?: string
+  // switchTab?: boolean
+  // anchorHLHandler?: (anchorId: string) => void
+  // myScrollIntoView?: () => void
+  // resetHighLight?: () => void
 }) => {
   //   const [repliesList,setRepliesList]=useState<Array<({
   //     __typename?: 'Reply';
@@ -78,7 +79,7 @@ const CommentList = ({
   //     document.body.removeEventListener('click', handleClickOutside, true)
   //   }
   // })
-  const meCommentId = commentId ? commentId : pollCommentId
+  // const meCommentId = commentId ? commentId : pollCommentId
 
   const {
     data: repliesData,
@@ -86,7 +87,7 @@ const CommentList = ({
     error: repliesError,
   } = useRepliesQuery({
     // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
-    variables: { commentId: commentId },
+    variables: { commentId: boardId },
     fetchPolicy: 'cache-first',
   })
 
@@ -108,6 +109,9 @@ const CommentList = ({
   // }
 
   // const loadMore = () => {}
+  const testData = {
+    replies: [{ text: '測試' }, { text: '測試' }, { text: '哈哈' }, { text: 'yesysefsek' }, { text: '測試' }],
+  }
 
   return (
     // <>
@@ -126,54 +130,58 @@ const CommentList = ({
     //       ))}
     //       <button type="submit">送出</button>
     //     </form>)}
-    <List
+    <div
       className={classes.List}
-      size="small"
-      itemLayout="vertical"
+      // size="small"
+      // itemLayout="vertical"
       // loadMore={loadMore}
-      rowKey={item => item.id}
-      dataSource={repliesData?.replies}
+      // rowKey={item => item.id}
+      // dataSource={repliesData?.replies}
       // footer={
       //   //   <div>
       //   //     <b>ant design</b> footer part
       //   //   </div>
       // }
-      renderItem={
-        (item, idx) => (
-          // item.type == 'vote' ? (null
-          // <>
-          //   <List.Item>
-          //     <List.Item.Meta title={item.content} />
+      // renderItem={
+      //   (item, idx) => (
+      // item.type == 'vote' ? (null
+      // <>
+      //   <List.Item>
+      //     <List.Item.Meta title={item.content} />
 
-          //     <Radios data={item.radios} countsHandler={countsHandler} />
+      //     <Radios data={item.radios} countsHandler={countsHandler} />
 
-          //     {/* <BarChart total={item.counts.reduce((a, b) => a + b)} /> */}
-          //     {/* <ParentSize>{({ width }) => <PieChart width={width} height={width - 80} />}</ParentSize> */}
-          //   </List.Item>
-          //   <li className={classes.commentRoot}>
-          //     <h4>共{item.comment.length + 1}則留言</h4>
-          //     {item.comment.map((el, idx) => {
-          //       return <CommentTemplate key={idx} id={item.id} content={el.content} floor={el.floor} />
-          //     })}
-          //   </li>
-          // </>
-          // ) : (
-          <li
-            className={classes.commentRoot}
-            ref={myRef}
-            // onClick={e => onClickHandler(e, item.text.matchAll(/(^\d+ )(.+$)/g))}
-          >
-            <CommentTemplate
-              id={item.id}
-              content={item.text.replace(/(^\d+ )(.+$)/g, '$2')}
-              // updatedAt={item.updatedAt}
-              floor={`#${repliesLength && repliesLength - idx}`}
-            />
-          </li>
-        )
-        // )
-      }
-    />
+      //     {/* <BarChart total={item.counts.reduce((a, b) => a + b)} /> */}
+      //     {/* <ParentSize>{({ width }) => <PieChart width={width} height={width - 80} />}</ParentSize> */}
+      //   </List.Item>
+      //   <li className={classes.commentRoot}>
+      //     <h4>共{item.comment.length + 1}則留言</h4>
+      //     {item.comment.map((el, idx) => {
+      //       return <CommentTemplate key={idx} id={item.id} content={el.content} floor={el.floor} />
+      //     })}
+      //   </li>
+      // </>
+      // ) : (
+      // )
+      // )
+      // }
+    >
+      {testData.replies.map((e, i) => (
+        <ul
+          className={classes.commentRoot}
+          key={i}
+          ref={myRef}
+          // onClick={e => onClickHandler(e, item.text.matchAll(/(^\d+ )(.+$)/g))}
+        >
+          <CommentTemplate
+            id={`${i}`}
+            content={e.text.replace(/(^\d+ )(.+$)/g, '$2')}
+            // updatedAt={item.updatedAt}
+            floor={`#${repliesLength && repliesLength - i}`}
+          />
+        </ul>
+      ))}
+    </div>
     // </>
   )
 }

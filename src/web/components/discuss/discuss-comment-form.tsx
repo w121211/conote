@@ -27,11 +27,10 @@ import classes from './discuss-page.module.scss'
 export const CommentForm = forwardRef(
   (
     {
-      commentId,
-      anchorId,
-      switchTab,
-      pollCommentId,
-    }: { commentId: string; anchorId: string; switchTab?: boolean; pollCommentId?: string },
+      boardId,
+
+      pollId,
+    }: { boardId: string; pollId?: string },
     ref,
   ) => {
     const [buttonDisable, setButtonState] = useState(true)
@@ -44,7 +43,7 @@ export const CommentForm = forwardRef(
     const [rerender, setRerender] = useState(false)
 
     const [form] = Form.useForm()
-    const onSubmit = (value: number | undefined) => {
+    const onSubmit = () => {
       form.submit()
     }
     // useEffect(() => {
@@ -55,15 +54,15 @@ export const CommentForm = forwardRef(
     //   }
     // }, [switchTab])
 
-    const {
-      data: commentsData,
-      loading: commentsLoading,
-      error: commentsError,
-      refetch: refetchComment,
-    } = useCommentQuery({
-      variables: { id: commentId },
-      fetchPolicy: 'cache-first',
-    })
+    // const {
+    //   data: commentsData,
+    //   loading: commentsLoading,
+    //   error: commentsError,
+    //   refetch: refetchComment,
+    // } = useCommentQuery({
+    //   variables: { id: boardId },
+    //   fetchPolicy: 'cache-first',
+    // })
 
     const {
       data: myVotesData,
@@ -79,19 +78,19 @@ export const CommentForm = forwardRef(
     //     setVoteCount(commentsData.comment.poll.count.nVotes)
     //   }
     // }, [commentsData, commentsLoading])
-    const pollId = commentsData?.comment?.poll?.id
-    const meVote = pollId && myVotesData?.myVotes.find((e, i) => e.pollId === parseInt(pollId))
+    // const pollId = commentsData?.comment?.poll?.id
+    // const meVote = pollId && myVotesData?.myVotes.find((e, i) => e.pollId === parseInt(pollId))
 
     const [createReply] = useCreateReplyMutation({
       update(cache, { data }) {
         const res = cache.readQuery<RepliesQuery, RepliesQueryVariables>({
           query: RepliesDocument,
-          variables: { commentId: commentId },
+          variables: { commentId: boardId },
         })
         if (data?.createReply && res?.replies) {
           cache.writeQuery({
             query: RepliesDocument,
-            variables: { commentId: commentId },
+            variables: { commentId: boardId },
             data: { replies: [data?.createReply].concat(res.replies) },
           })
           // addReplyCountByOne()
@@ -101,20 +100,20 @@ export const CommentForm = forwardRef(
       },
     })
 
-    const [createVote] = useCreateVoteMutation({
-      update(cache, { data }) {
-        const res = cache.readQuery<MyVotesQuery>({
-          query: MyVotesDocument,
-        })
-        if (data?.createVote && res?.myVotes) {
-          cache.writeQuery({
-            query: MyVotesDocument,
-            data: { myVotes: res.myVotes.concat([data.createVote]) },
-          })
-          refetchComment()
-        }
-      },
-    })
+    // const [createVote] = useCreateVoteMutation({
+    //   update(cache, { data }) {
+    //     const res = cache.readQuery<MyVotesQuery>({
+    //       query: MyVotesDocument,
+    //     })
+    //     if (data?.createVote && res?.myVotes) {
+    //       cache.writeQuery({
+    //         query: MyVotesDocument,
+    //         data: { myVotes: res.myVotes.concat([data.createVote]) },
+    //       })
+    //       refetchComment()
+    //     }
+    //   },
+    // })
 
     const onTextChange = ({ text, votes }: { text: string; votes: number }) => {
       if (text) {
@@ -131,46 +130,46 @@ export const CommentForm = forwardRef(
     //   }
 
     const onFinish = (values: any) => {
-      if (values.votes !== undefined) {
-        createVote({
-          variables: {
-            pollId: `${commentsData?.comment?.poll?.id}`,
-            choiceIdx: values.votes,
-          },
-        })
+      // if (values.votes !== undefined) {
+      //   createVote({
+      //     variables: {
+      //       pollId: `${commentsData?.comment?.poll?.id}`,
+      //       choiceIdx: values.votes,
+      //     },
+      //   })
 
-        // setVotedIdx(values.votes)
-      }
+      //   // setVotedIdx(values.votes)
+      // }
       if (values.text) {
         createReply({
           variables: {
-            commentId: commentId,
+            commentId: boardId,
             data: {
-              text: `${anchorId} ${values.text}`,
+              text: `${values.text}`,
             },
           },
         })
       }
 
-      if (values.text && !switchTab) {
-        createReply({
-          variables: {
-            commentId: commentId,
-            data: {
-              text: `${commentsData?.comment?.poll?.choices[values.votes] ?? ''} ${values.text}`,
-            },
-          },
-        })
-      }
+      // if (values.text && !switchTab) {
+      //   createReply({
+      //     variables: {
+      //       commentId: boardId,
+      //       data: {
+      //         text: `${commentsData?.comment?.poll?.choices[values.votes] ?? ''} ${values.text}`,
+      //       },
+      //     },
+      //   })
+      // }
       // console.log(total)
 
       form.resetFields()
       setButtonState(true)
 
-      console.log('values:' + values)
-      console.log(
-        `finish commentId:${commentId} pollId:${commentsData?.comment?.poll?.id} anchorId:${anchorId} ${values.text} ${values.votes}`,
-      )
+      console.log(boardId)
+      // console.log(
+      //   `finish commentId:${boardId} pollId:${commentsData?.comment?.poll?.id} anchorId:${anchorId} ${values.text} ${values.votes}`,
+      // )
     }
     // const total = commentsData?.comment?.poll?.count.nVotes.reduce((a, b) => a + b)
     return (
@@ -221,7 +220,7 @@ export const CommentForm = forwardRef(
         {/* </> */}
         {/* )} */}
 
-        <Button id="submitButton" type="text" disabled={buttonDisable} onClick={() => onSubmit(voteValue)}>
+        <Button id="submitButton" type="text" disabled={buttonDisable} onClick={() => onSubmit()}>
           送出
         </Button>
       </Form>

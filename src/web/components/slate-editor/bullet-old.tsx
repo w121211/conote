@@ -189,8 +189,10 @@ const BulletBody = ({ attributes, children, element }: RenderElementProps): JSX.
 
   return (
     <div {...attributes}>
-      <span className={`${selected && focused ? classes.red : classes.bulletBody}`}>{children}</span>
-      {console.log('jalskj')}
+      <span className={classes.bulletBody} style={style}>
+        {children}
+      </span>
+      {/* <span className={`${classes.bulletBody} ${selected && focused ? classes.selected : undefined}`}>{children}</span> */}
     </div>
   )
 }
@@ -838,193 +840,16 @@ const BulletEditor = (): JSX.Element => {
   )
 }
 
-// export default BulletEditor
-
-// Serialize
-
-type TokenStream = Array<string | Token>
-
-type BulletMeta = {
-  uid: number
-  anchorId?: number
-  authorIds?: string[]
-  boardId?: number
-  oauthorId?: string
-  source?: string
-}
-
-type Bullet<T = string | TokenStream> = {
-  meta?: BulletMeta
-  head: T
-  body?: T
-  children?: Bullet<T>[]
-  board?: true
-}
-
-function serialize(nodes: Node[]): Bullet<string>[] {
-  const bullets: Bullet<string>[] = []
-
-  for (const node of nodes) {
-    if (Element.isElement(node) && node.type === 'bullet') {
-      let head: string, body: string | undefined
-
-      if (node.children[0].type === 'bullet-head') {
-        head = Node.string(node.children[0])
-      } else {
-        throw new Error('bullet的第一個children一定為bullet-head')
-      }
-      if (node.children[1]?.type === 'bullet-body') {
-        body = Node.string(node.children[1])
-      }
-
-      bullets.push({
-        head,
-        body,
-        children: node.children.length > 0 ? serialize(node.children) : undefined,
-      })
-    }
-  }
-  return bullets
-}
-
-function deserialize(bullets: Bullet<string>[]): Element[] {
-  return bullets.map<Element>(e => {
-    const children: Element[] = []
-    children.push({ type: 'bullet-head', children: [{ text: e.head }] })
-    if (e.body) {
-      children.push({ type: 'bullet-body', children: [{ text: e.body }] })
-    }
-    return {
-      type: 'bullet',
-      children: [...children, ...deserialize(e.children ?? [])],
-    }
-  })
-}
-
-const cardBody: Bullet<string>[] = [
-  {
-    head: '[*]',
-    children: [{ head: '超市零售批發' }, { head: '實體店面和電商' }],
-  },
-  {
-    head: '[+]',
-    children: [
-      { head: '商品價格低' },
-      { head: '與科技混和：自動化結帳、取貨等' },
-      { head: 'Q2電商營收增長97%、會員數增加60%、實體店面營收增長9.3%' },
-      { head: '現金流足夠' },
-      { head: '股價抗跌' },
-    ],
-  },
-  {
-    head: '[-]',
-    children: [{ head: '股價增長速度慢' }],
-  },
-  {
-    head: '[vs]',
-    children: [
-      {
-        meta: {
-          uid: 10,
-          boardId: 20,
-          // anchorId?: number
-          // authorIds?: string[]
-          // oauthorId?: string
-          // source?: string
-        },
-        head: '<$AMZ> vs <$WMT>',
-        board: true,
-        children: [
-          {
-            head: '$WMT的實體店面提供更多的購物安全感 <- 商品問題可以在實體店面解決',
-          },
-          { head: '送貨速度：$AMZ通常需要一到兩天 vs $WMT當天送貨當天到' },
-        ],
-      },
-    ],
-  },
-  {
-    head: '[?]',
-    children: [
-      {
-        head: '<買> vs <賣> vs <觀望>',
-        board: true,
-        children: [
-          {
-            head: '<觀望> 加倉後無法降低風險，也不會增加收益，考量機會成本不會購入',
-          },
-        ],
-      },
-    ],
-  },
-]
-
-function tokenizeBullets(bullets: Bullet<string>[]): Bullet<TokenStream>[] {
-  return bullets.map<Bullet<TokenStream>>(e => {
-    return {
-      ...e,
-      head: tokenize(e.head, LINE_VALUE_GRAMMAR),
-      body: e.body ? tokenize(e.body, LINE_VALUE_GRAMMAR) : undefined,
-      children: e.children ? tokenizeBullets(e.children) : undefined,
-    }
-  })
-}
+export default BulletEditor
 
 const TestPage = () => {
-  const Token = ({ token }: { token: Token | string }): JSX.Element => {
-    if (typeof token === 'string') {
-      return <span>{token}</span>
-    }
-    if (typeof token.content === 'string') {
-      switch (token.type) {
-        case 'ticker':
-        case 'topic':
-        case 'vote-chocie':
-          return <span style={{ color: 'blue' }}>{token.content}</span>
-        default:
-          return <span>{token.content}</span>
-      }
-    }
-    throw new Error()
-  }
-
-  const BulletComponent = ({ bullet }: { bullet: Bullet<TokenStream> }): JSX.Element => {
-    return (
-      <div>
-        <div>
-          {bullet.head.map((e, i) => (
-            <Token key={i} token={e} />
-          ))}
-        </div>
-        {bullet.body && (
-          <div style={{ color: 'red' }}>
-            {bullet.body.map((e, i) => (
-              <Token key={i} token={e} />
-            ))}
-          </div>
-        )}
-        {bullet.children && bullet.children.length > 0 && (
-          <ul>
-            {bullet.children.map((e, i) => (
-              <li key={i}>
-                <BulletComponent bullet={e} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    )
-  }
-
-  const bullets = tokenizeBullets(cardBody)
-
   return (
     <div>
-      {bullets.map((e, i) => (
-        <BulletComponent key={i} bullet={e} />
-      ))}
+      <div contentEditable={'true'}>aaa</div>
+      <div contentEditable={'true'}>bbb</div>
+      <div>ccc</div>
     </div>
   )
 }
 
-export default BulletEditor
+// export default TestPage

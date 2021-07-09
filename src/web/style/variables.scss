@@ -3,11 +3,15 @@ $primary: #464648;
 $secondary: #5c6cda;
 $primaryHover: rgba(70, 70, 72, 0.9);
 $secondaryHover: #5c6ddab6;
-$gray: #4f5678;
+$gray: #a7adb2;
+$light-gray: #e3e6e7;
 $text: #5b6571;
 $natual: #f7f7f7;
 $link: #4e575f;
 $black: #353535;
+$green: #018478;
+$blue: #344aa4;
+$border: #dedfe2;
 // $natualHover: #f7f7fb;
 // $light-blue: #e0f2ff;
 $gray-natual: #8c8c8c;
@@ -17,24 +21,9 @@ $icon: #494d50;
 
 $white: #ffffff;
 // $black: #393939;
-$black_2: #515253;
-$disable: #a7a7a7;
-$natual-hover: rgba(240, 242, 245, 0.7);
-$light-primary: rgba(28, 191, 185, 0.17);
-$light-primary-hover: rgba(28, 191, 186, 0.13);
-$error: #f94d6a;
-$natual2: rgb(209, 209, 209);
 
 /* Fonts */
-$letter-sp: 0.0875rem;
-
-$font-xs: 12px;
-$font-sm: 14px;
-$font-lg: 16px;
-
-$font-rg: 400;
-$font-md: 500;
-$font-bd: 700;
+$serif: 'Noto Serif TC', 'Noto Serif SC', serif;
 
 %Round_sm_ch {
   // font-family: 'cwTeXYen';

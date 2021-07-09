@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { Comment } from 'antd'
-import { DislikeOutlined, LikeOutlined, DislikeFilled, LikeFilled } from '@ant-design/icons'
+// import { Comment } from 'antd'
+// import { DislikeOutlined, LikeOutlined, DislikeFilled, LikeFilled } from '@ant-design/icons'
 import moment from 'moment'
 import { MyTooltip } from '../my-tooltip/my-tooltip'
 import MyTextArea from '../myTextArea/myTextArea'
 import classes from './commentTemplate.module.scss'
+import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 
 interface commentTemplate {
   id?: string
@@ -47,18 +48,18 @@ const CommenTemplate = ({ id, content, floor, className, clicked, updatedAt }: c
 
   const actions = [
     // <MyTooltip key="comment-basic-like" title="Like">
-    <>
-      <span onClick={like}>
-        {React.createElement(action === 'liked' ? LikeFilled : LikeOutlined)}
-        <span className="comment-action">{likes}</span>
-      </span>
-      {/* // </MyTooltip>, */}
-      {/* // <MyTooltip key="comment-basic-dislike" title="Dislike"> */}
-      <span onClick={dislike}>
-        {React.createElement(action === 'disliked' ? DislikeFilled : DislikeOutlined)}
-        <span className="comment-action">{dislikes}</span>
-      </span>
-    </>,
+    // <>
+    //   <span onClick={like}>
+    //     {React.createElement(action === 'liked' ? LikeFilled : LikeOutlined)}
+    //     <span className="comment-action">{likes}</span>
+    //   </span>
+    //   {/* // </MyTooltip>, */}
+    //   {/* // <MyTooltip key="comment-basic-dislike" title="Dislike"> */}
+    //   <span onClick={dislike}>
+    //     {React.createElement(action === 'disliked' ? DislikeFilled : DislikeOutlined)}
+    //     <span className="comment-action">{dislikes}</span>
+    //   </span>
+    // </>,
     // </MyTooltip>,
     // parent ? (
     //   <span id={`1`} key="comment-basic-reply-to" onClick={toggleTextAreaHandler}>
@@ -68,15 +69,27 @@ const CommenTemplate = ({ id, content, floor, className, clicked, updatedAt }: c
   ]
 
   return (
-    <MyTooltip title="點擊回覆">
-      <Comment
-        className={classes.comment}
-        author={floor}
-        actions={actions}
-        content={content}
-        // datetime={moment(updatedAt).format('YYYY-MM-DD')}
-      />
-    </MyTooltip>
+    // <MyTooltip title="點擊回覆">
+    //   <Comment
+    //     className={classes.comment}
+    //     author={floor}
+    //     actions={actions}
+    //     content={content}
+    //     // datetime={moment(updatedAt).format('YYYY-MM-DD')}
+    //   />
+    // </MyTooltip>
+    <li className={classes.comment}>
+      <span className={classes.floor}>#{id}</span>
+      <span className={classes.arrowUpIcon}>
+        <ArrowUpIcon />
+        30
+      </span>
+      <span className={classes.arrowDownIcon}>
+        <ArrowUpIcon />
+        30
+      </span>
+      <span>{content}</span>
+    </li>
   )
 }
 export default CommenTemplate

@@ -123,7 +123,7 @@ export function App(): JSX.Element {
     <ApolloProvider client={client}>
       {/* <Protected> */}
       <CardPage />
-      sdffdofj
+
       {/* </Protected> */}
     </ApolloProvider>
   )

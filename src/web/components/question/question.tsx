@@ -149,7 +149,7 @@ const QuestionParent = ({
 
   return (
     <span ref={myRef} style={{ position: 'relative' }}>
-      {console.log(stream)}
+      {/* {console.log(stream)} */}
       <Popconfirm
         placement="bottom"
         getPopupContainer={trigger => {
@@ -189,7 +189,7 @@ const QuestionParent = ({
             setShowModal(prev => !prev)
           }}
         >
-          {console.log(stream)}
+          {/* {console.log(stream)} */}
           <span className={quesClasses.bulletWrapper}>
             <div>{mykey}.</div>
           </span>

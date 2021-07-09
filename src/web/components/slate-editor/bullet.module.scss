@@ -1,3 +1,15 @@
 .bulletBody {
+  -webkit-line-clamp: 1;
+  display: block;
+  -webkit-box-orient: vertical;
+  // display: 'inline-block;
+  width: 100px;
+  // whiteSpace: 'nowrap; // react的type會抗議這個，但需要 -> 移到css#class
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: grey;
   white-space: nowrap; // react的type會抗議這個，但需要 -> 移到css#class
+}
+.red {
+  color: red;
 }
