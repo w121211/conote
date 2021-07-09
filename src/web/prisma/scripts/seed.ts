@@ -3,19 +3,9 @@
  * 2. 作為server-side的測試demo
  * Run: npm run seed
  */
-import dotenv from 'dotenv'
 import { hash } from 'bcryptjs'
 import * as PA from '@prisma/client'
-import { getOrCreateCardBySymbol, createCardBody } from '../../lib/models/card'
-import { Editor } from '../../../lib/editor/src'
-
-const config = dotenv.config()
-if (config.error) {
-  throw config.error
-}
-if (!config.parsed?.BOT_EMAIL || !config.parsed?.BOT_PASSWORD) {
-  throw new Error('Error')
-}
+import { createCard } from '../../lib/models/card'
 
 const BOT = { email: config.parsed.BOT_EMAIL, password: config.parsed.BOT_PASSWORD }
 

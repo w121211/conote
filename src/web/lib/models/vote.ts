@@ -1,15 +1,18 @@
 // TODO: 1. user一段時間內不能重複vote 2. oauther同一個來源、1個poll只能有1個vote
-//
 import { Vote } from '@prisma/client'
 import prisma from '../prisma'
 
-function _updateNVotes(nVotes: number[], choiceIdx: number): number[] {
+function _updateNVotes(nVotes: number[], choiceIdx: number, nChoices: number): number[] {
+  // 新創的poll是一個空的array，需要修改
+  if (nVotes.length === 0) {
+    nVotes = [...Array(nChoices).keys()].map(e => 0)
+  }
+
   nVotes[choiceIdx] += 1
   return [...nVotes]
 }
 
 // function getChoice() {
-
 // }
 
 export async function createOauthorVote({
@@ -33,12 +36,11 @@ export async function createOauthorVote({
   }
   if (choiceText && poll.choices.indexOf(choiceText) < 0) {
     choiceIdx = poll.choices.indexOf(choiceText)
-    throw new Error('poll中沒有這個vote choice')
+    throw new Error('Poll的choices中沒有這個vote choice')
   }
   if (choiceIdx === undefined || choiceIdx < 0 || choiceIdx >= poll.choices.length) {
-    console.log(choiceIdx)
-    console.log(poll.choices)
-    throw new Error('Choice Index not valid')
+    console.error(choiceIdx, poll.choices)
+    throw new Error('Choice index not valid')
   }
 
   const vote = await prisma.vote.create({
@@ -49,15 +51,17 @@ export async function createOauthorVote({
       poll: { connect: { id: poll.id } },
     },
   })
-
   await prisma.pollCount.update({
-    data: { nVotes: _updateNVotes(poll.count.nVotes, choiceIdx) },
+    data: { nVotes: _updateNVotes(poll.count.nVotes, choiceIdx, poll.choices.length) },
     where: { pollId },
   })
 
   return vote
 }
 
+/**
+ * Naive vote: 不可重複vote、不可更新
+ */
 export async function createVote({
   choiceIdx,
   pollId,
@@ -67,8 +71,6 @@ export async function createVote({
   pollId: number
   userId: string
 }): Promise<Vote> {
-  // Naive vote: 不可重複vote、不可更新
-
   // TODO:
   const prevVote = await prisma.vote.findFirst({ where: { userId, pollId } })
   if (prevVote) throw new Error('User has voted')
@@ -86,7 +88,7 @@ export async function createVote({
   })
 
   await prisma.pollCount.update({
-    data: { nVotes: _updateNVotes(poll.count.nVotes, choiceIdx) },
+    data: { nVotes: _updateNVotes(poll.count.nVotes, choiceIdx, poll.choices.length) },
     where: { pollId },
   })
 

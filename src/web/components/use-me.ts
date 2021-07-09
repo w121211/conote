@@ -3,9 +3,9 @@ import { useRouter } from 'next/router'
 import {
   MeQuery,
   useMeQuery,
-  useMyAnchorLikesQuery,
+  useMyBoardLikesQuery,
+  useMyBulletLikesLazyQuery,
   useMyCommentLikesQuery,
-  useMyReplyLikesQuery,
   useMyVotesQuery,
 } from '../apollo/query.graphql'
 // import useSWR from 'swr'
@@ -21,9 +21,9 @@ export function useMe({
   const router = useRouter()
 
   // 從server取得me相關的資料，用於填充cache <- TODO: a better solution?
-  useMyAnchorLikesQuery()
+  useMyBulletLikesLazyQuery()
+  useMyBoardLikesQuery()
   useMyCommentLikesQuery()
-  useMyReplyLikesQuery()
   useMyVotesQuery()
 
   useEffect(() => {

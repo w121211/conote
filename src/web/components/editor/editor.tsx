@@ -10,7 +10,7 @@ import { Slate, Editable, withReact, ReactEditor, DefaultPlaceholder, RenderPlac
 import { createEditor, Descendant, Text, NodeEntry, Range, Editor, Transforms, Node } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editor as CardEditor, ExtTokenStream, streamToStr } from '../../../packages/editor/src/index'
-import { CustomEditor, CustomText } from '../../types/slate-custom-types'
+import { CustomEditor, CustomText } from '../../lib/slate-bullet/slate-custom-types'
 import {
   useSearchAllLazyQuery,
   useCreateWebCardBodyMutation,

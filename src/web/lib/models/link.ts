@@ -1,29 +1,42 @@
-import * as PA from '@prisma/client'
-import prisma from '../prisma'
+import { Card, Link, Oauthor } from '@prisma/client'
 import { parseUrl, tryFetch, FetchClient, FetchResult } from '../../../packages/fetcher/src/index'
+import prisma from '../prisma'
 
-interface ExtFetchResult extends FetchResult {
+type ExtFetchResult = FetchResult & {
   oauthorName?: string
 }
 
+const bannedCharMatcher = /[^a-zA-Z0-9_\p{Letter}]/gu
+
 function toOauthorName(domain: string, domainAuthorName: string) {
-  return `${domainAuthorName}:${domain}`
+  const author = domainAuthorName.replace(bannedCharMatcher, '_')
+  return `${author}:${domain}`
 }
 
-export async function getOrCreateLink(
-  url: string,
-  fetcher?: FetchClient,
-): Promise<[PA.Link, { fetchResult: ExtFetchResult }]> {
-  /**
-   * 給予一個URL，從資料庫中返回該URL對應的link
-   * 若link未存在，建立link，同時建立oauthor
-   */
+export function linkToSymbol(link: Link): string {
+  return `[[${link.url}]]`
+}
+
+/**
+ * 給一個url/symbol，從資料庫中返回該url/symbol對應的link
+ * 若link未存在，建立link，同時建立oauthor
+ */
+export async function getOrCreateLink({
+  fetcher,
+  url,
+}: {
+  fetcher?: FetchClient
+  url: string
+}): Promise<[Link & { card: Card | null }, { fetchResult?: ExtFetchResult }]> {
   // TODO: 這個url尚未resolved, 需要考慮redirect、不同url指向同一個頁面的情況
   const parsed = parseUrl(url)
-  const found = await prisma.link.findUnique({ where: { url: parsed.resolvedUrl } })
+  const found = await prisma.link.findUnique({
+    include: { card: true },
+    where: { url: parsed.resolvedUrl },
+  })
 
   if (found !== null) {
-    return [found, { fetchResult: found.meta as unknown as ExtFetchResult }]
+    return [found, { fetchResult: found.fetchResult as unknown as ExtFetchResult }]
   }
 
   // Link未存在，嘗試fetch取得來源資訊，建立link, cocard, oauthor後返回
@@ -31,7 +44,7 @@ export async function getOrCreateLink(
   let res: ExtFetchResult = fetcher ? await fetcher.fetch(url) : await tryFetch(url)
 
   // TODO: Oauthor的辨識太低，而且沒有統一
-  let oauthor: PA.Oauthor | undefined
+  let oauthor: Oauthor | undefined
   if (res.authorName) {
     const oauthorName = toOauthorName(res.domain, res.authorName)
     oauthor = await prisma.oauthor.upsert({
@@ -46,29 +59,12 @@ export async function getOrCreateLink(
     data: {
       url: res.resolvedUrl,
       domain: res.domain,
-      srcId: res.srcId,
-      srcType: res.srcType as any,
-      meta: res as any,
+      sourceType: res.srcType,
+      sourceId: res.srcId,
+      fetchResult: res as any,
       oauthor: oauthor ? { connect: { id: oauthor.id } } : undefined,
     },
+    include: { card: true },
   })
-
   return [link, { fetchResult: res }]
 }
-
-// export async function createLink(
-//   parsed: ParsedUrl,
-//   srcType?: PA.SrcType,
-//   srcId?: string,
-//   contentAuthorId?: string,
-// ): Promise<PA.Link | null> {
-//   return await prisma.link.create({
-//     data: {
-//       url: parsed.url,
-//       domain: parsed.domain,
-//       srcType,
-//       srcId,
-//       // contentAuthorId,
-//     },
-//   })
-// }

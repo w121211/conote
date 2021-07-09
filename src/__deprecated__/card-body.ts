@@ -2,12 +2,11 @@
 // import * as _ from 'lodash';
 // import dayjs from 'dayjs';
 import * as PA from '@prisma/client'
-import { Editor, DBLinker, Markerline } from '../../../packages/editor/src'
-import prisma from '../prisma'
-import { getOrCreateCardBySymbol } from './card'
-import { createComment, CommentMeta } from './comment'
-import { getBotId } from './user'
-import { createOauthorVote } from './vote'
+import { Editor, DBLinker, Markerline, Marker } from '../packages/editor/src'
+import prisma from '../web/lib/prisma'
+import { createComment, CommentMeta } from '../web/lib/models/comment'
+import { getBotId } from '../web/lib/models/user'
+import { createOauthorVote } from '../web/lib/models/vote'
 
 export type CardBodyMeta = Markerline[]
 
@@ -159,11 +158,13 @@ export async function createCardBody(
   }
 }
 
-export async function createWebCardBody(cocardId: number, text: string, userId: string): Promise<PA.CardBody> {
-  /** 創web-card */
-  const card = await prisma.cocard.findUnique({ where: { id: cocardId }, include: { body: true, link: true } })
+/**
+ * @deprecated
+ */
+export async function createWebCardBody(cardId: number, text: string, userId: string): Promise<PA.CardBody> {
+  const card = await prisma.cocard.findUnique({ where: { id: cardId }, include: { body: true, link: true } })
 
-  if (card === null) throw new Error(`找不到cocard: where id=${cocardId}`)
+  if (card === null) throw new Error(`找不到card: where id=${cardId}`)
   // if (card.link.oauthorName === null) throw new Error(`web-card需要有oauthor`)
 
   const editor = new Editor(

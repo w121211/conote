@@ -7,9 +7,9 @@ export type EmptyText = {
 }
 
 export type CustomText = {
-  bold?: true
-  italic?: true
-  code?: true
+  // bold?: true
+  // italic?: true
+  // code?: true
   text: string
   type?: string // stream type
 }
@@ -72,6 +72,7 @@ export type ListItemElement = {
 
 export type BulletElement = {
   type: 'bullet'
+  id?: number
   // onEdit?: true
   children: Descendant[]
 }
@@ -92,26 +93,24 @@ export type BulletBodyElement = {
 // }
 
 type CustomElement =
-  | BlockQuoteElement
-  | BulletedListElement
-  | CheckListItemElement
-  | EditableVoidElement
-  | HeadingElement
-  | HeadingTwoElement
-  | ImageElement
-  | LinkElement
-  | MentionElement
-  | ParagraphElement
-  | TableElement
-  | TableRowElement
-  | TableCellElement
-  | TitleElement
-  | VideoElement
-  | ListElement
-  | ListItemElement
-  | BulletElement
-  | BulletHeadElement
-  | BulletBodyElement
+  // | BlockQuoteElement
+  // | BulletedListElement
+  // | CheckListItemElement
+  // | EditableVoidElement
+  // | HeadingElement
+  // | HeadingTwoElement
+  // | ImageElement
+  // | LinkElement
+  // | MentionElement
+  // | ParagraphElement
+  // | TableElement
+  // | TableRowElement
+  // | TableCellElement
+  // | TitleElement
+  // | VideoElement
+  // | ListElement
+  // | ListItemElement
+  BulletElement | BulletHeadElement | BulletBodyElement
 
 export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 

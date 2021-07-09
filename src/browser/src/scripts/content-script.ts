@@ -14,8 +14,8 @@ function injectExtensionMarker(): void {
   //   extensionMarker.dataset.platform = getPlatformName()
   // extensionMarker.style.display = 'none'
   el.style.position = 'fixed'
-  el.style.top = '1em'
-  el.style.right = '1em'
+  el.style.top = '0em'
+  el.style.right = '0em'
   el.style.height = '100%'
   el.style.width = '200px'
   el.style.backgroundColor = 'red'

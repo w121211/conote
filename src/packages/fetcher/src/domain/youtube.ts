@@ -1,6 +1,5 @@
 import got from 'got'
 import { google } from 'googleapis'
-import { FetchResult, SrcType } from '../index'
 import { DomainFetchFunction, DomainNotFitError } from './index'
 
 const patterns = {
@@ -65,7 +64,7 @@ export const youtube: DomainFetchFunction = async function (url) {
     return {
       domain: 'youtube.com',
       resolvedUrl: url, // TODO: Bug 可能會有redirect, short-url, mobile-url
-      srcType: SrcType.VIDEO,
+      srcType: 'VIDEO',
       srcId: vid,
       srcTitle: e.snippet?.title ?? undefined,
       srcPublishDate: e.snippet?.publishedAt ? new Date(e.snippet?.publishedAt).toISOString() : undefined,

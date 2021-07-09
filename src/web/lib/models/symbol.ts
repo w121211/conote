@@ -1,52 +1,56 @@
-import * as PA from '@prisma/client'
-import prisma from '../prisma'
-// import { createTickerCocard } from './card';
+import { CardType } from '@prisma/client'
 
-export const SYMBOL_DOMAIN = '_'
+export type CardSymbol = {
+  symbolName: string
+  cardType: CardType
+  oauthorName?: string
+}
 
-const reTicker = /^\$[A-Z0-9]+$/
-const reTopic = /^\[\[[^\]]+\]\]$/
+const regexTicker = /^\$[A-Z0-9]+$/
+const regexTopic = /^\[\[[^\]]+\]\]$/
 
-function parse(symbolName: string): { name: string; cat: PA.SymbolCat; oauthoName?: string } {
-  let cat: PA.SymbolCat
-  let oauthoName: string | undefined
+/**
+ * Parse symbol, 分為：
+ * 1. ticker: $AB, $A01
+ * 2. topic: [[what ever]], [[包括unicode]]
+ * 3. 包含oauthor: $AB@someone [[Ha ha]]@作者
+ *
+ * TODO:
+ * 1. 無法區別[[topic]] vs [[https://...]]，[[https://...]]應要parse為WEBPAGE
+ * 2. 無法辨識oauthor
+ */
+export function parseSymbol(symbol: string): CardSymbol {
+  let cardType: CardType
+  let oauthorName: string | undefined
 
-  if (symbolName.match(reTicker) !== null) {
-    cat = PA.SymbolCat.TICKER
-  } else if (symbolName.match(reTopic) !== null) {
-    cat = PA.SymbolCat.TOPIC
+  if (symbol.match(regexTicker) !== null) {
+    cardType = CardType.TICKER
+  } else if (symbol.match(regexTopic) !== null) {
+    cardType = CardType.TOPIC
   } else {
-    throw new Error(`尚未支援的symbol format${symbolName}`)
+    throw new Error(`無法辨識的symbol format: ${symbol}`)
   }
-  return { name: symbolName, cat, oauthoName }
-}
-
-export function urlToSymbol(url: string): string | null {
-  // TODO: 需檢驗這是否符合symbol格式
-  // 若是symbo-url則返回symbol，否則返回null
-  if (url.startsWith('//')) {
-    return url.substr(2)
-  } else {
-    return null
+  return {
+    symbolName: symbol,
+    cardType,
+    oauthorName,
   }
 }
 
-export function symbolToUrl(symbolName: string): string {
-  const parsed = parse(symbolName)
-  return `//${parsed.name}`
-}
+// export function urlToSymbol(url: string): string | null {
+//   // TODO: 需檢驗這是否符合symbol格式
+//   // 若是symbo-url則返回symbol，否則返回null
+//   if (url.startsWith('//')) {
+//     return url.substr(2)
+//   } else {
+//     return null
+//   }
+// }
 
-export async function getOrCreateSymbol(symbolName: string): Promise<[PA.Symbol, { created: boolean }]> {
-  /** 創新symbol時，"不會"同步創link, cocard（這部分放在`getOrCreateCardBySymbol()`)*/
-
-  // 找symbol
-  const res = await prisma.symbol.findUnique({ where: { name: symbolName } })
-  if (res) {
-    return [res, { created: false }]
-  }
-
-  // 找不到symbol，創一個
-  const parsed = parse(symbolName)
-  const symbol = await prisma.symbol.create({ data: { name: parsed.name, cat: parsed.cat } })
-  return [symbol, { created: true }]
-}
+// export function symbolToUrl(symbol: string): CardSymbol & { url: string } {
+//   const parsed = parseSymbol(symbol)
+//   return {
+//     ...parsed,
+//     url: `//${parsed.name}`,
+//   }
+// }

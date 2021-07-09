@@ -7,13 +7,15 @@ import { useCocardQuery, CocardQuery } from '../../../web/apollo/query.graphql'
 import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../../packages/editor/src/index'
 
 function getTabUrl(): string | null {
-  // popup的情況
-  const params = new URLSearchParams(new URL(window.location.href).search)
-  const url = params.get('u')
-
-  // inject的情況
-  // console.log(window.location.href)
-  // const url = window.location.href
+  let url: string | null
+  if (window.location.protocol.includes('extension')) {
+    // popup的情況
+    const params = new URLSearchParams(new URL(window.location.href).search)
+    url = params.get('u')
+  } else {
+    // inject的情況
+    url = window.location.href
+  }
 
   return url
 }

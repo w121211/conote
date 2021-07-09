@@ -1,21 +1,48 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { AuthenticationError, UserInputError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
-import { getSession, Session } from '@auth0/nextjs-auth0'
+import { getSession } from '@auth0/nextjs-auth0'
+import { Vote } from '@prisma/client'
 import { ResolverContext } from './apollo-client'
 import prisma from '../lib/prisma'
-import { QueryResolvers, MutationResolvers, Cocard, CardTemplate, LikeChoice } from './type-defs.graphqls'
+import fetcher from '../lib/fetcher'
+import { QueryResolvers, MutationResolvers, BulletInput as GqlBulletInput } from './type-defs.graphqls'
 import { searchAllSymbols } from '../lib/search/fuzzy'
-import { getOrCreateLink } from '../lib/models/link'
-import { getOrCreateCardByLink, getOrCreateCardBySymbol } from '../lib/models/card'
-import { createWebCardBody } from '../lib/models/card-body'
+// import { getOrCreateLink } from '../lib/models/link'
+import { attachLatestHeadBody, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
 import { getOrCreateUser } from '../lib/models/user'
-import { createVote } from '../lib/models/vote'
+import { createOauthorVote, createVote } from '../lib/models/vote'
 import { deltaLike } from '../lib/helper'
+import { BulletInput } from '../lib/bullet-tree/types'
 
 function _toStringId<T extends { id: number }>(obj: T): T & { id: string } {
   return { ...obj, id: obj.id.toString() }
 }
+
+function _deleteNull<T>(obj: T) {
+  let k: keyof T
+  for (k in obj) {
+    if (obj[k] === null) {
+      delete obj[k]
+    }
+  }
+}
+
+function isBulletInput(obj: GqlBulletInput): obj is BulletInput {
+  _deleteNull(obj)
+  return true
+}
+
+// function _nullToUndefined<T>(obj: T): { [P in keyof T]: Exclude<T[P], null> } {
+//   for (const k in obj) {
+//     if (obj[k] === null) {
+//       delete obj[k]
+//     }
+//   }
+//   if (isNonNull(obj)) {
+//     return obj
+//   }
+// }
 
 // function isLocalAuthenticated(req: NextApiRequest, res: NextApiResponse): Session {
 //   try {
@@ -32,7 +59,7 @@ function isAuthenticated(req: NextApiRequest, res: NextApiResponse): { userId: s
   if (session?.user && session.user.appUserId) {
     return { userId: session.user.appUserId, email: session.user.email }
   }
-  throw new AuthenticationError('')
+  throw new AuthenticationError('Not authenticated')
 }
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
@@ -58,172 +85,114 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     throw new Error('Not implemented')
   },
 
-  async latestCards(_parent, { afterId }, _context, _info) {
+  async latestCardEntries(_parent, { afterId }, _context, _info) {
     // const maxDate = dayjs().startOf('d').subtract(7, 'd')
-    const cards = await prisma.cocard.findMany({
-      take: 30,
-      skip: afterId ? 1 : 0,
-      where: {
-        // createdAt: { gte: maxDate.toDate() },
-        // symbols: symbolId ? { some: { id: parseInt(symbolId) } } : undefined,
-      },
+    const cards = await prisma.card.findMany({
+      // where: { createdAt: { gte: maxDate.toDate() } },
       orderBy: { updatedAt: 'desc' },
       cursor: afterId ? { id: parseInt(afterId) } : undefined,
-      // TODO: 這裡含body會過於heavy
-      include: { link: true, body: true },
+      take: 30,
+      skip: afterId ? 1 : 0,
     })
-    return cards.map<Cocard>(e => ({
-      ...e,
-      id: e.id.toString(),
-      template: e.template as CardTemplate,
-      link: { ...e.link, id: e.link.id.toString() },
-      body: { ...e.body, id: e.body.id.toString() },
-    }))
-  },
-
-  async link(_parent, { url }, _context, _info) {
-    const link = await prisma.link.findUnique({
-      where: { url },
+    return cards.map(e => {
+      return { ..._toStringId(e) }
     })
-    if (link) return _toStringId(link)
-    return null
   },
 
-  async cocard(_parent, { url, symbol }, _context, _info) {
-    if (symbol) {
-      const card = await getOrCreateCardBySymbol(symbol)
-      return {
-        ..._toStringId(card),
-        template: card.template as CardTemplate,
-        link: _toStringId(card.link),
-        body: _toStringId(card.body),
-      }
-    }
-    if (url) {
-      // 找不到即創新cocard
-      const [link] = await getOrCreateLink(url)
-      const card = await getOrCreateCardByLink(link)
-      return {
-        ..._toStringId(card),
-        template: card.template as CardTemplate,
-        link: _toStringId(card.link),
-        body: _toStringId(card.body),
-      }
-    }
-    throw new Error('Not found')
-  },
-
-  selfcard(_parent, _args, _context, _info) {
-    throw new Error('Not implemented')
-    // return prisma.selfcard.findUnique({
-    //   where: { id: parseInt(id) },
-    //   include: { symbol: true, body: true },
-    // })
-  },
-
-  ocard(_parent, _args, _context, _info) {
-    throw new Error('Not implemented')
-    /** 若沒有 1. card 2. symbol -> 都建新的 */
-    // const symbol = await prisma.symbol.findOne({ where: { name: symbolName } })
-    // if (symbol === null)
-    //   throw new Error("Symbol not found")
-    // throw new ApolloError('Symbol not found', 'NO_SYMBOL');
-    // const oauthor = await prisma.oauthor.findUnique({ where: { name: oauthorName } })
-    // if (oauthor === null) throw new Error('Oauthor not found')
-    // const [symbol] = await getOrCreateSymbol(symbolName)
-
-    // return null
-    // return await prisma.ocard.upsert({
-    //   where: id ? { id: parseInt(id) } : { oauthorName_symbolName: { oauthorName, symbolName, } },
-    //   create: {
-    //     template: PA.CardTemplate.TICKER,
-    //     oauthor: { connect: { id: oauthor.id } },
-    //     symbol: { connect: { id: symbol.id } },
-    //   },
-    //   update: {},
-    //   include: { symbol: true, body: true },
-    // })
-  },
-
-  mycard(_parent, _args, _context, _info) {
-    // if (!req.userId) throw new AuthenticationError('must authenticate')
-    // // return null
-    // if (symbolName === '') throw new UserInputError('must gve ia symbol')
-    // return prisma.selfcard.findUnique({
-    //   where: {
-    //     userId_symbolName: {
-    //       userId: req.userId,
-    //       symbolName,
-    //     },
-    //   },
-    //   include: { symbol: true, body: true },
-    // })
-    throw new Error('Not implemented')
-  },
-
-  // comments: (parent, { pageId, afterId }, { prisma }) => {
-  //   return prisma.comment.findMany({
-  //     where: { pageId: parseInt(pageId), isProp: false },
-  //     orderBy: { createdAt: "desc" },
-  //     include: { count: true, replies: true },
-  //     cursor: afterId ? { id: parseInt(afterId) } : undefined,
-  //     take: 20
+  // async link(_parent, { url }, _context, _info) {
+  //   const link = await prisma.link.findUnique({
+  //     where: { url },
   //   })
+  //   if (link) return _toStringId(link)
+  //   return null
   // },
 
-  async anchor(_parent, { id }, _context, _info) {
-    const anchor = await prisma.anchor.findUnique({
-      where: { id: parseInt(id) },
-      include: { count: true },
-    })
-    if (anchor && anchor.count) {
-      return { ..._toStringId(anchor), count: _toStringId(anchor.count) }
+  async card(_parent, { symbol }, _context, _info) {
+    const card = await prisma.card.findUnique({ where: { symbol } })
+    if (card !== null) {
+      const _card = await attachLatestHeadBody(card)
+      return {
+        ..._toStringId(_card),
+        head: _toStringId(_card.head),
+        body: _toStringId(_card.body),
+      }
     }
     return null
   },
 
-  async comment(_parent, { id }, _context, _info) {
-    const comment = await prisma.comment.findUnique({
+  async webpageCard(_parent, { url }, _context, _info) {
+    const card = await getOrCreateCardByUrl({ fetcher, url })
+    return {
+      ..._toStringId(card),
+      link: _toStringId(card.link),
+      head: _toStringId(card.head),
+      body: _toStringId(card.body),
+    }
+  },
+
+  async bullet(_parent, { id }, _context, _info) {
+    const bullet = await prisma.bullet.findUnique({
+      include: { count: true },
       where: { id: parseInt(id) },
+    })
+    if (bullet && bullet.count) {
+      return {
+        ..._toStringId(bullet),
+        count: _toStringId(bullet.count),
+      }
+    }
+    return null
+  },
+
+  async board(_parent, { id }, _context, _info) {
+    const board = await prisma.board.findUnique({
       include: {
         count: true,
         poll: { include: { count: true } },
       },
+      where: { id: parseInt(id) },
     })
-    if (comment && comment.count && comment.poll && comment.poll.count) {
+    if (board && board.count && board.poll && board.poll.count) {
       return {
-        ..._toStringId(comment),
-        count: _toStringId(comment.count),
-        // count: _toStringId(comment.count),
-        poll: comment.poll ? { ..._toStringId(comment.poll), count: _toStringId(comment.poll.count) } : null,
+        ..._toStringId(board),
+        count: _toStringId(board.count),
+        poll: board.poll && {
+          ..._toStringId(board.poll),
+          count: _toStringId(board.poll.count),
+        },
       }
-    } else if (comment && comment.count && comment.poll === null) {
+    } else if (board && board.count && board.poll === null) {
       return {
-        ..._toStringId(comment),
-        count: _toStringId(comment.count),
-        poll: null,
+        ..._toStringId(board),
+        count: _toStringId(board.count),
+        poll: undefined,
       }
     }
     return null
   },
 
-  async replies(_parent, { commentId, afterId }, _context, _info) {
-    const replies = await prisma.reply.findMany({
-      where: { commentId: parseInt(commentId) },
+  async comments(_parent, { boardId, afterId }, _context, _info) {
+    const comments = await prisma.comment.findMany({
+      include: { count: true, vote: true },
+      where: { boardId: parseInt(boardId) },
       orderBy: { createdAt: 'desc' },
-      include: { count: true },
       cursor: afterId ? { id: parseInt(afterId) } : undefined,
       take: 100,
     })
-    return replies.map(e => {
+    return comments.map(e => {
       if (e.count) {
-        return { ..._toStringId(e), count: _toStringId(e.count) }
+        return {
+          ..._toStringId(e),
+          oauthorName: e.oauthorName ?? undefined,
+          count: _toStringId(e.count),
+          vote: e.vote && _toStringId(e.vote),
+        }
       }
       throw new Error()
     })
   },
 
-  // roboPolls: async (parent, { symbolName }, { prisma }) => {
+  // botPolls: async (parent, { symbolName }, { prisma }) => {
   //   const maxDate = dayjs().startOf("d").subtract(7, "d")
   //   // TODO: 應該要經過「挑選」，只挑重要的出來
   //   const polls = await prisma.poll.findMany({
@@ -273,7 +242,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 
   // repliedPosts: (parent, { parentId, afterId }, { prisma }) => {
   //   // const maxDate = dayjs().startOf("d").subtract(7, "d")
-
   //   // await prisma.postCount.findMany({
   //   //   where: {
   //   //     post: {
@@ -368,29 +336,29 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return user
   },
 
-  async myAnchorLikes(_parent, { after }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const likes = await prisma.anchorLike.findMany({ where: { userId }, take: 50 })
-    return likes.map(e => ({ ..._toStringId(e), choice: e.choice as LikeChoice }))
-  },
-
-  async myCommentLikes(_parent, { after }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const likes = await prisma.commentLike.findMany({ where: { userId }, take: 50 })
-    return likes.map(e => ({ ..._toStringId(e), choice: e.choice as LikeChoice }))
-  },
-
-  async myReplyLikes(_parent, { after }, { req, res }, _info) {
-    // return prisma.replyLike.findMany({ where: { userId: req.userId }, take: 50 })
-    const { userId } = isAuthenticated(req, res)
-    const likes = await prisma.replyLike.findMany({ where: { userId }, take: 50 })
-    return likes.map(e => ({ ..._toStringId(e), choice: e.choice as LikeChoice }))
-  },
-
   async myVotes(_parent, { after }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
     const votes = await prisma.vote.findMany({ where: { userId }, take: 50 })
     return votes.map(e => ({ ..._toStringId(e) }))
+  },
+
+  async myCommentLikes(_parent, { after }, { req, res }, _info) {
+    // return prisma.replyLike.findMany({ where: { userId: req.userId }, take: 50 })
+    const { userId } = isAuthenticated(req, res)
+    const likes = await prisma.commentLike.findMany({ where: { userId }, take: 50 })
+    return likes.map(e => ({ ..._toStringId(e) }))
+  },
+
+  async myBoardLikes(_parent, { after }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const likes = await prisma.boardLike.findMany({ where: { userId }, take: 50 })
+    return likes.map(e => ({ ..._toStringId(e) }))
+  },
+
+  async myBulletLikes(_parent, { after }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const likes = await prisma.bulletLike.findMany({ where: { userId }, take: 50 })
+    return likes.map(e => ({ ..._toStringId(e) }))
   },
 
   // myFollows: (parent, { after }, { prisma, req }) => {
@@ -399,179 +367,230 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 }
 
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
-  async createWebCardBody(_parent, { cardId, data }, { req, res }, _info) {
+  async createSymbolCard(_parent, { data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const body = await createWebCardBody(parseInt(cardId), data.text, userId)
-    return _toStringId(body)
+    const card = await getOrCreateCardBySymbol(data.symbol)
+    return {
+      ..._toStringId(card),
+      head: { ..._toStringId(card.head) },
+      body: { ..._toStringId(card.body) },
+    }
   },
 
-  // createMycard: async function (parent, { symbolName, data }, { prisma, req }) {
-  //   const cocard = await prisma.cocard.findUnique({ where: { linkUrl: symbolToUrl(symbolName) } })
-  //   if (cocard === null) throw new Error('Symbol not found, fail to create ticker-mycard')
-  //   // TODO:  需要確認comment的meta，又或者在這裡才加入meta
-  //   const card = await prisma.selfcard.create({
-  //     data: {
-  //       template: PA.CardTemplate.TICKER,
-  //       user: { connect: { id: req.userId } },
-  //       symbol: { connect: { name: symbolName } },
-  //       body: { create: { text: '', user: { connect: { id: req.userId } } } },
-  //     },
-  //   })
-  //   // 無法直接include（prisma的bug）
-  //   return await prisma.selfcard.findUnique({
-  //     where: { id: card.id },
-  //     include: { symbol: true, body: true },
-  //   })
-  // },
+  async createCardHead(_parent, { cardId, data }, { req, res }, _info) {
+    throw new Error('Not implemented')
+  },
 
-  // createOcard: async function (parent, { symbolName, oauthorName, data }, { prisma, req }) {
-  //   const cocard = await prisma.cocard.findOne({ where: { linkUrl: symbolToUrl(symbolName) } })
-  //   if (cocard === null)
-  //     throw new Error('Symbol not found, fail to create ticker-ocard')
-  //   const card = await prisma.ocard.create({
-  //     data: {
-  //       template: PA.CardTemplate.TICKER,
-  //       oauthor: { connect: { name: oauthorName } },
-  //       symbol: { connect: { name: symbolName } },
-  //       comments: {
-  //         create: data.map((e: CommentInput) => ({
-  //           // TODO: meta資料要檢查完才能存進資料庫
-  //           meta: { mark: e.mark, src: e.src },
-  //           text: e.text,
-  //           user: { connect: { id: req.userId } },
-  //           // 同時間port至cocard
-  //           cocard: { connect: { id: cocard.id } },
-  //           count: { create: {} },
-  //         }))
-  //       }
-  //     },
-  //   })
-  //   // 無法直接include（prisma的bug）
-  //   return await prisma.ocard.findOne({
-  //     where: { id: card.id },
-  //     include: {
-  //       symbol: true,
-  //       comments: { include: { count: true } },
-  //     },
-  //   })
-  // },
+  async createCardBody(_parent, { cardId, data }, { req, res }, _info) {
+    // const { userId } = isAuthenticated(req, res)
+    // if (isBulletInput(data.self.root)) {
+    //   const body = await createCardBody({
+    //     cardId: parseInt(cardId),
+    //     // nestedCards: data.nestedCards ?? undefined,
+    //     rootInput: data.self.root,
+    //     userId,
+    //   })
+    //   return _toStringId(body)
+    // }
+    throw new Error()
+  },
 
-  // createComments: function (parent, { cardId, cardType, symbolName, data }, { prisma, req }) {
-  //   /**
-  //    * TODO:
-  //    * - update/delete前comments的情形
-  //    * - 需要確認comment的meta，又或者在這裡才加入meta
-  //    * - Create poll
-  //    */
-  //   // 讓`ocard`, `selfcard`的comments同步連結至`cocard`
-  //   let conn: Record<string, { connect: { id?: number, linkUrl?: string } }> = {}
-  //   if (cardType === 'Cocard') {
-  //     conn['cocard'] = { connect: { id: parseInt(cardId) } }
-  //   } else if (cardType === 'Ocard' && symbolName) {
-  //     conn['ocard'] = { connect: { id: parseInt(cardId) } }
-  //     conn['cocard'] = { connect: { linkUrl: symbolToUrl(symbolName) } }
-  //   } else if (cardType === 'Selfcard') {
-  //     conn['selfcard'] = { connect: { id: parseInt(cardId) } }
-  //     conn['cocard'] = { connect: { linkUrl: symbolToUrl(symbolName) } }
-  //   } else {
-  //     throw new Error('Unrecognized `cardType`')
-  //   }
-  //   return prisma.$transaction(data.map((e: CommentInput) => prisma.comment.create({
-  //     data: {
-  //       // TODO: meta需要包含source, ...
-  //       meta: { mark: e.mark },
-  //       text: e.text,
-  //       user: { connect: { id: req.userId } },
-  //       // symbols: { connect: (data.symbolIds as string[]).map(x => ({ name: x })) },
-  //       count: { create: {} },
-  //       ...conn,
-  //     },
-  //     include: {
-  //       symbols: true,
-  //       count: true,
-  //       // replies: true,
-  //       // poll: true,
-  //     },
-  //   })))
-  // },
-
-  async createReply(_parent, { commentId, data }, { req, res }, _info) {
+  async createBoard(_parent, { cardId, bulletId, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const comment = await prisma.comment.findUnique({
-      where: { id: parseInt(commentId) },
+    const board = await prisma.board.create({
       include: { count: true },
+      data: {
+        hashtag: data.hashtag,
+        // TODO
+        meta: data.meta,
+        // TODO
+        content: data.content,
+        bullet: { connect: { id: parseInt(bulletId) } },
+        card: { connect: { id: parseInt(cardId) } },
+        user: { connect: { id: userId } },
+        count: { create: {} },
+      },
     })
-    if (comment === null) {
-      throw new Error(`Cannot find comment: id=${commentId}`)
+    if (board.count) {
+      return {
+        ..._toStringId(board),
+        count: _toStringId(board.count),
+      }
+    } else {
+      throw new Error()
     }
-    // if (post.status !== PostStatus.ACTIVE)
-    //   throw new Error("post is not active")
+  },
+
+  async createVote(_parent, { pollId, data }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const vote = await createVote({
+      choiceIdx: data.choiceIdx,
+      pollId: parseInt(pollId),
+      userId,
+    })
+    return _toStringId(vote)
+  },
+
+  async createComment(_parent, { boardId, pollId, data }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const board = await prisma.board.findUnique({
+      include: { count: true },
+      where: { id: parseInt(boardId) },
+    })
+    if (board === null) throw new Error(`Given boardId not found`)
+    // if (post.status !== PostStatus.ACTIVE) throw new Error("post is not active")
+
+    let vote: Vote | undefined
+    if (pollId && data.vote?.choiceIdx) {
+      vote = await createVote({
+        choiceIdx: data.vote.choiceIdx,
+        pollId: parseInt(pollId),
+        userId,
+      })
+    }
+    const comment = await prisma.comment.create({
+      include: { count: true, vote: true },
+      data: {
+        content: data.content,
+        user: { connect: { id: userId } },
+        // oauthor: { connect: { name: e.oauthor } },
+        count: { create: {} },
+        board: { connect: { id: parseInt(boardId) } },
+        vote: vote && { connect: { id: vote.id } },
+      },
+    })
     // await prisma.commentCount.update({
     //   data: { nReplies: comment.count.nComments + 1 },
     //   where: { commentId: comment.id }
     // })
-    const reply = await prisma.reply.create({
-      data: {
-        text: data.text,
-        user: { connect: { id: userId } },
-        comment: { connect: { id: parseInt(commentId) } },
-        count: { create: {} },
-      },
-      include: { count: true },
-    })
-    if (reply.count === null) {
-      throw new Error('Prisma error')
+
+    if (comment.count) {
+      return {
+        ..._toStringId(comment),
+        count: _toStringId(comment.count),
+        vote: comment.vote && _toStringId(comment.vote),
+      }
+    } else {
+      throw new Error()
     }
-    return { ..._toStringId(reply), count: _toStringId(reply.count) }
   },
 
-  async createAnchorLike(_parent, { anchorId, data }, { req, res }, _info) {
+  async createOauthorVote(_parent, { pollId, oauthorName, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const count = await prisma.anchorCount.findUnique({ where: { anchorId: parseInt(anchorId) } })
+    const vote = await createOauthorVote({
+      choiceIdx: data.choiceIdx,
+      pollId: parseInt(pollId),
+      oauthorName,
+      userId,
+    })
+    return _toStringId(vote)
+  },
+
+  async createOauthorComment(_parent, { boardId, pollId, oauthorName, data }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const board = await prisma.board.findUnique({
+      include: { count: true },
+      where: { id: parseInt(boardId) },
+    })
+    if (board === null) throw new Error(`Given boardId not found`)
+    // if (post.status !== PostStatus.ACTIVE) throw new Error("post is not active")
+
+    let vote: Vote | undefined
+    if (pollId && data.vote?.choiceIdx !== undefined) {
+      vote = await createOauthorVote({
+        choiceIdx: data.vote.choiceIdx,
+        pollId: parseInt(pollId),
+        oauthorName,
+        userId,
+      })
+    }
+    console.log(pollId)
+    console.log(data)
+    console.log(vote)
+    const comment = await prisma.comment.create({
+      include: { count: true },
+      data: {
+        content: data.content,
+        user: { connect: { id: userId } },
+        oauthor: { connect: { name: oauthorName } },
+        count: { create: {} },
+        board: { connect: { id: parseInt(boardId) } },
+        vote: vote && { connect: { id: vote.id } },
+      },
+    })
+    // await prisma.commentCount.update({
+    //   data: { nReplies: comment.count.nComments + 1 },
+    //   where: { commentId: comment.id }
+    // })
+
+    if (comment.count) {
+      return {
+        ..._toStringId(comment),
+        count: _toStringId(comment.count),
+      }
+    } else {
+      throw new Error()
+    }
+  },
+
+  async createBulletLike(_parent, { bulletId, data }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const count = await prisma.bulletCount.findUnique({
+      where: { bulletId: parseInt(bulletId) },
+    })
     if (count === null) {
       throw new Error('Prisma error')
     }
-    const like = await prisma.anchorLike.create({
+    const like = await prisma.bulletLike.create({
       data: {
         choice: data.choice,
         user: { connect: { id: userId } },
-        anchor: { connect: { id: parseInt(anchorId) } },
+        bullet: { connect: { id: parseInt(bulletId) } },
       },
     })
     const { deltaUp, deltaDown } = deltaLike(like)
-    const updatedCount = await prisma.anchorCount.update({
+    const updatedCount = await prisma.bulletCount.update({
       data: {
         nUps: count.nUps + deltaUp,
         nDowns: count.nDowns + deltaDown,
       },
-      where: { anchorId: like.anchorId },
+      where: { bulletId: like.bulletId },
     })
-    return { like: { ..._toStringId(like), choice: like.choice as LikeChoice }, count: _toStringId(updatedCount) }
+    return {
+      like: {
+        ..._toStringId(like),
+        choice: like.choice,
+      },
+      count: _toStringId(updatedCount),
+    }
   },
 
-  async updateAnchorLike(_parent, { id, data }, { req, res }, _info) {
+  async updateBulletLike(_parent, { id, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const prevLike = await prisma.anchorLike.findUnique({ where: { id: parseInt(id) } })
+    const prevLike = await prisma.bulletLike.findUnique({ where: { id: parseInt(id) } })
     if (prevLike === null || prevLike?.userId !== userId || data.choice === prevLike.choice) {
       throw new Error('No matched data')
     }
-    const count = await prisma.anchorCount.findUnique({ where: { anchorId: prevLike.anchorId } })
+    const count = await prisma.bulletCount.findUnique({ where: { bulletId: prevLike.bulletId } })
     if (count === null) {
       throw new Error('Prisma error, update fail')
     }
-    const like = await prisma.anchorLike.update({
+    const like = await prisma.bulletLike.update({
       data: { choice: data.choice },
       where: { id: prevLike.id },
     })
     const { deltaUp, deltaDown } = deltaLike(like, prevLike)
-    const updatedCount = await prisma.anchorCount.update({
+    const updatedCount = await prisma.bulletCount.update({
       data: {
         nUps: count.nUps + deltaUp,
         nDowns: count.nDowns + deltaDown,
       },
-      where: { anchorId: like.anchorId },
+      where: { bulletId: like.bulletId },
     })
-    return { like: { ..._toStringId(like), choice: like.choice as LikeChoice }, count: _toStringId(updatedCount) }
+    return {
+      like: { ..._toStringId(like), choice: like.choice },
+      count: _toStringId(updatedCount),
+    }
   },
 
   async createCommentLike(_parent, { commentId, data }, { req, res }, _info) {
@@ -595,7 +614,10 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       },
       where: { commentId: like.commentId },
     })
-    return { like: { ..._toStringId(like), choice: like.choice as LikeChoice }, count: _toStringId(updatedCount) }
+    return {
+      like: { ..._toStringId(like), choice: like.choice },
+      count: _toStringId(updatedCount),
+    }
   },
 
   async updateCommentLike(_parent, { id, data }, { req, res }, _info) {
@@ -620,63 +642,67 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       },
       where: { commentId: like.commentId },
     })
-    return { like: { ..._toStringId(like), choice: like.choice as LikeChoice }, count: _toStringId(updatedCount) }
+    return {
+      like: { ..._toStringId(like), choice: like.choice },
+      count: _toStringId(updatedCount),
+    }
   },
 
-  async createReplyLike(_parent, { replyId, data }, { req, res }, _info) {
+  async createBoardLike(_parent, { boardId, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const count = await prisma.replyCount.findUnique({ where: { replyId: parseInt(replyId) } })
+    const count = await prisma.boardCount.findUnique({
+      where: { boardId: parseInt(boardId) },
+    })
     if (count === null) {
       throw new Error('Prisma error')
     }
-    const like = await prisma.replyLike.create({
+    const like = await prisma.boardLike.create({
       data: {
         choice: data.choice,
         user: { connect: { id: userId } },
-        reply: { connect: { id: parseInt(replyId) } },
+        board: { connect: { id: parseInt(boardId) } },
       },
     })
     const { deltaUp, deltaDown } = deltaLike(like)
-    const updatedCount = await prisma.replyCount.update({
+    const updatedCount = await prisma.boardCount.update({
       data: {
         nUps: count.nUps + deltaUp,
         nDowns: count.nDowns + deltaDown,
       },
-      where: { replyId: like.replyId },
+      where: { boardId: like.boardId },
     })
-    return { like: { ..._toStringId(like), choice: like.choice as LikeChoice }, count: _toStringId(updatedCount) }
+    return {
+      like: { ..._toStringId(like), choice: like.choice },
+      count: _toStringId(updatedCount),
+    }
   },
 
-  async updateReplyLike(_parent, { id, data }, { req, res }, _info) {
+  async updateBoardLike(_parent, { id, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const prevLike = await prisma.replyLike.findUnique({ where: { id: parseInt(id) } })
+    const prevLike = await prisma.boardLike.findUnique({ where: { id: parseInt(id) } })
     if (prevLike === null || prevLike?.userId !== userId || data.choice === prevLike.choice) {
       throw new Error('No matched data')
     }
-    const count = await prisma.replyCount.findUnique({ where: { replyId: prevLike.replyId } })
+    const count = await prisma.boardCount.findUnique({ where: { boardId: prevLike.boardId } })
     if (count === null) {
       throw new Error('Prisma error, update fail')
     }
-    const like = await prisma.replyLike.update({
+    const like = await prisma.boardLike.update({
       data: { choice: data.choice },
       where: { id: prevLike.id },
     })
     const { deltaUp, deltaDown } = deltaLike(like, prevLike)
-    const updatedCount = await prisma.replyCount.update({
+    const updatedCount = await prisma.boardCount.update({
       data: {
         nUps: count.nUps + deltaUp,
         nDowns: count.nDowns + deltaDown,
       },
-      where: { replyId: like.replyId },
+      where: { boardId: like.boardId },
     })
-    return { like: { ..._toStringId(like), choice: like.choice as LikeChoice }, count: _toStringId(updatedCount) }
-  },
-
-  async createVote(_parent, { pollId, choiceIdx }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    console.log({ choiceIdx, pollId: parseInt(pollId), userId })
-    const vote = await createVote({ choiceIdx, pollId: parseInt(pollId), userId })
-    return _toStringId(vote)
+    return {
+      like: { ..._toStringId(like), choice: like.choice },
+      count: _toStringId(updatedCount),
+    }
   },
 
   // async signIn(_parent, { email, password }, { res }, _info) {
@@ -805,7 +831,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   //       poll: { connect: { id: parseInt(pollId) } },
   //     }
   //   })
-  //   const count = await prisma.pollCount.findOne({ where: { pollId: like.pollId } })
+  // const count = await prisma.pollCount.findUnique({ where: { pollId: like.pollId } })
   //   if (count === null) throw new Error('Something went wrong')
 
   //   const delta = deltaLike(like)

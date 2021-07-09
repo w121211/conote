@@ -23,6 +23,6 @@ export const general: DomainFetchFunction = async function (url) {
   return {
     domain,
     resolvedUrl: url,
-    srcType: SrcType.OTHER,
+    srcType: 'OTHER',
   }
 }

@@ -7,6 +7,6 @@ module.exports = {
   testEnvironment: '<rootDir>/prisma/prisma-test-environment.js',
   testTimeout: 10000,
   // setupFilesAfterEnv: ['<rootDir>/setup-tests.ts'],
-  testPathIgnorePatterns: ['<rootDir>[/\\\\](node_modules|.next)[/\\\\]', '<rootDir>/test'],
+  testPathIgnorePatterns: ['<rootDir>[/\\\\](node_modules|.next|dist)[/\\\\]', '<rootDir>/test'],
   silent: false,
 }

@@ -19,8 +19,8 @@
     // Custom settings
     "downlevelIteration": true
   },
-  "exclude": ["node_modules", ".next", "out", "prisma", "test"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "components/discuss/.discuss-poll-form.tsx"],
+  "exclude": ["node_modules", ".next", "out", "test"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
   "ts-node": {
     // options are overrides used only by ts-node
     "compilerOptions": {

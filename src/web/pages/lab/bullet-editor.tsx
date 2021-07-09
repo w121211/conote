@@ -1,24 +1,22 @@
 /* eslint-disable no-console */
 import assert from 'assert'
-import React, { useState, useMemo, useCallback, useEffect } from 'react'
-import { Editor, Transforms, Range, createEditor, Descendant, Element, Node, Path, Text, NodeEntry } from 'slate'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { createEditor, Descendant, Editor, Element, Node, NodeEntry, Path, Range, Text, Transforms } from 'slate'
 import {
-  Slate,
   Editable,
-  withReact,
-  useSlateStatic,
-  useReadOnly,
   ReactEditor,
   RenderElementProps,
+  RenderLeafProps,
+  Slate,
   useFocused,
   useSelected,
-  RenderLeafProps,
+  withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
 import { tokenize, LINE_VALUE_GRAMMAR, Token } from '../../../packages/editor/src/parser'
-import { createPortal } from 'react-dom'
-import { Key } from 'slate-react/dist/utils/key'
 import { useSearchAllLazyQuery } from '../../apollo/query.graphql'
+import { BulletElement } from '../../lib/bullet-tree/slate-custom-types'
 
 const SUGGESTIONS = {
   '@': ['@作者', '@me'],
@@ -26,14 +24,10 @@ const SUGGESTIONS = {
 
 const suggestTriggerMatcher = /(@|\[\[|\$)([\p{Letter}\d]*)$/u
 
-const initiaLBulletHeadValue = {
-  type: 'bullet-head',
-  children: [{ text: '' }],
-}
-
-const initialValue: Descendant[] = [
+const initialValueDummy: Descendant[] = [
   {
     type: 'bullet',
+    id: 1,
     children: [
       {
         type: 'bullet-head',
@@ -49,6 +43,7 @@ const initialValue: Descendant[] = [
       },
       {
         type: 'bullet',
+        id: 2,
         children: [
           {
             type: 'bullet-head',
@@ -60,6 +55,7 @@ const initialValue: Descendant[] = [
           },
           {
             type: 'bullet',
+            id: 3,
             children: [
               {
                 type: 'bullet-head',
@@ -73,6 +69,7 @@ const initialValue: Descendant[] = [
   },
   {
     type: 'bullet',
+    id: 4,
     children: [
       {
         type: 'bullet-head',
@@ -176,9 +173,9 @@ const BulletBody = ({ attributes, children, element }: RenderElementProps): JSX.
           color: 'red',
         }
       : {
-          '-webkit-line-clamp': 1,
-          display: '-webkit-box',
-          '-webkit-box-orient': 'vertical',
+          // '-webkit-line-clamp': 1,
+          // display: '-webkit-box',
+          // '-webkit-box-orient': 'vertical',
           // display: 'inline-block',
           width: '100px',
           // whiteSpace: 'nowrap', // react的type會抗議這個，但需要 -> 移到css#class
@@ -349,6 +346,24 @@ function withAutoComplete(editor: Editor): Editor {
   return editor
 }
 
+// function fixDuplicatedId(descendants: Descendant[]): Record<number, BulletElement[]> {
+//   const dict: Record<number, BulletElement[]> = {}
+//   for (const e of descendants) {
+//     if (Element.isElement(e)) {
+//       if (e.type === 'bullet' && e.id !== undefined) {
+//         if (e.id in dict) {
+//           dict[e.id].push(e)
+//         } else {
+//           dict[e.id] = [e]
+//         }
+//       }
+//       // for (const child of e.children) {
+
+//       // }
+//     }
+//   }
+// }
+
 function withBullet(editor: Editor): Editor {
   const { deleteBackward, insertBreak, normalizeNode } = editor
 
@@ -427,12 +442,13 @@ function withBullet(editor: Editor): Editor {
         const point = Editor.point(editor, selection)
 
         Editor.withoutNormalizing(editor, () => {
-          // 當在句首時 -> split-node
+          // 當在句首 -> split-node & 將原parent-id設為undefined
           if (Editor.isStart(editor, point, nodePath)) {
             Transforms.splitNodes(editor, {
               always: true,
               match: n => Element.isElement(n) && n.type === 'bullet',
             })
+            Transforms.setNodes<BulletElement>(editor, { id: undefined }, { at: parentPath })
             return
           }
 
@@ -442,12 +458,7 @@ function withBullet(editor: Editor): Editor {
               editor,
               {
                 type: 'bullet',
-                children: [
-                  {
-                    type: 'bullet-head',
-                    children: [{ text: '' }],
-                  },
-                ],
+                children: [{ type: 'bullet-head', children: [{ text: '' }] }],
               },
               { at: firstIndentBullet[1] },
             )
@@ -455,7 +466,7 @@ function withBullet(editor: Editor): Editor {
             return
           }
 
-          // 當在句中 or (句尾&沒有子條目)時 -> split-node & 將body接回原條目
+          // 當在 1.句中 2.句尾&沒有子條目 -> split-node & 將body接回原條目 & 將原parent-id設為undefined
           Transforms.splitNodes(editor, {
             always: true,
             match: n => Element.isElement(n) && n.type === 'bullet',
@@ -466,6 +477,7 @@ function withBullet(editor: Editor): Editor {
             match: (n, p) =>
               p.length === parentPath.length + 1 && Element.isElement(n) && ['bullet-body'].includes(n.type),
           })
+          Transforms.setNodes<BulletElement>(editor, { id: undefined }, { at: Path.next(parentPath) })
         })
         return
       }
@@ -588,7 +600,13 @@ function decorate([node, path]: NodeEntry): Range[] {
 
 // Main editor
 
-const BulletEditor = (): JSX.Element => {
+const BulletEditor = ({
+  initialValue = initialValueDummy,
+  onClose,
+}: {
+  initialValue?: Descendant[]
+  onClose?: ({ value }: { value: Descendant[] }) => void
+}): JSX.Element => {
   const [value, setValue] = useState<Descendant[]>(initialValue)
   const renderElement = useCallback((props: RenderElementProps) => <CustomElement {...props} />, [])
   const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
@@ -616,6 +634,10 @@ const BulletEditor = (): JSX.Element => {
     },
     [search],
   )
+
+  useEffect(() => {
+    setValue(initialValue)
+  }, [initialValue])
 
   useEffect(() => {
     if (search) {
@@ -752,86 +774,97 @@ const BulletEditor = (): JSX.Element => {
   }
 
   return (
-    <Slate
-      editor={editor}
-      value={value}
-      onChange={value => {
-        setValue(value)
-        const { selection } = editor
-
-        if (selection && Range.isCollapsed(selection)) {
-          const [cur] = Range.edges(selection)
-
-          // 從目前指標的行頭至指標之間，搜尋最後一個trigger符號
-          // const wordBefore = Editor.before(editor, start, { unit: 'word' })
-          // const before = wordBefore && Editor.before(editor, wordBefore)
-          const start = Editor.before(editor, cur, { unit: 'block' })
-          const startRange = start && Editor.range(editor, start, cur)
-          const startText = startRange && Editor.string(editor, startRange)
-          const startMatch = startText && startText.split('\n').pop()?.match(suggestTriggerMatcher)
-          // const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
-
-          // 若是在句中插入的情況，需要找break-point
-          // const after = Editor.after(editor, start)
-          // const afterRange = Editor.range(editor, start, after)
-          // const afterText = Editor.string(editor, afterRange)
-          // const afterMatch = afterText.match(/^(\s|$)/)
-
-          // console.log('-------')
-          // console.log(before, beforeRange, beforeText, beforeMatch)
-          // console.log(after, afterRange, afterText)
-          // console.log(beforeMatch, afterMatch)
-
-          if (startMatch && ['$', '[[', '@'].includes(startMatch[1])) {
-            const searchStart = Editor.before(editor, cur, {
-              distance: startMatch[0].length,
-              unit: 'offset',
-            })
-            const searchRange = searchStart && Editor.range(editor, searchStart, cur)
-            // console.log(searchRange)
-
-            if (searchRange) {
-              setSearch({
-                trigger: startMatch[1] as '$' | '[[' | '@',
-                term: startMatch[2],
-                range: searchRange,
-              })
-              setSelectedIdx(0)
-            }
-
-            return
-          }
-        }
-
-        setSearch(null)
-        setSuggestions(null)
-      }}
-    >
-      <Editable
-        autoCorrect="false"
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-        decorate={decorate}
-        onKeyDown={event => {
-          if (search) {
-            onKeyDownForSuggest(event)
-          } else {
-            onKeyDownForBullet(event)
+    <>
+      <button
+        onClick={() => {
+          if (onClose) {
+            onClose({ value: editor.children })
           }
         }}
-      />
-      {search && (
-        <Portal>
-          <SuggestionPanel
-            corner={corner}
-            suggestions={suggestions}
-            selectedIdx={selectedIdx}
-            setSelectedIdx={setSelectedIdx}
-            onSelected={onSelected}
-          />
-        </Portal>
-      )}
-    </Slate>
+      >
+        Close
+      </button>
+      <Slate
+        editor={editor}
+        value={value}
+        onChange={value => {
+          setValue(value)
+          const { selection } = editor
+
+          if (selection && Range.isCollapsed(selection)) {
+            const [cur] = Range.edges(selection)
+
+            // 從目前指標的行頭至指標之間，搜尋最後一個trigger符號
+            // const wordBefore = Editor.before(editor, start, { unit: 'word' })
+            // const before = wordBefore && Editor.before(editor, wordBefore)
+            const start = Editor.before(editor, cur, { unit: 'block' })
+            const startRange = start && Editor.range(editor, start, cur)
+            const startText = startRange && Editor.string(editor, startRange)
+            const startMatch = startText && startText.split('\n').pop()?.match(suggestTriggerMatcher)
+            // const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
+
+            // 若是在句中插入的情況，需要找break-point
+            // const after = Editor.after(editor, start)
+            // const afterRange = Editor.range(editor, start, after)
+            // const afterText = Editor.string(editor, afterRange)
+            // const afterMatch = afterText.match(/^(\s|$)/)
+
+            // console.log('-------')
+            // console.log(before, beforeRange, beforeText, beforeMatch)
+            // console.log(after, afterRange, afterText)
+            // console.log(beforeMatch, afterMatch)
+
+            if (startMatch && ['$', '[[', '@'].includes(startMatch[1])) {
+              const searchStart = Editor.before(editor, cur, {
+                distance: startMatch[0].length,
+                unit: 'offset',
+              })
+              const searchRange = searchStart && Editor.range(editor, searchStart, cur)
+              // console.log(searchRange)
+
+              if (searchRange) {
+                setSearch({
+                  trigger: startMatch[1] as '$' | '[[' | '@',
+                  term: startMatch[2],
+                  range: searchRange,
+                })
+                setSelectedIdx(0)
+              }
+
+              return
+            }
+          }
+
+          setSearch(null)
+          setSuggestions(null)
+        }}
+      >
+        <Editable
+          autoCorrect="false"
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+          decorate={decorate}
+          onKeyDown={event => {
+            if (search) {
+              onKeyDownForSuggest(event)
+            } else {
+              onKeyDownForBullet(event)
+            }
+          }}
+        />
+        {search && (
+          <Portal>
+            <SuggestionPanel
+              corner={corner}
+              suggestions={suggestions}
+              selectedIdx={selectedIdx}
+              setSelectedIdx={setSelectedIdx}
+              onSelected={onSelected}
+            />
+          </Portal>
+        )}
+      </Slate>
+    </>
   )
 }
 

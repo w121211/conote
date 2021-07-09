@@ -32,7 +32,7 @@ import {
   Token,
 } from '../../../packages/editor/src/parser'
 import { createPortal } from 'react-dom'
-import { Key } from 'slate-react/dist/utils/key'
+import { BulletElement } from './custom-types'
 
 const SUGGESTIONS = {
   '@': ['@作者', '@me'],
@@ -48,6 +48,7 @@ const initiaLBulletHeadValue = {
 const initialValue: Descendant[] = [
   {
     type: 'bullet',
+    id: 1,
     children: [
       {
         type: 'bullet-head',
@@ -63,6 +64,7 @@ const initialValue: Descendant[] = [
       },
       {
         type: 'bullet',
+        id: 2,
         children: [
           {
             type: 'bullet-head',
@@ -74,6 +76,7 @@ const initialValue: Descendant[] = [
           },
           {
             type: 'bullet',
+            id: 3,
             children: [
               {
                 type: 'bullet-head',
@@ -87,6 +90,7 @@ const initialValue: Descendant[] = [
   },
   {
     type: 'bullet',
+    id: 4,
     children: [
       {
         type: 'bullet-head',
@@ -463,12 +467,17 @@ function withBullet(editor: Editor): Editor {
         const point = Editor.point(editor, selection)
 
         Editor.withoutNormalizing(editor, () => {
-          // 當在句首時 -> split-node
+          // 當在句首 -> split-node & 將原parent-id設為undefined
           if (Editor.isStart(editor, point, nodePath)) {
             Transforms.splitNodes(editor, {
               always: true,
               match: (n) => Element.isElement(n) && n.type === 'bullet',
             })
+            Transforms.setNodes<BulletElement>(
+              editor,
+              { id: undefined },
+              { at: parentPath }
+            )
             return
           }
 
@@ -478,12 +487,7 @@ function withBullet(editor: Editor): Editor {
               editor,
               {
                 type: 'bullet',
-                children: [
-                  {
-                    type: 'bullet-head',
-                    children: [{ text: '' }],
-                  },
-                ],
+                children: [{ type: 'bullet-head', children: [{ text: '' }] }],
               },
               { at: firstIndentBullet[1] }
             )
@@ -491,7 +495,7 @@ function withBullet(editor: Editor): Editor {
             return
           }
 
-          // 當在句中 or (句尾&沒有子條目)時 -> split-node & 將body接回原條目
+          // 當在 1.句中 2.句尾&沒有子條目 -> split-node & 將body接回原條目 & 將原parent-id設為undefined
           Transforms.splitNodes(editor, {
             always: true,
             match: (n) => Element.isElement(n) && n.type === 'bullet',
@@ -504,6 +508,12 @@ function withBullet(editor: Editor): Editor {
               Element.isElement(n) &&
               ['bullet-body'].includes(n.type),
           })
+          Transforms.setNodes<BulletElement>(
+            editor,
+            { id: undefined },
+            { at: Path.next(parentPath) }
+          )
+          console.log(editor.children)
         })
         return
       }
@@ -911,7 +921,7 @@ const BulletEditor = (): JSX.Element => {
   )
 }
 
-// export default BulletEditor
+export default BulletEditor
 
 // Serialize
 
@@ -1105,4 +1115,4 @@ const TestPage = () => {
   )
 }
 
-export default TestPage
+// export default TestPage
