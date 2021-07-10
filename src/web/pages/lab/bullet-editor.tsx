@@ -868,7 +868,7 @@ const BulletEditor = ({
   )
 }
 
-// export default BulletEditor
+export default BulletEditor
 
 const TestPage = () => {
   return (

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { ApolloClient, NormalizedCacheObject, useApolloClient } from '@apollo/client'
 import { useUser } from '@auth0/nextjs-auth0'
-import { BoardStatus, CardType } from '@prisma/client'
+// import { BoardStatus, CardType } from '@prisma/client'
 import { Token } from 'prismjs'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Descendant, Element } from 'slate'
@@ -9,25 +9,25 @@ import { useSlateStatic } from 'slate-react'
 import {
   Board,
   BoardQuery,
-  Card,
-  CardDocument,
-  CardQuery,
-  CardQueryVariables,
+  Ocard,
+  OcardDocument,
+  OcardQuery,
+  OcardQueryVariables,
   Comment,
-  CommentsDocument,
-  CommentsQuery,
-  CommentsQueryVariables,
+  CommentDocument,
+  CommentQuery,
+  CommentQueryVariables,
   useBoardQuery,
-  useCardQuery,
-  useCommentsQuery,
-  useCreateCardBodyMutation,
+  useOcardQuery,
+  useCommentQuery,
+  useCreateWebCardBodyMutation,
   useCreateOauthorCommentMutation,
   useCreateSymbolCardMutation,
   useMeQuery,
   useSearchAllLazyQuery,
   useSearchAllQuery,
 } from '../../apollo/query.graphql'
-import { CardBodyInput, CardBulletRootInput } from '../../apollo/type-defs.graphqls'
+import { CardBodyInput } from '../../apollo/type-defs.graphqls'
 import { QueryDataProvider } from '../../components/data-provider'
 import { deserialize, serialize } from '../../lib/bullet-tree/serializer'
 import { tokenize } from '../../lib/bullet-tree/tokenizer'
@@ -35,7 +35,7 @@ import { Bullet, BulletInput } from '../../lib/bullet-tree/types'
 import { CardBodyContent, CardHeadContent, CardHeadContentValueInjected, NestedCardEntry } from '../../lib/models/card'
 import { injectCardHeadValue } from '../../lib/models/card-helpers'
 import { CardSymbol, parseSymbol } from '../../lib/models/symbol'
-import { useCardLazyQuery } from '../../__generated__/apollo/query.graphql'
+import { useOcardLazyQuery } from '../../__generated__/apollo/query.graphql'
 import BulletEditor from './bullet-editor'
 
 // type CardHeadAndParsedContent = Omit<CardHead, 'content'> & {
@@ -88,8 +88,8 @@ async function buildBodyTree(props: {
     if (card.bodyContent.nestedCards) {
       const results = await Promise.all(
         card.bodyContent.nestedCards.map(e =>
-          client.query<CardQuery, CardQueryVariables>({
-            query: CardDocument,
+          client.query<OcardQuery, OcardQueryVariables>({
+            query: OcardDocument,
             variables: { symbol: e.cardSymbol },
           }),
         ),
@@ -127,13 +127,13 @@ const OauthorCommentForm = ({
 }) => {
   const [createOauthorComment] = useCreateOauthorCommentMutation({
     update(cache, { data }) {
-      const res = cache.readQuery<CommentsQuery, CommentsQueryVariables>({
-        query: CommentsDocument,
+      const res = cache.readQuery<CommentQuery, CommentQueryVariables>({
+        query: CommentDocument,
         variables: { boardId },
       })
       if (data?.createOauthorComment && res?.comments) {
         cache.writeQuery({
-          query: CommentsDocument,
+          query: CommentDocument,
           variables: { boardId },
           data: { comments: res.comments.concat([data.createOauthorComment]) },
         })
@@ -209,7 +209,7 @@ const BoardItem = (props: { boardId: string; pollId?: string }) => {
   const { boardId, pollId } = props
   // const [reload, setReload] = useState(false)
   const boardResult = useBoardQuery({ variables: { id: boardId } })
-  const commentsResult = useCommentsQuery({ variables: { boardId } })
+  const commentsResult = useCommentQuery({ variables: { boardId } })
 
   if (boardResult.loading || commentsResult.loading) {
     return <div>Loading</div>
