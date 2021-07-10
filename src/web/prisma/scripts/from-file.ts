@@ -8,16 +8,15 @@ import { CardLabel, Editor, Markerline, splitByUrl } from '../../../packages/edi
 import { FetchClient } from '../../../packages/fetcher/src'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
 import {
-  BulletInput,
-  BulletPinCode,
   CardBodyContent,
-  cleanOp,
   createCardBody,
   getOrCreateCardBySymbol,
   getOrCreateCardByUrl,
-  NestedCard,
+  NestedCardEntry,
 } from '../../lib/models/card'
 import { createOauthorVote } from '../../lib/models/vote'
+import { BulletInput, BulletPinCode } from '../../lib/bullet-tree/types'
+import { cleanOp } from '../../lib/bullet-tree/node'
 
 const IGNORE_FILE_STARTS_WITH = '_'
 
@@ -222,7 +221,7 @@ async function main() {
       editor.setText(text)
       editor.flush()
 
-      const nestedCards: NestedCard[] = (
+      const nestedCards: NestedCardEntry[] = (
         await Promise.all(
           editor
             .getNestedMarkerlines()
@@ -232,12 +231,12 @@ async function main() {
         cardSymbol: e.symbol,
         cardBodyId: e.body.id,
       }))
-      const { root }: CardBodyContent = JSON.parse(card.body.content)
 
+      const prev: CardBodyContent = JSON.parse(card.body.content)
       await createCardBody({
         cardId: card.id,
         nestedCards,
-        rootInput: cleanOp(root),
+        rootInput: cleanOp(prev.root), // 不考慮卡片本身自身body更新的情形（因為seed files裡沒有此種情形）
         userId: TESTUSERS[0].id,
       })
 
