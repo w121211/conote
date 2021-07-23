@@ -1,9 +1,9 @@
 import { useRef, useEffect, useState } from 'react'
-import { head, body, nestedCards, card, Bullet } from '../../components/dummy'
-import Board from '../../components/discuss/discuss'
+import { head, body, nestedCards, card, Bullet } from '../components/dummy'
+import Board from '../components/board/board-page'
 import classes from '../../components/card.module.scss'
 import classesCardPage from '../card/card-page.module.scss'
-import CommentList from '../../components/commentList/commentList'
+import CommentList from '../components/commentList/commentList'
 
 const BulletBody = ({ childrenArr }: { childrenArr: Bullet[] }) => {
   const [showChildren, setShowChildren] = useState(false)
@@ -238,7 +238,8 @@ const CardPage = () => {
     <div
       className={classesCardPage.mainInner}
       onScroll={e => {
-        setScrollTop(e.target.scrollTop)
+        e.target as HTMLElement
+        setScrollTop((e.target as HTMLElement).scrollTop)
       }}
     >
       <CardBody />

@@ -186,7 +186,7 @@ model Board {
   user      User        @relation(fields: [userId], references: [id])
   userId    String
   bullet    Bullet      @relation(fields: [bulletId], references: [id])
-  bulletId  Int         @unique
+  bulletId  Int
   card      Card        @relation(fields: [cardId], references: [id])
   cardId    Int
   status    BoardStatus @default(ACTIVE)

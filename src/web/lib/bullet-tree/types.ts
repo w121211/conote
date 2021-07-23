@@ -58,6 +58,8 @@ export type Bullet = {
 
   headValidator?: string
   bodyValidator?: string
+
+  expandChild?: boolean //預設是否展開child
 }
 
 // type Nullable<T> = {

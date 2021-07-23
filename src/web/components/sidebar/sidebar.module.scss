@@ -27,6 +27,7 @@
   }
   .sideList {
     margin-top: 8px;
+    list-style: none;
     li {
       font-size: 13px;
       margin: 4px 0;
@@ -42,6 +43,9 @@
       // margin-right: 10px;
     }
   }
+  a {
+    border: none;
+  }
 }
 .menuIconWrapper {
   position: relative;
@@ -56,10 +60,10 @@
   @media screen and (max-width: 500px) {
     width: 40px;
     height: 40px;
-    // padding: 10px;
+    //
   }
-}
-.menuIcon {
-  width: 20px;
-  height: 20px;
+  .menuIcon {
+    width: 20px;
+    height: 20px;
+  }
 }

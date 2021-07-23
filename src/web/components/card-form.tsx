@@ -3,11 +3,11 @@ import { AutoComplete, Button, Form, Input } from 'antd'
 // import { SlateEditorPage } from './slate/bullet'
 import { Editor, Section } from '../../packages/editor/src/index'
 import {
-  useCreateWebCardBodyMutation,
-  Cocard,
-  CocardDocument,
-  CocardQuery,
-  CocardQueryVariables,
+  // useCreateWebCardBodyMutation,
+  Card,
+  // CocardDocument,
+  // CocardQuery,
+  // CocardQueryVariables,
 } from '../apollo/query.graphql'
 import { RenderCardBody } from './card'
 import Preview from './preview/preview'
@@ -98,7 +98,7 @@ function CardInput() {
   )
 }
 
-export function CardForm({ card, onFinish }: { card: Cocard; onFinish?: () => void }): JSX.Element {
+export function CardForm({ card, onFinish }: { card: Card; onFinish?: () => void }): JSX.Element {
   /**
    * TODO:
    * - 目前無法即時檢查輸入的ticker, topic是否存在
@@ -108,58 +108,58 @@ export function CardForm({ card, onFinish }: { card: Cocard; onFinish?: () => vo
    * - `<QueryOcard />`無法解決初始render時會互相卡住的問題，最好替換回最為直接的query.refetch
    */
   // const [queryOcard, { refetch }] = useLazyQuery<QT.ocard, QT.ocardVariables>(queries.OCARD)
-  const [createWebCardBody] = useCreateWebCardBodyMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<CocardQuery, CocardQueryVariables>({
-        query: CocardDocument,
-        variables: { url: card.link.url },
-      })
-      if (data?.createWebCardBody && res?.cocard) {
-        cache.writeQuery<CocardQuery, CocardQueryVariables>({
-          query: CocardDocument,
-          variables: { url: card.link.url },
-          data: { cocard: { ...res.cocard, body: data.createWebCardBody } },
-        })
-      }
-      // if (card.__typename === 'Selfcard') {
-      //   const q = cache.readQuery<QT.mycard, QT.mycardVariables>({
-      //     query: queries.MYCARD,
-      //     variables: { symbolName: card.symbol.name },
-      //   })
-      //   if (data?.createWebpageCardBody && q?.mycard) {
-      //     cache.writeQuery<QT.mycard, QT.mycardVariables>({
-      //       query: queries.MYCARD,
-      //       variables: { symbolName: card.symbol.name },
-      //       data: { mycard: { ...q.mycard, body: data?.createWebpageCardBody } },
-      //     })
-      //   }
-      // }
-    },
-  })
+  // const [createWebCardBody] = useCreateWebCardBodyMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<CocardQuery, CocardQueryVariables>({
+  //       query: CocardDocument,
+  //       variables: { url: card.link.url },
+  //     })
+  //     if (data?.createWebCardBody && res?.cocard) {
+  //       cache.writeQuery<CocardQuery, CocardQueryVariables>({
+  //         query: CocardDocument,
+  //         variables: { url: card.link.url },
+  //         data: { cocard: { ...res.cocard, body: data.createWebCardBody } },
+  //       })
+  //     }
+  //     // if (card.__typename === 'Selfcard') {
+  //     //   const q = cache.readQuery<QT.mycard, QT.mycardVariables>({
+  //     //     query: queries.MYCARD,
+  //     //     variables: { symbolName: card.symbol.name },
+  //     //   })
+  //     //   if (data?.createWebpageCardBody && q?.mycard) {
+  //     //     cache.writeQuery<QT.mycard, QT.mycardVariables>({
+  //     //       query: queries.MYCARD,
+  //     //       variables: { symbolName: card.symbol.name },
+  //     //       data: { mycard: { ...q.mycard, body: data?.createWebpageCardBody } },
+  //     //     })
+  //     //   }
+  //     // }
+  //   },
+  // })
 
-  const editor = new Editor(card.body?.text, [], card.link.url, card.link.oauthorName ?? undefined)
-  const [sects, setSects] = useState<Section[]>(editor.getSections())
+  // const editor = new Editor(card.body?.text, [], card.link.url, card.link.oauthorName ?? undefined)
+  // const [sects, setSects] = useState<Section[]>(editor.getSections())
   // const [symbols, setSymbols] = useState<string[]>([])
   // const symbolTokens = symbols.reduce<Array<string | PrismToken>>((acc, cur) => acc.concat(MK.tokenizeSymbol(cur)), [])
 
   function onValuesChange(changedValues: { input: string }) {
-    console.log(changedValues.input)
-    if (changedValues['input']) {
-      const editor = new Editor(undefined, undefined, card.link.url, card.link.oauthorName ?? undefined)
-      editor.setText(changedValues['input'])
-      editor.flush()
-      setSects(editor.getSections())
-      // setSymbols([])
-    }
+    // console.log(changedValues.input)
+    // if (changedValues['input']) {
+    //   const editor = new Editor(undefined, undefined, card.link.url, card.link.oauthorName ?? undefined)
+    //   editor.setText(changedValues['input'])
+    //   editor.flush()
+    //   setSects(editor.getSections())
+    // setSymbols([])
+    // }
   }
 
   async function _onFinish(values: { input: string }) {
-    await createWebCardBody({
-      variables: { cardId: card.id, data: { text: values['input'] } },
-    })
-    if (onFinish !== undefined) {
-      onFinish()
-    }
+    // await createWebCardBody({
+    //   variables: { cardId: card.id, data: { text: values['input'] } },
+    // })
+    // if (onFinish !== undefined) {
+    //   onFinish()
+    // }
   }
 
   const [preview, setPreview] = useState(false)
@@ -208,7 +208,7 @@ export function CardForm({ card, onFinish }: { card: Cocard; onFinish?: () => vo
         </Form.Item>
       </Form>
       <Preview previewVisible={preview} handleCancel={handleCancel} onSubmit={onSubmit}>
-        <RenderCardBody sects={sects} />
+        {/* <RenderCardBody sects={sects} /> */}
       </Preview>
     </div>
     // <div>

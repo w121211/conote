@@ -1,11 +1,12 @@
 import {
-  Bullet,
-  BulletInput,
-  BulletPinCode,
+  // Bullet,
+  // BulletInput,
+  // BulletPinCode,
   CardHeadContentValue,
   CardHeadContentValueInjected,
   PinBoard,
 } from './card'
+import { Bullet, BulletInput, BulletPinCode } from '../bullet-tree/types'
 
 /**
  * Search in a bullet tree and return the first found
@@ -39,6 +40,7 @@ export function findBullets({
       found = found.concat(findBullets({ node: e, where, curDepth: nextDepth }))
     }
   }
+
   return found
 }
 
@@ -63,6 +65,7 @@ export function injectCardHeadValue({
       throw new Error()
     }
   }
+
   return {
     ...value,
     pinBoards,

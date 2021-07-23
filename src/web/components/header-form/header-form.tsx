@@ -10,7 +10,7 @@ type FormInputs = {
 
 const HeaderForm = ({ initialValue }: { initialValue: FormInputs }) => {
   const { register, handleSubmit, setValue } = useForm<FormInputs>()
-  const onSubmit = d => console.log(d)
+  const onSubmit = (d: any) => console.log(d)
   if (initialValue) {
     initialValue.title && setValue('title', initialValue.title)
     initialValue.title && setValue('authorChoice', initialValue.authorChoice)

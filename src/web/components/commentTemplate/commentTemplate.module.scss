@@ -6,18 +6,26 @@
     background-color: #f7f8fb;
   }
 }
+.upDownWrapper {
+  color: $gray;
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: $gray;
+  }
+}
 .arrowUpIcon {
   // width: 16px;
   // height: 16px;
-  svg {
-    width: 16px;
-    height: 16px;
-  }
 }
 .arrowDownIcon {
   svg {
-    width: 16px;
-    height: 16px;
     transform: rotate(180deg);
+  }
+}
+.liked {
+  color: $secondary;
+  svg {
+    fill: $secondary;
   }
 }

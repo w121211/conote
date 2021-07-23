@@ -1,15 +1,15 @@
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import {
-  useCreateReplyMutation,
-  useCommentQuery,
-  RepliesQuery,
-  RepliesQueryVariables,
-  RepliesDocument,
-  useRepliesQuery,
-  useCreateVoteMutation,
-  CommentQuery,
-  CommentQueryVariables,
-  CommentDocument,
+  // useCreateReplyMutation,
+  // useCommentQuery,
+  // RepliesQuery,
+  // RepliesQueryVariables,
+  // RepliesDocument,
+  // useRepliesQuery,
+  // useCreateVoteMutation,
+  // CommentQuery,
+  // CommentQueryVariables,
+  // CommentDocument,
   MyVotesDocument,
   MyVotesQuery,
   useMyVotesQuery,
@@ -20,7 +20,7 @@ import Link from 'next/link'
 import { Popconfirm, PopconfirmProps } from 'antd'
 import { toUrlParams } from '../../lib/helper'
 import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../../packages/editor/src/index'
-import { CommentForm } from '../discuss/discuss-comment-form'
+import { CommentForm } from '../../__deprecated__/discuss-comment-form'
 import CommentList from '../commentList/commentList'
 import classes from '../card.module.scss'
 import quesClasses from './question.module.scss'
@@ -124,15 +124,15 @@ const QuestionParent = ({
   })
   const commentId = (typeof stream !== 'string' && stream.markerline?.commentId) || cardCommentId
   // if (stream.markerline?.commentId) {
-  const {
-    data: commentsData,
-    loading: commentsLoading,
-    error: commentsError,
-    refetch: refetchComment,
-  } = useCommentQuery({
-    variables: { id: commentId.toString() },
-    fetchPolicy: 'cache-first',
-  })
+  // const {
+  //   data: commentsData,
+  //   loading: commentsLoading,
+  //   error: commentsError,
+  //   refetch: refetchComment,
+  // } = useCommentQuery({
+  //   variables: { id: commentId.toString() },
+  //   fetchPolicy: 'cache-first',
+  // })
   const {
     data: myVotesData,
     loading: myVotesLoading,
@@ -140,11 +140,11 @@ const QuestionParent = ({
   } = useMyVotesQuery({
     fetchPolicy: 'cache-first',
   })
-  useEffect(() => {
-    if (commentsData?.comment?.poll) {
-      setVoteTotal(commentsData?.comment?.poll?.count.nVotes)
-    }
-  }, [commentsData, commentsLoading])
+  // useEffect(() => {
+  //   if (commentsData?.comment?.poll) {
+  //     setVoteTotal(commentsData?.comment?.poll?.count.nVotes)
+  //   }
+  // }, [commentsData, commentsLoading])
   // }
 
   return (
@@ -162,8 +162,8 @@ const QuestionParent = ({
           <>
             {typeof stream !== 'string' && stream.markerline?.anchorId && (
               <>
-                <CommentForm commentId={commentId.toString()} anchorId={stream.markerline.anchorId.toString()} />
-                <CommentList commentId={commentId.toString()} />
+                {/* <CommentForm commentId={commentId.toString()} anchorId={stream.markerline.anchorId.toString()} />
+                <CommentList commentId={commentId.toString()} /> */}
               </>
             )}
           </>

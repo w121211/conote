@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { QueryDataProvider } from '../../../web/components/data-provider'
 import { CardHead, CardBody } from '../../../web/components/card'
 import { CardForm } from '../../../web/components/card-form'
-import { useCocardQuery, CocardQuery } from '../../../web/apollo/query.graphql'
+import { useCardQuery, CardQuery, useWebpageCardQuery, WebpageCardQuery } from '../../../web/apollo/query.graphql'
 import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../../packages/editor/src/index'
+import CardIndex from '../../../web/pages/lab/card-index'
 
 function getTabUrl(): string | null {
   let url: string | null
@@ -25,48 +26,50 @@ export function CardPage(): JSX.Element {
   const [symbol, setSymbol] = useState('')
   const [urlState, setUrlState] = useState('')
   const [path, setPath] = useState<string[]>([])
-  useEffect(() => {
-    const url = getTabUrl()
-    if (url) {
-      setUrlState(url)
-      // setQueryVar(url)
-      setPath([url])
-    }
-  }, [])
-  useEffect(() => {
-    if (path[path.length - 1].includes('[[') && path[path.length - 1].includes(']]')) {
-      setSymbol(path[path.length - 1])
-    } else {
-      setUrlState(path[path.length - 1])
-    }
-  }, [path])
-  const { data, loading, error } = useCocardQuery({ variables: { symbol, url: urlState } })
+  // useEffect(() => {
+  //   const url = getTabUrl()
+  //   if (url) {
+  //     setUrlState(url)
+  //     // setQueryVar(url)
+  //     setPath([url])
+  //   }
+  // }, [])
+  // useEffect(() => {
+  //   if (path[path.length - 1].includes('[[') && path[path.length - 1].includes(']]')) {
+  //     setSymbol(path[path.length - 1])
+  //   } else {
+  //     setUrlState(path[path.length - 1])
+  //   }
+  // }, [path])
+  // const {data:webPageData,loading:webPageLoading,error:webPageError}=useWebpageCardQuery({variables:{url:urlState}})
+  // const { data, loading, error } = useCardQuery({ variables: { symbol} })
 
   // if (data) {
-  if (data && data.cocard) {
-    const editor = new Editor(
-      data.cocard.body?.text,
-      data.cocard.body?.meta,
-      data.cocard.link?.url,
-      data.cocard.link.oauthorName ?? undefined,
-    )
-    editor.flush({ attachMarkerlinesToTokens: true })
-    const sect = editor.getSections()
-    return (
-      // <QueryDataProvider
-      //   useQuery={() => useCocardQuery({ variables: { url } })}
-      //   render={(data: CocardQuery) => {
-      // const url = `/card/form?${getCardUrlParam(data.cocard)}`
-      // return (
-      <div>
-        <button
+  // if ((data && data.card)||(webPageData&&webPageData.webpageCard)) {
+  // const editor = new Editor(
+  //   data.card.body?.text,
+  //   data.card.body?.meta,
+  //   data.card.link?.url,
+  //   data.card.link?.oauthorName ?? undefined,
+  // )
+  // editor.flush({ attachMarkerlinesToTokens: true })
+  // const sect = editor.getSections()
+  return (
+    // <QueryDataProvider
+    //   useQuery={() => useCocardQuery({ variables: { url } })}
+    //   render={(data: CocardQuery) => {
+    // const url = `/card/form?${getCardUrlParam(data.cocard)}`
+    // return (
+    <div>
+      {/* <button
           onClick={() => {
             setEdit(!edit)
           }}
         >
           編輯
-        </button>
-        <CardHead card={data.cocard} sect={sect} height={0} />
+        </button> */}
+      <CardIndex />
+      {/* <CardHead card={data.cocard} sect={sect} height={0} />
         {edit ? (
           <CardForm card={data.cocard} />
         ) : (
@@ -82,23 +85,23 @@ export function CardPage(): JSX.Element {
             }}
             // symbolHandler={()=>{setSymbol}}
           />
-        )}
-      </div>
-      // )
-      // }
-      // return null
-      // }}
-      // />
-    )
+        )} */}
+    </div>
+    // )
     // }
-    // if (symbol) {
-    //   try {
-    //     symbolToUrl(symbol)
-    //     return _render(undefined, symbol)
-    //   } catch {
-    //     return <h1>Symbol format error</h1>
-    //   }
-    // }
-  }
-  return <h1>Require URL or Symbol (現階段還未支援symbol)</h1>
+    // return null
+    // }}
+    // />
+  )
+  // }
+  // if (symbol) {
+  //   try {
+  //     symbolToUrl(symbol)
+  //     return _render(undefined, symbol)
+  //   } catch {
+  //     return <h1>Symbol format error</h1>
+  //   }
+  // }
 }
+// return <h1>Require URL or Symbol (現階段還未支援symbol)</h1>
+// }

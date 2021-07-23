@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Radio, Space } from 'antd'
-import BarChart from '../bar/bar'
+import BarChart from '../../components/bar/bar'
 import classes from './radios.module.scss'
 
 type RadioArr = {

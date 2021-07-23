@@ -3,7 +3,7 @@
 //   BUYSELL = 'BUYSELL',
 // }
 
-import { CardBody } from './apollo/query.graphql'
+// import { CardBody } from './apollo/query.graphql'
 
 type PinCode = 'BUYSELL' | 'VS'
 

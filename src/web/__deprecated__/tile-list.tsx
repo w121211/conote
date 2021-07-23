@@ -5,15 +5,16 @@ import { Space, Comment as AntdComment } from 'antd'
 // import { PollChoiceRadioGroup } from './pollChoice'
 // import { PollFooter, PostFooter } from './tileFooter'
 // import { VotePostForm, NewChoicePostForm } from './postForm'
-import { Reply, TileOptions, defaultTileOptions } from './tile'
-import { RepliesQuery, useRepliesQuery } from '../apollo/query.graphql'
+import { TileOptions, defaultTileOptions } from './tile'
+// import { Reply, TileOptions, defaultTileOptions } from './tile'
+// import { RepliesQuery, useRepliesQuery } from '../apollo/query.graphql'
 
 export function ReplyList({
-  replies,
+  // replies,
   pattern = null,
   options = defaultTileOptions,
 }: {
-  replies: RepliesQuery['replies']
+  // replies: RepliesQuery['replies']
   pattern?: string | null
   options?: TileOptions
 }): JSX.Element {
@@ -28,10 +29,10 @@ export function ReplyList({
   //   else if (e.text.indexOf(pattern) >= 0)
   //     return <Reply key={i} reply={e} />
   //   return null
-  // })
-  const filteredReplies = replies
-    .filter(e => pattern === null || e.text.indexOf(pattern) >= 0)
-    .map((e, i) => <Reply key={i} reply={e} options={options} />)
+  // // })
+  // const filteredReplies = replies
+  //   .filter(e => pattern === null || e.text.indexOf(pattern) >= 0)
+  //   .map((e, i) => <Reply key={i} reply={e} options={options} />)
   // return (
   //   <List className={commentListSmallCss.List} size="large"
   //     // pagination={{
@@ -59,20 +60,21 @@ export function ReplyList({
   //   return <ul className={commentListSmallCss.List}>{filteredReplies}</ul>
   // }
   // return <ul>{filteredReplies}</ul>
-  return <div>{filteredReplies} </div>
+  // return <div>{filteredReplies} </div>
+  return <div> </div>
 }
 
-export function QueryReplyList({ commentId }: { commentId: string }): JSX.Element {
-  const { data, loading, error, refetch } = useRepliesQuery({ variables: { commentId } })
+// export function QueryReplyList({ commentId }: { commentId: string }): JSX.Element {
+//   const { data, loading, error, refetch } = useRepliesQuery({ variables: { commentId } })
 
-  if (loading) {
-    return <span>loading...</span>
-  }
-  if (error || !data) {
-    return <p>ERROR: {error?.message}</p>
-  }
-  return <ReplyList replies={data.replies} />
-}
+//   if (loading) {
+//     return <span>loading...</span>
+//   }
+//   if (error || !data) {
+//     return <p>ERROR: {error?.message}</p>
+//   }
+//   return <ReplyList replies={data.replies} />
+// }
 
 // export function CommentList({ comments }: { comments: QT.commentFragment[] }) {
 //   const spotComments = comments.filter(e => e.isTop)

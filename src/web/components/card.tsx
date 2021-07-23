@@ -4,24 +4,24 @@
 // import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input } from 'antd'
 import React, { useState, useRef, forwardRef, useEffect, useImperativeHandle } from 'react'
 import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../packages/editor/src/index'
-import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
+// import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { AnchorPanel } from './tile-panel'
 import { QueryCommentModal } from './tile'
 import { toUrlParams } from '../lib/helper'
-import { PollChoices } from './poll-form'
+import { PollChoices } from '../__deprecated__/poll-form'
 // import { Link } from './link'
 import { MyTooltip } from '../components/my-tooltip/my-tooltip'
-import BulletEditor from './slate-editor/bullet'
+import BulletEditor from '../__deprecated__/slate-editor/bullet'
 import Question from './question/question'
 import classes from './card.module.scss'
 import ClockIcon from '../assets/svg/clock.svg'
 import LinkIcon from '../assets/svg/link.svg'
-import { CardMeta } from '../lib/models/card'
+// import { CardMeta } from '../lib/models/card'
 import Linechart from './bar/lineChart'
 import HeaderForm from './header-form/header-form'
-import MyEditBtnPopover from './my-editBtn-popover/my-editBtn-popover'
+import MyEditBtnPopover from '../__deprecated__/my-editBtn-popover/my-editBtn-popover'
 // import moduleName from 'react-router';
 
 type myRef = {
@@ -714,7 +714,7 @@ export const RenderCardBody = forwardRef(
       pathPush,
       symbolHandler,
     }: {
-      sects: Section[]
+      sects?: Section[]
       text?: string[]
       titleRef?: (arr: any[]) => void
       showQuestion?: () => void
@@ -730,11 +730,11 @@ export const RenderCardBody = forwardRef(
     },
     ref,
   ): JSX.Element => {
-    const sectsFilter: (Section | string)[] = [
-      ...sects.filter(e => e.nestedCard !== undefined || e.stream?.length !== 0),
-    ]
-    sectsFilter[sectsFilter.length] = 'newcard'
-    const [sectArr, setSectArr] = useState(sectsFilter)
+    // const sectsFilter: (Section | string)[] = [
+    //   ...sects.filter(e => e.nestedCard !== undefined || e.stream?.length !== 0),
+    // ]
+    // sectsFilter[sectsFilter.length] = 'newcard'
+    // const [sectArr, setSectArr] = useState(sectsFilter)
     // console.log(sectArr)
     type MyRef = {
       spanRef: any[]
@@ -750,7 +750,7 @@ export const RenderCardBody = forwardRef(
     return (
       <>
         {/* {console.log(sects)} */}
-        {sectsFilter
+        {/* {sectsFilter
           // {sects
           //   .filter(e => e.nestedCard !== undefined || e.stream?.length !== 0)
           .map((e, i) => {
@@ -785,7 +785,7 @@ export const RenderCardBody = forwardRef(
                 symbolHandler={symbolHandler}
               />
             )
-          })}
+          })} */}
         {/* {console.log(myRef.current)} */}
         {titleRef && titleRef(myRef.current)}
         {/* <div>newCard</div> */}
@@ -796,7 +796,7 @@ export const RenderCardBody = forwardRef(
 RenderCardBody.displayName = 'RenderCardBody'
 
 export const CardBody = ({
-  card,
+  // card,
   bySrc,
   // cardCommentId,
   titleRefHandler,
@@ -811,7 +811,7 @@ export const CardBody = ({
   pathPush,
   symbolHandler,
 }: {
-  card: CocardFragment
+  // card: CocardFragment
   bySrc?: string
   // cardCommentId: number
   titleRefHandler?: (arr: any[]) => void
@@ -828,21 +828,22 @@ export const CardBody = ({
 }): JSX.Element => {
   // console.log(card)
 
-  if (card.body === null) return <p>[Error]: null body</p>
+  // if (card.body === null) return <p>[Error]: null body</p>
 
   // const meta: CardMeta | undefined = card.meta ? (JSON.parse(card.meta) as CardMeta) : undefined
-  const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
-  editor.flush({ attachMarkerlinesToTokens: true })
-  // console.log(editor.getText())
-  const text = editor.getText().split(/^\n/gm)
+  // const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
+  // editor.flush({ attachMarkerlinesToTokens: true })
+  // // console.log(editor.getText())
+  // const text = editor.getText().split(/^\n/gm)
   // console.log(text.split(/^\n/gm))
   return (
-    <RenderCardBody
+    <>
+      {/* <RenderCardBody
       sects={editor.getSections()}
       text={text}
       titleRef={titleRefHandler}
       showQuestion={showQuestion}
-      cardCommentId={(card.meta as CardMeta).commentId}
+      // cardCommentId={(card.meta as CardMeta).commentId}
       anchorIdHandler={anchorIdHandler}
       // pollCommentIdHandler={pollCommentIdHandler}
       clickPoll={clickPoll}
@@ -851,18 +852,18 @@ export const CardBody = ({
       // ref={ref}
       hlElementHandler={hlElementHandler}
       pathPush={pathPush}
-      symbolHandler={symbolHandler}
-    />
-    // </>
+      // symbolHandler={symbolHandler}
+    /> */}
+    </>
   )
 }
 
 export function CardHead({
-  card,
+  // card,
   sect,
   height,
 }: {
-  card: CocardFragment
+  // card: CocardFragment
   sect: Section[]
   height: number
 }): JSX.Element {
@@ -883,35 +884,35 @@ export function CardHead({
   }, [hasWindow])
   // const title = findOneComment(MARKER_FORMAT.srcTitle.mark, card.comments)
   // const publishDate = findOneComment(MARKER_FORMAT.srcPublishDate.mark, card.comments);
-  const _comment: CommentFragment = {
-    __typename: 'Comment',
-    id: 'string',
-    userId: 'string',
-    cocardId: 10,
-    ocardId: null,
-    selfcardId: null,
-    isTop: false,
-    text: 'Buy vs Sell',
-    // replies: [],
-    // topReplies: null,
-    poll: null,
-    count: {
-      __typename: 'CommentCount',
-      id: 'string;',
-      nViews: 1,
-      nUps: 2,
-      nDowns: 3,
-    },
-    meta: null,
-    createdAt: null,
-  }
+  // const _comment: CommentFragment = {
+  //   __typename: 'Comment',
+  //   id: 'string',
+  //   userId: 'string',
+  //   cocardId: 10,
+  //   ocardId: null,
+  //   selfcardId: null,
+  //   isTop: false,
+  //   text: 'Buy vs Sell',
+  //   // replies: [],
+  //   // topReplies: null,
+  //   poll: null,
+  //   count: {
+  //     __typename: 'CommentCount',
+  //     id: 'string;',
+  //     nViews: 1,
+  //     nUps: 2,
+  //     nDowns: 3,
+  //   },
+  //   meta: null,
+  //   createdAt: null,
+  // }
 
-  let cardTitle = card.link.url
-  // ticker的title
-  const cardDomain = card.link.domain
-  if (cardDomain === '_') {
-    cardTitle = cardTitle.slice(2)
-  }
+  // let cardTitle = card.link.url
+  // // ticker的title
+  // const cardDomain = card.link.domain
+  // if (cardDomain === '_') {
+  //   cardTitle = cardTitle.slice(2)
+  // }
   const [titleClick, setTitleClick] = useState(false)
   const titleClickedHandler = () => {
     setTitleClick(prev => !prev)
@@ -919,229 +920,230 @@ export function CardHead({
   // console.log(height)
 
   return (
-    <div
-      className={classes.header}
-      ref={headerRef}
-      style={{
-        top: `-${
-          headerRef.current &&
-          windowWidth &&
-          (windowWidth < 500 ? headerRef.current.clientHeight - 80 : headerRef.current.clientHeight - 45)
-        }px`,
-      }}
-    >
-      <div>
-        {cardDomain === '_' ? (
-          <h1 className={classes.tickerTitle}>{cardTitle.replace('[[', '').replace(']]', '')}</h1>
-        ) : (
-          <>
-            <div className={classes.headerTopWrapper}>
-              <span className={classes.flexContainer}>
-                <span className={classes.author}>
-                  {/* <a href={cardTitle} target="_blank" rel="noreferrer"> */}
-                  {card.link.oauthorName?.replace(/(.+):.+/gm, '$1')}
-                  {/* <LinkIcon className={classes.linkIcon} /> */}
-                  {/* </a> */}
-                </span>
-                {/* <span className={classes.webName}></span> */}
-                <span className={classes.date}>2021 / 4 / 9</span>
-              </span>
-              {/* <ClockIcon className={classes.clockIcon} /> */}
-              {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}
-              {/* <MyTooltip
-            title="ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
-            蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资"
-          > */}
-              <a className={classes.link} href={cardTitle} target="_blank" rel="noreferrer">
-                <span
-                  className={`${classes.title} ${titleClick ? classes.titleExpand : ''} ${
-                    height > 90 && classes.scroll
-                  } `}
-                  onClick={titleClickedHandler}
-                  ref={titleRef}
-                >
-                  {/* {console.log(headerRef.current?.offsetTop - height)} */}
-                  ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
-                  蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
-                </span>
-                {/* <LinkIcon className={classes.linkIcon} /> */}
-                {/* 連結{'\n'} */}
-              </a>
-            </div>
-            <div className={`${classes.symbolContainer} ${height > 90 && classes.scroll && classes.scroll}`}>
-              {/* <span>Tags:</span> */}
-              {sect.map((e, i) => {
-                if (e.nestedCard) {
-                  return (
-                    <span key={i} className={classes.symbol}>
-                      {e.nestedCard.symbol}
-                    </span>
-                  )
-                }
-              })}
-            </div>
-            <span
-              className={`${classes.title} ${classes.titleShort} ${height > 91 && classes.scroll}`}
-              // onClick={titleClickedHandler}
-              // ref={titleRef}
-            >
-              {/* {console.log(headerRef.current?.offsetTop - height)} */}
-              ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
-              蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
-            </span>
-            {/* </MyTooltip> */}
-          </>
-        )}
-      </div>
+    <></>
+    // <div
+    //   className={classes.header}
+    //   ref={headerRef}
+    //   style={{
+    //     top: `-${
+    //       headerRef.current &&
+    //       windowWidth &&
+    //       (windowWidth < 500 ? headerRef.current.clientHeight - 80 : headerRef.current.clientHeight - 45)
+    //     }px`,
+    //   }}
+    // >
+    //   <div>
+    //     {cardDomain === '_' ? (
+    //       <h1 className={classes.tickerTitle}>{cardTitle.replace('[[', '').replace(']]', '')}</h1>
+    //     ) : (
+    //       <>
+    //         <div className={classes.headerTopWrapper}>
+    //           <span className={classes.flexContainer}>
+    //             <span className={classes.author}>
+    //               {/* <a href={cardTitle} target="_blank" rel="noreferrer"> */}
+    //               {card.link.oauthorName?.replace(/(.+):.+/gm, '$1')}
+    //               {/* <LinkIcon className={classes.linkIcon} /> */}
+    //               {/* </a> */}
+    //             </span>
+    //             {/* <span className={classes.webName}></span> */}
+    //             <span className={classes.date}>2021 / 4 / 9</span>
+    //           </span>
+    //           {/* <ClockIcon className={classes.clockIcon} /> */}
+    //           {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}
+    //           {/* <MyTooltip
+    //         title="ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
+    //         蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资"
+    //       > */}
+    //           <a className={classes.link} href={cardTitle} target="_blank" rel="noreferrer">
+    //             <span
+    //               className={`${classes.title} ${titleClick ? classes.titleExpand : ''} ${
+    //                 height > 90 && classes.scroll
+    //               } `}
+    //               onClick={titleClickedHandler}
+    //               ref={titleRef}
+    //             >
+    //               {/* {console.log(headerRef.current?.offsetTop - height)} */}
+    //               ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
+    //               蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
+    //             </span>
+    //             {/* <LinkIcon className={classes.linkIcon} /> */}
+    //             {/* 連結{'\n'} */}
+    //           </a>
+    //         </div>
+    //         <div className={`${classes.symbolContainer} ${height > 90 && classes.scroll && classes.scroll}`}>
+    //           {/* <span>Tags:</span> */}
+    //           {sect.map((e, i) => {
+    //             if (e.nestedCard) {
+    //               return (
+    //                 <span key={i} className={classes.symbol}>
+    //                   {e.nestedCard.symbol}
+    //                 </span>
+    //               )
+    //             }
+    //           })}
+    //         </div>
+    //         <span
+    //           className={`${classes.title} ${classes.titleShort} ${height > 91 && classes.scroll}`}
+    //           // onClick={titleClickedHandler}
+    //           // ref={titleRef}
+    //         >
+    //           {/* {console.log(headerRef.current?.offsetTop - height)} */}
+    //           ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
+    //           蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
+    //         </span>
+    //         {/* </MyTooltip> */}
+    //       </>
+    //     )}
+    //   </div>
 
-      {/* <div><Comment comment={comment} /></div> */}
-      {/* {console.log(card)} */}
-      {/* {cardTitle} */}
-      {/* {title && title.text + '\n'} */}
-      {/* {publishDate && publishDate.text + '\n'} */}
-      {/* {card.link.oauthorName + '\n'} */}
-      {/* {'(NEXT)Keywords\n'} */}
-      {/* {card.comments.length === 0 ? "新建立" : undefined} */}
-    </div>
+    //   {/* <div><Comment comment={comment} /></div> */}
+    //   {/* {console.log(card)} */}
+    //   {/* {cardTitle} */}
+    //   {/* {title && title.text + '\n'} */}
+    //   {/* {publishDate && publishDate.text + '\n'} */}
+    //   {/* {card.link.oauthorName + '\n'} */}
+    //   {/* {'(NEXT)Keywords\n'} */}
+    //   {/* {card.comments.length === 0 ? "新建立" : undefined} */}
+    // </div>
   )
+  // }
+
+  // --- Helpers ---
+
+  // export function findOneComment<T extends QT.comment | QT.CommentInput>(mark: string, comments: T[]): T | undefined {
+  //   return comments.find(e => {
+  //     if ('meta' in e)
+  //       return (e as QT.comment).meta?.mark === mark
+  //     if ('mark' in e)
+  //       return (e as QT.CommentInput).mark === mark
+  //     throw new Error()
+  //   })
+  // }
+
+  // export function findManyComments<T extends QT.comment | QT.CommentInput>(mark: string, comments: T[]): T[] {
+  //   return comments.filter(e => {
+  //     if ('meta' in e)
+  //       return (e as QT.comment).meta?.mark === mark
+  //     if ('mark' in e)
+  //       return (e as QT.CommentInput).mark === mark
+  //     throw new Error()
+  //   })
+  // }
+
+  // ------- Deprecated --------
+
+  // function makeCardId(comment: QT.commentFragment): string {
+  //   let id: string
+  //   if (comment.cocardId) id = 'Cocard:' + comment.ocardId
+  //   else if (comment.ocardId) id = 'Ocard:' + comment.ocardId
+  //   else if (comment.selfcardId) id = 'Ocard:' + comment.ocardId
+  //   else throw new Error()
+  //   return id
+  // }
+
+  // function getVoteIdx(str: string): number | undefined {
+  //   /** []buy [X]sell []watch  -> return 1 */
+  //   const re = /\[.?\]/gm
+  //   let m
+  //   const matches = []
+  //   while ((m = re.exec(str)) !== null) {
+  //     // This is necessary to avoid infinite loops with zero-width matches
+  //     if (m.index === re.lastIndex) re.lastIndex++
+  //     // 選擇的選項標為1，其餘為0
+  //     matches.push(m[0].length > 2 ? 1 : 0)
+  //   }
+  //   return matches.indexOf(1)
+  // }
+
+  // function mapVoters(voteComments: QT.commentFragment[], nChoices: number): string[][] {
+  //   const voters: string[][] = []
+  //   for (let i = 0; i < nChoices; i++) {
+  //     const _voteChoiceN: string[] = []
+  //     for (const e of voteComments) {
+  //       if (e.text && getVoteIdx(e.text) === i) {
+  //         _voteChoiceN.push(makeCardId(e))
+  //       }
+  //     }
+  //     voters.push(_voteChoiceN)
+  //   }
+  //   return voters
+  // }
+
+  // function filterCommentsByVote(
+  //   voteIdx: number,
+  //   voters: string[][],
+  //   comments: QT.commentFragment[],
+  // ): QT.commentFragment[] {
+  //   // const voters = ["Ocard:1", "Selfcard:1"]
+  //   const votersByVote = voters[voteIdx]
+  //   return comments.filter(e => votersByVote.indexOf(makeCardId(e)) >= 0)
+  // }
+
+  // function ShowCardClicker({
+  //   selfcardId,
+  //   ocardId,
+  //   children,
+  // }: {
+  //   selfcardId?: string
+  //   ocardId?: string
+  //   children: React.ReactNode
+  // }) {
+  //   if (!selfcardId && !ocardId) throw new Error('selfcardId及ocardId至少需要一個')
+  //   return <span>{children}</span>
+  // }
+
+  // function QueryCardModal({ card, mycard }: { card: QT.cocard_cocard; mycard?: QT.selfcard_selfcard }) {
+  //   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+  //   const [cardId, setCardId] = useState<[string, number] | null>(null)
+  //   function onClick(comment: QT.commentFragment): void {
+  //     // console.log('onClick')
+  //     if (comment.ocardId) setCardId(['Ocard', comment.ocardId])
+  //     else if (comment.selfcardId) setCardId(['Selfcard', comment.selfcardId])
+  //     else return
+  //     setIsModalVisible(true)
+  //   }
+  //   /** (NEXT)將mycard的comments放入裡面，便利push到cocard */
+  //   // const battles = oneCommentByKey({ comments: card.comments, key: "battles" })
+  //   return (
+  //     <>
+  //       <Modal
+  //         visible={isModalVisible}
+  //         onCancel={function () {
+  //           setIsModalVisible(false)
+  //         }}
+  //       >
+  //         {/* {cardId && cardId[0] === 'Ocard' && <QueryOcard id={cardId[1].toString()} />} */}
+  //         {/* {cardId && cardId[0] === 'Selfcard' && <QuerySelfcard id={cardId[1].toString()} />} */}
+  //       </Modal>
+  //     </>
+  //   )
+  // }
+
+  // function QueryOcard({
+  //   oauthorName,
+  //   symbolName,
+  //   updateNestedOcards,
+  // }: {
+  //   oauthorName: string
+  //   symbolName?: string
+  //   updateNestedOcards(symbol: string, card?: QT.ocard_ocard, error?: string): void
+  // }) {
+  //   /** 僅用於call api，不render（需要這樣寫是因為目前apollo似乎沒有提供直接query data的方法，都得搭配hook） */
+  //   console.log('called QueryOcard()', symbolName)
+  //   const { error, data } = useQuery<QT.ocard, QT.ocardVariables>(queries.OCARD, {
+  //     variables: { oauthorName, symbolName },
+  //   })
+  //   if (symbolName === undefined) return null
+  //   if (error) updateNestedOcards(symbolName, undefined, error.toString())
+  //   else if (data?.ocard) updateNestedOcards(symbolName, data?.ocard)
+  //   return null
+  // }
+
+  // // function NestedTickerOcard({ symbolName, oauthorName, src }: { symbolName: string; oauthorName: string; src: string }) {
+  // //   const { data, error, loading } = useQuery<QT.ocard, QT.ocardVariables>(queries.OCARD, {
+  // //     variables: { symbolName, oauthorName },
+  // //   })
+  // //   if (loading) return <span>~ Loading... ~</span>
+  // //   if (data?.ocard) return <CardBody card={data.ocard} rootFormat={MK.TICKER_FORMATTER} bySrc={src} />
+  // //   return <span>Error!</span>
 }
-
-// --- Helpers ---
-
-// export function findOneComment<T extends QT.comment | QT.CommentInput>(mark: string, comments: T[]): T | undefined {
-//   return comments.find(e => {
-//     if ('meta' in e)
-//       return (e as QT.comment).meta?.mark === mark
-//     if ('mark' in e)
-//       return (e as QT.CommentInput).mark === mark
-//     throw new Error()
-//   })
-// }
-
-// export function findManyComments<T extends QT.comment | QT.CommentInput>(mark: string, comments: T[]): T[] {
-//   return comments.filter(e => {
-//     if ('meta' in e)
-//       return (e as QT.comment).meta?.mark === mark
-//     if ('mark' in e)
-//       return (e as QT.CommentInput).mark === mark
-//     throw new Error()
-//   })
-// }
-
-// ------- Deprecated --------
-
-// function makeCardId(comment: QT.commentFragment): string {
-//   let id: string
-//   if (comment.cocardId) id = 'Cocard:' + comment.ocardId
-//   else if (comment.ocardId) id = 'Ocard:' + comment.ocardId
-//   else if (comment.selfcardId) id = 'Ocard:' + comment.ocardId
-//   else throw new Error()
-//   return id
-// }
-
-// function getVoteIdx(str: string): number | undefined {
-//   /** []buy [X]sell []watch  -> return 1 */
-//   const re = /\[.?\]/gm
-//   let m
-//   const matches = []
-//   while ((m = re.exec(str)) !== null) {
-//     // This is necessary to avoid infinite loops with zero-width matches
-//     if (m.index === re.lastIndex) re.lastIndex++
-//     // 選擇的選項標為1，其餘為0
-//     matches.push(m[0].length > 2 ? 1 : 0)
-//   }
-//   return matches.indexOf(1)
-// }
-
-// function mapVoters(voteComments: QT.commentFragment[], nChoices: number): string[][] {
-//   const voters: string[][] = []
-//   for (let i = 0; i < nChoices; i++) {
-//     const _voteChoiceN: string[] = []
-//     for (const e of voteComments) {
-//       if (e.text && getVoteIdx(e.text) === i) {
-//         _voteChoiceN.push(makeCardId(e))
-//       }
-//     }
-//     voters.push(_voteChoiceN)
-//   }
-//   return voters
-// }
-
-// function filterCommentsByVote(
-//   voteIdx: number,
-//   voters: string[][],
-//   comments: QT.commentFragment[],
-// ): QT.commentFragment[] {
-//   // const voters = ["Ocard:1", "Selfcard:1"]
-//   const votersByVote = voters[voteIdx]
-//   return comments.filter(e => votersByVote.indexOf(makeCardId(e)) >= 0)
-// }
-
-// function ShowCardClicker({
-//   selfcardId,
-//   ocardId,
-//   children,
-// }: {
-//   selfcardId?: string
-//   ocardId?: string
-//   children: React.ReactNode
-// }) {
-//   if (!selfcardId && !ocardId) throw new Error('selfcardId及ocardId至少需要一個')
-//   return <span>{children}</span>
-// }
-
-// function QueryCardModal({ card, mycard }: { card: QT.cocard_cocard; mycard?: QT.selfcard_selfcard }) {
-//   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
-//   const [cardId, setCardId] = useState<[string, number] | null>(null)
-//   function onClick(comment: QT.commentFragment): void {
-//     // console.log('onClick')
-//     if (comment.ocardId) setCardId(['Ocard', comment.ocardId])
-//     else if (comment.selfcardId) setCardId(['Selfcard', comment.selfcardId])
-//     else return
-//     setIsModalVisible(true)
-//   }
-//   /** (NEXT)將mycard的comments放入裡面，便利push到cocard */
-//   // const battles = oneCommentByKey({ comments: card.comments, key: "battles" })
-//   return (
-//     <>
-//       <Modal
-//         visible={isModalVisible}
-//         onCancel={function () {
-//           setIsModalVisible(false)
-//         }}
-//       >
-//         {/* {cardId && cardId[0] === 'Ocard' && <QueryOcard id={cardId[1].toString()} />} */}
-//         {/* {cardId && cardId[0] === 'Selfcard' && <QuerySelfcard id={cardId[1].toString()} />} */}
-//       </Modal>
-//     </>
-//   )
-// }
-
-// function QueryOcard({
-//   oauthorName,
-//   symbolName,
-//   updateNestedOcards,
-// }: {
-//   oauthorName: string
-//   symbolName?: string
-//   updateNestedOcards(symbol: string, card?: QT.ocard_ocard, error?: string): void
-// }) {
-//   /** 僅用於call api，不render（需要這樣寫是因為目前apollo似乎沒有提供直接query data的方法，都得搭配hook） */
-//   console.log('called QueryOcard()', symbolName)
-//   const { error, data } = useQuery<QT.ocard, QT.ocardVariables>(queries.OCARD, {
-//     variables: { oauthorName, symbolName },
-//   })
-//   if (symbolName === undefined) return null
-//   if (error) updateNestedOcards(symbolName, undefined, error.toString())
-//   else if (data?.ocard) updateNestedOcards(symbolName, data?.ocard)
-//   return null
-// }
-
-// // function NestedTickerOcard({ symbolName, oauthorName, src }: { symbolName: string; oauthorName: string; src: string }) {
-// //   const { data, error, loading } = useQuery<QT.ocard, QT.ocardVariables>(queries.OCARD, {
-// //     variables: { symbolName, oauthorName },
-// //   })
-// //   if (loading) return <span>~ Loading... ~</span>
-// //   if (data?.ocard) return <CardBody card={data.ocard} rootFormat={MK.TICKER_FORMATTER} bySrc={src} />
-// //   return <span>Error!</span>
-// // }

@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { getCardUrlParam, symbolToUrl } from '../../lib/helper'
-import { CocardFragment, CocardQuery, useCocardQuery } from '../../apollo/query.graphql'
-import { CardBody } from '../../components/card'
-import { CardForm } from '../../components/card-form'
-import { SlateEditorPage, EditorWithAutoSuggest } from '../../components/editor/editor'
-import { QueryDataProvider } from '../../components/data-provider'
-import { useMe } from '../../components/use-me'
+// import { getCardUrlParam, symbolToUrl } from '../../lib/helper'
+import { CardFragment, CardQuery, useCardQuery } from '../../apollo/query.graphql'
+import { CardBody } from '../card'
+import { CardForm } from '../card-form'
+// import { SlateEditorPage, EditorWithAutoSuggest } from '../../components/editor/editor'
+import { QueryDataProvider } from '../data-provider'
+import { useMe } from '../use-me'
 import classes from './card-page.module.scss'
 
 // interface RouteProps extends RouteComponentProps {
@@ -36,31 +36,32 @@ export function CardFormPage(): JSX.Element | null {
 
   function _render({ url, symbol }: { url?: string; symbol?: string }): JSX.Element {
     return (
-      <QueryDataProvider
-        useQuery={() => useCocardQuery({ variables: { url, symbol } })}
-        render={(data: CocardQuery) => {
-          if (data && data.cocard) {
-            const url = `/card?${getCardUrlParam(data.cocard)}`
-            return (
-              <div className={classes.main}>
-                <SlateEditorPage
-                  card={data.cocard}
-                  onFinish={() => {
-                    router.push(url)
-                  }}
-                />
-                {/* <CardForm
-                  card={data.cocard}
-                  onFinish={() => {
-                    router.push(url)
-                  }}
-                /> */}
-              </div>
-            )
-          }
-          return null
-        }}
-      />
+      // <QueryDataProvider
+      //   useQuery={() => useCocardQuery({ variables: { url, symbol } })}
+      //   render={(data: CocardQuery) => {
+      //     if (data && data.cocard) {
+      //       const url = `/card?${getCardUrlParam(data.cocard)}`
+      //       return (
+      //         <div className={classes.main}>
+      //           <SlateEditorPage
+      //             card={data.cocard}
+      //             onFinish={() => {
+      //               router.push(url)
+      //             }}
+      //           />
+      //           {/* <CardForm
+      //             card={data.cocard}
+      //             onFinish={() => {
+      //               router.push(url)
+      //             }}
+      //           /> */}
+      //         </div>
+      //       )
+      //     }
+      //     return null
+      //   }}
+      // />
+      <></>
     )
   }
 

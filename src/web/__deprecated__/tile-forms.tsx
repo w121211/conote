@@ -1,5 +1,5 @@
 import { Form, Button, Input } from 'antd'
-import { RepliesDocument, RepliesQuery, RepliesQueryVariables, useCreateReplyMutation } from '../apollo/query.graphql'
+// import { RepliesDocument, RepliesQuery, RepliesQueryVariables, useCreateReplyMutation } from '../apollo/query.graphql'
 
 export function ReplyForm({
   commentId,
@@ -16,23 +16,23 @@ export function ReplyForm({
 }): JSX.Element {
   const [form] = Form.useForm()
 
-  const [createReply] = useCreateReplyMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<RepliesQuery, RepliesQueryVariables>({
-        query: RepliesDocument,
-        variables: { commentId },
-      })
-      if (data?.createReply && res?.replies) {
-        cache.writeQuery({
-          query: RepliesDocument,
-          variables: { commentId },
-          data: { replies: res.replies.concat([data?.createReply]) },
-        })
-        addReplyCountByOne()
-        form.resetFields()
-      }
-    },
-  })
+  // const [createReply] = useCreateReplyMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<RepliesQuery, RepliesQueryVariables>({
+  //       query: RepliesDocument,
+  //       variables: { commentId },
+  //     })
+  //     if (data?.createReply && res?.replies) {
+  //       cache.writeQuery({
+  //         query: RepliesDocument,
+  //         variables: { commentId },
+  //         data: { replies: res.replies.concat([data?.createReply]) },
+  //       })
+  //       addReplyCountByOne()
+  //       form.resetFields()
+  //     }
+  //   },
+  // })
   // const [createReply] = useMutation<QT.createReply, QT.createReplyVariables>(queries.CREATE_REPLY, {
   //   update(cache, { data }) {
   //     const res = cache.readQuery<QT.replies, QT.repliesVariables>({
@@ -50,16 +50,16 @@ export function ReplyForm({
   //     }
   //   },
   // })
-  function _onFinish(values: any) {
-    createReply({ variables: { commentId, data: values } })
-    if (onFinish) onFinish()
-  }
+  // function _onFinish(values: any) {
+  //   createReply({ variables: { commentId, data: values } })
+  //   if (onFinish) onFinish()
+  // }
   function _onFinishFailed(errorInfo: any) {
     console.log('Failed:', errorInfo)
     if (onFinishFailed) onFinishFailed()
   }
   return (
-    <Form form={form} name="reply-form" onFinish={_onFinish} onFinishFailed={_onFinishFailed}>
+    <Form form={form} name="reply-form" onFinishFailed={_onFinishFailed}>
       <Form.Item
         name="text"
         initialValue={suggestText}

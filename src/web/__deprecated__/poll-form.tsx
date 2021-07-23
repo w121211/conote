@@ -7,10 +7,10 @@ import {
   MyVotesQuery,
   MyVotesDocument,
   PollFragment,
-  RepliesDocument,
-  RepliesQuery,
-  RepliesQueryVariables,
-  useCreateReplyMutation,
+  // RepliesDocument,
+  // RepliesQuery,
+  // RepliesQueryVariables,
+  // useCreateReplyMutation,
   useCreateVoteMutation,
   useMyVotesQuery,
 } from '../apollo/query.graphql'
@@ -134,23 +134,23 @@ export function PollForm({ poll, setShowModal }: { poll: PollFragment; setShowMo
       setShowModal(false)
     },
   })
-  const [createReply, createReplyResult] = useCreateReplyMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<RepliesQuery, RepliesQueryVariables>({
-        query: RepliesDocument,
-        variables: { commentId: poll.commentId.toString() },
-      })
-      if (data?.createReply && res?.replies) {
-        cache.writeQuery<RepliesQuery, RepliesQueryVariables>({
-          query: RepliesDocument,
-          variables: { commentId: poll.commentId.toString() },
-          data: { replies: res?.replies.concat([data?.createReply]) },
-        })
-        // addReplyCountByOne()
-        form.resetFields()
-      }
-    },
-  })
+  // const [createReply, createReplyResult] = useCreateReplyMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<RepliesQuery, RepliesQueryVariables>({
+  //       query: RepliesDocument,
+  //       variables: { commentId: poll.commentId.toString() },
+  //     })
+  //     if (data?.createReply && res?.replies) {
+  //       cache.writeQuery<RepliesQuery, RepliesQueryVariables>({
+  //         query: RepliesDocument,
+  //         variables: { commentId: poll.commentId.toString() },
+  //         data: { replies: res?.replies.concat([data?.createReply]) },
+  //       })
+  //       // addReplyCountByOne()
+  //       form.resetFields()
+  //     }
+  //   },
+  // })
   function onFinish(values: any) {
     console.log(values)
     // form
@@ -166,20 +166,20 @@ export function PollForm({ poll, setShowModal }: { poll: PollFragment; setShowMo
     // if (choiceIdx === undefined) {
     //   form.
     // }
-    createVote({
-      variables: {
-        pollId: poll.id,
-        choiceIdx,
-      },
-    })
-    if (values.text) {
-      createReply({
-        variables: {
-          data: { text: `<${poll.choices[choiceIdx]}>${values.text}` },
-          commentId: poll.commentId.toString(),
-        },
-      })
-    }
+    // createVote({
+    //   variables: {
+    //     pollId: poll.id,
+    //     choiceIdx,
+    //   },
+    // })
+    // if (values.text) {
+    //   createReply({
+    //     variables: {
+    //       data: { text: `<${poll.choices[choiceIdx]}>${values.text}` },
+    //       commentId: poll.commentId.toString(),
+    //     },
+    //   })
+    // }
   }
   return (
     <Form form={form} onFinish={onFinish}>
@@ -191,13 +191,13 @@ export function PollForm({ poll, setShowModal }: { poll: PollFragment; setShowMo
       </Form.Item>
 
       <Form.Item>
-        {createVoteResult.loading || createReplyResult.loading ? (
+        {/* {createVoteResult.loading || createReplyResult.loading ? (
           <Spin />
         ) : (
           <Button shape="round" htmlType="submit">
             送出
           </Button>
-        )}
+        )} */}
       </Form.Item>
     </Form>
   )

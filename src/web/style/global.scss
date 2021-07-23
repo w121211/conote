@@ -28,8 +28,10 @@ body {
   overflow: hidden;
   width: auto;
   height: auto;
+  margin: 0;
   font-size: 15px;
   line-height: 2;
+
   @media screen and (max-width: 500px) {
     font-size: 14px;
   }
@@ -43,9 +45,10 @@ ul {
   display: flex;
   flex-direction: column;
   padding: 0;
+  list-style-position: outside;
   // list-style: none;
   // font-size: $font-sm;
-  margin-bottom: 0;
+  margin: 0;
 }
 li {
   height: auto;
@@ -56,8 +59,11 @@ span {
   // display: inline-block;
 }
 a {
-  color: $link;
+  color: $text;
+  border-bottom: 1px solid $text;
+  text-decoration: none;
   &:hover {
     color: $secondaryHover;
+    border-bottom: 1px solid $secondaryHover;
   }
 }

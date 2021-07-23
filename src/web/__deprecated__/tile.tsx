@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { Button, Comment as AntdComment, Modal } from 'antd'
-import { MeQuery, ReplyFragment, useCommentQuery } from '../apollo/query.graphql'
+// import { MeQuery, ReplyFragment, useCommentQuery } from '../apollo/query.graphql'
 // import { CommentList } from './commentList'
 import { PollForm } from './poll-form'
 import { ReplyForm } from './tile-forms'
-import { QueryReplyList } from './tile-list'
-import { ReplyPanel } from './tile-panel'
+// import { QueryReplyList } from './tile-list'
+// import { ReplyPanel } from './tile-panel'
 
 export interface TileOptions {
   dispReplies?: boolean
@@ -24,54 +24,54 @@ export const defaultTileOptions: TileOptions = {
   dispReplyAs: 'line',
 }
 
-export function Reply({
-  reply,
-  me,
-  options = defaultTileOptions,
-}: {
-  reply: ReplyFragment
-  me?: MeQuery['me']
-  options?: TileOptions
-}): JSX.Element {
-  // const edit = me?.id === post.userId ? <Link to={`/post/${post.id}?update`}>edit</Link> : null
-  // const panel = <ReplyPanel reply={reply} meAuthor={me?.id === reply.userId} />
-  // return <MdText text={reply.text} />
-  // if (options.dispReplyAs === 'tag') {
-  //   return (
-  //     <span>
-  //       <Popover content={panel}>
-  //         <Tag>
-  //           <MdText text={reply.text} />
-  //           <span>({reply.count.nUps - reply.count.nDowns})</span>
-  //         </Tag>
-  //       </Popover>
-  //     </span>
-  //   )
-  // } else if (options.dispReplyAs === 'tile') {
-  //   return (
-  //     <span>
-  //       <Popover className={tagPopoverCss.popover} content={panel}>
-  //         <MdText text={reply.text} />
-  //         <span>({reply.count.nUps - reply.count.nDowns})</span>
-  //       </Popover>
-  //       {/* {panel} */}
-  //     </span>
-  //   )
-  // } else {
-  //   return (
-  //     <li className={commentListSmallCss.commentRoot}>
-  //       <AntdComment content={reply.text} />
-  //       {panel}
-  //     </li>
-  //   )
-  // }
-  return (
-    <div>
-      <p>{reply.text}</p>
-      <ReplyPanel reply={reply} meAuthor={me?.id === reply.userId} />
-    </div>
-  )
-}
+// export function Reply({
+//   reply,
+//   me,
+//   options = defaultTileOptions,
+// }: {
+//   reply: ReplyFragment
+//   me?: MeQuery['me']
+//   options?: TileOptions
+// }): JSX.Element {
+//   // const edit = me?.id === post.userId ? <Link to={`/post/${post.id}?update`}>edit</Link> : null
+//   // const panel = <ReplyPanel reply={reply} meAuthor={me?.id === reply.userId} />
+//   // return <MdText text={reply.text} />
+//   // if (options.dispReplyAs === 'tag') {
+//   //   return (
+//   //     <span>
+//   //       <Popover content={panel}>
+//   //         <Tag>
+//   //           <MdText text={reply.text} />
+//   //           <span>({reply.count.nUps - reply.count.nDowns})</span>
+//   //         </Tag>
+//   //       </Popover>
+//   //     </span>
+//   //   )
+//   // } else if (options.dispReplyAs === 'tile') {
+//   //   return (
+//   //     <span>
+//   //       <Popover className={tagPopoverCss.popover} content={panel}>
+//   //         <MdText text={reply.text} />
+//   //         <span>({reply.count.nUps - reply.count.nDowns})</span>
+//   //       </Popover>
+//   //       {/* {panel} */}
+//   //     </span>
+//   //   )
+//   // } else {
+//   //   return (
+//   //     <li className={commentListSmallCss.commentRoot}>
+//   //       <AntdComment content={reply.text} />
+//   //       {panel}
+//   //     </li>
+//   //   )
+//   // }
+//   return (
+//     <div>
+//       <p>{reply.text}</p>
+//       <ReplyPanel reply={reply} meAuthor={me?.id === reply.userId} />
+//     </div>
+//   )
+// }
 
 // export function SuggestReply({
 //   text,
@@ -100,9 +100,9 @@ export function QueryCommentModal({
 
   const [showModal, setShowModal] = useState<boolean>(false)
   const [suggestReply, setSuggestReply] = useState<string | undefined>()
-  const { data, loading, error } = useCommentQuery({
-    variables: { id: commentId },
-  })
+  // const { data, loading, error } = useCommentQuery({
+  //   variables: { id: commentId },
+  // })
 
   function onClickFactory(text: string) {
     return function () {
@@ -111,20 +111,20 @@ export function QueryCommentModal({
     }
   }
 
-  if (loading) {
-    return <p>loading...</p>
-  }
-  if (error) {
-    console.error(error)
-    return <p>API error</p>
-  }
-  if (!data || !data.comment) {
-    return <p>Comment not found</p>
-  }
+  // if (loading) {
+  //   return <p>loading...</p>
+  // }
+  // if (error) {
+  //   console.error(error)
+  //   return <p>API error</p>
+  // }
+  // if (!data || !data.comment) {
+  //   return <p>Comment not found</p>
+  // }
 
   return (
     <div>
-      <Modal
+      {/* <Modal
         // title="Comment"
         visible={showModal}
         footer={null}
@@ -147,7 +147,7 @@ export function QueryCommentModal({
         <QueryReplyList commentId={data.comment.id} />
 
         {/* <SearchAllForm /> */}
-      </Modal>
+      {/* </Modal> */}
       <Button
         onClick={() => {
           setShowModal(true)

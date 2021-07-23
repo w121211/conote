@@ -1,25 +1,25 @@
 import { useState, forwardRef, useEffect } from 'react'
 import {
-  useCreateReplyMutation,
-  useCommentQuery,
-  RepliesQuery,
-  RepliesQueryVariables,
-  RepliesDocument,
-  useRepliesQuery,
-  useCreateVoteMutation,
-  CommentQuery,
-  CommentQueryVariables,
-  CommentDocument,
+  // useCreateReplyMutation,
+  // useCommentQuery,
+  // RepliesQuery,
+  // RepliesQueryVariables,
+  // RepliesDocument,
+  // useRepliesQuery,
+  // useCreateVoteMutation,
+  // CommentQuery,
+  // CommentQueryVariables,
+  // CommentDocument,
   MyVotesDocument,
   MyVotesQuery,
   useMyVotesQuery,
   MyVotesQueryResult,
   Vote,
-} from '../../apollo/query.graphql'
+} from '../apollo/query.graphql'
 import { Form, Button, Radio } from 'antd'
-import Radios from '../radios/radios'
+import Radios from './radios/radios'
 import MyTextArea from '../myTextArea/myTextArea'
-import BarChart from '../bar/bar'
+import BarChart from '../components/bar/bar'
 import classes from './discuss-page.module.scss'
 // import { setUncaughtExceptionCaptureCallback } from 'node:process'
 // import { useSubscription } from '@apollo/client'
@@ -81,24 +81,24 @@ export const CommentForm = forwardRef(
     // const pollId = commentsData?.comment?.poll?.id
     // const meVote = pollId && myVotesData?.myVotes.find((e, i) => e.pollId === parseInt(pollId))
 
-    const [createReply] = useCreateReplyMutation({
-      update(cache, { data }) {
-        const res = cache.readQuery<RepliesQuery, RepliesQueryVariables>({
-          query: RepliesDocument,
-          variables: { commentId: boardId },
-        })
-        if (data?.createReply && res?.replies) {
-          cache.writeQuery({
-            query: RepliesDocument,
-            variables: { commentId: boardId },
-            data: { replies: [data?.createReply].concat(res.replies) },
-          })
-          // addReplyCountByOne()
+    // const [createReply] = useCreateReplyMutation({
+    //   update(cache, { data }) {
+    //     const res = cache.readQuery<RepliesQuery, RepliesQueryVariables>({
+    //       query: RepliesDocument,
+    //       variables: { commentId: boardId },
+    //     })
+    //     if (data?.createReply && res?.replies) {
+    //       cache.writeQuery({
+    //         query: RepliesDocument,
+    //         variables: { commentId: boardId },
+    //         data: { replies: [data?.createReply].concat(res.replies) },
+    //       })
+    //       // addReplyCountByOne()
 
-          form.resetFields()
-        }
-      },
-    })
+    //       form.resetFields()
+    //     }
+    //   },
+    // })
 
     // const [createVote] = useCreateVoteMutation({
     //   update(cache, { data }) {
@@ -141,14 +141,14 @@ export const CommentForm = forwardRef(
       //   // setVotedIdx(values.votes)
       // }
       if (values.text) {
-        createReply({
-          variables: {
-            commentId: boardId,
-            data: {
-              text: `${values.text}`,
-            },
-          },
-        })
+        // createReply({
+        //   variables: {
+        //     commentId: boardId,
+        //     data: {
+        //       text: `${values.text}`,
+        //     },
+        //   },
+        // })
       }
 
       // if (values.text && !switchTab) {

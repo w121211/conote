@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, EventHandler } from 'react'
 import { SubmitErrorHandler, SubmitHandler, useForm, useFieldArray } from 'react-hook-form'
-import { useRepliesQuery, Reply, useCommentQuery, ReplyFragment } from '../../apollo/query.graphql'
+import { useCommentsQuery, CommentsDocument, Comment } from '../../apollo/query.graphql'
 // import { List } from 'antd'
 // import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
 // import * as QT from '../../graphql/query-types'
 import CommentTemplate from '../commentTemplate/commentTemplate'
-import Radios from '../radios/radios'
+import Radios from '../../__deprecated__/radios/radios'
 // import ParentSize from '@visx/responsive/lib/components/ParentSize'
 import BarChart from '../bar/bar'
 import classes from './commentList.module.scss'
@@ -37,28 +37,22 @@ type FormValues = {
 }
 
 const CommentList = ({
-  // type,
-  boardId,
-}: // pollCommentId,
+  commentsList,
+}: // filterCommentsList,
+// pollCommentId,
 // switchTab,
 // anchorHLHandler,
 // myScrollIntoView,
 // resetHighLight,
 {
-  boardId: string
-  // type?: string
-  // commentId: string
-  // pollCommentId?: string
-  // switchTab?: boolean
-  // anchorHLHandler?: (anchorId: string) => void
-  // myScrollIntoView?: () => void
-  // resetHighLight?: () => void
+  commentsList?: Comment[]
+  // filterCommentsList?: number[]
 }) => {
   //   const [repliesList,setRepliesList]=useState<Array<({
   //     __typename?: 'Reply';
   // } & ReplyFragment)>>()
   const myRef = useRef<HTMLLIElement>(null)
-
+  const [commentsValue, setCommentsValue] = useState(commentsList)
   // const onClickHandler = (e: React.MouseEvent, anchorId: IterableIterator<RegExpMatchArray> | null) => {
   //   if (anchorId) {
   //     const anchorIdArr = Array.from(anchorId)
@@ -81,17 +75,8 @@ const CommentList = ({
   // })
   // const meCommentId = commentId ? commentId : pollCommentId
 
-  const {
-    data: repliesData,
-    loading: repliesLoading,
-    error: repliesError,
-  } = useRepliesQuery({
-    // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
-    variables: { commentId: boardId },
-    fetchPolicy: 'cache-first',
-  })
+  const commentsLength = commentsList ? commentsList.length : 0
 
-  const repliesLength = repliesData?.replies.length
   // useEffect(() => {
   //   if(repliesData&&!repliesLoading){
   //     setRepliesList(repliesData.replies)
@@ -109,9 +94,9 @@ const CommentList = ({
   // }
 
   // const loadMore = () => {}
-  const testData = {
-    replies: [{ text: '測試' }, { text: '測試' }, { text: '哈哈' }, { text: 'yesysefsek' }, { text: '測試' }],
-  }
+  // const testData = {
+  //   replies: [{ text: '測試' }, { text: '測試' }, { text: '哈哈' }, { text: 'yesysefsek' }, { text: '測試' }],
+  // }
 
   return (
     // <>
@@ -166,21 +151,26 @@ const CommentList = ({
       // )
       // }
     >
-      {testData.replies.map((e, i) => (
-        <ul
-          className={classes.commentRoot}
-          key={i}
-          ref={myRef}
-          // onClick={e => onClickHandler(e, item.text.matchAll(/(^\d+ )(.+$)/g))}
-        >
-          <CommentTemplate
-            id={`${i}`}
-            content={e.text.replace(/(^\d+ )(.+$)/g, '$2')}
-            // updatedAt={item.updatedAt}
-            floor={`#${repliesLength && repliesLength - i}`}
-          />
-        </ul>
-      ))}
+      {commentsList &&
+        commentsList.map((e, i) => (
+          <ul
+            className={classes.commentRoot}
+            key={i}
+            // ref={myRef}
+            // onClick={e => onClickHandler(e, item.text.matchAll(/(^\d+ )(.+$)/g))}
+          >
+            {commentsList ? (
+              <CommentTemplate
+                commentId={e.id}
+                content={e.content.replace(/(^\d+ )(.+$)/g, '$2')}
+                updatedAt={e.updatedAt}
+                choice={e.count}
+                floor={`#${commentsLength && commentsLength - i}`}
+                key={i}
+              />
+            ) : null}
+          </ul>
+        ))}
     </div>
     // </>
   )
