@@ -1,7 +1,8 @@
 import { Descendant, BaseEditor, BaseRange, Node } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-// import { BulletOperation } from '../../../web/lib/bullet-tree/types'
+import { CardType } from '@prisma/client'
+import { BulletDraft, RootBullet } from '../../lib/bullet/types'
 
 export type EmptyText = {
   text: string
@@ -138,49 +139,42 @@ export type LabelInlineElement = {
 export type UlElement = {
   type: 'ul'
   children: LiElement[]
+
+  fold?: true
 }
 
 export type LiElement = {
   type: 'li'
   children: [LcElement, UlElement?]
 
-  fold?: true
+  // fold?: true
 }
 
 /**
  * li的content，實際的input地方
  */
-export type LcElement = {
+export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
   type: 'lc'
   children: CustomText[]
 
-  id?: number
-  body?: string
-  placeholder?: string
-  warning?: string
-
-  // op?: BulletOperation
-  prevHead?: string
-  prevBody?: string
-  sourceUrl?: string
-
   asOauthor?: true // 若沒有的話視為self author
   banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
-
-  freeze?: true
   // banDeleteBackward?: true
   // banDeleteForward?: true
   // banInsertBreak?: true
   // insertBreakAsIndent?: true
 
-  mirror?: true
-  root?: true
-  symbol?: string
-  createCard?: true // 找不到card，視為創新card
-  rootBullet?: Bullet // query card 取得的 body bullet root，保持靜態不修改
+  // rootBullet?: Bullet // query card 取得的 body bullet root，保持靜態不修改
 
   // comments?: CommentInput[]
   comment?: CommentInput
+
+  // 新增mirror時需要先暫時存放
+  root?: true
+  mirror?: true
+  symbol?: string
+  rootBullet?: RootBullet // 只有root會存root bullet，用此幫助serialize
+  newSymbol?: true // 找不到symbol，視為創新card
 }
 
 type CustomElement =

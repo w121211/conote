@@ -1,4 +1,4 @@
-# Custom scalar, see https://www.graphql-scalars.dev/docs/quick-start
+# Custom scalar，需要同步修改./apollo/schema.ts @see https://www.graphql-scalars.dev/docs/quick-start
 scalar DateTime
 scalar JSON
 
@@ -11,7 +11,7 @@ type Query {
   latestCardEntries(afterId: String): [CardEntry!]!
 
   # 以symbol查找，若無返回null
-  # @cardBodyId 若給予，會返回該body，若無，返回latest-body
+  # @cardBodyId 若給予，返回該card及指定的body，否則返回latest body
   card(symbol: String!, cardBodyId: String): Card
 
   # 以url查找，若無會fetch、resolve並創新card
@@ -101,9 +101,9 @@ type Query {
 type Mutation {
   # 實質上是get or create，另外 webpage card 是在 query 階段創新
   createSymbolCard(data: CardInput!): Card!
+  # createCardHead(cardId: ID!, data: CardBulletRootInput!): CardHead!
 
-  createCardHead(cardId: ID!, data: CardBulletRootInput!): CardHead!
-
+  # 若該symbol尚未有card時，需要給template，會同步創card, body
   createCardBody(cardId: ID!, data: CardBodyInput!): CardBody!
 
   # 等價於create hashtag
@@ -292,8 +292,10 @@ type Board {
   cardId: Int
   status: BoardStatus!
   hashtag: String!
-  meta: JSON!
-  content: JSON!
+  # meta: JSONObject!
+  # content: JSONObject!
+  meta: String! # json
+  content: String! # json
   poll: Poll
   count: BoardCount!
   createdAt: DateTime!
@@ -347,7 +349,8 @@ type Bullet {
 type CardHead {
   id: ID!
   userId: String!
-  content: JSON!
+  # content: JSONObject!
+  content: String! # json
   timestamp: Int!
   prevId: Int
 }
@@ -355,7 +358,8 @@ type CardHead {
 type CardBody {
   id: ID!
   userId: String!
-  content: JSON!
+  # content: JSONObject!
+  content: String! # json
   timestamp: Int!
   prevId: Int
 }
@@ -405,46 +409,46 @@ input BoardInput {
   content: String!
 }
 
-input BulletInput {
-  id: Int
-  timestamp: Int
-  userIds: [String!]
-  head: String!
-  body: String
-  # hashtags: Hashtag[]
-  placeholder: String
-  children: [BulletInput!]
-  prevHead: String
-  prevBody: String
-  op: BulletOperation
+# input BulletInput {
+#   id: Int
+#   timestamp: Int
+#   userIds: [String!]
+#   head: String!
+#   body: String
+#   # hashtags: Hashtag[]
+#   placeholder: String
+#   children: [BulletInput!]
+#   prevHead: String
+#   prevBody: String
+#   op: BulletOperation
 
-  sourceUrl: String
-  oauthorName: String
-  boardId: Int
-  pollId: Int
+#   sourceUrl: String
+#   oauthorName: String
+#   boardId: Int
+#   pollId: Int
 
-  # 這些需要bot權限，一般user無法操作
-  # freeze: Boolean
-  # freezeChildren: Boolean
-  # keyvalue: Boolean
-  # valueBoolean: Boolean
-  # valueArray: Boolean
-  # pin: Boolean
-  # pinCode: PinCode
-  # childTemplate: BulletInput
+#   # 這些需要bot權限，一般user無法操作
+#   # freeze: Boolean
+#   # freezeChildren: Boolean
+#   # keyvalue: Boolean
+#   # valueBoolean: Boolean
+#   # valueArray: Boolean
+#   # pin: Boolean
+#   # pinCode: PinCode
+#   # childTemplate: BulletInput
 
-  headValidator: String
-  bodyValidator: String
-}
+#   headValidator: String
+#   bodyValidator: String
+# }
 
-input CardBulletRootInput {
-  cardId: String!
-  root: BulletInput!
-}
+# input CardBulletRootInput {
+#   symbol: String!
+#   root: BulletInput!
+# }
 
 input CardBodyInput {
-  self: CardBulletRootInput
-  nested: [CardBulletRootInput!]
+  self: JSON
+  mirrors: [JSON!]
 }
 
 input CardTemplatePropsInput {
@@ -455,7 +459,7 @@ input CardTemplatePropsInput {
 
 input CardInput {
   symbol: String!
-  templateProps: CardTemplatePropsInput!
+  templateProps: CardTemplatePropsInput
 }
 
 # ------ NEXT ------

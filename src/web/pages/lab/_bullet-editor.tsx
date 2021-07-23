@@ -16,8 +16,9 @@ import {
 import { withHistory } from 'slate-history'
 import { tokenize, LINE_VALUE_GRAMMAR, Token } from '../../../packages/editor/src/parser'
 import { useSearchAllLazyQuery } from '../../apollo/query.graphql'
-import { BulletElement } from '../../lib/bullet-tree/slate-custom-types'
+
 import classes from './bullet-editor.module.scss'
+import { BulletElement } from '../../lib/bullet/editor/slate-custom-types'
 
 const SUGGESTIONS = {
   '@': ['@作者', '@me'],
@@ -260,78 +261,6 @@ const CustomElement = (props: RenderElementProps): JSX.Element => {
   }
 }
 
-const Portal = ({ children }: { children: React.ReactNode }): JSX.Element | null => {
-  return typeof document === 'object' ? createPortal(children, document.body) : null
-}
-
-const SuggestionPanel = ({
-  corner,
-  suggestions,
-  selectedIdx,
-  setSelectedIdx,
-  onSelected,
-}: {
-  corner?: { top: string; left: string }
-  suggestions: string[] | null
-  selectedIdx: number | null
-  setSelectedIdx: (a: number | null) => void
-  onSelected: (event: React.KeyboardEvent | React.MouseEvent, selectedTerm: string) => void
-}): JSX.Element => {
-  let items: JSX.Element
-  if (suggestions === null) {
-    items = <div>loading...</div>
-  } else if (suggestions.length === 0) {
-    items = <div>not found</div>
-  } else {
-    items = (
-      <>
-        {suggestions.map((e, i) => (
-          <div
-            key={i}
-            style={{
-              padding: '1px 3px',
-              borderRadius: '3px',
-              background: i === selectedIdx ? '#B4D5FF' : 'transparent',
-            }}
-            onMouseEnter={event => {
-              event.preventDefault()
-              setSelectedIdx(i)
-            }}
-            onMouseLeave={event => {
-              event.preventDefault()
-              setSelectedIdx(0)
-            }}
-            onMouseDown={event => {
-              event.preventDefault()
-            }}
-            onMouseUp={event => {
-              onSelected(event, e)
-            }}
-          >
-            {e}
-          </div>
-        ))}
-      </>
-    )
-  }
-
-  return (
-    <div
-      style={{
-        top: corner?.top ?? '-9999px',
-        left: corner?.left ?? '-9999px',
-        position: 'absolute',
-        zIndex: 1,
-        padding: '3px',
-        background: 'white',
-        borderRadius: '4px',
-        boxShadow: '0 1px 5px rgba(0,0,0,.2)',
-      }}
-    >
-      {items}
-    </div>
-  )
-}
 
 // Editor's functions
 
@@ -610,7 +539,7 @@ const BulletEditor = ({
   onClose,
 }: {
   initialValue?: Descendant[]
-  onClose?: ({ value }: { value: Descendant[] }) => void
+  onClose?: ({ value }: { value: UlElement[] }) => void
 }): JSX.Element => {
   const [value, setValue] = useState<Descendant[]>(initialValue)
   const renderElement = useCallback((props: RenderElementProps) => <CustomElement {...props} />, [])

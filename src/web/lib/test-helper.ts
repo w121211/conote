@@ -1,6 +1,6 @@
 // import { hash, hashSync } from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
-import { BulletInput } from './bullet-tree/types'
+import { BulletDraft } from './bullet/types'
 import { getBotEmail } from './models/user'
 
 export const BOT = { id: 'bot', email: getBotEmail() }
@@ -30,9 +30,19 @@ export const TESTOAUTHORS = [{ name: 'test-oauthor-1' }]
 //   { name: '[[Google hate Apple]]', cat: SymbolCat.TOPIC },
 // ]
 
-export const TEST_BULLET_INPUT: BulletInput = {
+export const TEST_BULLET_INPUT: BulletDraft = {
   head: '111',
-  children: [{ head: '222', children: [{ head: '333' }, { head: '444' }] }, { head: '555' }, { head: '666' }],
+  children: [
+    {
+      head: '222',
+      children: [
+        { head: '333', children: [] },
+        { head: '444', children: [] },
+      ],
+    },
+    { head: '555', children: [] },
+    { head: '666', children: [] },
+  ],
 }
 
 export async function createTestUsers(prisma: PrismaClient): Promise<void> {

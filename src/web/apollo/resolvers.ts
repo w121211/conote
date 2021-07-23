@@ -1,19 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { AuthenticationError, UserInputError } from 'apollo-server-micro'
+import { AuthenticationError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
 import { getSession } from '@auth0/nextjs-auth0'
 import { Vote } from '@prisma/client'
-import { ResolverContext } from './apollo-client'
 import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
-import { QueryResolvers, MutationResolvers, BulletInput as GqlBulletInput } from './type-defs.graphqls'
-import { searchAllSymbols } from '../lib/search/fuzzy'
-// import { getOrCreateLink } from '../lib/models/link'
+import { QueryResolvers, MutationResolvers } from './type-defs.graphqls'
+import { deltaLike } from '../lib/helper'
 import { attachLatestHeadBody, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
 import { getOrCreateUser } from '../lib/models/user'
 import { createOauthorVote, createVote } from '../lib/models/vote'
-import { deltaLike } from '../lib/helper'
-import { BulletInput } from '../lib/bullet-tree/types'
+import { searchAllSymbols } from '../lib/search/fuzzy'
+import { ResolverContext } from './apollo-client'
 
 function _toStringId<T extends { id: number }>(obj: T): T & { id: string } {
   return { ...obj, id: obj.id.toString() }
@@ -28,10 +26,10 @@ function _deleteNull<T>(obj: T) {
   }
 }
 
-function isBulletInput(obj: GqlBulletInput): obj is BulletInput {
-  _deleteNull(obj)
-  return true
-}
+// function isBulletInput(obj: GqlBulletInput): obj is BulletInput {
+//   _deleteNull(obj)
+//   return true
+// }
 
 // function _nullToUndefined<T>(obj: T): { [P in keyof T]: Exclude<T[P], null> } {
 //   for (const k in obj) {
@@ -108,13 +106,17 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   // },
 
   async card(_parent, { symbol }, _context, _info) {
-    const card = await prisma.card.findUnique({ where: { symbol } })
+    const card = await prisma.card.findUnique({
+      where: { symbol },
+      include: { link: true },
+    })
     if (card !== null) {
       const _card = await attachLatestHeadBody(card)
       return {
         ..._toStringId(_card),
         head: _toStringId(_card.head),
         body: _toStringId(_card.body),
+        link: card.link && _toStringId(card.link),
       }
     }
     return null
@@ -374,25 +376,32 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       ..._toStringId(card),
       head: { ..._toStringId(card.head) },
       body: { ..._toStringId(card.body) },
+      link: card.link && _toStringId(card.link),
     }
   },
 
-  async createCardHead(_parent, { cardId, data }, { req, res }, _info) {
-    throw new Error('Not implemented')
-  },
-
   async createCardBody(_parent, { cardId, data }, { req, res }, _info) {
-    // const { userId } = isAuthenticated(req, res)
-    // if (isBulletInput(data.self.root)) {
-    //   const body = await createCardBody({
+    const { userId } = isAuthenticated(req, res)
+    const [body] = await createCardBody({
+      cardId: parseInt(cardId),
+      self: data.self,
+      mirrors: data.mirrors ?? undefined,
+      userId,
+    })
+    console.log(body)
+    return _toStringId(body)
+    // try {
+    //   const [body] = await createCardBody({
     //     cardId: parseInt(cardId),
-    //     // nestedCards: data.nestedCards ?? undefined,
-    //     rootInput: data.self.root,
+    //     self: data.self,
+    //     mirrors: data.mirrors ?? undefined,
     //     userId,
     //   })
+    //   console.log(body)
     //   return _toStringId(body)
+    // } catch (err) {
+    //   throw new Error('err')
     // }
-    throw new Error()
   },
 
   async createBoard(_parent, { cardId, bulletId, data }, { req, res }, _info) {

@@ -1,11 +1,16 @@
 /* eslint-disable no-console */
-import { ApolloClient, NormalizedCacheObject, useApolloClient } from '@apollo/client'
+import { ApolloClient, ApolloError, useApolloClient } from '@apollo/client'
 import { useUser } from '@auth0/nextjs-auth0'
 import { BoardStatus, CardType } from '@prisma/client'
 import { Token } from 'prismjs'
+<<<<<<< HEAD
 import { createContext, FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Descendant, Element } from 'slate'
 import { useSlateStatic } from 'slate-react'
+=======
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { editorValue } from '../../apollo/cache'
+>>>>>>> 88799519858fc519d32574ac37da0f0dbb629b80
 import {
   Board,
   BoardQuery,
@@ -17,26 +22,26 @@ import {
   CommentsDocument,
   CommentsQuery,
   CommentsQueryVariables,
+  CreateSymbolCardDocument,
+  CreateSymbolCardMutation,
+  CreateSymbolCardMutationVariables,
   useBoardQuery,
   useCardQuery,
   useCommentsQuery,
   useCreateCardBodyMutation,
   useCreateOauthorCommentMutation,
-  useCreateSymbolCardMutation,
   useMeQuery,
-  useSearchAllLazyQuery,
-  useSearchAllQuery,
 } from '../../apollo/query.graphql'
 import { CardBodyInput } from '../../apollo/type-defs.graphqls'
 import { QueryDataProvider } from '../../components/data-provider'
 import { deserialize, serialize } from '../../lib/bullet-tree/serializer'
-import { tokenize } from '../../lib/bullet-tree/tokenizer'
-import { Bullet, BulletInput } from '../../lib/bullet-tree/types'
-import { CardBodyContent, CardHeadContent, CardHeadContentValueInjected, NestedCardEntry } from '../../lib/models/card'
+
+
+
 import { injectCardHeadValue } from '../../lib/models/card-helpers'
 import { CardSymbol, parseSymbol } from '../../lib/models/symbol'
 import { useCardLazyQuery } from '../../__generated__/apollo/query.graphql'
-import BulletEditor from './bullet-editor'
+
 import classes from '../../components/card.module.scss'
 import RightArrow from '../../assets/svg/right-arrow.svg'
 import Link from 'next/link'
@@ -52,6 +57,14 @@ import Popover from '../../components/popover/popover'
 // type CardBodyAndParsedContent = Omit<CardBody, 'content'> & {
 //   content: CardBodyContent
 // }
+import { BulletEditor } from '../../components/editor/editor'
+import { Serializer } from '../../components/editor/serializer'
+import { LiElement } from '../../components/editor/slate-custom-types'
+import { Node as BulletNode } from '../../lib/bullet/node'
+import { tokenize } from '../../lib/bullet/tokenizer'
+import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
+import { CardBodyContent, CardHeadContent, CardHeadContentValueInjected, PinBoard } from '../../lib/models/card'
+
 
 type CardParsed = Card & {
   headContent: CardHeadContent
@@ -59,15 +72,18 @@ type CardParsed = Card & {
   headValue: CardHeadContentValueInjected
 }
 
-// type NestedCardEntryWithParsedCard = NestedCardEntry & {
-//   card?: CardWithParsedContent
-// }
-
+/**
+ * 針對query後收到的gql card做後續parse，所以在此處理而非在後端
+ */
 function parseCard(card: Card): CardParsed {
   const headContent: CardHeadContent = JSON.parse(card.head.content)
   const bodyContent: CardBodyContent = JSON.parse(card.body.content)
+<<<<<<< HEAD
   const headValue = injectCardHeadValue({ bodyRoot: bodyContent.root, value: headContent.value })
 
+=======
+  const headValue = injectCardHeadValue({ bodyRoot: bodyContent.self, value: headContent.value })
+>>>>>>> 88799519858fc519d32574ac37da0f0dbb629b80
   return {
     ...card,
     headContent,
@@ -91,50 +107,103 @@ function getTabUrl(): string | null {
 }
 
 /**
- * 將原本的body bullet tree轉成顯示用的bullet tree
+ * 用client.query(...)方式query card，而非使用useQuery(...)，適用在非component但需要取得card的情況，例如取得mirrors
+ *
+ * @returns 當有card時返回card body bullet root; 找不到card時root為undefined，error為undefined; error時只返回error
  */
-async function buildBodyTree(props: {
-  card: CardParsed
+export async function queryAndParseCard(props: {
   // eslint-disable-next-line @typescript-eslint/ban-types
   client: ApolloClient<object>
-}): Promise<Bullet | BulletInput> {
+  symbol: string
+  mirror?: true
+}): Promise<{ root?: RootBullet; error?: ApolloError }> {
+  const { symbol, client, mirror } = props
+
+  const { data, error } = await client.query<CardQuery, CardQueryVariables>({
+    query: CardDocument,
+    variables: { symbol },
+  })
+
+  let root: RootBullet | undefined
+  if (data && data.card) {
+    const parsed = parseCard(data.card)
+    root = {
+      ...parsed.bodyContent.self,
+      mirror, // 增加mirror property
+    }
+  }
+
+  return { root, error }
+}
+
+/**
+ * 用client.query(...)方式create symbol card
+ *
+ * @returns 當有card時返回card body bullet root; 找不到card時root為undefined，error為undefined; error時只返回error
+ */
+export async function createAndParseCard(props: {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  client: ApolloClient<object>
+  symbol: string
+  mirror?: true
+}): Promise<{ root?: RootBullet }> {
+  const { symbol, client, mirror } = props
+
+  const { data } = await client.mutate<CreateSymbolCardMutation, CreateSymbolCardMutationVariables>({
+    mutation: CreateSymbolCardDocument,
+    variables: { data: { symbol } },
+  })
+
+  let root: RootBullet | undefined
+  if (data && data.createSymbolCard) {
+    const parsed = parseCard(data.createSymbolCard)
+    root = {
+      ...parsed.bodyContent.self,
+      mirror,
+    }
+  }
+  return { root }
+}
+
+/**
+ * 若是webpage card，query nested cards，並轉body
+ */
+async function buildCardBody(props: {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  client: ApolloClient<object>
+  card: CardParsed
+}): Promise<{
+  self: RootBullet
+  mirrors?: RootBullet[]
+}> {
   const { card, client } = props
 
-  if (card.type === CardType.WEBPAGE) {
-    const tempRoot: BulletInput = {
-      head: 'tempRoot',
-      // temp: true,
-      children: [card.bodyContent.root],
-    }
+  // 非webpage card，只有self
+  if (card.type !== CardType.WEBPAGE) {
+    return { self: card.bodyContent.self }
+  }
 
-    if (card.bodyContent.nestedCards) {
-      const results = await Promise.all(
-        card.bodyContent.nestedCards.map(e =>
-          client.query<CardQuery, CardQueryVariables>({
-            query: CardDocument,
-            variables: { symbol: e.cardSymbol },
-          }),
-        ),
-      )
-      for (const { error, data } of results) {
-        if (error) {
-          // console.error(error)
-        }
-        if (data && data.card) {
-          const nestedCard = parseCard(data.card)
-          const mirrorBullet: Bullet = {
-            ...nestedCard.bodyContent.root,
-            mirror: true,
-          }
-          tempRoot.children?.push(mirrorBullet)
-        }
+  // Webpage card，需要query and parse mirrors
+  const self = card.bodyContent.self
+  self.self = true // 設定此root的self flag
+
+  const mirrors: RootBullet[] = []
+  if (card.bodyContent.mirrors) {
+    const results = await Promise.all(
+      card.bodyContent.mirrors.map(e => queryAndParseCard({ client, symbol: e.symbol, mirror: true })),
+    )
+    for (const { root, error } of results) {
+      if (error) {
+        // TODO: 針對fail的卡要怎樣處理？
+        console.error(error)
+        continue
+      }
+      if (root) {
+        mirrors.push(root)
       }
     }
-
-    return tempRoot
-  } else {
-    return card.bodyContent.root
   }
+  return { self, mirrors }
 }
 
 const OauthorCommentForm = ({
@@ -255,45 +324,7 @@ export const BoardItem = (props: { boardId: string; pollId?: string }) => {
   )
 }
 
-const bodyRootDemo: BulletInput = {
-  head: 'root',
-  children: [
-    {
-      head: '1 $ABC [[123]]',
-      hashtags: [
-        {
-          userId: 'string',
-          boardId: 123,
-          boardStatus: BoardStatus.ACTIVE,
-          text: '#string',
-        },
-      ],
-      oauthorName: 'Hello',
-    },
-    { head: '2', body: '222 222' },
-    {
-      head: '3',
-      children: [
-        {
-          head: '1',
-          hashtags: [
-            {
-              userId: 'string',
-              boardId: 123,
-              boardStatus: BoardStatus.ACTIVE,
-              text: '#string',
-            },
-          ],
-          oauthorName: 'Hello',
-        },
-        { head: '2', body: '222 222' },
-        { head: '3' },
-      ],
-    },
-  ],
-}
-
-function hastaggable(node: Bullet | BulletInput): boolean {
+function hastaggable(node: Bullet | BulletDraft): boolean {
   if (node.id && !node.freeze) {
     return true
   }
@@ -543,8 +574,39 @@ const BulletItem = (props: {
   )
 }
 
+const CardBodyItem = (props: { card: Card; self: BulletDraft; mirrors?: BulletDraft[] }) => {
+  const { card, self, mirrors } = props
+
+  if (card.type === 'WEBPAGE') {
+    // 可能有mirrors
+    return (
+      <div>
+        <ul>
+          <BulletItem node={self} />
+        </ul>
+        {mirrors &&
+          mirrors.map((e, i) => (
+            <ul key={i}>
+              <BulletItem node={e} />
+            </ul>
+          ))}
+      </div>
+    )
+  }
+  // 沒有mirrors ，從第二層開始顯示 (ie 忽略root)
+  return (
+    <div>
+      <ul>
+        {self.children?.map((e, i) => (
+          <BulletItem key={i} node={e} />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 /**
- * Show a card
+ * Show a card 1. 有mirrors (ie webpage card) 2. 沒有mirrors
  */
 
 const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void }) => {
@@ -553,26 +615,12 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
   const pinBoard = parsedCard.headValue.pinBoards.find(e => e.pinCode === 'BUYSELL')
 
   const client = useApolloClient()
-  // const [createCardBody] = useCreateCardBodyMutation({
-  //   update(cache, { data }) {
-  //     const res = cache.readQuery<CardQuery, CardQueryVariables>({
-  //       query: CardDocument,
-  //       variables: { symbol: card.symbol },
-  //     })
-  //     if (data?.createCardBody && res?.card) {
-  //       cache.writeQuery<CardQuery, CardQueryVariables>({
-  //         query: CardDocument,
-  //         variables: { symbol: card.symbol },
-  //         data: { card: { ...res.card, body: data.createCardBody } },
-  //       })
-  //     }
-  //     // if (afterUpdate && data?.createCardBody) {
-  //     //   afterUpdate(data.createCardBody)
-  //     // }
-  //   },
-  // })
-
   const [showBoard, setShowBoard] = useState(false)
+
+  const [self, setSelf] = useState<RootBullet | RootBulletDraft>()
+  const [mirrors, setMirrors] = useState<RootBullet[] | RootBulletDraft[] | undefined>()
+
+  const [pinBoardBuysell, setPinBoardBuysell] = useState<PinBoard | undefined>()
   const [edit, setEdit] = useState(false)
   const [bodyTree, setBodyTree] = useState<BulletInput>() // tree root不顯示
   // const [bodyChildren, setBodyChildren] = useState<BulletInput[]>(bodyRootDemo.children ?? [])
@@ -583,21 +631,103 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
     setShowBoard(false)
   }
 
-  useEffect(() => {
-    async function build() {
-      const tree = await buildBodyTree({ card: parsedCard, client })
-      setBodyTree(tree)
-      setBodyChildren(tree.children ?? [])
-      console.log(tree)
-      console.log(card)
-    }
-    build()
+  // useEffect(() => {
+  //   async function build() {
+  //     const tree = await buildBodyTree({ card: parsedCard, client })
+  //     setBodyTree(tree)
+  //     setBodyChildren(tree.children ?? [])
+  //     // console.log(tree)
+  //     // console.log(card)
+  //   }
+  //   build()
     // console.log(card)
-  }, [card])
+  const [editorInitialValue, setEditorInitialValue] = useState<LiElement[] | undefined>()
 
   useEffect(() => {
-    setEditorValue(bodyChildren.map(e => deserialize(e)))
-  }, [bodyChildren])
+    async function _parseAndBuildCard() {
+      const parsed = parseCard(card)
+
+      // TODO: 改為更general的方式，而不是只針對BUYSELL
+      const _pinBoardBuysell = parsed.headValue.pinBoards.find(e => e.pinCode === 'BUYSELL')
+      setPinBoardBuysell(_pinBoardBuysell)
+
+      const { self, mirrors } = await buildCardBody({ client, card: parsed })
+      setSelf(self)
+      setMirrors(mirrors)
+
+      const lis: LiElement[] =
+        card.type === 'WEBPAGE'
+          ? [Serializer.toRootLi(self), ...(mirrors ?? []).map(e => Serializer.toRootLi(e))]
+          : [Serializer.toRootLi(self)]
+
+      console.log(lis)
+
+      setEditorInitialValue(lis)
+      setEdit(false) // 需要重設來trigger editor rerender
+    }
+
+    _parseAndBuildCard()
+  }, [card])
+
+  const onCloseEditor = useCallback(() => {
+    const value = editorValue() // 從cache取得目前的editor value
+    if (value === undefined) {
+      setEdit(false)
+      return
+    }
+    setEditorInitialValue(value)
+
+    const [first, ...rest] = value
+      .map(e => {
+        console.log(e)
+        try {
+          return Serializer.toRootBulletDraft(e)
+        } catch (err) {
+          console.warn(err)
+        }
+      })
+      .filter((e): e is RootBulletDraft => e !== undefined)
+
+    console.log(first)
+
+    setSelf(first)
+    if (card.type === 'WEBPAGE') {
+      setMirrors(rest)
+    }
+    setEdit(false)
+  }, [])
+
+  const [createCardBody, { error }] = useCreateCardBodyMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<CardQuery, CardQueryVariables>({
+        query: CardDocument,
+        variables: { symbol: card.symbol },
+      })
+      if (data?.createCardBody && res?.card) {
+        cache.writeQuery<CardQuery, CardQueryVariables>({
+          query: CardDocument,
+          variables: { symbol: card.symbol },
+          data: { card: { ...res.card, body: data.createCardBody } },
+        })
+      }
+      // if (afterUpdate && data?.createCardBody) {
+      //   afterUpdate(data.createCardBody)
+      // }
+    },
+  })
+
+  const onSubmit = useCallback(async () => {
+    console.log(self)
+    console.log(mirrors)
+    const data: CardBodyInput = card.type === 'WEBPAGE' ? { self, mirrors } : { self }
+    try {
+      await createCardBody({
+        variables: { cardId: card.id, data },
+      })
+    } catch (err) {
+      console.log(err)
+    }
+  }, [self, mirrors])
 
   return (
     <div>
@@ -656,24 +786,37 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
       {/* <h3>Body</h3> */}
       <button
         onClick={() => {
-          setEdit(!edit)
+          if (edit) onCloseEditor()
+          else setEdit(true)
         }}
       >
         Edit
       </button>
-      {edit ? (
-        <BulletEditor
-          initialValue={editorValue}
-          onClose={({ value }) => {
-            // const input = serialize(value[0])
-            // if (input === null) {
-            //   throw new Error('Bullet input不能為null')
-            // }
-            // setBodyRoot(input)
-            setBodyChildren(serialize(value))
-            setEdit(false)
+
+      {!edit && editorInitialValue && (
+        <button
+          onClick={event => {
+            event.preventDefault()
+            onSubmit()
           }}
-        />
+        >
+          Submit
+        </button>
+      )}
+
+      {error && <div>Submit fail...</div>}
+
+      {self ? (
+        edit ? (
+          <BulletEditor
+            initialValue={editorInitialValue}
+            oauthorName={card.link?.oauthorName ?? undefined}
+            sourceUrl={card.link?.url}
+            withMirror={card.type === 'WEBPAGE'}
+          />
+        ) : (
+          <CardBodyItem card={card} self={self} mirrors={mirrors} />
+        )
       ) : (
         <ul className={classes.bulletUl}>
           {bodyChildren.map((e, i) => (
@@ -748,14 +891,6 @@ const TestPage = ({
     handlePathPush(symbol)
     setSymbol(symbol)
   }
-
-  // if (userError || error) {
-  //   return <h1>Something goes wrong</h1>
-  // }
-  // if (meLoading || isLoading || loading) {
-  //   return <h1>Loading</h1>
-  // }
-
   return (
     // <div>
     <SymbolContext.Provider value={{ symbol: pathSymbol }}>
@@ -813,282 +948,3 @@ const TestPage = ({
 }
 
 export default TestPage
-
-// --- Unused ---
-
-/**
- * Create a new symbol card
- */
-const SymbolCardForm = (props: { source?: Card }) => {
-  const { source } = props
-  const [createSymbolCard, { data, loading }] = useCreateSymbolCardMutation({
-    // update(cache, { data }) {
-    //   const res = cache.readQuery<CardQuery, CardQueryVariables>({
-    //     query: CardDocument,
-    //     variables: { symbol: card.symbol },
-    //   })
-    //   if (data?.createCardBody && res?.card) {
-    //     cache.writeQuery<CardQuery, CardQueryVariables>({
-    //       query: CardDocument,
-    //       variables: { symbol: card.symbol },
-    //       data: { card: { ...res.card, body: data.createCardBody } },
-    //     })
-    //   }
-    // },
-  })
-
-  if (loading) {
-    return <div>Get or creating card...</div>
-  }
-  if (data?.createSymbolCard) {
-    return <div>Card created: {data?.createSymbolCard.symbol} </div>
-  }
-  return (
-    <div>
-      <form
-        onSubmit={event => {
-          event.preventDefault()
-          const data: Record<string, string> = {}
-          for (const [k, v] of new FormData(event.currentTarget).entries()) {
-            data[k] = v as string
-          }
-          createSymbolCard({
-            variables: {
-              data: {
-                symbol: data['symbol'],
-                templateProps: {
-                  template: data['template'],
-                  title: data['title'],
-                  // ticker?: Maybe<Scalars['String']>;
-                },
-              },
-            },
-          })
-        }}
-      >
-        <label>
-          Symbol:
-          <input type="text" id="symbol" name="symbol" defaultValue="$ROCK" />
-        </label>
-        <br />
-        <label>
-          Template:
-          <select id="template" name="template">
-            <option value="ticker">Ticker</option>
-            <option value="topic">Topic</option>
-          </select>
-        </label>
-        <br />
-        <label>
-          Title:
-          <input type="text" id="title" name="title" defaultValue="Rock'n Roll" />
-        </label>
-        <br />
-        <input type="submit" value="Submit" />
-      </form>
-    </div>
-  )
-}
-
-/**
- * Search a symbol
- */
-const SymbolSearchForm = () => {
-  // const { source } = props
-  const [term, setTerm] = useState('')
-  const [searchAll, { loading, data }] = useSearchAllLazyQuery()
-  if (loading) {
-    return <div>Searching...</div>
-  }
-  if (data?.searchAll) {
-    if (data.searchAll.length === 0) {
-      return <div>{term} not found, create one</div>
-    }
-    return (
-      <div>
-        {data.searchAll.map((e, i) => (
-          <div key={i}>{e}</div>
-        ))}
-      </div>
-    )
-  }
-  return (
-    <div>
-      <form
-        onSubmit={event => {
-          event.preventDefault()
-          const data: Record<string, string> = {}
-          for (const [k, v] of new FormData(event.currentTarget).entries()) {
-            data[k] = v as string
-          }
-          searchAll({ variables: { term } })
-        }}
-      >
-        <label>
-          Search:
-          <input type="text" id="term" name="term" defaultValue="$ROCK" />
-        </label>
-        <br />
-        <input type="submit" value="Submit" />
-      </form>
-    </div>
-  )
-}
-
-/**
- * Add a new nested card and create oauthor comment/vote all in one.
- * First search a symbol, if not exist, show card creation inputs.
- */
-const NestedCardForm = () => {
-  // const { source } = props
-  // const [search, setSearch] = useState('')
-  const [searchAll, searchAllResult] = useSearchAllLazyQuery()
-  const [queryCard, cardResult] = useCardLazyQuery()
-  const [term, setTerm] = useState('')
-  // const [searched, setSearched] = useState(false)
-  const [symbol, setSymbol] = useState<CardSymbol | null>(null)
-  // const [card, setCard] = useState<Card | null>(null)
-
-  // const a = parseSymbol()
-
-  useEffect(() => {
-    if (symbol !== null) {
-      queryCard({ variables: { symbol: symbol.symbolName } })
-    }
-  }, [symbol])
-
-  return (
-    <div>
-      {symbol === null && (
-        <form
-          onSubmit={event => {
-            event.preventDefault()
-            const data: Record<string, string> = {}
-            for (const [k, v] of new FormData(event.currentTarget).entries()) {
-              data[k] = v as string
-            }
-            searchAll({ variables: { term: data['term'] } })
-            setTerm(data['term'])
-          }}
-        >
-          <label>
-            Search:
-            <input type="text" id="term" name="term" defaultValue="$ROCK" />
-          </label>
-          <br />
-          <input type="submit" value="Search" />
-        </form>
-      )}
-
-      {searchAllResult.data?.searchAll &&
-        searchAllResult.data.searchAll.map((e, i) => (
-          <button
-            key={i}
-            onClick={() => {
-              setSymbol(parseSymbol(e))
-            }}
-          >
-            {e}
-          </button>
-        ))}
-
-      <h3>{symbol?.symbolName ?? term}</h3>
-
-      <form
-        onSubmit={event => {
-          event.preventDefault()
-          const data: Record<string, string> = {}
-          for (const [k, v] of new FormData(event.currentTarget).entries()) {
-            data[k] = v as string
-          }
-          searchAll({ variables: { term } })
-        }}
-      >
-        {/* <label>
-          Search:
-          <input type="text" id="term" name="term" defaultValue="$ROCK" />
-        </label> */}
-        <br />
-        <label>
-          @Oauthor vote:
-          <select id="vote" name="vote">
-            <option value="BUY">BUY</option>
-            <option value="SELL">SELL</option>
-            <option value="WATCH">WATCH</option>
-            <option value="NULL">null</option>
-          </select>
-        </label>
-        <br />
-        <label>
-          @Oauthor comment:
-          <input type="text" id="term" name="term" defaultValue="$ROCK" />
-        </label>
-
-        <br />
-        <input type="submit" value="Submit" />
-      </form>
-    </div>
-  )
-}
-
-const CardBodyItem = (props: { card: CardParsed; onChange?: (props: { input: BulletInput }) => void }) => {
-  const { card, onChange } = props
-  const [edit, setEdit] = useState(false)
-  const [input, setInput] = useState<BulletInput>(card.bodyContent.root)
-
-  // const initialValue = [deserialize(card.bodyContent.root)]
-  const initialValue = [deserialize(input)]
-  // return useMemo(() => {
-  //   console.log('editor memo')
-  //   return (
-  //     <>
-  // <button
-  //   onClick={() => {
-  //     console.log(value)
-  //   }}
-  // >
-  //   Submit
-  // </button>
-  // <BulletEditor
-  //   initialValue={initialValue}
-  //   onChange={({ value }) => {
-  //     setValue(value)
-  //   }}
-  // />
-  //     </>
-  //   )
-  // }, [])
-  return (
-    <div>
-      <button
-        onClick={() => {
-          setEdit(!edit)
-        }}
-      >
-        edit
-      </button>
-      {/* {edit ? (
-        <BulletEditor
-          initialValue={initialValue}
-          onClose={({ root }) => {
-            const input = serialize(root)
-            if (input === null) {
-              throw new Error('Bullet input不能為null')
-            }
-            if (onChange) {
-              onChange({ input })
-            }
-            setInput(input)
-            setEdit(false)
-          }}
-        />
-      ) : (
-        <ul>
-          {input?.children?.map((e, i) => (
-            <BulletItem key={i} node={e} />
-          ))}
-        </ul>
-      )} */}
-    </div>
-  )
-}

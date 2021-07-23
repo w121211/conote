@@ -4,32 +4,16 @@
  * - inline 在輸入時會自動合併到text
  */
 /* eslint-disable no-console */
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
-  CSSProperties,
-} from 'react'
+import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
 import Modal from 'react-modal'
-import {
-  Editor,
-  Transforms,
-  Range,
-  createEditor,
-  Descendant,
-  Element,
-  Node,
-  Path,
-  Text,
-  NodeEntry,
-  Point,
-} from 'slate'
+import { useApolloClient } from '@apollo/client'
+import { Editor, Transforms, Range, createEditor, Descendant, Element, Node, Path, Text, NodeEntry, Point } from 'slate'
 import {
   Slate,
   Editable,
   withReact,
   useSlateStatic,
+  useReadOnly,
   ReactEditor,
   RenderElementProps,
   useFocused,
@@ -37,48 +21,33 @@ import {
   RenderLeafProps,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
-import { LcElement, LiElement, UlElement } from './custom-types'
-// import {
-//   isLc,
-//   isLi,
-//   isLiArray,
-//   isUl,
-//   onKeyDown as onKeyDownWithList,
-//   withList,
-// } from './with-list'
-import {
-  isLc,
-  isLi,
-  isLiArray,
-  isUl,
-  onKeyDown as onKeyDownWithList,
-  withList,
-} from '../../../web/components/editor/with-list'
-// import { withMirrors } from '../../../web/components/editor/with-mirrors'
-// import { useSearch } from '../../../web/components/editor/suggest'
+import { editorValue } from '../../apollo/cache'
+import { Node as BulletNode } from '../../lib/bullet/node'
+import { Bullet, BulletDraft, RootBullet } from '../../lib/bullet/types'
+import { createAndParseCard, queryAndParseCard } from '../../pages/lab/card'
+import { LcElement, LiElement, UlElement } from './slate-custom-types'
+import { Serializer } from './serializer'
+import { isLc, isLi, isLiArray, isUl, onKeyDown as onKeyDownWithList, withList } from './with-list'
+import { withMirror } from './with-mirror'
+import { useInput } from './use-input'
+import { withOp } from './with-op'
+// import { cleanOp } from '../../lib/bullet/node'
+// import { useSearch } from './search'
 // import { BulletOneElement } from './custom-types'
-// import {
-//   deserialize,
-//   serialize,
-// } from '../../../web/lib/bullet/editor/serializer'
-// import { BulletInput } from '../../../web/lib/bullet/types'
 
-const initialValue: LiElement[] = [
+const initialValueDemo: LiElement[] = [
+  {
+    type: 'li',
+    children: [{ type: 'lc', body: '11', error: 'warning', placeholder: 'placeholder', children: [{ text: '11' }] }],
+  },
   {
     type: 'li',
     children: [
-      { type: 'lc', body: '111', children: [{ text: '111 aaa' }] },
-      // {
-      //   type: 'ul',
-      //   children: [
-      //     {
-      //       type: 'li',
-      //       children: [
-      //         { type: 'lc', body: '222', children: [{ text: '222' }] },
-      //       ],
-      //     },
-      //   ],
-      // },
+      { type: 'lc', body: '22', placeholder: 'placeholder', children: [{ text: '22' }] },
+      {
+        type: 'ul',
+        children: [{ type: 'li', children: [{ type: 'lc', body: '22-11', children: [{ text: '22-11' }] }] }],
+      },
     ],
   },
   // {
@@ -86,9 +55,9 @@ const initialValue: LiElement[] = [
   //   children: [
   //     {
   //       type: 'lc',
-  //       body: '222',
+  //       body: '111',
   //       freeze: true,
-  //       children: [{ text: '222 這是中文 $AAA' }],
+  //       children: [{ text: '111 這是中文 $AAA' }],
   //     },
   //     {
   //       type: 'ul',
@@ -100,6 +69,7 @@ const initialValue: LiElement[] = [
   //               type: 'lc',
   //               body: '333',
   //               // freeze: true,
+  //               id: 123,
   //               warning: 'warning',
   //               children: [{ text: '333' }],
   //             },
@@ -185,19 +155,6 @@ const initialValue: LiElement[] = [
   //   ],
   // },
 ]
-
-function useInput(props: { type: string }): [string, JSX.Element] {
-  const { type } = props
-  const [value, setValue] = useState('')
-  const input = (
-    <input
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      type={type}
-    />
-  )
-  return [value, input]
-}
 
 // function editBody(editor: Editor, bullet: NodeEntry<Element>): void {
 //   const [, bulletPath] = bullet
@@ -293,9 +250,7 @@ const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   )
 }
 
-const CommentModal = (props: {
-  onClose?: (value: { choosed?: string | null; comment: string }) => void
-}) => {
+const CommentModal = (props: { onClose?: (value: { choosed?: string | null; comment: string }) => void }) => {
   const { onClose } = props
   const [comment, commentInput] = useInput({ type: 'text' })
   const [isOpen, setIsOpen] = useState(false)
@@ -325,146 +280,108 @@ const CommentModal = (props: {
   )
 }
 
-const Ul = (props: RenderElementProps & { element: UlElement }) => {
-  const { attributes, children } = props
-  return <ul {...attributes}>{children}</ul>
-}
-
-const Li = (props: RenderElementProps & { element: LiElement }) => {
-  const { attributes, children, element } = props
-  const editor = useSlateStatic()
-  // { display: 'none', visibility: 'hidden', height: 0 }
-  const style: CSSProperties = element.fold ? { display: 'none' } : {}
-  return (
-    <div {...attributes}>
-      <div contentEditable={false}>
-        <button
-          onClick={() => {
-            const path = ReactEditor.findPath(editor, element)
-            Transforms.deselect(editor)
-            Transforms.setNodes<UlElement>(
-              editor,
-              { fold: element.fold ? undefined : true },
-              { at: path }
-            )
-          }}
-        >
-          Fold
-        </button>
-      </div>
-      {/* {!element.fold && <ul>{children}</ul>} */}
-      <div contentEditable={element.fold ? false : undefined}>
-        <li style={style}>{children}</li>
-      </div>
-    </div>
+const useAuthorSwitcher = (props: { oauthorName?: string }): [string, JSX.Element] => {
+  const { oauthorName } = props
+  const [author, setAuthor] = useState<string>(oauthorName ?? '@self')
+  const switcher = oauthorName ? (
+    <button
+      onClick={() => {
+        if (author === '@self') {
+          setAuthor(oauthorName)
+        } else {
+          setAuthor('@self')
+        }
+      }}
+    >
+      {author}
+    </button>
+  ) : (
+    <span>{author}</span>
   )
+  return [author, switcher]
 }
 
-async function queryCard(symbol: string): Promise<string[]> {
-  if (symbol.length === 0) {
-    throw new Error('')
-  }
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(['[+]', '[-]'])
-    }, 1000)
-  })
-}
+const LcMirror = (props: RenderElementProps & { element: LcElement; oauthorName?: string; sourceUrl?: string }) => {
+  const { attributes, children, element, oauthorName, sourceUrl } = props
 
-const Lc = (props: RenderElementProps & { element: LcElement }) => {
-  const { attributes, children, element } = props
+  const client = useApolloClient()
   const editor = useSlateStatic()
-  const focused = useFocused()
-  const selected = useSelected()
+  // const focused = useFocused()
+  // const selected = useSelected()
   const [loading, setLoading] = useState(false)
   const [placeholder, setPlaceholder] = useState<string | undefined>()
-  const [author, setAuthor] = useState(element.asOauthor ?? '@self')
-  const [body, bodyInput] = useInput({ type: 'text' })
+  // const [body, bodyInput] = useInput({ type: 'text' })
 
   useEffect(() => {
-    async function query() {
+    async function _queryAndTransform() {
       if (element.root && element.symbol && element.rootBullet === undefined) {
-        const path = ReactEditor.findPath(editor, element)
+        const lcPath = ReactEditor.findPath(editor, element)
+        const liEntry = Editor.above<LiElement>(editor, { at: lcPath, match: n => isLi(n) })
+
+        if (liEntry === undefined) {
+          console.error('找不到li')
+          return
+        }
 
         setLoading(true)
-        const card = await queryCard(element.symbol)
+
+        let newSymbol: true | undefined
+        let root: RootBullet | undefined
+
+        const data = await queryAndParseCard({ client, symbol: element.symbol, mirror: true })
+        if (data.error) {
+          Transforms.setNodes<LcElement>(editor, { error: 'server異常' }, { at: lcPath })
+        } else if (data.root === undefined) {
+          const _data = await createAndParseCard({ client, symbol: element.symbol, mirror: true })
+          if (_data.root) {
+            root = _data.root
+            newSymbol = true
+          }
+        } else {
+          root = data.root
+        }
+
+        if (root) {
+          const newLi = Serializer.toRootLi(root, { mirror: true, newSymbol })
+          // 移除原本的li，插入新的
+          Editor.withoutNormalizing(editor, () => {
+            Transforms.removeNodes(editor, { at: liEntry[1] })
+            Transforms.insertNodes<LiElement>(editor, newLi, { at: liEntry[1] })
+          })
+        } else {
+          Transforms.setNodes<LcElement>(editor, { error: 'server異常' }, { at: lcPath })
+        }
+
         setLoading(false)
-
-        const children = card.map<LiElement>((e) => ({
-          type: 'li',
-          children: [{ type: 'lc', freeze: true, children: [{ text: e }] }],
-        }))
-
-        Transforms.setNodes<LiElement>(
-          editor,
-          { rootBullet: card },
-          { at: path }
-        )
-        Transforms.insertNodes<UlElement>(
-          editor,
-          { type: 'ul', children, fold: true },
-          { at: Path.next(path) }
-        )
       }
     }
-    query()
 
+    _queryAndTransform()
     setPlaceholder(element.placeholder)
   }, [element])
 
-  const authorSwitcher = (oauthorName?: string) => {
-    if (oauthorName) {
-      return (
-        <button
-          onClick={() => {
-            if (author === '@self') {
-              setAuthor(oauthorName)
-            } else {
-              setAuthor('@self')
-            }
-          }}
-        >
-          {author}
-        </button>
-      )
-    } else {
-      return <span>{author}</span>
-    }
-  }
+  const style: CSSProperties = element.root ? { fontSize: '20px' } : {}
 
   return (
-    <div
-      {...attributes}
-      onKeyDown={(e) => {
-        console.log(e)
-      }}
-    >
+    <div {...attributes}>
       <li>
-        <span>{children}</span>
+        <span style={style}>{children}</span>
       </li>
 
-      <div contentEditable={false}>
-        {/* <span style={{ color: 'brown' }} onClick={() => {
-        }}>Here is a body text...</span> */}
-        {/* {bodyInput} */}
-      </div>
-
       <div contentEditable={false} style={{ color: 'green' }}>
-        {placeholder && Node.string(element).length === 0 && (
-          <span style={{ color: 'grey' }}>{placeholder}</span>
-        )}
-        {/* {authorSwitcher(element.oauthorName)} */}
+        {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>}
+        {sourceUrl}
         {element.id}
-        {element.warning}
+        {element.error}
         {element.freeze && 'freeze'}
       </div>
 
       {element.symbol && (
         <div contentEditable={false}>
           {loading && <span>loading...</span>}
-          <span>{author}</span>
+          {element.createCard && <span>#new</span>}
           <span>{element.symbol}</span>
-          <span>{element.warning}</span>
+          <span>{element.error}</span>
           <span>{element.comment?.oauthorComment}</span>
           <CommentModal
             onClose={({ comment }) => {
@@ -478,28 +395,93 @@ const Lc = (props: RenderElementProps & { element: LcElement }) => {
                     oauthorVote: -1,
                   },
                 },
-                { at: path }
+                { at: path },
               )
             }}
           />
         </div>
       )}
-      {/* {element.body && (
-        <div contentEditable={false}>
-          <span style={{ color: 'grey' }}>{element.body}</span>
-        </div>
-      )}
-      <div contentEditable={false}>
-        <input />
-      </div> */}
     </div>
   )
 }
 
-const CustomElement = (props: RenderElementProps) => {
+const Lc = (props: RenderElementProps & { element: LcElement; oauthorName?: string; sourceUrl?: string }) => {
+  const { attributes, children, element, oauthorName, sourceUrl } = props
+  const editor = useSlateStatic()
+  const [placeholder, setPlaceholder] = useState<string | undefined>()
+  const [author, authorSwitcher] = useAuthorSwitcher({ oauthorName })
+
+  useEffect(() => {
+    setPlaceholder(element.placeholder)
+  }, [element])
+
+  useEffect(() => {
+    if (oauthorName && element.op === 'CREATE') {
+      console.log('set~~~')
+      const lcPath = ReactEditor.findPath(editor, element)
+      if (author === '@self') {
+        Transforms.setNodes<LcElement>(editor, { oauthorName: undefined }, { at: lcPath })
+      } else {
+        Transforms.setNodes<LcElement>(editor, { oauthorName }, { at: lcPath })
+      }
+    }
+  }, [author, element])
+
+  return (
+    <div {...attributes}>
+      <li>
+        <span>{children}</span>
+      </li>
+
+      <div contentEditable={false} style={{ color: 'green' }}>
+        {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>}
+        {element.op === 'CREATE' && authorSwitcher}
+        {sourceUrl}
+        {element.id}
+        {element.error}
+        {element.freeze && 'freeze'}
+      </div>
+    </div>
+  )
+}
+
+const Li = (props: RenderElementProps & { element: LiElement }) => {
+  const { attributes, children } = props
+  return <div {...attributes}>{children}</div>
+}
+
+const Ul = (props: RenderElementProps & { element: UlElement }) => {
   const { attributes, children, element } = props
+  // { display: 'none', visibility: 'hidden', height: 0 }
+  const style: CSSProperties = element.fold ? { display: 'none' } : {}
+  const editor = useSlateStatic()
+  return (
+    <div {...attributes}>
+      <div contentEditable={false}>
+        <button
+          onClick={() => {
+            const path = ReactEditor.findPath(editor, element)
+            Transforms.deselect(editor)
+            Transforms.setNodes<UlElement>(editor, { fold: element.fold ? undefined : true }, { at: path })
+          }}
+        >
+          Fold
+        </button>
+      </div>
+      <ul style={style}>{children}</ul>
+    </div>
+  )
+}
+
+const CustomElement = (
+  props: RenderElementProps & { oauthorName?: string; sourceUrl?: string; withMirror: boolean },
+) => {
+  const { attributes, children, element, oauthorName, sourceUrl, withMirror } = props
   if (isLc(element)) {
-    return <Lc {...{ attributes, children, element }} />
+    if (element.root && withMirror) {
+      return <LcMirror {...{ attributes, children, element, oauthorName, sourceUrl }} />
+    }
+    return <Lc {...{ attributes, children, element, oauthorName, sourceUrl }} />
   }
   if (isLi(element)) {
     return <Li {...{ attributes, children, element }} />
@@ -550,30 +532,37 @@ const CustomElement = (props: RenderElementProps) => {
 //   return ranges
 // }
 
-const BulletEditor = (props: {
+export const BulletEditor = (props: {
+  initialValue?: LiElement[]
   oauthorName?: string
-  srcUrl?: string
+  sourceUrl?: string
+  withMirror?: boolean
 }): JSX.Element => {
-  const { oauthorName, srcUrl } = props
-  const [value, setValue] = useState<LiElement[]>(initialValue)
-  const renderElement = useCallback(
-    (props: RenderElementProps) => <CustomElement {...props} />,
-    []
-  )
-  const renderLeaf = useCallback(
-    (props: RenderLeafProps) => <Leaf {...props} />,
-    []
-  )
-  const editor = useMemo(
-    // () => withAutoComplete(withBullet(withHistory(withReact(createEditor())))),
-    () => withList(withHistory(withReact(createEditor()))),
-    // () => withMirrors(withList(withHistory(withReact(createEditor())))),
-    []
-  )
+  const { initialValue = initialValueDemo, oauthorName, sourceUrl, withMirror: withMirrorFlag = false } = props
 
+  const [value, setValue] = useState<LiElement[]>(initialValue)
+  // const editor = useMemo(
+  //   // () => withAutoComplete(withBullet(withHistory(withReact(createEditor())))),
+  //   // () => withList(withHistory(withReact(createEditor()))),
+  //   // () => withMirror(withList(withHistory(withReact(createEditor())))),
+  //   () => withMirror(withOp(withList(withHistory(withReact(createEditor()))))),
+  //   [],
+  // )
+  const editor = withMirrorFlag
+    ? useMemo(() => withMirror(withOp(withList(withHistory(withReact(createEditor()))))), [])
+    : useMemo(() => withOp(withList(withHistory(withReact(createEditor())))), [])
+  const renderElement = useCallback(
+    (props: RenderElementProps) => (
+      <CustomElement {...{ ...props, oauthorName, sourceUrl, withMirror: withMirrorFlag }} />
+    ),
+    [],
+  )
+  const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
   const _onKeyDownWithList = useCallback((event: React.KeyboardEvent) => {
     onKeyDownWithList(event, editor)
   }, [])
+
+  // const [searchPanel, onValueChange] = useSearch(editor)
 
   // useEffect(() => {
   //   if (searchAllResult.data) {
@@ -583,17 +572,17 @@ const BulletEditor = (props: {
   //   }
   // }, [searchAllResult])
 
-  // const [searchPanel, onValueChange] = useSearch(editor)
-
   return (
     <div>
       <Slate
         editor={editor}
         value={value}
-        onChange={(value) => {
+        onChange={value => {
           if (isLiArray(value)) {
             setValue(value)
-            // onValueChange(editor)
+            editorValue(value) // 將最新值存入cache
+          } else {
+            throw new Error('value需為ul array')
           }
         }}
       >
@@ -602,7 +591,7 @@ const BulletEditor = (props: {
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           // decorate={decorate}
-          onKeyDown={(event) => {
+          onKeyDown={event => {
             _onKeyDownWithList(event)
             // if (search) {
             //   onKeyDownForSuggest(event)
@@ -628,56 +617,3 @@ const BulletEditor = (props: {
     </div>
   )
 }
-
-export default BulletEditor
-
-// const bodyRootDemo: BulletInput = {
-//   head: 'root',
-//   children: [
-//     {
-//       head: '1 $ABC [[123]]',
-//       hashtags: [
-//         {
-//           userId: 'string',
-//           boardId: 123,
-//           boardStatus: 'ACTIVE',
-//           text: '#string',
-//         },
-//       ],
-//       oauthorName: 'Hello',
-//     },
-//     { head: '2', body: '222 222' },
-//     {
-//       head: '3',
-//       children: [
-//         {
-//           head: '1',
-//           hashtags: [
-//             {
-//               userId: 'string',
-//               boardId: 123,
-//               boardStatus: 'ACTIVE',
-//               text: '#string',
-//             },
-//           ],
-//           oauthorName: 'Hello',
-//         },
-//         { head: '2', body: '222 222' },
-//         { head: '3' },
-//       ],
-//     },
-//   ],
-// }
-
-// const TestPage = (): JSX.Element => {
-//   // card -> self/nested ->
-//   // deserialize(bodyRootDemo)
-
-//   return (
-//     <div>
-//       <BulletEditor />
-//     </div>
-//   )
-// }
-
-// export default TestPage
