@@ -5,9 +5,6 @@ const path = require('path')
 
 module.exports = withReactSvg({
   include: path.resolve(__dirname, 'assets/svg'),
-  future: {
-    webpack5: true,
-  },
   experimental: {
     externalDir: true,
   },

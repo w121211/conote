@@ -1,25 +1,28 @@
 import { CardType } from '@prisma/client'
 
-export type CardSymbol = {
+export type SymbolParsed = {
   symbolName: string
   cardType: CardType
   oauthorName?: string
 }
 
 const regexTicker = /^\$[A-Z0-9]+$/
+
 const regexTopic = /^\[\[[^\]]+\]\]$/
 
 /**
- * Parse symbol, 分為：
+ * Parse symbol, symbol分為：
  * 1. ticker: $AB, $A01
  * 2. topic: [[what ever]], [[包括unicode]]
- * 3. 包含oauthor: $AB@someone [[Ha ha]]@作者
+ * 3. 包含oauthor: `$AB@someone` `[[Ha ha]]@作者`
+ *
+ * @throws Symbol格式無法辨識
  *
  * TODO:
  * 1. 無法區別[[topic]] vs [[https://...]]，[[https://...]]應要parse為WEBPAGE
  * 2. 無法辨識oauthor
  */
-export function parseSymbol(symbol: string): CardSymbol {
+export function parse(symbol: string): SymbolParsed {
   let cardType: CardType
   let oauthorName: string | undefined
 
@@ -28,7 +31,7 @@ export function parseSymbol(symbol: string): CardSymbol {
   } else if (symbol.match(regexTopic) !== null) {
     cardType = CardType.TOPIC
   } else {
-    throw new Error(`無法辨識的symbol format: ${symbol}`)
+    throw new Error(`symbol格式無法辨識: ${symbol}`)
   }
   return {
     symbolName: symbol,

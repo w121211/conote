@@ -251,11 +251,11 @@ mutation CreateSymbolCard($data: CardInput!) {
   }
 }
 
-mutation CreateCardHead($cardId: ID!, $data: CardBulletRootInput!) {
-  createCardHead(cardId: $cardId, data: $data) {
-    ...cardHead
-  }
-}
+# mutation CreateCardHead($cardId: ID!, $data: CardBulletRootInput!) {
+#   createCardHead(cardId: $cardId, data: $data) {
+#     ...cardHead
+#   }
+# }
 
 mutation CreateCardBody($cardId: ID!, $data: CardBodyInput!) {
   createCardBody(cardId: $cardId, data: $data) {

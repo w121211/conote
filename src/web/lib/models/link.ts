@@ -21,13 +21,12 @@ export function linkToSymbol(link: Link): string {
  * 給一個url/symbol，從資料庫中返回該url/symbol對應的link
  * 若link未存在，建立link，同時建立oauthor
  */
-export async function getOrCreateLink({
-  fetcher,
-  url,
-}: {
+export async function getOrCreateLink(props: {
   fetcher?: FetchClient
   url: string
 }): Promise<[Link & { card: Card | null }, { fetchResult?: ExtFetchResult }]> {
+  const { fetcher, url } = props
+
   // TODO: 這個url尚未resolved, 需要考慮redirect、不同url指向同一個頁面的情況
   const parsed = parseUrl(url)
   const found = await prisma.link.findUnique({

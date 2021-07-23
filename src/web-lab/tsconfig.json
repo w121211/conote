@@ -1,7 +1,8 @@
 {
   "references": [
     { "path": "../packages/editor" },
-    { "path": "../packages/fetcher" }
+    { "path": "../packages/fetcher" },
+    { "path": "../web" }
   ],
   "compilerOptions": {
     "target": "es5",

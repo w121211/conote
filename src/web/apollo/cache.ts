@@ -1,10 +1,14 @@
 import { InMemoryCache, Reference, makeVar } from '@apollo/client'
+import { LiElement } from '../lib/bullet/editor/slate-custom-types'
 
 export function createCache(): InMemoryCache {
   return new InMemoryCache({
     typePolicies: {
       Query: {
         fields: {
+          // editorValue: {
+          //   // value:
+          // },
           // isLoggedIn: {
           //   read() {
           //     return isLoggedInVar()
@@ -25,6 +29,10 @@ export function createCache(): InMemoryCache {
     },
   })
 }
+
+export const editorValue = makeVar<LiElement[] | undefined>(undefined)
+
+export const testValue = makeVar<string>('this is a test')
 
 // SSR時沒有localStorage
 // export const isLoggedInVar = makeVar<boolean>(!!localStorage.getItem('token'))

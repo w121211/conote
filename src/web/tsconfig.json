@@ -17,7 +17,8 @@
     "jsx": "preserve",
 
     // Custom settings
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "composite": true
   },
   "exclude": ["node_modules", ".next", "out", "test"],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],

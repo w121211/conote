@@ -1,22 +1,22 @@
 /* eslint-disable no-await-in-loop */
-/** Run: yarn ts-node prisma/script/fromfile.ts */
 import { readdirSync, readFileSync } from 'fs'
 import { inspect } from 'util'
 import { resolve, join } from 'path'
 import { Card, CardBody, CardHead, Link, PrismaClient } from '@prisma/client'
-import { CardLabel, Editor, Markerline, splitByUrl } from '../../../packages/editor/src'
+import { Editor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../../packages/fetcher/src'
-import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
+import { Node as BulletNode } from '../../lib/bullet/node'
+import { BulletDraft, RootBulletDraft } from '../../lib/bullet/types'
 import {
   CardBodyContent,
   createCardBody,
   getOrCreateCardBySymbol,
   getOrCreateCardByUrl,
-  NestedCardEntry,
+  PinBoardCode,
 } from '../../lib/models/card'
 import { createOauthorVote } from '../../lib/models/vote'
-import { BulletInput, BulletPinCode } from '../../lib/bullet-tree/types'
-import { cleanOp } from '../../lib/bullet-tree/node'
+import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
+import { cloneDeep } from '@apollo/client/utilities'
 
 const IGNORE_FILE_STARTS_WITH = '_'
 
@@ -34,12 +34,12 @@ function search({
   byPinCode,
   inDepth,
 }: {
-  node: BulletInput
+  node: BulletDraft
   depth: number
   byHead?: string
-  byPinCode?: BulletPinCode
+  byPinCode?: PinBoardCode
   inDepth?: number
-}): BulletInput | null {
+}): BulletDraft | null {
   const nextDepth = depth + 1
 
   if (byHead && byHead === node.head) {
@@ -73,7 +73,13 @@ const NEAT_REPLY_CHOICE = [
 /**
  * 將markerlines插入(in-place)至對應的children裡，並對neat-reply創新comment/vote
  */
-async function insertMarkerlines(root: BulletInput, markerlines: Markerline[], userId: string): Promise<void> {
+async function insertMarkerlines(
+  root: RootBulletDraft,
+  markerlines: Markerline[],
+  userId: string,
+): Promise<RootBulletDraft> {
+  const _root = cloneDeep(root)
+
   for (const e of markerlines) {
     if (e.new && e.marker?.key && e.marker.value) {
       if (e.neatReply) {
@@ -100,7 +106,7 @@ async function insertMarkerlines(root: BulletInput, markerlines: Markerline[], u
         }
 
         // 取得node
-        const node = search({ node: root, depth: 0, byPinCode: 'BUYSELL' })
+        const node = search({ node: _root, depth: 0, byPinCode: 'BUYSELL' })
         if (node === null) {
           throw new Error('找不到buysell的node')
         }
@@ -125,41 +131,40 @@ async function insertMarkerlines(root: BulletInput, markerlines: Markerline[], u
             vote: { connect: { id: vote.id } },
           },
         })
-
-        const child: BulletInput = {
+        // oauther的board comment直接創造一個bullet
+        const child: BulletDraft = {
           head: e.str,
           sourceUrl: e.src,
           oauthorName: e.oauthor,
           commentId: comment.id,
           voteId: vote.id,
           op: 'CREATE',
+          children: [],
         }
-        if (node.children) {
-          node.children.push(child)
-        } else {
-          node.children = [child]
-        }
+        node.children.push(child)
 
         continue
       }
 
-      // 依照markerline的key找對應的head（PS. 僅找第一層）
+      // 依照 markerline key 找對應的 subtitle node（PS. 僅找第一層）
       const node = search({
-        node: root,
+        node: _root,
         depth: 0,
         byHead: e.marker.key,
         inDepth: 1,
       })
-      const child: BulletInput = {
+      const child: BulletDraft = {
         head: e.marker.value,
         sourceUrl: e.src,
         oauthorName: e.oauthor,
         op: 'CREATE',
+        children: [],
       }
       if (node) {
-        node.children?.push(child)
+        node.children.push(child)
       } else {
-        root.children?.push({
+        // 創一個subtitle bullet
+        _root.children.push({
           head: e.marker.key,
           op: 'CREATE',
           children: [child],
@@ -167,30 +172,8 @@ async function insertMarkerlines(root: BulletInput, markerlines: Markerline[], u
       }
     }
   }
-}
 
-/**
- * 搭配`editor.getNestedMarkerlines()`使用
- */
-async function createNestedCard(
-  cardlabel: CardLabel,
-  markerlines: Markerline[],
-  userId: string,
-): Promise<Card & { body: CardBody }> {
-  const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
-  const { root }: CardBodyContent = JSON.parse(nestedCard.body.content)
-  const rootInput = cleanOp(root)
-  await insertMarkerlines(rootInput, markerlines, userId)
-
-  const body = await createCardBody({
-    cardId: nestedCard.id,
-    rootInput,
-    userId: TESTUSERS[0].id,
-  })
-  return {
-    ...nestedCard,
-    body,
-  }
+  return _root
 }
 
 async function main() {
@@ -213,7 +196,7 @@ async function main() {
       try {
         card = await getOrCreateCardByUrl({ fetcher, url })
       } catch (err) {
-        console.error(err)
+        console.warn(err)
         continue
       }
 
@@ -221,22 +204,26 @@ async function main() {
       editor.setText(text)
       editor.flush()
 
-      const nestedCards: NestedCardEntry[] = (
-        await Promise.all(
-          editor
-            .getNestedMarkerlines()
-            .map(([cardlabel, markerlines]) => createNestedCard(cardlabel, markerlines, TESTUSERS[0].id)),
-        )
-      ).map(e => ({
-        cardSymbol: e.symbol,
-        cardBodyId: e.body.id,
-      }))
+      const mirrors: RootBulletDraft[] = []
 
-      const prev: CardBodyContent = JSON.parse(card.body.content)
+      for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
+        const mirrorCard = await getOrCreateCardBySymbol(cardlabel.symbol)
+        const { self }: CardBodyContent = JSON.parse(mirrorCard.body.content)
+
+        const draft = BulletNode.toDraft(self)
+
+        // console.log(markerlines)
+
+        const mirror = await insertMarkerlines(draft, markerlines, TESTUSERS[0].id)
+        mirrors.push(mirror)
+      }
+
+      // console.log(inspect(mirrors, { depth: 0 }))
+      // return
+
       await createCardBody({
         cardId: card.id,
-        nestedCards,
-        rootInput: cleanOp(prev.root), // 不考慮卡片本身自身body更新的情形（因為seed files裡沒有此種情形）
+        mirrors,
         userId: TESTUSERS[0].id,
       })
 

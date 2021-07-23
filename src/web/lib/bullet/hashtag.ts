@@ -1,8 +1,8 @@
 import { Board, BoardStatus } from '@prisma/client'
 import prisma from '../prisma'
-import { Bullet, BulletInput, Hashtag, HashtagInput } from './types'
+import { Bullet, BulletDraft, Hashtag, HashtagDraft } from './types'
 
-function isHashtagInput(value: Hashtag | HashtagInput): value is HashtagInput {
+function isHashtagInput(value: Hashtag | HashtagDraft): value is HashtagDraft {
   return 'op' in value
 }
 
@@ -16,7 +16,7 @@ async function runHastagOp({
   bulletBoardId?: number
   bulletId: number
   cardId: number
-  input: Hashtag | HashtagInput
+  input: Hashtag | HashtagDraft
   userId: string
 }): Promise<Hashtag | null> {
   if (!isHashtagInput(input)) {
@@ -83,7 +83,7 @@ export async function runHastagOpBatch({
   bulletBoardId?: number
   bulletId: number
   cardId: number
-  hashtags: (Hashtag | HashtagInput)[]
+  hashtags: (Hashtag | HashtagDraft)[]
   userId: string
 }): Promise<Hashtag[]> {
   return (
@@ -91,6 +91,6 @@ export async function runHastagOpBatch({
   ).filter((e): e is Hashtag => e !== null)
 }
 
-export function getLinkHashtag(bullet: Bullet | BulletInput) {
+export function getLinkHashtag(bullet: Bullet | BulletDraft) {
   return bullet.hashtags?.find(e => e.linkBullet)
 }

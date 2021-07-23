@@ -2,16 +2,25 @@ import { inspect } from 'util'
 import { Board, BoardStatus, Card, CardBody, CardHead, CardType, Link, Poll } from '@prisma/client'
 import { FetchClient } from '../../../packages/fetcher/src'
 import prisma from '../prisma'
-import { bulletToDict, runBulletInputOp } from '../bullet-tree/node'
-import { Bullet, BulletInput, BulletPinCode } from '../bullet-tree/types'
+import { Bullet, BulletDraft, RootBullet, RootBulletChildless, RootBulletDraft } from '../bullet/types'
 import { getOrCreateLink, linkToSymbol } from './link'
-import { parseSymbol } from './symbol'
+import { parse } from './symbol'
 import { getBotId } from './user'
+import { checkBulletDraft, Node as BulletNode } from '../bullet/node'
+import { runBulletOp } from '../bullet/operation'
 // import { getOrCreateLink } from './link'
 
+export type PinBoardCode = 'BUYSELL' | 'VS'
+
+export type PinBoard = {
+  pinCode: PinBoardCode
+  boardId: number
+  pollId?: number
+}
+
 /**
+ * card head content是以bullet形式儲存，但需要能導出此資料格式
  * 用於讓前端知道有什麼可用的property
- * card-head-content是以bullet形式儲存，但需能導出此資料格式
  */
 export type CardHeadContentValue = {
   template: string
@@ -31,35 +40,33 @@ export type CardHeadContentValue = {
   pinPrice?: true
 }
 
-export type PinBoard = {
-  pinCode: BulletPinCode
-  boardId: number
-  pollId?: number
-}
-
 export type CardHeadContentValueInjected = CardHeadContentValue & {
   pinBoards: PinBoard[]
 }
 
 export type CardHeadContent = {
-  root: Bullet
+  self: RootBullet
   value: CardHeadContentValue
 }
 
-export type NestedCardEntry = {
-  cardSymbol: string
-  cardBodyId: number
-}
+// export type MirrorOperation = BulletOperation
+
+// TODO: 改成用bullet存？ 可以直接用bullet ops
+// export type MirrorEntry = {
+//   cardSymbol: string
+//   cardBodyId: number // 儲存編輯後創的body id，可能與最新body不一樣
+//   // op?: MirrorOperation
+// }
 
 export type CardBodyContent = {
-  root: Bullet
-  nestedCards?: NestedCardEntry[]
+  self: RootBullet
+  mirrors?: RootBulletChildless[]
 }
 
 export type CardTemplate = {
   name: string
-  headRoot: BulletInput
-  bodyRoot: BulletInput
+  headDraft: RootBulletDraft
+  bodyDraft: RootBulletDraft
 }
 
 export type CardTemplateProps = {
@@ -71,36 +78,55 @@ export type CardTemplateProps = {
 
 export const templateTicker: CardTemplate = {
   name: '::Ticker',
-  headRoot: {
+  headDraft: {
+    draft: true,
+    root: true,
+    symbol: '%SYMBOL%',
     head: '_%SYMBOL%',
     freeze: true,
     freezeChildren: true,
     op: 'CREATE',
     children: [
-      { head: 'template', body: '::Ticker', keyvalue: true, op: 'CREATE' },
-      { head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE' },
-      { head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE' },
-      { head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE' },
-      { head: 'pinPrice', body: 'true', freeze: true, keyvalue: true, valueBoolean: true, op: 'CREATE' },
+      { draft: true, head: 'template', body: '::Ticker', keyvalue: true, op: 'CREATE', children: [] },
+      { draft: true, head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE', children: [] },
+      { draft: true, head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
+      { draft: true, head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
+      {
+        draft: true,
+        head: 'pinPrice',
+        body: 'true',
+        freeze: true,
+        keyvalue: true,
+        valueBoolean: true,
+        op: 'CREATE',
+        children: [],
+      },
     ],
   },
-  bodyRoot: {
+  bodyDraft: {
+    draft: true,
+    root: true,
+    symbol: '%SYMBOL%',
     head: '%SYMBOL%',
     freeze: true,
     op: 'CREATE',
     children: [
       {
+        draft: true,
         head: '[!]',
         freeze: true,
         op: 'CREATE',
         // children: [{ head: '', placeholder: 'a placeholder test', template: true }],
+        children: [],
       },
       {
+        draft: true,
         head: '[?]',
         freeze: true,
         op: 'CREATE',
         children: [
           {
+            draft: true,
             head: `%SYMBOL% <BUY> <SELL> <WATCH>`,
             pin: true,
             pinCode: 'BUYSELL',
@@ -109,46 +135,57 @@ export const templateTicker: CardTemplate = {
             freeze: true,
             op: 'CREATE',
             hashtags: [{ text: '#Answer', linkBullet: true, op: 'CREATE' }],
+            children: [],
           },
         ],
       },
-      { head: '[*]', freeze: true, op: 'CREATE' },
-      { head: '[+]', freeze: true, op: 'CREATE' },
-      { head: '[-]', freeze: true, op: 'CREATE' },
+      { draft: true, head: '[*]', freeze: true, op: 'CREATE', children: [] },
+      { draft: true, head: '[+]', freeze: true, op: 'CREATE', children: [] },
+      { draft: true, head: '[-]', freeze: true, op: 'CREATE', children: [] },
     ],
   },
 }
 
 export const templateWebpage: CardTemplate = {
   name: '::Webpage',
-  headRoot: {
+  headDraft: {
+    draft: true,
+    root: true,
+    symbol: '%SYMBOL%',
     head: '_%SYMBOL%',
     freeze: true,
     op: 'CREATE',
     children: [
-      { head: 'template', body: '::Webpage', keyvalue: true, op: 'CREATE' },
-      { head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE' },
-      { head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE' },
-      { head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE' },
+      { draft: true, head: 'template', body: '::Webpage', keyvalue: true, op: 'CREATE', children: [] },
+      { draft: true, head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE', children: [] },
+      { draft: true, head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
+      { draft: true, head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
     ],
   },
-  bodyRoot: {
+  bodyDraft: {
+    draft: true,
+    root: true,
+    symbol: '%SYMBOL%',
     head: '%SYMBOL%',
     freeze: true,
     op: 'CREATE',
     children: [
       {
+        draft: true,
         head: '[!]',
         freeze: true,
         op: 'CREATE',
+        children: [],
         // children: [{ head: '', placeholder: 'a placeholder test', template: true }],
       },
       {
+        draft: true,
         head: '[?]',
         freeze: true,
         op: 'CREATE',
         children: [
           {
+            draft: true,
             head: `%SYMBOL% <BUY> <SELL> <WATCH>`,
             pin: true,
             pinCode: 'BUYSELL',
@@ -157,19 +194,23 @@ export const templateWebpage: CardTemplate = {
             freeze: true,
             op: 'CREATE',
             hashtags: [{ text: '#Answer', linkBullet: true, op: 'CREATE' }],
+            children: [],
           },
         ],
       },
-      { head: '[*]', freeze: true, op: 'CREATE' },
-      { head: '[+]', freeze: true, op: 'CREATE' },
-      { head: '[-]', freeze: true, op: 'CREATE' },
+      { draft: true, head: '[*]', freeze: true, op: 'CREATE', children: [] },
+      { draft: true, head: '[+]', freeze: true, op: 'CREATE', children: [] },
+      { draft: true, head: '[-]', freeze: true, op: 'CREATE', children: [] },
     ],
   },
 }
 
 const regexReplaceMather = /%([A-Z_]+)%/gm
 
-export function replaceBulletInput(node: BulletInput, props: CardTemplateProps): BulletInput {
+/**
+ * (Recursive) 將Bullet draft的內容依照給予的card template properties替換掉
+ */
+export function replaceBulletDraft<T extends BulletDraft | RootBulletDraft>(node: T, props: CardTemplateProps): T {
   function _keyIn(key: string, props: CardTemplateProps): key is keyof CardTemplateProps {
     return key in props
   }
@@ -187,7 +228,8 @@ export function replaceBulletInput(node: BulletInput, props: CardTemplateProps):
     ...node,
     head: node.head.replace(regexReplaceMather, _replacer),
     body: node.body?.replace(regexReplaceMather, _replacer),
-    children: node.children?.map(e => replaceBulletInput(e, props)),
+    symbol: 'symbol' in node ? node.symbol.replace(regexReplaceMather, _replacer) : undefined,
+    children: node.children?.map(e => replaceBulletDraft(e, props)),
   }
 }
 
@@ -246,42 +288,34 @@ function bulletToKeyValue(node: Bullet): KeyValue<string | string[] | boolean | 
   return {}
 }
 
-export async function createCardHead({
-  cardId,
-  rootInput,
-  userId,
-}: {
+export async function createCardHead(prop: {
   cardId: number
-  rootInput: BulletInput
+  draft: RootBulletDraft
   userId: string
 }): Promise<CardBody> {
-  const cur = await getCurrentCardHead(cardId)
-  const curDict = cur ? bulletToDict(JSON.parse(cur.content)) : undefined
-
-  // Run bullet op
+  const { cardId, draft, userId } = prop
   const timestamp = Date.now()
-  const root = await runBulletInputOp({
+  const cur = await getCurrentCardHead(cardId)
+  const curContent: CardHeadContent | undefined = cur ? JSON.parse(cur.content) : undefined
+
+  const nextSelf = await runBulletOp({
     cardId: cardId,
-    input: rootInput,
-    curDict,
+    current: curContent && curContent.self,
+    draft,
     timestamp,
     userId,
   })
-  if (root === null) {
-    throw new Error()
-  }
 
-  // TODO: serializer
-  const content: CardHeadContent = {
-    root,
+  const nextContent: CardHeadContent = {
+    self: nextSelf,
     // TODO: require type guard
-    value: bulletToKeyValue(root) as CardHeadContentValue,
+    value: bulletToKeyValue(nextSelf) as CardHeadContentValue,
   }
-
   return await prisma.cardHead.create({
     data: {
       timestamp,
-      content: JSON.stringify(content),
+      // TODO: serializer
+      content: JSON.stringify(nextContent),
       card: { connect: { id: cardId } },
       user: { connect: { id: userId } },
       prev: cur ? { connect: { id: cur.id } } : undefined,
@@ -289,45 +323,196 @@ export async function createCardHead({
   })
 }
 
-export async function createCardBody({
-  cardId,
-  nestedCards,
-  rootInput,
-  userId,
-}: {
+/**
+ * 用於資料庫的建立，不考慮輸入資料的檢查等，內部使用
+ * @param self - 沒更新的情況可以不給，會抓current的self並填入，若找不到current（例如第一次創）則會報錯
+ */
+async function _createCardBody(props: {
   cardId: number
-  nestedCards?: NestedCardEntry[]
-  rootInput: BulletInput
+  self?: RootBulletDraft
+  nextMirrors?: RootBulletChildless[]
   userId: string
-}): Promise<CardBody> {
-  const cur = await getCurrentCardBody(cardId)
-  const curContent: CardBodyContent = cur && JSON.parse(cur.content)
-  const curDict = curContent && bulletToDict(curContent.root)
+}): Promise<[CardBody, CardBodyContent]> {
+  const { cardId, self, nextMirrors, userId } = props
 
-  // Run bullet op
-  const timestamp = Date.now()
-  const root = await runBulletInputOp({
-    cardId: cardId,
-    input: rootInput,
-    curDict,
-    timestamp,
-    userId,
-  })
-  if (root === null) {
-    throw new Error()
+  if (self === undefined && nextMirrors === undefined) {
+    throw new Error('需至少要給self或mirrors')
   }
 
-  // TODO: serializer
-  const content: CardBodyContent = { root, nestedCards }
+  const timestamp = Date.now()
+  const cur = await getCurrentCardBody(cardId)
+  const curContent: CardBodyContent | undefined = cur ? JSON.parse(cur.content) : undefined
 
-  return await prisma.cardBody.create({
+  const nextSelf = self
+    ? await runBulletOp({
+        cardId: cardId,
+        current: curContent && curContent.self,
+        draft: self,
+        timestamp,
+        userId,
+      })
+    : curContent?.self
+  if (nextSelf === undefined) {
+    throw new Error('body content需要有self')
+  }
+
+  const nextContent: CardBodyContent = { self: nextSelf, mirrors: nextMirrors }
+  const body = await prisma.cardBody.create({
     data: {
       timestamp,
-      content: JSON.stringify(content),
+      // TODO: serializer
+      content: JSON.stringify(nextContent),
       card: { connect: { id: cardId } },
       user: { connect: { id: userId } },
       prev: cur ? { connect: { id: cur.id } } : undefined,
     },
+  })
+  return [body, nextContent]
+}
+
+/**
+ * 檢查card body的self draft
+ * @returns 若檢驗沒問題，返回bullet input，若該mirror沒有op（等於不用create），返回null
+ * @throws 檢驗失敗時告知error
+ */
+async function checkDraft(draft: RootBulletDraft): Promise<{
+  cardSymbol: string
+  cardId?: number
+  curSelf?: Bullet
+  draft?: RootBulletDraft
+}> {
+  const symbol = draft.symbol
+
+  // draft沒有op，不用create，返回
+  if (!BulletNode.hasAnyOp(draft)) {
+    console.log(`${symbol}的draft沒有op，不用create，返回`)
+    return { cardSymbol: symbol }
+  }
+
+  // 檢查是否有card，沒有的話需要創
+  // TODO: 1. 需要增加template 2. 適合在這裡創卡嗎？
+  // const card = await getOrCreateCardBySymbol(symbol)
+
+  const card = await prisma.card.findUnique({ where: { symbol } })
+  if (card === null) {
+    throw new Error('用draft創新卡功能還沒implemented')
+  }
+  // if (cardCreated) {
+  //   const merged = mergeTree(root, body.root)
+  //   const checked = checkBulletInput(root, cur)
+  //   return checked
+  // }
+
+  const body = await getCurrentCardBody(card.id)
+  if (body === null) {
+    throw new Error('找不到body，第一次創卡無法使用checkDraft()')
+  }
+  const curContent: CardBodyContent = JSON.parse(body.content)
+
+  return {
+    cardId: card.id,
+    cardSymbol: symbol,
+    curSelf: curContent.self,
+    draft: {
+      ...draft,
+      children: draft.children.map(e => checkBulletDraft(e, curContent.self)),
+    },
+  }
+}
+
+/**
+ * 創card body的標準method，針對self, mirrors一起輸入創建，會進行輸入資料的檢查，
+ * 沒問題後先創mirrors的card body，再創self的card body
+ *
+ * 步驟：
+ * - 檢查此卡片是否允許mirrors
+ * - 對每個mirror，做完以下步驟後存成entry
+ *   - 沒有op，代表此mirror無更新，忽略
+ *   - 是新卡，創card、創body
+ *   - 非新卡，創body
+ * - 對mirrors本身增加、刪除
+ *   - TODO: 需記錄標示
+ * - 儲存
+ *   - self有更新？ -> 存新的self、或存cur self
+ *   - mirrors有更新？ -> 存新的mirros、或存cur mirrors
+ *   - self, mirrors皆無更新 -> 不儲存
+ *
+ * @throws 輸入資料有問題時會報錯，用try-catch方式創card body
+ */
+export async function createCardBody(props: {
+  cardId: number
+  self?: RootBulletDraft
+  mirrors?: RootBulletDraft[]
+  userId: string
+}): Promise<[CardBody, CardBodyContent]> {
+  const { cardId, self, mirrors, userId } = props
+
+  if (self === undefined && mirrors === undefined) {
+    throw new Error('self、mirrors需至少要給一個')
+  }
+  const body = await getCurrentCardBody(cardId)
+  if (body === null) {
+    throw new Error('Card body not found')
+  }
+  const card = await prisma.card.findUnique({ where: { id: cardId } })
+  if (card === null) {
+    throw new Error('Card not found')
+  }
+  if (mirrors && card.type !== CardType.WEBPAGE) {
+    // 檢查此卡片是否允許mirrors
+    throw new Error('Card not allow to have mirrors')
+  }
+
+  // 檢查self & mirrors
+  const checkedSelf = self && (await checkDraft(self))
+  const checkedMirrors = mirrors && (await Promise.all(mirrors.map(async e => await checkDraft(e))))
+
+  console.log(checkedSelf)
+  console.log(checkedMirrors)
+
+  // 若mirror有更新，創mirror body並更新entry，沒有更新的返回原entry
+  const bodyContent: CardBodyContent = JSON.parse(body.content)
+
+  // TODO: 目前忽略了將mirror entry被刪除的情況 -> 會直接從entries移除
+  const nextMirrors: RootBulletChildless[] | undefined =
+    checkedMirrors &&
+    (
+      await Promise.all(
+        checkedMirrors.map(async (checked): Promise<RootBulletChildless | undefined> => {
+          if (checked.draft === undefined) {
+            // 沒有draft，代表雖然有此mirror但沒更新，找current mirror填補，若找不到表示新增了一個symbol，但卻沒有更新，忽略此mirror
+            return bodyContent.mirrors?.find(e => e.symbol === checked.cardSymbol)
+          }
+          if (checked.cardId && checked.draft) {
+            const [body, bodyContent] = await _createCardBody({
+              cardId: checked.cardId,
+              self: checked.draft,
+              userId,
+            })
+            // mirror不需要完全記錄原本的node，因為會依symbol, body id抓原本的bullet
+            return {
+              id: bodyContent.self.id,
+              timestamp: bodyContent.self.timestamp,
+              userIds: bodyContent.self.userIds,
+              head: bodyContent.self.head,
+              root: true,
+              mirror: true,
+              symbol: bodyContent.self.symbol,
+              cardBodyId: body.id,
+              children: [],
+            }
+          }
+          return undefined
+        }),
+      )
+    ).filter((e): e is RootBulletChildless => e !== undefined)
+
+  // 更新self
+  return await _createCardBody({
+    cardId: card.id,
+    self: checkedSelf?.draft,
+    nextMirrors,
+    userId,
   })
 }
 
@@ -346,42 +531,48 @@ export async function attachLatestHeadBody(card: Card): Promise<
   }
 }
 
-async function createCard({
-  symbol,
-  template,
-  templateProps,
-  type,
-}: {
+/**
+ * 僅內部使用，會同時載入template並創第一個card body
+ */
+async function _createCard(props: {
+  link?: Link
   symbol: string
   template: CardTemplate
   templateProps: CardTemplateProps
   type: CardType
 }): Promise<
   Card & {
+    link: Link | null
     head: CardHead
     body: CardBody
   }
 > {
+  const { link, symbol, template, templateProps, type } = props
   const card = await prisma.card.create({
-    data: { type, symbol },
+    data: {
+      link: link && { connect: { id: link.id } },
+      type,
+      symbol,
+    },
+    include: { link: true },
   })
 
   // 依template建card-head, card-body
   const head = await createCardHead({
     cardId: card.id,
-    rootInput: replaceBulletInput(template.headRoot, templateProps),
+    draft: replaceBulletDraft(template.headDraft, templateProps),
     userId: await getBotId(),
   })
-  const body = await createCardBody({
+  const [body] = await _createCardBody({
     cardId: card.id,
-    rootInput: replaceBulletInput(template.bodyRoot, templateProps),
+    self: replaceBulletDraft(template.bodyDraft, templateProps),
     userId: await getBotId(),
   })
 
   return { ...card, head, body }
 }
 
-const templateDict: { [key in CardType]: CardTemplate } = {
+export const templateDict: { [key in CardType]: CardTemplate } = {
   [CardType.TICKER]: templateTicker,
   [CardType.TOPIC]: templateTicker,
   [CardType.WEBPAGE]: templateWebpage,
@@ -393,16 +584,20 @@ const templateDict: { [key in CardType]: CardTemplate } = {
  */
 export async function getOrCreateCardBySymbol(symbol: string): Promise<
   Card & {
+    link: Link | null
     head: CardHead
     body: CardBody
   }
 > {
-  const { symbolName, cardType, oauthorName } = parseSymbol(symbol)
+  const { symbolName, cardType, oauthorName } = parse(symbol)
   const template = templateDict[cardType]
-  const card = await prisma.card.findUnique({ where: { symbol: symbolName } })
+  const card = await prisma.card.findUnique({
+    where: { symbol: symbolName },
+    include: { link: true },
+  })
 
   if (card === null) {
-    return await createCard({
+    return await _createCard({
       symbol: symbolName,
       template: template,
       templateProps: {
@@ -413,7 +608,10 @@ export async function getOrCreateCardBySymbol(symbol: string): Promise<
       type: cardType,
     })
   } else {
-    return await attachLatestHeadBody(card)
+    return {
+      ...(await attachLatestHeadBody(card)),
+      link: card.link,
+    }
   }
 }
 
@@ -432,7 +630,8 @@ export async function getOrCreateCardByUrl({ fetcher, url }: { fetcher?: FetchCl
   const symbol = linkToSymbol(link)
   const card = link.card
     ? await attachLatestHeadBody(link.card)
-    : await createCard({
+    : await _createCard({
+        link,
         symbol,
         template: template,
         templateProps: {

@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { AutoComplete, Button, Form, Input } from 'antd'
-import { SlateEditorPage } from '../pages/lab/editor'
 import { Editor, Section } from '../../packages/editor/src/index'
 import {
   useCreateWebCardBodyMutation,

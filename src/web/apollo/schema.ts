@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { makeExecutableSchema } from '@graphql-tools/schema'
-import { DateTimeResolver } from 'graphql-scalars'
+import { DateTimeResolver, JSONObjectResolver, JSONResolver } from 'graphql-scalars'
 import resolvers from './resolvers'
 
 const typeDefs = readFileSync(join(process.cwd(), 'apollo/type-defs.graphqls'), 'utf8')
@@ -12,6 +12,8 @@ export const schema = makeExecutableSchema({
   typeDefs,
   resolvers: {
     DateTime: DateTimeResolver,
+    JSON: JSONResolver,
+    // JSONObject: JSONObjectResolver,
     ...resolvers,
   },
 })
