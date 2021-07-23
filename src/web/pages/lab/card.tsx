@@ -3,14 +3,11 @@ import { ApolloClient, ApolloError, useApolloClient } from '@apollo/client'
 import { useUser } from '@auth0/nextjs-auth0'
 import { BoardStatus, CardType } from '@prisma/client'
 import { Token } from 'prismjs'
-<<<<<<< HEAD
-import { createContext, FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+
 import { Descendant, Element } from 'slate'
 import { useSlateStatic } from 'slate-react'
-=======
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState, createContext } from 'react'
 import { editorValue } from '../../apollo/cache'
->>>>>>> 88799519858fc519d32574ac37da0f0dbb629b80
 import {
   Board,
   BoardQuery,
@@ -34,12 +31,10 @@ import {
 } from '../../apollo/query.graphql'
 import { CardBodyInput } from '../../apollo/type-defs.graphqls'
 import { QueryDataProvider } from '../../components/data-provider'
-import { deserialize, serialize } from '../../lib/bullet-tree/serializer'
-
-
+// import { deserialize, serialize } from '../../lib/bullet-tree/serializer'
 
 import { injectCardHeadValue } from '../../lib/models/card-helpers'
-import { CardSymbol, parseSymbol } from '../../lib/models/symbol'
+// import { CardSymbol, parseSymbol } from '../../lib/models/symbol'
 import { useCardLazyQuery } from '../../__generated__/apollo/query.graphql'
 
 import classes from '../../components/card.module.scss'
@@ -65,7 +60,6 @@ import { tokenize } from '../../lib/bullet/tokenizer'
 import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
 import { CardBodyContent, CardHeadContent, CardHeadContentValueInjected, PinBoard } from '../../lib/models/card'
 
-
 type CardParsed = Card & {
   headContent: CardHeadContent
   bodyContent: CardBodyContent
@@ -78,12 +72,7 @@ type CardParsed = Card & {
 function parseCard(card: Card): CardParsed {
   const headContent: CardHeadContent = JSON.parse(card.head.content)
   const bodyContent: CardBodyContent = JSON.parse(card.body.content)
-<<<<<<< HEAD
-  const headValue = injectCardHeadValue({ bodyRoot: bodyContent.root, value: headContent.value })
-
-=======
   const headValue = injectCardHeadValue({ bodyRoot: bodyContent.self, value: headContent.value })
->>>>>>> 88799519858fc519d32574ac37da0f0dbb629b80
   return {
     ...card,
     headContent,
@@ -430,7 +419,7 @@ const markToText = (e: string, handleSymbol?: (symbol: string) => void) => {
 }
 
 const BulletItem = (props: {
-  node: Bullet | BulletInput
+  node: Bullet | BulletDraft
   handleShowBoard?: (boardId: number | undefined) => void
   depth: number
   type: string
@@ -582,12 +571,28 @@ const CardBodyItem = (props: { card: Card; self: BulletDraft; mirrors?: BulletDr
     return (
       <div>
         <ul>
-          <BulletItem node={self} />
+          <BulletItem
+            node={self}
+            handleSymbol={_ => {
+              _
+            }}
+            depth={0}
+            type={card.type}
+            cardId={card.id}
+          />
         </ul>
         {mirrors &&
           mirrors.map((e, i) => (
             <ul key={i}>
-              <BulletItem node={e} />
+              <BulletItem
+                node={e}
+                handleSymbol={_ => {
+                  _
+                }}
+                depth={0}
+                type={card.type}
+                cardId={card.id}
+              />
             </ul>
           ))}
       </div>
@@ -598,7 +603,16 @@ const CardBodyItem = (props: { card: Card; self: BulletDraft; mirrors?: BulletDr
     <div>
       <ul>
         {self.children?.map((e, i) => (
-          <BulletItem key={i} node={e} />
+          <BulletItem
+            key={i}
+            node={e}
+            handleSymbol={_ => {
+              _
+            }}
+            depth={0}
+            type={card.type}
+            cardId={card.id}
+          />
         ))}
       </ul>
     </div>
@@ -611,8 +625,8 @@ const CardBodyItem = (props: { card: Card; self: BulletDraft; mirrors?: BulletDr
 
 const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void }) => {
   const { card, handleSymbol } = props
-  const parsedCard = parseCard(card)
-  const pinBoard = parsedCard.headValue.pinBoards.find(e => e.pinCode === 'BUYSELL')
+  // const parsedCard = parseCard(card)
+  // const pinBoard = parsedCard.headValue.pinBoards.find(e => e.pinCode === 'BUYSELL')
 
   const client = useApolloClient()
   const [showBoard, setShowBoard] = useState(false)
@@ -622,10 +636,10 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
 
   const [pinBoardBuysell, setPinBoardBuysell] = useState<PinBoard | undefined>()
   const [edit, setEdit] = useState(false)
-  const [bodyTree, setBodyTree] = useState<BulletInput>() // tree root不顯示
-  // const [bodyChildren, setBodyChildren] = useState<BulletInput[]>(bodyRootDemo.children ?? [])
-  const [bodyChildren, setBodyChildren] = useState<BulletInput[]>([])
-  const [editorValue, setEditorValue] = useState<Descendant[]>([])
+  const [bodyTree, setBodyTree] = useState<BulletDraft>() // tree root不顯示
+  // const [bodyChildren, setBodyChildren] = useState<BulletDraft[]>(bodyRootDemo.children ?? [])
+  const [bodyChildren, setBodyChildren] = useState<BulletDraft[]>([])
+  // const [editorValue, setEditorValue] = useState<Descendant[]>([])
   // console.log(card)
   const hideBoard = () => {
     setShowBoard(false)
@@ -640,7 +654,7 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
   //     // console.log(card)
   //   }
   //   build()
-    // console.log(card)
+  // console.log(card)
   const [editorInitialValue, setEditorInitialValue] = useState<LiElement[] | undefined>()
 
   useEffect(() => {
@@ -732,9 +746,9 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
   return (
     <div>
       {/* <h3>Head</h3> */}
-      <span className={classes.title}>{parsedCard.symbol}</span>
+      <span className={classes.title}>{self?.head}</span>
       {/* {console.log(pinBoard)} */}
-      {pinBoard && pinBoard.pinCode === 'BUYSELL' && (
+      {pinBoardBuysell && pinBoardBuysell.pinCode === 'BUYSELL' && (
         <span
           className={classes.tags}
           onClick={() => {
@@ -744,9 +758,9 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
           看多/看空/觀望
         </span>
       )}
-      {parsedCard.headContent.value.template}
+      {/* {parsedCard.headContent.value.template}
       {parsedCard.headContent.value.keywords}
-      {parsedCard.headContent.value.tags}
+      {parsedCard.headContent.value.tags} */}
       {/* <h3>Board</h3> */}
       {/* <button
         onClick={() => {
@@ -755,7 +769,7 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
       >
         Board
       </button> */}
-      {showBoard && pinBoard && (
+      {showBoard && pinBoardBuysell && (
         <Popover
           visible={showBoard}
           subTitle={
@@ -765,14 +779,14 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
               //   setShowBoard(!showBoard)
               // }}
             >
-              {parsedCard.symbol}
+              {self?.head}
             </span>
           }
           hideBoard={hideBoard}
         >
           <BoardPage
-            boardId={pinBoard.boardId.toString()}
-            pollId={pinBoard.pollId?.toString()}
+            boardId={pinBoardBuysell.boardId.toString()}
+            pollId={pinBoardBuysell.pollId?.toString()}
             title={'看多/看空/觀望'}
             // visible={showBoard}
             // hideBoard={hideBoard}
