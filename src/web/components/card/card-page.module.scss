@@ -1,0 +1,208 @@
+// @import '../style/global.module.scss';
+// pre span {
+//   // font-family: 微軟正黑體, sans-serif;
+//   font-family: 'Noto Sans TC', BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
+//     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+// }
+.main {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  background-color: $bg;
+  /* flex-direction: column; */
+  // align-items: center;
+  position: relative;
+  // padding: 3em 0;
+}
+.mainInner {
+  // display: flex;
+  flex: auto;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: $bg;
+  // padding: 0 24px;
+}
+.header {
+  // width: 90%;
+  // // line-height: 1.6em;
+  // // letter-spacing: 1px;
+  // padding-bottom: 10px;
+  // .title {
+  //   // font-family: "Noto Sans TC";
+  //   display: block;
+  //   margin: 10px 0;
+  //   line-height: 1.5;
+  //   white-space: pre-line;
+  //   font-weight: 500;
+  //   font-size: 18px;
+  //   color: $black;
+  // }
+  .date {
+    @extend %Round_sm_gray_en;
+    display: inline-block;
+    margin-right: 16px;
+  }
+  .webName {
+    @extend %Round_sm_gray_en;
+  }
+  .link {
+    @extend %Round_sm_ch;
+  }
+  .author {
+    @extend %Round_sm_gray_en;
+    @extend %Round_sm_ch;
+    color: $secondary;
+  }
+}
+.flexContainer {
+  display: flex;
+  align-items: center;
+}
+.textArea {
+  &:global(.ant-input) {
+    border: none;
+  }
+}
+.clockIcon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  fill: $gray;
+}
+a {
+  .linkIcon {
+    width: 16px;
+    height: 16px;
+    position: relative;
+    top: 3px;
+    margin-right: 3px;
+    fill: $secondary;
+  }
+  &:hover {
+    .linkIcon {
+      fill: $secondaryHover;
+    }
+  }
+}
+.cardInner {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  position: absolute;
+  left: 0;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+.cardElement {
+  width: 50%;
+  margin: 0 auto 4em;
+  order: 2;
+  @media screen and(max-width:500px) {
+    width: 94vw;
+    margin: 0px auto 1em;
+  }
+}
+.cardOuter {
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.cardBodyContainer {
+  width: 95%;
+  // height: 100%;
+  // display: flex;
+  .buttonWrapper {
+    // flex-grow: 1;
+    // left: 30%;
+  }
+}
+.button:global(.ant-btn) {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  margin-top: 5em;
+  border-radius: 29px;
+  border: none;
+  background: white;
+  // -webkit-box-shadow: 0 3px 6px #00000029;
+  box-shadow: 0 3px 6px #00000029;
+  right: 0;
+  .editIcon {
+    width: 25px;
+    height: 25px;
+    display: block;
+    position: relative;
+    // left: 2px;
+    top: -1px;
+    fill: $icon;
+    stroke: $icon;
+  }
+  &:hover {
+    background: $natual;
+    .editIcon {
+      fill: $secondary;
+      stroke: $secondary;
+    }
+  }
+}
+.section {
+  display: block;
+  box-shadow: 0 0 10px #ddd;
+  margin: 0 0 40px;
+  padding: 6px 16px;
+  border-left: 6px solid $secondary;
+
+  border-radius: 5px;
+}
+.template {
+  display: flex;
+  flex-direction: column;
+  min-width: 80%;
+  color: #4f565f73;
+  .title {
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .sectionTitle {
+    font-weight: 700;
+    font-size: 24px;
+  }
+  .marker {
+    font-weight: 700;
+    font-size: 17px;
+  }
+}
+.newCardBtn {
+  // display: block;
+  // margin: 0 auto;
+  width: fit-content;
+  user-select: none;
+}
+.newCardBtnContainer {
+  position: fixed;
+  bottom: 9vh;
+  right: 10vw;
+  width: 50px;
+  height: 50px;
+  color: white;
+  border-radius: 99px;
+  font-size: 35px;
+  cursor: pointer;
+  line-height: 47px;
+  display: flex;
+  justify-content: center;
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    background: $primary;
+    // transform: rotate(45deg);
+  }
+}

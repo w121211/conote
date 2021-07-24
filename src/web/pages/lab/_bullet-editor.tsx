@@ -16,6 +16,8 @@ import {
 import { withHistory } from 'slate-history'
 import { tokenize, LINE_VALUE_GRAMMAR, Token } from '../../../packages/editor/src/parser'
 import { useSearchAllLazyQuery } from '../../apollo/query.graphql'
+
+import classes from './bullet-editor.module.scss'
 import { BulletElement } from '../../lib/bullet/editor/slate-custom-types'
 
 const SUGGESTIONS = {
@@ -237,7 +239,11 @@ const CustomElement = (props: RenderElementProps): JSX.Element => {
 
   switch (element.type) {
     case 'bullet':
-      return <ul {...attributes}>{children}</ul>
+      return (
+        <ul className={classes.bulletHead} {...attributes}>
+          {children}
+        </ul>
+      )
     case 'bullet-head':
       return <li {...attributes}>{children}</li>
     case 'bullet-body':
@@ -791,6 +797,7 @@ const BulletEditor = ({
             />
           </Portal>
         )}
+        {/* <button onClick={()=>{handleFinish(value)}}></button> */}
       </Slate>
     </>
   )

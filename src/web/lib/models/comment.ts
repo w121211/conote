@@ -13,43 +13,43 @@ export interface CommentMeta {
   inCardIds: number[]
 }
 
-export async function createComment(
-  userId: string,
-  text: string,
-  meta?: CommentMeta,
-  pollChoices?: string[],
-): Promise<(Comment & { poll: Poll | null }) | Comment> {
-  let comment: (Comment & { poll: Poll | null }) | Comment
-  if (pollChoices) {
-    comment = await prisma.comment.create({
-      data: {
-        meta: meta as any,
-        text,
-        user: { connect: { id: userId } },
-        count: { create: {} },
-        poll: {
-          create: {
-            user: { connect: { id: userId } },
-            choices: pollChoices,
-            count: {
-              create: {
-                nVotes: pollChoices.map<number>(_e => 0),
-              },
-            },
-          },
-        },
-      },
-      include: { poll: true },
-    })
-  } else {
-    comment = await prisma.comment.create({
-      data: {
-        meta: meta as any,
-        text,
-        user: { connect: { id: userId } },
-        count: { create: {} },
-      },
-    })
-  }
-  return comment
-}
+// export async function createComment(
+//   userId: string,
+//   text: string,
+//   meta?: CommentMeta,
+//   pollChoices?: string[],
+// ): Promise<(Comment & { poll: Poll | null }) | Comment> {
+//   let comment: (Comment & { poll: Poll | null }) | Comment
+//   if (pollChoices) {
+//     comment = await prisma.comment.create({
+//       data: {
+//         meta: meta as any,
+//         text,
+//         user: { connect: { id: userId } },
+//         count: { create: {} },
+//         poll: {
+//           create: {
+//             user: { connect: { id: userId } },
+//             choices: pollChoices,
+//             count: {
+//               create: {
+//                 nVotes: pollChoices.map<number>(_e => 0),
+//               },
+//             },
+//           },
+//         },
+//       },
+//       include: { poll: true },
+//     })
+//   } else {
+//     comment = await prisma.comment.create({
+//       data: {
+//         meta: meta as any,
+//         text,
+//         user: { connect: { id: userId } },
+//         count: { create: {} },
+//       },
+//     })
+//   }
+//   return comment
+// }

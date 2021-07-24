@@ -1,0 +1,23 @@
+.container {
+  position: absolute;
+  background: #ffffff;
+  width: max-content;
+  top: 119%;
+  /* padding: 10px 20px; */
+  right: 0;
+  /* list-style: none; */
+  box-shadow: 0 3px 24px -5px #00000061;
+  color: $text;
+  ul {
+    display: block;
+    list-style: none;
+  }
+  li {
+    display: flex;
+    justify-content: center;
+    padding: 4px 10px;
+    &:not(:last-child) {
+      border-bottom: 1px solid $light-gray;
+    }
+  }
+}

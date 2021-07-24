@@ -1,6 +1,7 @@
 // import * as QT from './graphql/query-types'
-import { SymbolCat, CardTemplate, CocardFragment } from '../apollo/query.graphql'
-import { AnchorLike, CommentLike, LikeChoice, ReplyLike } from '@prisma/client'
+// import { SymbolCat, CardTemplate, CocardFragment } from '../apollo/query.graphql'
+import { CardFragment } from '../apollo/query.graphql'
+import { CommentLike, LikeChoice, BulletLike } from '@prisma/client'
 
 export function toUrlParams(params: Record<string, string>): string {
   const sp = new URLSearchParams()
@@ -14,21 +15,21 @@ export function toUrlParams(params: Record<string, string>): string {
 const reTicker = /^\$[A-Z0-9]+$/
 const reTopic = /^\[\[[^\]]+\]\]$/
 
-function parse(symbolName: string): { name: string; cat: SymbolCat; oauthoName?: string } {
-  let cat: SymbolCat
-  let oauthoName: string | undefined
-  // const mySymbolName = '//' + symbolName
-  // console.log(mySymbolName)
-  if (symbolName.match(reTicker) !== null) {
-    cat = SymbolCat.Ticker
-  } else if (symbolName.match(reTopic) !== null) {
-    cat = SymbolCat.Topic
-  } else {
-    // console.log(symbolName)
-    throw new Error(`尚未支援的symbol format${symbolName}`)
-  }
-  return { name: symbolName, cat, oauthoName }
-}
+// function parse(symbolName: string): { name: string; cat: SymbolCat; oauthoName?: string } {
+//   let cat: SymbolCat
+//   let oauthoName: string | undefined
+//   // const mySymbolName = '//' + symbolName
+//   // console.log(mySymbolName)
+//   if (symbolName.match(reTicker) !== null) {
+//     cat = SymbolCat.Ticker
+//   } else if (symbolName.match(reTopic) !== null) {
+//     cat = SymbolCat.Topic
+//   } else {
+//     // console.log(symbolName)
+//     throw new Error(`尚未支援的symbol format${symbolName}`)
+//   }
+//   return { name: symbolName, cat, oauthoName }
+// }
 
 export function urlToSymbol(url: string): string | null {
   // 若是symbo-url則返回symbol，否則返回null
@@ -39,11 +40,11 @@ export function urlToSymbol(url: string): string | null {
   }
 }
 
-export function symbolToUrl(symbolName: string): string {
-  const parsed = parse(symbolName)
-  console.log(parsed)
-  return `//${parsed.name}`
-}
+// export function symbolToUrl(symbolName: string): string {
+//   const parsed = parse(symbolName)
+//   console.log(parsed)
+//   return `//${parsed.name}`
+// }
 
 // export function encodeSymbol(symbol: string, cat: QT.SymbolCat) {
 //   if (cat === SymbolCat.Ticker) {
@@ -54,20 +55,20 @@ export function symbolToUrl(symbolName: string): string {
 //   }
 // }
 
-export function getCardUrlParam(card: CocardFragment): string {
-  let params: string
-  // console.log(card)
-  if (card.template === CardTemplate.Webpage) {
-    params = toUrlParams({ u: card.link.url })
-  } else {
-    params = toUrlParams({ s: card.link.url.substr(2) })
-  }
-  return params
-}
+// export function getCardUrlParam(card: CardFragment): string {
+//   let params: string
+//   // console.log(card)
+//   if (card.template === CardTemplate.Webpage) {
+//     params = toUrlParams({ u: card.link.url })
+//   } else {
+//     params = toUrlParams({ s: card.link.url.substr(2) })
+//   }
+//   return params
+// }
 
 export function deltaLike(
-  like: AnchorLike | CommentLike | ReplyLike,
-  prevLike?: AnchorLike | CommentLike | ReplyLike,
+  like: CommentLike | BulletLike,
+  prevLike?: CommentLike | BulletLike,
 ): { deltaDown: number; deltaUp: number } {
   // 計算up-down的變化值
   let deltaUp = 0

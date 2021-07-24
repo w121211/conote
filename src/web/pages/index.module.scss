@@ -5,6 +5,7 @@
   align-items: center;
   width: 100%;
   height: 100vh;
+  background: $bg;
 }
 .search {
   text-align: center;
@@ -14,13 +15,16 @@
     margin-bottom: 0;
   }
   :global(.ant-select) {
-    width: 450px;
+    width: min(450px, 100%);
   }
 }
 .outer {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  @media screen and (max-width: 500px) {
+    width: 85vw;
+  }
 }
 .inner {
   display: flex;
@@ -29,9 +33,73 @@
   /* flex: auto; */
   height: 100%;
   padding-bottom: 11vh;
+  // word-break: break-all;
   // flex-grow: 1;
   // /* flex-shrink: 1;
 }
 .latestCards {
   overflow: auto;
+}
+.latestCardsListText {
+  // font-family: 'jf-openhuninn-1.1';
+  display: flex;
+  color: #4f565f;
+  a {
+    color: #4f565f;
+    display: block;
+    /* display: -webkit-box; */
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: auto;
+    &:hover {
+      // color: $primaryHover;
+    }
+  }
+}
+.latestCardsListIndex {
+  display: inline-flex;
+  min-width: 1.5em;
+  /* justify-items: stretch; */
+  justify-content: flex-end;
+  margin-right: 10px;
+}
+.newCardBtn {
+  // display: block;
+  // margin: 0 auto;
+  width: fit-content;
+  user-select: none;
+  svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 22px;
+    stroke: black;
+  }
+}
+.newCardBtnContainer {
+  position: fixed;
+  bottom: 9vh;
+  right: 10vw;
+  width: 50px;
+  height: 50px;
+  // color: white;
+  // border-radius: 99px;
+  font-size: 35px;
+  cursor: pointer;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media screen and (max-width: 500px) {
+    width: 40px;
+    height: 40px;
+
+    top: 0;
+    right: 0;
+    // box-shadow: 0 6px 26px #0000002b;
+    z-index: 1;
+  }
+}
+.newCardBtnWrapper {
 }

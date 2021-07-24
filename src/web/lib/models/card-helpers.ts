@@ -32,6 +32,7 @@ export function findBullets({
       found = found.concat(findBullets({ node: e, where, curDepth: nextDepth }))
     }
   }
+
   return found
 }
 
@@ -56,6 +57,7 @@ export function injectCardHeadValue({
       throw new Error()
     }
   }
+
   return {
     ...value,
     pinBoards,

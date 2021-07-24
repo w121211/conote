@@ -1,4 +1,4 @@
-import { SectData } from '../pages/card/index'
+import { SectData } from './card/index'
 
 export const CardBody1 = ({ data }: { data: SectData[] }) => {
   return (
