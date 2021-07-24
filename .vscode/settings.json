@@ -14,7 +14,8 @@
     "**/.eslintcache": true,
     "**/.next": true,
     "**/__deprecated__/**": true,
-    "**/__generated__/**": true
+    "**/__generated__/**": true,
+    "**/dist/**": true
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",

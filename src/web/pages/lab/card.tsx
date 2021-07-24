@@ -1,17 +1,17 @@
 /* eslint-disable no-console */
+import React, { FormEvent, useCallback, useEffect, useMemo, useState, createContext } from 'react'
+import Link from 'next/link'
 import { ApolloClient, ApolloError, useApolloClient } from '@apollo/client'
 import { useUser } from '@auth0/nextjs-auth0'
-import { BoardStatus, CardType } from '@prisma/client'
 import { Token } from 'prismjs'
-
-import { Descendant, Element } from 'slate'
-import { useSlateStatic } from 'slate-react'
-import { FormEvent, useCallback, useEffect, useMemo, useState, createContext } from 'react'
+import { CardType } from '@prisma/client'
+import RightArrow from '../../assets/svg/right-arrow.svg'
 import { editorValue } from '../../apollo/cache'
 import {
   Board,
   BoardQuery,
   Card,
+  CardBodyInput,
   CardDocument,
   CardQuery,
   CardQueryVariables,
@@ -29,21 +29,17 @@ import {
   useCreateOauthorCommentMutation,
   useMeQuery,
 } from '../../apollo/query.graphql'
-import { CardBodyInput } from '../../apollo/type-defs.graphqls'
-import { QueryDataProvider } from '../../components/data-provider'
-// import { deserialize, serialize } from '../../lib/bullet-tree/serializer'
-
-import { injectCardHeadValue } from '../../lib/models/card-helpers'
-// import { CardSymbol, parseSymbol } from '../../lib/models/symbol'
-import { useCardLazyQuery } from '../../__generated__/apollo/query.graphql'
-
 import classes from '../../components/card.module.scss'
-import RightArrow from '../../assets/svg/right-arrow.svg'
-import Link from 'next/link'
 import BoardPage from '../../components/board/board-page'
-import { tryFetch } from '../../../packages/fetcher/src/index'
 import CreateBoardPage from '../../components/board/create-board-page'
 import Popover from '../../components/popover/popover'
+import { BulletEditor } from '../../components/editor/editor'
+import { Serializer } from '../../components/editor/serializer'
+import { LiElement } from '../../components/editor/slate-custom-types'
+import { tokenize } from '../../lib/bullet/tokenizer'
+import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
+import { CardBodyContent, CardHeadContent, CardHeadContentValueInjected, PinBoard } from '../../lib/models/card'
+import { injectCardHeadValue } from '../../lib/models/card-helpers'
 
 // type CardHeadAndParsedContent = Omit<CardHead, 'content'> & {
 //   content: CardHeadContent
@@ -52,13 +48,6 @@ import Popover from '../../components/popover/popover'
 // type CardBodyAndParsedContent = Omit<CardBody, 'content'> & {
 //   content: CardBodyContent
 // }
-import { BulletEditor } from '../../components/editor/editor'
-import { Serializer } from '../../components/editor/serializer'
-import { LiElement } from '../../components/editor/slate-custom-types'
-import { Node as BulletNode } from '../../lib/bullet/node'
-import { tokenize } from '../../lib/bullet/tokenizer'
-import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
-import { CardBodyContent, CardHeadContent, CardHeadContentValueInjected, PinBoard } from '../../lib/models/card'
 
 type CardParsed = Card & {
   headContent: CardHeadContent

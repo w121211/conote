@@ -1,18 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../../packages/editor/src/index'
 import { useRouter } from 'next/router'
-import { Button } from 'antd'
 // import { symbolToUrl, getCardUrlParam } from '../../lib/helper'
 import { CardQuery, useCardQuery } from '../../apollo/query.graphql'
 import { QueryDataProvider } from '../data-provider'
 import TickerAnchor from '../anchor/tickerAnchor'
-import { CardBody, CardHead } from '../card'
+// import { CardBody, CardHead } from '../card'
 import Discuss from '../board/board-page'
 import EditIcon from '../../assets/svg/edit.svg'
 import classes from './card-page.module.scss'
 import indexClasses from '../index.module.scss'
 import AddIcon from '../../assets/svg/add.svg'
-import CardHeadNew from '../../__deprecated__/card-new'
 
 export interface SectData {
   type: string

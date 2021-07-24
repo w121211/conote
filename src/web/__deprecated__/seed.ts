@@ -5,7 +5,7 @@
  */
 import { hash } from 'bcryptjs'
 import * as PA from '@prisma/client'
-import { createCard } from '../../lib/models/card'
+import { createCard } from '../lib/models/card'
 
 const BOT = { email: config.parsed.BOT_EMAIL, password: config.parsed.BOT_PASSWORD }
 

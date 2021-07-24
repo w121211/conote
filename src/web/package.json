@@ -17,8 +17,8 @@
     "test-all": "yarn lint && yarn type-check && yarn test",
     "migrate": "dotenv -e .env.local -- yarn run prisma migrate dev --preview-feature",
     "seed": "dotenv -e .env.local -- ts-node prisma/scripts/from-file.ts ./prisma/seeds",
-    "clean:types": "rm -rf dist && rm -rf reports",
-    "build:types": "yarn run clean:types && yarn tsc --build --verbose tsconfig.build-types.json"
+    "clean-types": "rm -rf dist && rm -rf reports",
+    "build-types": "yarn run clean-types && yarn tsc --build --verbose tsconfig.build-types.json"
   },
   "husky": {
     "hooks": {
@@ -49,8 +49,8 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-hook-form": "^7.6.2",
-    "react-select": "^4.3.1",
     "react-modal": "^3.14.3",
+    "react-select": "^4.3.1",
     "react-use-measure": "^2.0.4",
     "sass": "^1.32.12",
     "slate": "^0.63.0",
@@ -74,12 +74,14 @@
     "@types/react": "^17.0.1",
     "@types/react-dom": "^17.0.6",
     "@types/react-modal": "^3.12.1",
+    "@types/react-select": "^4.0.17",
     "@typescript-eslint/eslint-plugin": "^4.14.2",
     "@typescript-eslint/parser": "^4.14.2",
     "babel-jest": "^26.6.3",
     "dotenv-cli": "^4.0.0",
     "encoding": "^0.1.13",
     "eslint": "^7.19.0",
+    "eslint-config-next": "^11.0.1",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-react": "^7.19.0",
     "graphql-let": "^0.17.1",
@@ -88,6 +90,7 @@
     "jest": "^26.6.3",
     "jest-watch-typeahead": "^0.6.1",
     "lint-staged": "^10.0.10",
+    "pg": "^8.6.0",
     "prettier": "^2.0.2",
     "prisma": "^2.26.0",
     "ts-jest": "^26.5.5",

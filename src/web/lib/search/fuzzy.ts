@@ -3,16 +3,17 @@
  */
 // import _ from 'lodash'
 // import dayjs from 'dayjs'
+import { Card, CardType } from '@prisma/client'
 import Fuse from 'fuse.js'
-import { Symbol as PrismaSymbol } from '@prisma/client'
+// import { Symbol as PrismaSymbol } from '@prisma/client'
 import prisma from '../prisma'
 
 // 將資料庫取出的資料存在記憶體中（定時更新），用於fuzzy search
 // TODO: 改存在Redis
-let symbols: PrismaSymbol[] | null = null
-let symbolFuse: Fuse<PrismaSymbol>
-let topicFuseUpdatedAt: Date | null = null
-let tickerTitles: string[] | null = null
+let symbols: string[] | null = null
+let symbolFuse: Fuse<string>
+// let topicFuseUpdatedAt: Date | null = null
+// let tickerTitles: string[] | null = null
 
 // const prisma = new PA.PrismaClient({
 //   errorFormat: 'pretty',
@@ -46,16 +47,20 @@ let tickerTitles: string[] | null = null
 //   return titles;
 // }
 
-export async function getAllSymbols(): Promise<PrismaSymbol[]> {
+export async function getAllSymbols(): Promise<string[]> {
   console.log('Loading symbols from database...')
 
-  let symbols: PrismaSymbol[] = []
+  let symbols: string[] = []
   let cursor: number | undefined = undefined
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
     // eslint-disable-next-line no-await-in-loop
-    const res: PrismaSymbol[] = await prisma.symbol.findMany({
+    const res: Card[] = await prisma.card.findMany({
+      // select: { symbol: true},
+      where: {
+        OR: [{ type: CardType.TICKER }, { type: CardType.TOPIC }],
+      },
       take: 100,
       // skip cursor
       skip: cursor ? 1 : undefined,
@@ -65,7 +70,7 @@ export async function getAllSymbols(): Promise<PrismaSymbol[]> {
     if (res.length === 0) {
       break
     }
-    symbols = symbols.concat(res)
+    symbols = symbols.concat(res.map(e => e.symbol))
     cursor = res[res.length - 1].id
   }
   return symbols
@@ -77,8 +82,9 @@ export async function searchAllSymbols(term: string): Promise<string[]> {
     // console.log(symbols)
     symbolFuse = new Fuse(symbols, {
       includeScore: true,
-      keys: ['name'],
+      // keys: ['name'],
     })
   }
-  return symbolFuse.search(term).map(e => e.item.name)
+  // return symbolFuse.search(term).map(e => e.item.name)
+  return symbolFuse.search(term).map(e => e.item)
 }

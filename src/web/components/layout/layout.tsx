@@ -142,7 +142,7 @@ export default function Layout({
                     }}
                     key={i}
                     onClick={() => {
-                      handleSymbol && handleSymbol(e)
+                      // handleSymbol && handleSymbol(e)
                       handlePath && handlePath(i)
                     }}
                     // style={{

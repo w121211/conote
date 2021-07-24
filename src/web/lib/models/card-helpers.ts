@@ -1,4 +1,5 @@
-import { CardHeadContentValue, CardHeadContentValueInjected, PinBoard } from './card'
+import { Bullet, BulletDraft } from '../bullet/types'
+import { CardHeadContentValue, CardHeadContentValueInjected, PinBoard, PinBoardCode } from './card'
 
 /**
  * Search in a bullet tree and return the first found
@@ -8,17 +9,17 @@ export function findBullets({
   where,
   curDepth = 0,
 }: {
-  node: Bullet | BulletInput
+  node: Bullet | BulletDraft
   where: {
     head?: string
     pin?: true
-    pinCode?: BulletPinCode
+    pinCode?: PinBoardCode
     inDepth?: number
   }
   curDepth?: number
-}): (Bullet | BulletInput)[] {
+}): (Bullet | BulletDraft)[] {
   const nextDepth = curDepth + 1
-  let found: (Bullet | BulletInput)[] = []
+  let found: (Bullet | BulletDraft)[] = []
 
   if (where.head && where.head === node.head) {
     found.push(node)
