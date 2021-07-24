@@ -1,11 +1,4 @@
-import {
-  Bullet,
-  BulletInput,
-  BulletPinCode,
-  CardHeadContentValue,
-  CardHeadContentValueInjected,
-  PinBoard,
-} from './card'
+import { CardHeadContentValue, CardHeadContentValueInjected, PinBoard } from './card'
 
 /**
  * Search in a bullet tree and return the first found

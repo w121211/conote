@@ -21,7 +21,7 @@ Skafford: deploy k8s locally
 # install
 brew install skaffold
 
-# first test dockerfile works
+# first test dockerfile works (from project root folder)
 docker build .
 
 # from project root folder

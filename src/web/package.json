@@ -18,7 +18,7 @@
     "migrate": "dotenv -e .env.local -- yarn run prisma migrate dev --preview-feature",
     "seed": "dotenv -e .env.local -- ts-node prisma/scripts/from-file.ts ./prisma/seeds",
     "clean:types": "rm -rf dist && rm -rf reports",
-    "build:types": "yarn run clean:types && yarn tsc --build --verbose tsconfig.build.json"
+    "build:types": "yarn run clean:types && yarn tsc --build --verbose tsconfig.build-types.json"
   },
   "husky": {
     "hooks": {

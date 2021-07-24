@@ -1,5 +1,5 @@
 import { InMemoryCache, Reference, makeVar } from '@apollo/client'
-import { LiElement } from '../lib/bullet/editor/slate-custom-types'
+import { LiElement } from '../components/editor/slate-custom-types'
 
 export function createCache(): InMemoryCache {
   return new InMemoryCache({

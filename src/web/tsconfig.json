@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    // "noEmit": true,  // 當用於composite時需改為false
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",

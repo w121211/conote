@@ -1,5 +1,5 @@
 /**
- * References:
+ * @see
  * https://github.com/pmmmwh/react-refresh-webpack-plugin/blob/main/examples/typescript-without-babel/webpack.config.js
  * https://github.com/aeksco/react-typescript-web-extension-starter/blob/master/webpack.common.js
  * https://github.com/aeksco/react-typescript-web-extension-starter/blob/master/webpack.dev.js
