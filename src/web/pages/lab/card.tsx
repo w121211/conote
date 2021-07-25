@@ -72,6 +72,7 @@ type CardParsed = Card & {
 function parseCard(card: Card): CardParsed {
   const headContent: CardHeadContent = JSON.parse(card.head.content)
   const bodyContent: CardBodyContent = JSON.parse(card.body.content)
+  console.log(bodyContent)
   const headValue = injectCardHeadValue({ bodyRoot: bodyContent.self, value: headContent.value })
   return {
     ...card,
@@ -638,7 +639,7 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
   const [edit, setEdit] = useState(false)
   const [bodyTree, setBodyTree] = useState<BulletDraft>() // tree root不顯示
   // const [bodyChildren, setBodyChildren] = useState<BulletDraft[]>(bodyRootDemo.children ?? [])
-  const [bodyChildren, setBodyChildren] = useState<BulletDraft[]>([])
+  // const [bodyChildren, setBodyChildren] = useState<BulletDraft[]>([])
   // const [editorValue, setEditorValue] = useState<Descendant[]>([])
   // console.log(card)
   const hideBoard = () => {
@@ -731,8 +732,8 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
   })
 
   const onSubmit = useCallback(async () => {
-    console.log(self)
-    console.log(mirrors)
+    // console.log(self)
+    // console.log(mirrors)
     const data: CardBodyInput = card.type === 'WEBPAGE' ? { self, mirrors } : { self }
     try {
       await createCardBody({
@@ -833,7 +834,7 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
         )
       ) : (
         <ul className={classes.bulletUl}>
-          {bodyChildren.map((e, i) => (
+          {mirrors?.map((e, i) => (
             <>
               {/* {card.type === 'WEBPAGE' && ( */}
               <>
@@ -879,6 +880,7 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
 }
 
 export const SymbolContext = createContext({ symbol: '' })
+
 const TestPage = ({
   pathSymbol,
   handlePathPush,
@@ -953,7 +955,7 @@ const TestPage = ({
       >
         [[https://www.youtube.com/watch?v=F57gz9O0ABw]]
       </button>
-
+      {console.log(data?.card)}
       {data && data.card && <CardItem card={data.card} handleSymbol={handleSymbol} />}
       {/* <BoardPage boardId={}/> */}
     </SymbolContext.Provider>

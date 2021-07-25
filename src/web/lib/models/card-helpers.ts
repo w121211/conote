@@ -52,7 +52,9 @@ export function injectCardHeadValue({
   value: CardHeadContentValue
 }): CardHeadContentValueInjected {
   const pinBoards: PinBoard[] = []
+  // console.log(bodyRoot)
   const found = findBullets({ node: bodyRoot, where: { pin: true } })
+
   for (const e of found) {
     if (e.pinCode && e.boardId) {
       pinBoards.push({

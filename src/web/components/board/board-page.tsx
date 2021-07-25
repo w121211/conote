@@ -20,7 +20,7 @@ import // useCreateReplyMutation,
 import CommentList from '../commentList/commentList'
 import { CommentForm } from '../../__deprecated__/discuss-comment-form'
 import BoardFrom, { FormInputs } from '../board-form/board-form'
-import LineChart from '../bar/lineChart'
+import LineChart from '../../__deprecated__/lineChart'
 import BarChart from '../bar/bar'
 import classes from './board-page.module.scss'
 
