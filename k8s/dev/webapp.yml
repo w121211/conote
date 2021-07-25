@@ -1,0 +1,113 @@
+# See:
+# - https://github.com/Azure-Samples/payara-on-aks/blob/main/payara-cafe.yml
+# - https://github.com/GoogleCloudPlatform/cloud-code-samples/blob/master/nodejs/nodejs-guestbook/kubernetes-manifests/guestbook-backend.deployment.yaml
+# - https://github.com/GoogleCloudPlatform/solutions-modern-cicd-anthos/blob/master/starter-repos/shared-kustomize-bases/online-boutique/emailservice.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  replicas: 1 # No. of replicas/pods to run in this deployment
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      initContainers:
+        - name: init-db-ready
+          image: postgres:11-alpine
+          command: ['/bin/sh', '-c']
+          args:
+            - until (pg_isready -h $PG_HOST -p 5432 -U $PG_USER) do echo "Waiting for postgres at $DATABASE_URL"; sleep 2; done
+          env:
+            - name: POSTGRES_PASSWORD # postgres-image require a value
+              value: 'a_dummy_value'
+            - name: PG_HOST
+              value: 'postgres-release-postgresql'
+            - name: PG_USER
+              value: 'postgres'
+      containers:
+        # - name: tester
+        #   image: node:14-alpine
+        #   command: ['sleep', 'infinity']
+        # command: ['/bin/sh', '-c']
+        # args: ['yarn run migrate && yarn run seed && yarn run start']
+        - name: webapp
+          image: conote-webapp
+          # command: ['/bin/sh', '-c']
+          # args: ['yarn run start']
+          ports:
+            - containerPort: 3000 # The port that the container exposes
+          env:
+            - name: ENVIRONMENT
+              value: dev
+            - name: PORT
+              value: '3000'
+          #     - name: DATABASE_URL
+          #       valueFrom:
+          #         secretKeyRef:
+          #           name: postgres-database-url
+          #           key: url
+          #   - name: ALT_GREETING
+          #     valueFrom:
+          #       configMapKeyRef:
+          #         name: conote-configmap
+          #         key: ALT_GREETING
+          #   - name: ENABLE_RISKY
+          #       valueFrom:
+          #         configMapKeyRef:
+          #           name: conote-configmap
+          #           key: ENABLE_RISKY
+          #   - name: SPRING_DATASOURCE_USERNAME # Name of the environment variable
+          #     valueFrom: # Get the value of environment variable from kubernetes secrets
+          #       secretKeyRef:
+          #         name: mysql-user-pass
+          #         key: username
+          #   - name: SPRING_DATASOURCE_PASSWORD
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: mysql-user-pass
+          #         key: password
+
+          # readinessProbe:
+          #   initialDelaySeconds: 10
+          #   httpGet:
+          #     path: '/_healthz'
+          #     port: 8080
+          #     httpHeaders:
+          #       - name: 'Cookie'
+          #         value: 'shop_session-id=x-readiness-probe'
+
+          # readinessProbe:
+          #   periodSeconds: 5
+          #   exec:
+          #     command: ['/bin/grpc_health_probe', '-addr=:8080']
+
+          # livenessProbe:
+          #   periodSeconds: 5
+          #   exec:
+          #     command: ["/bin/grpc_health_probe", "-addr=:8080"]
+
+          # resources:
+          #   requests:
+          #     cpu: 100m
+          #     memory: 64Mi
+          #   limits:
+          #     cpu: 200m
+          #     memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp
+spec:
+  type: ClusterIP
+  selector:
+    app: webapp
+  ports:
+    - port: 3000
+      targetPort: 3000

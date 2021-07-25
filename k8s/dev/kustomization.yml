@@ -1,17 +1,19 @@
-# encoding: utf-8
+# See:
+# - https://github.com/GoogleCloudPlatform/cloud-code-samples/tree/master/nodejs/nodejs-guestbook/kubernetes-manifests
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namePrefix: conote-
 resources:
-  # - frontend.yml
-  - backend.yml
-  - postgres.yml
+  - webapp.yml
   - ingress.yml
-images:
-  # - name: conote-frontend
-  - name: conote-backend
+#   # - frontend.yml
+#   # - postgres.yml
+# images:
+#   - name: conote-webapp
 
-patchesStrategicMerge:
-  - env.yml
+# patchesStrategicMerge:
+#   - env.yml
 
 # The secrets file should not be checked into Git. It's published only for demonstration purpose.
 secretGenerator:

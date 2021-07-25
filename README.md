@@ -13,28 +13,46 @@ Run vscode devcontainer: Vscode remote-container extension, specify in `./.devco
 sudo docker exec -it <container_app> zsh
 ```
 
-# Use Skaffold, Okteto for k8s deployment
+# K8s Deployment
+
+### with skaffold
+
+kubectl Cheat Sheet: https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 
 Skafford: deploy k8s locally
 
 ```
-# install
-brew install skaffold
+# install skaffold, helm
+brew install skaffold, helm...
 
-# first test dockerfile works (from project root folder)
-docker build .
+# 確認context是在local
+kubectl config get-contexts
+kubectl config use-context docker-desktop
 
-# from project root folder
+# 用 helm 裝postgres chart
+helm repo add ...
+helm repo update
+helm install ...
+
+# from project root folder, first test dockerfile works
+docker build --progress=plain .
 skaffold dev --port-forward
 
+# use skaffold profile
+# skaffold run -p dev
+
+# Debug
 # 確認ingress有沒有安裝
 kubectl describe ingress
 # 如果出現 <error: endpoints "default-http-backend" not found>，表示沒安裝
 # 用helm安裝ingress
 helm install --namespace kube-system nginx ingress-nginx --repo https://kubernetes.github.io/ingress-nginx
+
 ```
 
-Okteto: deploy k8s online
+### with Okteto
+
+Sample app: https://github.com/okteto/movies
 
 ```
 # install okteto, see: https://okteto.com/docs/getting-started
@@ -57,7 +75,7 @@ okteto pipeline deploy
 okteto pipeline destroy
 ```
 
-# Useful hints
+# Hints
 
 ```
 # 當修改了 editor 時，需要先 build、更新 package 才能導入（只有 frontend/web 需要，backend 可同步編譯）
@@ -134,7 +152,7 @@ npm install
 npm run start
 ```
 
-### client playground
+### Client playground
 
 1. 啟動後用瀏覽器打開：http://localhost:3010/，即可看到網站
 2. login 帳號: aaa@aaa.com 密碼: aaa
