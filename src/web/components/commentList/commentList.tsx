@@ -5,11 +5,10 @@ import { useCommentsQuery, CommentsDocument, Comment } from '../../apollo/query.
 // import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
 // import * as QT from '../../graphql/query-types'
 import CommentTemplate from '../commentTemplate/commentTemplate'
-import Radios from '../../__deprecated__/radios/radios'
+// import Radios from '../../__deprecated__/radios/radios'
 // import ParentSize from '@visx/responsive/lib/components/ParentSize'
 import BarChart from '../bar/bar'
 import classes from './commentList.module.scss'
-import Item from 'antd/lib/list/Item'
 
 type RadioArr = {
   label: string

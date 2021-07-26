@@ -4,7 +4,7 @@
  * - inline 在輸入時會自動合併到text
  */
 /* eslint-disable no-console */
-import { BulletEditor } from '../../../web/components/editor/bullet-editor'
+import { BulletEditor } from '../../../web/components/editor/editor'
 
 const TestPage = (): JSX.Element => {
   return (

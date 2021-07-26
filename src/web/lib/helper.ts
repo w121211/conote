@@ -1,7 +1,7 @@
 // import * as QT from './graphql/query-types'
 // import { SymbolCat, CardTemplate, CocardFragment } from '../apollo/query.graphql'
 import { CardFragment } from '../apollo/query.graphql'
-import { CommentLike, LikeChoice, BulletLike } from '@prisma/client'
+import { CommentLike, LikeChoice, BulletLike, BoardLike } from '@prisma/client'
 
 export function toUrlParams(params: Record<string, string>): string {
   const sp = new URLSearchParams()
@@ -66,9 +66,9 @@ export function urlToSymbol(url: string): string | null {
 //   return params
 // }
 
-export function deltaLike(
-  like: CommentLike | BulletLike,
-  prevLike?: CommentLike | BulletLike,
+export function deltaLike<T extends CommentLike | BulletLike | BoardLike>(
+  like: T,
+  prevLike?: T,
 ): { deltaDown: number; deltaUp: number } {
   // 計算up-down的變化值
   let deltaUp = 0

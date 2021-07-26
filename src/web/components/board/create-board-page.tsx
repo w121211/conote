@@ -1,5 +1,4 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import { Form } from 'antd'
 import {
   useCreateCommentMutation,
   CommentsDocument,
@@ -19,7 +18,6 @@ import // useCreateReplyMutation,
 // RepliesDocument,
 '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
-import { CommentForm } from '../../__deprecated__/discuss-comment-form'
 import CreateBoardFrom, { BoardFormInputs } from '../board-form/create-board-form'
 import LineChart from '../../__deprecated__/lineChart'
 import classes from './board-page.module.scss'

@@ -8,7 +8,7 @@ import {
   // CocardQuery,
   // CocardQueryVariables,
 } from '../apollo/query.graphql'
-import { RenderCardBody } from './card'
+import { RenderCardBody } from '../components/card'
 import Preview from './preview/preview'
 import SaveIcon from '../assets/svg/save.svg'
 import classes from './card-form.module.scss'

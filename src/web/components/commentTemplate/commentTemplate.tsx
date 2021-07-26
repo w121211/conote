@@ -8,9 +8,9 @@ import {
 } from '../../apollo/query.graphql'
 // import { Comment } from 'antd'
 // import { DislikeOutlined, LikeOutlined, DislikeFilled, LikeFilled } from '@ant-design/icons'
-import moment from 'moment'
-import { MyTooltip } from '../my-tooltip/my-tooltip'
-import MyTextArea from '../myTextArea/myTextArea'
+// import moment from 'moment'
+// import { MyTooltip } from '../my-tooltip/my-tooltip'
+// import MyTextArea from '../myTextArea/myTextArea'
 import classes from './commentTemplate.module.scss'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 
