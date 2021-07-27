@@ -1,0 +1,19 @@
+.containerouter {
+  position: absolute;
+  top: 34px;
+  left: -75px;
+  padding: 0.5em;
+  background-color: white;
+  -webkit-box-shadow: 0 12px 25px -11px #00000066;
+  box-shadow: 0 4px 25px -6px #00000066;
+  z-index: 100;
+  width: 150px;
+  height: fit-content;
+  display: -moz-box;
+  display: flex;
+  -moz-box-orient: vertical;
+  -moz-box-direction: normal;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}

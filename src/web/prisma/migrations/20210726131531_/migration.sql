@@ -276,16 +276,16 @@ CREATE UNIQUE INDEX "Oauthor.name_unique" ON "Oauthor"("name");
 CREATE UNIQUE INDEX "PollCount.pollId_unique" ON "PollCount"("pollId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Poll_boardId_unique" ON "Poll"("boardId");
+CREATE UNIQUE INDEX "Poll.boardId_unique" ON "Poll"("boardId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CommentLike.userId_commentId_unique" ON "CommentLike"("userId", "commentId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "CommentCount_commentId_unique" ON "CommentCount"("commentId");
+CREATE UNIQUE INDEX "CommentCount.commentId_unique" ON "CommentCount"("commentId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Comment_voteId_unique" ON "Comment"("voteId");
+CREATE UNIQUE INDEX "Comment.voteId_unique" ON "Comment"("voteId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "BoardLike.userId_boardId_unique" ON "BoardLike"("userId", "boardId");
@@ -294,16 +294,13 @@ CREATE UNIQUE INDEX "BoardLike.userId_boardId_unique" ON "BoardLike"("userId", "
 CREATE UNIQUE INDEX "BoardCount.boardId_unique" ON "BoardCount"("boardId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Board.bulletId_unique" ON "Board"("bulletId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Board.cardId_bulletId_hashtag_unique" ON "Board"("cardId", "bulletId", "hashtag");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "BulletLike.userId_bulletId_unique" ON "BulletLike"("userId", "bulletId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "BulletCount_bulletId_unique" ON "BulletCount"("bulletId");
+CREATE UNIQUE INDEX "BulletCount.bulletId_unique" ON "BulletCount"("bulletId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Link.url_unique" ON "Link"("url");
@@ -324,7 +321,7 @@ CREATE UNIQUE INDEX "CardBody_prevId_unique" ON "CardBody"("prevId");
 CREATE UNIQUE INDEX "Card.symbol_unique" ON "Card"("symbol");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Card_linkUrl_unique" ON "Card"("linkUrl");
+CREATE UNIQUE INDEX "Card.linkUrl_unique" ON "Card"("linkUrl");
 
 -- AddForeignKey
 ALTER TABLE "Vote" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

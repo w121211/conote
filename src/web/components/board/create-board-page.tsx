@@ -19,7 +19,7 @@ import // useCreateReplyMutation,
 '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
 import CreateBoardFrom, { BoardFormInputs } from '../board-form/create-board-form'
-import LineChart from '../../__deprecated__/lineChart'
+// import LineChart from '../../__deprecated__/lineChart'
 import classes from './board-page.module.scss'
 import Popover from '../popover/popover'
 import BoardPage from './board-page'
