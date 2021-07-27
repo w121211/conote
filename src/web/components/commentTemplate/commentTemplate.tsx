@@ -1,18 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import {
-  CommentCount,
-  useCreateCommentLikeMutation,
-  MyCommentLikesDocument,
-  MyCommentLikesQuery,
-  useMyCommentLikesQuery,
-} from '../../apollo/query.graphql'
-// import { Comment } from 'antd'
-// import { DislikeOutlined, LikeOutlined, DislikeFilled, LikeFilled } from '@ant-design/icons'
-// import moment from 'moment'
-// import { MyTooltip } from '../my-tooltip/my-tooltip'
-// import MyTextArea from '../myTextArea/myTextArea'
+import { CommentCount } from '../../apollo/query.graphql'
+import UpDown from '../upDown/upDown'
 import classes from './commentTemplate.module.scss'
-import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 
 interface commentTemplate {
   id?: string
@@ -33,25 +22,39 @@ const CommenTemplate = ({ id, content, floor, className, clicked, updatedAt, cho
   const [action, setAction] = useState('')
   const [textArea, setTextArea] = useState(false)
 
-  const { data: myCommentLikeData, loading, error } = useMyCommentLikesQuery()
-  const [createCommentLike] = useCreateCommentLikeMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<MyCommentLikesQuery>({ query: MyCommentLikesDocument })
-      if (res?.myCommentLikes && data?.createCommentLike) {
-        cache.writeQuery<MyCommentLikesQuery>({
-          query: MyCommentLikesDocument,
-          data: { myCommentLikes: res.myCommentLikes.concat([data.createCommentLike.like]) },
-        })
-      }
-    },
-  })
-
-  const myChoice = myCommentLikeData?.myCommentLikes.find(e => e.commentId === parseInt(commentId))
-  // useEffect(()=>{
-  //   if(myChoice){
-  //     set
-  //   }
+  // const { data: myCommentLikeData, loading, error } = useMyCommentLikesQuery()
+  // const [createCommentLike] = useCreateCommentLikeMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<MyCommentLikesQuery>({ query: MyCommentLikesDocument })
+  //     if (res?.myCommentLikes && data?.createCommentLike) {
+  //       cache.writeQuery<MyCommentLikesQuery>({
+  //         query: MyCommentLikesDocument,
+  //         data: { myCommentLikes: res.myCommentLikes.concat([data.createCommentLike.like]) },
+  //       })
+  //     }
+  //   },
   // })
+
+  // const [updateCommentLike] = useUpdateCommentLikeMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<MyCommentLikesQuery>({
+  //       query: MyCommentLikesDocument,
+  //     })
+  //     if (res?.myCommentLikes && data?.updateCommentLike) {
+  //       cache.writeQuery<MyCommentLikesQuery>({
+  //         query: MyCommentLikesDocument,
+  //         data: { myCommentLikes: res.myCommentLikes.concat([data.updateCommentLike.like]) },
+  //       })
+  //     }
+  //   },
+  // })
+
+  // const myChoice = myCommentLikeData?.myCommentLikes.find(e => e.commentId === parseInt(commentId))
+  // // useEffect(()=>{
+  // //   if(myChoice){
+  // //     set
+  // //   }
+  // // })
 
   const toggleTextAreaHandler = (e: any) => {
     e.stopPropagation()
@@ -74,24 +77,33 @@ const CommenTemplate = ({ id, content, floor, className, clicked, updatedAt, cho
     e.stopPropagation()
   }
 
-  const handleLike = (choiceValue: string) => {
-    if (choiceValue === 'up') {
-      createCommentLike({
-        variables: {
-          commentId,
-          data: { choice: 'UP' },
-        },
-      })
-    }
-    if (choiceValue === 'down') {
-      createCommentLike({
-        variables: {
-          commentId,
-          data: { choice: 'DOWN' },
-        },
-      })
-    }
-  }
+  // const handleLike = (choiceValue: LikeChoice) => {
+
+  //   if (myChoice && myChoice.choice === choiceValue) {
+  //     updateCommentLike({
+  //       variables: {
+  //         id: myChoice.id,
+  //         data: { choice: 'NEUTRAL' },
+  //       },
+  //     })
+  //   }
+  //   if (myChoice && myChoice.choice !== choiceValue) {
+  //     updateCommentLike({
+  //       variables: {
+  //         id: myChoice.id,
+  //         data: { choice: choiceValue },
+  //       },
+  //     })
+  //   }
+  //   if (!myChoice) {
+  //     createCommentLike({
+  //       variables: {
+  //         commentId,
+  //         data: { choice: choiceValue },
+  //       },
+  //     })
+  //   }
+  // }
 
   return (
     // <MyTooltip title="點擊回覆">
@@ -105,26 +117,7 @@ const CommenTemplate = ({ id, content, floor, className, clicked, updatedAt, cho
     // </MyTooltip>
     <li className={classes.comment}>
       <span className={classes.floor}>{floor}</span>
-      <span className={classes.upDownWrapper}>
-        <span
-          className={`${classes.arrowUpIcon} ${myChoice && myChoice.choice === 'UP' && classes.liked}`}
-          onClick={() => {
-            handleLike('up')
-          }}
-        >
-          <ArrowUpIcon />
-          {choice.nUps}
-        </span>
-        <span
-          className={`${classes.arrowDownIcon} ${myChoice && myChoice.choice === 'DOWN' && classes.liked}`}
-          onClick={() => {
-            handleLike('down')
-          }}
-        >
-          <ArrowUpIcon />
-          {choice.nDowns}
-        </span>
-      </span>
+      <UpDown commentId={commentId} choice={choice} />
       <span>{content}</span>
     </li>
   )

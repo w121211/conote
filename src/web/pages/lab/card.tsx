@@ -420,11 +420,11 @@ const BulletItem = (props: {
   const { depth, node, handleSymbol, cardId } = props
   const [showBoard, setShowBoard] = useState(false)
   const [showCreateBoard, setShowCreateBoard] = useState(false)
-  const [showChildren, setShowChildren] = useState(depth < 1 ? true : false)
+  const [showChildren, setShowChildren] = useState(depth < 2 ? true : false)
   // const { node } = props
   const headTokens = tokenize(node.head)
   const bodyTokens = node.body ? tokenize(node.body) : undefined
-  console.log(node.hashtags)
+  // console.log(node.hashtags)
   const hideBoard = () => {
     setShowBoard(false)
   }
@@ -435,9 +435,7 @@ const BulletItem = (props: {
   const nextDepth = depth + 1
   return (
     <>
-      {props.type === 'WEBPAGE' &&
-      depth === 0 &&
-      (!node.children || (node.children && node.children.length === 0)) ? null : (
+      {depth === 0 && (!node.children || (node.children && node.children.length === 0)) ? null : (
         <li className={classes.inlineValue}>
           <span className={classes.bulletWrapper}>
             <span
@@ -446,7 +444,12 @@ const BulletItem = (props: {
                 setShowChildren(prev => !prev)
               }}
             >
-              <svg viewBox="0 0 18 18" className={`${classes.bulletSvg} ${node.children && classes.bulletSvgBg}`}>
+              <svg
+                viewBox="0 0 18 18"
+                className={`${classes.bulletSvg} ${
+                  showChildren || (node.children.length === 0 && node.children) ? '' : classes.bulletSvgBg
+                }`}
+              >
                 <circle cx="9" cy="9" r="4" />
               </svg>
               {/* • */}
@@ -480,6 +483,7 @@ const BulletItem = (props: {
                       <BoardPage
                         title={e.text}
                         boardId={e.boardId.toString()}
+                        pollId={node.pollId?.toString()}
                         // description={e.content}
                         // visible={showBoard}
                         // hideBoard={hideBoard}
@@ -553,14 +557,20 @@ const BulletItem = (props: {
   )
 }
 
-const CardBodyItem = (props: { card: Card; self: BulletDraft; mirrors?: BulletDraft[] }) => {
-  const { card, self, mirrors } = props
+const CardBodyItem = (props: {
+  card: Card
+  self: BulletDraft
+  mirrors?: BulletDraft[]
+  handleSymbol: (symbol: string) => void
+}) => {
+  const { card, self, mirrors, handleSymbol } = props
 
   if (card.type === 'WEBPAGE') {
     // 可能有mirrors
     return (
       <div>
-        <ul>
+        {self && <span className={classes.tickerTitle}>Self</span>}
+        {/* <ul>
           <BulletItem
             node={self}
             handleSymbol={_ => {
@@ -570,9 +580,9 @@ const CardBodyItem = (props: { card: Card; self: BulletDraft; mirrors?: BulletDr
             type={card.type}
             cardId={card.id}
           />
-        </ul>
-        {mirrors &&
-          mirrors.map((e, i) => (
+        </ul> */}
+        {self.children &&
+          self.children.map((e, i) => (
             <ul key={i}>
               <BulletItem
                 node={e}
@@ -583,6 +593,26 @@ const CardBodyItem = (props: { card: Card; self: BulletDraft; mirrors?: BulletDr
                 type={card.type}
                 cardId={card.id}
               />
+            </ul>
+          ))}
+        {mirrors &&
+          mirrors.map((e, i) => (
+            <ul key={i}>
+              {<span className={classes.tickerTitle}>{markToText(e.head, handleSymbol)}</span>}
+              {e.children.map((el, ind) => {
+                return (
+                  <BulletItem
+                    node={el}
+                    handleSymbol={_ => {
+                      _
+                    }}
+                    depth={0}
+                    type={card.type}
+                    cardId={card.id}
+                    key={ind}
+                  />
+                )
+              })}
             </ul>
           ))}
       </div>
@@ -615,6 +645,7 @@ const CardBodyItem = (props: { card: Card; self: BulletDraft; mirrors?: BulletDr
 
 const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void }) => {
   const { card, handleSymbol } = props
+  // console.log(card)
   // const parsedCard = parseCard(card)
   // const pinBoard = parsedCard.headValue.pinBoards.find(e => e.pinCode === 'BUYSELL')
 
@@ -810,46 +841,47 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
 
       {error && <div>Submit fail...</div>}
 
-      {self ? (
-        edit ? (
-          <BulletEditor
-            initialValue={editorInitialValue}
-            oauthorName={card.link?.oauthorName ?? undefined}
-            sourceUrl={card.link?.url}
-            withMirror={card.type === 'WEBPAGE'}
-          />
-        ) : (
-          <CardBodyItem card={card} self={self} mirrors={mirrors} />
-        )
-      ) : (
-        <ul className={classes.bulletUl}>
-          {mirrors?.map((e, i) => (
-            <>
-              {/* {card.type === 'WEBPAGE' && ( */}
-              <>
-                {e.children && e.children.length !== 0 && (
-                  <span className={classes.tickerTitle}>
-                    {e.head === card.symbol ? 'Self' : markToText(e.head, handleSymbol)}
-                  </span>
-                )}
-                {e.children &&
-                  e.children.map((el, i) => (
-                    <BulletItem
-                      key={i}
-                      node={el}
-                      depth={0}
-                      type={card.type}
-                      handleSymbol={handleSymbol}
-                      cardId={card.id}
-                    />
-                  ))}
-              </>
-              {/* )} */}
-              {/* {card.type === 'TICKER' && <BulletItem key={i} node={e} />} */}
-            </>
-          ))}
-        </ul>
-      )}
+      {
+        self ? (
+          edit ? (
+            <BulletEditor
+              initialValue={editorInitialValue}
+              oauthorName={card.link?.oauthorName ?? undefined}
+              sourceUrl={card.link?.url}
+              withMirror={card.type === 'WEBPAGE'}
+            />
+          ) : (
+            <CardBodyItem card={card} self={self} mirrors={mirrors} handleSymbol={handleSymbol} />
+          )
+        ) : null
+        // <ul className={classes.bulletUl}>
+        //   {mirrors?.map((e, i) => (
+        //     <>
+        //       {/* {card.type === 'WEBPAGE' && ( */}
+        //       <>
+        //         {e.children && e.children.length !== 0 && (
+        //           <span className={classes.tickerTitle}>
+        //             {e.head === card.symbol ? 'Self' : markToText(e.head, handleSymbol)}
+        //           </span>
+        //         )}
+        //         {e.children &&
+        //           e.children.map((el, i) => (
+        //             <BulletItem
+        //               key={i}
+        //               node={el}
+        //               depth={0}
+        //               type={card.type}
+        //               handleSymbol={handleSymbol}
+        //               cardId={card.id}
+        //             />
+        //           ))}
+        //       </>
+        //       {/* )} */}
+        //       {/* {card.type === 'TICKER' && <BulletItem key={i} node={e} />} */}
+        //     </>
+        //   ))}
+        // </ul>
+      }
       {/* <button
       // onClick={() => {}}
       >

@@ -1,6 +1,6 @@
 import { browser, Tabs } from 'webextension-polyfill-ts'
 import { ApolloClient, InMemoryCache } from '@apollo/client'
-import { LinkDocument, LinkQuery, LinkQueryVariables } from '../../../web/apollo/query.graphql'
+import { WebpageCardQuery, WebpageCardQueryVariables, WebpageCardDocument } from '../../../web/apollo/query.graphql'
 
 const cache = new InMemoryCache()
 const client = new ApolloClient({
@@ -18,9 +18,9 @@ const client = new ApolloClient({
   },
 })
 
-async function getLink(url: string): Promise<LinkQuery> {
-  const { data } = await client.query<LinkQuery, LinkQueryVariables>({
-    query: LinkDocument,
+async function getWebpage(url: string): Promise<WebpageCardQuery> {
+  const { data } = await client.query<WebpageCardQuery, WebpageCardQueryVariables>({
+    query: WebpageCardDocument,
     variables: { url },
   })
   return data
@@ -30,8 +30,8 @@ async function getLink(url: string): Promise<LinkQuery> {
 
 async function onTabActivated(tab: Tabs.Tab): Promise<void> {
   if (tab.url) {
-    const link = await getLink(tab.url)
-    if (link.link) {
+    const link = await getWebpage(tab.url)
+    if (link.webpageCard.link) {
       browser.browserAction.setBadgeText({ text: '1' })
     } else {
       browser.browserAction.setBadgeText({ text: '0' })
