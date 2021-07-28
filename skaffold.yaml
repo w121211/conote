@@ -1,33 +1,33 @@
+# @see
+# - https://github.com/GoogleCloudPladtform/solutions-modern-cicd-anthos/blob/master/starter-repos/online-boutique/skaffold.yaml
+# - helm: https://github.com/GoogleContainerTools/skaffold/tree/main/examples/helm-remote-repo
+
 apiVersion: skaffold/v2beta16
 kind: Config
-metadata:
-  name: conote
 build:
   artifacts:
-    - image: conote-backend
+    - image: conote-webapp
       context: .
-      docker:
-        dockerfile: Dockerfile
-        target: builder
-    # - image: conote-backend
-    #   context: .
-    #   docker:
-    #     dockerfile: Dockerfile
-    #     target: backend
+      # docker:
+      #   dockerfile: Dockerfile
+      #   target: builder
 deploy:
-  # helm:
-  #   releases:
-  #     - name: postgres
-  #       chartPath: bitnami/postgresql # Need to add repo first `helm repo add bitnami https://charts.bitnami.com/bitnami`
-  #       remote: true
-  #       setValues:
-  #         postgresqlUsername: 'postgresuser'
-  #         postgresqlPassword: 'postgrespassword'
+  helm:
+    releases:
+      - name: postgres-release
+        repo: https://charts.bitnami.com/bitnami
+        remoteChart: postgresql
+        # setValues:
+        #   postgresqlUsername: 'postgresuser'
+        #   postgresqlPassword: 'postgrespassword'
   kustomize:
     paths:
-      - k8s
-  # - overlays/dev
+      - k8s/dev
+      # - overlays/dev
 # profiles:
+#   - name: dev
+#     deploy:
+#       kubeContext: docker-desktop
 #   - name: prod
 #     deploy:
 #       kustomize:

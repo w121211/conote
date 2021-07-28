@@ -26,6 +26,7 @@ import {
   useCardQuery,
   useCommentsQuery,
   useCreateCardBodyMutation,
+  useCreateHashtagMutation,
   useCreateOauthorCommentMutation,
   useMeQuery,
 } from '../../apollo/query.graphql'
@@ -432,6 +433,8 @@ const BulletItem = (props: {
     setShowCreateBoard(false)
   }
 
+  const [createHashtag] = useCreateHashtagMutation()
+
   const nextDepth = depth + 1
   return (
     <>
@@ -500,6 +503,27 @@ const BulletItem = (props: {
 
             {hastaggable(node) && (
               <>
+                <button
+                  onClick={() => {
+                    if (node.id === undefined) {
+                      throw '需要bullet id才能創hashtag'
+                    }
+                    createHashtag({
+                      variables: {
+                        cardId,
+                        bulletId: node.id,
+                        data: {
+                          hashtag: '#new_hashtag',
+                          meta: '',
+                          content: 'some content',
+                        },
+                      },
+                    })
+                  }}
+                >
+                  Create Hashtag
+                </button>
+
                 <span
                   className={classes.link}
                   onClick={() => {
@@ -512,7 +536,7 @@ const BulletItem = (props: {
                 {showCreateBoard && node.id && (
                   <CreateBoardPage
                     subTitle={markToText(node.head)}
-                    bulletId={node.id.toString()}
+                    bulletId={node.id}
                     cardId={cardId}
                     visible={showCreateBoard}
                     hideBoard={hideCreateBoard}
@@ -917,7 +941,6 @@ const TestPage = ({
   // const[url,setUrl]=useState('')
   // useEffect(()=>{
   //   const tabUrl=getTabUrl()
-
   //   tabUrl&&setUrl(tabUrl)
   // },[])
   const { data, error, loading } = useCardQuery({

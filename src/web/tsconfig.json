@@ -19,7 +19,7 @@
     // Custom settings
     "downlevelIteration": true
   },
-  "exclude": ["node_modules", ".next", "out", "test", "__deprecated__", "prisma/prisma-test-environment.js"],
+  "exclude": ["node_modules", ".next", "out", "test", "__deprecated__", "prisma/prisma-test-environment.js", ".cache"],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
   "ts-node": {
     // options are overrides used only by ts-node

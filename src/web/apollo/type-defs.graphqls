@@ -10,6 +10,8 @@ type Query {
 
   latestCardEntries(afterId: String): [CardEntry!]!
 
+  link(url: String!): Link
+
   # 以symbol查找，若無返回null
   # @cardBodyId 若給予，返回該card及指定的body，否則返回latest body
   card(symbol: String!, cardBodyId: String): Card
@@ -17,9 +19,10 @@ type Query {
   # 以url查找，若無會fetch、resolve並創新card
   webpageCard(url: String!): Card!
 
-  bullet(id: ID!): Bullet
+  # 用id找不到，throw error
+  bullet(id: ID!): Bullet!
 
-  board(id: ID!): Board
+  board(id: ID!): Board!
 
   comments(boardId: ID!, afterId: ID): [Comment!]!
 
@@ -106,8 +109,9 @@ type Mutation {
   # 若該symbol尚未有card時，需要給template，會同步創card, body
   createCardBody(cardId: ID!, data: CardBodyInput!): CardBody!
 
-  # 等價於create hashtag
-  createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): Board!
+  # 等價於create hashtag，會同步update card body hashtag
+  # createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): CreateBoardResponse!
+  createHashtag(cardId: ID!, bulletId: Int!, data: BoardInput!): CreateHashtagResponse!
 
   createVote(pollId: ID!, data: VoteInput!): Vote!
   createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
@@ -118,14 +122,14 @@ type Mutation {
   # createOauthorComment(boardId: ID!, data: CommentInput!)
   # updateComment(id: ID!, data: CommentInput!): Comment!
 
-  createBulletLike(bulletId: ID!, data: LikeInput!): BulletLikeResonse!
-  updateBulletLike(id: ID!, data: LikeInput!): BulletLikeResonse!
+  createBulletLike(bulletId: ID!, data: LikeInput!): BulletLikeResponse!
+  updateBulletLike(id: ID!, data: LikeInput!): BulletLikeResponse!
 
-  createCommentLike(commentId: ID!, data: LikeInput!): CommentLikeResonse!
-  updateCommentLike(id: ID!, data: LikeInput!): CommentLikeResonse!
+  createCommentLike(commentId: ID!, data: LikeInput!): CommentLikeResponse!
+  updateCommentLike(id: ID!, data: LikeInput!): CommentLikeResponse!
 
-  createBoardLike(boardId: ID!, data: LikeInput!): BoardLikeResonse!
-  updateBoardLike(id: ID!, data: LikeInput!): BoardLikeResonse!
+  createBoardLike(boardId: ID!, data: LikeInput!): BoardLikeResponse!
+  updateBoardLike(id: ID!, data: LikeInput!): BoardLikeResponse!
 
   # signIn(email: String!, password: String!): AuthPayload!
   # signUp(email: String!, password: String!): User!
@@ -244,7 +248,7 @@ type CommentCount {
   nDowns: Int!
 }
 
-type CommentLikeResonse {
+type CommentLikeResponse {
   like: CommentLike!
   count: CommentCount!
 }
@@ -280,7 +284,7 @@ type BoardCount {
   # nComments: Int!
 }
 
-type BoardLikeResonse {
+type BoardLikeResponse {
   like: BoardLike!
   count: BoardCount!
 }
@@ -302,6 +306,20 @@ type Board {
   updatedAt: DateTime!
 }
 
+# type Hashtag {
+#   userId: String!
+#   boardId: Int!
+#   boardStatus: BoardStatus!
+#   text: String!
+#   linkBullet: Boolean
+# }
+
+type CreateHashtagResponse {
+  board: Board!
+  # hashtag: Hashtag!
+  cardBody: CardBody!
+}
+
 type Link {
   id: ID!
   url: String!
@@ -309,14 +327,6 @@ type Link {
   sourceType: String!
   sourceId: String
   oauthorName: String
-}
-
-type Hashtag {
-  userId: String!
-  boardId: Int!
-  boardStatus: BoardStatus!
-  text: String!
-  linkBullet: Boolean
 }
 
 type BulletLike {
@@ -333,7 +343,7 @@ type BulletCount {
   nDowns: Int!
 }
 
-type BulletLikeResonse {
+type BulletLikeResponse {
   like: BulletLike!
   count: BulletCount!
 }

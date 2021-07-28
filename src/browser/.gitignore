@@ -24,3 +24,7 @@ yarn-error.log*
 
 schema.json
 __generated__
+# *.graphql.d.ts
+# *.graphqls.d.ts
+/.cache
+
