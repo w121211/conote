@@ -141,7 +141,7 @@ const BoardForm = ({
       }
       // refetch()
     },
-    refetchQueries: [{ query: BoardDocument, variables: { boardId: boardId } }],
+    refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
   })
 
   const myHandleSubmit = (d: FormInputs) => {

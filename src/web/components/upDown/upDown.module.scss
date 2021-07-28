@@ -1,0 +1,23 @@
+.upDownWrapper {
+  color: $gray;
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: $gray;
+  }
+}
+.arrowUpIcon {
+  // width: 16px;
+  // height: 16px;
+}
+.arrowDownIcon {
+  svg {
+    transform: rotate(180deg);
+  }
+}
+.liked {
+  color: $secondary;
+  svg {
+    fill: $secondary;
+  }
+}

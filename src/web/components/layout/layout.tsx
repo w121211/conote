@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react'
 import SideBar from '../sidebar/sidebar'
+import MyTooltip from '../my-tooltip/my-tooltip'
 import classes from './layout.module.scss'
 import MenuIcon from '../../assets/svg/menu.svg'
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
@@ -32,13 +33,14 @@ export default function Layout({
   handleSymbol?: (e: string) => void
 }) {
   // const [origin, setOrigin] = useState<string[]>(path)
-  const [myPath, setMyPath] = useState<(string | string[])[]>([...path])
+  const [myPath, setMyPath] = useState<string[]>([...path])
   const [hiddenPath, setHiddenPath] = useState<string[]>([])
   const [showMenu, setShowMenu] = useState(false)
   const [pathTooLong, setPathTooLong] = useState(false)
   const [viewPortWidth, setViewPortWidth] = useState(0)
   const [ulOffsetWidth, setUlOffsetWidth] = useState(0)
   const [liMaxWidth, setLiMaxWidth] = useState<number>(0)
+  const [showTooltip, setShowTooltip] = useState(false)
   const pathRef = useRef<HTMLUListElement>(null)
   const pathLiRef = useRef<any[]>([])
   const showMenuHandler = () => {
@@ -74,12 +76,24 @@ export default function Layout({
   // }, [])
 
   useEffect(() => {
+    // if (path.length >= 4) {
+    //   const nestedPath: string[] = []
+    //   const newPath: string[] = []
+    //   nestedPath.push(...path.slice(1, -2))
+    //   newPath.push(path[0], '...', ...path.slice(-2))
+    //   setMyPath(newPath)
+    //   setHiddenPath(nestedPath)
+    // } else {
+    //   setMyPath([...path])
+    //   setHiddenPath([])
+    // }
+
     if (viewPortWidth > 0) {
       const pathElementWidth: number[] = []
       path.forEach((e, i) => {
         const textWidth = getTextWidth(e)
         if (textWidth) {
-          const newWidth = textWidth > 60 ? 60 : textWidth
+          const newWidth = textWidth > 80 ? 80 : textWidth
           pathElementWidth.push(newWidth)
         }
       })
@@ -91,13 +105,13 @@ export default function Layout({
         do {
           pathElementWidth[indx] = 0
           indx += 1
-          console.log(
-            pathElementWidth,
-            pathElementWidth.reduce((a, b) => a + b) + 25 * (pathElementWidth.length - indx) + 15,
-            viewPortWidth - 62 - 16,
-          )
+          // console.log(
+          //   pathElementWidth,
+          //   pathElementWidth.reduce((a, b) => a + b) + 25 * (pathElementWidth.length - indx) + 15,
+          //   viewPortWidth - 62 - 16,
+          // )
         } while (
-          pathElementWidth.reduce((a, b) => a + b) + 25 * (pathElementWidth.length - indx) + 15 >
+          pathElementWidth.reduce((a, b) => a + b) + 25 * (pathElementWidth.length - indx) + 13 >=
           viewPortWidth - 62 - 16
         )
         // console.log(pathElementWidth, pathElementWidth.reduce((a, b) => a + b) + 10, viewPortWidth - 62 - 16)
@@ -129,41 +143,53 @@ export default function Layout({
           <MenuIcon className={classes.menuIcon} />
         </div>
 
-        <ul className={classes.pathUl} ref={pathRef}>
+        <ul className={classes.pathUl} ref={pathRef} style={{ maxWidth: `${viewPortWidth - 62}px` }}>
           {myPath.length !== 0 &&
             myPath.map((e, i) => (
               <>
                 {i !== 0 && <RightArrow className={classes.rightArrow} />}
 
-                {e !== '...' ? (
+                {
                   <li
                     ref={e => {
                       pathLiRef.current[i] = e
                     }}
                     key={i}
                     onClick={() => {
-                      // handleSymbol && handleSymbol(e)
-                      handlePath && handlePath(i)
+                      if (e === '...') {
+                        setShowTooltip(prev => !prev)
+                      } else {
+                        handlePath && handlePath(i)
+                        handleSymbol && handleSymbol(e)
+                      }
                     }}
-                    // style={{
-                    //   maxWidth: '60px',
-                    //   // maxWidth: `min(60px,${liMaxWidth})`,
-                    //   // maxWidth: ` ${i === 0 || i === path.length - 1 ? Math.max(60, liMaxWidth) : liMaxWidth}px`,
-                    //   // minWidth: 'min(auto,60px)',
-                    // }}
+                    style={{ maxWidth: '80px', overflow: `${e === '...' ? 'visible' : 'hidden'}` }}
+                    // style={
+                    //   myPath.length < 4
+                    //     ? { maxWidth: `${(viewPortWidth - 62 - 25 * (myPath.length - 1)) / myPath.length}px` }
+                    //     : { maxWidth: `${(viewPortWidth - 62 - 25 * 3 - 13) / 3}px` }
+                    // }
                   >
-                    <span>{e}</span>
+                    {e}
+                    {showTooltip && e === '...' && (
+                      <MyTooltip visible={showTooltip}>
+                        {hiddenPath.map((el, ind) => {
+                          return (
+                            <span
+                              key={ind}
+                              onClick={() => {
+                                handlePath && handlePath(ind + 1)
+                                handleSymbol && handleSymbol(e)
+                              }}
+                            >
+                              {el}
+                            </span>
+                          )
+                        })}
+                      </MyTooltip>
+                    )}
                   </li>
-                ) : (
-                  <li
-                    ref={e => {
-                      pathLiRef.current[i] = e
-                    }}
-                    key={i}
-                  >
-                    <span>...</span>
-                  </li>
-                )}
+                }
               </>
             ))}
         </ul>

@@ -5,14 +5,22 @@ const Popover = ({
   visible,
   hideBoard,
   subTitle,
-}: {
+}: // width,
+{
   children: React.ReactNode
   visible: boolean
   hideBoard: () => void
   subTitle: JSX.Element
+  // width?: number
 }) => {
   return (
-    <div className={classes.containerouter} style={visible ? { visibility: 'visible' } : { visibility: 'hidden' }}>
+    <div
+      className={classes.containerouter}
+      style={{
+        visibility: `${visible ? 'visible' : 'hidden'}`,
+        // width: `${typeof width === 'number' ? width + 'px' : 'initial'}`,
+      }}
+    >
       <span
         onClick={(e: any) => {
           e.stopPropagation()
