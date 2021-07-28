@@ -24,7 +24,7 @@
     // "jsx": "preserve"
   },
   "include": ["src"],
-  "exclude": ["**/__deprecated__", "**/__tests__", "node_modules"]
+  "exclude": ["**/__deprecated__", "**/__tests__", "node_modules", ".cache"]
   // "exclude": [
   //   "**/__tests__",
   //   "**/__deprecated__",

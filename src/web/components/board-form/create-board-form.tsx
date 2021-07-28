@@ -1,10 +1,15 @@
 import { title } from 'process'
 import { useEffect, useState, useContext } from 'react'
 import { useForm, useController, useFormContext, FormProvider, useWatch, Control } from 'react-hook-form'
-import { BoardDocument, BoardQuery, CardDocument } from '../../apollo/query.graphql'
+import {
+  BoardDocument,
+  BoardQuery,
+  CardDocument,
+  CreateHashtagMutation,
+  useCreateHashtagMutation,
+} from '../../apollo/query.graphql'
 import classes from './board-form.module.scss'
 import { SymbolContext } from '../../pages/lab/card'
-import { useCreateHashtagMutation } from '../../__generated__/apollo/query.graphql'
 
 export type RadioInputs = {
   choice?: number | null
@@ -27,8 +32,8 @@ const CreateBoardForm = ({
 // filterComments,
 {
   cardId: string
-  bulletId: string
-  handleboardId: (d: CreateBoardMutation) => void
+  bulletId: number
+  handleboardId: (d: CreateHashtagMutation) => void
   // initialValue: FormInputs
 
   // pollChoices?: string[]

@@ -531,7 +531,7 @@ const BulletItem = (props: {
                 {showCreateBoard && node.id && (
                   <CreateBoardPage
                     subTitle={markToText(node.head)}
-                    bulletId={node.id.toString()}
+                    bulletId={node.id}
                     cardId={cardId}
                     visible={showCreateBoard}
                     hideBoard={hideCreateBoard}

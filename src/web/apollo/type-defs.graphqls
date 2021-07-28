@@ -10,6 +10,8 @@ type Query {
 
   latestCardEntries(afterId: String): [CardEntry!]!
 
+  link(url: String!): Link
+
   # 以symbol查找，若無返回null
   # @cardBodyId 若給予，返回該card及指定的body，否則返回latest body
   card(symbol: String!, cardBodyId: String): Card

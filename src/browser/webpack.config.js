@@ -47,7 +47,13 @@ module.exports = {
       {
         test: /\.graphql$/,
         exclude: /node_modules/,
-        use: [{ loader: 'babel-loader' }, { loader: 'graphql-let/loader' }],
+        use: [
+          { loader: 'babel-loader' },
+          {
+            loader: 'graphql-let/loader',
+            // options: { configFile: path.resolve(__dirname, '../web/.graphql-let.yml') },
+          },
+        ],
       },
       // {
       //   test: /\.graphqls$/,

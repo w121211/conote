@@ -179,11 +179,11 @@ query LatestCardEntries($afterId: String) {
   }
 }
 
-# query Link($url: String!) {
-#   link(url: $url) {
-#     ...link
-#   }
-# }
+query Link($url: String!) {
+  link(url: $url) {
+    ...link
+  }
+}
 
 query Card($symbol: String!) {
   card(symbol: $symbol) {

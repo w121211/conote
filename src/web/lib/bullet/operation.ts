@@ -93,17 +93,6 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
       include: { poll: true },
     })
   }
-
-  const hashtags =
-    draft.hashtags &&
-    (await runHastagOpBatch({
-      bulletBoardId: board?.id,
-      bulletId: bullet.id,
-      cardId,
-      hashtags: draft.hashtags,
-      userId,
-    }))
-
   // const node: BulletRootOrBullet<T> = {
   //   // TODO: 不應該直接copy input
   //   ...draft,
@@ -125,10 +114,20 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
     pollId: board?.poll?.id,
     userIds: [userId],
     timestamp,
-    hashtags,
+    // hashtags,
+    hashtags: [],
     children: [],
   }
-  return _returnOrThrow(node, draft)
+  const hashtags =
+    draft.hashtags &&
+    (await runHastagOpBatch({
+      hashtags: draft.hashtags,
+      bullet: node,
+      cardId,
+      userId,
+    }))
+
+  return _returnOrThrow({ ...node, hashtags }, draft)
 }
 
 /**

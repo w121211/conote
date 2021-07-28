@@ -1,6 +1,6 @@
 import { browser, Tabs } from 'webextension-polyfill-ts'
 import { ApolloClient, InMemoryCache } from '@apollo/client'
-import { LinkDocument, LinkQuery, LinkQueryVariables } from '../../../web/apollo/query.graphql'
+import { CardDocument, LinkQuery, LinkQueryVariables } from '../../../web/apollo/query.graphql'
 
 const cache = new InMemoryCache()
 const client = new ApolloClient({
@@ -20,7 +20,7 @@ const client = new ApolloClient({
 
 async function getLink(url: string): Promise<LinkQuery> {
   const { data } = await client.query<LinkQuery, LinkQueryVariables>({
-    query: LinkDocument,
+    query: CardDocument,
     variables: { url },
   })
   return data

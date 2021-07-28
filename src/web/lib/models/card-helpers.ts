@@ -10,7 +10,10 @@ export function injectCardHeadValue({
   value: CardHeadContentValue
 }): CardHeadContentValueInjected {
   const pinBoards: PinBoard[] = []
-  const found = BulletNode.find(bodyRoot, { pin: true })
+  const found = BulletNode.find({
+    node: bodyRoot,
+    matcher: n => n.pin === true,
+  })
   for (const e of found) {
     if (e.pinCode && e.boardId) {
       pinBoards.push({

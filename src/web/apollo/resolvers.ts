@@ -19,7 +19,7 @@ import { getOrCreateUser } from '../lib/models/user'
 import { createOauthorVote, createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
 import { ResolverContext } from './apollo-client'
-import { createHashtag, insertHashtag } from '../lib/bullet/hashtag'
+import { createHashtag } from '../lib/bullet/hashtag'
 
 function _toStringId<T extends { id: number }>(obj: T): T & { id: string } {
   return { ...obj, id: obj.id.toString() }
@@ -105,13 +105,13 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     })
   },
 
-  // async link(_parent, { url }, _context, _info) {
-  //   const link = await prisma.link.findUnique({
-  //     where: { url },
-  //   })
-  //   if (link) return _toStringId(link)
-  //   return null
-  // },
+  async link(_parent, { url }, _context, _info) {
+    const link = await prisma.link.findUnique({
+      where: { url },
+    })
+    if (link) return _toStringId(link)
+    return null
+  },
 
   async card(_parent, { symbol }, _context, _info) {
     const card = await prisma.card.findUnique({
@@ -413,7 +413,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
         op: 'CREATE',
       },
       root: content.self,
-      bulletId: parseInt(bulletId),
+      bulletId,
       cardId: parseInt(cardId),
       userId,
     })
