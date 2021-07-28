@@ -1,27 +1,18 @@
 import { cloneDeep } from '@apollo/client/utilities'
+import { PinBoardCode } from '../models/card'
 import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from './types'
 
 export type BulletDraftOrRootBulletDraft<T extends Bullet | RootBullet> = T extends Bullet
   ? RootBulletDraft
   : BulletDraft
 
-interface NodeInterface {
-  _toDraft: (node: Bullet) => BulletDraft
+export type Matcher = (node: Bullet | BulletDraft) => boolean
 
-  toList: (node: Bullet, path?: number[]) => Bullet[]
-  toDict: (node: Bullet) => Record<string, Bullet>
-  toDraft: (node: RootBullet) => RootBulletDraft
-
-  hasAnyOp: (node: BulletDraft) => boolean
-
-  removeEmptryNode: (node: BulletDraft) => BulletDraft | null
-}
-
-export const Node: NodeInterface = {
+export class Node {
   /**
    * 將node展開為list，附上path，並將children設為空array（避免後續操作children）
    */
-  toList: (node: Bullet, path: number[] = [0]): Bullet[] => {
+  public static toList(node: Bullet, path: number[] = [0]): Bullet[] {
     const _node = cloneDeep(node)
     if (_node.children) {
       const children = _node.children.reduce<Bullet[]>((acc, cur, i) => {
@@ -32,18 +23,18 @@ export const Node: NodeInterface = {
       return [{ ..._node, path }, ...children]
     }
     return [{ ..._node, path }]
-  },
+  }
 
-  toDict: (node: Bullet): Record<string, Bullet> => {
+  public static toDict(node: Bullet): Record<string, Bullet> {
     const _node = cloneDeep(node)
     const record: Record<string, Bullet> = {}
     for (const e of Node.toList(_node)) {
       record[e.id] = e
     }
     return record
-  },
+  }
 
-  _toDraft: (node: Bullet): BulletDraft => {
+  private static _toDraft(node: Bullet): BulletDraft {
     const _node = cloneDeep(node)
     delete _node.op
     return {
@@ -52,13 +43,13 @@ export const Node: NodeInterface = {
       prevBody: _node.body,
       children: _node.children?.map(e => Node._toDraft(e)),
     }
-  },
+  }
 
   /**
    * （Recursive）刪除cur bullet的op、將prev的值設為cur等，用於編輯
    * Root node不能被編輯，所以是從root的children開始變更
    */
-  toDraft: (node: RootBullet): RootBulletDraft => {
+  public static toDraft(node: RootBullet): RootBulletDraft {
     const _node = cloneDeep(node)
     delete _node.op
     return {
@@ -67,12 +58,12 @@ export const Node: NodeInterface = {
       prevBody: _node.body,
       children: _node.children.map(e => Node._toDraft(e)),
     }
-  },
+  }
 
   /**
    * （Recursive）查看tree中至少一個node有op，若無返回false
    */
-  hasAnyOp: (node: BulletDraft): boolean => {
+  public static hasAnyOp(node: BulletDraft): boolean {
     if (node.op) {
       return true
     }
@@ -82,12 +73,12 @@ export const Node: NodeInterface = {
       }
     }
     return false
-  },
+  }
 
   /**
    * （Recursive）若node的head為空且沒有children，移除，若仍有children @throws error
    */
-  removeEmptryNode: (node: BulletDraft): BulletDraft | null => {
+  public static removeEmptryNode(node: BulletDraft): BulletDraft | null {
     if (node.head.length === 0) {
       if (node.children.length > 0) {
         throw new Error('node沒有head，但有children，無法移除')
@@ -98,7 +89,65 @@ export const Node: NodeInterface = {
       ...node,
       children: node.children.map(e => Node.removeEmptryNode(e)).filter((e): e is BulletDraft => e !== null),
     }
-  },
+  }
+
+  /**
+   * Search in a bullet tree and return the first found
+   */
+  public static find(
+    // node: Bullet | BulletDraft,
+    // where: {
+    //   id?: number
+    //   head?: string
+    //   pin?: true
+    //   pinCode?: PinBoardCode
+    //   inDepth?: number
+    // },
+    // curDepth = 0,
+    props: { node: Bullet | BulletDraft; matcher: Matcher; depth?: { stopAfter?: number; cur: number } },
+  ): (Bullet | BulletDraft)[] {
+    const { node, matcher, depth = { cur: 0 } } = props
+    const nextDepth = depth.cur + 1
+    let found: (Bullet | BulletDraft)[] = []
+
+    if (matcher(node)) {
+      found.push(node)
+    }
+
+    // if (where.id !== undefined && where.id === node.id) {
+    //   found.push(node)
+    // } else if (where.head !== undefined && where.head === node.head) {
+    //   found.push(node)
+    // } else if (where.pin && where.pin === node.pin) {
+    //   found.push(node)
+    // } else if (where.pinCode !== undefined && where.pinCode === node.pinCode) {
+    //   found.push(node)
+    // }
+
+    if (depth.stopAfter === undefined || nextDepth <= depth.stopAfter) {
+      for (const e of node.children ?? []) {
+        found = found.concat(Node.find({ node: e, matcher, depth: { stopAfter: depth.stopAfter, cur: nextDepth } }))
+      }
+    }
+
+    return found
+  }
+
+  /**
+   * 設定bullet的property
+   */
+  public static set<T extends Bullet | BulletDraft>(props: {
+    node: T
+    matcher: Matcher
+    setter: (node: Bullet | BulletDraft) => void
+  }): T {
+    const { node, matcher, setter } = props
+    const _node = cloneDeep(node)
+    for (const e of Node.find({ node: _node, matcher })) {
+      setter(e)
+    }
+    return _node
+  }
 }
 
 /**

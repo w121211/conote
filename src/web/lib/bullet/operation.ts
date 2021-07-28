@@ -49,9 +49,9 @@ function _returnOrThrow<T extends BulletDraft | RootBulletDraft>(
 }
 
 /**
- * 創bullet，會在資料庫創一個bullet
+ * 在資料庫創一個bullet
  */
-export async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
+async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
   cardId: number
   draft: T
   timestamp: number
@@ -133,13 +133,15 @@ export async function createOneBullet<T extends BulletDraft | RootBulletDraft>(p
 
 /**
  * (Recursive)
- * @param current - 沒提供的情況視為第一次創建body
+ * Bullet operation
+ * @param current - 若沒給予視為第一次創建body
+ * @param timestamp - 若沒給予視為只執行hashtag ops、或沒有ops
  */
 export async function runBulletOp(props: {
-  cardId: number
   current?: RootBullet
   draft: RootBulletDraft
-  timestamp: number
+  timestamp?: number
+  cardId: number
   userId: string
 }): Promise<RootBullet> {
   const { cardId, current, draft, timestamp, userId } = props
@@ -148,6 +150,9 @@ export async function runBulletOp(props: {
 
   async function _run<T extends BulletDraft | RootBulletDraft>(draft: T): Promise<BulletOrRootBullet<T> | null> {
     if (draft.op === 'CREATE') {
+      if (timestamp === undefined) {
+        throw '執行bullet op需要給予timestamp'
+      }
       const childlessNext = await createOneBullet({ cardId, draft, timestamp, userId })
       const children =
         draft.children && (await Promise.all(draft.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
@@ -159,9 +164,7 @@ export async function runBulletOp(props: {
       return _returnOrThrow(next, draft)
     }
 
-    // input有對應的current node嗎？
-    const cur = draft.id && curDict && curDict[draft.id]
-
+    const cur = draft.id && curDict && curDict[draft.id] // draft有對應的current node嗎？
     if (cur) {
       if (cur.op === 'DELETE') {
         return null
@@ -179,6 +182,9 @@ export async function runBulletOp(props: {
         case 'DELETE':
         case 'UPDATE':
         case 'UPDATE_MOVE': {
+          if (timestamp === undefined) {
+            throw '執行bullet op需要給予timestamp'
+          }
           _timestamp = timestamp
           userIds = [...userIds, userId]
           head = draft.head
@@ -193,10 +199,9 @@ export async function runBulletOp(props: {
       const hashtags =
         draft.hashtags &&
         (await runHastagOpBatch({
-          bulletBoardId: cur.boardId,
-          bulletId: cur.id,
-          cardId,
           hashtags: draft.hashtags,
+          bullet: cur,
+          cardId,
           userId,
         }))
 

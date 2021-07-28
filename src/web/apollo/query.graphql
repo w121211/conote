@@ -263,9 +263,14 @@ mutation CreateCardBody($cardId: ID!, $data: CardBodyInput!) {
   }
 }
 
-mutation CreateBoard($cardId: ID!, $bulletId: ID!, $data: BoardInput!) {
-  createBoard(cardId: $cardId, bulletId: $bulletId, data: $data) {
-    ...board
+mutation createHashtag($cardId: ID!, $bulletId: Int!, $data: BoardInput!) {
+  createHashtag(cardId: $cardId, bulletId: $bulletId, data: $data) {
+    board {
+      ...board
+    }
+    cardBody {
+      ...cardBody
+    }
   }
 }
 

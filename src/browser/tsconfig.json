@@ -3,7 +3,7 @@
   "references": [
     { "path": "../packages/editor" },
     { "path": "../packages/fetcher" },
-    { "path": "../web/tsconfig.build.json" }
+    { "path": "../web/tsconfig.build-types.json" }
   ],
   "compilerOptions": {
     // "target": "es5", // 設為es5時會有error，與gql有關

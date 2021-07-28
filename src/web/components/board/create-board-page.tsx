@@ -29,16 +29,14 @@ const CreateBoardPage = ({
   bulletId,
   visible,
   hideBoard,
-
   subTitle,
 }: {
   cardId: string
   bulletId: string
   visible: boolean
   hideBoard: () => void
-
   subTitle: JSX.Element
-}) => {
+}): JSX.Element => {
   const [measureRef, bounds] = useMeasure()
   const [boardId, setBoardId] = useState<string | undefined>()
   const [title, setTitle] = useState('')

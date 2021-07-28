@@ -12,15 +12,14 @@ build:
       #   dockerfile: Dockerfile
       #   target: builder
 deploy:
-  # @see
-  # helm:
-  #   releases:
-  #     - name: postgres-release
-  #       repo: https://charts.bitnami.com/bitnami
-  #       remoteChart: postgresql
-  #       setValues:
-  #         postgresqlUsername: 'postgresuser'
-  #         postgresqlPassword: 'postgrespassword'
+  helm:
+    releases:
+      - name: postgres-release
+        repo: https://charts.bitnami.com/bitnami
+        remoteChart: postgresql
+        # setValues:
+        #   postgresqlUsername: 'postgresuser'
+        #   postgresqlPassword: 'postgrespassword'
   kustomize:
     paths:
       - k8s/dev

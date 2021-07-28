@@ -237,14 +237,14 @@ async function batchCreateBullet() {
   // TODO
 }
 
-async function getCurrentCardBody(cardId: number): Promise<CardBody | null> {
+export async function getCurrentCardBody(cardId: number): Promise<CardBody | null> {
   return await prisma.cardBody.findFirst({
     where: { cardId },
     orderBy: { createdAt: 'desc' },
   })
 }
 
-async function getCurrentCardHead(cardId: number): Promise<CardHead | null> {
+export async function getCurrentCardHead(cardId: number): Promise<CardHead | null> {
   return await prisma.cardHead.findFirst({
     where: { cardId },
     orderBy: { createdAt: 'desc' },

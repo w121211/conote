@@ -7,11 +7,19 @@ import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
 import { QueryResolvers, MutationResolvers } from './type-defs.graphqls'
 import { deltaLike } from '../lib/helper'
-import { attachLatestHeadBody, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
+import {
+  attachLatestHeadBody,
+  CardBodyContent,
+  createCardBody,
+  getCurrentCardBody,
+  getOrCreateCardBySymbol,
+  getOrCreateCardByUrl,
+} from '../lib/models/card'
 import { getOrCreateUser } from '../lib/models/user'
 import { createOauthorVote, createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
 import { ResolverContext } from './apollo-client'
+import { createHashtag, insertHashtag } from '../lib/bullet/hashtag'
 
 function _toStringId<T extends { id: number }>(obj: T): T & { id: string } {
   return { ...obj, id: obj.id.toString() }
@@ -143,7 +151,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         count: _toStringId(bullet.count),
       }
     }
-    return null
+    throw new Error()
   },
 
   async board(_parent, { id }, _context, _info) {
@@ -170,7 +178,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         poll: undefined,
       }
     }
-    return null
+    throw new Error()
   },
 
   async comments(_parent, { boardId, afterId }, _context, _info) {
@@ -388,45 +396,52 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       mirrors: data.mirrors ?? undefined,
       userId,
     })
-    console.log(body)
+    // console.log(body)
     return _toStringId(body)
-    // try {
-    //   const [body] = await createCardBody({
-    //     cardId: parseInt(cardId),
-    //     self: data.self,
-    //     mirrors: data.mirrors ?? undefined,
-    //     userId,
-    //   })
-    //   console.log(body)
-    //   return _toStringId(body)
-    // } catch (err) {
-    //   throw new Error('err')
-    // }
   },
 
-  async createBoard(_parent, { cardId, bulletId, data }, { req, res }, _info) {
+  async createHashtag(_parent, { cardId, bulletId, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const board = await prisma.board.create({
-      include: { count: true },
-      data: {
-        hashtag: data.hashtag,
-        // TODO
-        meta: data.meta,
-        // TODO
-        content: data.content,
-        bullet: { connect: { id: parseInt(bulletId) } },
-        card: { connect: { id: parseInt(cardId) } },
-        user: { connect: { id: userId } },
-        count: { create: {} },
+
+    const body = await getCurrentCardBody(parseInt(cardId))
+    if (body === null) throw '找不到對應的card body'
+    const content: CardBodyContent = JSON.parse(body.content)
+
+    const [hashtag, updatedRoot] = await createHashtag({
+      draft: {
+        text: data.hashtag,
+        op: 'CREATE',
       },
+      root: content.self,
+      bulletId: parseInt(bulletId),
+      cardId: parseInt(cardId),
+      userId,
     })
-    if (board.count) {
-      return {
+    const updatedContent: CardBodyContent = {
+      ...content,
+      self: updatedRoot,
+    }
+    const updatedBody = await prisma.cardBody.update({
+      data: {
+        content: JSON.stringify(updatedContent),
+      },
+      where: { id: body.id },
+    })
+
+    const board = await prisma.board.findUnique({
+      include: { count: true },
+      where: { id: hashtag.boardId },
+    })
+    if (board === null || board.count === null) {
+      throw new Error()
+    }
+
+    return {
+      board: {
         ..._toStringId(board),
         count: _toStringId(board.count),
-      }
-    } else {
-      throw new Error()
+      },
+      cardBody: _toStringId(updatedBody),
     }
   },
 
