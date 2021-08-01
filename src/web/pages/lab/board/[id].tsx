@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { BoardItem } from '../card'
+import { BoardItem } from '../../../components/card'
 
 const Board = (): JSX.Element => {
   const router = useRouter()

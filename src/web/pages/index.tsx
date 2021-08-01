@@ -69,7 +69,7 @@ function HomePage(): JSX.Element {
   const router = useRouter()
   const { user, error, isLoading } = useUser()
   const { data, loading } = useMeQuery()
-
+  console.log(data)
   if (loading || isLoading) return <h1>Loading</h1>
 
   return (

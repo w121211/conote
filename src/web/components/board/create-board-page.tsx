@@ -35,7 +35,7 @@ const CreateBoardPage = ({
   bulletId: number
   visible: boolean
   hideBoard: () => void
-  subTitle: JSX.Element
+  subTitle: string
 }): JSX.Element => {
   const [measureRef, bounds] = useMeasure()
   const [boardId, setBoardId] = useState<string | undefined>()
@@ -46,10 +46,10 @@ const CreateBoardPage = ({
   const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
 
   const handleBoardId = (d: CreateHashtagMutation) => {
-    // setTitle(d.createHashtag.hashtag)
-    // setBoardId(d.createHashtag.id)
+    setTitle(d.createHashtag.board.hashtag)
+    setBoardId(d.createHashtag.board.id)
   }
-  console.log(boardId)
+  // console.log(boardId)
 
   return (
     <Popover visible={visible} hideBoard={hideBoard} subTitle={subTitle}>
@@ -58,7 +58,7 @@ const CreateBoardPage = ({
         {boardId ? (
           <>
             <BoardPage boardId={boardId} title={title} />
-            {console.log(boardId)}
+            {/* {console.log(boardId)} */}
           </>
         ) : (
           <CreateBoardFrom bulletId={bulletId} cardId={cardId} handleboardId={handleBoardId} />

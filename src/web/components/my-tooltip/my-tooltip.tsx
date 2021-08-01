@@ -1,3 +1,4 @@
+import React from 'react'
 import classes from './my-tooltip.module.scss'
 
 const myTooltip = ({

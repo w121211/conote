@@ -26,8 +26,12 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  background: white;
+  background: $white;
   line-height: 0;
+  box-shadow: 0 3px 6px #0000001a;
+  span {
+    color: $black;
+  }
   @media screen and (max-width: 500px) {
     // width: 100vw;
     // justify-content: flex-start;
@@ -48,12 +52,14 @@
 .pathUl {
   display: flex;
   flex-direction: row;
+  padding: 0;
   // flex-grow: 1;
   list-style: none;
   // width: fit-content;
   align-items: center;
   height: 100%;
-  li {
+  span {
+    cursor: pointer;
     display: flex;
     position: relative;
     align-items: center;
@@ -65,17 +71,23 @@
     text-overflow: ellipsis;
     // max-width: 60px;
     // width: fit-content;
-    span {
-      display: inline-block;
-      height: fit-content;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      line-height: normal;
-    }
+    // span {
+    //   display: inline-block;
+    //   height: fit-content;
+    //   overflow: hidden;
+    //   white-space: nowrap;
+    //   text-overflow: ellipsis;
+    //   line-height: normal;
+    // }
+  }
+  & > li {
+    display: flex;
+    height: 100%;
   }
   svg {
     flex-shrink: 0;
+    stroke: $black;
+    stroke-width: 7px;
   }
 }
 .rightArrow {

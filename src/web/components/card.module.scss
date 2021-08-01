@@ -160,15 +160,15 @@
     }
   }
 }
-.commentIcon {
-  position: relative;
-  height: 1.2em;
-  top: 3px;
-  fill: $gray-natual;
-  &:hover {
-    fill: $gray-hover;
-  }
-}
+// .commentIcon {
+//   position: relative;
+//   height: 1.2em;
+//   top: 3px;
+//   fill: $gray-natual;
+//   &:hover {
+//     fill: $gray-hover;
+//   }
+// }
 
 .tooltip {
   background-color: $secondary;
@@ -277,7 +277,7 @@
 
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  cursor: pointer;
+  // cursor: pointer;
   letter-spacing: 0;
   opacity: 1;
   // transition: transform 0.3s ease-in, opacity 0.1s ease-in-out 0.1s;
@@ -323,14 +323,6 @@
     // border-bottom: 1px solid $primary;
   }
 
-  .date {
-    display: inline-block;
-    margin-right: 16px;
-    /* font-style: italic; */
-    color: $text;
-    font-family: 'Cantarell', sans-serif;
-    font-size: 0.8em;
-  }
   .webName {
     @extend %Round_sm_gray_en;
   }
@@ -573,7 +565,7 @@ a {
   flex-shrink: 0;
   display: flex;
   margin-right: 1em;
-  background: $bg;
+  // background: $bg;
   border: 1px solid $primary;
   font-family: initial;
 }
@@ -670,6 +662,11 @@ h1.tickerTitle {
   @media screen and (max-width: 500px) {
     // margin-left: .em;
   }
+  &:hover {
+    // & > .hashTagBtn {
+    //   visibility: visible;
+    // }
+  }
   // .panel {
   //   display: inline-flex;
   //   position: absolute;
@@ -722,15 +719,47 @@ h1.tickerTitle {
   justify-content: center;
 }
 .oauthorName {
-  color: $gray;
+  font-size: 12px;
+  color: $gray-text;
 }
 .link {
   color: $text;
   border-bottom: 1px solid $text;
   text-decoration: none;
   line-height: 1.5;
+  word-break: break-all;
+
   &:hover {
+    cursor: pointer;
     color: $secondaryHover;
     border-bottom: 1px solid $secondaryHover;
+  }
+}
+.hashTagBtn {
+  color: $text;
+  border-radius: 3px;
+  border: none;
+  margin: 0;
+  margin-left: 8px;
+  padding: 2px 10px;
+  // visibility: hidden;
+  &:hover {
+    cursor: pointer;
+    background-color: $secondaryHover;
+    color: white;
+  }
+}
+.mirrorBullet {
+  fill: white;
+  stroke: $bullet;
+}
+.date {
+  display: flex;
+  // margin-right: 16px;
+  /* font-style: italic; */
+  span {
+    color: $gray-text;
+    font-family: 'Cantarell', sans-serif;
+    font-size: 0.8em;
   }
 }

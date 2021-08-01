@@ -7,6 +7,7 @@ import { AppState, useAuth0 } from '@auth0/auth0-react'
 import { cache } from './cache'
 import { useMeQuery, MeQuery } from '../../../web/apollo/query.graphql'
 import { CardPage } from './card-page'
+import '../../../web/style/global.scss'
 // import './app.css'
 
 class BrowserStorageWrapper implements PersistentStorage {
@@ -39,11 +40,50 @@ const onRedirectCallback = (appState: AppState) => {
 }
 
 const Protected = ({ children }: { children: React.ReactNode }): JSX.Element | null => {
-  const { data } = useMeQuery()
-  if (data?.me) return <>{children}</>
+  const { data, refetch } = useMeQuery({ fetchPolicy: 'network-only' })
+
+  const handleLogin = (e: React.MouseEvent) => {
+    e.preventDefault()
+    browser.tabs.update({
+      url: 'http://localhost:3000/api/auth/login',
+    })
+    // refetch()
+  }
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const onUpdate = (tab: any) => {
+      browser.tabs.goBack()
+    }
+    browser.tabs.update({
+      url: 'http://localhost:3000/api/auth/logout',
+    })
+
+    // refetch()
+  }
+
+  if (data?.me) {
+    console.log(data.me)
+    // return (
+    //   <span
+    //     onClick={e => {
+    //       handleLogout(e)
+    //     }}
+    //   >
+    //     Logout
+    //   </span>
+    // )
+    return <>{children}</>
+  }
   return (
     <div>
-      <a href="http://localhost:3000">Login</a> Required
+      <span
+        onClick={e => {
+          handleLogin(e)
+        }}
+      >
+        Login
+      </span>{' '}
+      Required
     </div>
   )
 }
@@ -51,7 +91,7 @@ const Protected = ({ children }: { children: React.ReactNode }): JSX.Element | n
 export const App = (): JSX.Element => {
   const [client, setClient] = useState<ApolloClient<NormalizedCacheObject>>()
   const [persistor, setPersistor] = useState<CachePersistor<NormalizedCacheObject>>()
-
+  // console.log('test')
   useEffect(() => {
     async function init() {
       const newPersistor = new CachePersistor({
@@ -119,6 +159,7 @@ export const App = (): JSX.Element => {
   if (!client) {
     return <h2>Initializing app...</h2>
   }
+  // console.log('test')
   return (
     <ApolloProvider client={client}>
       <Protected>

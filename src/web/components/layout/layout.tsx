@@ -123,7 +123,7 @@ export default function Layout({
         // setMyPath(newMyPath)
         setHiddenPath(filterCopyArr)
         setMyPath(newCopyArr)
-        console.log(newCopyArr)
+        // console.log(newCopyArr)
       } else {
         setMyPath([...path])
       }
@@ -146,15 +146,14 @@ export default function Layout({
         <ul className={classes.pathUl} ref={pathRef} style={{ maxWidth: `${viewPortWidth - 62}px` }}>
           {myPath.length !== 0 &&
             myPath.map((e, i) => (
-              <>
+              <li key={i}>
                 {i !== 0 && <RightArrow className={classes.rightArrow} />}
 
                 {
-                  <li
-                    ref={e => {
-                      pathLiRef.current[i] = e
-                    }}
-                    key={i}
+                  <span
+                    // ref={e => {
+                    //   pathLiRef.current[i] = e
+                    // }}
                     onClick={() => {
                       if (e === '...') {
                         setShowTooltip(prev => !prev)
@@ -188,9 +187,9 @@ export default function Layout({
                         })}
                       </MyTooltip>
                     )}
-                  </li>
+                  </span>
                 }
-              </>
+              </li>
             ))}
         </ul>
       </div>

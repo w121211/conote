@@ -1,10 +1,45 @@
-.containerouter {
+.containerOuter {
   position: fixed;
   width: 100vw;
   height: 100vh;
   top: 0;
   left: 0;
-  background-color: white;
+  background-color: $white;
   box-shadow: 0 12px 25px -11px #00000066;
   z-index: 100;
+  padding: 1em;
+  padding-top: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.topBar {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  height: 45px;
+  // margin-bottom: 20px;
+  background-color: $white;
+}
+.cancelIconWrapper {
+  svg {
+    display: flex;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+  }
+}
+.subTitle {
+  cursor: default;
+  margin-left: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc(100vw - 75px);
+  color: $text;
+  &:hover {
+    color: $text;
+  }
+}
+.children {
+  margin-top: 50px;
 }
