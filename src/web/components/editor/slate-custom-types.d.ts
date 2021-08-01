@@ -48,7 +48,7 @@ export type LabelInlineElement = {
 export type UlElement = {
   type: 'ul'
   children: LiElement[]
-  fold?: true
+  folded?: true
 }
 
 /**

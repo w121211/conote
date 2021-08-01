@@ -1,41 +1,28 @@
-/**
- * Note:
- * - inline element不能是最後一個child(slate本身的限制)，會自動在最後加一個text -> 可能對render有問題
- * - inline 在輸入時會自動合併到text
- */
-/* eslint-disable no-console */
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
 import Modal from 'react-modal'
 import { useApolloClient } from '@apollo/client'
-import { Editor, Transforms, Range, createEditor, Descendant, Element, Node, Path, Text, NodeEntry, Point } from 'slate'
+import { Editor, Transforms, createEditor, Node } from 'slate'
 import {
-  Slate,
   Editable,
-  withReact,
-  useSlateStatic,
-  useReadOnly,
   ReactEditor,
   RenderElementProps,
-  useFocused,
-  useSelected,
   RenderLeafProps,
+  Slate,
+  useSlateStatic,
+  withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
 import { editorValue } from '../../apollo/cache'
-import { Node as BulletNode } from '../../lib/bullet/node'
-import { Bullet, BulletDraft, RootBullet } from '../../lib/bullet/types'
+import { RootBullet } from '../../lib/bullet/types'
 import { createAndParseCard, queryAndParseCard } from '../card'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 import { Serializer } from './serializer'
-import { isLc, isLi, isLiArray, isUl, onKeyDown as onKeyDownWithList, withList } from './with-list'
+import { isLc, isLi, isLiArray, isUl, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { withMirror } from './with-mirror'
 import { useInput } from './use-input'
 import { withOp } from './with-op'
 import BulletSvg from '../bullet-svg/bullet-svg'
 import classes from './editor.module.scss'
-// import { cleanOp } from '../../lib/bullet/node'
-// import { useSearch } from './search'
-// import { BulletOneElement } from './custom-types'
 
 const initialValueDemo: LiElement[] = [
   {
@@ -48,7 +35,22 @@ const initialValueDemo: LiElement[] = [
       { type: 'lc', body: '22', placeholder: 'placeholder', children: [{ text: '22' }] },
       {
         type: 'ul',
-        children: [{ type: 'li', children: [{ type: 'lc', body: '22-11', children: [{ text: '22-11' }] }] }],
+        children: [
+          { type: 'li', children: [{ type: 'lc', body: '22-11', children: [{ text: '22-11' }] }] },
+          {
+            type: 'li',
+            children: [
+              { type: 'lc', children: [{ text: '' }] },
+              {
+                type: 'ul',
+                children: [
+                  { type: 'li', children: [{ type: 'lc', body: '22-11', children: [{ text: '22-11' }] }] },
+                  { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
+                ],
+              },
+            ],
+          },
+        ],
       },
     ],
   },
@@ -419,7 +421,6 @@ const Lc = (props: RenderElementProps & { element: LcElement; oauthorName?: stri
 
   useEffect(() => {
     if (oauthorName && element.op === 'CREATE') {
-      console.log('set~~~')
       const lcPath = ReactEditor.findPath(editor, element)
       if (author === '@self') {
         Transforms.setNodes<LcElement>(editor, { oauthorName: undefined }, { at: lcPath })
@@ -449,31 +450,61 @@ const Lc = (props: RenderElementProps & { element: LcElement; oauthorName?: stri
 }
 
 const Li = (props: RenderElementProps & { element: LiElement }) => {
-  const editor = useSlateStatic()
-
   const { attributes, children, element } = props
 
-  return <div {...attributes}> {children}</div>
+  const [hasUl, setHasUl] = useState(false)
+  const [ulFolded, setUlFolded] = useState<true | undefined>()
+  const editor = useSlateStatic()
+
+  useEffect(() => {
+    const path = ReactEditor.findPath(editor, element)
+    try {
+      const ul = Editor.node(editor, ulPath(path))
+      if (isUl(ul[0])) {
+        setHasUl(true)
+        setUlFolded(ul[0].folded)
+      }
+    } catch (err) {
+      // 找不到ul
+      setHasUl(false)
+      setUlFolded(undefined)
+    }
+  }, [editor, element])
+
+  return (
+    <div {...attributes}>
+      <div contentEditable={false}>
+        {hasUl && (
+          <button
+            onClick={event => {
+              event.preventDefault()
+              const path = ReactEditor.findPath(editor, element)
+              try {
+                const ul = Editor.node(editor, ulPath(path))
+                if (isUl(ul[0])) {
+                  Transforms.deselect(editor)
+                  Transforms.setNodes<UlElement>(editor, { folded: ul[0].folded ? undefined : true }, { at: ul[1] })
+                }
+              } catch (err) {
+                // 不用處理
+              }
+            }}
+          >
+            Fold
+          </button>
+        )}
+      </div>
+      {children}
+    </div>
+  )
 }
 
 const Ul = (props: RenderElementProps & { element: UlElement }) => {
   const { attributes, children, element } = props
   // { display: 'none', visibility: 'hidden', height: 0 }
-  const style: CSSProperties = element.fold ? { display: 'none' } : {}
-  const editor = useSlateStatic()
+  const style: CSSProperties = element.folded ? { display: 'none' } : {}
   return (
     <div {...attributes}>
-      <div contentEditable={false}>
-        <button
-          onClick={() => {
-            const path = ReactEditor.findPath(editor, element)
-            Transforms.deselect(editor)
-            Transforms.setNodes<UlElement>(editor, { fold: element.fold ? undefined : true }, { at: path })
-          }}
-        >
-          Fold
-        </button>
-      </div>
       <ul className={classes.bulletUl} style={style}>
         {children}
       </ul>
@@ -566,8 +597,8 @@ export const BulletEditor = (props: {
     [],
   )
   const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
-  const _onKeyDownWithList = useCallback((event: React.KeyboardEvent) => {
-    onKeyDownWithList(event, editor)
+  const _withListOnKeyDown = useCallback((event: React.KeyboardEvent) => {
+    withListOnKeyDown(event, editor)
   }, [])
 
   // const [searchPanel, onValueChange] = useSearch(editor)
@@ -600,7 +631,7 @@ export const BulletEditor = (props: {
           renderLeaf={renderLeaf}
           // decorate={decorate}
           onKeyDown={event => {
-            _onKeyDownWithList(event)
+            _withListOnKeyDown(event)
             // if (search) {
             //   onKeyDownForSuggest(event)
             // } else {
