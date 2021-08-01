@@ -24,13 +24,15 @@ import { withHistory } from 'slate-history'
 import { editorValue } from '../../apollo/cache'
 import { Node as BulletNode } from '../../lib/bullet/node'
 import { Bullet, BulletDraft, RootBullet } from '../../lib/bullet/types'
-import { createAndParseCard, queryAndParseCard } from '../../pages/lab/card'
+import { createAndParseCard, queryAndParseCard } from '../card'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 import { Serializer } from './serializer'
 import { isLc, isLi, isLiArray, isUl, onKeyDown as onKeyDownWithList, withList } from './with-list'
 import { withMirror } from './with-mirror'
 import { useInput } from './use-input'
 import { withOp } from './with-op'
+import BulletSvg from '../bullet-svg/bullet-svg'
+import classes from './editor.module.scss'
 // import { cleanOp } from '../../lib/bullet/node'
 // import { useSearch } from './search'
 // import { BulletOneElement } from './custom-types'
@@ -429,25 +431,29 @@ const Lc = (props: RenderElementProps & { element: LcElement; oauthorName?: stri
 
   return (
     <div {...attributes}>
-      <li>
+      <li className={classes.bulletLi}>
+        <BulletSvg />
         <span>{children}</span>
       </li>
 
-      <div contentEditable={false} style={{ color: 'green' }}>
+      {/* <div contentEditable={false} style={{ color: 'green' }}>
         {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>}
         {element.op === 'CREATE' && authorSwitcher}
         {sourceUrl}
         {element.id}
         {element.error}
         {element.freeze && 'freeze'}
-      </div>
+      </div> */}
     </div>
   )
 }
 
 const Li = (props: RenderElementProps & { element: LiElement }) => {
-  const { attributes, children } = props
-  return <div {...attributes}>{children}</div>
+  const editor = useSlateStatic()
+
+  const { attributes, children, element } = props
+
+  return <div {...attributes}> {children}</div>
 }
 
 const Ul = (props: RenderElementProps & { element: UlElement }) => {
@@ -468,7 +474,9 @@ const Ul = (props: RenderElementProps & { element: UlElement }) => {
           Fold
         </button>
       </div>
-      <ul style={style}>{children}</ul>
+      <ul className={classes.bulletUl} style={style}>
+        {children}
+      </ul>
     </div>
   )
 }

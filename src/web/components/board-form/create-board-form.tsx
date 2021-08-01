@@ -1,5 +1,5 @@
 import { title } from 'process'
-import { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { useForm, useController, useFormContext, FormProvider, useWatch, Control } from 'react-hook-form'
 import {
   BoardDocument,
@@ -9,7 +9,7 @@ import {
   useCreateHashtagMutation,
 } from '../../apollo/query.graphql'
 import classes from './board-form.module.scss'
-import { SymbolContext } from '../../pages/lab/card'
+import { SymbolContext } from '../card'
 
 export type RadioInputs = {
   choice?: number | null
@@ -54,21 +54,23 @@ const CreateBoardForm = ({
   // }
 
   const [createHashtag] = useCreateHashtagMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<BoardQuery>({
-        query: BoardDocument,
-      })
-      if (data?.createHashtag && res?.board) {
-        cache.writeQuery({
-          query: BoardDocument,
-          data: { board: data.createHashtag },
-        })
-      }
-      // handleboardId(data?.createBoard.id)
+    // update(cache, { data }) {
+    //   const res = cache.readQuery<BoardQuery>({
+    //     query: BoardDocument,
+    //   })
+    //   if (data?.createHashtag && res?.board) {
+    //     cache.writeQuery({
+    //       query: BoardDocument,
+    //       data: { board: data.createHashtag },
+    //     })
+    //   }
+    //   // handleboardId(data?.createBoard.id)
 
-      // refetch()
-    },
+    //   // refetch()
+    //   console.log('createHashtag')
+    // },
     onCompleted(data) {
+      // console.log('oncompelet', data)
       handleboardId(data)
     },
     refetchQueries: [{ query: CardDocument, variables: { symbol: context.symbol } }],
@@ -84,7 +86,7 @@ const CreateBoardForm = ({
           data: { content: d.description ?? '', hashtag: d.hashtag, meta: '' },
         },
       })
-      console.log(bulletId, cardId, d.hashtag)
+      // console.log(bulletId, cardId, d.hashtag)
     }
 
     reset({ hashtag: '', description: '' })

@@ -6,7 +6,7 @@ import { useUser } from '@auth0/nextjs-auth0'
 import { Token } from 'prismjs'
 import { CardType } from '@prisma/client'
 import RightArrow from '../../assets/svg/right-arrow.svg'
-import { editorValue } from '../../apollo/cache'
+import { editorValue } from '../apollo/cache'
 import {
   Board,
   BoardQuery,
@@ -29,18 +29,24 @@ import {
   useCreateHashtagMutation,
   useCreateOauthorCommentMutation,
   useMeQuery,
-} from '../../apollo/query.graphql'
-import classes from '../../components/card.module.scss'
-import BoardPage from '../../components/board/board-page'
-import CreateBoardPage from '../../components/board/create-board-page'
-import Popover from '../../components/popover/popover'
-import { BulletEditor } from '../../components/editor/editor'
-import { Serializer } from '../../components/editor/serializer'
-import { LiElement } from '../../components/editor/slate-custom-types'
-import { tokenize } from '../../lib/bullet/tokenizer'
-import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
-import { CardBodyContent, CardHeadContent, CardHeadContentValueInjected, PinBoard } from '../../lib/models/card'
-import { injectCardHeadValue } from '../../lib/models/card-helpers'
+} from '../apollo/query.graphql'
+import classes from './card.module.scss'
+import BoardPage from './board/board-page'
+import CreateBoardPage from './board/create-board-page'
+import Popover from './popover/popover'
+import { BulletEditor } from './editor/editor'
+import { Serializer } from './editor/serializer'
+import { LiElement } from './editor/slate-custom-types'
+import { tokenize } from '../lib/bullet/tokenizer'
+import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../lib/bullet/types'
+import {
+  CardBodyContent,
+  CardHeadContent,
+  CardHeadContentValue,
+  CardHeadContentValueInjected,
+  PinBoard,
+} from '../lib/models/card'
+import { injectCardHeadValue } from '../lib/models/card-helpers'
 
 // type CardHeadAndParsedContent = Omit<CardHead, 'content'> & {
 //   content: CardHeadContent
@@ -62,7 +68,7 @@ type CardParsed = Card & {
 function parseCard(card: Card): CardParsed {
   const headContent: CardHeadContent = JSON.parse(card.head.content)
   const bodyContent: CardBodyContent = JSON.parse(card.body.content)
-  console.log(bodyContent)
+  // console.log(bodyContent)
   const headValue = injectCardHeadValue({ bodyRoot: bodyContent.self, value: headContent.value })
   return {
     ...card,
@@ -416,12 +422,14 @@ const BulletItem = (props: {
   type: string
   handleSymbol: (symbol: string) => void
   cardId: string
+  mirror?: boolean
 }) => {
   // const [filtered, setFiltered] = useState()
-  const { depth, node, handleSymbol, cardId } = props
+  const { depth, node, handleSymbol, cardId, mirror } = props
+  // console.log(node)
   const [showBoard, setShowBoard] = useState(false)
   const [showCreateBoard, setShowCreateBoard] = useState(false)
-  const [showChildren, setShowChildren] = useState(depth < 2 ? true : false)
+  const [showChildren, setShowChildren] = useState(depth < depth + 2 ? true : false)
   // const { node } = props
   const headTokens = tokenize(node.head)
   const bodyTokens = node.body ? tokenize(node.body) : undefined
@@ -436,9 +444,15 @@ const BulletItem = (props: {
   const [createHashtag] = useCreateHashtagMutation()
 
   const nextDepth = depth + 1
+  const cutString = (s: string) => {
+    if (s.length > 6) {
+      return s.substring(0, 5) + '...'
+    }
+    return s
+  }
   return (
     <>
-      {depth === 0 && (!node.children || (node.children && node.children.length === 0)) ? null : (
+      {depth < 2 && (!node.children || (node.children && node.children.length === 0)) ? null : (
         <li className={classes.inlineValue}>
           <span className={classes.bulletWrapper}>
             <span
@@ -451,7 +465,7 @@ const BulletItem = (props: {
                 viewBox="0 0 18 18"
                 className={`${classes.bulletSvg} ${
                   showChildren || (node.children.length === 0 && node.children) ? '' : classes.bulletSvgBg
-                }`}
+                } ${mirror && classes.mirrorBullet}`}
               >
                 <circle cx="9" cy="9" r="4" />
               </svg>
@@ -471,6 +485,9 @@ const BulletItem = (props: {
             ),
             // ),
           )} */}
+            {node.oauthorName && (
+              <span className={classes.oauthorName}> @{cutString(node.oauthorName.split(':', 1)[0])}</span>
+            )}
             {node.hashtags &&
               node.hashtags.map((e, i) => (
                 <span
@@ -480,9 +497,9 @@ const BulletItem = (props: {
                     setShowBoard(true)
                   }}
                 >
-                  {e.text}
+                  {' ' + e.text}
                   {e.boardId && (
-                    <Popover visible={showBoard} hideBoard={hideBoard} subTitle={markToText(node.head)}>
+                    <Popover visible={showBoard} hideBoard={hideBoard} subTitle={node.head}>
                       <BoardPage
                         title={e.text}
                         boardId={e.boardId.toString()}
@@ -499,11 +516,9 @@ const BulletItem = (props: {
                 // </Link>
               ))}
 
-            {node.oauthorName && <span className={classes.oauthorName}>@{node.oauthorName.split(':', 1)}</span>}
-
             {hastaggable(node) && (
               <>
-                <button
+                {/* <button
                   onClick={() => {
                     if (node.id === undefined) {
                       throw '需要bullet id才能創hashtag'
@@ -522,20 +537,19 @@ const BulletItem = (props: {
                   }}
                 >
                   Create Hashtag
-                </button>
+                </button> */}
 
-                <span
-                  className={classes.link}
+                <button
+                  className={classes.hashTagBtn}
                   onClick={() => {
                     setShowCreateBoard(true)
                   }}
                 >
-                  (#)
-                  {/* {console.log(headTokens, bodyTokens)} */}
-                </span>
+                  #
+                </button>
                 {showCreateBoard && node.id && (
                   <CreateBoardPage
-                    subTitle={markToText(node.head)}
+                    subTitle={node.head}
                     bulletId={node.id}
                     cardId={cardId}
                     visible={showCreateBoard}
@@ -613,7 +627,7 @@ const CardBodyItem = (props: {
                 handleSymbol={_ => {
                   _
                 }}
-                depth={0}
+                depth={1}
                 type={card.type}
                 cardId={card.id}
               />
@@ -622,21 +636,21 @@ const CardBodyItem = (props: {
         {mirrors &&
           mirrors.map((e, i) => (
             <ul key={i}>
-              {<span className={classes.tickerTitle}>{markToText(e.head, handleSymbol)}</span>}
-              {e.children.map((el, ind) => {
-                return (
-                  <BulletItem
-                    node={el}
-                    handleSymbol={_ => {
-                      _
-                    }}
-                    depth={0}
-                    type={card.type}
-                    cardId={card.id}
-                    key={ind}
-                  />
-                )
-              })}
+              {/* {<span className={classes.tickerTitle}>{markToText(e.head, handleSymbol)}</span>} */}
+              {/* {e.children.map((el, ind) => { */}
+              {/* return ( */}
+              <BulletItem
+                node={e}
+                handleSymbol={_ => {
+                  _
+                }}
+                depth={0}
+                type={card.type}
+                cardId={card.id}
+                key={i}
+                mirror
+              />
+              {/* })} */}
             </ul>
           ))}
       </div>
@@ -653,7 +667,7 @@ const CardBodyItem = (props: {
             handleSymbol={_ => {
               _
             }}
-            depth={0}
+            depth={1}
             type={card.type}
             cardId={card.id}
           />
@@ -667,7 +681,7 @@ const CardBodyItem = (props: {
  * Show a card 1. 有mirrors (ie webpage card) 2. 沒有mirrors
  */
 
-const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void }) => {
+export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void }) => {
   const { card, handleSymbol } = props
   // console.log(card)
   // const parsedCard = parseCard(card)
@@ -676,6 +690,7 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
   const client = useApolloClient()
   const [showBoard, setShowBoard] = useState(false)
 
+  const [headContentValue, setHeadContentValue] = useState<CardHeadContentValue | undefined>()
   const [self, setSelf] = useState<RootBullet | RootBulletDraft>()
   const [mirrors, setMirrors] = useState<RootBullet[] | RootBulletDraft[] | undefined>()
 
@@ -705,7 +720,8 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
   useEffect(() => {
     async function _parseAndBuildCard() {
       const parsed = parseCard(card)
-
+      setHeadContentValue(parsed.headContent.value)
+      console.log(parsed)
       // TODO: 改為更general的方式，而不是只針對BUYSELL
       const _pinBoardBuysell = parsed.headValue.pinBoards.find(e => e.pinCode === 'BUYSELL')
       setPinBoardBuysell(_pinBoardBuysell)
@@ -787,22 +803,37 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
       console.log(err)
     }
   }, [self, mirrors])
-
+  // console.log(card)
+  const formateDate = (date: any) => {
+    let yourDate = new Date(date)
+    const offset = yourDate.getTimezoneOffset()
+    yourDate = new Date(yourDate.getTime() - offset * 60 * 1000)
+    return yourDate.toISOString().split('T')[0]
+  }
+  // const creatDate=new Date(card.createdAt)
+  // const updateDate=new Date(card.updatedAt)
   return (
     <div>
       {/* <h3>Head</h3> */}
-      <span className={classes.title}>{self?.head}</span>
+
+      <span className={classes.title}>{headContentValue?.title || card.symbol}</span>
       {/* {console.log(pinBoard)} */}
       {pinBoardBuysell && pinBoardBuysell.pinCode === 'BUYSELL' && (
-        <span
-          className={classes.tags}
-          onClick={() => {
-            setShowBoard(!showBoard)
-          }}
-        >
-          看多/看空/觀望
-        </span>
+        <div>
+          <span
+            className={classes.tags}
+            onClick={() => {
+              setShowBoard(!showBoard)
+            }}
+          >
+            看多/看空/觀望
+          </span>
+        </div>
       )}
+      <div className={classes.date}>
+        <span>創建於{formateDate(card.createdAt)} / </span>
+        <span>更新於{formateDate(card.updatedAt)}</span>
+      </div>
       {/* {parsedCard.headContent.value.template}
       {parsedCard.headContent.value.keywords}
       {parsedCard.headContent.value.tags} */}
@@ -815,20 +846,7 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
         Board
       </button> */}
       {showBoard && pinBoardBuysell && (
-        <Popover
-          visible={showBoard}
-          subTitle={
-            <span
-              className={classes.tags}
-              // onClick={() => {
-              //   setShowBoard(!showBoard)
-              // }}
-            >
-              {self?.head}
-            </span>
-          }
-          hideBoard={hideBoard}
-        >
+        <Popover visible={showBoard} subTitle={self?.head} hideBoard={hideBoard}>
           <BoardPage
             boardId={pinBoardBuysell.boardId.toString()}
             pollId={pinBoardBuysell.pollId?.toString()}
@@ -844,22 +862,24 @@ const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void })
       {/* {console.log(pinBoard)} */}
       {/* <h3>Body</h3> */}
       <button
+        data-type="secondary"
         onClick={() => {
           if (edit) onCloseEditor()
           else setEdit(true)
         }}
       >
-        Edit
+        編輯
       </button>
 
       {!edit && editorInitialValue && (
         <button
+          data-type="primary"
           onClick={event => {
             event.preventDefault()
             onSubmit()
           }}
         >
-          Submit
+          送出
         </button>
       )}
 

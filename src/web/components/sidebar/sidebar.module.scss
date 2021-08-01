@@ -6,7 +6,7 @@
   flex-shrink: 0;
   width: 220px;
   height: 100vh;
-  background: white;
+  background: $white;
 
   padding: 0 1.5em 1em;
   border-right: 1px solid #ecedf2;
@@ -18,6 +18,9 @@
     align-items: center;
     // color: #3f4346;
     font-weight: 500;
+    &:hover {
+      border-bottom: 0;
+    }
     span {
       // margin-left: 10px;
       display: inline-block;
@@ -39,7 +42,7 @@
       flex-shrink: 0;
       width: 20px;
       height: 20px;
-      fill: #ecedf2;
+      // fill: #ecedf2;
       // margin-right: 10px;
     }
   }

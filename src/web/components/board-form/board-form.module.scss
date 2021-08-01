@@ -1,10 +1,11 @@
 .formContainer {
-  border-bottom: 1px solid $natual;
+  border-bottom: 1px solid $gray-text;
 }
 .form {
-  display: block;
+  display: flex;
   margin: 1em 0 2em;
-  width: 70%;
+  flex-direction: column;
+  // width: 70%;
   //   font-size: 14px;
   label {
     display: inline-block;
@@ -12,6 +13,7 @@
     font-weight: 700;
   }
   input {
+    background: $white;
     &[type='text'] {
       border: 0;
       border-bottom: 1px solid $primary;
@@ -23,6 +25,11 @@
         border-bottom-width: 2px;
       }
     }
+  }
+  button {
+    margin-top: 0;
+    width: fit-content;
+    align-self: flex-end;
   }
   .radioLabel {
     position: relative;
@@ -50,7 +57,7 @@
           stroke: $primary;
         }
         .checkMark {
-          stroke: white;
+          stroke: $white;
         }
       }
     }
@@ -64,7 +71,7 @@
   display: inline-flex;
 }
 .section:not(:last-child) {
-  margin-bottom: 2em;
+  margin-bottom: 1em;
 }
 .choiceWrapper {
   display: flex;

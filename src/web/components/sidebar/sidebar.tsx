@@ -11,7 +11,7 @@ import MenuIcon from '../../assets/svg/menu.svg'
 import layoutClasses from '../layout/layout.module.scss'
 
 const SideBar = ({ style, showMenuHandler }: { style: React.CSSProperties; showMenuHandler: () => void }) => {
-  const { user, error, isLoading } = useUser()
+  // const { user, error, isLoading } = useUser()
   const { data, loading } = useMeQuery()
 
   return (
@@ -24,9 +24,17 @@ const SideBar = ({ style, showMenuHandler }: { style: React.CSSProperties; showM
       >
         <MenuIcon className={classes.menuIcon} />
       </div>
-      {data && user ? (
+      {data ? (
         <>
-          Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
+          {window.location.protocol.includes('extension') ? (
+            <>
+              Welcome {data.me.id}! <a href="http://localhost:3000/api/auth/logout">Logout</a>
+            </>
+          ) : (
+            <>
+              Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
+            </>
+          )}
         </>
       ) : (
         <a href="/api/auth/login">Login</a>

@@ -1,5 +1,5 @@
 import { title } from 'process'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm, useController, useFormContext, FormProvider, useWatch, Control } from 'react-hook-form'
 import {
   useCreateCommentMutation,
@@ -165,7 +165,7 @@ const BoardForm = ({
     }
     setChecked(Array(pollChoices?.length).fill(false))
     setChoiceValue(null)
-    reset({ title: '', choice: undefined, lines: '' })
+    reset({ title: '', lines: '' })
   }
 
   const handleChoiceValue = (i: string) => {

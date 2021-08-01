@@ -10,7 +10,7 @@
   display: block;
   height: 8px;
   width: 100%;
-  background: $bg;
+  background: $white;
 }
 .bar {
   height: 100%;
@@ -106,6 +106,9 @@
   display: flex;
   justify-content: space-between;
   text-transform: capitalize;
-  color: white;
+  color: $white;
   margin: 0 1em;
+  span {
+    color: $white;
+  }
 }

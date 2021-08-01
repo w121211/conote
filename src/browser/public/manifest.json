@@ -15,12 +15,12 @@
     "default_title": "Hello world?"
     // "default_popup": "popup.html"  // 改用bg來叫，開新視窗
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content-script.js"]
-    }
-  ],
+  // "content_scripts": [
+  //   {
+  //     "matches": ["<all_urls>"],
+  //     "js": ["content-script.js"]
+  //   }
+  // ],
   "icons": {
     "16": "icon-16.png",
     "48": "icon-48.png",
