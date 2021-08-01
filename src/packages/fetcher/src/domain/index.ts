@@ -15,9 +15,10 @@ export class DomainNotFitError extends Error {
 const fetchFns: DomainFetchFunction[] = [youtube, general]
 
 export async function tryFetch(url: string): Promise<FetchResult> {
-  for (const e of fetchFns) {
+  for (const fn of fetchFns) {
     try {
-      return await e(url)
+      // eslint-disable-next-line no-await-in-loop
+      return await fn(url)
     } catch (err) {
       //   console.error(err)
       if (err instanceof DomainNotFitError) continue
