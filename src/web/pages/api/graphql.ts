@@ -6,7 +6,10 @@ import { schema } from '../../apollo/schema'
 
 const apolloServer = new ApolloServer({
   schema,
-  playground: true,
+  // playground: true, // access: http://localhost:3000/api/graphql
+  playground: {
+    settings: { 'request.credentials': 'include' },
+  },
   debug: true,
   context(ctx) {
     return ctx

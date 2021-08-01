@@ -1,6 +1,4 @@
-/* eslint-disable no-await-in-loop */
 import { readdirSync, readFileSync } from 'fs'
-import { inspect } from 'util'
 import { resolve, join } from 'path'
 import { Card, CardBody, CardHead, Link, PrismaClient } from '@prisma/client'
 import { Editor, Markerline, splitByUrl } from '../../../packages/editor/src'
