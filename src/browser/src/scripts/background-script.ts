@@ -70,10 +70,11 @@ browser.browserAction.onClicked.addListener(async tab => {
   const params = new URLSearchParams({ u: tab.url ?? '' })
 
   const window = await browser.windows.create({
-    // type: 'popup',
-    url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
+    type: 'popup',
+    // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
+    url: 'http://localhost:3000/card/card-page' + '?' + params.toString(),
     width: 500,
-    height: 500,
+    height: 900,
     left: 100,
   })
 
