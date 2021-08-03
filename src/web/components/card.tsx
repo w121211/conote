@@ -10,6 +10,7 @@ import { editorValue } from '../apollo/cache'
 import {
   Board,
   BoardQuery,
+  BulletCount,
   Card,
   CardBodyInput,
   CardDocument,
@@ -23,6 +24,7 @@ import {
   CreateSymbolCardMutation,
   CreateSymbolCardMutationVariables,
   useBoardQuery,
+  useBulletQuery,
   useCardQuery,
   useCommentsQuery,
   useCreateCardBodyMutation,
@@ -47,6 +49,7 @@ import {
   PinBoard,
 } from '../lib/models/card'
 import { injectCardHeadValue } from '../lib/models/card-helpers'
+import UpDown from './upDown/upDown'
 
 // type CardHeadAndParsedContent = Omit<CardHead, 'content'> & {
 //   content: CardHeadContent
@@ -425,15 +428,28 @@ const BulletItem = (props: {
   mirror?: boolean
 }) => {
   // const [filtered, setFiltered] = useState()
+
   const { depth, node, handleSymbol, cardId, mirror } = props
   // console.log(node)
   const [showBoard, setShowBoard] = useState(false)
   const [showCreateBoard, setShowCreateBoard] = useState(false)
   const [showChildren, setShowChildren] = useState(depth < depth + 2 ? true : false)
+  // const [choice,setChoice]=useState<BulletCount>()
   // const { node } = props
+
   const headTokens = tokenize(node.head)
   const bodyTokens = node.body ? tokenize(node.body) : undefined
-  // console.log(node.hashtags)
+  const { data: bulletData, loading, error } = useBulletQuery({ variables: { id: `${node.id ?? ''}` } })
+  // console.log(node)
+
+  //   useEffect(()=>{
+  //     if(bulletData?.bullet){
+  // setChoice(bulletData.bullet.count)
+
+  //     }
+
+  //   },[bulletData])
+
   const hideBoard = () => {
     setShowBoard(false)
   }
@@ -441,7 +457,7 @@ const BulletItem = (props: {
     setShowCreateBoard(false)
   }
 
-  const [createHashtag] = useCreateHashtagMutation()
+  // const [createHashtag] = useCreateHashtagMutation()
 
   const nextDepth = depth + 1
   const cutString = (s: string) => {
@@ -558,6 +574,10 @@ const BulletItem = (props: {
                 )}
               </>
             )}
+
+            {/* {bulletData?.bullet.count && node.id && (
+              <UpDown choice={bulletData.bullet.count} bulletId={node.id.toString()} />
+            )} */}
 
             {bodyTokens && (
               <div className={classes.bulletBody}>

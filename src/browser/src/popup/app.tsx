@@ -40,11 +40,11 @@ const onRedirectCallback = (appState: AppState) => {
 }
 
 const Protected = ({ children }: { children: React.ReactNode }): JSX.Element | null => {
-  const { data, refetch } = useMeQuery({ fetchPolicy: 'network-only' })
+  const { data, refetch } = useMeQuery({ fetchPolicy: 'network-only', nextFetchPolicy: 'cache-first' })
 
   const handleLogin = (e: React.MouseEvent) => {
     e.preventDefault()
-    browser.tabs.update({
+    browser.tabs.create({
       url: 'http://localhost:3000/api/auth/login',
     })
     // refetch()
@@ -162,9 +162,9 @@ export const App = (): JSX.Element => {
   // console.log('test')
   return (
     <ApolloProvider client={client}>
-      <Protected>
-        <CardPage />
-      </Protected>
+      {/* <Protected> */}
+      <CardPage />
+      {/* </Protected> */}
     </ApolloProvider>
   )
   // <Auth0Provider

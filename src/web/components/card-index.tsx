@@ -9,14 +9,16 @@ import { useCardQuery, useWebpageCardQuery } from '../apollo/query.graphql'
 
 function getTabUrl(): string | null {
   let url: string | null
-  if (window.location.protocol.includes('extension')) {
-    // popup的情況
-    const params = new URLSearchParams(new URL(window.location.href).search)
-    url = params.get('u')
-  } else {
-    // inject的情況
-    url = window.location.href
-  }
+  // if (window.location.protocol.includes('extension')) {
+  //   // popup的情況
+  //   const params = new URLSearchParams(new URL(window.location.href).search)
+  //   url = params.get('u')
+  // } else {
+  // inject的情況
+  // url = window.location.href
+  const params = new URLSearchParams(new URL(window.location.href).search)
+  url = params.get('u')
+  // }
 
   return url
 }
@@ -70,11 +72,11 @@ const CardIndex = () => {
   return (
     // <UserProvider>
     <Layout path={path} handlePath={handlePath} handleSymbol={handleSymbol}>
-      {window.location.protocol.includes('extension') ? (
+      {/* {window.location.protocol.includes('extension') ? (
         <CardPage pathSymbol={symbol} handlePathPush={handlePathPush} />
-      ) : (
-        <TestPage pathSymbol={symbol} handlePathPush={handlePathPush} />
-      )}
+      ) : ( */}
+      <TestPage pathSymbol={symbol} handlePathPush={handlePathPush} />
+      {/* // )} */}
     </Layout>
     // </UserProvider>
   )

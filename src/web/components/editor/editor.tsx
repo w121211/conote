@@ -23,6 +23,8 @@ import { useInput } from './use-input'
 import { withOp } from './with-op'
 import BulletSvg from '../bullet-svg/bullet-svg'
 import classes from './editor.module.scss'
+import HeaderForm from '../header-form/header-form'
+import Popover from '../popover/popover'
 
 const initialValueDemo: LiElement[] = [
   {
@@ -268,18 +270,14 @@ const CommentModal = (props: { onClose?: (value: { choosed?: string | null; comm
       >
         @作者 Modal
       </button>
-      <Modal
-        contentLabel="Comment modal"
-        isOpen={isOpen}
-        onRequestClose={() => {
+      <Popover
+        visible={isOpen}
+        hideBoard={() => {
           setIsOpen(false)
-          if (onClose) {
-            onClose({ comment })
-          }
         }}
       >
-        {commentInput}
-      </Modal>
+        <HeaderForm initialValue={{ authorChoice: '', authorLines: '' }} />
+      </Popover>
     </div>
   )
 }
@@ -364,7 +362,7 @@ const LcMirror = (props: RenderElementProps & { element: LcElement; oauthorName?
     setPlaceholder(element.placeholder)
   }, [element])
 
-  const style: CSSProperties = element.root ? { fontSize: '20px' } : {}
+  const style: CSSProperties = element.root ? { fontSize: '1em' } : {}
 
   return (
     <div {...attributes}>
@@ -372,21 +370,21 @@ const LcMirror = (props: RenderElementProps & { element: LcElement; oauthorName?
         <span style={style}>{children}</span>
       </li>
 
-      <div contentEditable={false} style={{ color: 'green' }}>
+      {/* <div contentEditable={false} style={{ color: 'green' }}>
         {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>}
         {sourceUrl}
         {element.id}
         {element.error}
         {element.freeze && 'freeze'}
-      </div>
+      </div> */}
 
       {element.symbol && (
         <div contentEditable={false}>
           {loading && <span>loading...</span>}
           {element.createCard && <span>#new</span>}
-          <span>{element.symbol}</span>
+          {/* <span>{element.symbol}</span>
           <span>{element.error}</span>
-          <span>{element.comment?.oauthorComment}</span>
+          <span>{element.comment?.oauthorComment}</span> */}
           <CommentModal
             onClose={({ comment }) => {
               const path = ReactEditor.findPath(editor, element)
@@ -432,8 +430,7 @@ const Lc = (props: RenderElementProps & { element: LcElement; oauthorName?: stri
 
   return (
     <div {...attributes}>
-      <li className={classes.bulletLi}>
-        <BulletSvg />
+      <li>
         <span>{children}</span>
       </li>
 
@@ -472,10 +469,10 @@ const Li = (props: RenderElementProps & { element: LiElement }) => {
   }, [editor, element])
 
   return (
-    <div {...attributes}>
+    <div {...attributes} className={classes.bulletLi}>
       <div contentEditable={false}>
-        {hasUl && (
-          <button
+        {hasUl ? (
+          <span
             onClick={event => {
               event.preventDefault()
               const path = ReactEditor.findPath(editor, element)
@@ -490,11 +487,15 @@ const Li = (props: RenderElementProps & { element: LiElement }) => {
               }
             }}
           >
-            Fold
-          </button>
+            <BulletSvg />
+            {/* Fold */}
+          </span>
+        ) : (
+          <BulletSvg />
         )}
       </div>
-      {children}
+
+      <div>{children}</div>
     </div>
   )
 }
