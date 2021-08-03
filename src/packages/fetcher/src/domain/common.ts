@@ -1,4 +1,4 @@
-import { SrcType } from '../index'
+// import { SrcType } from '../index'
 import { DomainFetchFunction } from './index'
 
 export type ParseUrlResult = {
@@ -15,7 +15,7 @@ export function parseUrl(url: string): ParseUrlResult {
   }
 }
 
-export const general: DomainFetchFunction = async function (url) {
+export const common: DomainFetchFunction = async function (url) {
   /** TODO: 若是在browser，嘗試抓該網站的title,... */
   const { domain } = parseUrl(url)
 

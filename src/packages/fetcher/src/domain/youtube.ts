@@ -1,4 +1,3 @@
-import got from 'got'
 import { google } from 'googleapis'
 import { DomainFetchFunction, DomainNotFitError } from './index'
 

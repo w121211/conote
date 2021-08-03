@@ -1,4 +1,4 @@
-import { general } from './general'
+import { common } from './common'
 import { youtube } from './youtube'
 import { FetchResult } from '../index'
 
@@ -12,7 +12,7 @@ export class DomainNotFitError extends Error {
 }
 
 // 依序嘗試執行，若失敗則嘗試下一個
-const fetchFns: DomainFetchFunction[] = [youtube, general]
+const fetchFns: DomainFetchFunction[] = [youtube, common]
 
 export async function tryFetch(url: string): Promise<FetchResult> {
   for (const fn of fetchFns) {
@@ -20,9 +20,12 @@ export async function tryFetch(url: string): Promise<FetchResult> {
       // eslint-disable-next-line no-await-in-loop
       return await fn(url)
     } catch (err) {
-      //   console.error(err)
-      if (err instanceof DomainNotFitError) continue
-      else break
+      if (err instanceof DomainNotFitError) {
+        continue
+      } else {
+        console.error(err)
+        break
+      }
     }
   }
   throw new Error(`Fetch error: ${url}`)

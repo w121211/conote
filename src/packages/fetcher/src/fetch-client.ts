@@ -3,7 +3,7 @@ import { LocalCache } from './local-cache'
 import { tryFetch } from './domain/index'
 
 export class FetchClient {
-  /** 有cache支援 */
+  // 有cache支援
   private cache: LocalCache | null = null
 
   constructor(localCachePath: string | null = null) {
