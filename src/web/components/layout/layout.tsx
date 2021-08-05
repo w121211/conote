@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react'
+import { useRouter } from 'next/router'
 import SideBar from '../sidebar/sidebar'
 import MyTooltip from '../my-tooltip/my-tooltip'
 import classes from './layout.module.scss'
@@ -33,6 +34,7 @@ export default function Layout({
   handleSymbol?: (e: string) => void
 }) {
   // const [origin, setOrigin] = useState<string[]>(path)
+  const router = useRouter()
   const [myPath, setMyPath] = useState<string[]>([...path])
   const [hiddenPath, setHiddenPath] = useState<string[]>([])
   const [showMenu, setShowMenu] = useState(false)
@@ -47,9 +49,6 @@ export default function Layout({
     setShowMenu(false)
   }
 
-  const isEllipsisActive = (current: any) => {
-    return current.offsetWidth < current.scrollWidth
-  }
   useEffect(() => {
     if (window) {
       setViewPortWidth(window.innerWidth)
@@ -130,6 +129,12 @@ export default function Layout({
     }
   }, [viewPortWidth, path])
 
+  // useEffect(() => {
+  //   if (window) {
+  //     console.log(window && window.history)
+  //   }
+  // })
+
   return (
     <div className={classes.layout}>
       <div className={classes.children}>{children}</div>
@@ -147,7 +152,11 @@ export default function Layout({
           {myPath.length !== 0 &&
             myPath.map((e, i) => (
               <li key={i}>
-                {i !== 0 && <RightArrow className={classes.rightArrow} />}
+                {i !== 0 && (
+                  <div className={classes.rightArrow}>
+                    <RightArrow />
+                  </div>
+                )}
 
                 {
                   <span
@@ -158,8 +167,10 @@ export default function Layout({
                       if (e === '...') {
                         setShowTooltip(prev => !prev)
                       } else {
+                        window.history.go(-(myPath.length - i - 1))
+                        // router.push(`/card/${encodeURIComponent(e)}`)
                         handlePath && handlePath(i)
-                        handleSymbol && handleSymbol(e)
+                        // handleSymbol && handleSymbol(e)
                       }
                     }}
                     style={{ maxWidth: '80px', overflow: `${e === '...' ? 'visible' : 'hidden'}` }}

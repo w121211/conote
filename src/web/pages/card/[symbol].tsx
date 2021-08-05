@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 // import { QueryDataProvider } from '../../../web/components/data-provider'
 // import { CardHead, CardBody } from '../../../web/components/card'
 // import { CardForm } from '../../../web/components/card-form'
 
-import { useCardQuery, CardQuery, useWebpageCardQuery, WebpageCardQuery } from '../../../web/apollo/query.graphql'
+import { useCardQuery, CardQuery, useWebpageCardQuery, WebpageCardQuery } from '../../apollo/query.graphql'
 import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../../packages/editor/src/index'
-import CardIndex from '../../../web/components/card-index'
+import CardIndex from '../../components/card-index'
 
 // function getTabUrl(): string | null {
 //   let url: string | null
@@ -23,18 +24,41 @@ import CardIndex from '../../../web/components/card-index'
 // }
 
 export function CardPage(): JSX.Element {
+  const router = useRouter()
+  const { symbol } = router.query
+
+  // const decodeUri = decodeURIComponent(symbol??'')
   const [edit, setEdit] = useState<boolean>(false)
-  const [symbol, setSymbol] = useState('')
-  const [urlState, setUrlState] = useState('')
-  const [path, setPath] = useState<string[]>([])
-  // useEffect(() => {
-  //   const url = getTabUrl()
-  //   if (url) {
-  //     setUrlState(url)
-  //     // setQueryVar(url)
-  //     setPath([url])
-  //   }
-  // }, [])
+  const [mySymbol, setMySymbol] = useState('')
+  const [myUrl, setMyUrl] = useState('')
+  // const [urlState, setUrlState] = useState('')
+  const [path, setPath] = useState<string>('')
+
+  useEffect(() => {
+    if (symbol && typeof symbol === 'string') {
+      if (symbol.includes('[[') || symbol.includes('$')) {
+        setMySymbol(symbol)
+
+        // console.log('setSymbol')
+      } else {
+        setMyUrl(symbol)
+        // console.log('setUrl')
+      }
+    }
+  }, [symbol])
+
+  const { data: webPageData } = useWebpageCardQuery({
+    variables: { url: myUrl },
+    onCompleted(data) {
+      if (data.webpageCard) {
+        setPath(data.webpageCard.symbol)
+        // setPath([data.webpageCard.symbol])
+        setMySymbol(data.webpageCard.symbol)
+        // console.log('setSymbol query')
+        // console.log(webPageData.webpageCard)
+      }
+    },
+  })
   // useEffect(() => {
   //   if (path[path.length - 1].includes('[[') && path[path.length - 1].includes(']]')) {
   //     setSymbol(path[path.length - 1])
@@ -70,7 +94,7 @@ export function CardPage(): JSX.Element {
           編輯
         </button> */}
 
-      <CardIndex />
+      <CardIndex mySymbol={mySymbol} />
 
       {/* <CardHead card={data.cocard} sect={sect} height={0} />
         {edit ? (

@@ -24,7 +24,7 @@ export type FormInputs = {
   lines: string
 }
 
-const RadioInput = ({
+export const RadioInput = ({
   value,
   content,
   // filterComments,
@@ -34,8 +34,8 @@ const RadioInput = ({
   value: string
   content: string
   // filterComments: (i: number) => void
-  choiceValue: (i: string) => void
-  checked: boolean
+  choiceValue?: (i: string) => void
+  checked?: boolean
 }) => {
   // const {field}=useController({value,content})
   const methods = useFormContext()
@@ -52,7 +52,7 @@ const RadioInput = ({
         onClick={e => {
           // handleChange(e.target)
           // setChecked(prev => !prev)
-          choiceValue(value)
+          choiceValue && choiceValue(value)
         }}
       />
       <svg width="32" height="32" viewBox="-4 -4 39 39" aria-hidden="true" focusable="false">

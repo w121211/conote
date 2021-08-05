@@ -256,8 +256,13 @@ const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   )
 }
 
-const CommentModal = (props: { onClose?: (value: { choosed?: string | null; comment: string }) => void }) => {
-  const { onClose } = props
+const CommentModal = (props: {
+  onClose?: (value: { choosed?: string | null; comment: string }) => void
+  pollId: string
+  boardId: string
+  oauthorName: string
+}) => {
+  const { onClose, pollId, boardId, oauthorName } = props
   const [comment, commentInput] = useInput({ type: 'text' })
   const [isOpen, setIsOpen] = useState(false)
 
@@ -276,7 +281,12 @@ const CommentModal = (props: { onClose?: (value: { choosed?: string | null; comm
           setIsOpen(false)
         }}
       >
-        <HeaderForm initialValue={{ authorChoice: '', authorLines: '' }} />
+        <HeaderForm
+          initialValue={{ authorChoice: '', authorLines: '' }}
+          pollId={pollId}
+          boardId={boardId}
+          oauthorName={oauthorName}
+        />
       </Popover>
     </div>
   )
@@ -303,8 +313,16 @@ const useAuthorSwitcher = (props: { oauthorName?: string }): [string, JSX.Elemen
   return [author, switcher]
 }
 
-const LcMirror = (props: RenderElementProps & { element: LcElement; oauthorName?: string; sourceUrl?: string }) => {
-  const { attributes, children, element, oauthorName, sourceUrl } = props
+const LcMirror = (
+  props: RenderElementProps & {
+    element: LcElement
+    oauthorName?: string
+    sourceUrl?: string
+    pollId: string
+    boardId: string
+  },
+) => {
+  const { attributes, children, element, oauthorName, sourceUrl, pollId, boardId } = props
 
   const client = useApolloClient()
   const editor = useSlateStatic()
@@ -377,8 +395,8 @@ const LcMirror = (props: RenderElementProps & { element: LcElement; oauthorName?
         {element.error}
         {element.freeze && 'freeze'}
       </div> */}
-
-      {element.symbol && (
+      {console.log(element)}
+      {oauthorName && element.symbol && (
         <div contentEditable={false}>
           {loading && <span>loading...</span>}
           {element.createCard && <span>#new</span>}
@@ -386,6 +404,9 @@ const LcMirror = (props: RenderElementProps & { element: LcElement; oauthorName?
           <span>{element.error}</span>
           <span>{element.comment?.oauthorComment}</span> */}
           <CommentModal
+            oauthorName={oauthorName}
+            pollId={pollId}
+            boardId={boardId}
             onClose={({ comment }) => {
               const path = ReactEditor.findPath(editor, element)
               Transforms.setNodes<LiElement>(
@@ -514,12 +535,18 @@ const Ul = (props: RenderElementProps & { element: UlElement }) => {
 }
 
 const CustomElement = (
-  props: RenderElementProps & { oauthorName?: string; sourceUrl?: string; withMirror: boolean },
+  props: RenderElementProps & {
+    oauthorName?: string
+    sourceUrl?: string
+    withMirror: boolean
+    pollId: string
+    boardId: string
+  },
 ) => {
-  const { attributes, children, element, oauthorName, sourceUrl, withMirror } = props
+  const { attributes, children, element, oauthorName, sourceUrl, withMirror, pollId, boardId } = props
   if (isLc(element)) {
     if (element.root && withMirror) {
-      return <LcMirror {...{ attributes, children, element, oauthorName, sourceUrl }} />
+      return <LcMirror {...{ attributes, children, element, oauthorName, sourceUrl, pollId, boardId }} />
     }
     return <Lc {...{ attributes, children, element, oauthorName, sourceUrl }} />
   }
@@ -577,8 +604,17 @@ export const BulletEditor = (props: {
   oauthorName?: string
   sourceUrl?: string
   withMirror?: boolean
+  pollId: string
+  boardId: string
 }): JSX.Element => {
-  const { initialValue = initialValueDemo, oauthorName, sourceUrl, withMirror: withMirrorFlag = false } = props
+  const {
+    initialValue = initialValueDemo,
+    oauthorName,
+    sourceUrl,
+    withMirror: withMirrorFlag = false,
+    pollId,
+    boardId,
+  } = props
 
   const [value, setValue] = useState<LiElement[]>(initialValue)
   // const editor = useMemo(
@@ -593,7 +629,7 @@ export const BulletEditor = (props: {
     : useMemo(() => withOp(withList(withHistory(withReact(createEditor())))), [])
   const renderElement = useCallback(
     (props: RenderElementProps) => (
-      <CustomElement {...{ ...props, oauthorName, sourceUrl, withMirror: withMirrorFlag }} />
+      <CustomElement {...{ ...props, oauthorName, sourceUrl, withMirror: withMirrorFlag, pollId, boardId }} />
     ),
     [],
   )
