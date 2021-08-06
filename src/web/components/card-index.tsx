@@ -10,7 +10,7 @@ import { useCardQuery, useWebpageCardQuery } from '../apollo/query.graphql'
 // import { useRouter } from 'next/router'
 
 function getTabUrl(): string | null {
-  let url: string | null
+  // let url: string | null
   // if (window.location.protocol.includes('extension')) {
   //   // popup的情況
   //   const params = new URLSearchParams(new URL(window.location.href).search)
@@ -19,7 +19,7 @@ function getTabUrl(): string | null {
   // inject的情況
   // url = window.location.href
   const params = new URLSearchParams(new URL(window.location.href).search)
-  url = params.get('u')
+  const url = params.get('u')
   // }
 
   return url

@@ -2,8 +2,7 @@ import { PrismaClient } from '@prisma/client'
 
 // PrismaClient is attached to the `global` object in development to prevent
 // exhausting your database connection limit.
-//
-// Learn more:
+// @see
 // https://pris.ly/d/help/next-js-best-practices
 // https://github.com/nextauthjs/next-auth/issues/824
 
@@ -17,9 +16,9 @@ function getPrismaClient(): PrismaClient {
   if (process.env.NODE_ENV === `production`) {
     return new PrismaClient()
   } else {
-    console.log('Creating global prisma client')
     const newGlobalThis = globalThis as GlobalThisWithPrismaClient
     if (!newGlobalThis[prismaClientPropertyName]) {
+      console.log('Creating global prisma client')
       newGlobalThis[prismaClientPropertyName] = new PrismaClient()
     }
     return newGlobalThis[prismaClientPropertyName]

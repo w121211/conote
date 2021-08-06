@@ -281,12 +281,12 @@ const CommentModal = (props: {
           setIsOpen(false)
         }}
       >
-        <HeaderForm
+        {/* <HeaderForm
           initialValue={{ authorChoice: '', authorLines: '' }}
           pollId={pollId}
           boardId={boardId}
           oauthorName={oauthorName}
-        />
+        /> */}
       </Popover>
     </div>
   )
@@ -318,11 +318,11 @@ const LcMirror = (
     element: LcElement
     oauthorName?: string
     sourceUrl?: string
-    pollId: string
-    boardId: string
+    // pollId: string
+    // boardId: string
   },
 ) => {
-  const { attributes, children, element, oauthorName, sourceUrl, pollId, boardId } = props
+  const { attributes, children, element, oauthorName, sourceUrl } = props
 
   const client = useApolloClient()
   const editor = useSlateStatic()
@@ -362,7 +362,7 @@ const LcMirror = (
         }
 
         if (root) {
-          const newLi = Serializer.toRootLi(root, { mirror: true, newSymbol })
+          const newLi = Serializer.toRootLi(root, { newSymbol })
           // 移除原本的li，插入新的
           Editor.withoutNormalizing(editor, () => {
             Transforms.removeNodes(editor, { at: liEntry[1] })
@@ -396,6 +396,7 @@ const LcMirror = (
         {element.freeze && 'freeze'}
       </div> */}
       {console.log(element)}
+
       {oauthorName && element.symbol && (
         <div contentEditable={false}>
           {loading && <span>loading...</span>}
@@ -403,7 +404,8 @@ const LcMirror = (
           {/* <span>{element.symbol}</span>
           <span>{element.error}</span>
           <span>{element.comment?.oauthorComment}</span> */}
-          <CommentModal
+
+          {/* <CommentModal
             oauthorName={oauthorName}
             pollId={pollId}
             boardId={boardId}
@@ -421,7 +423,7 @@ const LcMirror = (
                 { at: path },
               )
             }}
-          />
+          /> */}
         </div>
       )}
     </div>
@@ -539,14 +541,14 @@ const CustomElement = (
     oauthorName?: string
     sourceUrl?: string
     withMirror: boolean
-    pollId: string
-    boardId: string
+    // pollId: string
+    // boardId: string
   },
 ) => {
-  const { attributes, children, element, oauthorName, sourceUrl, withMirror, pollId, boardId } = props
+  const { attributes, children, element, oauthorName, sourceUrl, withMirror } = props
   if (isLc(element)) {
     if (element.root && withMirror) {
-      return <LcMirror {...{ attributes, children, element, oauthorName, sourceUrl, pollId, boardId }} />
+      return <LcMirror {...{ attributes, children, element, oauthorName, sourceUrl }} />
     }
     return <Lc {...{ attributes, children, element, oauthorName, sourceUrl }} />
   }
@@ -604,16 +606,16 @@ export const BulletEditor = (props: {
   oauthorName?: string
   sourceUrl?: string
   withMirror?: boolean
-  pollId: string
-  boardId: string
+  // pollId: string
+  // boardId: string
 }): JSX.Element => {
   const {
     initialValue = initialValueDemo,
     oauthorName,
     sourceUrl,
-    withMirror: withMirrorFlag = false,
-    pollId,
-    boardId,
+    withMirror: isWithMirror = false,
+    // pollId,
+    // boardId,
   } = props
 
   const [value, setValue] = useState<LiElement[]>(initialValue)
@@ -624,12 +626,12 @@ export const BulletEditor = (props: {
   //   () => withMirror(withOp(withList(withHistory(withReact(createEditor()))))),
   //   [],
   // )
-  const editor = withMirrorFlag
+  const editor = isWithMirror
     ? useMemo(() => withMirror(withOp(withList(withHistory(withReact(createEditor()))))), [])
     : useMemo(() => withOp(withList(withHistory(withReact(createEditor())))), [])
   const renderElement = useCallback(
     (props: RenderElementProps) => (
-      <CustomElement {...{ ...props, oauthorName, sourceUrl, withMirror: withMirrorFlag, pollId, boardId }} />
+      <CustomElement {...{ ...props, oauthorName, sourceUrl, withMirror: isWithMirror }} />
     ),
     [],
   )

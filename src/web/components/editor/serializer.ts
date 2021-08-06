@@ -51,7 +51,7 @@ export class Serializer {
     }
   }
 
-  static toRootLi(root: RootBullet, options?: { mirror?: true; newSymbol?: true }): LiElement {
+  static toRootLi(root: RootBullet, options?: { newSymbol?: true }): LiElement {
     const li = Serializer._toLi(BulletNode.toDraft(root))
     const [lc, ...rest] = li.children
     return {
@@ -62,7 +62,7 @@ export class Serializer {
           root: true,
           symbol: root.symbol,
           rootBullet: root,
-          mirror: options?.mirror,
+          mirror: root.mirror,
           newSymbol: options?.newSymbol,
         },
         ...rest,

@@ -17,7 +17,7 @@ class PrismaTestEnvironment extends NodeEnvironment {
   constructor(config) {
     super(config)
     this.schema = `test_${nanoid()}`
-    this.databaseUrl = `${process.env.TEST_DATABASE_URL}${this.schema}`
+    this.databaseUrl = `${process.env.DATABASE_TESTER_URL}${this.schema}`
   }
 
   async setup() {

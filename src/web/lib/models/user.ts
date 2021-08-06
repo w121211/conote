@@ -1,6 +1,3 @@
-// import * as request from 'request'
-// import { resolve } from 'path'
-// import dotenv from 'dotenv'
 import { User } from '@prisma/client'
 import prisma from '../prisma'
 
@@ -32,9 +29,7 @@ export async function getBotId(): Promise<string> {
 
 export async function getOrCreateUser(email: string): Promise<User> {
   const user = await prisma.user.upsert({
-    create: {
-      email,
-    },
+    create: { email },
     update: {},
     where: { email },
   })

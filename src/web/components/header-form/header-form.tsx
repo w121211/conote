@@ -25,7 +25,7 @@ const HeaderForm = ({
   boardId: string
   oauthorName: string
   pollId: string
-}) => {
+}): JSX.Element => {
   const [authorName, setAuthorName] = useState('')
   const methods = useForm<FormInputs>()
   const { register, handleSubmit, setValue, watch } = methods

@@ -737,7 +737,7 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
           ? [Serializer.toRootLi(self), ...(mirrors ?? []).map(e => Serializer.toRootLi(e))]
           : [Serializer.toRootLi(self)]
 
-      // console.log(lis)
+      console.log(lis)
 
       setEditorInitialValue(lis)
       setEdit(false) // 需要重設來trigger editor rerender
@@ -895,8 +895,8 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
               oauthorName={card.link?.oauthorName ?? undefined}
               sourceUrl={card.link?.url}
               withMirror={card.type === 'WEBPAGE'}
-              boardId={pinBoardBuysell.boardId.toString()}
-              pollId={pinBoardBuysell.pollId?.toString()}
+              // boardId={pinBoardBuysell.boardId.toString()}
+              // pollId={pinBoardBuysell.pollId?.toString()}
             />
           ) : (
             <CardBodyItem card={card} self={self} mirrors={mirrors} handleSymbol={handleSymbol} />
