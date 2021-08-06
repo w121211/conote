@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@apollo/client'
 // import { UserProvider } from '@auth0/nextjs-auth0'
 
 import TestPage from './card'
 import CardPage from './extension-page'
 import Layout from './layout/layout'
 import { useCardQuery, useWebpageCardQuery } from '../apollo/query.graphql'
+// import { GET_PATH_HISTORY } from '../../browser/src/popup/cache'
 // import { useRouter } from 'next/router'
 
 function getTabUrl(): string | null {
@@ -23,59 +25,119 @@ function getTabUrl(): string | null {
   return url
 }
 
-const CardIndex = () => {
-  const [path, setPath] = useState<string[]>([])
-  const [symbol, setSymbol] = useState('')
-  const [url, setUrl] = useState('')
-  useEffect(() => {
-    const tabUrl = getTabUrl()
+const CardIndex = ({ mySymbol, rootPath }: { webPageUrl?: string; mySymbol: string; rootPath?: string }) => {
+  const pathRef = useRef<string[]>([])
+  // const [path, setPath] = useState<string[]>([])
+  // const [symbol, setSymbol] = useState('')
+  // const [url, setUrl] = useState<string>('')
+  const [prevPath, setPrevPath] = useState<string>('')
 
-    if (tabUrl) {
-      setUrl(tabUrl)
-      setPath([`[[${tabUrl}]]`])
+  const handlePath = (i: number) => {
+    // setPath(prev => {
+    //   // window.history.pushState([...prev].slice(0, i + 1), '')
+    //   return [...prev].slice(0, i + 1)
+    // })
+    pathRef.current = [...pathRef.current].slice(0, i + 1)
+  }
+  // const handleSymbol = (e: string) => {
+  //   // setSymbol(e)
+  // }
+  const handlePathPush = (e: string) => {
+    // setPath(prev => {
+    //   // window.history.pushState([...prev, e], '')
+    //   // console.log(window.history)
+    //   return [...prev, e]
+    // })
+    pathRef.current = [...pathRef.current, e]
+  }
+
+  const handlePopState = (e: PopStateEvent) => {
+    if (e.state.idx < pathRef.current.length) {
+      //back
+      // const newArr = [...path]
+      // newArr.pop()
+
+      // setPath(newArr)
+      handlePath(e.state.idx)
+      console.log(e.state.idx, pathRef.current)
+    }
+    if (e.state.idx === pathRef.current.length) {
+      // setPath([...path, decodeURIComponent(e.state.as.replace('/card/', ''))])
+      pathRef.current = [...pathRef.current, decodeURIComponent(e.state.as.replace('/card/', ''))]
+      console.log('forward')
     }
 
-    // console.log(tabUrl)
+    // console.log(e.state.idx, pathRef.current.length, e.state.idx === pathRef.current.length - 1)
+  }
+
+  useEffect(() => {
+    if (mySymbol) {
+      pathRef.current = [mySymbol]
+    }
+    if (window) {
+      window.addEventListener(
+        'popstate',
+        e => handlePopState(e),
+
+        true,
+      )
+    }
+    return window.removeEventListener(
+      'popstate',
+      e => handlePopState(e),
+
+      true,
+    )
   }, [])
-  const {
-    data: webPageData,
-    loading: webPageLoading,
-    error: webPageError,
-    refetch: webPageRefetch,
-  } = useWebpageCardQuery({ variables: { url: url } })
-  // console.log(webPageData?.webpageCard)
 
-  useEffect(() => {
-    if (webPageData?.webpageCard) {
-      setPath([webPageData.webpageCard.symbol])
-      setSymbol(webPageData.webpageCard.symbol)
-      // console.log(webPageData.webpageCard)
-    }
-    if (!webPageData?.webpageCard) {
-      webPageRefetch()
-    }
-  }, [webPageData])
+  if (prevPath !== mySymbol && prevPath === '') {
+    pathRef.current = [mySymbol]
+    setPrevPath(mySymbol)
+  }
+
+  // useEffect(() => {
+  //   if (rootPath) {
+  //     // window.history.pushState([rootPath], '')
+  //     // setPath([rootPath])
+  //     pathRef.current.push(rootPath)
+  //   }
+  // }, [rootPath])
+  // useEffect(() => {
+  //   if (rootPath) {
+  //     // window.history.pushState([rootPath], '')
+  //     setPath([rootPath])
+  //   }
+  // }, [rootPath])
+  // useEffect(() => {
+  //   if (window) {
+  //     // window.history.pushState(path, '')
+  //     console.log(window.history)
+  //   }
+  // }, [path])
+
+  // useEffect(() => {
+  //   if (mySymbol) {
+  //     // setPath([...path, mySymbol])
+  //     // setSymbol(webPageData.webpageCard.symbol)
+  //     // console.log(webPageData.webpageCard)
+  //   }
+
+  // }, [mySymbol])
+
   // const { data, loading, error } = useCardQuery({ variables: { symbol} })
   //   const router = useRouter()
   //   if (typeof window !== 'undefined') console.log(window.history)
   //   console.log(router.asPath)
-  const handlePath = (i: number) => {
-    setPath(prev => [...prev].slice(0, i + 1))
-  }
-  const handleSymbol = (e: string) => {
-    setSymbol(e)
-  }
-  const handlePathPush = (e: string) => {
-    setPath(prev => [...prev, e])
-  }
 
+  // console.log(path)
+  // console.log(window.history)
   return (
     // <UserProvider>
-    <Layout path={path} handlePath={handlePath} handleSymbol={handleSymbol}>
+    <Layout path={pathRef.current} handlePath={handlePath}>
       {/* {window.location.protocol.includes('extension') ? (
         <CardPage pathSymbol={symbol} handlePathPush={handlePathPush} />
       ) : ( */}
-      <TestPage pathSymbol={symbol} handlePathPush={handlePathPush} />
+      <TestPage pathSymbol={mySymbol} handlePathPush={handlePathPush} />
       {/* // )} */}
     </Layout>
     // </UserProvider>

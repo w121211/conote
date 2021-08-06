@@ -1,5 +1,6 @@
 import { browser, Tabs } from 'webextension-polyfill-ts'
 import { ApolloClient, InMemoryCache } from '@apollo/client'
+// import { cache } from '../popup/cache'
 import { CardDocument, LinkQuery, LinkQueryVariables } from '../../../web/apollo/query.graphql'
 
 const cache = new InMemoryCache()
@@ -68,11 +69,12 @@ browser.browserAction.onClicked.addListener(async tab => {
   }, console.error)
 
   const params = new URLSearchParams({ u: tab.url ?? '' })
+  const encodeUri = encodeURIComponent(tab.url ?? '')
 
   const window = await browser.windows.create({
-    type: 'popup',
+    // type: 'popup',
     // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
-    url: 'http://localhost:3000/card/card-page' + '?' + params.toString(),
+    url: 'http://localhost:3000/card/' + encodeUri,
     width: 500,
     height: 900,
     left: 100,

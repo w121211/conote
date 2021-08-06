@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import React, { FormEvent, useCallback, useEffect, useMemo, useState, createContext } from 'react'
 import Link from 'next/link'
+import router from 'next/router'
 import { ApolloClient, ApolloError, useApolloClient } from '@apollo/client'
 import { useUser } from '@auth0/nextjs-auth0'
 import { Token } from 'prismjs'
@@ -642,15 +643,7 @@ const CardBodyItem = (props: {
         {self.children &&
           self.children.map((e, i) => (
             <ul key={i}>
-              <BulletItem
-                node={e}
-                handleSymbol={_ => {
-                  _
-                }}
-                depth={1}
-                type={card.type}
-                cardId={card.id}
-              />
+              <BulletItem node={e} handleSymbol={handleSymbol} depth={1} type={card.type} cardId={card.id} />
             </ul>
           ))}
         {mirrors &&
@@ -661,9 +654,7 @@ const CardBodyItem = (props: {
               {/* return ( */}
               <BulletItem
                 node={e}
-                handleSymbol={_ => {
-                  _
-                }}
+                handleSymbol={handleSymbol}
                 depth={0}
                 type={card.type}
                 cardId={card.id}
@@ -681,16 +672,7 @@ const CardBodyItem = (props: {
     <div>
       <ul>
         {self.children?.map((e, i) => (
-          <BulletItem
-            key={i}
-            node={e}
-            handleSymbol={_ => {
-              _
-            }}
-            depth={1}
-            type={card.type}
-            cardId={card.id}
-          />
+          <BulletItem key={i} node={e} handleSymbol={handleSymbol} depth={1} type={card.type} cardId={card.id} />
         ))}
       </ul>
     </div>
@@ -741,7 +723,7 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
     async function _parseAndBuildCard() {
       const parsed = parseCard(card)
       setHeadContentValue(parsed.headContent.value)
-      console.log(parsed)
+      // console.log(parsed)
       // TODO: 改為更general的方式，而不是只針對BUYSELL
       const _pinBoardBuysell = parsed.headValue.pinBoards.find(e => e.pinCode === 'BUYSELL')
       setPinBoardBuysell(_pinBoardBuysell)
@@ -755,7 +737,7 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
           ? [Serializer.toRootLi(self), ...(mirrors ?? []).map(e => Serializer.toRootLi(e))]
           : [Serializer.toRootLi(self)]
 
-      console.log(lis)
+      // console.log(lis)
 
       setEditorInitialValue(lis)
       setEdit(false) // 需要重設來trigger editor rerender
@@ -913,6 +895,8 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
               oauthorName={card.link?.oauthorName ?? undefined}
               sourceUrl={card.link?.url}
               withMirror={card.type === 'WEBPAGE'}
+              boardId={pinBoardBuysell.boardId.toString()}
+              pollId={pinBoardBuysell.pollId?.toString()}
             />
           ) : (
             <CardBodyItem card={card} self={self} mirrors={mirrors} handleSymbol={handleSymbol} />
@@ -970,11 +954,12 @@ const TestPage = ({
   pathSymbol,
   handlePathPush,
 }: {
-  pathSymbol: string
+  pathSymbol?: string
   handlePathPush: (e: string) => void
 }): JSX.Element => {
   const { user, error: userError, isLoading } = useUser()
   const { data: meData, loading: meLoading } = useMeQuery()
+
   const [symbol, setSymbol] = useState<string>('$GOOG')
   // const [path, setPath] = useState<string[]>(['$GOOG'])
   // const [showBoardPage, setShowBoardPage] = useState(false)
@@ -984,28 +969,31 @@ const TestPage = ({
   //   tabUrl&&setUrl(tabUrl)
   // },[])
   const { data, error, loading } = useCardQuery({
-    variables: { symbol: pathSymbol },
+    variables: { symbol: pathSymbol ?? '' },
   })
 
   const handleSymbol = (symbol: string) => {
     handlePathPush(symbol)
-    setSymbol(symbol)
+    router.push(`/card/${encodeURIComponent(symbol)}`)
+    // setSymbol(symbol)
+    // console.log(symbol)
   }
   return (
     // <div>
-    <SymbolContext.Provider value={{ symbol: pathSymbol }}>
+    <SymbolContext.Provider value={{ symbol: pathSymbol ?? '' }}>
       <div>{(user === undefined || meData === undefined) && <a href="/api/auth/login">Login</a>}</div>
-      <button
+      {/* <button
         onClick={() => {
           setSymbol('')
-          handlePathPush('')
+          // handlePathPush('')
         }}
       >
         Clear
-      </button>
+      </button> */}
       <button
         onClick={() => {
-          setSymbol('$AAPL')
+          router.push('/card/$AAPL')
+          // setSymbol('$AAPL')
           handlePathPush('$AAPL')
           // setPath([...path, '$AAPL'])
         }}
@@ -1014,7 +1002,8 @@ const TestPage = ({
       </button>
       <button
         onClick={() => {
-          setSymbol('$BA')
+          router.push('/card/$BA')
+          // setSymbol('$BA')
           handlePathPush('$BA')
           // setPath([...path, '$BA'])
         }}
@@ -1023,7 +1012,8 @@ const TestPage = ({
       </button>
       <button
         onClick={() => {
-          setSymbol('$ROCK')
+          router.push('/card/$ROCK')
+          // setSymbol('$ROCK')
           handlePathPush('$ROCK')
           // setPath([...path, '$ROCK'])
         }}
@@ -1032,14 +1022,15 @@ const TestPage = ({
       </button>
       <button
         onClick={() => {
-          setSymbol('[[https://www.youtube.com/watch?v=F57gz9O0ABw]]')
+          router.push(`/card/${encodeURIComponent('[[https://www.youtube.com/watch?v=F57gz9O0ABw]]')}`)
+          // setSymbol('[[https://www.youtube.com/watch?v=F57gz9O0ABw]]')
           handlePathPush('[[https://www.youtube.com/watch?v=F57gz9O0ABw]]')
           // setPath([...path, '[[https://www.youtube.com/watch?v=F57gz9O0ABw]]'])
         }}
       >
         [[https://www.youtube.com/watch?v=F57gz9O0ABw]]
       </button>
-      {console.log(data?.card)}
+      {/* {console.log(data?.card)} */}
       {data && data.card && <CardItem card={data.card} handleSymbol={handleSymbol} />}
       {/* <BoardPage boardId={}/> */}
     </SymbolContext.Provider>

@@ -84,15 +84,16 @@
     display: flex;
     height: 100%;
   }
+}
+.rightArrow {
+  display: flex;
+  width: 1em;
+  margin: 0 6px;
+  flex-shrink: 0;
   svg {
-    flex-shrink: 0;
     stroke: $black;
     stroke-width: 7px;
   }
-}
-.rightArrow {
-  width: 16px;
-  padding: 0 6px;
   @media screen and(max-width:500px) {
     width: 13px;
   }
