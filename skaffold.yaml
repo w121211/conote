@@ -1,4 +1,5 @@
 # @see
+# - https://github.com/GoogleCloudPlatform/microservices-demo
 # - https://github.com/GoogleCloudPladtform/solutions-modern-cicd-anthos/blob/master/starter-repos/online-boutique/skaffold.yaml
 # - helm: https://github.com/GoogleContainerTools/skaffold/tree/main/examples/helm-remote-repo
 
@@ -6,24 +7,24 @@ apiVersion: skaffold/v2beta16
 kind: Config
 build:
   artifacts:
-    - image: conote-webapp
+    - image: conote-web
       context: .
-      # docker:
-      #   dockerfile: Dockerfile
-      #   target: builder
+      docker:
+        dockerfile: Dockerfile
+        target: builder
 deploy:
-  helm:
-    releases:
-      - name: postgres-release
-        repo: https://charts.bitnami.com/bitnami
-        remoteChart: postgresql
-        # setValues:
-        #   postgresqlUsername: 'postgresuser'
-        #   postgresqlPassword: 'postgrespassword'
+  # helm:
+  #   releases:
+  #     - name: postgres-release
+  #       repo: https://charts.bitnami.com/bitnami
+  #       remoteChart: postgresql
+  #       setValues:
+  #         postgresqlUsername: 'postgresuser'
+  #         postgresqlPassword: 'postgrespassword'
   kustomize:
     paths:
       - k8s/dev
-      # - overlays/dev
+    buildArgs: ['--load-restrictor LoadRestrictionsNone']
 # profiles:
 #   - name: dev
 #     deploy:
