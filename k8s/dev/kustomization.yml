@@ -5,7 +5,7 @@ kind: Kustomization
 namePrefix: conote-
 resources:
   - web.yml
-  - ingress.yml
+  # - ingress.yml
 # patchesStrategicMerge:
 #   - env.yml
 secretGenerator:

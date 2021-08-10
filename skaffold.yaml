@@ -9,9 +9,9 @@ build:
   artifacts:
     - image: conote-web
       context: .
-      docker:
-        dockerfile: Dockerfile
-        target: builder
+      # docker:
+      #   dockerfile: Dockerfile
+      #   target: builder
 deploy:
   # helm:
   #   releases:

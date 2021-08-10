@@ -113,13 +113,15 @@ kind: Service
 metadata:
   name: web
 spec:
-  type: ClusterIP
-  # type: LoadBalancer
+  # type: ClusterIP
+  # type: NodePort
+  type: LoadBalancer
   selector:
     app: web
   ports:
-    - port: 3000
+    - port: 31251
       targetPort: 3000
+      # nodePort: 31251 # GKE needs to open firewall @see https://stackoverflow.com/questions/68452384/how-can-i-visit-nodeport-service-in-gke
   # ports:
   #   - name: http
   #     port: 80
