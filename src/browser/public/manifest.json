@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Chrome Extension Starter",
-  "description": "A Chrome Extension starter kit",
+  "name": "Conote extension",
+  "description": "A conote extension (under development)",
   "version": "0.1.0",
   "background": {
     "scripts": ["background-script.js"],
@@ -12,7 +12,7 @@
       "16": "icon-16.png",
       "48": "icon-48.png"
     },
-    "default_title": "Hello world?"
+    "default_title": "Conote"
     // "default_popup": "popup.html"  // 改用bg來叫，開新視窗
   },
   // "content_scripts": [

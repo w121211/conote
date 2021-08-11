@@ -27,8 +27,9 @@ async function getLink(url: string): Promise<LinkQuery> {
   return data
 }
 
-// 網頁變動、開新tab時，依照該頁面的url調整icon的badge
-
+/**
+ * 網頁變動、開新tab時，依照該頁面的url調整icon的badge
+ */
 async function onTabActivated(tab: Tabs.Tab): Promise<void> {
   if (tab.url) {
     const link = await getLink(tab.url)
@@ -60,21 +61,23 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   }
 })
 
-// --- 點擊icon後，開啟一個新視窗，並載入對應的卡片
-
+/**
+ * 點擊extension icon，開啟一個新視窗，並載入對應的卡片URL
+ */
 browser.browserAction.onClicked.addListener(async tab => {
   browser.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
     const tab = tabs[0] // Safe to assume there will only be one result
     console.log(tab.url)
   }, console.error)
 
-  const params = new URLSearchParams({ u: tab.url ?? '' })
-  const encodeUri = encodeURIComponent(tab.url ?? '')
+  const params = new URLSearchParams({ url: tab.url ?? '' })
+  // const tabUrl = encodeURIComponent(tab.url ?? '')
 
   const window = await browser.windows.create({
     // type: 'popup',
     // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
-    url: 'http://localhost:3000/card/' + encodeUri,
+    // url: 'http://localhost:3000/card/' + encodeUri,
+    url: `${process.env.APP_BASE_URL}/card?${params.toString()}`,
     width: 500,
     height: 900,
     left: 100,
@@ -83,9 +86,11 @@ browser.browserAction.onClicked.addListener(async tab => {
   console.log('The normal window has been created')
 })
 
-// --- 相互溝通
+console.log(process.env.APP_BASE_URL)
 
-// Listen for messages sent from other parts of the extension
+/**
+ * 相互溝通 Listen for messages sent from other parts of the extension
+ */
 browser.runtime.onMessage.addListener((request: { popupMounted: boolean }) => {
   // Log statement if request.popupMounted is true
   // NOTE: this request is sent in `popup/component.tsx`

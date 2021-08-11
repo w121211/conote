@@ -70,7 +70,7 @@ export function CardPage(): JSX.Element {
           編輯
         </button> */}
 
-      <CardIndex />
+      {/* <CardIndex /> */}
 
       {/* <CardHead card={data.cocard} sect={sect} height={0} />
         {edit ? (
