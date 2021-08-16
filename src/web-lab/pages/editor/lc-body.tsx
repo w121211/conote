@@ -6,6 +6,7 @@ import React, {
   CSSProperties,
   useRef,
 } from 'react'
+import Modal from 'react-modal'
 import {
   Editor,
   Transforms,
@@ -24,18 +25,20 @@ import {
   Editable,
   withReact,
   useSlateStatic,
-  useReadOnly,
   ReactEditor,
   RenderElementProps,
   useFocused,
+  useReadOnly,
   useSelected,
   RenderLeafProps,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
 import {
+  LabelInlineElement,
   LcBodyElement,
   LcElement,
   LcHeadElement,
+  LcMirrorElement,
   LiElement,
   UlElement,
 } from './slate-custom-types'
@@ -46,6 +49,84 @@ import {
   removeLcBody,
 } from './with-lcbody'
 // import { useSearch } from './search'
+
+const initialValueDemo: LiElement[] = [
+  {
+    type: 'li',
+    children: [
+      {
+        type: 'lc',
+        children: [
+          {
+            type: 'lc-mirror',
+            children: [{ text: '::$XX' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    type: 'li',
+    children: [
+      {
+        type: 'lc',
+        children: [
+          {
+            type: 'lc-head',
+            // body: '__11',
+            children: [
+              { text: '11' },
+              { text: '11' },
+              { type: 'label', children: [{ text: '#label' }] },
+              { text: '' },
+            ],
+          },
+          // { type: 'lc-body', children: [{ text: '__11' }] },
+        ],
+      },
+    ],
+  },
+  {
+    type: 'li',
+    children: [
+      {
+        type: 'lc',
+        children: [
+          { type: 'lc-head', body: '__22', children: [{ text: '22' }] },
+          // { type: 'lc-body', children: [{ text: '__22' }] },
+        ],
+      },
+      {
+        type: 'ul',
+        children: [
+          {
+            type: 'li',
+            children: [
+              {
+                type: 'lc',
+                children: [
+                  { type: 'lc-head', body: '__33', children: [{ text: '33' }] },
+                  { type: 'lc-body', children: [{ text: '__33' }] },
+                ],
+              },
+            ],
+          },
+          {
+            type: 'li',
+            children: [
+              {
+                type: 'lc',
+                children: [
+                  { type: 'lc-head', body: '__44', children: [{ text: '44' }] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+]
 
 /**
  * @see https://stackoverflow.com/questions/28889826/how-to-set-focus-on-an-input-field-after-rendering
@@ -93,61 +174,6 @@ export function lcPath(liPath: Path): Path {
 export function ulPath(liPath: Path): Path {
   return [...liPath, 1]
 }
-
-const initialValueDemo: LiElement[] = [
-  {
-    type: 'li',
-    children: [
-      {
-        type: 'lc',
-        children: [
-          { type: 'lc-head', body: '__11', children: [{ text: '11' }] },
-          { type: 'lc-body', children: [{ text: '__11' }] },
-        ],
-      },
-    ],
-  },
-  {
-    type: 'li',
-    children: [
-      {
-        type: 'lc',
-        children: [
-          { type: 'lc-head', body: '__22', children: [{ text: '22' }] },
-          // { type: 'lc-body', children: [{ text: '__22' }] },
-        ],
-      },
-      {
-        type: 'ul',
-        children: [
-          {
-            type: 'li',
-            children: [
-              {
-                type: 'lc',
-                children: [
-                  { type: 'lc-head', body: '__33', children: [{ text: '33' }] },
-                  { type: 'lc-body', children: [{ text: '__33' }] },
-                ],
-              },
-            ],
-          },
-          {
-            type: 'li',
-            children: [
-              {
-                type: 'lc',
-                children: [
-                  { type: 'lc-head', body: '__44', children: [{ text: '44' }] },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-]
 
 const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   let style: React.CSSProperties = {}
@@ -371,6 +397,70 @@ const Ul = (props: RenderElementProps & { element: UlElement }) => {
   )
 }
 
+const Label = (
+  props: RenderElementProps & {
+    element: LabelInlineElement
+    oauthorName?: string
+    sourceUrl?: string
+  }
+) => {
+  const { attributes, children, element, oauthorName, sourceUrl } = props
+  const readonly = useReadOnly()
+  const focused = useFocused()
+  const selected = useSelected()
+
+  useEffect(() => {
+    console.log(readonly, focused, selected)
+    // if (focused && !selected) {
+    // const path = ReactEditor.findPath(editor, element)
+    // removeLcBody(editor, [element, path])
+    // }
+  }, [readonly, focused, selected])
+  if (readonly) {
+    return <button {...attributes}>{children}</button>
+  }
+  return (
+    <span {...attributes} style={{ color: 'red' }}>
+      {children}
+    </span>
+  )
+}
+
+const LcMirror = (
+  props: RenderElementProps & {
+    element: LcMirrorElement
+    oauthorName?: string
+    sourceUrl?: string
+  }
+) => {
+  const { attributes, children, element, oauthorName, sourceUrl } = props
+  const readonly = useReadOnly()
+  const focused = useFocused()
+  const selected = useSelected()
+
+  useEffect(() => {
+    console.log(readonly, focused, selected)
+    // if (focused && !selected) {
+    // const path = ReactEditor.findPath(editor, element)
+    // removeLcBody(editor, [element, path])
+    // }
+  }, [readonly, focused, selected])
+
+  if (readonly) {
+    return (
+      <div>
+        <button {...attributes}>{children}</button>
+        <EditorModal />
+      </div>
+    )
+  }
+  return (
+    <span {...attributes} style={{ color: 'blue' }}>
+      {children}
+    </span>
+  )
+}
+
 const CustomElement = (
   props: RenderElementProps & {
     oauthorName?: string
@@ -380,6 +470,20 @@ const CustomElement = (
 ) => {
   const { attributes, children, element, oauthorName, sourceUrl, withMirror } =
     props
+
+  switch (element.type) {
+    case 'label':
+      return (
+        <Label {...{ attributes, children, element, oauthorName, sourceUrl }} />
+      )
+    case 'lc-mirror':
+      return (
+        <LcMirror
+          {...{ attributes, children, element, oauthorName, sourceUrl }}
+        />
+      )
+  }
+
   if (isLcHead(element)) {
     return (
       <LcHead {...{ attributes, children, element, oauthorName, sourceUrl }} />
@@ -442,6 +546,34 @@ const CustomElement = (
 //   return ranges
 // }
 
+const withLabel = (editor: Editor): Editor => {
+  const { insertData, insertText, isInline } = editor
+
+  editor.isInline = (element) => {
+    return element.type === 'label' ? true : isInline(element)
+  }
+
+  // editor.insertText = text => {
+  //   if (text && isUrl(text)) {
+  //     wrapLink(editor, text)
+  //   } else {
+  //     insertText(text)
+  //   }
+  // }
+
+  // editor.insertData = data => {
+  //   const text = data.getData('text/plain')
+
+  //   if (text && isUrl(text)) {
+  //     wrapLink(editor, text)
+  //   } else {
+  //     insertData(data)
+  //   }
+  // }
+
+  return editor
+}
+
 const withTest = (editor: Editor) => {
   const { isVoid } = editor
 
@@ -454,13 +586,13 @@ const withTest = (editor: Editor) => {
 
 export const BulletEditor = (props: {
   initialValue?: LiElement[]
-  oauthorName?: string
+  authorName?: string
   sourceUrl?: string
   withMirror?: boolean
 }): JSX.Element => {
   const {
     initialValue = initialValueDemo,
-    oauthorName,
+    authorName,
     sourceUrl,
     withMirror: isWithMirror = false,
   } = props
@@ -470,13 +602,13 @@ export const BulletEditor = (props: {
     // () => withAutoComplete(withBullet(withHistory(withReact(createEditor())))),
     // () => withList(withHistory(withReact(createEditor()))),
     // () => withMirror(withList(withHistory(withReact(createEditor())))),
-    () => withTest(withHistory(withReact(createEditor()))),
+    () => withLabel(withHistory(withReact(createEditor()))),
     []
   )
   const renderElement = useCallback(
     (props: RenderElementProps) => (
       <CustomElement
-        {...{ ...props, oauthorName, sourceUrl, withMirror: isWithMirror }}
+        {...{ ...props, authorName, sourceUrl, withMirror: isWithMirror }}
       />
     ),
     []
@@ -495,27 +627,34 @@ export const BulletEditor = (props: {
   //   }
   // }, [searchAllResult])
 
+  const [readonly, setReadonly] = useState(false)
+
   return (
     <div>
+      <button onClick={() => setReadonly(!readonly)}>
+        Readonly {readonly ? 'Y' : 'N'}
+      </button>
       <Slate
         editor={editor}
         value={value}
         onChange={(value) => {
           if (isLiArray(value)) {
             setValue(value)
+
+            sessionStorage.setItem('editorValue', JSON.stringify(value))
           } else {
-            throw new Error('value需為ul array')
+            throw new Error('value 需為 li array')
           }
         }}
       >
         <Editable
           autoCorrect="false"
+          // decorate={decorate}
+          readOnly={readonly}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
-          // decorate={decorate}
           onKeyDown={(event) => {
             withLcbodyOnKeyDown(event, editor)
-
             // if (search) {
             //   onKeyDownForSuggest(event)
             // } else {
@@ -535,16 +674,42 @@ export const BulletEditor = (props: {
             />
           </Portal>
         )} */}
-        {/* <CommentPanel /> */}
       </Slate>
     </div>
   )
 }
 
+const ModalEditor = () => {
+  const [isOpen, setIsOpen] = useState(true)
+
+  function closeModal() {
+    setIsOpen(false)
+  }
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      // onAfterOpen={afterOpenModal}
+      onRequestClose={closeModal}
+      // style={customStyles}
+      contentLabel="Example Modal"
+    >
+      <button onClick={closeModal}>close</button>
+      <BulletEditor />
+    </Modal>
+  )
+}
+
 const TestPage = (): JSX.Element => {
+  // sessionStorage.removeItem('key')
+  // sessionStorage.clear()
+  const data = sessionStorage.getItem('key')
+
   return (
     <div>
       <BulletEditor />
+      {/* <hr />
+      <BulletEditor /> */}
     </div>
   )
 }
