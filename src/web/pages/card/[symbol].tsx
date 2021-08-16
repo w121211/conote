@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 // import { QueryDataProvider } from '../../../web/components/data-provider'
@@ -23,7 +22,8 @@ import CardIndex from '../../components/card-index'
 //   return url
 // }
 
-export function CardPage(): JSX.Element {
+export function CardSymbolPage(): JSX.Element {
+  console.log('CardSymbolPage')
   const router = useRouter()
   const { symbol } = router.query
 
@@ -144,4 +144,4 @@ export function CardPage(): JSX.Element {
 }
 // return <h1>Require URL or Symbol (現階段還未支援symbol)</h1>
 // }
-export default CardPage
+export default CardSymbolPage

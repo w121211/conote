@@ -13,13 +13,11 @@ Run vscode devcontainer: Vscode remote-container extension, specify in `./.devco
 sudo docker exec -it <container_app> zsh
 ```
 
-# K8s Deployment
-
-### with skaffold
+# K8s Dev & Deploy
 
 kubectl Cheat Sheet: https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 
-Skafford: deploy k8s locally
+### Skafford: dev locally
 
 ```
 # install skaffold, helm
@@ -36,19 +34,76 @@ helm install ...
 
 # from project root folder, first test dockerfile works
 docker build --progress=plain .
+
+# dev
 skaffold dev --port-forward
 
-# use skaffold profile
-# skaffold run -p dev
+### Debug ###
 
-# Debug
-# 確認ingress有沒有安裝
+# 確認 ingress 有沒有安裝，如果出現 <error: endpoints "default-http-backend" not found> 表示沒安裝
 kubectl describe ingress
-# 如果出現 <error: endpoints "default-http-backend" not found>，表示沒安裝
-# 用helm安裝ingress
+
+# 用 helm 安裝ingress
 helm install --namespace kube-system nginx ingress-nginx --repo https://kubernetes.github.io/ingress-nginx
+```
+
+### Skafford: deploy to google cloud
+
+GCP Samples
+
+- https://github.com/GoogleCloudPlatform/microservices-demo
+- https://github.com/GoogleCloudPlatform/solutions-modern-cicd-anthos
+- https://github.com/GoogleCloudPlatform/python-docs-samples
+
+步驟
+
+- 在 cloud 建立 k8s cluster https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
+-
 
 ```
+# switch context to cloud cluster
+kubectl config get-contexts
+kubectl config use-context ...
+
+# dev, conote-try需換成對應的project name
+skaffold dev --default-repo=gcr.io/conote-try --port-forward
+
+# deploy
+skaffold run --tail --profile=dev --default-repo=gcr.io/conote-try
+skaffold delete # remove deploy
+```
+
+### Postgresql backup, dump, restore
+
+See:
+
+https://gist.github.com/ricjcosme/cf576d3d4272cc35de1335a98c547da6
+https://cwienczek.com/2020/06/simple-backup-of-postgres-database-in-kubernetes/
+https://simplebackups.io/blog/postgresql-pgdump-and-pgrestore-guide-examples/#summary-of-the-pg_restore-command
+https://github.com/rinormaloku/postgre-backup-container
+
+Naive dump & restore
+
+```
+# 先開一個 postgres client （不要關）
+export POSTGRES_PASSWORD=$(kubectl get secret --namespace default postgres-release-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+kubectl run postgres-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.12.0-debian-10-r44 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host postgres-release-postgresql -U postgres -d postgres -p 5432
+
+# dump
+kubectl exec -i postgres-release-postgresql-client -- pg_dump --host postgres-release-postgresql -U postgres -d prisma -p 5432 -Ft > prisma_dump.tar
+
+# restore
+kubectl exec postgres-release-postgresql-client -i -- pg_restore --host postgres-release-postgresql -U postgres -d prisma -p 5432 -Ft --clean --if-exists < prisma_dump.tar
+```
+
+Troubleshoots:
+
+- postgres 密碼錯誤，無法登入？ 若重裝 postgres chart，需要另外刪除 pvc
+  ```
+  kubectl get pvc
+  kubectl delete pvc ...
+  ```
+  https://github.com/bitnami/charts/issues/2061
 
 ### with Okteto
 

@@ -131,6 +131,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async webpageCard(_parent, { url }, _context, _info) {
+    console.log(url)
     const card = await getOrCreateCardByUrl({ fetcher, url })
     return {
       ..._toStringId(card),

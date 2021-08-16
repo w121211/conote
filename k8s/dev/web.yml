@@ -6,47 +6,55 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp
+  name: web
 spec:
   selector:
     matchLabels:
-      app: webapp
+      app: web
   replicas: 1 # No. of replicas/pods to run in this deployment
   template:
     metadata:
       labels:
-        app: webapp
+        app: web
     spec:
-      initContainers:
-        - name: init-db-ready
-          image: postgres:11-alpine
-          command: ['/bin/sh', '-c']
-          args:
-            - until (pg_isready -h $PG_HOST -p 5432 -U $PG_USER) do echo "Waiting for postgres at $DATABASE_URL"; sleep 2; done
-          env:
-            - name: POSTGRES_PASSWORD # postgres-image require a value
-              value: 'a_dummy_value'
-            - name: PG_HOST
-              value: 'postgres-release-postgresql'
-            - name: PG_USER
-              value: 'postgres'
+      # initContainers:
+      #   - name: init-db-ready
+      #     image: postgres:11-alpine
+      #     command: ['/bin/sh', '-c']
+      #     args:
+      #       - until (pg_isready -h $PG_HOST -p 5432 -U $PG_USER) do echo "Waiting for postgres at $DATABASE_URL"; sleep 2; done
+      #     env:
+      #       - name: POSTGRES_PASSWORD # postgres-image require a value
+      #         value: 'a_dummy_value'
+      #       - name: PG_HOST
+      #         value: 'postgres-release-postgresql'
+      #       - name: PG_USER
+      #         value: 'postgres'
       containers:
         # - name: tester
         #   image: node:14-alpine
         #   command: ['sleep', 'infinity']
-        # command: ['/bin/sh', '-c']
-        # args: ['yarn run migrate && yarn run seed && yarn run start']
-        - name: webapp
-          image: conote-webapp
-          # command: ['/bin/sh', '-c']
-          # args: ['yarn run start']
+        - name: web
+          image: conote-web
+          command: ['/bin/sh', '-c']
+          args: ['yarn run start']
           ports:
             - containerPort: 3000 # The port that the container exposes
+          envFrom:
+            - secretRef:
+                name: web-local-env
           env:
             - name: ENVIRONMENT
               value: dev
             - name: PORT
               value: '3000'
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-release-postgresql
+                  key: postgresql-password
+            - name: DATABASE_URL
+              value: 'postgresql://postgres:$(POSTGRES_PASSWORD)@postgres-release-postgresql:5432/prisma?schema=public'
           #     - name: DATABASE_URL
           #       valueFrom:
           #         secretKeyRef:
@@ -103,11 +111,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: webapp
+  name: web
 spec:
-  type: ClusterIP
+  # type: ClusterIP
+  # type: NodePort
+  type: LoadBalancer
   selector:
-    app: webapp
+    app: web
   ports:
-    - port: 3000
+    - port: 31251
       targetPort: 3000
+      # nodePort: 31251 # GKE needs to open firewall @see https://stackoverflow.com/questions/68452384/how-can-i-visit-nodeport-service-in-gke
+  # ports:
+  #   - name: http
+  #     port: 80
+  #     targetPort: 3000

@@ -50,6 +50,8 @@ COPY --from=builder /app/src/web/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/src/web/.next ./.next
 COPY --from=builder /app/src/web/node_modules ./node_modules
 COPY --from=builder /app/src/web/package.json ./package.json
+COPY --from=builder /app/src/web/apollo/type-defs.graphqls ./apollo/type-defs.graphqls
+COPY --from=builder /app/src/web/apollo/query.graphql ./apollo/query.graphql
 
 USER nextjs
 

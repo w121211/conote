@@ -112,7 +112,8 @@ module.exports = {
   //   writeToDisk: true,
   // },
   plugins: [
-    // new Dotenv(),
+    // 注意不能將機密資料放入.env!!! @see https://github.com/mrsteele/dotenv-webpack
+    new Dotenv({ path: './.env' }),
     // isDevelopment && new ReactRefreshPlugin(),
     new ForkTsCheckerWebpackPlugin({
       typescript: {
