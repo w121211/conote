@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
 import Modal from 'react-modal'
 import { useApolloClient } from '@apollo/client'
-import { Editor, Transforms, createEditor, Node } from 'slate'
+import { Editor, Transforms, createEditor, Node, NodeEntry } from 'slate'
 import {
   Editable,
   ReactEditor,
@@ -15,7 +15,7 @@ import { withHistory } from 'slate-history'
 import { editorValue } from '../../apollo/cache'
 import { RootBullet } from '../../lib/bullet/types'
 import { createAndParseCard, queryAndParseCard } from '../card'
-import { LcElement, LiElement, UlElement } from './slate-custom-types'
+import { CustomRange, LcElement, LiElement, UlElement } from './slate-custom-types'
 import { Serializer } from './serializer'
 import { isLc, isLi, isLiArray, isUl, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { withMirror } from './with-mirror'
@@ -29,33 +29,37 @@ import Popover from '../popover/popover'
 const initialValueDemo: LiElement[] = [
   {
     type: 'li',
-    children: [{ type: 'lc', body: '11', error: 'warning', placeholder: 'placeholder', children: [{ text: '11' }] }],
+    children: [{ type: 'lc', children: [{ text: '' }] }],
   },
-  {
-    type: 'li',
-    children: [
-      { type: 'lc', body: '22', placeholder: 'placeholder', children: [{ text: '22' }] },
-      {
-        type: 'ul',
-        children: [
-          { type: 'li', children: [{ type: 'lc', body: '22-11', children: [{ text: '22-11' }] }] },
-          {
-            type: 'li',
-            children: [
-              { type: 'lc', children: [{ text: '' }] },
-              {
-                type: 'ul',
-                children: [
-                  { type: 'li', children: [{ type: 'lc', body: '22-11', children: [{ text: '22-11' }] }] },
-                  { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
+  // {
+  //   type: 'li',
+  //   children: [{ type: 'lc', body: '11', error: 'warning', placeholder: 'placeholder', children: [{ text: '11' }] }],
+  // },
+  // {
+  //   type: 'li',
+  //   children: [
+  //     { type: 'lc', body: '22', placeholder: 'placeholder', children: [{ text: '22' }] },
+  //     {
+  //       type: 'ul',
+  //       children: [
+  //         { type: 'li', children: [{ type: 'lc', body: '22-11', children: [{ text: '22-11' }] }] },
+  //         {
+  //           type: 'li',
+  //           children: [
+  //             { type: 'lc', children: [{ text: '' }] },
+  //             {
+  //               type: 'ul',
+  //               children: [
+  //                 { type: 'li', children: [{ type: 'lc', body: '22-11', children: [{ text: '22-11' }] }] },
+  //                 { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
+  //               ],
+  //             },
+  //           ],
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
   // {
   //   type: 'li',
   //   children: [
@@ -217,6 +221,7 @@ const initialValueDemo: LiElement[] = [
 
 const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   let style: React.CSSProperties = {}
+
   switch (leaf.type) {
     case 'sect-symbol': {
       style = { fontWeight: 'bold' }
@@ -561,46 +566,6 @@ const CustomElement = (
   return <span {...attributes}>{children}</span>
 }
 
-// function decorate([node, path]: NodeEntry): Range[] {
-//   const ranges: Range[] = []
-
-//   if (!Text.isText(node)) {
-//     return ranges
-//   }
-
-//   function getLength(token: string | Token): number {
-//     if (typeof token === 'string') {
-//       return token.length
-//     } else if (typeof token.content === 'string') {
-//       return token.content.length
-//     } else if (Array.isArray(token.content)) {
-//       return token.content.reduce((l, t) => l + getLength(t), 0)
-//     } else {
-//       return 0
-//     }
-//   }
-
-//   const tokens = tokenize(node.text, LINE_VALUE_GRAMMAR)
-//   let start = 0
-
-//   for (const token of tokens) {
-//     const length = getLength(token)
-//     const end = start + length
-
-//     if (typeof token !== 'string') {
-//       ranges.push({
-//         // [token.type]: true,
-//         type: token.type,
-//         anchor: { path, offset: start },
-//         focus: { path, offset: end },
-//       })
-//     }
-//     start = end
-//   }
-
-//   return ranges
-// }
-
 export const BulletEditor = (props: {
   initialValue?: LiElement[]
   oauthorName?: string
@@ -635,6 +600,62 @@ export const BulletEditor = (props: {
     ),
     [],
   )
+
+  // function decorate([node, path]: NodeEntry): CustomRange[] {
+  //   const ranges: CustomRange[] = []
+  //   if (editor.selection != null) {
+  //     if (
+  //       !Editor.isEditor(node) &&
+  //       Editor.string(editor, [path[0]]) === "" &&
+  //       Range.includes(editor.selection, path) &&
+  //       Range.isCollapsed(editor.selection)
+  //     ) {
+  //       return [
+  //         {
+  //           ...editor.selection,
+  //           placeholder: true,
+  //         },
+  //       ];
+  //     }
+  //   }
+
+  // //   if (!Text.isText(node)) {
+  // //     return ranges
+  // // }
+
+  //   // function getLength(token: string | Token): number {
+  //   //   if (typeof token === 'string') {
+  //   //     return token.length
+  //   //   } else if (typeof token.content === 'string') {
+  //   //     return token.content.length
+  //   //   } else if (Array.isArray(token.content)) {
+  //   //     return token.content.reduce((l, t) => l + getLength(t), 0)
+  //   //   } else {
+  //   //     return 0
+  //   //   }
+  //   // }
+
+  //   // const tokens = tokenize(node.text, LINE_VALUE_GRAMMAR)
+  //   // let start = 0
+
+  //   // for (const token of tokens) {
+  //   //   const length = getLength(token)
+  //   //   const end = start + length
+
+  //   //   if (typeof token !== 'string') {
+  //   //     ranges.push({
+  //   //       // [token.type]: true,
+  //   //       type: token.type,
+  //   //       anchor: { path, offset: start },
+  //   //       focus: { path, offset: end },
+  //   //     })
+  //   //   }
+  //   //   start = end
+  //   // }
+
+  //   return ranges
+  // }
+
   const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
   const _withListOnKeyDown = useCallback((event: React.KeyboardEvent) => {
     withListOnKeyDown(event, editor)

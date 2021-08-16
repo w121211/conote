@@ -1,9 +1,10 @@
 .containerouter {
   position: absolute;
-  top: 34px;
-  left: -75px;
+  top: 45px;
+  bottom: 45px;
+  // left: -75px;
   padding: 0.5em;
-  background-color: white;
+  background-color: $white;
   -webkit-box-shadow: 0 12px 25px -11px #00000066;
   box-shadow: 0 4px 25px -6px #00000066;
   z-index: 100;
@@ -11,9 +12,14 @@
   height: fit-content;
   display: -moz-box;
   display: flex;
+  align-items: flex-start;
   -moz-box-orient: vertical;
   -moz-box-direction: normal;
   flex-direction: column;
+
   flex-wrap: nowrap;
   white-space: nowrap;
+  span {
+    // padding: 10px 0;
+  }
 }

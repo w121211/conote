@@ -11,7 +11,10 @@ import {
   MyVotesDocument,
   MyVotesQuery,
   BoardDocument,
+  useMyVotesQuery,
+  Vote,
 } from '../../apollo/query.graphql'
+import BarChart from '../bar/bar'
 import classes from './board-form.module.scss'
 
 export type RadioInputs = {
@@ -27,16 +30,23 @@ export type FormInputs = {
 export const RadioInput = ({
   value,
   content,
+  count,
+  total,
+  myVote,
   // filterComments,
   choiceValue,
   checked,
 }: {
   value: string
   content: string
+  count?: number
+  total?: number
+  myVote?: Vote
+
   // filterComments: (i: number) => void
   choiceValue?: (i: string) => void
   checked?: boolean
-}) => {
+}): JSX.Element => {
   // const {field}=useController({value,content})
   const methods = useFormContext()
 
@@ -55,8 +65,16 @@ export const RadioInput = ({
           choiceValue && choiceValue(value)
         }}
       />
-      <svg width="32" height="32" viewBox="-4 -4 39 39" aria-hidden="true" focusable="false">
-        {/* <!-- The background --> */}
+      <BarChart
+        content={content}
+        value={parseInt(value)}
+        total={total ?? 0}
+        count={count ?? 0}
+        voted={myVote?.choiceIdx.toString() === value}
+        checked={checked}
+      />
+      {/* <svg width="32" height="32" viewBox="-4 -4 39 39" aria-hidden="true" focusable="false">
+        
         <rect
           className={classes.checkBg}
           width="35"
@@ -69,7 +87,7 @@ export const RadioInput = ({
           rx="6"
           ry="6"
         ></rect>
-        {/* <!-- The checkmark--> */}
+        
         <polyline
           className={classes.checkMark}
           points="4,14 12,23 28,5"
@@ -77,8 +95,8 @@ export const RadioInput = ({
           strokeWidth="4"
           fill="none"
         ></polyline>
-      </svg>
-      <span>{content}</span>
+      </svg> */}
+      {/* <span>{content}</span> */}
     </label>
   )
 }
@@ -87,24 +105,40 @@ const BoardForm = ({
   pollId,
   boardId,
   initialValue,
-
-  pollChoices,
+  clickedChoiceIdx,
+  // pollChoices,
   refetch,
   filterComments,
 }: {
   pollId?: string
   boardId: string
   initialValue: FormInputs
-
-  pollChoices?: string[]
+  clickedChoiceIdx?: number
+  // pollChoices?: string[]
   refetch: () => void
   filterComments: (i: number) => void
-}) => {
+}): JSX.Element => {
   // const { field, fieldState } = useController({ name: 'choice' })
+  const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
+  const { data: myVotesData } = useMyVotesQuery()
   const methods = useForm<FormInputs>()
   const { register, handleSubmit, setValue, reset, getValues } = methods
   const [choiceValue, setChoiceValue] = useState<number | null | undefined>()
-  const [check, setChecked] = useState<boolean[]>(Array(pollChoices?.length).fill(false))
+  const [check, setChecked] = useState<boolean[]>(Array(boardData?.board.poll?.choices.length).fill(false))
+  const [myVote, setMyVote] = useState<Vote>()
+
+  useEffect(() => {
+    if (myVotesData) {
+      setMyVote(myVotesData?.myVotes.find(e => e.pollId.toString() === pollId))
+    }
+  }, [myVotesData])
+  useEffect(() => {
+    setChecked(prev => {
+      const newCheck = [...prev]
+      if (clickedChoiceIdx !== undefined) newCheck[clickedChoiceIdx] = true
+      return newCheck
+    })
+  }, [clickedChoiceIdx])
 
   if (initialValue) {
     // initialValue.title && setValue('title', initialValue.title)
@@ -150,7 +184,13 @@ const BoardForm = ({
         variables: {
           boardId,
           pollId,
-          data: { content: `${pollChoices && d.choice ? '<' + pollChoices[parseInt(d.choice)] + '>' : ''} ${d.lines}` },
+          data: {
+            content: `${
+              boardData?.board.poll?.choices && d.choice
+                ? '<' + boardData?.board.poll?.choices[parseInt(d.choice)] + '>'
+                : ''
+            } ${d.lines}`,
+          },
         },
       })
     }
@@ -161,9 +201,9 @@ const BoardForm = ({
           data: { choiceIdx: parseInt(d.choice) },
         },
       })
-      console.log(typeof d.choice, pollId)
+      // console.log(typeof d.choice, pollId)
     }
-    setChecked(Array(pollChoices?.length).fill(false))
+    setChecked(Array(boardData?.board.poll?.choices?.length).fill(false))
     setChoiceValue(null)
     reset({ title: '', lines: '' })
   }
@@ -210,21 +250,27 @@ const BoardForm = ({
           {/* <input type="text" {...register('title')} placeholder="Symbol 或 Topic" /> */}
           {/* </div> */}
           <div className={classes.section}>
-            {pollChoices && pollId && (
+            {boardData?.board.poll?.choices && pollId && (
               <div className={classes.choiceWrapper}>
                 {/* <label>@作者</label> */}
                 <div className={classes.radioWrapper}>
-                  {pollChoices.map((e, i) => (
+                  {boardData?.board.poll?.choices.map((e, i) => (
                     <RadioInput
                       value={`${i}`}
                       content={e}
+                      total={boardData.board.poll ? boardData.board.poll.count.nVotes.reduce((a, b) => a + b) : 0}
+                      count={boardData?.board.poll?.count.nVotes[i]}
                       // filterComments={filterComments}
                       key={i}
                       choiceValue={handleChoiceValue}
                       checked={check[i]}
+                      myVote={myVote}
                     />
                   ))}
                 </div>
+                <span className={classes.votedCount}>
+                  共 {boardData.board.poll?.count.nVotes.reduce((a, b) => a + b)} 人參與投票
+                </span>
               </div>
             )}
             <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." />

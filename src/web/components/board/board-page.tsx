@@ -26,15 +26,17 @@ const BoardPage = ({
   boardId,
   pollId,
   // description,
+  clickedChoiceIdx,
 
   title,
 }: {
   boardId: string
   pollId?: string
+  clickedChoiceIdx?: number
   //  description?:string
 
   title?: string
-}) => {
+}): JSX.Element => {
   const [measureRef, bounds] = useMeasure()
   const [boardValue, setBoardValue] = useState<Board>()
   const [pollValue, setPollValue] = useState([''])
@@ -119,16 +121,17 @@ const BoardPage = ({
         {/* <div className={classes.underLine}> */}
         {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
         {/* </div> */}
-        {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />}
+        {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}
         <BoardFrom
           boardId={boardId}
           pollId={pollId}
           initialValue={{ title: '', choice: undefined, lines: '' }}
-          pollChoices={pollValue}
+          // pollChoices={pollValue}
           refetch={() => {
             commentsRetch()
           }}
           filterComments={filterComments}
+          clickedChoiceIdx={clickedChoiceIdx}
         />
         {/* <CommentForm
         boardId={boardId}

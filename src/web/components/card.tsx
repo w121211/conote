@@ -32,6 +32,7 @@ import {
   useCreateHashtagMutation,
   useCreateOauthorCommentMutation,
   useMeQuery,
+  useWebpageCardQuery,
 } from '../apollo/query.graphql'
 import classes from './card.module.scss'
 import BoardPage from './board/board-page'
@@ -51,6 +52,11 @@ import {
 } from '../lib/models/card'
 import { injectCardHeadValue } from '../lib/models/card-helpers'
 import UpDown from './upDown/upDown'
+import MyTooltip from './my-tooltip/my-tooltip'
+
+import BulletPanelSvg from './bullet-panel/bullet-panel-svg'
+import BulletPanel from './bullet-panel/bullet-panel'
+import ScrIcon from '../assets/svg/foreign.svg'
 
 // type CardHeadAndParsedContent = Omit<CardHead, 'content'> & {
 //   content: CardHeadContent
@@ -321,8 +327,14 @@ function hastaggable(node: Bullet | BulletDraft): boolean {
   return false
 }
 
-const TokenItem = (props: { token: Token | string; handleSymbol?: (symbol: string) => void }) => {
-  const { token, handleSymbol } = props
+const TokenItem = (props: {
+  token: Token | string
+  handleSymbol?: (symbol: string) => void
+  depth?: number
+  self?: boolean
+  handleClickChoice?: (content: string) => void
+}) => {
+  const { token, handleSymbol, depth, self, handleClickChoice } = props
   // console.log(token)
   if (typeof token === 'string') {
     return <span className={classes.text}>{token}</span>
@@ -331,19 +343,37 @@ const TokenItem = (props: { token: Token | string; handleSymbol?: (symbol: strin
     switch (token.type) {
       case 'ticker':
       case 'topic':
+        return (
+          <>
+            {self ? (
+              <span className={classes.self}>Self</span>
+            ) : (
+              <span
+                className={`${classes.link} ${depth === 0 ? classes.mirrorTitle : ''}`}
+                onClick={e => {
+                  // e.preventDefault()
+                  if (
+                    typeof token.content === 'string' &&
+                    (token.content.startsWith('$') || token.content.startsWith('[['))
+                  ) {
+                    // console.log(token.content)
+                    handleSymbol && handleSymbol(token.content)
+                  }
+                }}
+              >
+                {token.content}
+              </span>
+            )}
+          </>
+        )
       case 'vote-chocie':
         return (
           <span
             className={classes.link}
             onClick={e => {
               // e.preventDefault()
-              if (
-                typeof token.content === 'string' &&
-                (token.content.startsWith('$') || token.content.startsWith('[['))
-              ) {
-                // console.log(token.content)
-                handleSymbol && handleSymbol(token.content)
-              }
+              e.stopPropagation()
+              handleClickChoice && handleClickChoice(token.content as string)
             }}
           >
             {token.content}
@@ -358,7 +388,15 @@ const TokenItem = (props: { token: Token | string; handleSymbol?: (symbol: strin
   return null
 }
 
-const markToText = (e: string, handleSymbol?: (symbol: string) => void) => {
+// const markerTemplate=(text:string,marker:string,deth) => {
+
+// }
+
+const markToText = (
+  e: string,
+  handleSymbol?: (symbol: string) => void,
+  handleClickChoice?: (content: string) => void,
+): JSX.Element => {
   switch (e) {
     case '[vs]':
       return (
@@ -412,7 +450,7 @@ const markToText = (e: string, handleSymbol?: (symbol: string) => void) => {
         // </span>
         <>
           {tokenize(e).map((el, i) => (
-            <TokenItem token={el} key={i} handleSymbol={handleSymbol} />
+            <TokenItem token={el} key={i} handleSymbol={handleSymbol} handleClickChoice={handleClickChoice} />
           ))}
         </>
       )
@@ -421,7 +459,8 @@ const markToText = (e: string, handleSymbol?: (symbol: string) => void) => {
 
 const BulletItem = (props: {
   node: Bullet | BulletDraft
-  handleShowBoard?: (boardId: number | undefined) => void
+
+  // handleClickChoice?:(content:string)=>void
   depth: number
   type: string
   handleSymbol: (symbol: string) => void
@@ -432,16 +471,17 @@ const BulletItem = (props: {
 
   const { depth, node, handleSymbol, cardId, mirror } = props
   // console.log(node)
-  const [showBoard, setShowBoard] = useState(false)
+  const [showBoard, setShowBoard] = useState<number | undefined>()
+  const [showPanel, setShowPanel] = useState<boolean>(false)
   const [showCreateBoard, setShowCreateBoard] = useState(false)
   const [showChildren, setShowChildren] = useState(depth < depth + 2 ? true : false)
+  const [clickChoiceIdx, setClickChoiceIdx] = useState<number | undefined>()
   // const [choice,setChoice]=useState<BulletCount>()
   // const { node } = props
 
   const headTokens = tokenize(node.head)
   const bodyTokens = node.body ? tokenize(node.body) : undefined
   const { data: bulletData, loading, error } = useBulletQuery({ variables: { id: `${node.id ?? ''}` } })
-  // console.log(node)
 
   //   useEffect(()=>{
   //     if(bulletData?.bullet){
@@ -451,11 +491,19 @@ const BulletItem = (props: {
 
   //   },[bulletData])
 
-  const hideBoard = () => {
-    setShowBoard(false)
+  const hideBoard = (i: number) => {
+    setShowBoard(undefined)
   }
   const hideCreateBoard = () => {
     setShowCreateBoard(false)
+  }
+  const handleClickChoice = (content: string) => {
+    const hashtagIdx = node.hashtags?.findIndex(e => e.boardId === node.boardId)
+    const filterHead = node.head.split(' ').filter(e => e.startsWith('<'))
+    const contentIdx = filterHead.findIndex(e => e === content)
+    setClickChoiceIdx(contentIdx)
+
+    setShowBoard(hashtagIdx)
   }
 
   // const [createHashtag] = useCreateHashtagMutation()
@@ -471,6 +519,8 @@ const BulletItem = (props: {
     <>
       {depth < 2 && (!node.children || (node.children && node.children.length === 0)) ? null : (
         <li className={classes.inlineValue}>
+          <div className={classes.bulletPanelSibling}></div>
+
           <span className={classes.bulletWrapper}>
             <span
               className={classes.bullet}
@@ -488,10 +538,50 @@ const BulletItem = (props: {
               </svg>
               {/* • */}
             </span>
-          </span>
+            {node.oauthorName ? (
+              <MyTooltip className={classes.bulletTooltip}>
+                <span className={classes.oauthorName}> @{cutString(node.oauthorName.split(':', 1)[0])}</span>
+              </MyTooltip>
+            ) : null}
 
-          <span>
-            {markToText(node.head, handleSymbol)}
+            {showCreateBoard && node.id && (
+              <CreateBoardPage
+                subTitle={node.head}
+                bulletId={node.id}
+                cardId={cardId}
+                visible={showCreateBoard}
+                hideBoard={hideCreateBoard}
+              />
+            )}
+          </span>
+          {(hastaggable(node) || node.sourceUrl) && (
+            <BulletPanel className={classes.bulletPanel} visible={showPanel}>
+              <>
+                <div
+                  className={classes.panelElement}
+                  onClick={() => {
+                    setShowCreateBoard(true)
+                  }}
+                >
+                  <span className={classes.panelIcon}>#</span>
+                  新增Hashtag
+                </div>
+
+                <div className={classes.panelElement}>
+                  <span className={classes.panelIcon}>
+                    <ScrIcon />
+                  </span>
+                  查看來源
+                </div>
+              </>
+            </BulletPanel>
+          )}
+          <span className={classes.bulletContent}>
+            {depth === 0
+              ? headTokens.map((el, i) => (
+                  <TokenItem token={el} key={i} handleSymbol={handleSymbol} depth={0} self={!mirror} />
+                ))
+              : markToText(node.head, handleSymbol, handleClickChoice)}
             {/* {headTokens.map(
             (e, i) => (
               
@@ -502,25 +592,23 @@ const BulletItem = (props: {
             ),
             // ),
           )} */}
-            {node.oauthorName && (
-              <span className={classes.oauthorName}> @{cutString(node.oauthorName.split(':', 1)[0])}</span>
-            )}
             {node.hashtags &&
               node.hashtags.map((e, i) => (
                 <span
                   className={classes.hashtag}
                   key={i}
                   onClick={() => {
-                    setShowBoard(true)
+                    setShowBoard(i)
                   }}
                 >
                   {' ' + e.text}
                   {e.boardId && (
-                    <Popover visible={showBoard} hideBoard={hideBoard} subTitle={node.head}>
+                    <Popover visible={i === showBoard} hideBoard={() => hideBoard(i)} subTitle={node.head}>
                       <BoardPage
                         title={e.text}
                         boardId={e.boardId.toString()}
                         pollId={node.pollId?.toString()}
+                        clickedChoiceIdx={i === showBoard ? clickChoiceIdx : undefined}
                         // description={e.content}
                         // visible={showBoard}
                         // hideBoard={hideBoard}
@@ -532,49 +620,6 @@ const BulletItem = (props: {
                 //   {e.text}
                 // </Link>
               ))}
-
-            {hastaggable(node) && (
-              <>
-                {/* <button
-                  onClick={() => {
-                    if (node.id === undefined) {
-                      throw '需要bullet id才能創hashtag'
-                    }
-                    createHashtag({
-                      variables: {
-                        cardId,
-                        bulletId: node.id,
-                        data: {
-                          hashtag: '#new_hashtag',
-                          meta: '',
-                          content: 'some content',
-                        },
-                      },
-                    })
-                  }}
-                >
-                  Create Hashtag
-                </button> */}
-
-                <button
-                  className={classes.hashTagBtn}
-                  onClick={() => {
-                    setShowCreateBoard(true)
-                  }}
-                >
-                  #
-                </button>
-                {showCreateBoard && node.id && (
-                  <CreateBoardPage
-                    subTitle={node.head}
-                    bulletId={node.id}
-                    cardId={cardId}
-                    visible={showCreateBoard}
-                    hideBoard={hideCreateBoard}
-                  />
-                )}
-              </>
-            )}
 
             {/* {bulletData?.bullet.count && node.id && (
               <UpDown choice={bulletData.bullet.count} bulletId={node.id.toString()} />
@@ -627,25 +672,17 @@ const CardBodyItem = (props: {
   if (card.type === 'WEBPAGE') {
     // 可能有mirrors
     return (
-      <div>
-        {self && <span className={classes.tickerTitle}>Self</span>}
-        {/* <ul>
-          <BulletItem
-            node={self}
-            handleSymbol={_ => {
-              _
-            }}
-            depth={0}
-            type={card.type}
-            cardId={card.id}
-          />
-        </ul> */}
-        {self.children &&
+      <div className={classes.cardBodyItem}>
+        {/* {self && <span className={classes.tickerTitle}>Self</span>} */}
+        <ul>
+          <BulletItem node={self} handleSymbol={handleSymbol} depth={0} type={card.type} cardId={card.id} />
+        </ul>
+        {/* {self.children &&
           self.children.map((e, i) => (
             <ul key={i}>
-              <BulletItem node={e} handleSymbol={handleSymbol} depth={1} type={card.type} cardId={card.id} />
+              <BulletItem node={e} handleSymbol={handleSymbol} depth={0} type={card.type} cardId={card.id} />
             </ul>
-          ))}
+          ))} */}
         {mirrors &&
           mirrors.map((e, i) => (
             <ul key={i}>
@@ -952,9 +989,11 @@ export const SymbolContext = createContext({ symbol: '' })
 
 const TestPage = ({
   pathSymbol,
+  webPageUrl,
   handlePathPush,
 }: {
   pathSymbol?: string
+  webPageUrl?: string
   handlePathPush: (e: string) => void
 }): JSX.Element => {
   const { user, error: userError, isLoading } = useUser()
@@ -971,6 +1010,7 @@ const TestPage = ({
   const { data, error, loading } = useCardQuery({
     variables: { symbol: pathSymbol ?? '' },
   })
+  const { data: webpageData } = useWebpageCardQuery({ variables: { url: webPageUrl ?? '' } })
 
   const handleSymbol = (symbol: string) => {
     handlePathPush(symbol)
@@ -978,10 +1018,23 @@ const TestPage = ({
     // setSymbol(symbol)
     // console.log(symbol)
   }
+
+  if (user === undefined && !loading && meData === undefined && !meLoading) {
+    return (
+      <>
+        <a href="/api/auth/login">Login</a>
+        <span>以繼續瀏覽</span>
+      </>
+    )
+  }
+
+  if (loading || meLoading) {
+    return <div>Loading...</div>
+  }
+
   return (
     // <div>
     <SymbolContext.Provider value={{ symbol: pathSymbol ?? '' }}>
-      <div>{(user === undefined || meData === undefined) && <a href="/api/auth/login">Login</a>}</div>
       {/* <button
         onClick={() => {
           setSymbol('')
@@ -1032,6 +1085,13 @@ const TestPage = ({
       </button>
       {/* {console.log(data?.card)} */}
       {data && data.card && <CardItem card={data.card} handleSymbol={handleSymbol} />}
+      {webpageData && webpageData.webpageCard && (
+        <>
+          {console.log('getWebpage', webPageUrl)}
+          <CardItem card={webpageData.webpageCard} handleSymbol={handleSymbol} />
+        </>
+      )}
+      {!data?.card && !webpageData?.webpageCard && <BulletEditor />}
       {/* <BoardPage boardId={}/> */}
     </SymbolContext.Provider>
     // {/* </div> */}

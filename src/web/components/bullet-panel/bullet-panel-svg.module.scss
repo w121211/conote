@@ -1,0 +1,12 @@
+.svgContainer {
+  // position: absolute
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 28px;
+  width: 17px;
+  top: 6px;
+  svg {
+    fill: $gray-text;
+  }
+}

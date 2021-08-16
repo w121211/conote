@@ -656,17 +656,19 @@ h1.tickerTitle {
   padding: 3px 0;
   align-items: flex-start;
   font-family: initial;
-  // font-size: 14px;
-  // line-height: 24px;
-  // margin-left: 1.5em;
-  @media screen and (max-width: 500px) {
-    // margin-left: .em;
-  }
+
   &:hover {
-    // & > .hashTagBtn {
+    // & > .bulletPanel {
     //   visibility: visible;
     // }
   }
+  // font-size: 14px;
+  // line-height: 24px;
+  // margin-left: 1.5em;
+  // @media screen and (max-width: 500px) {
+  //   // margin-left: .em;
+  // }
+
   // .panel {
   //   display: inline-flex;
   //   position: absolute;
@@ -708,7 +710,25 @@ h1.tickerTitle {
     // margin-right: 0;
   }
 }
+.bulletPanelSibling {
+  width: 96vw;
+  height: 37px;
+  position: absolute;
+  left: -15vw;
+  &:hover {
+    & ~ .bulletPanel {
+      visibility: visible;
+    }
+  }
+}
+.bulletPanel {
+  visibility: hidden;
+  &:hover {
+    visibility: visible;
+  }
+}
 .bulletWrapper {
+  position: relative;
   flex-shrink: 0;
   flex-grow: 0;
   display: flex;
@@ -717,10 +737,23 @@ h1.tickerTitle {
   min-height: 2em;
   align-items: center;
   justify-content: center;
-}
-.oauthorName {
-  font-size: 12px;
-  color: $gray-text;
+  .bulletTooltip {
+    width: fit-content;
+
+    top: 28px;
+    bottom: 28px;
+    // display: none;
+    visibility: hidden;
+  }
+  &:hover {
+    .bulletTooltip {
+      // display: flex;
+      visibility: visible;
+    }
+    & ~ .bulletPanel {
+      visibility: visible;
+    }
+  }
 }
 .link {
   color: $text;
@@ -733,20 +766,6 @@ h1.tickerTitle {
     cursor: pointer;
     color: $secondaryHover;
     border-bottom: 1px solid $secondaryHover;
-  }
-}
-.hashTagBtn {
-  color: $text;
-  border-radius: 3px;
-  border: none;
-  margin: 0;
-  margin-left: 8px;
-  padding: 2px 10px;
-  // visibility: hidden;
-  &:hover {
-    cursor: pointer;
-    background-color: $secondaryHover;
-    color: white;
   }
 }
 .mirrorBullet {
@@ -762,4 +781,58 @@ h1.tickerTitle {
     font-family: 'Cantarell', sans-serif;
     font-size: 0.8em;
   }
+}
+.cardBodyItem {
+  & > ul:not(:first-child) {
+    margin-top: 3em;
+  }
+}
+.self {
+  font-size: 1.2em;
+  line-height: 1.5;
+  // color: $secondary;
+  font-weight: bold;
+}
+.mirrorTitle {
+  color: $secondary;
+  font-size: 1.2em;
+  font-weight: bold;
+  border-bottom: 1px solid $secondary;
+}
+.bulletContent {
+  .oauthorName {
+    font-size: 12px;
+    color: $gray-text;
+    // visibility: hidden;
+  }
+}
+.panelIcon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: $text;
+  border-radius: 3px;
+  border: none;
+  margin: 0;
+  background-color: $gray;
+
+  margin-right: 8px;
+  // padding: 2px 8px;
+  flex-shrink: 0;
+
+  // visibility: hidden;
+  svg {
+    width: 12px;
+    fill: $text;
+  }
+  // &:hover {
+  //   cursor: pointer;
+  //   // background-color: $secondaryHover;
+  //   // color: white;
+  // }
+}
+.panelElement {
+  margin: 4px;
 }

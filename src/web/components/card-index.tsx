@@ -25,9 +25,9 @@ function getTabUrl(): string | null {
   return url
 }
 
-const CardIndex = ({ mySymbol, rootPath }: { webPageUrl?: string; mySymbol: string; rootPath?: string }) => {
+const CardIndex = ({ mySymbol, webPageUrl }: { webPageUrl?: string; mySymbol?: string }) => {
   const pathRef = useRef<string[]>([])
-  // const [path, setPath] = useState<string[]>([])
+  const [path, setPath] = useState<string[]>([])
   // const [symbol, setSymbol] = useState('')
   // const [url, setUrl] = useState<string>('')
   const [prevPath, setPrevPath] = useState<string>('')
@@ -38,6 +38,7 @@ const CardIndex = ({ mySymbol, rootPath }: { webPageUrl?: string; mySymbol: stri
     //   return [...prev].slice(0, i + 1)
     // })
     pathRef.current = [...pathRef.current].slice(0, i + 1)
+    // console.log('handlePath', i + 1)
   }
   // const handleSymbol = (e: string) => {
   //   // setSymbol(e)
@@ -48,7 +49,9 @@ const CardIndex = ({ mySymbol, rootPath }: { webPageUrl?: string; mySymbol: stri
     //   // console.log(window.history)
     //   return [...prev, e]
     // })
-    pathRef.current = [...pathRef.current, e]
+    if (pathRef.current[pathRef.current.length - 1] !== e) {
+      pathRef.current = [...pathRef.current, e]
+    }
   }
 
   const handlePopState = (e: PopStateEvent) => {
@@ -58,12 +61,16 @@ const CardIndex = ({ mySymbol, rootPath }: { webPageUrl?: string; mySymbol: stri
       // newArr.pop()
 
       // setPath(newArr)
-      handlePath(e.state.idx)
-      console.log(e.state.idx, pathRef.current)
+      pathRef.current = [...pathRef.current].slice(0, e.state.idx + 1)
+      setPath(pathRef.current)
+      // handlePath(e.state.idx)
+      // console.log(e.state.idx, pathRef.current, pathRef.current.length)
+      console.log('back')
     }
     if (e.state.idx === pathRef.current.length) {
       // setPath([...path, decodeURIComponent(e.state.as.replace('/card/', ''))])
       pathRef.current = [...pathRef.current, decodeURIComponent(e.state.as.replace('/card/', ''))]
+      setPath(pathRef.current)
       console.log('forward')
     }
 
@@ -90,11 +97,23 @@ const CardIndex = ({ mySymbol, rootPath }: { webPageUrl?: string; mySymbol: stri
     )
   }, [])
 
-  if (prevPath !== mySymbol && prevPath === '') {
-    pathRef.current = [mySymbol]
-    setPrevPath(mySymbol)
+  if ((prevPath !== mySymbol || prevPath !== `[[${webPageUrl}]]`) && prevPath === '') {
+    if (mySymbol) {
+      pathRef.current = [mySymbol]
+      setPrevPath(mySymbol)
+    }
+    if (webPageUrl) {
+      pathRef.current = [`[[${webPageUrl}]]`]
+
+      setPrevPath(`[[${webPageUrl}]]`)
+    }
+    // console.log('[mySymbol]', mySymbol)
   }
 
+  useEffect(() => {
+    setPath(pathRef.current)
+    console.log('setPath')
+  }, [pathRef.current])
   // useEffect(() => {
   //   if (rootPath) {
   //     // window.history.pushState([rootPath], '')
@@ -131,13 +150,14 @@ const CardIndex = ({ mySymbol, rootPath }: { webPageUrl?: string; mySymbol: stri
 
   // console.log(path)
   // console.log(window.history)
+
   return (
     // <UserProvider>
-    <Layout path={pathRef.current} handlePath={handlePath}>
+    <Layout path={path} handlePath={handlePath}>
       {/* {window.location.protocol.includes('extension') ? (
         <CardPage pathSymbol={symbol} handlePathPush={handlePathPush} />
       ) : ( */}
-      <TestPage pathSymbol={mySymbol} handlePathPush={handlePathPush} />
+      <TestPage pathSymbol={mySymbol} webPageUrl={webPageUrl} handlePathPush={handlePathPush} />
       {/* // )} */}
     </Layout>
     // </UserProvider>

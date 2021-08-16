@@ -1,53 +1,64 @@
 import React, { useEffect, useState } from 'react'
-import { Poll } from '../../apollo/query.graphql'
+// import { Poll } from '../../apollo/query.graphql'
+
 import classes from './bar.module.scss'
 
-const BarChart = ({ pollData }: { pollData: Poll }) => {
-  const [myData, setMyData] = useState(pollData)
+const BarChart = ({
+  content,
+  value,
+  count,
+  total,
+  voted,
+
+  checked,
+}: {
+  // pollData?: Poll
+  content: string
+  value: number
+  total: number
+  count: number
+  voted: boolean
+
+  checked?: boolean
+}): JSX.Element => {
+  // const [myData, setMyData] = useState(pollData)
   const persentage = (count: number, total: number) => Math.round((count / total + Number.EPSILON) * 100) || 0
-  const total = myData.count.nVotes.length === 0 ? 0 : myData.count.nVotes.reduce((a, b) => a + b)
-  useEffect(() => {
-    setMyData(pollData)
-  }, [pollData])
+  // const total = myData?.count.nVotes.length === 0 ? 0 : myData?.count.nVotes.reduce((a, b) => a + b)
+  // useEffect(() => {
+  //   setMyData(pollData)
+  // }, [pollData])
+
   return (
-    <>
-      {myData.choices.map((e, i) => (
-        // <div key={i}>
-        <span className={` ${classes.vote} ${classes.text}`} key={i}>
-          <div
-            className={classes.voteColorBlock}
-            style={{
-              clipPath: ` polygon(0 0, ${persentage(myData.count.nVotes[i], total) + '%'} 0, ${
-                persentage(myData.count.nVotes[i], total) + '%'
-              } 100%,0 100%) `,
-            }}
-          >
-            <span className={classes.voteColorBlockText}>
-              {typeof e === 'string' && e.replace(/^<(.+)>$/g, '$1').toLowerCase()}
-              <span>
-                {persentage(myData.count.nVotes[i], total)}%({myData.count.nVotes[i] || 0})
-              </span>
-            </span>
-          </div>
-          <span className={classes.voteText}>
-            {typeof e === 'string' && e.replace(/^<(.+)>$/g, '$1').toLowerCase()}
+    <div className={classes.barChartWrapper}>
+      <span className={` ${classes.vote} ${classes.text} ${checked && classes.clicked}`}>
+        <div
+          className={`${classes.voteColorBlock} ${voted ? classes.voted : ''}`}
+          style={{
+            clipPath: `polygon(0% 0, ${persentage(count, total)}% 0, ${persentage(count, total)}% 100%,0% 100%) `,
+
+            // width: `${persentage(count, total)}%`,
+          }}
+        >
+          <span className={classes.voteColorBlockText}>
+            {content}
+            {/* {typeof e === 'string' && e.replace(/^<(.+)>$/g, '$1').toLowerCase()} */}
             <span>
-              {persentage(myData.count.nVotes[i], total)}%({myData.count.nVotes[i] || 0})
+              {persentage(count, total)}%({count || 0})
             </span>
           </span>
-          {/* <span className={quesClasses.voteColorBlockText}>{e.content}</span> */}
+        </div>
+        <span className={classes.voteText}>
+          {content}
+          {/* {typeof e === 'string' && e.replace(/^<(.+)>$/g, '$1').toLowerCase()} */}
+          <span>
+            {persentage(count, total)}%({count || 0})
+          </span>
         </span>
-        // {/* </div> */}
-        // <div className={classes.container} key={i}>
-        //   <div className={classes.barWrapper}>
-        //     <div className={classes.bar} style={{ width: `${persentage(pollData.count.nVotes[i], total) + '%'}` }} />
-        //   </div>
-        //   <span className={classes.number}>{`${persentage(pollData.count.nVotes[i], total)}% (${
-        //     pollData.count.nVotes[i]
-        //   })`}</span>
-        // </div>
-      ))}
-    </>
+        {/* <span className={quesClasses.voteColorBlockText}>{e.content}</span> */}
+      </span>
+
+      {/* ))} */}
+    </div>
   )
 }
 export default BarChart
