@@ -39,29 +39,18 @@ export type CustomText = {
 export type LabelInlineElement = {
   type: 'label'
   children: CustomText[]
-  symbol: string
 }
 
-/**
- * ul只允許包li child
- */
-export type UlElement = {
-  type: 'ul'
-  children: LiElement[]
-  fold?: true
+export type MirrorInlineElement = {
+  type: 'mirror'
+  children: CustomText[]
+
+  mirrorSymbol: string
 }
 
-/**
- * li只允許包2個child：[lc, ul?]
- */
-export type LiElement = {
-  type: 'li'
-  children: [LcElement, UlElement?]
-}
-
-export type LcElement = {
-  type: 'lc'
-  children: [LcHeadElement, LcBodyElement?]
+export type LcBodyElement = {
+  type: 'lc-body'
+  children: CustomText[]
 }
 
 /**
@@ -69,7 +58,7 @@ export type LcElement = {
  */
 export type LcHeadElement = Omit<BulletDraft, 'head' | 'children'> & {
   type: 'lc-head'
-  children: CustomText[]
+  children: (CustomText | LabelInlineElement | MirrorInlineElement)[]
 
   body?: string
   isEditingBody?: true
@@ -94,13 +83,31 @@ export type LcHeadElement = Omit<BulletDraft, 'head' | 'children'> & {
   newSymbol?: true // 找不到symbol，視為創新card
 }
 
-export type LcBodyElement = {
-  type: 'lc-body'
-  children: CustomText[]
+export type LcElement = {
+  type: 'lc'
+  children: [LcHeadElement, LcBodyElement?]
+}
+
+/**
+ * li只允許包2個child：[lc, ul?]
+ */
+export type LiElement = {
+  type: 'li'
+  children: [LcElement, UlElement?]
+}
+
+/**
+ * ul只允許包li child
+ */
+export type UlElement = {
+  type: 'ul'
+  children: LiElement[]
+  fold?: true
 }
 
 type CustomElement =
   | LabelInlineElement
+  | MirrorInlineElement
   | UlElement
   | LiElement
   | LcElement
