@@ -9,3 +9,31 @@
   list-style: none;
   align-items: flex-start;
 }
+.bulletWrapper {
+  position: relative;
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: flex;
+  width: 24px;
+  margin-right: 4px;
+  min-height: 2em;
+  align-items: center;
+  justify-content: center;
+  .bulletTooltip {
+    width: fit-content;
+
+    top: 28px;
+    bottom: 28px;
+    // display: none;
+    visibility: hidden;
+  }
+  &:hover {
+    .bulletTooltip {
+      // display: flex;
+      visibility: visible;
+    }
+    & ~ .bulletPanel {
+      visibility: visible;
+    }
+  }
+}

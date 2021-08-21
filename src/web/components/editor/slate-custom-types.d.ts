@@ -19,6 +19,7 @@ export type CustomText = {
   code?: true
   text: string
   type?: string // stream type
+  placeholder?: boolean
 }
 
 // export type BulletBodyInlineElement = {
@@ -95,6 +96,7 @@ type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
 type CustomRange = BaseRange & {
   type?: string
+  placeholder?: boolean
 }
 
 declare module 'slate' {

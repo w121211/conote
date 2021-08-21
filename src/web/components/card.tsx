@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React, { FormEvent, useCallback, useEffect, useMemo, useState, createContext } from 'react'
+import React, { FormEvent, useCallback, useEffect, useMemo, useState, createContext, useRef } from 'react'
 import Link from 'next/link'
 import router from 'next/router'
 import { ApolloClient, ApolloError, useApolloClient } from '@apollo/client'
@@ -736,6 +736,20 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
   const [pinBoardBuysell, setPinBoardBuysell] = useState<PinBoard | undefined>()
   const [edit, setEdit] = useState(false)
   const [bodyTree, setBodyTree] = useState<BulletDraft>() // tree root不顯示
+
+  const contentRef = useRef<HTMLDivElement>(null)
+  const handleClickOutOfEditor = (e: MouseEvent) => {
+    if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
+      setEdit(false)
+    }
+  }
+  useEffect(() => {
+    document.body.addEventListener('click', handleClickOutOfEditor, true)
+    return () => {
+      document.body.removeEventListener('click', handleClickOutOfEditor), true
+    }
+  }, [])
+
   // const [bodyChildren, setBodyChildren] = useState<BulletDraft[]>(bodyRootDemo.children ?? [])
   // const [bodyChildren, setBodyChildren] = useState<BulletDraft[]>([])
   // const [editorValue, setEditorValue] = useState<Descendant[]>([])
@@ -777,7 +791,7 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
       console.log(lis)
 
       setEditorInitialValue(lis)
-      setEdit(false) // 需要重設來trigger editor rerender
+      // setEdit(false) // 需要重設來trigger editor rerender
     }
 
     _parseAndBuildCard()
@@ -900,7 +914,7 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
       )} */}
       {/* {console.log(pinBoard)} */}
       {/* <h3>Body</h3> */}
-      <button
+      {/* <button
         data-type="secondary"
         onClick={() => {
           if (edit) onCloseEditor()
@@ -908,7 +922,8 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
         }}
       >
         編輯
-      </button>
+      </button> */}
+      <span>{edit ? '編輯模式' : '閱讀模式'}</span>
 
       {!edit && editorInitialValue && (
         <button
@@ -924,54 +939,59 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
 
       {error && <div>Submit fail...</div>}
 
-      {
-        self ? (
-          edit ? (
-            <BulletEditor
-              initialValue={editorInitialValue}
-              oauthorName={card.link?.oauthorName ?? undefined}
-              sourceUrl={card.link?.url}
-              withMirror={card.type === 'WEBPAGE'}
-              // boardId={pinBoardBuysell.boardId.toString()}
-              // pollId={pinBoardBuysell.pollId?.toString()}
-            />
-          ) : (
-            <CardBodyItem card={card} self={self} mirrors={mirrors} handleSymbol={handleSymbol} />
-          )
-        ) : null
-        // <ul className={classes.bulletUl}>
-        //   {mirrors?.map((e, i) => (
-        //     <>
-        //       {/* {card.type === 'WEBPAGE' && ( */}
-        //       <>
-        //         {e.children && e.children.length !== 0 && (
-        //           <span className={classes.tickerTitle}>
-        //             {e.head === card.symbol ? 'Self' : markToText(e.head, handleSymbol)}
-        //           </span>
-        //         )}
-        //         {e.children &&
-        //           e.children.map((el, i) => (
-        //             <BulletItem
-        //               key={i}
-        //               node={el}
-        //               depth={0}
-        //               type={card.type}
-        //               handleSymbol={handleSymbol}
-        //               cardId={card.id}
-        //             />
-        //           ))}
-        //       </>
-        //       {/* )} */}
-        //       {/* {card.type === 'TICKER' && <BulletItem key={i} node={e} />} */}
-        //     </>
-        //   ))}
-        // </ul>
-      }
+      <div onClick={() => setEdit(true)} ref={contentRef}>
+        {console.log(editorInitialValue)}
+        {
+          self ? (
+            <>
+              <BulletEditor
+                initialValue={editorInitialValue}
+                oauthorName={card.link?.oauthorName ?? undefined}
+                sourceUrl={card.link?.url}
+                withMirror={card.type === 'WEBPAGE'}
+                readOnly={!edit}
+                // boardId={pinBoardBuysell.boardId.toString()}
+                // pollId={pinBoardBuysell.pollId?.toString()}
+              />
+              <CardBodyItem card={card} self={self} mirrors={mirrors} handleSymbol={handleSymbol} />
+            </>
+          ) : // ) : (
+          // )
+          null
+          // <ul className={classes.bulletUl}>
+          //   {mirrors?.map((e, i) => (
+          //     <>
+          //       {/* {card.type === 'WEBPAGE' && ( */}
+          //       <>
+          //         {e.children && e.children.length !== 0 && (
+          //           <span className={classes.tickerTitle}>
+          //             {e.head === card.symbol ? 'Self' : markToText(e.head, handleSymbol)}
+          //           </span>
+          //         )}
+          //         {e.children &&
+          //           e.children.map((el, i) => (
+          //             <BulletItem
+          //               key={i}
+          //               node={el}
+          //               depth={0}
+          //               type={card.type}
+          //               handleSymbol={handleSymbol}
+          //               cardId={card.id}
+          //             />
+          //           ))}
+          //       </>
+          //       {/* )} */}
+          //       {/* {card.type === 'TICKER' && <BulletItem key={i} node={e} />} */}
+          //     </>
+          //   ))}
+          // </ul>
+        }
+      </div>
       {/* <button
       // onClick={() => {}}
       >
-        Submit
-      </button> */}
+      Submit
+    </button> */}
       {/* {pinBoard && (
         <BoardPage
           boardId={pinBoard.boardId.toString()}

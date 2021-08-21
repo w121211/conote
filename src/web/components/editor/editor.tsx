@@ -1,13 +1,15 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
 import Modal from 'react-modal'
 import { useApolloClient } from '@apollo/client'
-import { Editor, Transforms, createEditor, Node, NodeEntry } from 'slate'
+import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path } from 'slate'
 import {
+  DefaultLeaf,
   Editable,
   ReactEditor,
   RenderElementProps,
   RenderLeafProps,
   Slate,
+  useSelected,
   useSlateStatic,
   withReact,
 } from 'slate-react'
@@ -25,6 +27,7 @@ import BulletSvg from '../bullet-svg/bullet-svg'
 import classes from './editor.module.scss'
 import HeaderForm from '../header-form/header-form'
 import Popover from '../popover/popover'
+import MyTooltip from '../my-tooltip/my-tooltip'
 
 const initialValueDemo: LiElement[] = [
   {
@@ -219,45 +222,57 @@ const initialValueDemo: LiElement[] = [
 //   )
 // }
 
-const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
-  let style: React.CSSProperties = {}
-
-  switch (leaf.type) {
-    case 'sect-symbol': {
-      style = { fontWeight: 'bold' }
-      break
-    }
-    case 'multiline-marker':
-    case 'inline-marker': {
-      style = { color: 'red' }
-      break
-    }
-    case 'inline-value':
-    case 'line-value': {
-      style = { color: 'blue' }
-      break
-    }
-    case 'line-mark':
-    case 'inline-mark': {
-      style = { color: 'orange' }
-      break
-    }
-    case 'mark':
-    case 'ticker':
-    case 'topic': {
-      style = { color: 'brown' }
-      break
-    }
-    case 'stamp': {
-      style = { color: 'yellow' }
-      break
-    }
+const Leaf = (props: RenderLeafProps) => {
+  const { attributes, children, leaf } = props
+  // let style: React.CSSProperties = {}
+  if (leaf.placeholder) {
+    return (
+      <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
+        <span {...attributes}>
+          {/* <DefaultLeaf {...props} /> */}
+          {children}
+        </span>
+        <span style={{ opacity: 0.3, position: 'absolute', top: 0 }} contentEditable={false}>
+          Type / to open menu
+        </span>
+      </span>
+    )
   }
+  // switch (leaf.type) {
+  //   case 'sect-symbol': {
+  //     style = { fontWeight: 'bold' }
+  //     break
+  //   }
+  //   case 'multiline-marker':
+  //   case 'inline-marker': {
+  //     style = { color: 'red' }
+  //     break
+  //   }
+  //   case 'inline-value':
+  //   case 'line-value': {
+  //     style = { color: 'blue' }
+  //     break
+  //   }
+  //   case 'line-mark':
+  //   case 'inline-mark': {
+  //     style = { color: 'orange' }
+  //     break
+  //   }
+  //   case 'mark':
+  //   case 'ticker':
+  //   case 'topic': {
+  //     style = { color: 'brown' }
+  //     break
+  //   }
+  //   case 'stamp': {
+  //     style = { color: 'yellow' }
+  //     break
+  //   }
+  // }
 
   return (
-    <span {...attributes} style={style}>
-      {children}
-    </span>
+    // <span {...attributes} style={style}>
+    <span {...attributes}>{children}</span>
   )
 }
 
@@ -389,9 +404,9 @@ const LcMirror = (
 
   return (
     <div {...attributes}>
-      <li>
-        <span style={style}>{children}</span>
-      </li>
+      {/* <li> */}
+      <span style={style}>{children}</span>
+      {/* </li> */}
 
       {/* <div contentEditable={false} style={{ color: 'green' }}>
         {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>}
@@ -458,9 +473,9 @@ const Lc = (props: RenderElementProps & { element: LcElement; oauthorName?: stri
 
   return (
     <div {...attributes}>
-      <li>
-        <span>{children}</span>
-      </li>
+      {/* <li> */}
+      <span>{children}</span>
+      {/* </li> */}
 
       {/* <div contentEditable={false} style={{ color: 'green' }}>
         {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>}
@@ -474,8 +489,8 @@ const Lc = (props: RenderElementProps & { element: LcElement; oauthorName?: stri
   )
 }
 
-const Li = (props: RenderElementProps & { element: LiElement }) => {
-  const { attributes, children, element } = props
+const Li = (props: RenderElementProps & { element: LiElement; oauthorName?: string }) => {
+  const { attributes, children, element, oauthorName } = props
 
   const [hasUl, setHasUl] = useState(false)
   const [ulFolded, setUlFolded] = useState<true | undefined>()
@@ -501,6 +516,7 @@ const Li = (props: RenderElementProps & { element: LiElement }) => {
       <div contentEditable={false}>
         {hasUl ? (
           <span
+            className={classes.bulletWrapper}
             onClick={event => {
               event.preventDefault()
               const path = ReactEditor.findPath(editor, element)
@@ -516,10 +532,22 @@ const Li = (props: RenderElementProps & { element: LiElement }) => {
             }}
           >
             <BulletSvg />
+            {oauthorName ? (
+              <MyTooltip className={classes.bulletTooltip}>
+                <span className={classes.oauthorName}> @{oauthorName}</span>
+              </MyTooltip>
+            ) : null}
             {/* Fold */}
           </span>
         ) : (
-          <BulletSvg />
+          <span className={classes.bulletWrapper}>
+            <BulletSvg />
+            {oauthorName ? (
+              <MyTooltip className={classes.bulletTooltip}>
+                <span className={classes.oauthorName}> @{oauthorName}</span>
+              </MyTooltip>
+            ) : null}
+          </span>
         )}
       </div>
 
@@ -534,9 +562,9 @@ const Ul = (props: RenderElementProps & { element: UlElement }) => {
   const style: CSSProperties = element.folded ? { display: 'none' } : {}
   return (
     <div {...attributes}>
-      <ul className={classes.bulletUl} style={style}>
+      <div className={classes.bulletUl} style={style}>
         {children}
-      </ul>
+      </div>
     </div>
   )
 }
@@ -558,7 +586,7 @@ const CustomElement = (
     return <Lc {...{ attributes, children, element, oauthorName, sourceUrl }} />
   }
   if (isLi(element)) {
-    return <Li {...{ attributes, children, element }} />
+    return <Li {...{ attributes, children, element, oauthorName }} />
   }
   if (isUl(element)) {
     return <Ul {...{ attributes, children, element }} />
@@ -571,6 +599,7 @@ export const BulletEditor = (props: {
   oauthorName?: string
   sourceUrl?: string
   withMirror?: boolean
+  readOnly?: boolean
   // pollId: string
   // boardId: string
 }): JSX.Element => {
@@ -579,11 +608,16 @@ export const BulletEditor = (props: {
     oauthorName,
     sourceUrl,
     withMirror: isWithMirror = false,
+    readOnly,
     // pollId,
     // boardId,
   } = props
-
+  const [prevValue, setPrevValue] = useState<LiElement[] | undefined>()
   const [value, setValue] = useState<LiElement[]>(initialValue)
+  if (initialValue !== prevValue) {
+    setValue(initialValue)
+    setPrevValue(initialValue)
+  }
   // const editor = useMemo(
   //   // () => withAutoComplete(withBullet(withHistory(withReact(createEditor())))),
   //   // () => withList(withHistory(withReact(createEditor()))),
@@ -601,60 +635,60 @@ export const BulletEditor = (props: {
     [],
   )
 
-  // function decorate([node, path]: NodeEntry): CustomRange[] {
-  //   const ranges: CustomRange[] = []
-  //   if (editor.selection != null) {
-  //     if (
-  //       !Editor.isEditor(node) &&
-  //       Editor.string(editor, [path[0]]) === "" &&
-  //       Range.includes(editor.selection, path) &&
-  //       Range.isCollapsed(editor.selection)
-  //     ) {
-  //       return [
-  //         {
-  //           ...editor.selection,
-  //           placeholder: true,
-  //         },
-  //       ];
-  //     }
-  //   }
+  function decorate([node, path]: NodeEntry): CustomRange[] {
+    const ranges: CustomRange[] = []
+    if (editor.selection != null) {
+      if (
+        !Editor.isEditor(node) &&
+        // Editor.string(editor, [path[0]]) === '' &&
+        Editor.string(editor, path) === '' &&
+        Range.includes(editor.selection, path) &&
+        Range.isCollapsed(editor.selection)
+      ) {
+        // ranges.push({
+        //   ...editor.selection,
+        //   placeholder: true,
+        // })
+        console.log(editor.selection)
+        return [{ ...editor.selection, placeholder: true }]
+      }
+    }
+    //   if (!Text.isText(node)) {
+    //     return ranges
+    // }
 
-  // //   if (!Text.isText(node)) {
-  // //     return ranges
-  // // }
+    //   function getLength(token: string | Token): number {
+    //     if (typeof token === 'string') {
+    //       return token.length
+    //     } else if (typeof token.content === 'string') {
+    //       return token.content.length
+    //     } else if (Array.isArray(token.content)) {
+    //       return token.content.reduce((l, t) => l + getLength(t), 0)
+    //     } else {
+    //       return 0
+    //     }
+    //   }
 
-  //   // function getLength(token: string | Token): number {
-  //   //   if (typeof token === 'string') {
-  //   //     return token.length
-  //   //   } else if (typeof token.content === 'string') {
-  //   //     return token.content.length
-  //   //   } else if (Array.isArray(token.content)) {
-  //   //     return token.content.reduce((l, t) => l + getLength(t), 0)
-  //   //   } else {
-  //   //     return 0
-  //   //   }
-  //   // }
+    // const tokens = tokenize(node.text, LINE_VALUE_GRAMMAR)
+    // let start = 0
 
-  //   // const tokens = tokenize(node.text, LINE_VALUE_GRAMMAR)
-  //   // let start = 0
+    // for (const token of tokens) {
+    //   const length = getLength(token)
+    //   const end = start + length
 
-  //   // for (const token of tokens) {
-  //   //   const length = getLength(token)
-  //   //   const end = start + length
+    //   if (typeof token !== 'string') {
+    //     ranges.push({
+    //       // [token.type]: true,
+    //       type: token.type,
+    //       anchor: { path, offset: start },
+    //       focus: { path, offset: end },
+    //     })
+    //   }
+    //   start = end
+    // }
 
-  //   //   if (typeof token !== 'string') {
-  //   //     ranges.push({
-  //   //       // [token.type]: true,
-  //   //       type: token.type,
-  //   //       anchor: { path, offset: start },
-  //   //       focus: { path, offset: end },
-  //   //     })
-  //   //   }
-  //   //   start = end
-  //   // }
-
-  //   return ranges
-  // }
+    return ranges
+  }
 
   const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
   const _withListOnKeyDown = useCallback((event: React.KeyboardEvent) => {
@@ -670,7 +704,7 @@ export const BulletEditor = (props: {
   //     setSuggestions(null)
   //   }
   // }, [searchAllResult])
-
+  // console.log(initialValue)
   return (
     <div>
       <Slate
@@ -688,8 +722,8 @@ export const BulletEditor = (props: {
         <Editable
           autoCorrect="false"
           renderElement={renderElement}
+          decorate={decorate}
           renderLeaf={renderLeaf}
-          // decorate={decorate}
           onKeyDown={event => {
             _withListOnKeyDown(event)
             // if (search) {
@@ -698,6 +732,7 @@ export const BulletEditor = (props: {
             //   onKeyDownForBullet(event)
             // }
           }}
+          readOnly={readOnly}
         />
         {/* {searchPanel} */}
         {/* {search && (
