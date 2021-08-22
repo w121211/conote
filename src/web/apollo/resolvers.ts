@@ -11,7 +11,7 @@ import {
   attachLatestHeadBody,
   CardBodyContent,
   createCardBody,
-  getCurrentCardBody,
+  getLatestCardBody,
   getOrCreateCardBySymbol,
   getOrCreateCardByUrl,
 } from '../lib/models/card'
@@ -393,8 +393,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { userId } = isAuthenticated(req, res)
     const [body] = await createCardBody({
       cardId: parseInt(cardId),
-      self: data.self,
-      mirrors: data.mirrors ?? undefined,
+      value: data.self, 
       userId,
     })
     // console.log(body)
@@ -404,7 +403,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   async createHashtag(_parent, { cardId, bulletId, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
 
-    const body = await getCurrentCardBody(parseInt(cardId))
+    const body = await getLatestCardBody(parseInt(cardId))
     if (body === null) throw '找不到對應的card body'
     const content: CardBodyContent = JSON.parse(body.content)
 
@@ -413,14 +412,14 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
         text: data.hashtag,
         op: 'CREATE',
       },
-      root: content.self,
+      root: content.value,
       bulletId,
       cardId: parseInt(cardId),
       userId,
     })
     const updatedContent: CardBodyContent = {
       ...content,
-      self: updatedRoot,
+      value: updatedRoot,
     }
     const updatedBody = await prisma.cardBody.update({
       data: {

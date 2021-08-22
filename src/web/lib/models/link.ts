@@ -14,7 +14,7 @@ function toOauthorName(domain: string, domainAuthorName: string) {
 }
 
 export function linkToSymbol(link: Link): string {
-  return `[[${link.url}]]`
+  return `@${link.url}`
 }
 
 /**

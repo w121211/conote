@@ -1,7 +1,7 @@
 import { Descendant, BaseEditor, BaseRange, Node } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-import { BulletDraft, RootBullet } from '../../lib/bullet/types'
+import { BulletDraft, Hashtag, HashtagDraft, RootBullet } from '../../lib/bullet/types'
 
 export type CommentInput = {
   boardCode: !PinBoardCode
@@ -39,24 +39,12 @@ export type CustomText = {
 export type LabelInlineElement = {
   type: 'label'
   children: CustomText[]
-  symbol: string
 }
 
-/**
- * ul只允許包li child
- */
-export type UlElement = {
-  type: 'ul'
-  children: LiElement[]
-  folded?: true
-}
-
-/**
- * li只允許包2個child：[lc, ul?]
- */
-export type LiElement = {
-  type: 'li'
-  children: [LcElement, UlElement?]
+export type HashtagInlineElement = {
+  type: 'hashtag'
+  children: CustomText[]
+  hashtag?: Hashtag | HashtagDraft
 }
 
 /**
@@ -64,7 +52,7 @@ export type LiElement = {
  */
 export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
   type: 'lc'
-  children: CustomText[]
+  children: (CustomText | LabelInlineElement)[]
 
   body?: string
   editingBody?: true
@@ -87,6 +75,23 @@ export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
   symbol?: string
   rootBullet?: RootBullet // 只有root會存root bullet，用此幫助serialize
   newSymbol?: true // 找不到symbol，視為創新card
+}
+
+/**
+ * li只允許包2個child：[lc, ul?]
+ */
+export type LiElement = {
+  type: 'li'
+  children: [LcElement, UlElement?]
+}
+
+/**
+ * ul只允許包li child
+ */
+export type UlElement = {
+  type: 'ul'
+  children: LiElement[]
+  folded?: true
 }
 
 type CustomElement = LabelInlineElement | UlElement | LiElement | LcElement

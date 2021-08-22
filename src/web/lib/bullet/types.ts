@@ -1,100 +1,87 @@
-import { BoardStatus } from '@prisma/client'
-import { PinBoardCode } from '../models/card'
+// import { BoardStatus } from '@prisma/client'
+// import { PinBoardCode } from '../models/card'
 
-// type Nullable<T> = {
-//   [P in keyof T]?: T[P] | null
-// }
+import { Hashtag, HashtagDraft, HashtagGroup, HashtagGroupDraft } from './hashtag'
 
-// current Bullet {id, ....} -> BulletDraft {op: 'CREATE', ....}  -> {id: 123, ....}
-
-export type HashtagOperation = 'CREATE' | 'UPDATE' | 'DELETE'
-
-export type Hashtag = {
-  userId: string
-  boardId: number
-  boardStatus: BoardStatus
-  text: string
-  linkBullet?: true // 特殊hashtag，用於表示bullet的board/poll
-}
-
-export type HashtagDraft = Partial<Hashtag> & {
-  text: string
-  op: HashtagOperation // 編輯狀態
-}
+/**
+ * Bullet operation flow:
+ * - Create: draft: BulletDraft {op: 'CREATE', ....}  -> next: Bullet {op: 'CREATE', draft, id, ....}
+ * - Update: current: Bullet {id, ....} -> draft: BulletDraft {id, draft, op: 'UPDATE', ....}  -> next: Bullet {id, op: 'UPDATE', ....}
+ * - Non-op: current: Bullet {id, op, ....} -> draft: BulletDraft {id, op, ....}  -> next: Bullet {id, op, ....} (會和 current 值相同)
+ */
 
 export type BulletOperation = 'CREATE' | 'MOVE' | 'UPDATE' | 'DELETE' | 'UPDATE_MOVE'
 
 export type Bullet = {
   id: number
-  timestamp: number // 該次的commit時間點，用於判斷哪些是本次的commit
-  userIds: string[] // 最後一個為目前的user
+  timestamp: number // commit 的時間點，有修改時才會更新，沒修改時會沿用之前的時間，用於判斷本次 commit 包含哪些 bullet
+  userIds: string[] // 最後一個為最新修改此 bullet 的 user
 
   head: string
   body?: string
-  hashtags?: Hashtag[]
-  children: Bullet[] // 強制要有，空的表示為無children
+  children: Bullet[] // 空 array 表示為無children
 
-  op?: BulletOperation // 記錄編輯狀態，用於提醒
+  op?: BulletOperation // 記錄編輯狀態，用於 revision TODO: 若沒修改時 op 會移除嗎？？？
   prevHead?: string
   prevBody?: string
 
   placeholder?: string
   sourceUrl?: string
   oauthorName?: string
-  boardId?: number // 連結到一個board，例如提問
-  pollId?: number // 連結到一個poll
-  commentId?: number // 連結到一個comment
-  voteId?: number // 連結到一個vote
 
   freeze?: true // 無法變動
   freezeChildren?: true // 無法新增child
-  keyvalue?: true // 用key-value的方式呈現
-  valueBoolean?: true // body必須是boolean
-  valueArray?: true // body必須是string array
-  board?: true
-  poll?: true
-  pollChoices?: string[]
 
-  pin?: true
-  pinCode?: PinBoardCode
+  mirror?: true
+
+  hashtags?: (Hashtag | HashtagGroup)[] // injected, 不會儲存
+
+  // board?: true
+  // poll?: true
+  // pollChoices?: string[]
+  // pin?: true
+  // pinCode?: PinBoardCode
+  // boardId?: number // 連結到一個board，例如提問
+  // pollId?: number // 連結到一個poll
+  // commentId?: number // 連結到一個comment
+  // voteId?: number // 連結到一個vote
 
   childTemplate?: Omit<Bullet, 'id'>
 
-  headValidator?: string
-  bodyValidator?: string
-
   path?: number[] // node位置，計算時使用，不儲存
-}
 
-// export type BulletChildless = Omit<Bullet, 'children'>
+  // Next
+  headValueChecker?: string
+  bodyValueChecker?: string
+
+  // Consider to remove
+  keyvalue?: true // 用key-value的方式呈現
+  valueBoolean?: true // body必須是boolean
+  valueArray?: true // body必須是string array
+}
 
 export type BulletDraft = Omit<Partial<Bullet>, 'children' | 'hashtags'> & {
   head: string
-  hashtags?: (Hashtag | HashtagDraft)[]
-  // children?: BulletDraft[] | null
-  children: BulletDraft[]
+  hashtags?: (Hashtag | HashtagDraft | HashtagGroup | HashtagGroupDraft)[]
+  children: BulletDraft[] // 視所有的 tree 都為 BulletDraft，好處是在 type 上可以更容易處理，壞處是無法區分哪個有修改哪個沒有 TODO: 更好的區分
 
   // 用於輔助顯示，不會直接影響
-  draft?: true // 表示該值有修改（搭配op）
+  draft?: true // 表示此 bullet 有被修改，搭配 op 做更新，用於區隔沒有修改的 bullet（因為即便是未修改的 bullet，type 仍然是 BulletDraft)
   error?: string
   createCard?: true // 為新創的card
 }
 
-type BaseRoot = {
+type RootBulletBase = {
   root: true
-  symbol: string // 用於記錄這個card
-  self?: true // 非mirror
-  mirror?: true // 是mirror
-  cardBodyId?: number // mirror時，可能不是最新的card body
+  symbol: string // 記錄此 card symbol
+  // self?: true // 非mirror
+  // mirror?: true // 是mirror
+  // cardBodyId?: number // mirror時，可能不是最新的card body
 }
 
-export type RootBullet = BaseRoot & Bullet
+export type RootBullet = RootBulletBase & Bullet
 
-export type RootBulletChildless = Omit<RootBullet, 'children'> & {
-  children: []
-}
-
-export type RootBulletDraft = BaseRoot & BulletDraft
+export type RootBulletDraft = RootBulletBase & BulletDraft
 
 // export function hasCardSymbol(node: BulletDraft): node is BulletDraft & Required<Pick<BulletDraft, 'cardSymbol'>> {
 //   return 'cardSymbol' in node

@@ -15,7 +15,7 @@ import { withHistory } from 'slate-history'
 import { editorValue } from '../../apollo/cache'
 import { RootBullet } from '../../lib/bullet/types'
 import { createAndParseCard, queryAndParseCard } from '../card'
-import { LcElement, LiElement, UlElement } from './slate-custom-types'
+import { LabelInlineElement, LcElement, LiElement, UlElement } from './slate-custom-types'
 import { Serializer } from './serializer'
 import { isLc, isLi, isLiArray, isUl, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { withMirror } from './with-mirror'
@@ -29,8 +29,35 @@ import Popover from '../popover/popover'
 const initialValueDemo: LiElement[] = [
   {
     type: 'li',
-    children: [{ type: 'lc', body: '11', error: 'warning', placeholder: 'placeholder', children: [{ text: '11' }] }],
+    children: [
+      {
+        type: 'lc',
+        body: '11',
+        error: 'warning',
+        placeholder: 'placeholder',
+        children: [
+          { text: 'abcdef' },
+          { text: 'abcdef' },
+          { type: 'label', children: [{ text: '#abc' }] },
+          { text: '' },
+        ],
+      },
+    ],
   },
+
+  {
+    type: 'li',
+    children: [
+      {
+        type: 'lc',
+        body: '11',
+        error: 'warning',
+        placeholder: 'placeholder',
+        children: [{ text: 'abcdef' }, { text: 'abcdef' }],
+      },
+    ],
+  },
+
   {
     type: 'li',
     children: [
@@ -313,6 +340,8 @@ const useAuthorSwitcher = (props: { oauthorName?: string }): [string, JSX.Elemen
   return [author, switcher]
 }
 
+// const Mirror = () => {}
+
 const LcMirror = (
   props: RenderElementProps & {
     element: LcElement
@@ -536,6 +565,23 @@ const Ul = (props: RenderElementProps & { element: UlElement }) => {
   )
 }
 
+const Label = (
+  props: RenderElementProps & {
+    element: LabelInlineElement
+    oauthorName?: string
+    sourceUrl?: string
+    // pollId: string
+    // boardId: string
+  },
+) => {
+  const { attributes, children, element, oauthorName, sourceUrl } = props
+  return (
+    <span {...attributes} style={{ color: 'red' }}>
+      {children}
+    </span>
+  )
+}
+
 const CustomElement = (
   props: RenderElementProps & {
     oauthorName?: string
@@ -546,6 +592,11 @@ const CustomElement = (
   },
 ) => {
   const { attributes, children, element, oauthorName, sourceUrl, withMirror } = props
+  switch (element.type) {
+    case 'label':
+      return <Label {...{ attributes, children, element, oauthorName, sourceUrl }} />
+  }
+
   if (isLc(element)) {
     if (element.root && withMirror) {
       return <LcMirror {...{ attributes, children, element, oauthorName, sourceUrl }} />
@@ -601,6 +652,34 @@ const CustomElement = (
 //   return ranges
 // }
 
+const withLabel = (editor: Editor): Editor => {
+  const { insertData, insertText, isInline } = editor
+
+  editor.isInline = element => {
+    return element.type === 'label' ? true : isInline(element)
+  }
+
+  // editor.insertText = text => {
+  //   if (text && isUrl(text)) {
+  //     wrapLink(editor, text)
+  //   } else {
+  //     insertText(text)
+  //   }
+  // }
+
+  // editor.insertData = data => {
+  //   const text = data.getData('text/plain')
+
+  //   if (text && isUrl(text)) {
+  //     wrapLink(editor, text)
+  //   } else {
+  //     insertData(data)
+  //   }
+  // }
+
+  return editor
+}
+
 export const BulletEditor = (props: {
   initialValue?: LiElement[]
   oauthorName?: string
@@ -626,9 +705,12 @@ export const BulletEditor = (props: {
   //   () => withMirror(withOp(withList(withHistory(withReact(createEditor()))))),
   //   [],
   // )
-  const editor = isWithMirror
-    ? useMemo(() => withMirror(withOp(withList(withHistory(withReact(createEditor()))))), [])
-    : useMemo(() => withOp(withList(withHistory(withReact(createEditor())))), [])
+  // const editor = isWithMirror
+  //   ? useMemo(() => withMirror(withOp(withList(withHistory(withReact(createEditor()))))), [])
+  //   : useMemo(() => withOp(withList(withHistory(withReact(createEditor())))), [])
+
+  const editor = useMemo(() => withLabel(withOp(withList(withHistory(withReact(createEditor()))))), [])
+
   const renderElement = useCallback(
     (props: RenderElementProps) => (
       <CustomElement {...{ ...props, oauthorName, sourceUrl, withMirror: isWithMirror }} />
@@ -650,8 +732,11 @@ export const BulletEditor = (props: {
   //   }
   // }, [searchAllResult])
 
+  const [readonly, setReadonly] = useState(false)
+
   return (
     <div>
+      <button onClick={() => setReadonly(!readonly)}>Readonly {readonly ? 'Y' : 'N'}</button>
       <Slate
         editor={editor}
         value={value}
@@ -668,6 +753,7 @@ export const BulletEditor = (props: {
           autoCorrect="false"
           renderElement={renderElement}
           renderLeaf={renderLeaf}
+          readOnly={readonly}
           // decorate={decorate}
           onKeyDown={event => {
             _withListOnKeyDown(event)

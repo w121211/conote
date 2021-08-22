@@ -1,5 +1,7 @@
+import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
+import { cloneDeep } from '@apollo/client/utilities'
 import { Card, CardBody, CardHead, Link, PrismaClient } from '@prisma/client'
 import { Editor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../../packages/fetcher/src'
@@ -14,7 +16,6 @@ import {
 } from '../../lib/models/card'
 import { createOauthorVote } from '../../lib/models/vote'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
-import { cloneDeep } from '@apollo/client/utilities'
 
 const IGNORE_FILE_STARTS_WITH = '_'
 
@@ -78,69 +79,72 @@ async function insertMarkerlines(
 ): Promise<RootBulletDraft> {
   const _root = cloneDeep(root)
 
+  async function _insertNeatReply(e: Markerline) {
+    if (!e.neatReply) throw new Error('非neatReply')
+    if (!e.src) throw new Error('缺src，無法創neat-reply')
+    if (!e.stampId) throw new Error('缺stampId，無法創neat-reply')
+    if (!e.pollChoices) throw new Error('缺pollChoices，無法創neat-reply')
+    if (e.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1，無法創neat-reply')
+    if (!e.nestedCard) throw new Error('缺nestedCard，無法創neat-reply')
+    if (!e.oauthor) throw new Error('缺oauthor，無法創neat-reply')
+
+    // 取得並檢查choice-index
+    const choice = e.pollChoices[0]
+    let choiceIdx: number | undefined
+    for (const e of NEAT_REPLY_CHOICE) {
+      if (e.options.indexOf(choice)) {
+        choiceIdx = e.choiceIdx
+        break
+      }
+    }
+    if (choiceIdx === undefined) {
+      console.error(e)
+      throw new Error('所給的vote-choice非預設的那幾個')
+    }
+
+    // 取得node
+    const node = search({ node: _root, depth: 0, byPinCode: 'BUYSELL' })
+    if (node === null) {
+      throw new Error('找不到buysell的node')
+    }
+    if (node.boardId === undefined || node.pollId === undefined) {
+      console.error(node)
+      throw new Error('node需要boardId, pollId才能創neat-reply')
+    }
+
+    const vote = await createOauthorVote({
+      choiceIdx,
+      pollId: node.pollId,
+      oauthorName: e.oauthor,
+      userId,
+    })
+    const comment = await prisma.comment.create({
+      data: {
+        content: `${e.str} ^[[${e.src}]]`,
+        user: { connect: { id: userId } },
+        oauthor: { connect: { name: e.oauthor } },
+        count: { create: {} },
+        board: { connect: { id: node.boardId } },
+        vote: { connect: { id: vote.id } },
+      },
+    })
+    // oauther的board comment直接創造一個bullet
+    const child: BulletDraft = {
+      head: e.str,
+      sourceUrl: e.src,
+      oauthorName: e.oauthor,
+      commentId: comment.id,
+      voteId: vote.id,
+      op: 'CREATE',
+      children: [],
+    }
+    node.children.push(child)
+  }
+
   for (const e of markerlines) {
     if (e.new && e.marker?.key && e.marker.value) {
       if (e.neatReply) {
-        if (!e.neatReply) throw new Error('非neatReply')
-        if (!e.src) throw new Error('缺src，無法創neat-reply')
-        if (!e.stampId) throw new Error('缺stampId，無法創neat-reply')
-        if (!e.pollChoices) throw new Error('缺pollChoices，無法創neat-reply')
-        if (e.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1，無法創neat-reply')
-        if (!e.nestedCard) throw new Error('缺nestedCard，無法創neat-reply')
-        if (!e.oauthor) throw new Error('缺oauthor，無法創neat-reply')
-
-        // 取得並檢查choice-index
-        const choice = e.pollChoices[0]
-        let choiceIdx: number | undefined
-        for (const e of NEAT_REPLY_CHOICE) {
-          if (e.options.indexOf(choice)) {
-            choiceIdx = e.choiceIdx
-            break
-          }
-        }
-        if (choiceIdx === undefined) {
-          console.error(e)
-          throw new Error('所給的vote-choice非預設的那幾個')
-        }
-
-        // 取得node
-        const node = search({ node: _root, depth: 0, byPinCode: 'BUYSELL' })
-        if (node === null) {
-          throw new Error('找不到buysell的node')
-        }
-        if (node.boardId === undefined || node.pollId === undefined) {
-          console.error(node)
-          throw new Error('node需要boardId, pollId才能創neat-reply')
-        }
-
-        const vote = await createOauthorVote({
-          choiceIdx,
-          pollId: node.pollId,
-          oauthorName: e.oauthor,
-          userId,
-        })
-        const comment = await prisma.comment.create({
-          data: {
-            content: `${e.str} ^[[${e.src}]]`,
-            user: { connect: { id: userId } },
-            oauthor: { connect: { name: e.oauthor } },
-            count: { create: {} },
-            board: { connect: { id: node.boardId } },
-            vote: { connect: { id: vote.id } },
-          },
-        })
-        // oauther的board comment直接創造一個bullet
-        const child: BulletDraft = {
-          head: e.str,
-          sourceUrl: e.src,
-          oauthorName: e.oauthor,
-          commentId: comment.id,
-          voteId: vote.id,
-          op: 'CREATE',
-          children: [],
-        }
-        node.children.push(child)
-
+        // _insertNeatReply(e)
         continue
       }
 
@@ -198,32 +202,41 @@ async function main() {
         continue
       }
 
+      const { value: selfRoot }: CardBodyContent = JSON.parse(card.body.content)
+
+      const selfRootDraft = BulletNode.toDraft(selfRoot)
+
       const editor = new Editor('', [], card.link.url, card.link.oauthorName ?? undefined)
       editor.setText(text)
       editor.flush()
 
-      const mirrors: RootBulletDraft[] = []
-
       for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
         const mirrorCard = await getOrCreateCardBySymbol(cardlabel.symbol)
-        const { self }: CardBodyContent = JSON.parse(mirrorCard.body.content)
+        const { value: mirrorRoot }: CardBodyContent = JSON.parse(mirrorCard.body.content)
 
-        const draft = BulletNode.toDraft(self)
-
+        const draft = BulletNode.toDraft(mirrorRoot)
         // console.log(markerlines)
 
         const mirror = await insertMarkerlines(draft, markerlines, TESTUSERS[0].id)
-        mirrors.push(mirror)
+
+        const body = await createCardBody({ cardId: mirrorCard.id, root: mirror, userId: TESTUSERS[0].id })
+        // console.log(inspect(body[1], { depth: null }))
+
+        selfRootDraft.children.push({
+          draft: true,
+          op: 'CREATE',
+          head: `::${cardlabel.symbol}`,
+          mirror: true,
+          children: [],
+        })
       }
 
-      // console.log(inspect(mirrors, { depth: 0 }))
-      // return
-
-      await createCardBody({
+      const body = await createCardBody({
         cardId: card.id,
-        mirrors,
+        root: selfRootDraft,
         userId: TESTUSERS[0].id,
       })
+      // console.log(inspect(body[1], { depth: null }))
 
       console.log(`Card and card-body created`)
     }

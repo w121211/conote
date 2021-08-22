@@ -251,7 +251,7 @@ export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDra
     let checked: Omit<BulletDraft, 'children'>
     switch (_draft.op) {
       case 'CREATE': {
-        if (cur) throw new Error('node不能同時有id與CREATE')
+        if (cur) throw new Error('node不能同時有 id 與 CREATE')
         checked = {
           head: _draft.head,
           body: _draft.body,
@@ -262,8 +262,8 @@ export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDra
         break
       }
       case 'UPDATE': {
-        if (cur === undefined) throw new Error('UPDATE找不到原本的node')
-        if (_draft.head === cur.head && _draft.body === _draft.body) throw new Error('UPDATE沒有偵測到值變動')
+        if (cur === undefined) throw new Error('UPDATE 找不到原本的 node')
+        if (_draft.head === cur.head && _draft.body === _draft.body) throw new Error('UPDATE 沒有偵測到值變動')
         checked = {
           ...cur,
           head: _draft.head,
@@ -275,7 +275,7 @@ export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDra
         break
       }
       case 'DELETE':
-        if (cur === undefined) throw new Error('DELETE找不到原本的node')
+        if (cur === undefined) throw new Error('DELETE 找不到原本的 node')
         checked = {
           ...cur,
           head: '',
@@ -286,7 +286,7 @@ export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDra
         }
         break
       default:
-        if (cur === undefined) throw new Error('無op，但找不到原本的node')
+        if (cur === undefined) throw new Error('無 op，但找不到原本的 node')
         checked = cur
         break
     }
