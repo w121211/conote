@@ -1,25 +1,9 @@
-// @import '../../style/variables.scss';
-.container {
+.barChartWrapper {
+  padding: 3px;
+  // background-color: $black;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  margin-top: 4px;
 }
-.barWrapper {
-  display: block;
-  height: 8px;
-  width: 100%;
-  background: $white;
-}
-.bar {
-  height: 100%;
-  background-color: #c1d0e2;
-}
-.number {
-  font-size: 10px;
-  color: #73808c;
-}
+
 .text {
   font-weight: 700;
   color: $text;
@@ -69,12 +53,15 @@
   position: relative;
   display: block;
   width: 100%;
-  background: #f7f7f7;
+  background: $natual;
+  border: 2px solid $white;
   // border-radius: 20px;
-  mix-blend-mode: multiply;
-  border-bottom: 0;
+  // mix-blend-mode: multiply;
+  // border-bottom: 0;
   &:hover {
-    border-bottom: 0;
+    border: 2px solid $secondaryHover;
+
+    // border-bottom: 0;
   }
   // padding: 5px 10px;
   &:not(:first-child) {
@@ -101,6 +88,9 @@
   width: 100%;
   // border-radius: 20px;
   // mix-blend-mode: multiply;
+  &.voted {
+    background-color: $secondary;
+  }
 }
 .voteColorBlockText {
   display: flex;
@@ -111,4 +101,7 @@
   span {
     color: $white;
   }
+}
+.clicked {
+  border: 2px solid $secondary;
 }

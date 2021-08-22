@@ -64,6 +64,8 @@ export class Serializer {
           rootBullet: root,
           mirror: root.mirror,
           newSymbol: options?.newSymbol,
+          // boardId: root.boardId,
+          // pollId: root.pollId,
         },
         ...rest,
       ],

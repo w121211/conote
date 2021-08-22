@@ -9,7 +9,7 @@
   //   font-size: 14px;
   label {
     display: inline-block;
-    margin-right: 1em;
+    margin-right: 0;
     font-weight: 700;
   }
   input {
@@ -37,7 +37,7 @@
     font-weight: 400;
 
     align-items: center;
-    margin-right: 20px;
+    margin-right: 0;
     // border: 1px solid $primary;
     svg {
       width: 1em;
@@ -62,21 +62,26 @@
       }
     }
     span {
-      color: $text;
+      // color: $text;
       font-weight: 500;
     }
   }
 }
 .radioWrapper {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
 }
 .section:not(:last-child) {
   margin-bottom: 1em;
 }
 .choiceWrapper {
-  display: flex;
+  // display: flex;
 }
 .comment {
   line-height: 2;
   margin-top: 1em;
+}
+.votedCount {
+  display: block;
+  text-align: end;
 }

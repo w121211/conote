@@ -28,32 +28,32 @@ export function CardSymbolPage(): JSX.Element {
   const { symbol } = router.query
 
   // const decodeUri = decodeURIComponent(symbol??'')
-  const [edit, setEdit] = useState<boolean>(false)
-  const [mySymbol, setMySymbol] = useState('')
-  const [myUrl, setMyUrl] = useState('')
+  // const [edit, setEdit] = useState<boolean>(false)
+  // const [mySymbol, setMySymbol] = useState('')
+  // const [myUrl, setMyUrl] = useState('')
   // const [urlState, setUrlState] = useState('')
-  const [path, setPath] = useState<string>('')
+  // const [path, setPath] = useState<string>('')
 
-  useEffect(() => {
-    if (symbol && typeof symbol === 'string') {
-      if (symbol.includes('[[') || symbol.includes('$')) {
-        setMySymbol(symbol)
+  // useEffect(() => {
+  //   if (symbol && typeof symbol === 'string') {
+  //     if (symbol.startsWith('[[') || symbol.includes('$')) {
+  //       setMySymbol(symbol)
 
-        // console.log('setSymbol')
-      } else {
-        setMyUrl(symbol)
-        // console.log('setUrl')
-      }
-    }
-  }, [symbol])
+  //       console.log('setSymbol', symbol)
+  //     } else {
+  //       setMyUrl(symbol)
+  //       console.log('setUrl', symbol)
+  //     }
+  //   }
+  // }, [symbol])
 
   // const { data: webPageData } = useWebpageCardQuery({
   //   variables: { url: myUrl },
   //   onCompleted(data) {
   //     if (data.webpageCard) {
-  //       setPath(data.webpageCard.symbol)
+  //       // setPath(data.webpageCard.symbol)
   //       // setPath([data.webpageCard.symbol])
-  //       setMySymbol(data.webpageCard.symbol)
+  //       // setMySymbol(data.webpageCard.symbol)
   //       // console.log('setSymbol query')
   //       // console.log(webPageData.webpageCard)
   //     }
@@ -79,6 +79,18 @@ export function CardSymbolPage(): JSX.Element {
   // )
   // editor.flush({ attachMarkerlinesToTokens: true })
   // const sect = editor.getSections()
+  let mySymbol
+  let myUrl
+  if (symbol && typeof symbol === 'string') {
+    if (symbol.startsWith('[[') || symbol.includes('$')) {
+      mySymbol = symbol
+
+      console.log('setSymbol', symbol)
+    } else {
+      myUrl = symbol
+      console.log('setUrl', symbol)
+    }
+  }
   return (
     // <QueryDataProvider
     //   useQuery={() => useCocardQuery({ variables: { url } })}
@@ -94,7 +106,7 @@ export function CardSymbolPage(): JSX.Element {
           編輯
         </button> */}
 
-      <CardIndex mySymbol={mySymbol} />
+      <CardIndex mySymbol={mySymbol} webPageUrl={myUrl} />
 
       {/* <CardHead card={data.cocard} sect={sect} height={0} />
         {edit ? (
