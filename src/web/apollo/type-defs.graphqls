@@ -20,9 +20,9 @@ type Query {
   webpageCard(url: String!): Card!
 
   # 以 card symbol 找該 card 所有的 active hashtags
-  hashtags(symbol: String): [Hashtag!]
+  hashtags(symbol: String!): [Hashtag!]
 
-  # @throw 若找不到，丟error
+  # 若找不到，@throw error
   bullet(id: ID!): Bullet!
 
   board(id: ID!): Board!
@@ -35,6 +35,9 @@ type Query {
   myCommentLikes(after: String): [CommentLike!]!
   myBoardLikes(after: String): [BoardLike!]!
   myBulletLikes(after: String): [BulletLike!]!
+
+  # 會有找不到的可能 TODO: 整合成對單張卡片搜尋？
+  myHashtagLike(hashtagId: Int!): HashtagLike
 
   # --- NEXT ---
 
@@ -110,7 +113,7 @@ type Mutation {
   # createCardHead(cardId: ID!, data: CardBulletRootInput!): CardHead!
 
   # 若該 symbol 尚未有 card 時，需要給 template，會同步創 card, body
-  createCardBody(cardId: ID!, data: CardBodyInput!): CardBody!
+  createCardBody(cardSymbol: String!, data: CardBodyInput!): CardBody!
 
   # 等價於create hashtag，會同步update card body hashtag
   # createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): CreateBoardResponse!
@@ -118,7 +121,7 @@ type Mutation {
   # （尚未開放）一般的 hashtag 需透過 editor 編輯來創造，但對於內建、常用的 hashtag 可直接創造
   # createQuickHashtag(cardId: ID!, bulletId: Int!, data: BoardInput!): CreateHashtagResponse!
 
-  createHashtagLike(bulletId: ID!, data: LikeInput!): HashtagLikeResponse!
+  createHashtagLike(hashtagId: ID!, data: LikeInput!): HashtagLikeResponse!
   updateHashtagLike(id: ID!, data: LikeInput!): HashtagLikeResponse!
 
   createVote(pollId: ID!, data: VoteInput!): Vote!
@@ -198,7 +201,7 @@ type Link {
   domain: String!
   sourceType: String!
   sourceId: String
-  oauthorName: String
+  authorName: String
 }
 
 # type Choice {
@@ -231,7 +234,6 @@ type PollCount {
 type Poll {
   id: ID!
   userId: ID!
-  boardId: Int!
   # type: PollType!
   # status: PollStatus!
   choices: [String!]!
@@ -252,11 +254,18 @@ type Poll {
 }
 
 type Hashtag {
+  id: ID!
   userId: String!
-  boardId: Int!
-  boardStatus: BoardStatus!
+  authorName: String
+  bulletId: Int!
+  cardId: Int!
+  # pollId: Int
+  # status: HashtagStatus
   text: String!
-  linkBullet: Boolean
+  poll: Poll
+  count: HashtagCount!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type HashtagLike {
@@ -267,6 +276,23 @@ type HashtagLike {
   updatedAt: DateTime!
 }
 
+type HashtagCount {
+  id: ID!
+  nUps: Int!
+  nDowns: Int!
+}
+
+type HashtagLikeResponse {
+  like: HashtagLike!
+  count: HashtagCount!
+}
+
+# type CreateHashtagResponse {
+#   board: Board!
+#   # hashtag: Hashtag!
+#   cardBody: CardBody!
+# }
+
 type BulletCount {
   id: ID!
   nUps: Int!
@@ -276,12 +302,6 @@ type BulletCount {
 type BulletLikeResponse {
   like: BulletLike!
   count: BulletCount!
-}
-
-type CreateHashtagResponse {
-  board: Board!
-  # hashtag: Hashtag!
-  cardBody: CardBody!
 }
 
 type BulletLike {
@@ -292,17 +312,6 @@ type BulletLike {
   updatedAt: DateTime!
 }
 
-type BulletCount {
-  id: ID!
-  nUps: Int!
-  nDowns: Int!
-}
-
-type BulletLikeResponse {
-  like: BulletLike!
-  count: BulletCount!
-}
-
 type Bullet {
   id: ID!
   cardId: Int!
@@ -311,20 +320,20 @@ type Bullet {
   updatedAt: DateTime!
 }
 
-type CardHead {
-  id: ID!
-  userId: String!
-  # content: JSONObject!
-  content: String! # json
-  timestamp: Int!
-  prevId: Int
-}
+# type CardHead {
+#   id: ID!
+#   userId: String!
+#   # content: JSONObject!
+#   content: String! # json
+#   timestamp: Int!
+#   prevId: Int
+# }
 
 type CardBody {
   id: ID!
   userId: String!
   # content: JSONObject!
-  content: String! # json
+  content: String! # in json
   timestamp: Int!
   prevId: Int
 }
@@ -334,7 +343,6 @@ type Card {
   type: CardType!
   symbol: String!
   link: Link
-  head: CardHead!
   body: CardBody!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -487,8 +495,8 @@ input BoardInput {
 # }
 
 input CardBodyInput {
-  self: JSON
-  mirrors: [JSON!]
+  root: JSON!
+  # mirrors: [JSON!]
 }
 
 input CardTemplatePropsInput {

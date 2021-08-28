@@ -14,9 +14,9 @@ import {
   RootBullet,
   RootBulletDraft,
 } from './types'
-import { runHastagOpBatch } from './hashtag'
-import { Node } from './node'
+import { BulletNode } from './node'
 import { cloneDeep } from '@apollo/client/utilities'
+import { runHastagOpBatch } from '../hashtag/operation'
 
 /**
  * 使用conditional type，輸入是bullet draft時返回bullet，輸入是root bullet draft時返回root bullet
@@ -108,7 +108,7 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
   // }
 
   // 將 draft-flag, hashtags 取出，不存入 bulllet
-  const { draft: _, hashtags: _hashtags, ...included } = draft
+  const { draft: _, newHashtags: _hashtags, ...included } = draft
 
   const node: Bullet | RootBullet = {
     // TODO: 不應該直接copy input
@@ -148,7 +148,7 @@ export async function runBulletOp(props: {
 }): Promise<RootBullet> {
   const { cardId, current, draft, timestamp, userId } = props
 
-  const curDict = current && Node.toDict(current)
+  const curDict = current && BulletNode.toDict(current)
 
   async function _run<T extends BulletDraft | RootBulletDraft>(draft: T): Promise<BulletOrRootBullet<T> | null> {
     if (draft.op === 'CREATE') {
@@ -197,9 +197,9 @@ export async function runBulletOp(props: {
         }
       }
 
-      if (draft.hashtags) {
+      if (draft.newHashtags) {
         await runHastagOpBatch({
-          hashtags: draft.hashtags,
+          hashtags: draft.newHashtags,
           bulletId: cur.id,
           cardId,
           userId,

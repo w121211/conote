@@ -1,7 +1,7 @@
 // import * as QT from './graphql/query-types'
 // import { SymbolCat, CardTemplate, CocardFragment } from '../apollo/query.graphql'
 import { CardFragment } from '../apollo/query.graphql'
-import { CommentLike, LikeChoice, BulletLike, BoardLike } from '@prisma/client'
+import { CommentLike, LikeChoice, BulletLike, BoardLike, HashtagLike } from '@prisma/client'
 
 export function toUrlParams(params: Record<string, string>): string {
   const sp = new URLSearchParams()
@@ -66,7 +66,7 @@ export function urlToSymbol(url: string): string | null {
 //   return params
 // }
 
-export function deltaLike<T extends CommentLike | BulletLike | BoardLike>(
+export function deltaLike<T extends CommentLike | BulletLike | BoardLike | HashtagLike>(
   like: T,
   prevLike?: T,
 ): { deltaDown: number; deltaUp: number } {

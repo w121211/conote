@@ -2,10 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { AuthenticationError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
 import { getSession } from '@auth0/nextjs-auth0'
-import { Vote } from '@prisma/client'
+import { Hashtag, HashtagCount, HashtagStatus, Poll, PollCount, Vote } from '@prisma/client'
 import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
-import { QueryResolvers, MutationResolvers } from './type-defs.graphqls'
+import { QueryResolvers, MutationResolvers, Hashtag as GqlHashtag } from './type-defs.graphqls'
 import { deltaLike } from '../lib/helper'
 import {
   attachLatestHeadBody,
@@ -16,10 +16,9 @@ import {
   getOrCreateCardByUrl,
 } from '../lib/models/card'
 import { getOrCreateUser } from '../lib/models/user'
-import { createOauthorVote, createVote } from '../lib/models/vote'
+import { createAuthorVote, createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
 import { ResolverContext } from './apollo-client'
-import { createHashtag } from '../lib/bullet/hashtag'
 
 function _toStringId<T extends { id: number }>(obj: T): T & { id: string } {
   return { ...obj, id: obj.id.toString() }
@@ -122,7 +121,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       const _card = await attachLatestHeadBody(card)
       return {
         ..._toStringId(_card),
-        head: _toStringId(_card.head),
         body: _toStringId(_card.body),
         link: card.link && _toStringId(card.link),
       }
@@ -131,14 +129,43 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async webpageCard(_parent, { url }, _context, _info) {
-    console.log(url)
     const card = await getOrCreateCardByUrl({ fetcher, url })
     return {
       ..._toStringId(card),
       link: _toStringId(card.link),
-      head: _toStringId(card.head),
       body: _toStringId(card.body),
     }
+  },
+
+  async hashtags(_parent, { symbol }, _context, _info) {
+    const hashtags = (
+      await prisma.hashtag.findMany({
+        where: { AND: [{ card: { symbol } }, { status: HashtagStatus.ACTIVE }] },
+        include: { count: true, poll: { include: { count: true } } },
+      })
+    ).filter(
+      (
+        e,
+      ): e is Hashtag & {
+        count: HashtagCount
+        poll: (Poll & { count: PollCount }) | null
+      } => {
+        if (e.count === null || (e.poll && e.poll.count === null)) {
+          throw 'count 不應為 null, database error'
+        }
+        return true
+      },
+    )
+    return hashtags.map(e => {
+      return {
+        ..._toStringId(e),
+        count: { ..._toStringId(e.count) },
+        poll: e.poll && {
+          ..._toStringId(e.poll),
+          count: _toStringId(e.poll.count),
+        },
+      }
+    })
   },
 
   async bullet(_parent, { id }, _context, _info) {
@@ -156,51 +183,53 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async board(_parent, { id }, _context, _info) {
-    const board = await prisma.board.findUnique({
-      include: {
-        count: true,
-        poll: { include: { count: true } },
-      },
-      where: { id: parseInt(id) },
-    })
-    if (board && board.count && board.poll && board.poll.count) {
-      return {
-        ..._toStringId(board),
-        count: _toStringId(board.count),
-        poll: board.poll && {
-          ..._toStringId(board.poll),
-          count: _toStringId(board.poll.count),
-        },
-      }
-    } else if (board && board.count && board.poll === null) {
-      return {
-        ..._toStringId(board),
-        count: _toStringId(board.count),
-        poll: undefined,
-      }
-    }
-    throw new Error()
+    throw 'Consider to remove'
+    // const board = await prisma.board.findUnique({
+    //   include: {
+    //     count: true,
+    //     poll: { include: { count: true } },
+    //   },
+    //   where: { id: parseInt(id) },
+    // })
+    // if (board && board.count && board.poll && board.poll.count) {
+    //   return {
+    //     ..._toStringId(board),
+    //     count: _toStringId(board.count),
+    //     poll: board.poll && {
+    //       ..._toStringId(board.poll),
+    //       count: _toStringId(board.poll.count),
+    //     },
+    //   }
+    // } else if (board && board.count && board.poll === null) {
+    //   return {
+    //     ..._toStringId(board),
+    //     count: _toStringId(board.count),
+    //     poll: undefined,
+    //   }
+    // }
+    // throw new Error()
   },
 
   async comments(_parent, { boardId, afterId }, _context, _info) {
-    const comments = await prisma.comment.findMany({
-      include: { count: true, vote: true },
-      where: { boardId: parseInt(boardId) },
-      orderBy: { createdAt: 'desc' },
-      cursor: afterId ? { id: parseInt(afterId) } : undefined,
-      take: 100,
-    })
-    return comments.map(e => {
-      if (e.count) {
-        return {
-          ..._toStringId(e),
-          oauthorName: e.oauthorName ?? undefined,
-          count: _toStringId(e.count),
-          vote: e.vote && _toStringId(e.vote),
-        }
-      }
-      throw new Error()
-    })
+    throw 'Consider to remove'
+    // const comments = await prisma.comment.findMany({
+    //   include: { count: true, vote: true },
+    //   where: { boardId: parseInt(boardId) },
+    //   orderBy: { createdAt: 'desc' },
+    //   cursor: afterId ? { id: parseInt(afterId) } : undefined,
+    //   take: 100,
+    // })
+    // return comments.map(e => {
+    //   if (e.count) {
+    //     return {
+    //       ..._toStringId(e),
+    //       oauthorName: e.oauthorName ?? undefined,
+    //       count: _toStringId(e.count),
+    //       vote: e.vote && _toStringId(e.vote),
+    //     }
+    //   }
+    //   throw new Error()
+    // })
   },
 
   // botPolls: async (parent, { symbolName }, { prisma }) => {
@@ -347,6 +376,16 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return user
   },
 
+  async myHashtagLike(_parent, { hashtagId }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const like = await prisma.hashtagLike.findUnique({
+      where: {
+        userId_hashtagId: { hashtagId, userId },
+      },
+    })
+    return like ? _toStringId(like) : null
+  },
+
   async myVotes(_parent, { after }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
     const votes = await prisma.vote.findMany({ where: { userId }, take: 50 })
@@ -383,67 +422,66 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const card = await getOrCreateCardBySymbol(data.symbol)
     return {
       ..._toStringId(card),
-      head: { ..._toStringId(card.head) },
       body: { ..._toStringId(card.body) },
       link: card.link && _toStringId(card.link),
     }
   },
 
-  async createCardBody(_parent, { cardId, data }, { req, res }, _info) {
+  async createCardBody(_parent, { cardSymbol, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
+    const card = await prisma.card.findUnique({ where: { symbol: cardSymbol } })
+    if (card === null) {
+      throw 'Card symbol not found'
+    }
     const [body] = await createCardBody({
-      cardId: parseInt(cardId),
-      value: data.self, 
+      cardId: card.id,
+      root: data.root,
       userId,
     })
     // console.log(body)
     return _toStringId(body)
   },
 
-  async createHashtag(_parent, { cardId, bulletId, data }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-
-    const body = await getLatestCardBody(parseInt(cardId))
-    if (body === null) throw '找不到對應的card body'
-    const content: CardBodyContent = JSON.parse(body.content)
-
-    const [hashtag, updatedRoot] = await createHashtag({
-      draft: {
-        text: data.hashtag,
-        op: 'CREATE',
-      },
-      root: content.value,
-      bulletId,
-      cardId: parseInt(cardId),
-      userId,
-    })
-    const updatedContent: CardBodyContent = {
-      ...content,
-      value: updatedRoot,
-    }
-    const updatedBody = await prisma.cardBody.update({
-      data: {
-        content: JSON.stringify(updatedContent),
-      },
-      where: { id: body.id },
-    })
-
-    const board = await prisma.board.findUnique({
-      include: { count: true },
-      where: { id: hashtag.boardId },
-    })
-    if (board === null || board.count === null) {
-      throw new Error()
-    }
-
-    return {
-      board: {
-        ..._toStringId(board),
-        count: _toStringId(board.count),
-      },
-      cardBody: _toStringId(updatedBody),
-    }
-  },
+  // async createHashtag(_parent, { cardId, bulletId, data }, { req, res }, _info) {
+  //   const { userId } = isAuthenticated(req, res)
+  //   const body = await getLatestCardBody(parseInt(cardId))
+  //   if (body === null) throw '找不到對應的card body'
+  //   const content: CardBodyContent = JSON.parse(body.content)
+  //   const [hashtag, updatedRoot] = await createHashtag({
+  //     draft: {
+  //       text: data.hashtag,
+  //       op: 'CREATE',
+  //     },
+  //     root: content.value,
+  //     bulletId,
+  //     cardId: parseInt(cardId),
+  //     userId,
+  //   })
+  //   const updatedContent: CardBodyContent = {
+  //     ...content,
+  //     value: updatedRoot,
+  //   }
+  //   const updatedBody = await prisma.cardBody.update({
+  //     data: {
+  //       content: JSON.stringify(updatedContent),
+  //     },
+  //     where: { id: body.id },
+  //   })
+  //   const board = await prisma.board.findUnique({
+  //     include: { count: true },
+  //     where: { id: hashtag.boardId },
+  //   })
+  //   if (board === null || board.count === null) {
+  //     throw new Error()
+  //   }
+  //   return {
+  //     board: {
+  //       ..._toStringId(board),
+  //       count: _toStringId(board.count),
+  //     },
+  //     cardBody: _toStringId(updatedBody),
+  //   }
+  // },
 
   async createVote(_parent, { pollId, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
@@ -500,85 +538,83 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createOauthorVote(_parent, { pollId, oauthorName, data }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const vote = await createOauthorVote({
-      choiceIdx: data.choiceIdx,
-      pollId: parseInt(pollId),
-      oauthorName,
-      userId,
-    })
-    return _toStringId(vote)
+    throw 'Consider to remove'
+    //   const { userId } = isAuthenticated(req, res)
+    //   const vote = await createOauthorVote({
+    //     choiceIdx: data.choiceIdx,
+    //     pollId: parseInt(pollId),
+    //     oauthorName,
+    //     userId,
+    //   })
+    //   return _toStringId(vote)
+    // },
   },
 
   async createOauthorComment(_parent, { boardId, pollId, oauthorName, data }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const board = await prisma.board.findUnique({
-      include: { count: true },
-      where: { id: parseInt(boardId) },
-    })
-    if (board === null) throw new Error(`Given boardId not found`)
-    // if (post.status !== PostStatus.ACTIVE) throw new Error("post is not active")
-
-    let vote: Vote | undefined
-    if (pollId && data.vote?.choiceIdx !== undefined) {
-      vote = await createOauthorVote({
-        choiceIdx: data.vote.choiceIdx,
-        pollId: parseInt(pollId),
-        oauthorName,
-        userId,
-      })
-    }
-    console.log(pollId)
-    console.log(data)
-    console.log(vote)
-    const comment = await prisma.comment.create({
-      include: { count: true },
-      data: {
-        content: data.content,
-        user: { connect: { id: userId } },
-        oauthor: { connect: { name: oauthorName } },
-        count: { create: {} },
-        board: { connect: { id: parseInt(boardId) } },
-        vote: vote && { connect: { id: vote.id } },
-      },
-    })
-    // await prisma.commentCount.update({
-    //   data: { nReplies: comment.count.nComments + 1 },
-    //   where: { commentId: comment.id }
-    // })
-
-    if (comment.count) {
-      return {
-        ..._toStringId(comment),
-        count: _toStringId(comment.count),
-      }
-    } else {
-      throw new Error()
-    }
+    throw 'Consider to remove'
+    //   const { userId } = isAuthenticated(req, res)
+    //   const board = await prisma.board.findUnique({
+    //     include: { count: true },
+    //     where: { id: parseInt(boardId) },
+    //   })
+    //   if (board === null) throw new Error(`Given boardId not found`)
+    //   // if (post.status !== PostStatus.ACTIVE) throw new Error("post is not active")
+    //   let vote: Vote | undefined
+    //   if (pollId && data.vote?.choiceIdx !== undefined) {
+    //     vote = await createOauthorVote({
+    //       choiceIdx: data.vote.choiceIdx,
+    //       pollId: parseInt(pollId),
+    //       oauthorName,
+    //       userId,
+    //     })
+    //   }
+    //   const comment = await prisma.comment.create({
+    //     include: { count: true },
+    //     data: {
+    //       content: data.content,
+    //       user: { connect: { id: userId } },
+    //       oauthor: { connect: { name: oauthorName } },
+    //       count: { create: {} },
+    //       board: { connect: { id: parseInt(boardId) } },
+    //       vote: vote && { connect: { id: vote.id } },
+    //     },
+    //   })
+    //   // await prisma.commentCount.update({
+    //   //   data: { nReplies: comment.count.nComments + 1 },
+    //   //   where: { commentId: comment.id }
+    //   // })
+    //   if (comment.count) {
+    //     return {
+    //       ..._toStringId(comment),
+    //       count: _toStringId(comment.count),
+    //     }
+    //   } else {
+    //     throw new Error()
+    //   }
   },
 
-  async createBulletLike(_parent, { bulletId, data }, { req, res }, _info) {
+  async createHashtagLike(_parent, { hashtagId, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const count = await prisma.bulletCount.findUnique({
-      where: { bulletId: parseInt(bulletId) },
+    const count = await prisma.hashtagCount.findUnique({
+      where: { hashtagId: parseInt(hashtagId) },
     })
     if (count === null) {
       throw new Error('Prisma error')
     }
-    const like = await prisma.bulletLike.create({
+    const like = await prisma.hashtagLike.create({
       data: {
         choice: data.choice,
         user: { connect: { id: userId } },
-        bullet: { connect: { id: parseInt(bulletId) } },
+        hashtag: { connect: { id: parseInt(hashtagId) } },
       },
     })
     const { deltaUp, deltaDown } = deltaLike(like)
-    const updatedCount = await prisma.bulletCount.update({
+    const updatedCount = await prisma.hashtagCount.update({
       data: {
         nUps: count.nUps + deltaUp,
         nDowns: count.nDowns + deltaDown,
       },
-      where: { bulletId: like.bulletId },
+      where: { hashtagId: like.hashtagId },
     })
     return {
       like: {
@@ -589,27 +625,27 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async updateBulletLike(_parent, { id, data }, { req, res }, _info) {
+  async updateHashtagLike(_parent, { id, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const prevLike = await prisma.bulletLike.findUnique({ where: { id: parseInt(id) } })
+    const prevLike = await prisma.hashtagLike.findUnique({ where: { id: parseInt(id) } })
     if (prevLike === null || prevLike?.userId !== userId || data.choice === prevLike.choice) {
       throw new Error('No matched data')
     }
-    const count = await prisma.bulletCount.findUnique({ where: { bulletId: prevLike.bulletId } })
+    const count = await prisma.hashtagCount.findUnique({ where: { hashtagId: prevLike.hashtagId } })
     if (count === null) {
       throw new Error('Prisma error, update fail')
     }
-    const like = await prisma.bulletLike.update({
+    const like = await prisma.hashtagLike.update({
       data: { choice: data.choice },
       where: { id: prevLike.id },
     })
     const { deltaUp, deltaDown } = deltaLike(like, prevLike)
-    const updatedCount = await prisma.bulletCount.update({
+    const updatedCount = await prisma.hashtagCount.update({
       data: {
         nUps: count.nUps + deltaUp,
         nDowns: count.nDowns + deltaDown,
       },
-      where: { bulletId: like.bulletId },
+      where: { hashtagId: like.hashtagId },
     })
     return {
       like: { ..._toStringId(like), choice: like.choice },

@@ -1,73 +1,13 @@
 import { Hashtag as PrismaHashtag, HashtagStatus, Poll, PollCount } from '@prisma/client'
 import prisma from '../prisma'
-
-/**
- * Hashtag 類型
- * - plain text：用於 filter 時可以被搜尋，不會在資料庫裡建立，eg (#buy)
- * - by system: 系統預設，可+1、可 filter，可從功能列上增加，eg #up #down #pin
- * - by user: 使用者建立，可+1/-1（-1表答對此 hashtag 不認同）、可 filter，可從功能列上增加，eg #黑馬
- * - hashtag group：本質上是 poll，eg (#多 #空)，用括號包住投票的選項，可點擊投票（類似+1）、filter、可對整個 group +1/-1、可查看當前投票情形
- */
-
-export type HashtagOperation = 'CREATE' | 'UPDATE' | 'DELETE'
-
-export type Hashtag = Omit<PrismaHashtag, 'status' | 'pollId' | 'createdAt' | 'updatedAt'> & {
-  type: 'hashtag'
-}
-
-export type HashtagDraft = Partial<Omit<Hashtag, 'type'>> & {
-  type: 'hashtag-draft'
-  op: HashtagOperation // 編輯狀態
-  text: string
-}
-
-/** eg (#buy #sell #hold) */
-export type HashtagGroup = Omit<Hashtag, 'type'> & {
-  type: 'hashtag-group'
-  poll: Omit<Poll, 'type' | 'status' | 'createdAt' | 'updatedAt'> & {
-    count: Omit<PollCount, 'pollId' | 'nJudgments' | 'createdAt' | 'updatedAt'>
-  }
-}
-
-export type HashtagGroupDraft = Partial<Omit<HashtagGroup, 'type'>> & {
-  type: 'hashtag-group-draft'
-  op: HashtagOperation // 編輯狀態
-  pollChoices: string[]
-}
+import { hashtagGroupToString } from './text'
+import { Hashtag, HashtagDraft, HashtagGroup, HashtagGroupDraft } from './types'
 
 // class HashtagOperation {
 //   public static check() {}
 //   public static parse() {}
 //   pubkic static
 // }
-
-const reHashtag = /ab+c/
-
-function isHashtagText(text: string): boolean {
-  return reHashtag.test(text)
-}
-
-function toText(group: HashtagGroupDraft): string {
-  return `(${group.pollChoices.join(' ')})`
-}
-
-/**
- * 檢查 hashtag
- * @throw 檢查有問題時丟相關錯誤
- */
-// async function checkHashtag(draft: HashtagDraft, bulletHashtags: Hashtag[]) {}
-
-function checkHashtagGroup(draft: HashtagGroupDraft): draft is HashtagGroupDraft {
-  if (draft.pollChoices.length === 0) {
-    throw 'poll choices 的數量需大於0'
-  }
-  for (const e of draft.pollChoices) {
-    if (!isHashtagText(e)) {
-      throw `poll choice 格式不符 hashtag: ${e}`
-    }
-  }
-  return true
-}
 
 async function runHashtagGroupOp(props: {
   draft: HashtagGroupDraft
@@ -90,7 +30,7 @@ async function runHashtagGroupOp(props: {
           user: { connect: { id: userId } },
           count: { create: {} },
           poll: { create: { user: { connect: { id: userId } }, choices: draft.pollChoices, count: { create: {} } } },
-          text: toText(draft),
+          text: hashtagGroupToString(draft),
         },
         include: { poll: { include: { count: true } } },
       })
@@ -161,6 +101,26 @@ async function runHashtagOp(props: {
     }
   }
   throw 'unexpected error'
+}
+
+export async function runHastagOpBatch(props: {
+  hashtags: (Hashtag | HashtagDraft | HashtagGroup | HashtagGroupDraft)[]
+  bulletId: number
+  cardId: number
+  userId: string
+}): Promise<(Hashtag | HashtagGroup)[]> {
+  const { hashtags, bulletId, cardId, userId } = props
+  return await Promise.all(
+    hashtags.map(e => {
+      if (e.type === 'hashtag-group-draft') {
+        return runHashtagGroupOp({ draft: e, bulletId, cardId, userId })
+      }
+      if (e.type === 'hashtag-draft') {
+        return runHashtagOp({ draft: e, bulletId, cardId, userId })
+      }
+      return e
+    }),
+  )
 }
 
 // export function getLinkHashtag(bullet: Bullet | BulletDraft) {
@@ -246,23 +206,3 @@ async function runHashtagOp(props: {
 //   }
 //   return [hashtag, updatedRoot]
 // }
-
-export async function runHastagOpBatch(props: {
-  hashtags: (Hashtag | HashtagDraft | HashtagGroup | HashtagGroupDraft)[]
-  bulletId: number
-  cardId: number
-  userId: string
-}): Promise<(Hashtag | HashtagGroup)[]> {
-  const { hashtags, bulletId, cardId, userId } = props
-  return await Promise.all(
-    hashtags.map(e => {
-      if (e.type === 'hashtag-group-draft') {
-        return runHashtagGroupOp({ draft: e, bulletId, cardId, userId })
-      }
-      if (e.type === 'hashtag-draft') {
-        return runHashtagOp({ draft: e, bulletId, cardId, userId })
-      }
-      return e
-    }),
-  )
-}

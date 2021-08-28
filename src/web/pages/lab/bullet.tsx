@@ -1,5 +1,12 @@
-import React, { useState } from 'react'
-import { Hashtag, HashtagGroup } from '../../lib/bullet/hashtag'
+import React, { useEffect, useState } from 'react'
+import {
+  HashtagLike,
+  LikeChoice,
+  useCreateHashtagLikeMutation,
+  useMyHashtagLikeQuery,
+  useUpdateHashtagLikeMutation,
+} from '../../apollo/query.graphql'
+import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import { Bullet, RootBullet } from '../../lib/bullet/types'
 
 const root: RootBullet = {
@@ -32,7 +39,81 @@ const root: RootBullet = {
 
 const HashtagComponent = (props: { hashtag: Hashtag }): JSX.Element => {
   const { hashtag } = props
-  return <button>{hashtag.text}</button>
+  const [createHashtagLike] = useCreateHashtagLikeMutation({
+    // update(cache, { data }) {
+    // const res = cache.readQuery<MyCommentLikesQuery>({ query: MyCommentLikesDocument })
+    // if (res?.myCommentLikes && data?.createCommentLike) {
+    //   cache.writeQuery<MyCommentLikesQuery>({
+    //     query: MyCommentLikesDocument,
+    //     data: { myCommentLikes: res.myCommentLikes.concat([data.createCommentLike.like]) },
+    //   })
+    // }
+    // },
+  })
+  const [updateHashtagLike] = useUpdateHashtagLikeMutation({
+    // update(cache, { data }) {
+    // const res = cache.readQuery<MyCommentLikesQuery>({
+    //   query: MyCommentLikesDocument,
+    // })
+    // if (res?.myCommentLikes && data?.updateCommentLike) {
+    //   cache.writeQuery<MyCommentLikesQuery>({
+    //     query: MyCommentLikesDocument,
+    //     data: { myCommentLikes: res.myCommentLikes.concat([data.updateCommentLike.like]) },
+    //   })
+    // }
+    // },
+  })
+  const { data, loading, error } = useMyHashtagLikeQuery({ variables: { hashtagId: hashtag.id } })
+
+  function handleClickLike(choice: LikeChoice) {
+    if (data === undefined) {
+      return
+    }
+    const { myHashtagLike } = data
+    if (myHashtagLike && myHashtagLike.choice === choice) {
+      updateHashtagLike({
+        variables: {
+          id: myHashtagLike.id,
+          data: { choice: 'NEUTRAL' },
+        },
+      })
+    }
+    if (myHashtagLike && myHashtagLike.choice !== choice) {
+      updateHashtagLike({
+        variables: {
+          id: myHashtagLike.id,
+          data: { choice },
+        },
+      })
+    }
+    if (myHashtagLike === undefined) {
+      createHashtagLike({
+        variables: {
+          hashtagId: hashtag.id.toString(),
+          data: { choice },
+        },
+      })
+    }
+  }
+  return (
+    <div>
+      {hashtag.text}
+      <button
+        onClick={() => {
+          handleClickLike('DOWN')
+        }}
+      >
+        up
+      </button>
+      <button
+        onClick={() => {
+          handleClickLike('DOWN')
+        }}
+      >
+        down
+      </button>
+    </div>
+  )
 }
 
 const HashtagGroupComponent = (props: { hashtagGroup: HashtagGroup }): JSX.Element => {

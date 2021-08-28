@@ -341,7 +341,12 @@ function parseLcHead(
     throw new Error()
   }
 
-  const inlines = tokens.map((e) => _toInlineElement(e))
+  // const inlines = tokens.map((e) => _toInlineElement(e))
+  const inlines: (CustomText | LabelInlineElement | MirrorInlineElement)[] = [
+    { text: '11' },
+    { type: 'label', children: [{ text: '22' }] },
+    { type: 'label', children: [{ text: '33' }] },
+  ]
 
   console.log(inlines)
 
@@ -349,7 +354,8 @@ function parseLcHead(
     at: path,
     match: (n, p) => Path.isChild(p, path),
   })
-  Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
+  // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
+  Transforms.insertNodes(editor, inlines, { at: [...path, 0] })
 }
 
 const LcHead = (

@@ -15,17 +15,17 @@ function _updateNVotes(nVotes: number[], choiceIdx: number, nChoices: number): n
 // function getChoice() {
 // }
 
-export async function createOauthorVote({
+export async function createAuthorVote({
   choiceIdx,
   choiceText,
   pollId,
-  oauthorName,
+  authorName,
   userId,
 }: {
   choiceIdx?: number
   choiceText?: string
   pollId: number
-  oauthorName: string
+  authorName: string
   userId: string
 }): Promise<Vote> {
   // 允許重複投票
@@ -47,7 +47,7 @@ export async function createOauthorVote({
     data: {
       choiceIdx,
       user: { connect: { id: userId } },
-      oauthor: { connect: { name: oauthorName } },
+      author: { connect: { name: authorName } },
       poll: { connect: { id: poll.id } },
     },
   })

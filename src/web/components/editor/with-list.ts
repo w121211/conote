@@ -455,7 +455,8 @@ export function withList(editor: Editor): Editor {
     }
 
     if (isLi(node)) {
-      // console.debug(editor.children)
+      // console.log(editor.children)
+      // console.log(node)
 
       // 檢查li只能有lc, ul?
       assert(isLc(node.children[0]))

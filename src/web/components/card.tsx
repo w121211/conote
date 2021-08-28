@@ -41,7 +41,7 @@ import Popover from './popover/popover'
 import { BulletEditor } from './editor/editor'
 import { Serializer } from './editor/serializer'
 import { LiElement } from './editor/slate-custom-types'
-import { tokenize } from '../lib/bullet/tokenizer'
+import { tokenize } from '../lib/bullet/text'
 import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../lib/bullet/types'
 import {
   CardBodyContent,
@@ -103,9 +103,9 @@ function getTabUrl(): string | null {
 }
 
 /**
- * 用client.query(...)方式query card，而非使用useQuery(...)，適用在非component但需要取得card的情況，例如取得mirrors
+ * 用 client.query(...) 而非使用 useQuery(...)，適用在非 component 但需要取得 card 的情況，例如取得 mirror
  *
- * @returns 當有card時返回card body bullet root; 找不到card時root為undefined，error為undefined; error時只返回error
+ * @returns 當有 card 時返回 card body bullet root; 找不到 card 時 root 為 undefined，error 為 undefined; error 時只返回 error
  */
 export async function queryAndParseCard(props: {
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -1053,8 +1053,8 @@ const TestPage = ({
   }
 
   return (
-    // <div>
-    <SymbolContext.Provider value={{ symbol: pathSymbol ?? '' }}>
+    <div>
+      {/* <SymbolContext.Provider value={{ symbol: pathSymbol ?? '' }}> */}
       {/* <button
         onClick={() => {
           setSymbol('')
@@ -1103,6 +1103,7 @@ const TestPage = ({
       >
         [[https://www.youtube.com/watch?v=F57gz9O0ABw]]
       </button>
+
       {/* {console.log(data?.card)} */}
       {data && data.card && <CardItem card={data.card} handleSymbol={handleSymbol} />}
       {webpageData && webpageData.webpageCard && (
@@ -1111,10 +1112,11 @@ const TestPage = ({
           <CardItem card={webpageData.webpageCard} handleSymbol={handleSymbol} />
         </>
       )}
+
       {!data?.card && !webpageData?.webpageCard && <BulletEditor />}
       {/* <BoardPage boardId={}/> */}
-    </SymbolContext.Provider>
-    // {/* </div> */}
+      {/* </SymbolContext.Provider> */}
+    </div>
   )
 }
 

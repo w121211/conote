@@ -1,7 +1,7 @@
 // import { BoardStatus } from '@prisma/client'
 // import { PinBoardCode } from '../models/card'
 
-import { Hashtag, HashtagDraft, HashtagGroup, HashtagGroupDraft } from './hashtag'
+import { Hashtag, HashtagDraft, HashtagGroup, HashtagGroupDraft } from '../hashtag/types'
 
 /**
  * Bullet operation flow:
@@ -27,14 +27,12 @@ export type Bullet = {
 
   placeholder?: string
   sourceUrl?: string
-  oauthorName?: string
+  authorName?: string
 
   freeze?: true // 無法變動
   freezeChildren?: true // 無法新增child
 
   mirror?: true
-
-  hashtags?: (Hashtag | HashtagGroup)[] // injected, 不會儲存
 
   // board?: true
   // poll?: true
@@ -60,10 +58,11 @@ export type Bullet = {
   valueArray?: true // body必須是string array
 }
 
-export type BulletDraft = Omit<Partial<Bullet>, 'children' | 'hashtags'> & {
+export type BulletDraft = Omit<Partial<Bullet>, 'children'> & {
   head: string
-  hashtags?: (Hashtag | HashtagDraft | HashtagGroup | HashtagGroupDraft)[]
   children: BulletDraft[] // 視所有的 tree 都為 BulletDraft，好處是在 type 上可以更容易處理，壞處是無法區分哪個有修改哪個沒有 TODO: 更好的區分
+  curHashtags?: (Hashtag | HashtagGroup)[] // injected
+  newHashtags?: (HashtagDraft | HashtagGroupDraft)[]
 
   // 用於輔助顯示，不會直接影響
   draft?: true // 表示此 bullet 有被修改，搭配 op 做更新，用於區隔沒有修改的 bullet（因為即便是未修改的 bullet，type 仍然是 BulletDraft)
@@ -81,7 +80,10 @@ type RootBulletBase = {
 
 export type RootBullet = RootBulletBase & Bullet
 
-export type RootBulletDraft = RootBulletBase & BulletDraft
+export type RootBulletDraft = RootBulletBase &
+  BulletDraft & {
+    allHashtags?: (Hashtag | HashtagGroup)[] // injected
+  }
 
 // export function hasCardSymbol(node: BulletDraft): node is BulletDraft & Required<Pick<BulletDraft, 'cardSymbol'>> {
 //   return 'cardSymbol' in node

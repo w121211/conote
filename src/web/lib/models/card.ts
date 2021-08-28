@@ -1,9 +1,10 @@
 import { Card, CardBody, CardType, Link } from '@prisma/client'
 import { FetchClient } from '../../../packages/fetcher/src'
 import prisma from '../prisma'
-import { checkBulletDraft, Node as BulletNode } from '../bullet/node'
+import { checkBulletDraft, BulletNode } from '../bullet/node'
 import { runBulletOp } from '../bullet/operation'
 import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../bullet/types'
+import { HashtagDraft, HashtagGroupDraft } from '../hashtag/types'
 import { getOrCreateLink, linkToSymbol } from './link'
 import { parse } from './symbol'
 import { getBotId } from './user'
@@ -64,7 +65,7 @@ export type CardBodyContent = {
 
 export type CardTemplate = {
   name: string
-  headDraft: RootBulletDraft
+  // headDraft: RootBulletDraft
   bodyDraft: RootBulletDraft
 }
 
@@ -75,40 +76,47 @@ export type CardTemplateProps = {
   ticker?: string
 }
 
+const defaultHashtags: (HashtagDraft | HashtagGroupDraft)[] = [
+  { type: 'hashtag-draft', op: 'CREATE', text: '#up' },
+  { type: 'hashtag-draft', op: 'CREATE', text: '#down' },
+  { type: 'hashtag-draft', op: 'CREATE', text: '#pin' },
+]
+
 export const templateTicker: CardTemplate = {
   name: '::Ticker',
-  headDraft: {
-    draft: true,
-    op: 'CREATE',
-    root: true,
-    symbol: '%SYMBOL%',
-    head: '_%SYMBOL%',
-    freeze: true,
-    freezeChildren: true,
-    children: [
-      { draft: true, op: 'CREATE', head: 'template', body: '::Ticker', keyvalue: true, children: [] },
-      { draft: true, op: 'CREATE', head: 'title', body: '%TITLE%', keyvalue: true, children: [] },
-      { draft: true, op: 'CREATE', head: 'keywords', body: '', keyvalue: true, valueArray: true, children: [] },
-      { draft: true, op: 'CREATE', head: 'tags', body: '', keyvalue: true, valueArray: true, children: [] },
-      {
-        draft: true,
-        op: 'CREATE',
-        head: 'pinPrice',
-        body: 'true',
-        freeze: true,
-        keyvalue: true,
-        valueBoolean: true,
-        children: [],
-      },
-    ],
-  },
+  // headDraft: {
+  //   draft: true,
+  //   op: 'CREATE',
+  //   root: true,
+  //   symbol: '%SYMBOL%',
+  //   head: '_%SYMBOL%',
+  //   freeze: true,
+  //   freezeChildren: true,
+  //   children: [
+  //     { draft: true, op: 'CREATE', head: 'template', body: '::Ticker', keyvalue: true, children: [] },
+  //     { draft: true, op: 'CREATE', head: 'title', body: '%TITLE%', keyvalue: true, children: [] },
+  //     { draft: true, op: 'CREATE', head: 'keywords', body: '', keyvalue: true, valueArray: true, children: [] },
+  //     { draft: true, op: 'CREATE', head: 'tags', body: '', keyvalue: true, valueArray: true, children: [] },
+  //     {
+  //       draft: true,
+  //       op: 'CREATE',
+  //       head: 'pinPrice',
+  //       body: 'true',
+  //       freeze: true,
+  //       keyvalue: true,
+  //       valueBoolean: true,
+  //       children: [],
+  //     },
+  //   ],
+  // },
   bodyDraft: {
     draft: true,
     op: 'CREATE',
     root: true,
     symbol: '%SYMBOL%',
     head: '%SYMBOL%',
-    // freeze: true,
+    freeze: true,
+    newHashtags: defaultHashtags,
     children: [
       {
         draft: true,
@@ -166,20 +174,20 @@ export const templateTicker: CardTemplate = {
 
 export const templateWebpage: CardTemplate = {
   name: '::Webpage',
-  headDraft: {
-    draft: true,
-    root: true,
-    symbol: '%SYMBOL%',
-    head: '_%SYMBOL%',
-    freeze: true,
-    op: 'CREATE',
-    children: [
-      { draft: true, head: 'template', body: '::Webpage', keyvalue: true, op: 'CREATE', children: [] },
-      { draft: true, head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE', children: [] },
-      { draft: true, head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
-      { draft: true, head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
-    ],
-  },
+  // headDraft: {
+  //   draft: true,
+  //   root: true,
+  //   symbol: '%SYMBOL%',
+  //   head: '_%SYMBOL%',
+  //   freeze: true,
+  //   op: 'CREATE',
+  //   children: [
+  //     { draft: true, head: 'template', body: '::Webpage', keyvalue: true, op: 'CREATE', children: [] },
+  //     { draft: true, head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE', children: [] },
+  //     { draft: true, head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
+  //     { draft: true, head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
+  //   ],
+  // },
   bodyDraft: {
     draft: true,
     op: 'CREATE',
@@ -187,6 +195,7 @@ export const templateWebpage: CardTemplate = {
     freeze: true,
     root: true,
     symbol: '%SYMBOL%',
+    newHashtags: defaultHashtags,
     children: [
       {
         draft: true,

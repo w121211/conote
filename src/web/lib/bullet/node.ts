@@ -1,5 +1,4 @@
 import { cloneDeep } from '@apollo/client/utilities'
-import { PinBoardCode } from '../models/card'
 import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from './types'
 
 export type BulletDraftOrRootBulletDraft<T extends Bullet | RootBullet> = T extends Bullet
@@ -8,7 +7,7 @@ export type BulletDraftOrRootBulletDraft<T extends Bullet | RootBullet> = T exte
 
 export type Matcher = (node: Bullet | BulletDraft) => boolean
 
-export class Node {
+export class BulletNode {
   /**
    * 將node展開為list，附上path，並將children設為空array（避免後續操作children）
    */
@@ -16,7 +15,7 @@ export class Node {
     const _node = cloneDeep(node)
     if (_node.children) {
       const children = _node.children.reduce<Bullet[]>((acc, cur, i) => {
-        const items = Node.toList(cur, [...path, i])
+        const items = BulletNode.toList(cur, [...path, i])
         return acc.concat(items)
       }, [])
       node.children = [] // 將children設為空
@@ -28,7 +27,7 @@ export class Node {
   public static toDict(node: Bullet): Record<string, Bullet> {
     const _node = cloneDeep(node)
     const record: Record<string, Bullet> = {}
-    for (const e of Node.toList(_node)) {
+    for (const e of BulletNode.toList(_node)) {
       record[e.id] = e
     }
     return record
@@ -41,7 +40,7 @@ export class Node {
       ..._node,
       prevHead: _node.head,
       prevBody: _node.body,
-      children: _node.children?.map(e => Node._toDraft(e)),
+      children: _node.children?.map(e => BulletNode._toDraft(e)),
     }
   }
 
@@ -56,7 +55,7 @@ export class Node {
       ..._node,
       prevHead: _node.head,
       prevBody: _node.body,
-      children: _node.children.map(e => Node._toDraft(e)),
+      children: _node.children.map(e => BulletNode._toDraft(e)),
     }
   }
 
@@ -68,7 +67,7 @@ export class Node {
       return true
     }
     for (const e of node.children) {
-      if (Node.hasAnyOp(e)) {
+      if (BulletNode.hasAnyOp(e)) {
         return true
       }
     }
@@ -87,7 +86,7 @@ export class Node {
     }
     return {
       ...node,
-      children: node.children.map(e => Node.removeEmptryNode(e)).filter((e): e is BulletDraft => e !== null),
+      children: node.children.map(e => BulletNode.removeEmptryNode(e)).filter((e): e is BulletDraft => e !== null),
     }
   }
 
@@ -126,7 +125,9 @@ export class Node {
 
     if (depth.stopAfter === undefined || nextDepth <= depth.stopAfter) {
       for (const e of node.children ?? []) {
-        found = found.concat(Node.find({ node: e, matcher, depth: { stopAfter: depth.stopAfter, cur: nextDepth } }))
+        found = found.concat(
+          BulletNode.find({ node: e, matcher, depth: { stopAfter: depth.stopAfter, cur: nextDepth } }),
+        )
       }
     }
 
@@ -143,7 +144,7 @@ export class Node {
   }): T {
     const { node, matcher, setter } = props
     const _node = cloneDeep(node)
-    for (const e of Node.find({ node: _node, matcher })) {
+    for (const e of BulletNode.find({ node: _node, matcher })) {
       setter(e)
     }
     return _node
@@ -240,7 +241,7 @@ export class Node {
  * - path
  */
 export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDraft {
-  const curDict = Node.toDict(cur)
+  const curDict = BulletNode.toDict(cur)
 
   function _check(_draft: BulletDraft): BulletDraft {
     const cur = _draft.id ? curDict[_draft.id] : undefined
@@ -256,7 +257,7 @@ export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDra
           head: _draft.head,
           body: _draft.body,
           sourceUrl: _draft.sourceUrl,
-          oauthorName: _draft.oauthorName,
+          authorName: _draft.authorName,
           op: 'CREATE',
         }
         break
