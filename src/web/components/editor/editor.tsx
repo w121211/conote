@@ -14,7 +14,7 @@ import {
   withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
-import { editorValue } from '../../apollo/cache'
+import { editorRoot } from '../../apollo/cache'
 import { RootBullet } from '../../lib/bullet/types'
 import { createAndParseCard, queryAndParseCard } from '../card'
 import { CustomRange, LcElement, LiElement, UlElement } from './slate-custom-types'
@@ -28,6 +28,12 @@ import classes from './editor.module.scss'
 import HeaderForm from '../header-form/header-form'
 import Popover from '../popover/popover'
 import MyTooltip from '../my-tooltip/my-tooltip'
+// import * as openLi from './open-li';
+import { useRouter } from 'next/router'
+import { toLink, useLocalValue } from './open-li'
+import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
+import BulletPanel from '../bullet-panel/bullet-panel'
+import ScrIcon from '../assets/svg/foreign.svg'
 
 const initialValueDemo: LiElement[] = [
   {
@@ -415,7 +421,7 @@ const LcMirror = (
         {element.error}
         {element.freeze && 'freeze'}
       </div> */}
-      {console.log(element)}
+      {/* {console.log(element)} */}
 
       {oauthorName && element.symbol && (
         <div contentEditable={false}>
@@ -491,11 +497,19 @@ const Lc = (props: RenderElementProps & { element: LcElement; oauthorName?: stri
 
 const Li = (props: RenderElementProps & { element: LiElement; oauthorName?: string }) => {
   const { attributes, children, element, oauthorName } = props
-
+  // console.log(element)
   const [hasUl, setHasUl] = useState(false)
   const [ulFolded, setUlFolded] = useState<true | undefined>()
+  const [showPanel, setShowPanel] = useState<boolean>(false)
   const editor = useSlateStatic()
+  const router = useRouter()
 
+  const href = toLink({
+    urlPathname: router.pathname,
+    urlQuery: router.query,
+    liPath: ReactEditor.findPath(editor, element),
+  })
+  // console.log(href, ReactEditor.findPath(editor, element))
   useEffect(() => {
     const path = ReactEditor.findPath(editor, element)
     try {
@@ -513,12 +527,16 @@ const Li = (props: RenderElementProps & { element: LiElement; oauthorName?: stri
 
   return (
     <div {...attributes} className={classes.bulletLi}>
-      <div contentEditable={false}>
+      <div className={classes.arrowBulletWrapper} contentEditable={false}>
         {hasUl ? (
           <span
-            className={classes.bulletWrapper}
+            className={classes.arrowWrapper}
             onClick={event => {
               event.preventDefault()
+              setUlFolded(prev => {
+                if (prev === undefined) return true
+                if (prev === true) return undefined
+              })
               const path = ReactEditor.findPath(editor, element)
               try {
                 const ul = Editor.node(editor, ulPath(path))
@@ -531,23 +549,88 @@ const Li = (props: RenderElementProps & { element: LiElement; oauthorName?: stri
               }
             }}
           >
-            <BulletSvg />
-            {oauthorName ? (
+            <ArrowUpIcon style={ulFolded ? undefined : { transform: 'rotate(180deg)' }} />
+
+            {/* <BulletSvg /> */}
+            {/* {oauthorName ? (
               <MyTooltip className={classes.bulletTooltip}>
                 <span className={classes.oauthorName}> @{oauthorName}</span>
               </MyTooltip>
-            ) : null}
+            ) : null} */}
             {/* Fold */}
           </span>
         ) : (
-          <span className={classes.bulletWrapper}>
+          <span className={classes.arrowWrapper}>
+            <ArrowUpIcon style={{ opacity: 0 }} />
+
+            {/* <BulletSvg /> */}
+            {/* {oauthorName ? (
+          <MyTooltip className={classes.bulletTooltip}>
+            <span className={classes.oauthorName}> @{oauthorName}</span>
+          </MyTooltip>
+        ) : null} */}
+            {/* Fold */}
+          </span>
+        )}
+        <span contentEditable={false}>
+          {/* <a href={href}> */}
+          <span
+            // className={classes.bulletWrapper}
+            onClick={event => {
+              event.stopPropagation()
+              const path = [...ReactEditor.findPath(editor, element)]
+              if (element.children[0].mirror && element.children[0].symbol) {
+                // console.log(element)
+                router.query.m = encodeURIComponent(element.children[0].symbol)
+                // console.log(path, ReactEditor.findPath(editor, element))
+              } else {
+                console.log(path)
+                // path.unshift(1)
+                router.query.p = encodeURIComponent(path.join('.'))
+              }
+              router.push(router)
+            }}
+          >
             <BulletSvg />
-            {oauthorName ? (
+            {/* {oauthorName ? (
               <MyTooltip className={classes.bulletTooltip}>
                 <span className={classes.oauthorName}> @{oauthorName}</span>
               </MyTooltip>
-            ) : null}
+            ) : null} */}
           </span>
+          {/* </a> */}
+        </span>
+        {/* {(hastaggable(node) || node.sourceUrl) && ( */}
+        {oauthorName && (
+          <BulletPanel className={classes.bulletPanel} visible={showPanel}>
+            <>
+              <div
+                className={classes.panelElement}
+                onClick={() => {
+                  // setShowCreateBoard(true)
+                }}
+              >
+                <span className={classes.panelIcon}>#</span>
+                {oauthorName}
+              </div>
+              <div
+                className={classes.panelElement}
+                onClick={() => {
+                  // setShowCreateBoard(true)
+                }}
+              >
+                <span className={classes.panelIcon}>#</span>
+                新增Hashtag
+              </div>
+
+              <div className={classes.panelElement}>
+                <span className={classes.panelIcon}>
+                  <ScrIcon />
+                </span>
+                查看來源
+              </div>
+            </>
+          </BulletPanel>
         )}
       </div>
 
@@ -600,6 +683,7 @@ export const BulletEditor = (props: {
   sourceUrl?: string
   withMirror?: boolean
   readOnly?: boolean
+  onValueChange?: (value: LiElement[]) => void
   // pollId: string
   // boardId: string
 }): JSX.Element => {
@@ -609,15 +693,13 @@ export const BulletEditor = (props: {
     sourceUrl,
     withMirror: isWithMirror = false,
     readOnly,
+    onValueChange,
     // pollId,
     // boardId,
   } = props
-  const [prevValue, setPrevValue] = useState<LiElement[] | undefined>()
   const [value, setValue] = useState<LiElement[]>(initialValue)
-  if (initialValue !== prevValue) {
-    setValue(initialValue)
-    setPrevValue(initialValue)
-  }
+  // const { root, mirror, path, openedLi, value, setLocalValue } = useLocalValue(initialValue)
+
   // const editor = useMemo(
   //   // () => withAutoComplete(withBullet(withHistory(withReact(createEditor())))),
   //   // () => withList(withHistory(withReact(createEditor()))),
@@ -649,7 +731,7 @@ export const BulletEditor = (props: {
         //   ...editor.selection,
         //   placeholder: true,
         // })
-        console.log(editor.selection)
+        // console.log(editor.selection)
         return [{ ...editor.selection, placeholder: true }]
       }
     }
@@ -706,14 +788,18 @@ export const BulletEditor = (props: {
   // }, [searchAllResult])
   // console.log(initialValue)
   return (
-    <div>
+    <div className={classes.bulletEditorContainer}>
       <Slate
         editor={editor}
         value={value}
         onChange={value => {
           if (isLiArray(value)) {
             setValue(value)
-            editorValue(value) // 將最新值存入cache
+            // editorValue(value) // 將最新值存入cache
+
+            if (onValueChange) {
+              onValueChange(value)
+            }
           } else {
             throw new Error('value需為ul array')
           }
@@ -750,4 +836,13 @@ export const BulletEditor = (props: {
       </Slate>
     </div>
   )
+}
+
+export interface BulletEditorType {
+  initialValue?: LiElement[]
+  oauthorName?: string
+  sourceUrl?: string
+  withMirror?: boolean
+  readOnly?: boolean
+  onValueChange?: (value: LiElement[]) => void
 }

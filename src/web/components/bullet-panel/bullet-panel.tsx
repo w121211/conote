@@ -1,19 +1,21 @@
-import React, { useState } from 'react'
+import React, { ReactElement, useState } from 'react'
 import MyTooltip from '../my-tooltip/my-tooltip'
 import BulletPanelSvg from './bullet-panel-svg'
 import classes from './bullet-panel.module.scss'
 
-const BulletPanel = ({
-  children,
-  visible,
-  handleVisibleState,
-  className,
-}: {
-  children: React.ReactNode
+interface Child {
+  icon: SVGComponentTransferFunctionElement | SVGElement | Element | string | ReactElement
+  text: string | React.ReactNode
+}
+
+export interface BulletPanelType {
+  children: Child[]
   visible: boolean
   handleVisibleState?: (state: boolean) => void
   className?: string
-}): JSX.Element => {
+}
+
+const BulletPanel = ({ children, visible, handleVisibleState, className }: BulletPanelType): JSX.Element => {
   const [showPanel, setShowPanel] = useState<boolean>(false)
 
   const handleShowPanel = (state: boolean) => {
@@ -29,7 +31,14 @@ const BulletPanel = ({
         }}
       />
       <MyTooltip className={classes.panelTooltip} visible={showPanel} handleVisibleState={handleShowPanel}>
-        {children}
+        {children.map((e, i) => {
+          return (
+            <div className={classes.panelElement} key={i}>
+              <span className={classes.panelIcon}>{e.icon}</span>
+              {e.text}
+            </div>
+          )
+        })}
       </MyTooltip>
     </div>
   )

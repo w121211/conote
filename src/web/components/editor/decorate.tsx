@@ -1,26 +1,7 @@
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
-  CSSProperties,
-  useRef,
-} from 'react'
+import React, { useState, useMemo, useCallback, useEffect, CSSProperties, useRef } from 'react'
 import Modal from 'react-modal'
 import { Grammar, Token, tokenize as prismTokenize, TokenStream } from 'prismjs'
-import {
-  Editor,
-  Transforms,
-  Range,
-  createEditor,
-  Descendant,
-  Element,
-  Node,
-  Path,
-  Text,
-  NodeEntry,
-  Point,
-} from 'slate'
+import { Editor, Transforms, Range, createEditor, Descendant, Element, Node, Path, Text, NodeEntry, Point } from 'slate'
 import {
   Slate,
   Editable,
@@ -36,19 +17,19 @@ import {
 import { withHistory } from 'slate-history'
 import {
   LabelInlineElement,
-  LcBodyElement,
+  // LcBodyElement,
   LcElement,
-  LcHeadElement,
+  // LcHeadElement,
   LiElement,
-  MirrorInlineElement,
+  // MirrorInlineElement,
   UlElement,
 } from './slate-custom-types'
-import {
-  isLcBody,
-  isLcHead,
-  onKeyDown as withLcbodyOnKeyDown,
-  removeLcBody,
-} from './with-lcbody'
+// import {
+//   isLcBody,
+//   isLcHead,
+//   onKeyDown as withLcbodyOnKeyDown,
+//   removeLcBody,
+// } from './with-lcbody'
 import { CustomText } from '../../../web/components/editor/slate-custom-types'
 // import { useSearch } from './search'
 
@@ -80,10 +61,7 @@ const initialValueDemo: LiElement[] = [
           {
             type: 'lc-head',
             // body: '__11',
-            children: [
-              { text: '::[[A mirror]] ' },
-              { type: 'label', children: [{ text: '#label' }] },
-            ],
+            children: [{ text: '::[[A mirror]] ' }, { type: 'label', children: [{ text: '#label' }] }],
           },
           // { type: 'lc-body', children: [{ text: '__11' }] },
         ],
@@ -120,9 +98,7 @@ const initialValueDemo: LiElement[] = [
             children: [
               {
                 type: 'lc',
-                children: [
-                  { type: 'lc-head', body: '__44', children: [{ text: '44' }] },
-                ],
+                children: [{ type: 'lc-head', body: '__44', children: [{ text: '44' }] }],
               },
             ],
           },
@@ -164,7 +140,7 @@ export function ulPath(liPath: Path): Path {
 const LcBody = (
   props: RenderElementProps & {
     element: LcBodyElement
-  }
+  },
 ) => {
   const { attributes, children, element } = props
   const editor = useSlateStatic()
@@ -198,11 +174,7 @@ const Ul = (props: RenderElementProps & { element: UlElement }) => {
           onClick={() => {
             const path = ReactEditor.findPath(editor, element)
             Transforms.deselect(editor)
-            Transforms.setNodes<UlElement>(
-              editor,
-              { fold: element.fold ? undefined : true },
-              { at: path }
-            )
+            Transforms.setNodes<UlElement>(editor, { fold: element.fold ? undefined : true }, { at: path })
           }}
         >
           Fold
@@ -217,21 +189,15 @@ const CustomElement = (
   props: RenderElementProps & {
     oauthorName?: string
     sourceUrl?: string
-  }
+  },
 ) => {
   const { attributes, children, element, oauthorName, sourceUrl } = props
 
   switch (element.type) {
     case 'label':
-      return (
-        <Label {...{ attributes, children, element, oauthorName, sourceUrl }} />
-      )
+      return <Label {...{ attributes, children, element, oauthorName, sourceUrl }} />
     case 'mirror':
-      return (
-        <Mirror
-          {...{ attributes, children, element, oauthorName, sourceUrl }}
-        />
-      )
+      return <Mirror {...{ attributes, children, element, oauthorName, sourceUrl }} />
     // case 'mirror':
     //   return (
     //     <Mirror
@@ -241,14 +207,10 @@ const CustomElement = (
   }
 
   if (isLcHead(element)) {
-    return (
-      <LcHead {...{ attributes, children, element, oauthorName, sourceUrl }} />
-    )
+    return <LcHead {...{ attributes, children, element, oauthorName, sourceUrl }} />
   }
   if (isLcBody(element)) {
-    return (
-      <LcBody {...{ attributes, children, element, oauthorName, sourceUrl }} />
-    )
+    return <LcBody {...{ attributes, children, element, oauthorName, sourceUrl }} />
   }
   if (isLc(element)) {
     return <span {...attributes}>{children}</span>
@@ -290,8 +252,7 @@ const grammar: Grammar = {
   ticker: { pattern: /\$[A-Z-=]+/ },
   topic: { pattern: /\[\[[^\]\n]+\]\]/u },
   url: {
-    pattern:
-      /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
+    pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
   },
   hashtag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
   user: { pattern: /(?<=\s|^)@(?:[a-zA-Z0-9]+|\(author\))(?=\s|$)/ },
@@ -301,19 +262,14 @@ function tokenize(text: string): (string | Token)[] {
   return prismTokenize(text, grammar)
 }
 
-function parseLcHead(
-  editor: Editor,
-  lcBodyEntry: NodeEntry<LcHeadElement>
-): void {
+function parseLcHead(editor: Editor, lcBodyEntry: NodeEntry<LcHeadElement>): void {
   const [node, path] = lcBodyEntry
 
   const tokens = tokenize(Node.string(node))
 
   // TODO: validate
 
-  function _toInlineElement(
-    token: string | Token
-  ): CustomText | LabelInlineElement | MirrorInlineElement {
+  function _toInlineElement(token: string | Token): CustomText | LabelInlineElement | MirrorInlineElement {
     if (typeof token === 'string') {
       return { text: token }
     }
@@ -341,7 +297,7 @@ function parseLcHead(
     throw new Error()
   }
 
-  const inlines = tokens.map((e) => _toInlineElement(e))
+  const inlines = tokens.map(e => _toInlineElement(e))
 
   console.log(inlines)
 
@@ -355,7 +311,7 @@ function parseLcHead(
 const LcHead = (
   props: RenderElementProps & {
     element: LcHeadElement
-  }
+  },
 ) => {
   const { attributes, children, element } = props
   const editor = useSlateStatic()
@@ -378,9 +334,7 @@ const LcHead = (
       </li>
 
       <div contentEditable={false} style={{ color: 'green' }}>
-        {!element.isEditingBody && (
-          <span style={{ color: 'red' }}>{element.body}</span>
-        )}
+        {!element.isEditingBody && <span style={{ color: 'red' }}>{element.body}</span>}
         {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>} */}
         {/* {element.op === 'CREATE' && authorSwitcher} */}
       </div>
@@ -393,7 +347,7 @@ const Mirror = (
     element: MirrorInlineElement
     oauthorName?: string
     sourceUrl?: string
-  }
+  },
 ) => {
   const { attributes, children, element, oauthorName, sourceUrl } = props
   const readonly = useReadOnly()
@@ -409,7 +363,7 @@ const Label = (
     element: LabelInlineElement
     oauthorName?: string
     sourceUrl?: string
-  }
+  },
 ) => {
   const { attributes, children, element, oauthorName, sourceUrl } = props
   const readonly = useReadOnly()
@@ -491,7 +445,7 @@ function decorate([node, path]: NodeEntry): Range[] {
 const withLabel = (editor: Editor): Editor => {
   const { isInline } = editor
 
-  editor.isInline = (element) => {
+  editor.isInline = element => {
     return ['label', 'mirror'].includes(element.type) ? true : isInline(element)
   }
 
@@ -504,42 +458,25 @@ export const BulletEditor = (props: {
   sourceUrl?: string
   withMirror?: boolean
 }): JSX.Element => {
-  const {
-    initialValue = initialValueDemo,
-    authorName,
-    sourceUrl,
-    withMirror: isWithMirror = false,
-  } = props
+  const { initialValue = initialValueDemo, authorName, sourceUrl, withMirror: isWithMirror = false } = props
 
   const [value, setValue] = useState<LiElement[]>(initialValue)
-  const editor = useMemo(
-    () => withLabel(withHistory(withReact(createEditor()))),
-    []
-  )
+  const editor = useMemo(() => withLabel(withHistory(withReact(createEditor()))), [])
   const renderElement = useCallback(
-    (props: RenderElementProps) => (
-      <CustomElement
-        {...{ ...props, authorName, sourceUrl, withMirror: isWithMirror }}
-      />
-    ),
-    []
+    (props: RenderElementProps) => <CustomElement {...{ ...props, authorName, sourceUrl, withMirror: isWithMirror }} />,
+    [],
   )
-  const renderLeaf = useCallback(
-    (props: RenderLeafProps) => <Leaf {...props} />,
-    []
-  )
+  const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
 
   const [readonly, setReadonly] = useState(false)
 
   return (
     <div>
-      <button onClick={() => setReadonly(!readonly)}>
-        Readonly {readonly ? 'Y' : 'N'}
-      </button>
+      <button onClick={() => setReadonly(!readonly)}>Readonly {readonly ? 'Y' : 'N'}</button>
       <Slate
         editor={editor}
         value={value}
-        onChange={(value) => {
+        onChange={value => {
           if (isLiArray(value)) {
             setValue(value)
           } else {
@@ -553,7 +490,7 @@ export const BulletEditor = (props: {
           readOnly={readonly}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
-          onKeyDown={(event) => {
+          onKeyDown={event => {
             withLcbodyOnKeyDown(event, editor)
           }}
         />

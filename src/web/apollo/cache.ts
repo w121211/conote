@@ -30,7 +30,9 @@ export function createCache(): InMemoryCache {
   })
 }
 
-export const editorValue = makeVar<LiElement[] | undefined>(undefined)
+// export const editorValue = makeVar<LiElement[] | undefined>(undefined)
+export const editorRoot = makeVar<LiElement | undefined>(undefined)
+export const editorMirror = makeVar<LiElement | undefined>(undefined)
 
 export const testValue = makeVar<string>('this is a test')
 

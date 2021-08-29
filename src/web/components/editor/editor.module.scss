@@ -37,3 +37,28 @@
     }
   }
 }
+.arrowWrapper {
+  position: absolute;
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: flex;
+  width: 8px;
+  left: -1em;
+  // margin-right: 4px;
+  min-height: 2em;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    // opacity: 0;
+    height: 10px;
+    transform: rotate(90deg);
+  }
+}
+.arrowBulletWrapper {
+  display: flex;
+  position: relative;
+}
+.bulletEditorContainer {
+  margin-left: 3em;
+}

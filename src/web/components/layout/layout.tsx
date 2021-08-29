@@ -119,7 +119,7 @@ export default function Layout({
   // }, [])
 
   useEffect(() => {
-    console.log('pathEffect')
+    // console.log('pathEffect')
     // if (path.length >= 4) {
     //   const nestedPath: string[] = []
     //   const newPath: string[] = []
@@ -158,7 +158,7 @@ export default function Layout({
         // console.log(pathElementWidth, pathElementWidth.reduce((a, b) => a + b) + 10, viewPortWidth - 62 - 16)
         const copyArr: string[] = [...path]
         const filterCopyArr = copyArr.slice(1, indx)
-        console.log(indx)
+        // console.log(indx)
         const newCopyArr = [...path]
         newCopyArr.splice(1, indx - 1, '...')
         // setMyPath(newMyPath)
@@ -169,7 +169,7 @@ export default function Layout({
         setMyPath([...path])
       }
     } else {
-      console.log(path)
+      // console.log(path)
       setMyPath([...path])
     }
   }, [viewPortWidth, path])

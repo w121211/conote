@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
 import React, { FormEvent, useCallback, useEffect, useMemo, useState, createContext, useRef } from 'react'
 import Link from 'next/link'
-import router from 'next/router'
+import router, { useRouter } from 'next/router'
 import { ApolloClient, ApolloError, useApolloClient } from '@apollo/client'
 import { useUser } from '@auth0/nextjs-auth0'
 import { Token } from 'prismjs'
 import { CardType } from '@prisma/client'
 import RightArrow from '../../assets/svg/right-arrow.svg'
-import { editorValue } from '../apollo/cache'
+// import { editorValue } from '../apollo/cache'
 import {
   Board,
   BoardQuery,
@@ -56,7 +56,9 @@ import MyTooltip from './my-tooltip/my-tooltip'
 
 import BulletPanelSvg from './bullet-panel/bullet-panel-svg'
 import BulletPanel from './bullet-panel/bullet-panel'
-import ScrIcon from '../assets/svg/foreign.svg'
+import SrcIcon from '../assets/svg/foreign.svg'
+import { getLevels, Level, useLocalValue } from './editor/open-li'
+// import { Node } from 'slate'
 
 // type CardHeadAndParsedContent = Omit<CardHead, 'content'> & {
 //   content: CardHeadContent
@@ -75,7 +77,7 @@ type CardParsed = Card & {
 /**
  * 針對query後收到的gql card做後續parse，所以在此處理而非在後端
  */
-function parseCard(card: Card): CardParsed {
+export function parseCard(card: Card): CardParsed {
   const headContent: CardHeadContent = JSON.parse(card.head.content)
   const bodyContent: CardBodyContent = JSON.parse(card.body.content)
   // console.log(bodyContent)
@@ -556,24 +558,10 @@ const BulletItem = (props: {
           </span>
           {(hastaggable(node) || node.sourceUrl) && (
             <BulletPanel className={classes.bulletPanel} visible={showPanel}>
-              <>
-                <div
-                  className={classes.panelElement}
-                  onClick={() => {
-                    setShowCreateBoard(true)
-                  }}
-                >
-                  <span className={classes.panelIcon}>#</span>
-                  新增Hashtag
-                </div>
-
-                <div className={classes.panelElement}>
-                  <span className={classes.panelIcon}>
-                    <ScrIcon />
-                  </span>
-                  查看來源
-                </div>
-              </>
+              {[
+                { icon: '#', text: '新增標籤' },
+                { icon: <SrcIcon />, text: '查看來源' },
+              ]}
             </BulletPanel>
           )}
           <span className={classes.bulletContent}>
@@ -737,6 +725,14 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
   const [edit, setEdit] = useState(false)
   const [bodyTree, setBodyTree] = useState<BulletDraft>() // tree root不顯示
 
+  // useEffect(() => {
+  //   if (root && path) {
+  //     const levels = getLevels(root, path)
+  //     levels.pop() // 最後一個是當前的 li ，不需要
+  //     setLevels(levels)
+  //   }
+  // }, [root, path])
+
   const contentRef = useRef<HTMLDivElement>(null)
   const handleClickOutOfEditor = (e: MouseEvent) => {
     if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
@@ -769,6 +765,9 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
   //   build()
   // console.log(card)
   const [editorInitialValue, setEditorInitialValue] = useState<LiElement[] | undefined>()
+  const cardini: CardBodyContent = JSON.parse(card.body.content)
+  const { root, mirror, path, openedLi, value, setLocalValue } = useLocalValue([Serializer.toRootLi(cardini.self)])
+  // console.log('openLi', openedLi)
 
   useEffect(() => {
     async function _parseAndBuildCard() {
@@ -788,14 +787,21 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
           ? [Serializer.toRootLi(self), ...(mirrors ?? []).map(e => Serializer.toRootLi(e))]
           : [Serializer.toRootLi(self)]
 
-      console.log(lis)
+      // console.log(lis)
 
       setEditorInitialValue(lis)
+
       // setEdit(false) // 需要重設來trigger editor rerender
     }
 
     _parseAndBuildCard()
   }, [card])
+
+  // useEffect(() => {
+  //   if (editorInitialValue) {
+  //     setLocalValue(editorInitialValue)
+  //   }
+  // }, [editorInitialValue])
 
   const onCloseEditor = useCallback(() => {
     const value = editorValue() // 從cache取得目前的editor value
@@ -868,7 +874,7 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
   return (
     <div>
       {/* <h3>Head</h3> */}
-
+      {/* <h1 className={classes.title}>{}</h1> */}
       <span className={classes.title}>{headContentValue?.title || card.symbol}</span>
       {/* {console.log(pinBoard)} */}
       {pinBoardBuysell && pinBoardBuysell.pinCode === 'BUYSELL' && (
@@ -940,20 +946,23 @@ export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => 
       {error && <div>Submit fail...</div>}
 
       <div onClick={() => setEdit(true)} ref={contentRef}>
-        {console.log(editorInitialValue)}
+        {/* {console.log(editorInitialValue)} */}
         {
           self ? (
             <>
               <BulletEditor
-                initialValue={editorInitialValue}
+                initialValue={value}
                 oauthorName={card.link?.oauthorName ?? undefined}
                 sourceUrl={card.link?.url}
                 withMirror={card.type === 'WEBPAGE'}
                 readOnly={!edit}
+                onValueChange={value => {
+                  setLocalValue(value)
+                }}
                 // boardId={pinBoardBuysell.boardId.toString()}
                 // pollId={pinBoardBuysell.pollId?.toString()}
               />
-              <CardBodyItem card={card} self={self} mirrors={mirrors} handleSymbol={handleSymbol} />
+              {/* <CardBodyItem card={card} self={self} mirrors={mirrors} handleSymbol={handleSymbol} /> */}
             </>
           ) : // ) : (
           // )
@@ -1018,7 +1027,7 @@ const TestPage = ({
 }): JSX.Element => {
   const { user, error: userError, isLoading } = useUser()
   const { data: meData, loading: meLoading } = useMeQuery()
-
+  const router = useRouter()
   const [symbol, setSymbol] = useState<string>('$GOOG')
   // const [path, setPath] = useState<string[]>(['$GOOG'])
   // const [showBoardPage, setShowBoardPage] = useState(false)
@@ -1031,6 +1040,17 @@ const TestPage = ({
     variables: { symbol: pathSymbol ?? '' },
   })
   const { data: webpageData } = useWebpageCardQuery({ variables: { url: webPageUrl ?? '' } })
+
+  // const { root, mirror, path, openedLi, value, setLocalValue } = useLocalValue()
+  const [levels, setLevels] = useState<Level[]>()
+
+  // useEffect(() => {
+  //   if (root && path) {
+  //     const levels = getLevels(root, path)
+  //     levels.pop() // 最後一個是當前的 li ，不需要
+  //     setLevels(levels)
+  //   }
+  // }, [root, path])
 
   const handleSymbol = (symbol: string) => {
     handlePathPush(symbol)
@@ -1112,6 +1132,14 @@ const TestPage = ({
         </>
       )}
       {!data?.card && !webpageData?.webpageCard && <BulletEditor />}
+      {/* {value && (
+        <BulletEditor
+          initialValue={value}
+          onValueChange={value => {
+            setLocalValue(value)
+          }}
+        />
+      )} */}
       {/* <BoardPage boardId={}/> */}
     </SymbolContext.Provider>
     // {/* </div> */}

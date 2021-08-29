@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import classes from './my-tooltip.module.scss'
 
-interface Tooltip {
+export interface Tooltip {
   children: React.ReactNode
   visible?: boolean
   handleVisibleState?: (state: boolean) => void
@@ -70,7 +70,7 @@ const MyTooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
   }, [visible])
 
   return (
-    <div className={`${classes.containerouter} ${className ? className : ''}`} style={styleState} ref={myRef}>
+    <div className={`${classes.containerOuter} ${className ? className : ''}`} style={styleState} ref={myRef}>
       {children}
     </div>
   )

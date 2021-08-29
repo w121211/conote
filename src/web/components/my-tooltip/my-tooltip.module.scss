@@ -1,8 +1,8 @@
-.containerouter {
+.containerOuter {
   position: absolute;
   top: 45px;
   bottom: 45px;
-  // left: -75px;
+
   padding: 0.5em;
   background-color: $white;
   -webkit-box-shadow: 0 12px 25px -11px #00000066;
@@ -19,7 +19,4 @@
 
   flex-wrap: nowrap;
   white-space: nowrap;
-  span {
-    // padding: 10px 0;
-  }
 }
