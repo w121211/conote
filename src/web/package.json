@@ -41,6 +41,7 @@
     "@prisma/client": "^2.26.0",
     "@svgr/webpack": "^5.5.0",
     "apollo-server-micro": "^2.23.0",
+    "apollo3-cache-persist": "^0.12.1",
     "cookie": "^0.4.1",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.0",

@@ -9,7 +9,6 @@ fragment poll on Poll {
   __typename
   id
   userId
-  boardId
   choices
   count {
     id
@@ -95,43 +94,58 @@ fragment link on Link {
   domain
   sourceType
   sourceId
-  oauthorName
+  authorName
 }
 
-fragment bulletLike on BulletLike {
+fragment hashtagLike on HashtagLike {
   __typename
   id
-  bulletId
+  hashtagId
   choice
   createdAt
   updatedAt
 }
 
-fragment bulletCount on BulletCount {
+fragment hashtagCount on HashtagCount {
   __typename
   id
   nUps
   nDowns
 }
 
-fragment bullet on Bullet {
+fragment hashtag on Hashtag {
+  __typename
   id
+  userId
+  authorName
+  bulletId
   cardId
+  text
+  poll {
+    ...poll
+  }
   count {
-    ...bulletCount
+    ...hashtagCount
   }
   createdAt
   updatedAt
 }
 
-fragment cardHead on CardHead {
-  __typename
+fragment bullet on Bullet {
   id
-  userId
-  content
-  timestamp
-  prevId
+  cardId
+  createdAt
+  updatedAt
 }
+
+# fragment cardHead on CardHead {
+#   __typename
+#   id
+#   userId
+#   content
+#   timestamp
+#   prevId
+# }
 
 fragment cardBody on CardBody {
   __typename
@@ -150,9 +164,9 @@ fragment card on Card {
   link {
     ...link
   }
-  head {
-    ...cardHead
-  }
+  # head {
+  #   ...cardHead
+  # }
   body {
     ...cardBody
   }
@@ -194,6 +208,12 @@ query Card($symbol: String!) {
 query WebpageCard($url: String!) {
   webpageCard(url: $url) {
     ...card
+  }
+}
+
+query Hashtags($symbol: String!) {
+  hashtags(symbol: $symbol) {
+    ...hashtag
   }
 }
 
@@ -239,9 +259,9 @@ query MyBoardLikes {
   }
 }
 
-query MyBulletLikes {
-  myBulletLikes {
-    ...bulletLike
+query MyHashtagLike($hashtagId: Int!) {
+  myHashtagLike(hashtagId: $hashtagId) {
+    ...hashtagLike
   }
 }
 
@@ -257,22 +277,22 @@ mutation CreateSymbolCard($data: CardInput!) {
 #   }
 # }
 
-mutation CreateCardBody($cardId: ID!, $data: CardBodyInput!) {
-  createCardBody(cardId: $cardId, data: $data) {
+mutation CreateCardBody($cardSymbol: String!, $data: CardBodyInput!) {
+  createCardBody(cardSymbol: $cardSymbol, data: $data) {
     ...cardBody
   }
 }
 
-mutation createHashtag($cardId: ID!, $bulletId: Int!, $data: BoardInput!) {
-  createHashtag(cardId: $cardId, bulletId: $bulletId, data: $data) {
-    board {
-      ...board
-    }
-    cardBody {
-      ...cardBody
-    }
-  }
-}
+# mutation createHashtag($cardId: ID!, $bulletId: Int!, $data: BoardInput!) {
+#   createHashtag(cardId: $cardId, bulletId: $bulletId, data: $data) {
+#     board {
+#       ...board
+#     }
+#     cardBody {
+#       ...cardBody
+#     }
+#   }
+# }
 
 mutation CreateVote($pollId: ID!, $data: VoteInput!) {
   createVote(pollId: $pollId, data: $data) {
@@ -298,24 +318,24 @@ mutation CreateOauthorComment($boardId: ID!, $pollId: ID, $oauthorName: String!,
   }
 }
 
-mutation CreateBulletLike($bulletId: ID!, $data: LikeInput!) {
-  createBulletLike(bulletId: $bulletId, data: $data) {
+mutation CreateHashtagLike($hashtagId: ID!, $data: LikeInput!) {
+  createHashtagLike(hashtagId: $hashtagId, data: $data) {
     like {
-      ...bulletLike
+      ...hashtagLike
     }
     count {
-      ...bulletCount
+      ...hashtagCount
     }
   }
 }
 
-mutation UpdateBulletLike($id: ID!, $data: LikeInput!) {
-  updateBulletLike(id: $id, data: $data) {
+mutation UpdateHashtagLike($id: ID!, $data: LikeInput!) {
+  updateHashtagLike(id: $id, data: $data) {
     like {
-      ...bulletLike
+      ...hashtagLike
     }
     count {
-      ...bulletCount
+      ...hashtagCount
     }
   }
 }

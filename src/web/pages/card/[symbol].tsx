@@ -1,147 +1,124 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-// import { QueryDataProvider } from '../../../web/components/data-provider'
-// import { CardHead, CardBody } from '../../../web/components/card'
-// import { CardForm } from '../../../web/components/card-form'
+import { Node } from 'slate'
+import { BulletEditor } from '../../components/editor/editor'
+import { LiElement } from '../../components/editor/slate-custom-types'
+import { useLocalValue } from '../../components/editor/use-local-value'
+import { isLi } from '../../components/editor/with-list'
+import { getNavLocation, NavLocation, pathToHref } from '../../components/editor/with-location'
 
-import { useCardQuery, CardQuery, useWebpageCardQuery, WebpageCardQuery } from '../../apollo/query.graphql'
-import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../../packages/editor/src/index'
-import CardIndex from '../../components/card-index'
+// TODO: 與 li-location 合併
+type Nav = {
+  text: string
+  path: number[]
+}
 
-// function getTabUrl(): string | null {
-//   let url: string | null
-//   // if (window?.location.protocol.includes('extension')) {
-//   //   // popup的情況
-//   //   const params = new URLSearchParams(new URL(window.location.href).search)
-//   //   url = params.get('u')
-//   // } else {
-//   // inject的情況
-//   url = window.location.href
-//   // }
-
-//   return url
-// }
-
-export function CardSymbolPage(): JSX.Element {
-  console.log('CardSymbolPage')
-  const router = useRouter()
-  const { symbol } = router.query
-
-  // const decodeUri = decodeURIComponent(symbol??'')
-  // const [edit, setEdit] = useState<boolean>(false)
-  // const [mySymbol, setMySymbol] = useState('')
-  // const [myUrl, setMyUrl] = useState('')
-  // const [urlState, setUrlState] = useState('')
-  // const [path, setPath] = useState<string>('')
-
-  // useEffect(() => {
-  //   if (symbol && typeof symbol === 'string') {
-  //     if (symbol.startsWith('[[') || symbol.includes('$')) {
-  //       setMySymbol(symbol)
-
-  //       console.log('setSymbol', symbol)
-  //     } else {
-  //       setMyUrl(symbol)
-  //       console.log('setUrl', symbol)
-  //     }
-  //   }
-  // }, [symbol])
-
-  // const { data: webPageData } = useWebpageCardQuery({
-  //   variables: { url: myUrl },
-  //   onCompleted(data) {
-  //     if (data.webpageCard) {
-  //       // setPath(data.webpageCard.symbol)
-  //       // setPath([data.webpageCard.symbol])
-  //       // setMySymbol(data.webpageCard.symbol)
-  //       // console.log('setSymbol query')
-  //       // console.log(webPageData.webpageCard)
-  //     }
-  //   },
-  // })
-  // useEffect(() => {
-  //   if (path[path.length - 1].includes('[[') && path[path.length - 1].includes(']]')) {
-  //     setSymbol(path[path.length - 1])
-  //   } else {
-  //     setUrlState(path[path.length - 1])
-  //   }
-  // }, [path])
-  // const {data:webPageData,loading:webPageLoading,error:webPageError}=useWebpageCardQuery({variables:{url:urlState}})
-  // const { data, loading, error } = useCardQuery({ variables: { symbol} })
-
-  // if (data) {
-  // if ((data && data.card)||(webPageData&&webPageData.webpageCard)) {
-  // const editor = new Editor(
-  //   data.card.body?.text,
-  //   data.card.body?.meta,
-  //   data.card.link?.url,
-  //   data.card.link?.oauthorName ?? undefined,
-  // )
-  // editor.flush({ attachMarkerlinesToTokens: true })
-  // const sect = editor.getSections()
-  let mySymbol
-  let myUrl
-  if (symbol && typeof symbol === 'string') {
-    if (symbol.startsWith('[[') || symbol.includes('$')) {
-      mySymbol = symbol
-
-      console.log('setSymbol', symbol)
-    } else {
-      myUrl = symbol
-      console.log('setUrl', symbol)
+function getNavs(root: LiElement, destPath: number[]): Nav[] {
+  const navs: Nav[] = []
+  for (const [n, p] of Node.levels(root, destPath)) {
+    console.log(n, p)
+    if (isLi(n)) {
+      const [lc] = n.children
+      navs.push({
+        text: Node.string(lc),
+        path: p,
+      })
     }
   }
-  return (
-    // <QueryDataProvider
-    //   useQuery={() => useCocardQuery({ variables: { url } })}
-    //   render={(data: CocardQuery) => {
-    // const url = `/card/form?${getCardUrlParam(data.cocard)}`
-    // return (
-    <div>
-      {/* <button
-          onClick={() => {
-            setEdit(!edit)
-          }}
-        >
-          編輯
-        </button> */}
-
-      <CardIndex mySymbol={mySymbol} webPageUrl={myUrl} />
-
-      {/* <CardHead card={data.cocard} sect={sect} height={0} />
-        {edit ? (
-          <CardForm card={data.cocard} />
-        ) : (
-          <CardBody
-            card={data.cocard}
-            clickPoll={() => {}}
-            anchorIdHandler={() => {}}
-            showDiscuss={() => {}}
-            anchorIdHL={''}
-            hlElementHandler={() => {}}
-            pathPush={() => {
-              setPath
-            }}
-            // symbolHandler={()=>{setSymbol}}
-          />
-        )} */}
-    </div>
-    // )
-    // }
-    // return null
-    // }}
-    // />
-  )
-  // }
-  // if (symbol) {
-  //   try {
-  //     symbolToUrl(symbol)
-  //     return _render(undefined, symbol)
-  //   } catch {
-  //     return <h1>Symbol format error</h1>
-  //   }
-  // }
+  return navs
 }
-// return <h1>Require URL or Symbol (現階段還未支援symbol)</h1>
-// }
+
+const CardSymbolPage = (): JSX.Element | null => {
+  const router = useRouter()
+  const [navs, setNavs] = useState<Nav[]>() // editor route
+  const [readonly, setReadonly] = useState(false)
+  const [location, setLocation] = useState<NavLocation>()
+  const { data, setLocalValue, submitting, submitValue, dropValue } = useLocalValue({ location })
+
+  useEffect(() => {
+    if (router.isReady) {
+      const location = getNavLocation(router.query)
+      setLocation(location)
+    }
+  }, [router])
+
+  useEffect(() => {
+    if (data && location) {
+      const { self, mirror } = data
+      const navs = mirror ? getNavs(mirror.rootLi, location.openedLiPath) : getNavs(self.rootLi, location.openedLiPath)
+      navs.pop() // 最後一個是當前的 li ，不需要
+      setNavs(navs)
+    }
+  }, [data, location])
+
+  if (data === undefined || location === undefined) {
+    return null
+  }
+  const { mirror, openedLi, value } = data
+  const [openedLiLc] = openedLi.children
+
+  return (
+    <div>
+      <a href="/api/auth/login">Login</a>
+
+      <button
+        onClick={() => {
+          setReadonly(!readonly)
+        }}
+      >
+        {readonly ? 'Readonly*' : 'Readonly'}
+      </button>
+
+      <button
+        onClick={() => {
+          if (!submitting) {
+            submitValue()
+          }
+        }}
+      >
+        {submitting ? '...' : 'Submit'}
+      </button>
+
+      <button
+        onClick={() => {
+          dropValue()
+          router.reload()
+        }}
+      >
+        {'Drop'}
+      </button>
+
+      {mirror && (
+        <span>
+          <a href={pathToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>Home</a>
+          ...
+        </span>
+      )}
+
+      {navs &&
+        navs.map((e, i) => (
+          <span key={i}>
+            <a href={pathToHref({ ...location, openedLiPath: e.path })}>{e.text}</a>|
+          </span>
+        ))}
+
+      <div>
+        <h3>{Node.string(openedLiLc)}</h3>
+        {openedLiLc.rootBulletDraft?.allHashtags
+          ? openedLiLc.rootBulletDraft.allHashtags.map((e, i) => <button key={i}>{e.text}</button>)
+          : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <button key={i}>{e.text}</button>)}
+      </div>
+
+      <BulletEditor
+        initialValue={value}
+        location={location}
+        onValueChange={value => {
+          setLocalValue(value)
+        }}
+        readOnly={readonly}
+      />
+    </div>
+  )
+}
+
 export default CardSymbolPage

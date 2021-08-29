@@ -12,14 +12,17 @@ type Query {
 
   link(url: String!): Link
 
-  # 以symbol查找，若無返回null
-  # @cardBodyId 若給予，返回該card及指定的body，否則返回latest body
+  # 以 symbol 查找，若無返回 null
+  # @cardBodyId 若給予，返回該card及指定的body，否則返回 latest body
   card(symbol: String!, cardBodyId: String): Card
 
-  # 以url查找，若無會fetch、resolve並創新card
+  # 以 url 查找，若無會 fetch, resolve url 並創新 card
   webpageCard(url: String!): Card!
 
-  # 用id找不到，throw error
+  # 以 card symbol 找該 card 所有的 active hashtags
+  hashtags(symbol: String!): [Hashtag!]
+
+  # 若找不到，@throw error
   bullet(id: ID!): Bullet!
 
   board(id: ID!): Board!
@@ -32,6 +35,9 @@ type Query {
   myCommentLikes(after: String): [CommentLike!]!
   myBoardLikes(after: String): [BoardLike!]!
   myBulletLikes(after: String): [BulletLike!]!
+
+  # 會有找不到的可能 TODO: 整合成對單張卡片搜尋？
+  myHashtagLike(hashtagId: Int!): HashtagLike
 
   # --- NEXT ---
 
@@ -102,18 +108,24 @@ type Query {
 }
 
 type Mutation {
-  # 實質上是get or create，另外 webpage card 是在 query 階段創新
+  # 若 symbol 已存在會直接返回現有的 card，不另外創新
   createSymbolCard(data: CardInput!): Card!
   # createCardHead(cardId: ID!, data: CardBulletRootInput!): CardHead!
 
-  # 若該symbol尚未有card時，需要給template，會同步創card, body
-  createCardBody(cardId: ID!, data: CardBodyInput!): CardBody!
+  # 若該 symbol 尚未有 card 時，需要給 template，會同步創 card, body
+  createCardBody(cardSymbol: String!, data: CardBodyInput!): CardBody!
 
   # 等價於create hashtag，會同步update card body hashtag
   # createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): CreateBoardResponse!
-  createHashtag(cardId: ID!, bulletId: Int!, data: BoardInput!): CreateHashtagResponse!
+
+  # （尚未開放）一般的 hashtag 需透過 editor 編輯來創造，但對於內建、常用的 hashtag 可直接創造
+  # createQuickHashtag(cardId: ID!, bulletId: Int!, data: BoardInput!): CreateHashtagResponse!
+
+  createHashtagLike(hashtagId: ID!, data: LikeInput!): HashtagLikeResponse!
+  updateHashtagLike(id: ID!, data: LikeInput!): HashtagLikeResponse!
 
   createVote(pollId: ID!, data: VoteInput!): Vote!
+
   createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
 
   createOauthorVote(pollId: ID!, oauthorName: String!, data: VoteInput!): Vote!
@@ -122,8 +134,8 @@ type Mutation {
   # createOauthorComment(boardId: ID!, data: CommentInput!)
   # updateComment(id: ID!, data: CommentInput!): Comment!
 
-  createBulletLike(bulletId: ID!, data: LikeInput!): BulletLikeResponse!
-  updateBulletLike(id: ID!, data: LikeInput!): BulletLikeResponse!
+  # createBulletLike(bulletId: ID!, data: LikeInput!): BulletLikeResponse!
+  # updateBulletLike(id: ID!, data: LikeInput!): BulletLikeResponse!
 
   createCommentLike(commentId: ID!, data: LikeInput!): CommentLikeResponse!
   updateCommentLike(id: ID!, data: LikeInput!): CommentLikeResponse!
@@ -183,6 +195,15 @@ type User {
   # trips: [Launch]!
 }
 
+type Link {
+  id: ID!
+  url: String!
+  domain: String!
+  sourceType: String!
+  sourceId: String
+  authorName: String
+}
+
 # type Choice {
 #   id: ID!
 #   userId: ID!
@@ -213,7 +234,6 @@ type PollCount {
 type Poll {
   id: ID!
   userId: ID!
-  boardId: Int!
   # type: PollType!
   # status: PollStatus!
   choices: [String!]!
@@ -232,6 +252,111 @@ type Poll {
   createdAt: DateTime!
   updatedAt: DateTime!
 }
+
+type Hashtag {
+  id: ID!
+  userId: String!
+  authorName: String
+  bulletId: Int!
+  cardId: Int!
+  # pollId: Int
+  # status: HashtagStatus
+  text: String!
+  poll: Poll
+  count: HashtagCount!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type HashtagLike {
+  id: ID!
+  hashtagId: Int!
+  choice: LikeChoice!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type HashtagCount {
+  id: ID!
+  nUps: Int!
+  nDowns: Int!
+}
+
+type HashtagLikeResponse {
+  like: HashtagLike!
+  count: HashtagCount!
+}
+
+# type CreateHashtagResponse {
+#   board: Board!
+#   # hashtag: Hashtag!
+#   cardBody: CardBody!
+# }
+
+type BulletCount {
+  id: ID!
+  nUps: Int!
+  nDowns: Int!
+}
+
+type BulletLikeResponse {
+  like: BulletLike!
+  count: BulletCount!
+}
+
+type BulletLike {
+  id: ID!
+  bulletId: Int!
+  choice: LikeChoice!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Bullet {
+  id: ID!
+  cardId: Int!
+  count: BulletCount!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# type CardHead {
+#   id: ID!
+#   userId: String!
+#   # content: JSONObject!
+#   content: String! # json
+#   timestamp: Int!
+#   prevId: Int
+# }
+
+type CardBody {
+  id: ID!
+  userId: String!
+  # content: JSONObject!
+  content: String! # in json
+  timestamp: Int!
+  prevId: Int
+}
+
+type Card {
+  id: ID!
+  type: CardType!
+  symbol: String!
+  link: Link
+  body: CardBody!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type CardEntry {
+  id: ID!
+  type: CardType!
+  symbol: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# Consider to remove
 
 type CommentLike {
   id: ID!
@@ -306,93 +431,6 @@ type Board {
   updatedAt: DateTime!
 }
 
-# type Hashtag {
-#   userId: String!
-#   boardId: Int!
-#   boardStatus: BoardStatus!
-#   text: String!
-#   linkBullet: Boolean
-# }
-
-type CreateHashtagResponse {
-  board: Board!
-  # hashtag: Hashtag!
-  cardBody: CardBody!
-}
-
-type Link {
-  id: ID!
-  url: String!
-  domain: String!
-  sourceType: String!
-  sourceId: String
-  oauthorName: String
-}
-
-type BulletLike {
-  id: ID!
-  bulletId: Int!
-  choice: LikeChoice!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type BulletCount {
-  id: ID!
-  nUps: Int!
-  nDowns: Int!
-}
-
-type BulletLikeResponse {
-  like: BulletLike!
-  count: BulletCount!
-}
-
-type Bullet {
-  id: ID!
-  cardId: Int!
-  count: BulletCount!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type CardHead {
-  id: ID!
-  userId: String!
-  # content: JSONObject!
-  content: String! # json
-  timestamp: Int!
-  prevId: Int
-}
-
-type CardBody {
-  id: ID!
-  userId: String!
-  # content: JSONObject!
-  content: String! # json
-  timestamp: Int!
-  prevId: Int
-}
-
-type Card {
-  id: ID!
-  type: CardType!
-  symbol: String!
-  link: Link
-  head: CardHead!
-  body: CardBody!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type CardEntry {
-  id: ID!
-  type: CardType!
-  symbol: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
 # ------ Inputs ------
 
 input LikeInput {
@@ -457,8 +495,8 @@ input BoardInput {
 # }
 
 input CardBodyInput {
-  self: JSON
-  mirrors: [JSON!]
+  root: JSON!
+  # mirrors: [JSON!]
 }
 
 input CardTemplatePropsInput {

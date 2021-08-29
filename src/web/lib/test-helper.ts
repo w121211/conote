@@ -13,7 +13,7 @@ export const TESTUSERS = [
   { id: 'testuser4', email: 'eee@eee.com', password: 'eee' },
 ]
 
-export const TESTOAUTHORS = [{ name: 'test-oauthor-1' }]
+export const TESTAUTHORS = [{ name: 'test-author-1' }]
 
 // export const TEST_SYMBOLS = [
 //   { name: '$AAA', cat: SymbolCat.TICKER },
@@ -59,8 +59,8 @@ export async function createTestUsers(prisma: PrismaClient): Promise<void> {
     ),
   )
   await prisma.$transaction(
-    TESTOAUTHORS.map(e =>
-      prisma.oauthor.create({
+    TESTAUTHORS.map(e =>
+      prisma.author.create({
         data: { name: e.name },
       }),
     ),

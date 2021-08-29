@@ -1,14 +1,13 @@
-import { inspect } from 'util'
-import { Board, BoardStatus, Card, CardBody, CardHead, CardType, Link, Poll } from '@prisma/client'
+import { Card, CardBody, CardType, Link } from '@prisma/client'
 import { FetchClient } from '../../../packages/fetcher/src'
 import prisma from '../prisma'
-import { Bullet, BulletDraft, RootBullet, RootBulletChildless, RootBulletDraft } from '../bullet/types'
+import { checkBulletDraft, BulletNode } from '../bullet/node'
+import { runBulletOp } from '../bullet/operation'
+import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../bullet/types'
+import { HashtagDraft, HashtagGroupDraft } from '../hashtag/types'
 import { getOrCreateLink, linkToSymbol } from './link'
 import { parse } from './symbol'
 import { getBotId } from './user'
-import { checkBulletDraft, Node as BulletNode } from '../bullet/node'
-import { runBulletOp } from '../bullet/operation'
-// import { getOrCreateLink } from './link'
 
 export type PinBoardCode = 'BUYSELL' | 'VS'
 
@@ -59,13 +58,14 @@ export type CardHeadContent = {
 // }
 
 export type CardBodyContent = {
-  self: RootBullet
-  mirrors?: RootBulletChildless[]
+  value: RootBullet
+  // self: RootBullet
+  // mirrors?: RootBulletChildless[]
 }
 
 export type CardTemplate = {
   name: string
-  headDraft: RootBulletDraft
+  // headDraft: RootBulletDraft
   bodyDraft: RootBulletDraft
 }
 
@@ -76,131 +76,133 @@ export type CardTemplateProps = {
   ticker?: string
 }
 
+const defaultHashtags: (HashtagDraft | HashtagGroupDraft)[] = [
+  { type: 'hashtag-draft', op: 'CREATE', text: '#up' },
+  { type: 'hashtag-draft', op: 'CREATE', text: '#down' },
+  { type: 'hashtag-draft', op: 'CREATE', text: '#pin' },
+]
+
 export const templateTicker: CardTemplate = {
   name: '::Ticker',
-  headDraft: {
-    draft: true,
-    root: true,
-    symbol: '%SYMBOL%',
-    head: '_%SYMBOL%',
-    freeze: true,
-    freezeChildren: true,
-    op: 'CREATE',
-    children: [
-      { draft: true, head: 'template', body: '::Ticker', keyvalue: true, op: 'CREATE', children: [] },
-      { draft: true, head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE', children: [] },
-      { draft: true, head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
-      { draft: true, head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
-      {
-        draft: true,
-        head: 'pinPrice',
-        body: 'true',
-        freeze: true,
-        keyvalue: true,
-        valueBoolean: true,
-        op: 'CREATE',
-        children: [],
-      },
-    ],
-  },
+  // headDraft: {
+  //   draft: true,
+  //   op: 'CREATE',
+  //   root: true,
+  //   symbol: '%SYMBOL%',
+  //   head: '_%SYMBOL%',
+  //   freeze: true,
+  //   freezeChildren: true,
+  //   children: [
+  //     { draft: true, op: 'CREATE', head: 'template', body: '::Ticker', keyvalue: true, children: [] },
+  //     { draft: true, op: 'CREATE', head: 'title', body: '%TITLE%', keyvalue: true, children: [] },
+  //     { draft: true, op: 'CREATE', head: 'keywords', body: '', keyvalue: true, valueArray: true, children: [] },
+  //     { draft: true, op: 'CREATE', head: 'tags', body: '', keyvalue: true, valueArray: true, children: [] },
+  //     {
+  //       draft: true,
+  //       op: 'CREATE',
+  //       head: 'pinPrice',
+  //       body: 'true',
+  //       freeze: true,
+  //       keyvalue: true,
+  //       valueBoolean: true,
+  //       children: [],
+  //     },
+  //   ],
+  // },
   bodyDraft: {
     draft: true,
+    op: 'CREATE',
     root: true,
     symbol: '%SYMBOL%',
     head: '%SYMBOL%',
     freeze: true,
-    op: 'CREATE',
+    newHashtags: defaultHashtags,
     children: [
       {
         draft: true,
-        head: '[!]',
-        freeze: true,
         op: 'CREATE',
+        head: '討論區',
+        children: [
+          {
+            draft: true,
+            op: 'CREATE',
+            head: '提問',
+            children: [
+              {
+                draft: true,
+                op: 'CREATE',
+                head: '%SYMBOL% 如何操作？',
+                hashtags: [{ op: 'CREATE', type: 'hashtag-group-draft', pollChoices: ['#buy', '#sell', '#hold'] }],
+                children: [],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        draft: true,
+        op: 'CREATE',
+        head: '[!]',
         // children: [{ head: '', placeholder: 'a placeholder test', template: true }],
         children: [],
       },
       {
         draft: true,
-        head: '[?]',
-        freeze: true,
         op: 'CREATE',
+        head: '[?]',
         children: [
-          {
-            draft: true,
-            head: `%SYMBOL% <BUY> <SELL> <WATCH>`,
-            pin: true,
-            pinCode: 'BUYSELL',
-            poll: true,
-            pollChoices: ['BUY', 'SELL', 'WATCH'],
-            freeze: true,
-            op: 'CREATE',
-            hashtags: [{ text: '#Answer', linkBullet: true, op: 'CREATE' }],
-            children: [],
-          },
+          // {
+          //   draft: true,
+          //   head: `%SYMBOL% <BUY> <SELL> <WATCH>`,
+          //   pin: true,
+          //   pinCode: 'BUYSELL',
+          //   poll: true,
+          //   pollChoices: ['BUY', 'SELL', 'WATCH'],
+          //   freeze: true,
+          //   op: 'CREATE',
+          //   hashtags: [{ text: '#Answer', linkBullet: true, op: 'CREATE' }],
+          //   children: [],
+          // },
         ],
       },
-      { draft: true, head: '[*]', freeze: true, op: 'CREATE', children: [] },
-      { draft: true, head: '[+]', freeze: true, op: 'CREATE', children: [] },
-      { draft: true, head: '[-]', freeze: true, op: 'CREATE', children: [] },
+      { draft: true, op: 'CREATE', head: '[*]', children: [] },
+      { draft: true, op: 'CREATE', head: '[+]', children: [] },
+      { draft: true, op: 'CREATE', head: '[-]', children: [] },
     ],
   },
 }
 
 export const templateWebpage: CardTemplate = {
   name: '::Webpage',
-  headDraft: {
-    draft: true,
-    root: true,
-    symbol: '%SYMBOL%',
-    head: '_%SYMBOL%',
-    freeze: true,
-    op: 'CREATE',
-    children: [
-      { draft: true, head: 'template', body: '::Webpage', keyvalue: true, op: 'CREATE', children: [] },
-      { draft: true, head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE', children: [] },
-      { draft: true, head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
-      { draft: true, head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
-    ],
-  },
+  // headDraft: {
+  //   draft: true,
+  //   root: true,
+  //   symbol: '%SYMBOL%',
+  //   head: '_%SYMBOL%',
+  //   freeze: true,
+  //   op: 'CREATE',
+  //   children: [
+  //     { draft: true, head: 'template', body: '::Webpage', keyvalue: true, op: 'CREATE', children: [] },
+  //     { draft: true, head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE', children: [] },
+  //     { draft: true, head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
+  //     { draft: true, head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
+  //   ],
+  // },
   bodyDraft: {
     draft: true,
-    root: true,
-    symbol: '%SYMBOL%',
+    op: 'CREATE',
     head: '%SYMBOL%',
     freeze: true,
-    op: 'CREATE',
+    root: true,
+    symbol: '%SYMBOL%',
+    newHashtags: defaultHashtags,
     children: [
       {
         draft: true,
-        head: '[!]',
-        freeze: true,
         op: 'CREATE',
+        head: '隨筆區',
         children: [],
-        // children: [{ head: '', placeholder: 'a placeholder test', template: true }],
       },
-      {
-        draft: true,
-        head: '[?]',
-        freeze: true,
-        op: 'CREATE',
-        children: [
-          {
-            draft: true,
-            head: `%SYMBOL% <BUY> <SELL> <WATCH>`,
-            pin: true,
-            pinCode: 'BUYSELL',
-            poll: true,
-            pollChoices: ['BUY', 'SELL', 'WATCH'],
-            freeze: true,
-            op: 'CREATE',
-            hashtags: [{ text: '#Answer', linkBullet: true, op: 'CREATE' }],
-            children: [],
-          },
-        ],
-      },
-      { draft: true, head: '[*]', freeze: true, op: 'CREATE', children: [] },
-      { draft: true, head: '[+]', freeze: true, op: 'CREATE', children: [] },
-      { draft: true, head: '[-]', freeze: true, op: 'CREATE', children: [] },
     ],
   },
 }
@@ -237,19 +239,19 @@ async function batchCreateBullet() {
   // TODO
 }
 
-export async function getCurrentCardBody(cardId: number): Promise<CardBody | null> {
+export async function getLatestCardBody(cardId: number): Promise<CardBody | null> {
   return await prisma.cardBody.findFirst({
     where: { cardId },
     orderBy: { createdAt: 'desc' },
   })
 }
 
-export async function getCurrentCardHead(cardId: number): Promise<CardHead | null> {
-  return await prisma.cardHead.findFirst({
-    where: { cardId },
-    orderBy: { createdAt: 'desc' },
-  })
-}
+// export async function getCurrentCardHead(cardId: number): Promise<CardHead | null> {
+//   return await prisma.cardHead.findFirst({
+//     where: { cardId },
+//     orderBy: { createdAt: 'desc' },
+//   })
+// }
 
 function serializeContent() {
   // TODO
@@ -288,80 +290,66 @@ function bulletToKeyValue(node: Bullet): KeyValue<string | string[] | boolean | 
   return {}
 }
 
-export async function createCardHead(prop: {
-  cardId: number
-  draft: RootBulletDraft
-  userId: string
-}): Promise<CardBody> {
-  const { cardId, draft, userId } = prop
-  const timestamp = Date.now()
-  const cur = await getCurrentCardHead(cardId)
-  const curContent: CardHeadContent | undefined = cur ? JSON.parse(cur.content) : undefined
+// export async function createCardHead(prop: {
+//   cardId: number
+//   draft: RootBulletDraft
+//   userId: string
+// }): Promise<CardBody> {
+//   const { cardId, draft, userId } = prop
+//   const timestamp = Date.now()
+//   const cur = await getCurrentCardHead(cardId)
+//   const curContent: CardHeadContent | undefined = cur ? JSON.parse(cur.content) : undefined
+//   const nextSelf = await runBulletOp({
+//     cardId: cardId,
+//     current: curContent && curContent.self,
+//     draft,
+//     timestamp,
+//     userId,
+//   })
+//   const nextContent: CardHeadContent = {
+//     self: nextSelf,
+//     // TODO: require type guard
+//     value: bulletToKeyValue(nextSelf) as CardHeadContentValue,
+//   }
+//   return await prisma.cardHead.create({
+//     data: {
+//       timestamp,
+//       // TODO: serializer
+//       content: JSON.stringify(nextContent),
+//       card: { connect: { id: cardId } },
+//       user: { connect: { id: userId } },
+//       prev: cur ? { connect: { id: cur.id } } : undefined,
+//     },
+//   })
+// }
 
-  const nextSelf = await runBulletOp({
+/**
+ * 用於資料庫的建立，不考慮輸入資料的檢查等，內部使用
+ */
+async function _createCardBody(props: {
+  cardId: number
+  root: RootBulletDraft
+  userId: string
+}): Promise<[CardBody, CardBodyContent]> {
+  const { cardId, root, userId } = props
+
+  const timestamp = Date.now()
+  const cur = await getLatestCardBody(cardId)
+  const curContent: CardBodyContent | undefined = cur ? JSON.parse(cur.content) : undefined
+
+  const nextRoot = await runBulletOp({
     cardId: cardId,
-    current: curContent && curContent.self,
-    draft,
+    current: curContent && curContent.value,
+    draft: root,
     timestamp,
     userId,
   })
 
-  const nextContent: CardHeadContent = {
-    self: nextSelf,
-    // TODO: require type guard
-    value: bulletToKeyValue(nextSelf) as CardHeadContentValue,
-  }
-  return await prisma.cardHead.create({
-    data: {
-      timestamp,
-      // TODO: serializer
-      content: JSON.stringify(nextContent),
-      card: { connect: { id: cardId } },
-      user: { connect: { id: userId } },
-      prev: cur ? { connect: { id: cur.id } } : undefined,
-    },
-  })
-}
-
-/**
- * 用於資料庫的建立，不考慮輸入資料的檢查等，內部使用
- * @param self - 沒更新的情況可以不給，會抓current的self並填入，若找不到current（例如第一次創）則會報錯
- */
-async function _createCardBody(props: {
-  cardId: number
-  self?: RootBulletDraft
-  nextMirrors?: RootBulletChildless[]
-  userId: string
-}): Promise<[CardBody, CardBodyContent]> {
-  const { cardId, self, nextMirrors, userId } = props
-
-  if (self === undefined && nextMirrors === undefined) {
-    throw new Error('需至少要給self或mirrors')
-  }
-
-  const timestamp = Date.now()
-  const cur = await getCurrentCardBody(cardId)
-  const curContent: CardBodyContent | undefined = cur ? JSON.parse(cur.content) : undefined
-
-  const nextSelf = self
-    ? await runBulletOp({
-        cardId: cardId,
-        current: curContent && curContent.self,
-        draft: self,
-        timestamp,
-        userId,
-      })
-    : curContent?.self
-  if (nextSelf === undefined) {
-    throw new Error('body content需要有self')
-  }
-
-  const nextContent: CardBodyContent = { self: nextSelf, mirrors: nextMirrors }
+  const nextContent: CardBodyContent = { value: nextRoot }
   const body = await prisma.cardBody.create({
     data: {
       timestamp,
-      // TODO: serializer
-      content: JSON.stringify(nextContent),
+      content: JSON.stringify(nextContent), // TODO: serializer
       card: { connect: { id: cardId } },
       user: { connect: { id: userId } },
       prev: cur ? { connect: { id: cur.id } } : undefined,
@@ -371,22 +359,24 @@ async function _createCardBody(props: {
 }
 
 /**
- * 檢查card body的self draft
- * @returns 若檢驗沒問題，返回bullet input，若該mirror沒有op（等於不用create），返回null
- * @throws 檢驗失敗時告知error
+ * 檢查 card body 的 value draft，若檢驗有問題，throws 錯誤
+ * @returns 若檢驗沒問題，返回 bullet input
+ * @throws 檢驗失敗時告知 error
  */
 async function checkDraft(draft: RootBulletDraft): Promise<{
   cardSymbol: string
   cardId?: number
-  curSelf?: Bullet
-  draft?: RootBulletDraft
+  curValue?: Bullet
+  draft: RootBulletDraft
 }> {
   const symbol = draft.symbol
 
   // draft沒有op，不用create，返回
   if (!BulletNode.hasAnyOp(draft)) {
-    console.log(`${symbol}的draft沒有op，不用create，返回`)
-    return { cardSymbol: symbol }
+    // console.log(`${symbol}的draft沒有op，不用create，返回`)
+    // return { cardSymbol: symbol }
+    console.error(draft)
+    throw new Error('draft沒有op')
   }
 
   // 檢查是否有card，沒有的話需要創
@@ -403,19 +393,19 @@ async function checkDraft(draft: RootBulletDraft): Promise<{
   //   return checked
   // }
 
-  const body = await getCurrentCardBody(card.id)
+  const body = await getLatestCardBody(card.id)
   if (body === null) {
-    throw new Error('找不到body，第一次創卡無法使用checkDraft()')
+    throw new Error('找不到 body，第一次創卡無法使用 checkDraft()')
   }
   const curContent: CardBodyContent = JSON.parse(body.content)
 
   return {
     cardId: card.id,
     cardSymbol: symbol,
-    curSelf: curContent.self,
+    curValue: curContent.value,
     draft: {
       ...draft,
-      children: draft.children.map(e => checkBulletDraft(e, curContent.self)),
+      children: draft.children.map(e => checkBulletDraft(e, curContent.value)),
     },
   }
 }
@@ -441,16 +431,16 @@ async function checkDraft(draft: RootBulletDraft): Promise<{
  */
 export async function createCardBody(props: {
   cardId: number
-  self?: RootBulletDraft
-  mirrors?: RootBulletDraft[]
+  root: RootBulletDraft
   userId: string
 }): Promise<[CardBody, CardBodyContent]> {
-  const { cardId, self, mirrors, userId } = props
+  const { cardId, root, userId } = props
 
-  if (self === undefined && mirrors === undefined) {
-    throw new Error('self、mirrors需至少要給一個')
-  }
-  const body = await getCurrentCardBody(cardId)
+  // if (self === undefined && mirrors === undefined) {
+  //   throw new Error('self、mirrors需至少要給一個')
+  // }
+
+  const body = await getLatestCardBody(cardId)
   if (body === null) {
     throw new Error('Card body not found')
   }
@@ -458,81 +448,76 @@ export async function createCardBody(props: {
   if (card === null) {
     throw new Error('Card not found')
   }
-  if (mirrors && card.type !== CardType.WEBPAGE) {
-    // 檢查此卡片是否允許mirrors
-    throw new Error('Card not allow to have mirrors')
-  }
 
-  // 檢查self & mirrors
-  const checkedSelf = self && (await checkDraft(self))
-  const checkedMirrors = mirrors && (await Promise.all(mirrors.map(async e => await checkDraft(e))))
+  // if (mirrors && card.type !== CardType.WEBPAGE) {
+  //   // 檢查此卡片是否允許mirrors
+  //   throw new Error('Card not allow to have mirrors')
+  // }
 
-  console.log(checkedSelf)
-  console.log(checkedMirrors)
+  const checked = root && (await checkDraft(root))
+  // const checkedMirrors = mirrors && (await Promise.all(mirrors.map(async e => await checkDraft(e))))
 
+  // const bodyContent: CardBodyContent = JSON.parse(body.content)
   // 若mirror有更新，創mirror body並更新entry，沒有更新的返回原entry
-  const bodyContent: CardBodyContent = JSON.parse(body.content)
-
   // TODO: 目前忽略了將mirror entry被刪除的情況 -> 會直接從entries移除
-  const nextMirrors: RootBulletChildless[] | undefined =
-    checkedMirrors &&
-    (
-      await Promise.all(
-        checkedMirrors.map(async (checked): Promise<RootBulletChildless | undefined> => {
-          if (checked.draft === undefined) {
-            // 沒有draft，代表雖然有此mirror但沒更新，找current mirror填補，若找不到表示新增了一個symbol，但卻沒有更新，忽略此mirror
-            return bodyContent.mirrors?.find(e => e.symbol === checked.cardSymbol)
-          }
-          if (checked.cardId && checked.draft) {
-            const [body, bodyContent] = await _createCardBody({
-              cardId: checked.cardId,
-              self: checked.draft,
-              userId,
-            })
-            // mirror不需要完全記錄原本的node，因為會依symbol, body id抓原本的bullet
-            return {
-              id: bodyContent.self.id,
-              timestamp: bodyContent.self.timestamp,
-              userIds: bodyContent.self.userIds,
-              head: bodyContent.self.head,
-              root: true,
-              mirror: true,
-              symbol: bodyContent.self.symbol,
-              cardBodyId: body.id,
-              children: [],
-            }
-          }
-          return undefined
-        }),
-      )
-    ).filter((e): e is RootBulletChildless => e !== undefined)
+  // const nextMirrors: RootBulletChildless[] | undefined =
+  //   checkedMirrors &&
+  //   (
+  //     await Promise.all(
+  //       checkedMirrors.map(async (checked): Promise<RootBulletChildless | undefined> => {
+  //         if (checked.draft === undefined) {
+  //           // 沒有draft，代表雖然有此mirror但沒更新，找current mirror填補，若找不到表示新增了一個symbol，但卻沒有更新，忽略此mirror
+  //           return bodyContent.mirrors?.find(e => e.symbol === checked.cardSymbol)
+  //         }
+  //         if (checked.cardId && checked.draft) {
+  //           const [body, bodyContent] = await _createCardBody({
+  //             cardId: checked.cardId,
+  //             self: checked.draft,
+  //             userId,
+  //           })
+  //           // mirror不需要完全記錄原本的node，因為會依symbol, body id抓原本的bullet
+  //           return {
+  //             id: bodyContent.self.id,
+  //             timestamp: bodyContent.self.timestamp,
+  //             userIds: bodyContent.self.userIds,
+  //             head: bodyContent.self.head,
+  //             root: true,
+  //             mirror: true,
+  //             symbol: bodyContent.self.symbol,
+  //             cardBodyId: body.id,
+  //             children: [],
+  //           }
+  //         }
+  //         return undefined
+  //       }),
+  //     )
+  //   ).filter((e): e is RootBulletChildless => e !== undefined)
 
   // 更新self
   return await _createCardBody({
     cardId: card.id,
-    self: checkedSelf?.draft,
-    nextMirrors,
+    root: checked.draft,
     userId,
   })
 }
 
 export async function attachLatestHeadBody(card: Card): Promise<
   Card & {
-    head: CardHead
+    // head: CardHead
     body: CardBody
   }
 > {
-  const head = await getCurrentCardHead(card.id)
-  const body = await getCurrentCardBody(card.id)
-  if (head && body) {
-    return { ...card, head, body }
+  // const head = await getCurrentCardHead(card.id)
+  const body = await getLatestCardBody(card.id)
+  if (body) {
+    return { ...card, body }
   } else {
     throw new Error('card沒有對應的head/body，需要先創head/body')
   }
 }
 
 /**
- * 僅內部使用，會同時載入template並創第一個card body
+ * 僅供內部使用，會載入 template 並創第一個 card body
  */
 async function _createCard(props: {
   link?: Link
@@ -543,7 +528,7 @@ async function _createCard(props: {
 }): Promise<
   Card & {
     link: Link | null
-    head: CardHead
+    // head: CardHead
     body: CardBody
   }
 > {
@@ -556,20 +541,18 @@ async function _createCard(props: {
     },
     include: { link: true },
   })
-
   // 依template建card-head, card-body
-  const head = await createCardHead({
-    cardId: card.id,
-    draft: replaceBulletDraft(template.headDraft, templateProps),
-    userId: await getBotId(),
-  })
+  // const head = await createCardHead({
+  //   cardId: card.id,
+  //   draft: replaceBulletDraft(template.headDraft, templateProps),
+  //   userId: await getBotId(),
+  // })
   const [body] = await _createCardBody({
     cardId: card.id,
-    self: replaceBulletDraft(template.bodyDraft, templateProps),
+    root: replaceBulletDraft(template.bodyDraft, templateProps),
     userId: await getBotId(),
   })
-
-  return { ...card, head, body }
+  return { ...card, body }
 }
 
 export const templateDict: { [key in CardType]: CardTemplate } = {
@@ -579,13 +562,13 @@ export const templateDict: { [key in CardType]: CardTemplate } = {
 }
 
 /**
- * 搜尋、創新symbol card
- * TODO: 當symbol為url時，應導向webpage card
+ * 搜尋、創新 symbol card
+ * TODO: 當 symbol為url 時，應導向 webpage card
  */
 export async function getOrCreateCardBySymbol(symbol: string): Promise<
   Card & {
     link: Link | null
-    head: CardHead
+    // head: CardHead
     body: CardBody
   }
 > {
@@ -616,12 +599,13 @@ export async function getOrCreateCardBySymbol(symbol: string): Promise<
 }
 
 /**
- * 搜尋、創新webpage card，若給予的url找不到對應的link，會fetch url並創一個link
+ * 搜尋、創新 webpage card
+ * 若給予的 url 在資料庫中找不到對應的 link，會 fetch url 並創一個 link
  */
 export async function getOrCreateCardByUrl({ fetcher, url }: { fetcher?: FetchClient; url: string }): Promise<
   Card & {
     link: Link
-    head: CardHead
+    // head: CardHead
     body: CardBody
   }
 > {
@@ -641,6 +625,5 @@ export async function getOrCreateCardByUrl({ fetcher, url }: { fetcher?: FetchCl
         },
         type: CardType.WEBPAGE,
       })
-
   return { ...card, link }
 }

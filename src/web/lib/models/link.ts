@@ -1,4 +1,4 @@
-import { Card, Link, Oauthor } from '@prisma/client'
+import { Card, Link, Author } from '@prisma/client'
 import { parseUrl, tryFetch, FetchClient, FetchResult } from '../../../packages/fetcher/src/index'
 import prisma from '../prisma'
 
@@ -8,13 +8,13 @@ type ExtFetchResult = FetchResult & {
 
 const bannedCharMatcher = /[^a-zA-Z0-9_\p{Letter}]/gu
 
-function toOauthorName(domain: string, domainAuthorName: string) {
+function toAuthorName(domain: string, domainAuthorName: string) {
   const author = domainAuthorName.replace(bannedCharMatcher, '_')
   return `${author}:${domain}`
 }
 
 export function linkToSymbol(link: Link): string {
-  return `[[${link.url}]]`
+  return `@${link.url}`
 }
 
 /**
@@ -43,15 +43,15 @@ export async function getOrCreateLink(props: {
   let res: ExtFetchResult = fetcher ? await fetcher.fetch(url) : await tryFetch(url)
 
   // TODO: Oauthor的辨識太低，而且沒有統一
-  let oauthor: Oauthor | undefined
+  let author: Author | undefined
   if (res.authorName) {
-    const oauthorName = toOauthorName(res.domain, res.authorName)
-    oauthor = await prisma.oauthor.upsert({
-      where: { name: oauthorName },
-      create: { name: oauthorName },
+    const authorName = toAuthorName(res.domain, res.authorName)
+    author = await prisma.author.upsert({
+      where: { name: authorName },
+      create: { name: authorName },
       update: {},
     })
-    res = { ...res, oauthorName }
+    res = { ...res, authorName }
   }
 
   const link = await prisma.link.create({
@@ -61,7 +61,7 @@ export async function getOrCreateLink(props: {
       sourceType: res.srcType,
       sourceId: res.srcId,
       fetchResult: res as any,
-      oauthor: oauthor ? { connect: { id: oauthor.id } } : undefined,
+      author: author ? { connect: { id: author.id } } : undefined,
     },
     include: { card: true },
   })

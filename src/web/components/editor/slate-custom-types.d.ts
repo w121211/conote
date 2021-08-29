@@ -1,7 +1,8 @@
-import { Descendant, BaseEditor, BaseRange, Node } from 'slate'
+import { BaseEditor, BaseRange } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-import { BulletDraft, RootBullet } from '../../lib/bullet/types'
+import { BulletDraft, Hashtag, HashtagDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
+import { HashtagGroup, HashtagGroupDraft } from '../../lib/hashtag/types'
 
 export type CommentInput = {
   boardCode: !PinBoardCode
@@ -22,34 +23,63 @@ export type CustomText = {
   placeholder?: boolean
 }
 
-// export type BulletBodyInlineElement = {
-//   type: 'bullet-body-inline'
-//   children: CustomText[]
-// }
-
-// export type BulletBodyInlineStopElement = {
-//   type: 'bullet-body-inline-stop'
-//   children: CustomText[]
-// }
-
-// export type TickerElement = {
-//   type: 'bullet-body'
-//   children: Descendant[]
-// }
-
 export type LabelInlineElement = {
-  type: 'label'
+  type: 'label-inline'
   children: CustomText[]
-  symbol: string
+}
+
+export type MirrorInlineElement = {
+  type: 'mirror-inline'
+  children: CustomText[]
+  mirrorSymbol: string
+}
+
+export type CurHashtagsPlacerInlineElement = {
+  type: 'cur-hashtags-placer-inline'
+  children: CustomText[]
+  hashtags: (Hashtag | HashtagGroup)[]
+}
+
+export type HashtagInlineElement = {
+  type: 'hashtag-inline'
+  children: CustomText[]
+  hashtagDraft?: HashtagDraft
+}
+
+export type HashtagGroupInlineElement = {
+  type: 'hashtag-group-inline'
+  children: CustomText[]
+  hashtagGroupDraft?: HashtagGroupDraft
 }
 
 /**
- * ul只允許包li child
+ * li的content，實際文字輸入、操作的element，所以將bullet properties集中在此
  */
-export type UlElement = {
-  type: 'ul'
-  children: LiElement[]
-  folded?: true
+export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
+  type: 'lc'
+  children: (CustomText | LabelInlineElement)[]
+
+  body?: string
+  editingBody?: true
+
+  asAuthor?: true // 若沒有的話視為self author
+  banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
+  // banDeleteBackward?: true
+  // banDeleteForward?: true
+  // banInsertBreak?: true
+  // insertBreakAsIndent?: true
+
+  // rootBullet?: Bullet // query card 取得的 body bullet root，保持靜態不修改
+
+  // comments?: CommentInput[]
+  // comment?: CommentInput
+
+  // 新增mirror時需要先暫時存放
+  root?: true
+  mirror?: true
+  symbol?: string
+  rootBulletDraft?: RootBulletDraft // 只有 root 會存 root bullet，用此幫助 serialize
+  newSymbol?: true // 找不到symbol，視為創新card
 }
 
 /**
@@ -61,36 +91,22 @@ export type LiElement = {
 }
 
 /**
- * li的content，實際文字輸入、操作的element，所以將bullet properties集中在此
+ * ul只允許包li child
  */
-export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
-  type: 'lc'
-  children: CustomText[]
-
-  body?: string
-  editingBody?: true
-
-  asOauthor?: true // 若沒有的話視為self author
-  banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
-  // banDeleteBackward?: true
-  // banDeleteForward?: true
-  // banInsertBreak?: true
-  // insertBreakAsIndent?: true
-
-  // rootBullet?: Bullet // query card 取得的 body bullet root，保持靜態不修改
-
-  // comments?: CommentInput[]
-  comment?: CommentInput
-
-  // 新增mirror時需要先暫時存放
-  root?: true
-  mirror?: true
-  symbol?: string
-  rootBullet?: RootBullet // 只有root會存root bullet，用此幫助serialize
-  newSymbol?: true // 找不到symbol，視為創新card
+export type UlElement = {
+  type: 'ul'
+  children: LiElement[]
+  folded?: true
 }
 
-type CustomElement = LabelInlineElement | UlElement | LiElement | LcElement
+type CustomInlineElement =
+  | LabelInlineElement
+  | MirrorInlineElement
+  | CurHashtagsPlacerInlineElement
+  | HashtagInlineElement
+  | HashtagGroupInlineElement
+
+type CustomElement = CustomInlineElement | LcElement | LiElement | UlElement
 
 type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 

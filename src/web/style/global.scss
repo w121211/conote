@@ -47,29 +47,31 @@ body {
 //   font-family: 'Noto Sans TC';
 //   overflow: hidden;
 // }
+
 svg {
   fill: $black;
 }
 
-ul {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  list-style-position: outside;
-  // list-style: none;
-  // font-size: $font-sm;
-  margin: 0;
-}
-li {
-  height: auto;
-  // margin-bottom: 10px;
-}
+// ul {
+//   display: flex;
+//   flex-direction: column;
+//   padding: 0;
+//   list-style-position: outside;
+//   // list-style: none;
+//   // font-size: $font-sm;
+//   margin: 0;
+// }
+// li {
+//   height: auto;
+//   // margin-bottom: 10px;
+// }
 
-span,
-div {
-  color: $text;
-  // display: inline-block;
-}
+// span,
+// div {
+//   color: $text;
+//   // display: inline-block;
+// }
+
 a {
   color: $text;
   border-bottom: 1px solid $text;

@@ -23,11 +23,12 @@ model User {
   comments     Comment[]
   commentLikes CommentLike[]
   cardBodies   CardBody[]
-  cardHeads    CardHead[]
+  Hashtag      Hashtag[]
+  HashtagLike  HashtagLike[]
 }
 
 // TODO: 非常像symbol，可以合併進symbol？ -> No!poll的情況需要以oauthor為代表
-model Oauthor {
+model Author {
   id        Int       @id @default(autoincrement())
   name      String    @unique
   createdAt DateTime  @default(now())
@@ -35,6 +36,22 @@ model Oauthor {
   votes     Vote[]
   links     Link[]
   comments  Comment[]
+  Hashtag   Hashtag[]
+}
+
+model Link {
+  id          Int        @id @default(autoincrement())
+  url         String     @unique
+  domain      String
+  sourceType  SourceType
+  sourceId    String? // fetcher抓到的source content id
+  fetchResult Json? // fetcher抓到的任意資訊
+
+  // source是由這個oauthor建立
+  author     Author? @relation(fields: [authorName], references: [name])
+  authorName String?
+
+  card Card? // 1-to-1
 }
 
 // model Profile {
@@ -62,18 +79,18 @@ model Oauthor {
 // }
 
 model Vote {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  oauthor   Oauthor? @relation(fields: [oauthorId], references: [id])
-  oauthorId Int?
-  poll      Poll     @relation(fields: [pollId], references: [id])
-  pollId    Int
-  choiceIdx Int
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  author     Author?  @relation(fields: [authorName], references: [name])
+  authorName String?
+  poll       Poll     @relation(fields: [pollId], references: [id])
+  pollId     Int
+  choiceIdx  Int
   // reward    Float?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  comment   Comment? // 1-to-1
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  comment    Comment? // 1-to-1
 
   // @@unique([userId, pollId])
 }
@@ -98,8 +115,6 @@ model Poll {
   id        Int        @id @default(autoincrement())
   user      User       @relation(fields: [userId], references: [id])
   userId    String
-  board     Board      @relation(fields: [boardId], references: [id])
-  boardId   Int        @unique
   type      PollType   @default(FIXED)
   status    PollStatus @default(OPEN)
   choices   String[]
@@ -109,10 +124,142 @@ model Poll {
   // minVotes     Int        @default(30)
   // nDaysJudge   Int        @default(5)
   // minJudgments Int        @default(5)
-  votes     Vote[]
-  count     PollCount? // 1-to-1
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  board     Board?
+  hashtag   Hashtag? // 1-to-1
+  votes     Vote[]
+  count     PollCount? // 1-to-1
+}
+
+model HashtagLike {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  hashtag   Hashtag    @relation(fields: [hashtagId], references: [id])
+  hashtagId Int
+  choice    LikeChoice
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, hashtagId])
+}
+
+model HashtagCount {
+  id        Int      @id @default(autoincrement())
+  hashtag   Hashtag  @relation(fields: [hashtagId], references: [id])
+  hashtagId Int      @unique
+  nViews    Int      @default(0)
+  nUps      Int      @default(0)
+  nDowns    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Hashtag {
+  id         Int           @id @default(autoincrement())
+  user       User          @relation(fields: [userId], references: [id])
+  userId     String
+  author     Author?       @relation(fields: [authorName], references: [name])
+  authorName String?
+  bullet     Bullet        @relation(fields: [bulletId], references: [id])
+  bulletId   Int
+  card       Card          @relation(fields: [cardId], references: [id])
+  cardId     Int
+  poll       Poll?         @relation(fields: [pollId], references: [id])
+  pollId     Int?          @unique
+  status     HashtagStatus @default(ACTIVE)
+  text       String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  count      HashtagCount?
+  likes      HashtagLike[]
+
+  @@unique([bulletId, text])
+}
+
+model BulletLike {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  bullet    Bullet     @relation(fields: [bulletId], references: [id])
+  bulletId  Int
+  choice    LikeChoice
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, bulletId])
+}
+
+model BulletCount {
+  id        Int      @id @default(autoincrement())
+  bullet    Bullet   @relation(fields: [bulletId], references: [id])
+  bulletId  Int      @unique
+  nUps      Int      @default(0)
+  nDowns    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Bullet {
+  // id String @id @default(cuid())
+  id        Int          @id @default(autoincrement())
+  card      Card         @relation(fields: [cardId], references: [id])
+  cardId    Int
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  likes     BulletLike[]
+  count     BulletCount? // 1-to-1
+  boards    Board[]
+  hashtags  Hashtag[]
+}
+
+// model CardHead {
+//   id        Int       @id @default(autoincrement())
+//   card      Card      @relation(fields: [cardId], references: [id])
+//   cardId    Int
+//   user      User      @relation(fields: [userId], references: [id])
+//   userId    String
+//   content   String
+//   timestamp Int
+//   prev      CardHead? @relation("CardHeadHistory", fields: [prevId], references: [id])
+//   prevId    Int?
+//   next      CardHead? @relation("CardHeadHistory")
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   @@unique([cardId, timestamp])
+// }
+
+model CardBody {
+  id        Int       @id @default(autoincrement())
+  card      Card      @relation(fields: [cardId], references: [id])
+  cardId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  content   String
+  timestamp Int
+  prev      CardBody? @relation("CardBodyHistory", fields: [prevId], references: [id])
+  prevId    Int?
+  next      CardBody? @relation("CardBodyHistory")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([cardId, timestamp])
+}
+
+model Card {
+  id        Int        @id @default(autoincrement())
+  symbol    String     @unique
+  link      Link?      @relation(fields: [linkUrl], references: [url])
+  linkUrl   String?    @unique
+  type      CardType
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  bullets   Bullet[]
+  bodies    CardBody[]
+  boards    Board[]
+  ticks     Tick[]
+  hashtags  Hashtag[]
 }
 
 model CommentLike {
@@ -140,21 +287,21 @@ model CommentCount {
 }
 
 model Comment {
-  id          Int           @id @default(autoincrement())
-  user        User          @relation(fields: [userId], references: [id])
-  userId      String
-  oauthor     Oauthor?      @relation(fields: [oauthorName], references: [name])
-  oauthorName String?
-  board       Board         @relation(fields: [boardId], references: [id])
-  boardId     Int
-  vote        Vote?         @relation(fields: [voteId], references: [id])
-  voteId      Int?          @unique
-  status      CommentStatus @default(ACTIVE)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  content     String
-  count       CommentCount?
-  likes       CommentLike[]
+  id         Int           @id @default(autoincrement())
+  user       User          @relation(fields: [userId], references: [id])
+  userId     String
+  author     Author?       @relation(fields: [authorName], references: [name])
+  authorName String?
+  board      Board         @relation(fields: [boardId], references: [id])
+  boardId    Int
+  vote       Vote?         @relation(fields: [voteId], references: [id])
+  voteId     Int?          @unique
+  status     CommentStatus @default(ACTIVE)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  content    String
+  count      CommentCount?
+  likes      CommentLike[]
 }
 
 model BoardLike {
@@ -194,115 +341,14 @@ model Board {
   meta      String
   content   String
   comments  Comment[]
-  poll      Poll? // 1-to-1
+  pollId    Int?
+  poll      Poll?       @relation(fields: [pollId], references: [id]) // 1-to-1
   likes     BoardLike[]
   count     BoardCount? // 1-to-1
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
   @@unique([cardId, bulletId, hashtag])
-}
-
-model BulletLike {
-  id        Int        @id @default(autoincrement())
-  user      User       @relation(fields: [userId], references: [id])
-  userId    String
-  bullet    Bullet     @relation(fields: [bulletId], references: [id])
-  bulletId  Int
-  choice    LikeChoice
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  @@unique([userId, bulletId])
-}
-
-model BulletCount {
-  id        Int      @id @default(autoincrement())
-  bullet    Bullet   @relation(fields: [bulletId], references: [id])
-  bulletId  Int      @unique
-  nUps      Int      @default(0)
-  nDowns    Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Bullet {
-  // id String @id @default(cuid())
-  id Int @id @default(autoincrement())
-
-  // path      String?  // 記錄bullet在tree的位置
-
-  card      Card         @relation(fields: [cardId], references: [id])
-  cardId    Int
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  likes     BulletLike[]
-  count     BulletCount? // 1-to-1
-  boards    Board[]
-}
-
-model Link {
-  id          Int        @id @default(autoincrement())
-  url         String     @unique
-  domain      String
-  sourceType  SourceType
-  sourceId    String? // fetcher抓到的source content id
-  fetchResult Json? // fetcher抓到的任意資訊
-
-  // source是由這個oauthor建立
-  oauthor     Oauthor? @relation(fields: [oauthorName], references: [name])
-  oauthorName String?
-
-  card Card? // 1-to-1
-}
-
-model CardHead {
-  id        Int       @id @default(autoincrement())
-  card      Card      @relation(fields: [cardId], references: [id])
-  cardId    Int
-  user      User      @relation(fields: [userId], references: [id])
-  userId    String
-  content   String
-  timestamp Int
-  prev      CardHead? @relation("CardHeadHistory", fields: [prevId], references: [id])
-  prevId    Int?
-  next      CardHead? @relation("CardHeadHistory")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@unique([cardId, timestamp])
-}
-
-model CardBody {
-  id        Int       @id @default(autoincrement())
-  card      Card      @relation(fields: [cardId], references: [id])
-  cardId    Int
-  user      User      @relation(fields: [userId], references: [id])
-  userId    String
-  content   String
-  timestamp Int
-  prev      CardBody? @relation("CardBodyHistory", fields: [prevId], references: [id])
-  prevId    Int?
-  next      CardBody? @relation("CardBodyHistory")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@unique([cardId, timestamp])
-}
-
-model Card {
-  id        Int        @id @default(autoincrement())
-  symbol    String     @unique
-  type      CardType
-  link      Link?      @relation(fields: [linkUrl], references: [url])
-  linkUrl   String?    @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  bullets   Bullet[]
-  bodies    CardBody[]
-  heads     CardHead[]
-  boards    Board[]
-  ticks     Tick[]
 }
 
 // model Selfcard {
@@ -355,6 +401,14 @@ enum CardStatus {
   REDIRECT
   REPORTED
   DUPLICATED
+}
+
+enum HashtagStatus {
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
 }
 
 enum BoardStatus {

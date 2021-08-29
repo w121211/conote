@@ -4,7 +4,7 @@ import { BulletOperation } from '../../lib/bullet/types'
 import { LcElement } from './slate-custom-types'
 import { isLc } from './with-list'
 
-export function withOp(editor: Editor): Editor {
+export function withOperation(editor: Editor): Editor {
   const { normalizeNode } = editor
 
   /**

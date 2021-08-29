@@ -1,5 +1,7 @@
+/**
+ * https://immerjs.github.io/immer/
+ */
 import { inspect } from 'util'
-import { Board, Poll } from '@prisma/client'
 import { getBotId } from '../models/user'
 import prisma from '../prisma'
 import {
@@ -12,9 +14,9 @@ import {
   RootBullet,
   RootBulletDraft,
 } from './types'
-import { getLinkHashtag, runHastagOpBatch } from './hashtag'
-import { Node } from './node'
+import { BulletNode } from './node'
 import { cloneDeep } from '@apollo/client/utilities'
+import { runHastagOpBatch } from '../hashtag/operation'
 
 /**
  * 使用conditional type，輸入是bullet draft時返回bullet，輸入是root bullet draft時返回root bullet
@@ -70,29 +72,29 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
     },
   })
 
-  let board: (Board & { poll: Poll | null }) | undefined
-  if (draft.board || draft.poll) {
-    const hashtag = getLinkHashtag(draft)
-    if (hashtag === undefined) {
-      throw new Error('創bullet-board需要有搭配的link-hashtag')
-    }
-    board = await prisma.board.create({
-      data: {
-        hashtag: hashtag.text,
-        meta: '',
-        content: draft.head,
-        user: { connect: { id: userId } },
-        card: { connect: { id: cardId } },
-        bullet: { connect: { id: bullet.id } },
-        poll:
-          draft.poll && draft.pollChoices
-            ? { create: { user: { connect: { id: userId } }, choices: draft.pollChoices, count: { create: {} } } }
-            : undefined,
-        count: { create: {} },
-      },
-      include: { poll: true },
-    })
-  }
+  // let board: (Board & { poll: Poll | null }) | undefined
+  // if (draft.board || draft.poll) {
+  //   const hashtag = getLinkHashtag(draft)
+  //   if (hashtag === undefined) {
+  //     throw new Error('創bullet-board需要有搭配的link-hashtag')
+  //   }
+  //   board = await prisma.board.create({
+  //     data: {
+  //       hashtag: hashtag.text,
+  //       meta: '',
+  //       content: draft.head,
+  //       user: { connect: { id: userId } },
+  //       card: { connect: { id: cardId } },
+  //       bullet: { connect: { id: bullet.id } },
+  //       poll:
+  //         draft.poll && draft.pollChoices
+  //           ? { create: { user: { connect: { id: userId } }, choices: draft.pollChoices, count: { create: {} } } }
+  //           : undefined,
+  //       count: { create: {} },
+  //     },
+  //     include: { poll: true },
+  //   })
+  // }
   // const node: BulletRootOrBullet<T> = {
   //   // TODO: 不應該直接copy input
   //   ...draft,
@@ -105,47 +107,48 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
   //   children: undefined,
   // }
 
-  const { draft: _, ...included } = draft
+  // 將 draft-flag, hashtags 取出，不存入 bulllet
+  const { draft: _, newHashtags: _hashtags, ...included } = draft
+
   const node: Bullet | RootBullet = {
     // TODO: 不應該直接copy input
     ...included,
     id: bullet.id,
-    boardId: board?.id,
-    pollId: board?.poll?.id,
+    // boardId: board?.id,
+    // pollId: board?.poll?.id,
     userIds: [userId],
     timestamp,
-    // hashtags,
-    hashtags: [],
     children: [],
   }
-  const hashtags =
-    draft.hashtags &&
-    (await runHastagOpBatch({
-      hashtags: draft.hashtags,
-      bullet: node,
+
+  if (_hashtags) {
+    await runHastagOpBatch({
+      hashtags: _hashtags,
+      bulletId: node.id,
       cardId,
       userId,
-    }))
+    })
+  }
 
-  return _returnOrThrow({ ...node, hashtags }, draft)
+  return _returnOrThrow(node, draft)
 }
 
 /**
- * (Recursive)
- * Bullet operation
+ * (Recursive) Bullet operation
+ * Step: current -> draft -> next
  * @param current - 若沒給予視為第一次創建body
  * @param timestamp - 若沒給予視為只執行hashtag ops、或沒有ops
  */
 export async function runBulletOp(props: {
-  current?: RootBullet
-  draft: RootBulletDraft
-  timestamp?: number
   cardId: number
+  draft: RootBulletDraft
   userId: string
+  current?: RootBullet
+  timestamp?: number
 }): Promise<RootBullet> {
   const { cardId, current, draft, timestamp, userId } = props
 
-  const curDict = current && Node.toDict(current)
+  const curDict = current && BulletNode.toDict(current)
 
   async function _run<T extends BulletDraft | RootBulletDraft>(draft: T): Promise<BulletOrRootBullet<T> | null> {
     if (draft.op === 'CREATE') {
@@ -194,20 +197,19 @@ export async function runBulletOp(props: {
         }
       }
 
-      // TODO: hashtags需要和先前的做比較
-      const hashtags =
-        draft.hashtags &&
-        (await runHastagOpBatch({
-          hashtags: draft.hashtags,
-          bullet: cur,
+      if (draft.newHashtags) {
+        await runHastagOpBatch({
+          hashtags: draft.newHashtags,
+          bulletId: cur.id,
           cardId,
           userId,
-        }))
-
+        })
+      }
       const children = (await Promise.all(draft.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
       const next = {
         ...cur,
         draft: undefined,
+        hashtags: undefined,
         timestamp: _timestamp,
         op: draft.op,
         children,
@@ -216,7 +218,6 @@ export async function runBulletOp(props: {
         body,
         prevHead,
         prevBody,
-        hashtags,
       }
       return _returnOrThrow(next, draft)
     }

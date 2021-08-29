@@ -25,7 +25,7 @@ function getTabUrl(): string | null {
   return url
 }
 
-const CardIndex = ({ mySymbol, webPageUrl }: { webPageUrl?: string; mySymbol?: string }) => {
+const CardIndex = ({ mySymbol, webPageUrl }: { webPageUrl?: string; mySymbol?: string }): JSX.Element => {
   const pathRef = useRef<string[]>([])
   const [path, setPath] = useState<string[]>([])
   // const [symbol, setSymbol] = useState('')
