@@ -8,6 +8,7 @@ import { HashtagDraft, HashtagGroupDraft } from '../hashtag/types'
 import { getOrCreateLink, linkToSymbol } from './link'
 import { parse } from './symbol'
 import { getBotId } from './user'
+import { inspect } from 'util'
 
 export type PinBoardCode = 'BUYSELL' | 'VS'
 
@@ -132,7 +133,7 @@ export const templateTicker: CardTemplate = {
                 draft: true,
                 op: 'CREATE',
                 head: '%SYMBOL% 如何操作？',
-                hashtags: [{ op: 'CREATE', type: 'hashtag-group-draft', pollChoices: ['#buy', '#sell', '#hold'] }],
+                newHashtags: [{ op: 'CREATE', type: 'hashtag-group-draft', pollChoices: ['#buy', '#sell', '#hold'] }],
                 children: [],
               },
             ],
@@ -375,7 +376,7 @@ async function checkDraft(draft: RootBulletDraft): Promise<{
   if (!BulletNode.hasAnyOp(draft)) {
     // console.log(`${symbol}的draft沒有op，不用create，返回`)
     // return { cardSymbol: symbol }
-    console.error(draft)
+    console.error(inspect(draft, { depth: null }))
     throw new Error('draft沒有op')
   }
 

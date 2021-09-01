@@ -32,13 +32,13 @@ async function runHashtagGroupOp(props: {
           poll: { create: { user: { connect: { id: userId } }, choices: draft.pollChoices, count: { create: {} } } },
           text: hashtagGroupToString(draft),
         },
-        include: { poll: { include: { count: true } } },
+        include: { poll: true },
       })
-      if (hashtag.poll && hashtag.poll.count) {
+      if (hashtag.poll) {
         return {
           type: 'hashtag-group',
           ...hashtag,
-          poll: { ...hashtag.poll, count: { ...hashtag.poll.count } },
+          poll: { ...hashtag.poll },
         }
       }
       throw 'Database unexpected error'

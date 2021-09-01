@@ -72,7 +72,12 @@ const CardSymbolPage = (): JSX.Element | null => {
       <button
         onClick={() => {
           if (!submitting) {
-            submitValue()
+            submitValue({
+              onFinish: () => {
+                dropValue()
+                router.reload()
+              },
+            })
           }
         }}
       >

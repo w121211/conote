@@ -180,7 +180,7 @@ export const useLocalValue = (props: {
   data?: LocalValueData
   setLocalValue: (value: LiElement[]) => void
   submitting: boolean
-  submitValue: () => void // 將 value 發送至後端（搭配 createCardBody() )
+  submitValue: (props: { onFinish?: () => void }) => void // 將 value 發送至後端（搭配 createCardBody() )
   dropValue: () => void // 將 value 從 local 刪除
 } => {
   const { location } = props
@@ -230,34 +230,42 @@ export const useLocalValue = (props: {
     [data],
   )
 
-  const submitValue = useCallback(() => {
-    if (data) {
-      setSubmitting(true)
+  const submitValue = useCallback(
+    (props: { onFinish?: () => void }) => {
+      const { onFinish } = props
+      if (data) {
+        setSubmitting(true)
 
-      // TODO: 用 root 檢查哪些是新增的 mirrors （有些 mirror 可能新增後又刪掉，這些 mirror 不應該被創）
+        // TODO: 用 root 檢查哪些是新增的 mirrors （有些 mirror 可能新增後又刪掉，這些 mirror 不應該被創）
 
-      // 從 local 取得目前的 root/mirror value 並依序 submit
-      const rootDict = editorRootDict.get()
-      const promises = []
-      for (const k in rootDict) {
-        const root = rootDict[k]
-        promises.push(
-          client.mutate<CreateCardBodyMutation, CreateCardBodyMutationVariables>({
-            mutation: CreateCardBodyDocument,
-            variables: { cardSymbol: k, data: Serializer.toRootBulletDraft(root) },
-          }),
-        )
+        // 從 local 取得目前的 root/mirror value 並依序 submit
+        const rootDict = editorRootDict.get()
+        const promises = []
+        for (const k in rootDict) {
+          const root = rootDict[k]
+          promises.push(
+            client.mutate<CreateCardBodyMutation, CreateCardBodyMutationVariables>({
+              mutation: CreateCardBodyDocument,
+              variables: { cardSymbol: k, data: { root: Serializer.toRootBulletDraft(root) } },
+            }),
+          )
+        }
+        Promise.all(promises).then(res => {
+          // 清除 local storage
+          editorCurrentCard.set(null)
+          editorRootDict.set(null)
+          setSubmitting(false)
+
+          // TODO: 更新 apollo cache
+
+          if (onFinish) {
+            onFinish()
+          }
+        })
       }
-      Promise.all(promises).then(res => {
-        // 清除 local storage
-        editorCurrentCard.set(null)
-        editorRootDict.set(null)
-        setSubmitting(false)
-
-        // TODO: 更新 apollo cache
-      })
-    }
-  }, [data])
+    },
+    [data],
+  )
 
   const dropValue = useCallback(() => {
     editorCurrentCard.set(null)

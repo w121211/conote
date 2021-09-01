@@ -38,23 +38,23 @@ function getLength(token: string | PrismToken): number {
 //   }
 // }
 
-function toTokens(prismTokens: (string | PrismToken)[]): Token[] {
-  const tokens: Token[] = []
-  let start = 0
-  for (const token of tokens) {
-    const length = getLength(token)
-    const end = start + length
-    if (typeof token !== 'string') {
-      ranges.push({
-        // [token.type]: true,
-        type: token.type,
-        anchor: { path, offset: start },
-        focus: { path, offset: end },
-      })
-    }
-    start = end
-  }
-}
+// function toTokens(prismTokens: (string | PrismToken)[]): Token[] {
+//   const tokens: Token[] = []
+//   let start = 0
+//   for (const token of tokens) {
+//     const length = getLength(token)
+//     const end = start + length
+//     if (typeof token !== 'string') {
+//       ranges.push({
+//         // [token.type]: true,
+//         type: token.type,
+//         anchor: { path, offset: start },
+//         focus: { path, offset: end },
+//       })
+//     }
+//     start = end
+//   }
+// }
 
 export function tokenToString(stream: TokenStream, ignoreTokenType?: string): string {
   let t = ''
