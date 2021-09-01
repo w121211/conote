@@ -21,3 +21,13 @@
     fill: $secondary;
   }
 }
+.button {
+  svg {
+    fill: $gray-text;
+  }
+}
+.clicked {
+  svg {
+    fill: $black;
+  }
+}

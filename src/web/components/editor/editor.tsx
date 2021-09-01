@@ -42,6 +42,8 @@ import {
 } from '../../apollo/query.graphql'
 import { NavLocation, pathToHref } from './with-location'
 import { parseLcAndReplaceChildren, withInline } from './with-inline'
+import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
+import BulletPanel from '../bullet-panel/bullet-panel'
 
 const HashtagLike = (props: { hashtag: Hashtag | HashtagGroup }): JSX.Element | null => {
   const { hashtag } = props
@@ -232,9 +234,13 @@ const LabelInline = (
   useEffect(() => {
     // console.log(readonly, focused, selected)
   }, [readonly, focused, selected])
-
   if (readonly) {
-    return <button {...attributes}>{children}</button>
+    // console.log(Node.string(element))
+    return (
+      <a href={`/card/${Node.string(element)}`} {...attributes}>
+        {children}
+      </a>
+    )
   }
   return <span {...attributes}>{children}</span>
 }
@@ -285,7 +291,11 @@ const HashtagInline = (props: RenderElementProps & { element: HashtagInlineEleme
   const { attributes, children, element } = props
   const readonly = useReadOnly()
   if (readonly) {
-    return <button {...attributes}>{children}</button>
+    return (
+      <button {...attributes} data-type="inline">
+        {children}
+      </button>
+    )
   }
   return <span {...attributes}>{children}</span>
 }
@@ -333,7 +343,7 @@ const Lc = (
 
   return (
     <div {...attributes}>
-      <span>{children}</span>
+      <span className={classes.lcText}>{children}</span>
       {readonly && (
         <div contentEditable={false} style={{ color: 'green' }}>
           {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>}
@@ -354,7 +364,9 @@ const Li = (
   const { attributes, children, element, location, authorName } = props
   const editor = useSlateStatic()
   const [hasUl, setHasUl] = useState(false)
-  // const [ulFolded, setUlFolded] = useState<true | undefined>()
+  const [ulFolded, setUlFolded] = useState<true | undefined>()
+  const [showPanelIcon, setShowPanelIcon] = useState(false)
+  // console.log(element)
 
   useEffect(() => {
     const path = ReactEditor.findPath(editor, element)
@@ -372,46 +384,76 @@ const Li = (
   }, [editor, element])
 
   const href = pathToHref(location, ReactEditor.findPath(editor, element))
+  // console.log(authorName, element)
   return (
-    <div {...attributes} className={classes.bulletLi}>
-      <div contentEditable={false}>
-        <a href={href}>open</a>
+    <div
+      {...attributes}
+      className={classes.bulletLi}
+      onMouseOver={e => {
+        e.stopPropagation()
+        setShowPanelIcon(true)
+      }}
+      onMouseOut={e => {
+        setShowPanelIcon(false)
+      }}
+    >
+      <div contentEditable={false}></div>
+      <div className={classes.arrowBulletWrapper} contentEditable={false}>
+        <BulletPanel
+          visible={showPanelIcon}
+          sourceUrl={element.children[0].sourceUrl}
+          authorName={element.children[0].authorName}
+        >
+          {/* <span className={classes.oauthorName}> @{authorName}</span> */}
+        </BulletPanel>
 
         {hasUl ? (
-          <span
-            className={classes.bulletWrapper}
-            onClick={event => {
-              // 設定 folded property
-              event.preventDefault()
-              const path = ReactEditor.findPath(editor, element)
-              try {
-                const ul = Editor.node(editor, ulPath(path))
-                if (isUl(ul[0])) {
-                  Transforms.deselect(editor)
-                  Transforms.setNodes<UlElement>(editor, { folded: ul[0].folded ? undefined : true }, { at: ul[1] })
+          <>
+            <span
+              className={classes.arrowWrapper}
+              onClick={event => {
+                // 設定 folded property
+                event.preventDefault()
+                const path = ReactEditor.findPath(editor, element)
+                try {
+                  const ul = Editor.node(editor, ulPath(path))
+                  if (isUl(ul[0])) {
+                    Transforms.deselect(editor)
+                    Transforms.setNodes<UlElement>(editor, { folded: ul[0].folded ? undefined : true }, { at: ul[1] })
+                    setUlFolded(ul[0].folded ? undefined : true)
+                  }
+                } catch (err) {
+                  // 不用處理
                 }
-              } catch (err) {
-                // 不用處理
-              }
-            }}
-          >
-            <BulletSvg />
-            {authorName ? (
-              <MyTooltip className={classes.bulletTooltip}>
-                <span className={classes.oauthorName}> @{authorName}</span>
-              </MyTooltip>
-            ) : null}
-          </span>
+              }}
+            >
+              <ArrowUpIcon
+                style={ulFolded === undefined ? { transform: 'rotate(180deg)' } : { transform: 'rotate(90deg)' }}
+              />
+              {/* {authorName ? (
+              ) : // <MyTooltip className={classes.bulletTooltip}>
+              //   <span className={classes.oauthorName}> @{authorName}</span>
+              // </MyTooltip>
+              null} */}
+            </span>
+            {/* <BulletPanel><span className={classes.oauthorName}> @{authorName}</span></BulletPanel> */}
+          </>
         ) : (
-          <span className={classes.bulletWrapper}>
-            <BulletSvg />
-            {authorName ? (
-              <MyTooltip className={classes.bulletTooltip}>
-                <span className={classes.oauthorName}> @{authorName}</span>
-              </MyTooltip>
-            ) : null}
-          </span>
+          <>
+            <span className={classes.arrowWrapper}>
+              <ArrowUpIcon style={{ opacity: 0 }} />
+              {/* <BulletSvg /> */}
+              {/* {authorName ? (
+              ) : // <MyTooltip className={classes.bulletTooltip}>
+              //   <span className={classes.oauthorName}> @{authorName}</span>
+              // </MyTooltip>
+              null} */}
+            </span>
+          </>
         )}
+        <a href={href}>
+          <BulletSvg />
+        </a>
       </div>
 
       <div>{children}</div>
@@ -440,6 +482,7 @@ const CustomElement = (
   },
 ): JSX.Element => {
   const { attributes, children, element, location, authorName, sourceUrl } = props
+
   switch (element.type) {
     case 'label-inline':
       return <LabelInline {...{ attributes, children, element, authorName, sourceUrl }} />
@@ -548,7 +591,7 @@ export const BulletEditor = (props: {
   // console.log(initialValue)
 
   return (
-    <div>
+    <div className={classes.bulletEditorContainer}>
       <Slate
         editor={editor}
         value={value}

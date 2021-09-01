@@ -5,7 +5,7 @@ import { cloneDeep } from '@apollo/client/utilities'
 import { Card, CardBody, Link, PrismaClient } from '@prisma/client'
 import { Editor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../../packages/fetcher/src'
-import { Node as BulletNode } from '../../lib/bullet/node'
+import { BulletNode } from '../../lib/bullet/node'
 import { BulletDraft, RootBulletDraft } from '../../lib/bullet/types'
 import {
   CardBodyContent,

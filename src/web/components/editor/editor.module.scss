@@ -5,9 +5,11 @@
 }
 
 .bulletLi {
+  position: relative;
   display: flex;
   list-style: none;
   align-items: flex-start;
+  margin-left: -3em;
 }
 .bulletWrapper {
   position: relative;
@@ -38,27 +40,34 @@
   }
 }
 .arrowWrapper {
-  position: absolute;
+  // position: absolute;
   flex-shrink: 0;
   flex-grow: 0;
   display: flex;
-  width: 8px;
-  left: -1em;
+  padding: 0 6px;
+  // width: 8px;
+  // left: -1em;
   // margin-right: 4px;
   min-height: 2em;
   align-items: center;
   justify-content: center;
 
-  svg {
+  & > svg {
     // opacity: 0;
     height: 10px;
-    transform: rotate(90deg);
+    width: 8px;
+    // transform: rotate(90deg);
   }
 }
 .arrowBulletWrapper {
   display: flex;
   position: relative;
+  & > a {
+    border-bottom: 0;
+  }
 }
 .bulletEditorContainer {
-  margin-left: 3em;
+  margin-left: 2em;
+}
+.lcText {
 }

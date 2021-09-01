@@ -1,16 +1,22 @@
 .panelTooltip {
   // left: -75px;
+  max-width: 100px;
 }
 .container {
   display: flex;
-  justify-content: center;
-  position: absolute;
-  left: -1em;
+  // justify-content: center;
+  // position: absolute;
+
+  left: -2.5em;
+  padding: 0 6px;
   user-select: none;
+  height: 100%;
+  font-size: 14px;
 }
 .panelIcon {
-  width: 28px;
-  height: 28px;
+  // position: absolute;
+  width: 12px;
+  // height: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -18,16 +24,18 @@
   border-radius: 3px;
   border: none;
   margin: 0;
-  background-color: $gray;
+  // background-color: $gray;
 
-  margin-right: 8px;
+  margin-right: 10px;
   // padding: 2px 8px;
   flex-shrink: 0;
 
   // visibility: hidden;
   svg {
     width: 12px;
+    height: 12px;
     fill: $text;
+    stroke: $text;
   }
   // &:hover {
   //   cursor: pointer;
@@ -36,5 +44,44 @@
   // }
 }
 .panelElement {
-  margin: 4px;
+  // margin: 2px 0;
+  padding: 3px 10px;
+  font-size: 13px;
+  width: 100%;
+  // flex: 1;
+
+  &:hover {
+    &:not(.title) {
+      background-color: $secondaryHover-light;
+    }
+    cursor: pointer;
+    a {
+      color: $text;
+    }
+  }
+}
+.bulletPanelSibling {
+  width: 96vw;
+  height: 100%;
+  position: absolute;
+  // left: 3vw;
+  // &:hover {
+  //   & ~ .bulletPanel {
+  //     visibility: visible;
+  //   }
+  // }
+}
+.title {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: -8px;
+  font-weight: bold;
+  color: $text;
+}
+.divider {
+  width: 100%;
+  height: 0;
+  margin: 8px 0;
+  border-top: 1px solid $gray;
 }

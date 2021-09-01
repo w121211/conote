@@ -1,13 +1,19 @@
 import React from 'react'
 import classes from './bullet-panel-svg.module.scss'
 
-const BulletPanelSvg = ({ clicked }: { clicked: (e: MouseEvent) => void }): JSX.Element => {
+const BulletPanelSvg = ({
+  clicked,
+  className,
+  style,
+}: { clicked?: () => void; className?: string } & React.HTMLAttributes<HTMLDivElement>): JSX.Element => {
   return (
     <div
-      className={classes.svgContainer}
-      onClick={(e: MouseEvent) => {
-        clicked(e)
+      className={`${classes.svgContainer} ${className}`}
+      onClick={e => {
+        e.stopPropagation()
+        // clicked()
       }}
+      style={style}
     >
       <svg viewBox="0 0 30 30">
         <circle cx="10" cy="5" r="3"></circle>

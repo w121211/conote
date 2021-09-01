@@ -4,9 +4,15 @@
   justify-content: center;
   align-items: center;
   height: 28px;
-  width: 17px;
-  top: 6px;
+  width: 15px;
+  // top: 6px;
+  visibility: hidden;
+  position: relative;
+  z-index: 1;
   svg {
     fill: $gray-text;
   }
+  // &:hover {
+  //   visibility: visible;
+  // }
 }

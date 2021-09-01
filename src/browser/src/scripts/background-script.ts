@@ -71,13 +71,14 @@ browser.browserAction.onClicked.addListener(async tab => {
   }, console.error)
 
   const params = new URLSearchParams({ url: tab.url ?? '' })
-  // const tabUrl = encodeURIComponent(tab.url ?? '')
+  const tabUrl = encodeURIComponent(tab.url ?? '')
 
   const window = await browser.windows.create({
     // type: 'popup',
     // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
     // url: 'http://localhost:3000/card/' + encodeUri,
-    url: `${process.env.APP_BASE_URL}/card?${params.toString()}`,
+    // url: `${process.env.APP_BASE_URL}/card?${params.toString()}`,
+    url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
     width: 500,
     height: 900,
     left: 100,

@@ -1,14 +1,14 @@
 .containerOuter {
   position: absolute;
-  top: 45px;
-  bottom: 45px;
+  // top: 30px;
+  // bottom: 100%;
 
-  padding: 0.5em;
+  // padding: 0.5em;
   background-color: $white;
-  -webkit-box-shadow: 0 12px 25px -11px #00000066;
-  box-shadow: 0 4px 25px -6px #00000066;
+  -webkit-box-shadow: 0 6px 19px -4px #00000042;
+  // box-shadow: 0 4px 25px -6px #00000066;
   z-index: 100;
-  width: 150px;
+
   height: fit-content;
   display: -moz-box;
   display: flex;
@@ -19,4 +19,10 @@
 
   flex-wrap: nowrap;
   white-space: nowrap;
+
+  color: $text;
+
+  opacity: 0;
+  transform: translateY(0);
+  transition: all 0.1s;
 }

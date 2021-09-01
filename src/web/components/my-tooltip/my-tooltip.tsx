@@ -14,7 +14,7 @@ const MyTooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
   children,
   visible,
   handleVisibleState,
-
+  top,
   className,
 }) => {
   // const [visibleState, setVisibleState] = useState(visible)
@@ -25,14 +25,24 @@ const MyTooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
     const newStyle: React.CSSProperties = {}
 
     if (visible !== undefined) {
-      newStyle.visibility = `${typeof visible === 'boolean' && visible === true ? 'visible' : 'hidden'}`
+      newStyle.visibility = `${visible === true ? 'visible' : 'hidden'}`
+      newStyle.opacity = `${visible === true ? 1 : 0}`
+      // newStyle.transform = `${ visible === true ? 'visible' : 'hidden'}`
     }
     if (myRef.current) {
-      myRef.current.getBoundingClientRect().top > window.innerHeight / 2
-        ? (newStyle.top = 'auto')
-        : (newStyle.bottom = 'auto')
+      if (myRef.current.getBoundingClientRect().top > window.innerHeight / 2) {
+        newStyle.bottom = '120%'
+        newStyle.transform = 'translateY(8px)'
+      } else {
+        newStyle.top = '120%'
+
+        newStyle.transform = 'translateY(-8px)'
+      }
 
       // console.log(myRef.current.getBoundingClientRect().top, window.innerHeight / 2)
+    }
+    if (top && top >= 0) {
+      newStyle.top = top + 'px'
     }
 
     return newStyle
