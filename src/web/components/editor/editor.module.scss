@@ -5,9 +5,11 @@
 }
 
 .bulletLi {
+  position: relative;
   display: flex;
   list-style: none;
   align-items: flex-start;
+  margin-left: -3em;
 }
 .bulletWrapper {
   position: relative;
@@ -36,4 +38,36 @@
       visibility: visible;
     }
   }
+}
+.arrowWrapper {
+  // position: absolute;
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: flex;
+  padding: 0 6px;
+  // width: 8px;
+  // left: -1em;
+  // margin-right: 4px;
+  min-height: 2em;
+  align-items: center;
+  justify-content: center;
+
+  & > svg {
+    // opacity: 0;
+    height: 10px;
+    width: 8px;
+    // transform: rotate(90deg);
+  }
+}
+.arrowBulletWrapper {
+  display: flex;
+  position: relative;
+  & > a {
+    border-bottom: 0;
+  }
+}
+.bulletEditorContainer {
+  margin-left: 2em;
+}
+.lcText {
 }

@@ -9,11 +9,11 @@ import {
   useUpdateCommentLikeMutation,
   LikeChoice,
   BulletCount,
-  useMyBulletLikesQuery,
-  MyBulletLikesQuery,
-  MyBulletLikesDocument,
-  useCreateBulletLikeMutation,
-  useUpdateBulletLikeMutation,
+  // useMyBulletLikesQuery,
+  // MyBulletLikesQuery,
+  // MyBulletLikesDocument,
+  // useCreateBulletLikeMutation,
+  // useUpdateBulletLikeMutation,
   CommentLike,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
@@ -30,22 +30,22 @@ const UpDown = ({
 }) => {
   const [myChoice, setMyChoice] = useState<any>()
   const { data: myCommentLikeData, loading, error } = useMyCommentLikesQuery()
-  const {
-    data: myBulletLikeData,
-    loading: myBulletLikeLoading,
-    error: myBulletLikeLoadingError,
-  } = useMyBulletLikesQuery()
-  const [createBulletLike] = useCreateBulletLikeMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<MyBulletLikesQuery>({ query: MyCommentLikesDocument })
-      if (res?.myBulletLikes && data?.createBulletLike) {
-        cache.writeQuery<MyBulletLikesQuery>({
-          query: MyBulletLikesDocument,
-          data: { myBulletLikes: res.myBulletLikes.concat([data.createBulletLike.like]) },
-        })
-      }
-    },
-  })
+  // const {
+  //   data: myBulletLikeData,
+  //   loading: myBulletLikeLoading,
+  //   error: myBulletLikeLoadingError,
+  // } = useMyBulletLikesQuery()
+  // const [createBulletLike] = useCreateBulletLikeMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<MyBulletLikesQuery>({ query: MyCommentLikesDocument })
+  //     if (res?.myBulletLikes && data?.createBulletLike) {
+  //       cache.writeQuery<MyBulletLikesQuery>({
+  //         query: MyBulletLikesDocument,
+  //         data: { myBulletLikes: res.myBulletLikes.concat([data.createBulletLike.like]) },
+  //       })
+  //     }
+  //   },
+  // })
   const [createCommentLike] = useCreateCommentLikeMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyCommentLikesQuery>({ query: MyCommentLikesDocument })
@@ -71,33 +71,33 @@ const UpDown = ({
       }
     },
   })
-  const [updateBulletLike] = useUpdateBulletLikeMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<MyBulletLikesQuery>({
-        query: MyBulletLikesDocument,
-      })
-      if (res?.myBulletLikes && data?.updateBulletLike) {
-        cache.writeQuery<MyBulletLikesQuery>({
-          query: MyBulletLikesDocument,
-          data: { myBulletLikes: res.myBulletLikes.concat([data.updateBulletLike.like]) },
-        })
-      }
-    },
-  })
+  // const [updateBulletLike] = useUpdateBulletLikeMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<MyBulletLikesQuery>({
+  //       query: MyBulletLikesDocument,
+  //     })
+  //     if (res?.myBulletLikes && data?.updateBulletLike) {
+  //       cache.writeQuery<MyBulletLikesQuery>({
+  //         query: MyBulletLikesDocument,
+  //         data: { myBulletLikes: res.myBulletLikes.concat([data.updateBulletLike.like]) },
+  //       })
+  //     }
+  //   },
+  // })
 
   const handleMyChoice = () => {
     if (commentId) {
       return myCommentLikeData?.myCommentLikes.find(e => e.commentId === parseInt(commentId))
     }
-    if (bulletId) {
-      return myBulletLikeData?.myBulletLikes.find(e => e.bulletId === parseInt(bulletId))
-    }
+    // if (bulletId) {
+    //   return myBulletLikeData?.myBulletLikes.find(e => e.bulletId === parseInt(bulletId))
+    // }
     return undefined
   }
-  useEffect(() => {
-    const res = handleMyChoice()
-    setMyChoice(res)
-  }, [myCommentLikeData, myBulletLikeData])
+  // useEffect(() => {
+  //   const res = handleMyChoice()
+  //   setMyChoice(res)
+  // }, [myCommentLikeData, myBulletLikeData])
 
   const handleLike = (choiceValue: LikeChoice) => {
     if (myChoice && myChoice.choice === choiceValue) {
@@ -109,14 +109,14 @@ const UpDown = ({
           },
         })
       }
-      if (bulletId) {
-        updateBulletLike({
-          variables: {
-            id: myChoice.id,
-            data: { choice: 'NEUTRAL' },
-          },
-        })
-      }
+      // if (bulletId) {
+      //   updateBulletLike({
+      //     variables: {
+      //       id: myChoice.id,
+      //       data: { choice: 'NEUTRAL' },
+      //     },
+      //   })
+      // }
     }
     if (myChoice && myChoice.choice !== choiceValue) {
       if (commentId) {
@@ -127,14 +127,14 @@ const UpDown = ({
           },
         })
       }
-      if (bulletId) {
-        updateBulletLike({
-          variables: {
-            id: myChoice.id,
-            data: { choice: choiceValue },
-          },
-        })
-      }
+      // if (bulletId) {
+      //   updateBulletLike({
+      //     variables: {
+      //       id: myChoice.id,
+      //       data: { choice: choiceValue },
+      //     },
+      //   })
+      // }
     }
     if (!myChoice) {
       if (commentId) {
@@ -145,14 +145,14 @@ const UpDown = ({
           },
         })
       }
-      if (bulletId) {
-        createBulletLike({
-          variables: {
-            bulletId,
-            data: { choice: choiceValue },
-          },
-        })
-      }
+      // if (bulletId) {
+      //   createBulletLike({
+      //     variables: {
+      //       bulletId,
+      //       data: { choice: choiceValue },
+      //     },
+      //   })
+      // }
     }
   }
   return (

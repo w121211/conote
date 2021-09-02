@@ -4,7 +4,7 @@ import {
   MeQuery,
   useMeQuery,
   useMyBoardLikesQuery,
-  useMyBulletLikesLazyQuery,
+  // useMyBulletLikesLazyQuery,
   useMyCommentLikesQuery,
   useMyVotesQuery,
 } from '../apollo/query.graphql'
@@ -21,7 +21,7 @@ export function useMe({
   const router = useRouter()
 
   // 從server取得me相關的資料，用於填充cache <- TODO: a better solution?
-  useMyBulletLikesLazyQuery()
+  // useMyBulletLikesLazyQuery()
   useMyBoardLikesQuery()
   useMyCommentLikesQuery()
   useMyVotesQuery()

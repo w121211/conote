@@ -1,10 +1,13 @@
 .layout {
   display: flex;
+  flex-direction: column;
   height: 100vh;
+  overflow-y: auto;
 }
 .children {
-  padding: 45px 1.5em;
-  overflow: auto;
+  padding: 0 1.5em 0;
+  margin-top: 45px;
+  // top: 45px;
 }
 .menuIconWrapper {
   // width: 100vw;
@@ -13,6 +16,7 @@
   /* box-shadow: 0 6px 26px #0000002b; */
   /* border-bottom: 1px solid #c2c2dac9; */
   // border-radius: 3px;
+  display: flex;
   padding: 0em 1.5em;
 }
 .menuIcon {
@@ -27,8 +31,9 @@
   align-items: center;
   justify-content: flex-start;
   background: $white;
-  line-height: 0;
+  // line-height: 0;
   box-shadow: 0 3px 6px #0000001a;
+  transition: transform 0.1s;
   span {
     color: $black;
   }
@@ -57,6 +62,7 @@
   list-style: none;
   // width: fit-content;
   align-items: center;
+  // justify-content: space-between;
   height: 100%;
   span {
     cursor: pointer;
@@ -84,6 +90,11 @@
     display: flex;
     height: 100%;
   }
+  a {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 .rightArrow {
   display: flex;
@@ -96,5 +107,15 @@
   }
   @media screen and(max-width:500px) {
     width: 13px;
+  }
+}
+.tooltip {
+  height: 100%;
+  box-shadow: 0 2px 19px -4px #00000042;
+  span {
+    overflow: visible;
+    padding: 0 10px;
+    // display: block;
+    // height: 100%;
   }
 }
