@@ -9,7 +9,7 @@ import { ParsedUrlQuery } from 'querystring'
 
 export type NavLocation = {
   selfSymbol: string
-  mirrorSymbol?: string
+  mirrorSymbol?: string // 包括前綴的mirror符號，eg ::$XX, ::[[Hello World]]
   openedLiPath: number[]
 }
 
@@ -48,5 +48,8 @@ export function pathToHref(lcation: NavLocation, joinLiPath?: number[]): string 
     params.set(PATH_KEY, openedLiPath.join(PATH_SPLITTER))
   }
   const _params = params.toString()
-  return _params.length > 0 ? `/card/${selfSymbol}?${params.toString()}` : `/card/${selfSymbol}`
+
+  return _params.length > 0
+    ? `/card/${encodeURIComponent(selfSymbol)}?${params.toString()}`
+    : `/card/${encodeURIComponent(selfSymbol)}`
 }

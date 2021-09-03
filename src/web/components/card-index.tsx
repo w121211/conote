@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@apollo/client'
 // import { UserProvider } from '@auth0/nextjs-auth0'
 
-import TestPage from './card'
+// import TestPage from './card'
 import CardPage from './extension-page'
 import Layout from './layout/layout'
 import { useCardQuery, useWebpageCardQuery } from '../apollo/query.graphql'
@@ -153,11 +153,11 @@ const CardIndex = ({ mySymbol, webPageUrl }: { webPageUrl?: string; mySymbol?: s
 
   return (
     // <UserProvider>
-    <Layout path={path} handlePath={handlePath}>
+    <Layout handlePath={handlePath}>
       {/* {window.location.protocol.includes('extension') ? (
         <CardPage pathSymbol={symbol} handlePathPush={handlePathPush} />
       ) : ( */}
-      <TestPage pathSymbol={mySymbol} webPageUrl={webPageUrl} handlePathPush={handlePathPush} />
+      {/* <TestPage webPageUrl={webPageUrl} handlePathPush={handlePathPush} /> */}
       {/* // )} */}
     </Layout>
     // </UserProvider>

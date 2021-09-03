@@ -29,7 +29,7 @@
     "rootDir": ".",
     "outDir": "dist"
   },
-  "exclude": ["node_modules", ".next", "out", "prisma", "test", "__deprecated__", "**/__tests__"],
+  "exclude": ["node_modules", ".next", "out", "prisma", "test", "__deprecated__", "**/__tests__", "stories"],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
   "ts-node": {
     // options are overrides used only by ts-node

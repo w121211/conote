@@ -5,16 +5,9 @@ import { getSession } from '@auth0/nextjs-auth0'
 import { Hashtag, HashtagCount, HashtagStatus, Poll, PollCount, Vote } from '@prisma/client'
 import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
-import { QueryResolvers, MutationResolvers, Hashtag as GqlHashtag } from './type-defs.graphqls'
+import { QueryResolvers, MutationResolvers } from './type-defs.graphqls'
 import { deltaLike } from '../lib/helper'
-import {
-  attachLatestHeadBody,
-  CardBodyContent,
-  createCardBody,
-  getLatestCardBody,
-  getOrCreateCardBySymbol,
-  getOrCreateCardByUrl,
-} from '../lib/models/card'
+import { attachLatestHeadBody, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
 import { getOrCreateUser } from '../lib/models/user'
 import { createAuthorVote, createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
@@ -113,19 +106,25 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async card(_parent, { symbol }, _context, _info) {
-    const card = await prisma.card.findUnique({
-      where: { symbol },
-      include: { link: true },
-    })
-    if (card !== null) {
-      const _card = await attachLatestHeadBody(card)
-      return {
-        ..._toStringId(_card),
-        body: _toStringId(_card.body),
-        link: card.link && _toStringId(card.link),
-      }
+    const card = await getOrCreateCardBySymbol(symbol)
+    return {
+      ..._toStringId(card),
+      link: card.link ? _toStringId(card.link) : null,
+      body: _toStringId(card.body),
     }
-    return null
+    // const card = await prisma.card.findUnique({
+    //   where: { symbol },
+    //   include: { link: true },
+    // })
+    // if (card !== null) {
+    //   const _card = await attachLatestHeadBody(card)
+    //   return {
+    //     ..._toStringId(_card),
+    //     body: _toStringId(_card.body),
+    //     link: card.link && _toStringId(card.link),
+    //   }
+    // }
+    // return null
   },
 
   async webpageCard(_parent, { url }, _context, _info) {

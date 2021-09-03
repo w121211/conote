@@ -1,1147 +1,1151 @@
-// import { ReactElement, useState, useEffect } from 'react'
-// import { useQuery, useMutation, useLazyQuery, useApolloClient } from '@apollo/client'
-// import { Link, navigate, redirectTo } from '@reach/router'
-// import { AutoComplete, Button, Modal, Popover, Tag, Tooltip, Radio, Form, Input } from 'antd'
-import React, { useState, useRef, forwardRef, useEffect, useImperativeHandle } from 'react'
-import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../packages/editor/src/index'
-// import { CocardFragment, CommentFragment } from '../apollo/query.graphql'
+/* eslint-disable no-console */
+import React, { FormEvent, useCallback, useEffect, useMemo, useState, createContext, useRef } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { AnchorPanel } from './tile-panel'
-import { toUrlParams } from '../lib/helper'
-// import { Link } from './link'
-import { MyTooltip } from '../components/my-tooltip/my-tooltip'
-import BulletEditor from '../__deprecated__/slate-editor/bullet'
-import Question from '../__deprecated__/question/question'
+import router, { useRouter } from 'next/router'
+import { ApolloClient, ApolloError, useApolloClient } from '@apollo/client'
+import { useUser } from '@auth0/nextjs-auth0'
+import { Token } from 'prismjs'
+import { CardType } from '@prisma/client'
+import RightArrow from '../../assets/svg/right-arrow.svg'
+// import { editorValue } from '../apollo/cache'
+import {
+  Board,
+  BoardQuery,
+  BulletCount,
+  Card,
+  CardBodyInput,
+  CardDocument,
+  CardQuery,
+  CardQueryVariables,
+  Comment,
+  CommentsDocument,
+  CommentsQuery,
+  CommentsQueryVariables,
+  CreateSymbolCardDocument,
+  CreateSymbolCardMutation,
+  CreateSymbolCardMutationVariables,
+  useBoardQuery,
+  useBulletQuery,
+  useCardQuery,
+  useCommentsQuery,
+  useCreateCardBodyMutation,
+  useCreateHashtagMutation,
+  useCreateOauthorCommentMutation,
+  useMeQuery,
+  useWebpageCardQuery,
+} from '../apollo/query.graphql'
 import classes from './card.module.scss'
-import ClockIcon from '../assets/svg/clock.svg'
-import LinkIcon from '../assets/svg/link.svg'
-// import { CardMeta } from '../lib/models/card'
-import Linechart from '../__deprecated__/lineChart'
-import HeaderForm from './header-form/header-form'
-import MyEditBtnPopover from '../__deprecated__/my-editBtn-popover/my-editBtn-popover'
-// import moduleName from 'react-router';
+import BoardPage from '../components/board/board-page'
+import CreateBoardPage from '../components/board/create-board-page'
+import Popover from '../components/popover/popover'
+import { BulletEditor } from '../components/editor/editor'
+import { Serializer } from '../components/editor/serializer'
+import { LiElement } from '../components/editor/slate-custom-types'
+import { tokenize } from '../lib/bullet/text'
+import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../lib/bullet/types'
+import {
+  CardBodyContent,
+  CardHeadContent,
+  CardHeadContentValue,
+  CardHeadContentValueInjected,
+  PinBoard,
+} from '../lib/models/card'
+import { injectCardHeadValue } from '../lib/models/card-helpers'
+import UpDown from '../components/upDown/upDown'
+import MyTooltip from '../components/my-tooltip/my-tooltip'
 
-type myRef = {
-  spanScrollIntoview: () => void
-  anchorScrollIntoView: () => void
-  anchor: () => HTMLSpanElement
+import BulletPanelSvg from '../components/bullet-panel/bullet-panel-svg'
+import BulletPanel from '../components/bullet-panel/bullet-panel'
+import SrcIcon from '../assets/svg/foreign.svg'
+import { getLevels, Level, useLocalValue } from './editor/open-li'
+// import { Node } from 'slate'
 
-  hlSpan: () => HTMLSpanElement
+// type CardHeadAndParsedContent = Omit<CardHead, 'content'> & {
+//   content: CardHeadContent
+// }
+
+// type CardBodyAndParsedContent = Omit<CardBody, 'content'> & {
+//   content: CardBodyContent
+// }
+
+type CardParsed = Card & {
+  headContent: CardHeadContent
+  bodyContent: CardBodyContent
+  headValue: CardHeadContentValueInjected
 }
-const RenderTokenStream = forwardRef(
-  (
-    {
-      stream,
 
-      showQuestion,
+/**
+ * 針對query後收到的gql card做後續parse，所以在此處理而非在後端
+ */
+export function parseCard(card: Card): CardParsed {
+  const headContent: CardHeadContent = JSON.parse(card.head.content)
+  const bodyContent: CardBodyContent = JSON.parse(card.body.content)
+  // console.log(bodyContent)
+  const headValue = injectCardHeadValue({ bodyRoot: bodyContent.self, value: headContent.value })
+  return {
+    ...card,
+    headContent,
+    bodyContent,
+    headValue,
+  }
+}
 
-      commentIdHandler,
-      anchorIdHandler,
-      cardCommentId,
+function getTabUrl(): string | null {
+  let url: string | null
+  if (window.location.protocol.includes('extension')) {
+    // popup的情況
+    const params = new URLSearchParams(new URL(window.location.href).search)
+    url = params.get('u')
+  } else {
+    // inject的情況
+    url = window.location.href
+  }
 
-      clickPoll,
-      showDiscuss,
-      anchorIdHL,
-      hlElementHandler,
-      meAnchor,
-      showHeaderForm,
-      pathPush,
-      symbolHandler,
-    }: {
-      stream: ExtTokenStream
-      className?: string
+  return url
+}
 
-      titleRef?: (arr: any[]) => void
-      showQuestion?: () => void
-      type?: string
-      cardCommentId: number
-      commentIdHandler?: (commentId: string) => void
-      anchorIdHandler?: (anchorId: string) => void
-      commentId?: string
-      clickPoll?: (commentId: string) => void
-      showDiscuss?: () => void
-      highLightClassName?: boolean
-      anchorIdHL?: string
-      hlElementHandler?: (el: HTMLSpanElement) => void
-      meAnchor?: string
-      showHeaderForm: boolean
-      pathPush: (symbol: string) => void
-      symbolHandler: (symbol: string) => void
+/**
+ * 用 client.query(...) 而非使用 useQuery(...)，適用在非 component 但需要取得 card 的情況，例如取得 mirror
+ *
+ * @returns 當有 card 時返回 card body bullet root; 找不到 card 時 root 為 undefined，error 為 undefined; error 時只返回 error
+ */
+export async function queryAndParseCard(props: {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  client: ApolloClient<object>
+  symbol: string
+  mirror?: true
+}): Promise<{ root?: RootBullet; error?: ApolloError }> {
+  const { symbol, client, mirror } = props
+
+  const { data, error } = await client.query<CardQuery, CardQueryVariables>({
+    query: CardDocument,
+    variables: { symbol },
+  })
+
+  let root: RootBullet | undefined
+  if (data && data.card) {
+    const parsed = parseCard(data.card)
+    root = {
+      ...parsed.bodyContent.self,
+      mirror, // 增加mirror property
+    }
+  }
+
+  return { root, error }
+}
+
+/**
+ * 用client.query(...)方式create symbol card
+ *
+ * @returns 當有card時返回card body bullet root; 找不到card時root為undefined，error為undefined; error時只返回error
+ */
+export async function createAndParseCard(props: {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  client: ApolloClient<object>
+  symbol: string
+  mirror?: true
+}): Promise<{ root?: RootBullet }> {
+  const { symbol, client, mirror } = props
+
+  const { data } = await client.mutate<CreateSymbolCardMutation, CreateSymbolCardMutationVariables>({
+    mutation: CreateSymbolCardDocument,
+    variables: { data: { symbol } },
+  })
+
+  let root: RootBullet | undefined
+  if (data && data.createSymbolCard) {
+    const parsed = parseCard(data.createSymbolCard)
+    root = {
+      ...parsed.bodyContent.self,
+      mirror,
+    }
+  }
+  return { root }
+}
+
+/**
+ * 若是webpage card，query nested cards，並轉body
+ */
+async function buildCardBody(props: {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  client: ApolloClient<object>
+  card: CardParsed
+}): Promise<{
+  self: RootBullet
+  mirrors?: RootBullet[]
+}> {
+  const { card, client } = props
+
+  // 非webpage card，只有self
+  if (card.type !== CardType.WEBPAGE) {
+    return { self: card.bodyContent.self }
+  }
+
+  // Webpage card，需要query and parse mirrors
+  const self = card.bodyContent.self
+  self.self = true // 設定此root的self flag
+
+  const mirrors: RootBullet[] = []
+  if (card.bodyContent.mirrors) {
+    const results = await Promise.all(
+      card.bodyContent.mirrors.map(e => queryAndParseCard({ client, symbol: e.symbol, mirror: true })),
+    )
+    for (const { root, error } of results) {
+      if (error) {
+        // TODO: 針對fail的卡要怎樣處理？
+        console.error(error)
+        continue
+      }
+      if (root) {
+        mirrors.push(root)
+      }
+    }
+  }
+  return { self, mirrors }
+}
+
+const OauthorCommentForm = ({
+  boardId,
+  pollId,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onUpdated = () => {},
+}: {
+  boardId: string
+  pollId?: string
+  onUpdated?: () => void
+}) => {
+  const [createOauthorComment] = useCreateOauthorCommentMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<CommentsQuery, CommentsQueryVariables>({
+        query: CommentsDocument,
+        variables: { boardId },
+      })
+      if (data?.createOauthorComment && res?.comments) {
+        cache.writeQuery({
+          query: CommentsDocument,
+          variables: { boardId },
+          data: { comments: res.comments.concat([data.createOauthorComment]) },
+        })
+        // addReplyCountByOne()
+        // form.resetFields()
+        if (onUpdated) {
+          onUpdated()
+        }
+      }
     },
-    ref: any,
-  ): JSX.Element | null => {
-    // const inlineValueArr: string[] = [classes.inlineValue]
-    // const [Panel, setPanel] = useState(false)
-    const highLightRef = useRef<HTMLSpanElement>(null)
-    // const [commentTextArea, setCommentTextArea] = useState(inlineValueArr)
+  })
 
-    const onFocusHandler = (e: any) => {
-      e.stopPropagation()
-      // e.preventDefault()
-      // setPanel(true)
-    }
-    const onBlurHandler = (e: any) => {
-      e.stopPropagation()
-      // e.preventDefault()
-      // if (!commentTextArea) {
-      // setPanel(false)
-      // }
-    }
-    const router = useRouter()
-    // console.log(commentTextArea)
+  return (
+    <div>
+      <h3>Create oauthor comment/vote</h3>
+      <form
+        onSubmit={event => {
+          event.preventDefault()
+          const data: Record<string, string> = {}
+          for (const [k, v] of new FormData(event.currentTarget).entries()) {
+            data[k] = v as string
+          }
+          const vote =
+            data['vote'] === 'NULL' ? undefined : { choiceIdx: ['BUY', 'SELL', 'WATCH'].indexOf(data['vote']) }
+          createOauthorComment({
+            variables: {
+              boardId,
+              pollId,
+              oauthorName: data['oauthor'],
+              data: {
+                content: data['content'],
+                vote,
+              },
+            },
+          })
+        }}
+      >
+        <label>
+          Oauthor:
+          <input type="text" id="oauthor" name="oauthor" defaultValue="刘翔的投资频道:youtube.com" />
+        </label>
+        <br />
+        <label>
+          Comment:
+          <input type="text" id="content" name="content" defaultValue="Hahaha!" />
+        </label>
+        <br />
+        <label>
+          Vote:
+          <select id="vote" name="vote">
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+            <option value="WATCH">WATCH</option>
+            <option value="NULL">null</option>
+          </select>
+        </label>
+        <br />
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+  )
+}
 
-    if (typeof stream === 'string') {
-      // return stream.search(/\n+/g) >= 0 || stream.search(/ {2,}/g) >= 0 || stream === ' ' ? (
-      return stream.search(/\n+/g) >= 0 || stream.search(/ {2,}/g) >= 0 || stream === ' ' ? null : (
-        // <>
-        //   {stream}
-        //   {/* {console.log(stream)} */}
-        // </>
-        // 一般render
-        <span
-          // id={`${meAnchor}`}
-          className={`${classes.text} }`}
-          // ref={el => {
-          //   if (meAnchor === anchorIdHL && hlElementHandler && el) {
-          //     hlElementHandler(el)
-          //     el.scrollIntoView({ behavior: 'smooth' })
-          //   }
-          // }}
-        >
-          {stream.replace(/^ +/g, '').replace(/ +$/g, '')}
-          {/* {console.log(meAnchor)} */}
-          {/* {console.log(hlRef)} */}
-          {/* {highLightClassName && highLightRef.current && hlElementHandler
-              ? hlElementHandler(highLightRef?.current)
-              : null} */}
-          {/* {children} */}
-        </span>
-      )
-    }
-    if (Array.isArray(stream)) {
-      const hasStr = stream.some(e => typeof e === 'string')
-      const noReturn = stream.every(e => e !== '\n')
-      // if (condition) console.log(stream)
+const CommentItem = ({ comment }: { comment: Comment }) => {
+  return (
+    <p>
+      [{comment.vote?.choiceIdx}] {comment.content} (@{comment.oauthorName} @@{comment.userId})
+    </p>
+  )
+}
 
-      return (
-        <>
-          {/* {console.log(stream)} */}
-          {hasStr && noReturn ? (
-            //包含hover效果
-            // <div className={classes.array} onClick={onFocusHandler} onBlur={onBlurHandler} tabIndex={0}>
-            <span
-              id={`${meAnchor}`}
-              className={`${classes.array} ${meAnchor === anchorIdHL && meAnchor !== undefined ? 'highLight' : ''}`}
-              // className={`${classes.array} `}
-              ref={el => {
-                if (meAnchor === anchorIdHL && hlElementHandler && el) {
-                  hlElementHandler(el)
-                  el.scrollIntoView({ behavior: 'smooth' })
-                }
-              }}
-            >
-              {stream.map((e, i) => {
-                return (
-                  <RenderTokenStream
-                    key={i}
-                    stream={e}
-                    // showPanel={Panel}
-                    ref={ref}
-                    showQuestion={showQuestion}
-                    commentIdHandler={commentIdHandler}
-                    anchorIdHandler={anchorIdHandler}
-                    clickPoll={clickPoll}
-                    showDiscuss={showDiscuss}
-                    anchorIdHL={anchorIdHL}
-                    hlElementHandler={hlElementHandler}
-                    meAnchor={meAnchor}
-                    cardCommentId={cardCommentId}
-                    showHeaderForm={showHeaderForm}
-                    pathPush={pathPush}
-                    symbolHandler={symbolHandler}
-                  />
-                )
-              })}
-            </span>
-          ) : (
-            //一般render
-            stream.map((e, i) => {
-              // console.log(e)
-              return (
-                <RenderTokenStream
-                  key={i}
-                  stream={e}
-                  ref={ref}
-                  showQuestion={showQuestion}
-                  commentIdHandler={commentIdHandler}
-                  anchorIdHandler={anchorIdHandler}
-                  // pollCommentIdHandler={pollCommentIdHandler}
-                  clickPoll={clickPoll}
-                  showDiscuss={showDiscuss}
-                  anchorIdHL={anchorIdHL}
-                  // highLightClassName={highLightClassName}
-                  hlElementHandler={hlElementHandler}
-                  meAnchor={meAnchor}
-                  cardCommentId={cardCommentId}
-                  showHeaderForm={showHeaderForm}
-                  pathPush={pathPush}
-                  symbolHandler={symbolHandler}
-                />
-              )
-            })
-          )}
-        </>
-      )
-    }
-    // const err = token.marker ? <span>({token.marker.error})</span> : null
-    const content = streamToStr(stream.content)
-    switch (stream.type) {
-      // case 'sect-ticker':
-      // case 'sect-topic': {
-      //   console.log(`symbol: ${content}`)
-      //   return (
-      //     <span>
-      //       <Link to={`/card?${toUrlParams({ s: content })}`}>{content}</Link>
-      //     </span>
-      //   )
-      // }
-      case 'vote-chocie':
-        return (
-          // <button>
-          <>
-            {/* {console.log(stream)} */}
-            {/* {stream.content} */}
-            {/* <RenderTokenStream
-              stream={stream.content}
-              ref={ref}
-              showQuestion={showQuestion}
-              commentIdHandler={commentIdHandler}
-            /> */}
-          </>
-          // </button>
-        )
+export const BoardItem = (props: { boardId: string; pollId?: string }) => {
+  const { boardId, pollId } = props
+  // const [reload, setReload] = useState(false)
+  const boardResult = useBoardQuery({ variables: { id: boardId } })
+  const commentsResult = useCommentsQuery({ variables: { boardId } })
 
-      case 'sect-symbol':
-        // console.log(`symbol: ${content}`)
+  if (boardResult.loading || commentsResult.loading) {
+    return <div>Loading</div>
+  }
+  if (boardResult.error || commentsResult.error) {
+    return <div>Error</div>
+  }
+  return (
+    <div>
+      {boardResult.data && boardResult.data.board && (
+        <p>
+          {boardResult.data.board.hashtag}
+          {boardResult.data.board.poll && boardResult.data.board.poll.choices.map((e, i) => <span key={i}>e</span>)}
+        </p>
+      )}
+      {commentsResult.data &&
+        commentsResult.data.comments &&
+        commentsResult.data.comments.map((e, i) => <CommentItem key={i} comment={e} />)}
+      <OauthorCommentForm boardId={boardId} pollId={pollId} />
+    </div>
+  )
+}
+
+function hastaggable(node: Bullet | BulletDraft): boolean {
+  if (node.id && !node.freeze) {
+    return true
+  }
+  return false
+}
+
+const TokenItem = (props: {
+  token: Token | string
+  handleSymbol?: (symbol: string) => void
+  depth?: number
+  self?: boolean
+  handleClickChoice?: (content: string) => void
+}) => {
+  const { token, handleSymbol, depth, self, handleClickChoice } = props
+  // console.log(token)
+  if (typeof token === 'string') {
+    return <span className={classes.text}>{token}</span>
+  }
+  if (typeof token.content === 'string') {
+    switch (token.type) {
+      case 'ticker':
+      case 'topic':
         return (
           <>
-            {showHeaderForm ? (
-              <HeaderForm
-                initialValue={{
-                  title: content,
-                  authorChoice: 'buy',
-                  authorLines: '兩種觀點皆合理 短期注意系統化風險 看好美股的長期走勢，版塊輪動不會有大規模回調',
-                }}
-              />
+            {self ? (
+              <span className={classes.self}>Self</span>
             ) : (
               <span
-                id={content}
-                className={classes.tickerTitle}
-                onClick={() => {
-                  pathPush(content)
-                  symbolHandler(content)
+                className={`${classes.link} ${depth === 0 ? classes.mirrorTitle : ''}`}
+                onClick={e => {
+                  // e.preventDefault()
+                  if (
+                    typeof token.content === 'string' &&
+                    (token.content.startsWith('$') || token.content.startsWith('[['))
+                  ) {
+                    // console.log(token.content)
+                    handleSymbol && handleSymbol(token.content)
+                  }
                 }}
-                ref={
-                  ref
-                  // console.log(el)
-                }
               >
-                {/* <Link href={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link> */}
-                <span>{content.replace('[[', '').replace(']]', '')}</span>
-
-                {content.search(/^\$[A-Z]+$/gm) !== -1 && (
-                  <>
-                    <span className={classes.symbolFullName}>Unity Software Inc.</span>
-                    <span className={classes.symbolPrice}>
-                      <span className={classes.price}>249.29</span>
-                      <span className={`${classes.priceChange} ${classes.green}`}>+1.00(+0.40%)</span>
-                      {/* <span className={`${classes.pricePercent} ${classes.green}`}>+0.40%</span> */}
-                    </span>
-                    {/* <span className={classes.headerChartArea}>
-                      <div className={classes.headerVote}>
-                        <div className={classes.voteHeader}>你的預測是？</div>
-                        <div className={classes.voteChoices}>
-                          <span>買</span>
-                          <span>賣</span>
-                          <span>觀望</span>
-                        </div>
-                      </div>
-                      <span className={classes.headerAuthorLines}>
-                        <Linechart />
-                        <div className={classes.authorLineWrapper}>
-                          <span className={classes.authorTagWrapper}>
-                            <span className={classes.authorTag}>@娜娜</span>
-                            <span className={classes.choiceTag}>買</span>
-                          </span>
-                          <span>兩種觀點皆合理 短期注意系統化風險 看好美股的長期走勢，版塊輪動不會有大規模回調</span>
-                        </div>
-                      </span>
-                    </span> */}
-                  </>
-                )}
+                {token.content}
               </span>
             )}
           </>
         )
-
-      case 'multiline-marker':
-        if (Array.isArray(stream.content)) {
-          if (stream.content.find(e => typeof e !== 'string' && e.content === '[?]')) {
-            return (
-              <ul>
-                <Question stream={stream.content} cardCommentId={cardCommentId} />
-                {/* <RenderTokenStream
-                  stream={stream.content}
-                  showQuestion={showQuestion}
-                  commentIdHandler={commentIdHandler}
-                  anchorIdHandler={anchorIdHandler}
-                  clickPoll={clickPoll}
-                  showDiscuss={showDiscuss}
-                  anchorIdHL={anchorIdHL}
-                  hlElementHandler={hlElementHandler}
-                /> */}
-                {/* {console.log(stream)} */}
-              </ul>
-            )
-          }
-          // const contentArr=stream.content as any[]
-        }
-        return (
-          <ul>
-            <RenderTokenStream
-              stream={stream.content}
-              ref={ref}
-              showQuestion={showQuestion}
-              commentIdHandler={commentIdHandler}
-              anchorIdHandler={anchorIdHandler}
-              // pollCommentIdHandler={pollCommentIdHandler}
-              clickPoll={clickPoll}
-              showDiscuss={showDiscuss}
-              anchorIdHL={anchorIdHL}
-              // highLightClassName={highLightClassName}
-              hlElementHandler={hlElementHandler}
-              cardCommentId={cardCommentId}
-              showHeaderForm={showHeaderForm}
-              pathPush={pathPush}
-              symbolHandler={symbolHandler}
-            />
-            {/* {console.log(stream)} */}
-          </ul>
-        )
-      case 'inline-marker':
-        if (Array.isArray(stream.content)) {
-          if (stream.content.find(e => typeof e !== 'string' && e.content === '[?]')) {
-            return <Question stream={stream.content} cardCommentId={cardCommentId} />
-          }
-        }
-        return (
-          <RenderTokenStream
-            stream={stream.content}
-            ref={ref}
-            showQuestion={showQuestion}
-            commentIdHandler={commentIdHandler}
-            anchorIdHandler={anchorIdHandler}
-            // pollCommentIdHandler={pollCommentIdHandler}
-            clickPoll={clickPoll}
-            showDiscuss={showDiscuss}
-            anchorIdHL={anchorIdHL}
-            // highLightClassName={highLightClassName}
-            hlElementHandler={hlElementHandler}
-            cardCommentId={cardCommentId}
-            showHeaderForm={showHeaderForm}
-            pathPush={pathPush}
-            symbolHandler={symbolHandler}
-          />
-        )
-      case 'inline-value':
-      case 'line-value': {
-        if (stream.markerline?.poll && stream.markerline.commentId) {
-          return (
-            // <QueryCommentModal commentId={stream.markerline.commentId.toString()}>
-            // <button onClick={showQuestion}>
-            <>
-              <RenderTokenStream
-                stream={stream.content}
-                ref={ref}
-                showQuestion={showQuestion}
-                // commentOnClickHandler={commentOnClickHandler}
-                // pollCommentIdHandler={pollCommentIdHandler}
-                // commentIdHandler={commentIdHandler}
-                anchorIdHandler={anchorIdHandler}
-                clickPoll={clickPoll}
-                showDiscuss={showDiscuss}
-                anchorIdHL={anchorIdHL}
-                // highLightClassName={highLightClassName}
-                hlElementHandler={hlElementHandler}
-                cardCommentId={cardCommentId}
-                showHeaderForm={showHeaderForm}
-                pathPush={pathPush}
-                symbolHandler={symbolHandler}
-              />
-              {/* {console.log(stream)} */}
-              <button
-                onClick={() => {
-                  stream.markerline?.commentId && clickPoll && clickPoll(stream.markerline.commentId.toString())
-                  stream.markerline?.anchorId &&
-                    anchorIdHandler &&
-                    anchorIdHandler(stream.markerline.anchorId.toString())
-                  showQuestion && showQuestion()
-                }}
-              >
-                參與投票
-              </button>
-            </>
-            // </button>
-            // </QueryCommentModal>
-          )
-        }
-        if (!stream.markerline?.commentId && stream.markerline?.anchorId) {
-          // return <PollChoices pollId={'10'} choices={['aaa', 'bbb']} />
-          return (
-            // <QueryCommentModal id={stream.markerline.commentId.toString()}>
-            <li className={classes.inlineValue}>
-              <span className={classes.bulletWrapper}>
-                <span className={classes.bullet}>•</span>
-              </span>
-              {/* <svg viewBox="0 0 18 18" className={classes.bullet}>
-                <circle cx="9" cy="9" r="3.5"></circle>
-              </svg> */}
-              <RenderTokenStream
-                stream={stream.content}
-                ref={ref}
-                showQuestion={showQuestion}
-                commentIdHandler={commentIdHandler}
-                anchorIdHandler={anchorIdHandler}
-                // pollCommentIdHandler={pollCommentIdHandler}
-                clickPoll={clickPoll}
-                showDiscuss={showDiscuss}
-                anchorIdHL={anchorIdHL}
-                meAnchor={stream.markerline.anchorId.toString()}
-                // highLightClassName={anchorIdHL === stream.markerline.anchorId.toString()}
-                hlElementHandler={hlElementHandler}
-                cardCommentId={cardCommentId}
-                showHeaderForm={showHeaderForm}
-                pathPush={pathPush}
-                symbolHandler={symbolHandler}
-              />
-              {/* {stream.markerline && commentIdHandler(stream.markerline.commentId.toString())} */}
-              {/* {stream.markerline && anchorIdHandler(stream.markerline.anchorId.toString())} */}
-            </li>
-            // {/* </QueryCommentModal> */}
-          )
-        }
-        if (stream.marker && (stream.marker.key.search('[key]') >= 0 || stream.marker.key.search('[~]') >= 0)) {
-          return (
-            <RenderTokenStream
-              stream={stream.content}
-              ref={ref}
-              showQuestion={showQuestion}
-              commentIdHandler={commentIdHandler}
-              anchorIdHandler={anchorIdHandler}
-              // pollCommentIdHandler={pollCommentIdHandler}
-              clickPoll={clickPoll}
-              showDiscuss={showDiscuss}
-              anchorIdHL={anchorIdHL}
-              // highLightClassName={highLightClassName}
-              hlElementHandler={hlElementHandler}
-              cardCommentId={cardCommentId}
-              showHeaderForm={showHeaderForm}
-              pathPush={pathPush}
-              symbolHandler={symbolHandler}
-            />
-          )
-        }
-        return (
-          // {/* {console.log(stream.content)} */}
-          <RenderTokenStream
-            stream={stream.content}
-            ref={ref}
-            showQuestion={showQuestion}
-            commentIdHandler={commentIdHandler}
-            anchorIdHandler={anchorIdHandler}
-            // pollCommentIdHandler={pollCommentIdHandler}
-            clickPoll={clickPoll}
-            showDiscuss={showDiscuss}
-            anchorIdHL={anchorIdHL}
-            // highLightClassName={highLightClassName}
-            hlElementHandler={hlElementHandler}
-            cardCommentId={cardCommentId}
-            showHeaderForm={showHeaderForm}
-            pathPush={pathPush}
-            symbolHandler={symbolHandler}
-          />
-        )
-      }
-
-      case 'line-mark':
-      case 'inline-mark':
-        return (
-          <>
-            {content === '[vs]' && (
-              <span className={classes.marker}>
-                比較<span className={classes.markerSyntax}>{content}</span>
-              </span>
-            )}
-            {content === '[*]' && (
-              <span className={classes.marker}>
-                介紹<span className={classes.markerSyntax}>{content}</span>
-              </span>
-            )}
-            {content === '[+]' && (
-              <span className={classes.marker}>
-                優勢/機會<span className={classes.markerSyntax}>{content}</span>
-              </span>
-            )}
-            {content === '[-]' && (
-              <span className={classes.marker}>
-                劣勢/危機<span className={classes.markerSyntax}>{content}</span>
-                {/* {console.log()} */}
-              </span>
-            )}
-            {content === '[?]' && (
-              <span className={classes.marker}>
-                提問<span className={classes.markerSyntax}>{content}</span>
-              </span>
-            )}
-            {content === '[key]' && (
-              <span className={classes.marker}>
-                關鍵字<span className={classes.markerSyntax}>{content}</span>
-              </span>
-            )}
-            {['[+]', '[-]', '[?]', '[key]', '[*]', '[vs]'].includes(content) || (
-              <span className={classes.marker}>
-                {/* {console.log(content)} */}
-                {content.replace('[', '').replace(']', '')}
-              </span>
-            )}
-          </>
-        )
-      // return <span className={classes.marker}>{content}</span>
-      case 'ticker':
-      case 'topic': {
-        // console.log(`symbol: ${content}`)
+      case 'vote-chocie':
         return (
           <span
-            className={classes.keyword}
-            onClick={() => {
-              pathPush(content)
-              symbolHandler(content)
+            className={classes.link}
+            onClick={e => {
+              // e.preventDefault()
+              e.stopPropagation()
+              handleClickChoice && handleClickChoice(token.content as string)
             }}
           >
-            {/* {console.log(content)} */}
-            {/* <Link href={`/card?${toUrlParams({ s: content })}`}>{content.replace('[[', '').replace(']]', '')}</Link> */}
-            <span>{content.replace('[[', '').replace(']]', '')}</span>
+            {token.content}
           </span>
         )
-      }
-      case 'stamp': {
-        const panel =
-          stream.markerline && stream.markerline.anchorId ? (
-            <AnchorPanel
-              anchorId={stream.markerline.anchorId.toString()}
-              anchorIdHandler={anchorIdHandler}
-              meAuthor={false}
-              showDiscuss={showDiscuss}
-              // commentMouseUpHandler={commentMouseUpHandler}
-            />
-          ) : null
-        const src =
-          stream.markerline && stream.markerline.src ? (
-            <Link href={`/card?${toUrlParams({ u: stream.markerline.src })}`}>src</Link>
-          ) : null
-
-        if (panel || src)
-          return (
-            <span className={classes.panel}>
-              {/* <span> */}
-              {/* {console.log(stream.markerline)} */}
-              {panel}
-              {src}
-            </span>
-          )
-        return null
-      }
+      // case 'mark':
+      //   return <span className={classes.marker}>{token.content}</span>
       default:
-        // Recursive
-        return (
-          <RenderTokenStream
-            stream={stream.content}
-            ref={ref}
-            showQuestion={showQuestion}
-            commentIdHandler={commentIdHandler}
-            anchorIdHandler={anchorIdHandler}
-            // pollCommentIdHandler={pollCommentIdHandler}
-            clickPoll={clickPoll}
-            showDiscuss={showDiscuss}
-            anchorIdHL={anchorIdHL}
-            // highLightClassName={highLightClassName}
-            hlElementHandler={hlElementHandler}
-            cardCommentId={cardCommentId}
-            showHeaderForm={showHeaderForm}
-            pathPush={pathPush}
-            symbolHandler={symbolHandler}
-          />
-        )
+        return <span>{token.content}</span>
     }
-  },
-)
-RenderTokenStream.displayName = 'RenderTokenStream'
+  }
+  return null
+}
 
-const RenderSection = forwardRef(
-  (
-    {
-      sect,
-      text,
-      showQuestion,
-      cardCommentId,
-      // pollCommentIdHandler,
-      anchorIdHandler,
-      clickPoll,
-      showDiscuss,
-      anchorIdHL,
-      hlElementHandler,
-      pathPush,
-      symbolHandler,
-    }: // commentId
-    {
-      sect: Section
-      text: string
-      showQuestion?: () => void
-      cardCommentId: number
-      // pollCommentIdHandler?: (commentId: string) => void
-      clickPoll?: (commentId: string) => void
-      anchorIdHandler?: (anchorId: string) => void
-      showDiscuss?: () => void
-      anchorIdHL?: string
-      hlElementHandler?: (el: HTMLSpanElement) => void
-      // commentId:string
-      pathPush: (symbol: string) => void
-      symbolHandler: (symbol: string) => void
-    },
-    ref,
-  ): JSX.Element | null => {
-    const [showEditor, setShowEditor] = useState(false)
-    const [showHeaderForm, setShowHeaderForm] = useState(false)
-    const [showPopover, setShowPopover] = useState(false)
+// const markerTemplate=(text:string,marker:string,deth) => {
 
-    const showHeaderFormHandler = () => {
-      setShowHeaderForm(true)
-    }
+// }
 
-    if (sect.stream && sect.stream.length !== 0) {
+const markToText = (
+  e: string,
+  handleSymbol?: (symbol: string) => void,
+  handleClickChoice?: (content: string) => void,
+): JSX.Element => {
+  switch (e) {
+    case '[vs]':
       return (
-        <div className={classes.cardSection}>
-          {/* {console.log(sect.stream)} */}
-          <div className={classes.cardSectionInner}>
-            {showEditor ? (
-              <>
-                <RenderTokenStream
-                  stream={sect.stream}
-                  ref={ref}
-                  showQuestion={showQuestion}
-                  showDiscuss={showDiscuss}
-                  anchorIdHandler={anchorIdHandler}
-                  clickPoll={clickPoll}
-                  anchorIdHL={anchorIdHL}
-                  hlElementHandler={hlElementHandler}
-                  cardCommentId={cardCommentId}
-                  showHeaderForm={showHeaderForm}
-                  pathPush={pathPush}
-                  symbolHandler={symbolHandler}
-                />
-                <BulletEditor />
-              </>
-            ) : (
-              <RenderTokenStream
-                stream={sect.stream}
-                ref={ref}
-                showQuestion={showQuestion}
-                showDiscuss={showDiscuss}
-                anchorIdHandler={anchorIdHandler}
-                clickPoll={clickPoll}
-                anchorIdHL={anchorIdHL}
-                hlElementHandler={hlElementHandler}
-                cardCommentId={cardCommentId}
-                showHeaderForm={showHeaderForm}
-                pathPush={pathPush}
-                symbolHandler={symbolHandler}
-              />
-            )}
-            {/* {console.log(sect)} */}
-            <span
-              className={classes.sectionEditBtn}
-              onClick={() => {
-                setShowEditor(prev => !prev)
-                setShowHeaderForm(prev => !prev)
-                // setShowEditor(prev => !prev)
-                // setShowHeaderForm(prev => !prev)
-              }}
-            >
-              <span className={classes.sectionEditBtnText}>{showEditor ? '儲存' : '編輯'}</span>
-              {/* {!showEditor && !showHeaderForm && showPopover && (
-                <MyEditBtnPopover showHeaderFormHandler={showHeaderFormHandler} />
-              )} */}
-              {/* <svg width="30" height="30" viewBox="0 0 30 30" preserveAspectRatio="xMinYMin meet">
-                <path d="M 3 10 L 15 24 L 27 10" fill="transparent" /> */}
-              {/* </svg> */}
-            </span>
-          </div>
-        </div>
+        <span>
+          比較<span className={classes.markerSyntax}>{e}</span>
+        </span>
       )
+    case '[*]':
+      return (
+        <span>
+          概要<span className={classes.markerSyntax}>{e}</span>
+        </span>
+      )
+    case '[+]':
+      return (
+        <span>
+          加<span className={classes.markerSyntax}>{e}</span>
+        </span>
+      )
+    case '[-]':
+      return (
+        <span>
+          減<span className={classes.markerSyntax}>{e}</span>
+          {/* {console.log()} */}
+        </span>
+      )
+    case '[?]':
+      return (
+        <span>
+          提問<span className={classes.markerSyntax}>{e}</span>
+        </span>
+      )
+    case '[key]':
+      return (
+        <span>
+          關鍵字<span className={classes.markerSyntax}>{e}</span>
+        </span>
+      )
+    case '[!]':
+      return (
+        <span>
+          最新<span className={classes.markerSyntax}>{e}</span>
+        </span>
+      )
+    default:
+      return (
+        // <span>
+        //   {/* {console.log(e)} */}
+        //   {/* {e.replace('[[', '').replace(']]', '')} */}
+        //   {e}
+        // </span>
+        <>
+          {tokenize(e).map((el, i) => (
+            <TokenItem token={el} key={i} handleSymbol={handleSymbol} handleClickChoice={handleClickChoice} />
+          ))}
+        </>
+      )
+  }
+}
+
+const BulletItem = (props: {
+  node: Bullet | BulletDraft
+
+  // handleClickChoice?:(content:string)=>void
+  depth: number
+  type: string
+  handleSymbol: (symbol: string) => void
+  cardId: string
+  mirror?: boolean
+}) => {
+  // const [filtered, setFiltered] = useState()
+
+  const { depth, node, handleSymbol, cardId, mirror } = props
+  // console.log(node)
+  const [showBoard, setShowBoard] = useState<number | undefined>()
+  const [showPanel, setShowPanel] = useState<boolean>(false)
+  const [showCreateBoard, setShowCreateBoard] = useState(false)
+  const [showChildren, setShowChildren] = useState(depth < depth + 2 ? true : false)
+  const [clickChoiceIdx, setClickChoiceIdx] = useState<number | undefined>()
+  // const [choice,setChoice]=useState<BulletCount>()
+  // const { node } = props
+
+  const headTokens = tokenize(node.head)
+  const bodyTokens = node.body ? tokenize(node.body) : undefined
+  const { data: bulletData, loading, error } = useBulletQuery({ variables: { id: `${node.id ?? ''}` } })
+
+  //   useEffect(()=>{
+  //     if(bulletData?.bullet){
+  // setChoice(bulletData.bullet.count)
+
+  //     }
+
+  //   },[bulletData])
+
+  const hideBoard = (i: number) => {
+    setShowBoard(undefined)
+  }
+  const hideCreateBoard = () => {
+    setShowCreateBoard(false)
+  }
+  const handleClickChoice = (content: string) => {
+    const hashtagIdx = node.hashtags?.findIndex(e => e.boardId === node.boardId)
+    const filterHead = node.head.split(' ').filter(e => e.startsWith('<'))
+    const contentIdx = filterHead.findIndex(e => e === content)
+    setClickChoiceIdx(contentIdx)
+
+    setShowBoard(hashtagIdx)
+  }
+
+  // const [createHashtag] = useCreateHashtagMutation()
+
+  const nextDepth = depth + 1
+  const cutString = (s: string) => {
+    if (s.length > 6) {
+      return s.substring(0, 5) + '...'
     }
-    return null
-  },
-)
-RenderSection.displayName = 'RenderSection'
-
-export const RenderCardBody = forwardRef(
-  (
-    {
-      sects,
-      text,
-      titleRef,
-      showQuestion,
-      cardCommentId,
-      // pollCommentIdHandler,
-      anchorIdHandler,
-      clickPoll,
-      showDiscuss,
-      anchorIdHL,
-      hlElementHandler,
-      pathPush,
-      symbolHandler,
-    }: {
-      sects?: Section[]
-      text?: string[]
-      titleRef?: (arr: any[]) => void
-      showQuestion?: () => void
-      cardCommentId?: number
-      // pollCommentIdHandler?: (commentId: string) => void
-      anchorIdHandler?: (anchorId: string) => void
-      clickPoll?: (commentId: string) => void
-      showDiscuss?: () => void
-      anchorIdHL?: string
-      hlElementHandler?: (el: HTMLSpanElement) => void
-      pathPush: (symbol: string) => void
-      symbolHandler: (symbol: string) => void
-    },
-    ref,
-  ): JSX.Element => {
-    // const sectsFilter: (Section | string)[] = [
-    //   ...sects.filter(e => e.nestedCard !== undefined || e.stream?.length !== 0),
-    // ]
-    // sectsFilter[sectsFilter.length] = 'newcard'
-    // const [sectArr, setSectArr] = useState(sectsFilter)
-    // console.log(sectArr)
-    type MyRef = {
-      spanRef: any[]
-      anchorRef: any[]
-    }
-    const myRef = useRef<any>([])
-
-    interface PanelArr {
-      content: string
-      panel: boolean
-    }
-
-    return (
-      <>
-        {/* {console.log(sects)} */}
-        {/* {sectsFilter
-          // {sects
-          //   .filter(e => e.nestedCard !== undefined || e.stream?.length !== 0)
-          .map((e, i) => {
-            if (typeof e === 'string') {
-              return (
-                <div className={`${classes.cardSection} ${classes.opacity50}`}>
-                  <div className={classes.cardSectionInner}>
-                    <HeaderForm initialValue={{ authorChoice: '', authorLines: '', title: '' }} />
-                    <BulletEditor />
-                  </div>
-                </div>
-              )
-            }
-            return (
-              <RenderSection
-                key={i}
-                sect={e}
-                text={(text && text[i]) || ''}
-                ref={el => {
-                  // console.log(el)
-                  myRef.current[i] = el
-                }}
-                showQuestion={showQuestion}
-                cardCommentId={cardCommentId || 0}
-                anchorIdHandler={anchorIdHandler}
-                // pollCommentIdHandler={pollCommentIdHandler}
-                clickPoll={clickPoll}
-                showDiscuss={showDiscuss}
-                anchorIdHL={anchorIdHL}
-                hlElementHandler={hlElementHandler}
-                pathPush={pathPush}
-                symbolHandler={symbolHandler}
-              />
-            )
-          })} */}
-        {/* {console.log(myRef.current)} */}
-        {titleRef && titleRef(myRef.current)}
-        {/* <div>newCard</div> */}
-      </>
-    )
-  },
-)
-RenderCardBody.displayName = 'RenderCardBody'
-
-export const CardBody = ({
-  // card,
-  bySrc,
-  // cardCommentId,
-  titleRefHandler,
-  showQuestion,
-  commentIdHandler,
-  // pollCommentIdHandler,
-  anchorIdHandler,
-  clickPoll,
-  showDiscuss,
-  anchorIdHL,
-  hlElementHandler,
-  pathPush,
-  symbolHandler,
-}: {
-  // card: CocardFragment
-  bySrc?: string
-  // cardCommentId: number
-  titleRefHandler?: (arr: any[]) => void
-  showQuestion?: () => void
-  commentIdHandler?: (commentId: string) => void
-  // pollCommentIdHandler: (commentId: string) => void
-  clickPoll: (commentId: string) => void
-  anchorIdHandler: (anchorId: string) => void
-  showDiscuss: () => void
-  anchorIdHL: string
-  hlElementHandler: (el: HTMLSpanElement) => void
-  pathPush: (symbol: string) => void
-  symbolHandler?: (symbol: string) => void
-}): JSX.Element => {
-  // console.log(card)
-
-  // if (card.body === null) return <p>[Error]: null body</p>
-
-  // const meta: CardMeta | undefined = card.meta ? (JSON.parse(card.meta) as CardMeta) : undefined
-  // const editor = new Editor(card.body?.text, card.body?.meta, card.link.url, card.link.oauthorName ?? undefined)
-  // editor.flush({ attachMarkerlinesToTokens: true })
-  // // console.log(editor.getText())
-  // const text = editor.getText().split(/^\n/gm)
-  // console.log(text.split(/^\n/gm))
+    return s
+  }
   return (
     <>
-      {/* <RenderCardBody
-      sects={editor.getSections()}
-      text={text}
-      titleRef={titleRefHandler}
-      showQuestion={showQuestion}
-      // cardCommentId={(card.meta as CardMeta).commentId}
-      anchorIdHandler={anchorIdHandler}
-      // pollCommentIdHandler={pollCommentIdHandler}
-      clickPoll={clickPoll}
-      showDiscuss={showDiscuss}
-      anchorIdHL={anchorIdHL}
-      // ref={ref}
-      hlElementHandler={hlElementHandler}
-      pathPush={pathPush}
-      // symbolHandler={symbolHandler}
-    /> */}
+      {depth < 2 && (!node.children || (node.children && node.children.length === 0)) ? null : (
+        <li className={classes.inlineValue}>
+          <div className={classes.bulletPanelSibling}></div>
+
+          <span className={classes.bulletWrapper}>
+            <span
+              className={classes.bullet}
+              onClick={() => {
+                setShowChildren(prev => !prev)
+              }}
+            >
+              <svg
+                viewBox="0 0 18 18"
+                className={`${classes.bulletSvg} ${
+                  showChildren || (node.children.length === 0 && node.children) ? '' : classes.bulletSvgBg
+                } ${mirror && classes.mirrorBullet}`}
+              >
+                <circle cx="9" cy="9" r="4" />
+              </svg>
+              {/* • */}
+            </span>
+            {node.oauthorName ? (
+              <MyTooltip className={classes.bulletTooltip}>
+                <span className={classes.oauthorName}> @{cutString(node.oauthorName.split(':', 1)[0])}</span>
+              </MyTooltip>
+            ) : null}
+
+            {showCreateBoard && node.id && (
+              <CreateBoardPage
+                subTitle={node.head}
+                bulletId={node.id}
+                cardId={cardId}
+                visible={showCreateBoard}
+                hideBoard={hideCreateBoard}
+              />
+            )}
+          </span>
+          {(hastaggable(node) || node.sourceUrl) && (
+            <BulletPanel className={classes.bulletPanel} visible={showPanel}>
+              {[
+                { icon: '#', text: '新增標籤' },
+                { icon: <SrcIcon />, text: '查看來源' },
+              ]}
+            </BulletPanel>
+          )}
+          <span className={classes.bulletContent}>
+            {depth === 0
+              ? headTokens.map((el, i) => (
+                  <TokenItem token={el} key={i} handleSymbol={handleSymbol} depth={0} self={!mirror} />
+                ))
+              : markToText(node.head, handleSymbol, handleClickChoice)}
+            {/* {headTokens.map(
+            (e, i) => (
+              
+        
+
+                <TokenItem key={i} token={e} />
+              
+            ),
+            // ),
+          )} */}
+            {node.hashtags &&
+              node.hashtags.map((e, i) => (
+                <span
+                  className={classes.hashtag}
+                  key={i}
+                  onClick={() => {
+                    setShowBoard(i)
+                  }}
+                >
+                  {' ' + e.text}
+                  {e.boardId && (
+                    <Popover visible={i === showBoard} hideBoard={() => hideBoard(i)} subTitle={node.head}>
+                      <BoardPage
+                        title={e.text}
+                        boardId={e.boardId.toString()}
+                        pollId={node.pollId?.toString()}
+                        clickedChoiceIdx={i === showBoard ? clickChoiceIdx : undefined}
+                        // description={e.content}
+                        // visible={showBoard}
+                        // hideBoard={hideBoard}
+                      />
+                    </Popover>
+                  )}
+                </span>
+                // <Link key={i} href={`/lab/board/[board]`} as={`/lab/board/${e.boardId}`}>
+                //   {e.text}
+                // </Link>
+              ))}
+
+            {/* {bulletData?.bullet.count && node.id && (
+              <UpDown choice={bulletData.bullet.count} bulletId={node.id.toString()} />
+            )} */}
+
+            {bodyTokens && (
+              <div className={classes.bulletBody}>
+                {/* <br /> */}
+                {bodyTokens.map((e, i) => (
+                  <TokenItem key={i} token={e} handleSymbol={handleSymbol} />
+                ))}
+              </div>
+            )}
+
+            {/* 若為topic ticker 標題一律顯示children */}
+            {/* {headTokens.find(e => typeof e !== 'string' && (e.type === 'topic' || e.type === 'ticker')) && (
+            <ul>{node.children && node.children.map((e, i) => <BulletItem key={i} node={e} />)}</ul>
+          )} */}
+            {/* 若為topic ticker標題的children click bullet控制是否渲染children */}
+            {showChildren && (
+              <ul>
+                {node.children &&
+                  node.children.map((e, i) => (
+                    <BulletItem
+                      key={i}
+                      node={e}
+                      depth={nextDepth}
+                      type={props.type}
+                      handleSymbol={handleSymbol}
+                      cardId={cardId}
+                    />
+                  ))}
+              </ul>
+            )}
+          </span>
+        </li>
+      )}
     </>
   )
 }
 
-export function CardHead({
-  // card,
-  sect,
-  height,
-}: {
-  // card: CocardFragment
-  sect: Section[]
-  height: number
-}): JSX.Element {
-  const headerRef = useRef<HTMLDivElement>(null)
-  const titleRef = useRef<HTMLSpanElement>(null)
-  const hasWindow = typeof window !== undefined
-  const [windowWidth, setWindowWidth] = useState(hasWindow ? window.innerWidth : null)
-  useEffect(() => {
-    if (hasWindow) {
-      window.addEventListener('resize', () => {
-        setWindowWidth(window.innerWidth)
-      })
-      return () =>
-        window.removeEventListener('resize', () => {
-          // setWindowWidth(window.innerWidth)
-        })
-    }
-  }, [hasWindow])
-  // const title = findOneComment(MARKER_FORMAT.srcTitle.mark, card.comments)
-  // const publishDate = findOneComment(MARKER_FORMAT.srcPublishDate.mark, card.comments);
-  // const _comment: CommentFragment = {
-  //   __typename: 'Comment',
-  //   id: 'string',
-  //   userId: 'string',
-  //   cocardId: 10,
-  //   ocardId: null,
-  //   selfcardId: null,
-  //   isTop: false,
-  //   text: 'Buy vs Sell',
-  //   // replies: [],
-  //   // topReplies: null,
-  //   poll: null,
-  //   count: {
-  //     __typename: 'CommentCount',
-  //     id: 'string;',
-  //     nViews: 1,
-  //     nUps: 2,
-  //     nDowns: 3,
-  //   },
-  //   meta: null,
-  //   createdAt: null,
-  // }
+const CardBodyItem = (props: {
+  card: Card
+  self: BulletDraft
+  mirrors?: BulletDraft[]
+  handleSymbol: (symbol: string) => void
+}) => {
+  const { card, self, mirrors, handleSymbol } = props
 
-  // let cardTitle = card.link.url
-  // // ticker的title
-  // const cardDomain = card.link.domain
-  // if (cardDomain === '_') {
-  //   cardTitle = cardTitle.slice(2)
-  // }
-  const [titleClick, setTitleClick] = useState(false)
-  const titleClickedHandler = () => {
-    setTitleClick(prev => !prev)
+  if (card.type === 'WEBPAGE') {
+    // 可能有mirrors
+    return (
+      <div className={classes.cardBodyItem}>
+        {/* {self && <span className={classes.tickerTitle}>Self</span>} */}
+        <ul>
+          <BulletItem node={self} handleSymbol={handleSymbol} depth={0} type={card.type} cardId={card.id} />
+        </ul>
+        {/* {self.children &&
+          self.children.map((e, i) => (
+            <ul key={i}>
+              <BulletItem node={e} handleSymbol={handleSymbol} depth={0} type={card.type} cardId={card.id} />
+            </ul>
+          ))} */}
+        {mirrors &&
+          mirrors.map((e, i) => (
+            <ul key={i}>
+              {/* {<span className={classes.tickerTitle}>{markToText(e.head, handleSymbol)}</span>} */}
+              {/* {e.children.map((el, ind) => { */}
+              {/* return ( */}
+              <BulletItem
+                node={e}
+                handleSymbol={handleSymbol}
+                depth={0}
+                type={card.type}
+                cardId={card.id}
+                key={i}
+                mirror
+              />
+              {/* })} */}
+            </ul>
+          ))}
+      </div>
+    )
   }
-  // console.log(height)
+  // 沒有mirrors ，從第二層開始顯示 (ie 忽略root)
+  return (
+    <div>
+      <ul>
+        {self.children?.map((e, i) => (
+          <BulletItem key={i} node={e} handleSymbol={handleSymbol} depth={1} type={card.type} cardId={card.id} />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/**
+ * Show a card 1. 有mirrors (ie webpage card) 2. 沒有mirrors
+ */
+
+export const CardItem = (props: { card: Card; handleSymbol: (symbol: string) => void }) => {
+  const { card, handleSymbol } = props
+  // console.log(card)
+  // const parsedCard = parseCard(card)
+  // const pinBoard = parsedCard.headValue.pinBoards.find(e => e.pinCode === 'BUYSELL')
+
+  const client = useApolloClient()
+  const [showBoard, setShowBoard] = useState(false)
+
+  const [headContentValue, setHeadContentValue] = useState<CardHeadContentValue | undefined>()
+  const [self, setSelf] = useState<RootBullet | RootBulletDraft>()
+  const [mirrors, setMirrors] = useState<RootBullet[] | RootBulletDraft[] | undefined>()
+
+  const [pinBoardBuysell, setPinBoardBuysell] = useState<PinBoard | undefined>()
+  const [edit, setEdit] = useState(false)
+  const [bodyTree, setBodyTree] = useState<BulletDraft>() // tree root不顯示
+
+  // useEffect(() => {
+  //   if (root && path) {
+  //     const levels = getLevels(root, path)
+  //     levels.pop() // 最後一個是當前的 li ，不需要
+  //     setLevels(levels)
+  //   }
+  // }, [root, path])
+
+  const contentRef = useRef<HTMLDivElement>(null)
+  const handleClickOutOfEditor = (e: MouseEvent) => {
+    if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
+      setEdit(false)
+    }
+  }
+  useEffect(() => {
+    document.body.addEventListener('click', handleClickOutOfEditor, true)
+    return () => {
+      document.body.removeEventListener('click', handleClickOutOfEditor), true
+    }
+  }, [])
+
+  // const [bodyChildren, setBodyChildren] = useState<BulletDraft[]>(bodyRootDemo.children ?? [])
+  // const [bodyChildren, setBodyChildren] = useState<BulletDraft[]>([])
+  // const [editorValue, setEditorValue] = useState<Descendant[]>([])
+  // console.log(card)
+  const hideBoard = () => {
+    setShowBoard(false)
+  }
+
+  // useEffect(() => {
+  //   async function build() {
+  //     const tree = await buildBodyTree({ card: parsedCard, client })
+  //     setBodyTree(tree)
+  //     setBodyChildren(tree.children ?? [])
+  //     // console.log(tree)
+  //     // console.log(card)
+  //   }
+  //   build()
+  // console.log(card)
+  const [editorInitialValue, setEditorInitialValue] = useState<LiElement[] | undefined>()
+  const cardini: CardBodyContent = JSON.parse(card.body.content)
+  const { root, mirror, path, openedLi, value, setLocalValue } = useLocalValue([Serializer.toRootLi(cardini.self)])
+  // console.log('openLi', openedLi)
+
+  useEffect(() => {
+    async function _parseAndBuildCard() {
+      const parsed = parseCard(card)
+      setHeadContentValue(parsed.headContent.value)
+      // console.log(parsed)
+      // TODO: 改為更general的方式，而不是只針對BUYSELL
+      const _pinBoardBuysell = parsed.headValue.pinBoards.find(e => e.pinCode === 'BUYSELL')
+      setPinBoardBuysell(_pinBoardBuysell)
+
+      const { self, mirrors } = await buildCardBody({ client, card: parsed })
+      setSelf(self)
+      setMirrors(mirrors)
+
+      const lis: LiElement[] =
+        card.type === 'WEBPAGE'
+          ? [Serializer.toRootLi(self), ...(mirrors ?? []).map(e => Serializer.toRootLi(e))]
+          : [Serializer.toRootLi(self)]
+
+      // console.log(lis)
+
+      setEditorInitialValue(lis)
+
+      // setEdit(false) // 需要重設來trigger editor rerender
+    }
+
+    _parseAndBuildCard()
+  }, [card])
+
+  // useEffect(() => {
+  //   if (editorInitialValue) {
+  //     setLocalValue(editorInitialValue)
+  //   }
+  // }, [editorInitialValue])
+
+  const onCloseEditor = useCallback(() => {
+    const value = editorValue() // 從cache取得目前的editor value
+    if (value === undefined) {
+      setEdit(false)
+      return
+    }
+    setEditorInitialValue(value)
+
+    const [first, ...rest] = value
+      .map(e => {
+        console.log(e)
+        try {
+          return Serializer.toRootBulletDraft(e)
+        } catch (err) {
+          console.warn(err)
+        }
+      })
+      .filter((e): e is RootBulletDraft => e !== undefined)
+
+    console.log(first)
+
+    setSelf(first)
+    if (card.type === 'WEBPAGE') {
+      setMirrors(rest)
+    }
+    setEdit(false)
+  }, [])
+
+  const [createCardBody, { error }] = useCreateCardBodyMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<CardQuery, CardQueryVariables>({
+        query: CardDocument,
+        variables: { symbol: card.symbol },
+      })
+      if (data?.createCardBody && res?.card) {
+        cache.writeQuery<CardQuery, CardQueryVariables>({
+          query: CardDocument,
+          variables: { symbol: card.symbol },
+          data: { card: { ...res.card, body: data.createCardBody } },
+        })
+      }
+      // if (afterUpdate && data?.createCardBody) {
+      //   afterUpdate(data.createCardBody)
+      // }
+    },
+  })
+
+  const onSubmit = useCallback(async () => {
+    // console.log(self)
+    // console.log(mirrors)
+    const data: CardBodyInput = card.type === 'WEBPAGE' ? { self, mirrors } : { self }
+    try {
+      await createCardBody({
+        variables: { cardId: card.id, data },
+      })
+    } catch (err) {
+      console.log(err)
+    }
+  }, [self, mirrors])
+  // console.log(card)
+  const formateDate = (date: any) => {
+    let yourDate = new Date(date)
+    const offset = yourDate.getTimezoneOffset()
+    yourDate = new Date(yourDate.getTime() - offset * 60 * 1000)
+    return yourDate.toISOString().split('T')[0]
+  }
+  // const creatDate=new Date(card.createdAt)
+  // const updateDate=new Date(card.updatedAt)
+  return (
+    <div>
+      {/* <h3>Head</h3> */}
+      {/* <h1 className={classes.title}>{}</h1> */}
+      <span className={classes.title}>{headContentValue?.title || card.symbol}</span>
+      {/* {console.log(pinBoard)} */}
+      {pinBoardBuysell && pinBoardBuysell.pinCode === 'BUYSELL' && (
+        <div>
+          <span
+            className={classes.tags}
+            onClick={() => {
+              setShowBoard(!showBoard)
+            }}
+          >
+            看多/看空/觀望
+          </span>
+        </div>
+      )}
+      <div className={classes.date}>
+        <span>創建於{formateDate(card.createdAt)} / </span>
+        <span>更新於{formateDate(card.updatedAt)}</span>
+      </div>
+      {/* {parsedCard.headContent.value.template}
+      {parsedCard.headContent.value.keywords}
+      {parsedCard.headContent.value.tags} */}
+      {/* <h3>Board</h3> */}
+      {/* <button
+        onClick={() => {
+          setShowBoard(!showBoard)
+        }}
+      >
+        Board
+      </button> */}
+      {showBoard && pinBoardBuysell && (
+        <Popover visible={showBoard} subTitle={self?.head} hideBoard={hideBoard}>
+          <BoardPage
+            boardId={pinBoardBuysell.boardId.toString()}
+            pollId={pinBoardBuysell.pollId?.toString()}
+            title={'看多/看空/觀望'}
+            // visible={showBoard}
+            // hideBoard={hideBoard}
+          />
+        </Popover>
+      )}
+      {/* {showBoard && pinBoard && (
+        <BoardItem boardId={pinBoard.boardId.toString()} pollId={pinBoard.pollId?.toString()} />
+      )} */}
+      {/* {console.log(pinBoard)} */}
+      {/* <h3>Body</h3> */}
+      {/* <button
+        data-type="secondary"
+        onClick={() => {
+          if (edit) onCloseEditor()
+          else setEdit(true)
+        }}
+      >
+        編輯
+      </button> */}
+      <span>{edit ? '編輯模式' : '閱讀模式'}</span>
+
+      {!edit && editorInitialValue && (
+        <button
+          data-type="primary"
+          onClick={event => {
+            event.preventDefault()
+            onSubmit()
+          }}
+        >
+          送出
+        </button>
+      )}
+
+      {error && <div>Submit fail...</div>}
+
+      <div onClick={() => setEdit(true)} ref={contentRef}>
+        {/* {console.log(editorInitialValue)} */}
+        {
+          self ? (
+            <>
+              <BulletEditor
+                initialValue={value}
+                oauthorName={card.link?.oauthorName ?? undefined}
+                sourceUrl={card.link?.url}
+                withMirror={card.type === 'WEBPAGE'}
+                readOnly={!edit}
+                onValueChange={value => {
+                  setLocalValue(value)
+                }}
+                // boardId={pinBoardBuysell.boardId.toString()}
+                // pollId={pinBoardBuysell.pollId?.toString()}
+              />
+              {/* <CardBodyItem card={card} self={self} mirrors={mirrors} handleSymbol={handleSymbol} /> */}
+            </>
+          ) : // ) : (
+          // )
+          null
+          // <ul className={classes.bulletUl}>
+          //   {mirrors?.map((e, i) => (
+          //     <>
+          //       {/* {card.type === 'WEBPAGE' && ( */}
+          //       <>
+          //         {e.children && e.children.length !== 0 && (
+          //           <span className={classes.tickerTitle}>
+          //             {e.head === card.symbol ? 'Self' : markToText(e.head, handleSymbol)}
+          //           </span>
+          //         )}
+          //         {e.children &&
+          //           e.children.map((el, i) => (
+          //             <BulletItem
+          //               key={i}
+          //               node={el}
+          //               depth={0}
+          //               type={card.type}
+          //               handleSymbol={handleSymbol}
+          //               cardId={card.id}
+          //             />
+          //           ))}
+          //       </>
+          //       {/* )} */}
+          //       {/* {card.type === 'TICKER' && <BulletItem key={i} node={e} />} */}
+          //     </>
+          //   ))}
+          // </ul>
+        }
+      </div>
+      {/* <button
+      // onClick={() => {}}
+      >
+      Submit
+    </button> */}
+      {/* {pinBoard && (
+        <BoardPage
+          boardId={pinBoard.boardId.toString()}
+          pollId={pinBoard.pollId?.toString()}
+          visible={showBoard}
+          hideBoard={hideBoard}
+        />
+      )} */}
+      {/* {/* <BoardPage boardId={}/> */}
+    </div>
+  )
+}
+
+export const SymbolContext = createContext({ symbol: '' })
+
+const TestPage = ({
+  pathSymbol,
+  webPageUrl,
+  handlePathPush,
+}: {
+  pathSymbol?: string
+  webPageUrl?: string
+  handlePathPush: (e: string) => void
+}): JSX.Element => {
+  const { user, error: userError, isLoading } = useUser()
+  const { data: meData, loading: meLoading } = useMeQuery()
+  const router = useRouter()
+  const [symbol, setSymbol] = useState<string>('$GOOG')
+  // const [path, setPath] = useState<string[]>(['$GOOG'])
+  // const [showBoardPage, setShowBoardPage] = useState(false)
+  // const[url,setUrl]=useState('')
+  // useEffect(()=>{
+  //   const tabUrl=getTabUrl()
+  //   tabUrl&&setUrl(tabUrl)
+  // },[])
+  const { data, error, loading } = useCardQuery({
+    variables: { symbol: pathSymbol ?? '' },
+  })
+  const { data: webpageData } = useWebpageCardQuery({ variables: { url: webPageUrl ?? '' } })
+
+  // const { root, mirror, path, openedLi, value, setLocalValue } = useLocalValue()
+  const [levels, setLevels] = useState<Level[]>()
+
+  // useEffect(() => {
+  //   if (root && path) {
+  //     const levels = getLevels(root, path)
+  //     levels.pop() // 最後一個是當前的 li ，不需要
+  //     setLevels(levels)
+  //   }
+  // }, [root, path])
+
+  const handleSymbol = (symbol: string) => {
+    handlePathPush(symbol)
+    router.push(`/card/${encodeURIComponent(symbol)}`)
+    // setSymbol(symbol)
+    // console.log(symbol)
+  }
+
+  if (user === undefined && !loading && meData === undefined && !meLoading) {
+    return (
+      <>
+        <a href="/api/auth/login">Login</a>
+        <span>以繼續瀏覽</span>
+      </>
+    )
+  }
+
+  if (loading || meLoading) {
+    return <div>Loading...</div>
+  }
 
   return (
-    <></>
-    // <div
-    //   className={classes.header}
-    //   ref={headerRef}
-    //   style={{
-    //     top: `-${
-    //       headerRef.current &&
-    //       windowWidth &&
-    //       (windowWidth < 500 ? headerRef.current.clientHeight - 80 : headerRef.current.clientHeight - 45)
-    //     }px`,
-    //   }}
-    // >
-    //   <div>
-    //     {cardDomain === '_' ? (
-    //       <h1 className={classes.tickerTitle}>{cardTitle.replace('[[', '').replace(']]', '')}</h1>
-    //     ) : (
-    //       <>
-    //         <div className={classes.headerTopWrapper}>
-    //           <span className={classes.flexContainer}>
-    //             <span className={classes.author}>
-    //               {/* <a href={cardTitle} target="_blank" rel="noreferrer"> */}
-    //               {card.link.oauthorName?.replace(/(.+):.+/gm, '$1')}
-    //               {/* <LinkIcon className={classes.linkIcon} /> */}
-    //               {/* </a> */}
-    //             </span>
-    //             {/* <span className={classes.webName}></span> */}
-    //             <span className={classes.date}>2021 / 4 / 9</span>
-    //           </span>
-    //           {/* <ClockIcon className={classes.clockIcon} /> */}
-    //           {/* <span className={classes.date}>{publishDate && stringToArr(publishDate.text ?? "", "T", 0)}</span> */}
-    //           {/* <MyTooltip
-    //         title="ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
-    //         蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资"
-    //       > */}
-    //           <a className={classes.link} href={cardTitle} target="_blank" rel="noreferrer">
-    //             <span
-    //               className={`${classes.title} ${titleClick ? classes.titleExpand : ''} ${
-    //                 height > 90 && classes.scroll
-    //               } `}
-    //               onClick={titleClickedHandler}
-    //               ref={titleRef}
-    //             >
-    //               {/* {console.log(headerRef.current?.offsetTop - height)} */}
-    //               ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
-    //               蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
-    //             </span>
-    //             {/* <LinkIcon className={classes.linkIcon} /> */}
-    //             {/* 連結{'\n'} */}
-    //           </a>
-    //         </div>
-    //         <div className={`${classes.symbolContainer} ${height > 90 && classes.scroll && classes.scroll}`}>
-    //           {/* <span>Tags:</span> */}
-    //           {sect.map((e, i) => {
-    //             if (e.nestedCard) {
-    //               return (
-    //                 <span key={i} className={classes.symbol}>
-    //                   {e.nestedCard.symbol}
-    //                 </span>
-    //               )
-    //             }
-    //           })}
-    //         </div>
-    //         <span
-    //           className={`${classes.title} ${classes.titleShort} ${height > 91 && classes.scroll}`}
-    //           // onClick={titleClickedHandler}
-    //           // ref={titleRef}
-    //         >
-    //           {/* {console.log(headerRef.current?.offsetTop - height)} */}
-    //           ARK女股神Cathie Wood持续加仓买入已经拥有1400万美元 不能错过的新能源股票 电动三宝
-    //           蔚来，理想，小鹏，特斯拉股票交易策略更新 NIU股票小牛电动股票分析 美股投资
-    //         </span>
-    //         {/* </MyTooltip> */}
-    //       </>
-    //     )}
-    //   </div>
+    <div>
+      {/* <SymbolContext.Provider value={{ symbol: pathSymbol ?? '' }}> */}
+      {/* <button
+        onClick={() => {
+          setSymbol('')
+          // handlePathPush('')
+        }}
+      >
+        Clear
+      </button> */}
+      <button
+        onClick={() => {
+          router.push('/card/$AAPL')
+          // setSymbol('$AAPL')
+          handlePathPush('$AAPL')
+          // setPath([...path, '$AAPL'])
+        }}
+      >
+        $AAPL
+      </button>
+      <button
+        onClick={() => {
+          router.push('/card/$BA')
+          // setSymbol('$BA')
+          handlePathPush('$BA')
+          // setPath([...path, '$BA'])
+        }}
+      >
+        $BA
+      </button>
+      <button
+        onClick={() => {
+          router.push('/card/$ROCK')
+          // setSymbol('$ROCK')
+          handlePathPush('$ROCK')
+          // setPath([...path, '$ROCK'])
+        }}
+      >
+        $ROCK
+      </button>
+      <button
+        onClick={() => {
+          router.push(`/card/${encodeURIComponent('[[https://www.youtube.com/watch?v=F57gz9O0ABw]]')}`)
+          // setSymbol('[[https://www.youtube.com/watch?v=F57gz9O0ABw]]')
+          handlePathPush('[[https://www.youtube.com/watch?v=F57gz9O0ABw]]')
+          // setPath([...path, '[[https://www.youtube.com/watch?v=F57gz9O0ABw]]'])
+        }}
+      >
+        [[https://www.youtube.com/watch?v=F57gz9O0ABw]]
+      </button>
 
-    //   {/* <div><Comment comment={comment} /></div> */}
-    //   {/* {console.log(card)} */}
-    //   {/* {cardTitle} */}
-    //   {/* {title && title.text + '\n'} */}
-    //   {/* {publishDate && publishDate.text + '\n'} */}
-    //   {/* {card.link.oauthorName + '\n'} */}
-    //   {/* {'(NEXT)Keywords\n'} */}
-    //   {/* {card.comments.length === 0 ? "新建立" : undefined} */}
-    // </div>
+      {/* {console.log(data?.card)} */}
+      {data && data.card && <CardItem card={data.card} handleSymbol={handleSymbol} />}
+      {webpageData && webpageData.webpageCard && (
+        <>
+          {console.log('getWebpage', webPageUrl)}
+          <CardItem card={webpageData.webpageCard} handleSymbol={handleSymbol} />
+        </>
+      )}
+
+      {!data?.card && !webpageData?.webpageCard && <BulletEditor />}
+      {/* {value && (
+        <BulletEditor
+          initialValue={value}
+          onValueChange={value => {
+            setLocalValue(value)
+          }}
+        />
+      )} */}
+      {/* <BoardPage boardId={}/> */}
+      {/* </SymbolContext.Provider> */}
+    </div>
   )
-  // }
-
-  // --- Helpers ---
-
-  // export function findOneComment<T extends QT.comment | QT.CommentInput>(mark: string, comments: T[]): T | undefined {
-  //   return comments.find(e => {
-  //     if ('meta' in e)
-  //       return (e as QT.comment).meta?.mark === mark
-  //     if ('mark' in e)
-  //       return (e as QT.CommentInput).mark === mark
-  //     throw new Error()
-  //   })
-  // }
-
-  // export function findManyComments<T extends QT.comment | QT.CommentInput>(mark: string, comments: T[]): T[] {
-  //   return comments.filter(e => {
-  //     if ('meta' in e)
-  //       return (e as QT.comment).meta?.mark === mark
-  //     if ('mark' in e)
-  //       return (e as QT.CommentInput).mark === mark
-  //     throw new Error()
-  //   })
-  // }
-
-  // ------- Deprecated --------
-
-  // function makeCardId(comment: QT.commentFragment): string {
-  //   let id: string
-  //   if (comment.cocardId) id = 'Cocard:' + comment.ocardId
-  //   else if (comment.ocardId) id = 'Ocard:' + comment.ocardId
-  //   else if (comment.selfcardId) id = 'Ocard:' + comment.ocardId
-  //   else throw new Error()
-  //   return id
-  // }
-
-  // function getVoteIdx(str: string): number | undefined {
-  //   /** []buy [X]sell []watch  -> return 1 */
-  //   const re = /\[.?\]/gm
-  //   let m
-  //   const matches = []
-  //   while ((m = re.exec(str)) !== null) {
-  //     // This is necessary to avoid infinite loops with zero-width matches
-  //     if (m.index === re.lastIndex) re.lastIndex++
-  //     // 選擇的選項標為1，其餘為0
-  //     matches.push(m[0].length > 2 ? 1 : 0)
-  //   }
-  //   return matches.indexOf(1)
-  // }
-
-  // function mapVoters(voteComments: QT.commentFragment[], nChoices: number): string[][] {
-  //   const voters: string[][] = []
-  //   for (let i = 0; i < nChoices; i++) {
-  //     const _voteChoiceN: string[] = []
-  //     for (const e of voteComments) {
-  //       if (e.text && getVoteIdx(e.text) === i) {
-  //         _voteChoiceN.push(makeCardId(e))
-  //       }
-  //     }
-  //     voters.push(_voteChoiceN)
-  //   }
-  //   return voters
-  // }
-
-  // function filterCommentsByVote(
-  //   voteIdx: number,
-  //   voters: string[][],
-  //   comments: QT.commentFragment[],
-  // ): QT.commentFragment[] {
-  //   // const voters = ["Ocard:1", "Selfcard:1"]
-  //   const votersByVote = voters[voteIdx]
-  //   return comments.filter(e => votersByVote.indexOf(makeCardId(e)) >= 0)
-  // }
-
-  // function ShowCardClicker({
-  //   selfcardId,
-  //   ocardId,
-  //   children,
-  // }: {
-  //   selfcardId?: string
-  //   ocardId?: string
-  //   children: React.ReactNode
-  // }) {
-  //   if (!selfcardId && !ocardId) throw new Error('selfcardId及ocardId至少需要一個')
-  //   return <span>{children}</span>
-  // }
-
-  // function QueryCardModal({ card, mycard }: { card: QT.cocard_cocard; mycard?: QT.selfcard_selfcard }) {
-  //   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
-  //   const [cardId, setCardId] = useState<[string, number] | null>(null)
-  //   function onClick(comment: QT.commentFragment): void {
-  //     // console.log('onClick')
-  //     if (comment.ocardId) setCardId(['Ocard', comment.ocardId])
-  //     else if (comment.selfcardId) setCardId(['Selfcard', comment.selfcardId])
-  //     else return
-  //     setIsModalVisible(true)
-  //   }
-  //   /** (NEXT)將mycard的comments放入裡面，便利push到cocard */
-  //   // const battles = oneCommentByKey({ comments: card.comments, key: "battles" })
-  //   return (
-  //     <>
-  //       <Modal
-  //         visible={isModalVisible}
-  //         onCancel={function () {
-  //           setIsModalVisible(false)
-  //         }}
-  //       >
-  //         {/* {cardId && cardId[0] === 'Ocard' && <QueryOcard id={cardId[1].toString()} />} */}
-  //         {/* {cardId && cardId[0] === 'Selfcard' && <QuerySelfcard id={cardId[1].toString()} />} */}
-  //       </Modal>
-  //     </>
-  //   )
-  // }
-
-  // function QueryOcard({
-  //   oauthorName,
-  //   symbolName,
-  //   updateNestedOcards,
-  // }: {
-  //   oauthorName: string
-  //   symbolName?: string
-  //   updateNestedOcards(symbol: string, card?: QT.ocard_ocard, error?: string): void
-  // }) {
-  //   /** 僅用於call api，不render（需要這樣寫是因為目前apollo似乎沒有提供直接query data的方法，都得搭配hook） */
-  //   console.log('called QueryOcard()', symbolName)
-  //   const { error, data } = useQuery<QT.ocard, QT.ocardVariables>(queries.OCARD, {
-  //     variables: { oauthorName, symbolName },
-  //   })
-  //   if (symbolName === undefined) return null
-  //   if (error) updateNestedOcards(symbolName, undefined, error.toString())
-  //   else if (data?.ocard) updateNestedOcards(symbolName, data?.ocard)
-  //   return null
-  // }
-
-  // // function NestedTickerOcard({ symbolName, oauthorName, src }: { symbolName: string; oauthorName: string; src: string }) {
-  // //   const { data, error, loading } = useQuery<QT.ocard, QT.ocardVariables>(queries.OCARD, {
-  // //     variables: { symbolName, oauthorName },
-  // //   })
-  // //   if (loading) return <span>~ Loading... ~</span>
-  // //   if (data?.ocard) return <CardBody card={data.ocard} rootFormat={MK.TICKER_FORMATTER} bySrc={src} />
-  // //   return <span>Error!</span>
 }
+
+export default TestPage

@@ -22,6 +22,7 @@ import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 
 const IGNORE_FILE_STARTS_WITH = '_'
 const includeFiles: string[] = [
+  '20210425-j.txt',
   // '20210615-j.txt',
   // '20210716-j.txt',
   // '20210816-j.txt',
@@ -46,7 +47,6 @@ const BUYSELL_HASHTAG_CHOICES = ['#buy', '#sell', '#hold']
 function searchTree(props: {
   node: BulletDraft
   depth: number
-  // byPinCode?: PinBoardCode
   inDepth?: number
   where: {
     // userId?: string
@@ -75,16 +75,15 @@ function searchTree(props: {
       return [node, hashtagGroup]
     }
   }
-
   if (inDepth === undefined || nextDepth <= inDepth) {
-    for (const e of node.children ?? []) {
+    for (const e of node.children) {
       const res = searchTree({
         node: e,
         depth: depth + 1,
         inDepth,
         where,
       })
-      if (res) {
+      if (res[0] !== null) {
         return res
       }
     }
@@ -174,16 +173,14 @@ async function insertMarkerlines(
     if (e.new && e.marker?.key && e.marker.value) {
       if (e.neatReply) {
         _insertNeatReply(e)
-        // continue
       }
+
       // 依照 markerline key 找對應的 subtitle node（PS. 僅找第一層）
       const [node] = searchTree({
         node: _root,
         depth: 0,
         inDepth: 1,
-        where: {
-          head: e.marker.key,
-        },
+        where: { head: e.marker.key },
       })
       const child: BulletDraft = {
         head: e.marker.value,
@@ -266,6 +263,7 @@ async function main() {
         // console.log(inspect(draftWithHashtags, { depth: null }))
 
         const mirror = await insertMarkerlines(draftWithHashtags, markerlines, TESTUSERS[0].id)
+        // console.log(inspect(mirror, { depth: null }))
 
         const body = await createCardBody({ cardId: mirrorCard.id, root: mirror, userId: TESTUSERS[0].id })
         // console.log(inspect(body[1], { depth: null }))

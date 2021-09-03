@@ -28,11 +28,8 @@ import {
 import { BulletEditor } from '../../components/editor/editor'
 import { Serializer } from '../../components/editor/serializer'
 import { LiElement, UlElement } from '../../components/editor/slate-custom-types'
-import { Node as BulletNode } from '../../lib/bullet/node'
-import { tokenize } from '../../lib/bullet/text'
 import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
 import { CardBodyContent, CardHeadContent, CardHeadContentValueInjected, PinBoard } from '../../lib/models/card'
-import { injectCardHeadValue } from '../../lib/models/card-helpers'
 
 const TestPage = (): JSX.Element => {
   const [createCardBody, { error }] = useCreateCardBodyMutation({
@@ -63,7 +60,7 @@ const TestPage = (): JSX.Element => {
     <div>
       <button
         onClick={e => {
-          createCardBody({ variables: { cardId: '1', data: {} } })
+          // createCardBody({ variables: { cardId: '1', data: {} } })
         }}
       >
         submit

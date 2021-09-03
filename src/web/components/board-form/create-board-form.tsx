@@ -5,11 +5,11 @@ import {
   BoardDocument,
   BoardQuery,
   CardDocument,
-  CreateHashtagMutation,
-  useCreateHashtagMutation,
+  // CreateHashtagMutation,
+  // useCreateHashtagMutation,
 } from '../../apollo/query.graphql'
 import classes from './board-form.module.scss'
-import { SymbolContext } from '../card'
+// import { SymbolContext } from '../card'
 
 export type RadioInputs = {
   choice?: number | null
@@ -24,8 +24,8 @@ export type BoardFormInputs = {
 const CreateBoardForm = ({
   cardId,
   bulletId,
-  handleboardId,
-}: // initialValue
+}: // handleboardId,
+// initialValue
 
 // pollChoices,
 // refetch,
@@ -33,7 +33,7 @@ const CreateBoardForm = ({
 {
   cardId: string
   bulletId: number
-  handleboardId: (d: CreateHashtagMutation) => void
+  // handleboardId: (d: CreateHashtagMutation) => void
   // initialValue: FormInputs
 
   // pollChoices?: string[]
@@ -42,7 +42,7 @@ const CreateBoardForm = ({
 }): JSX.Element => {
   // const { field, fieldState } = useController({ name: 'choice' })
   const { register, handleSubmit, setValue, reset, getValues } = useForm<BoardFormInputs>()
-  const context = useContext(SymbolContext)
+  // const context = useContext(SymbolContext)
 
   // const [choiceValue, setChoiceValue] = useState<number | null | undefined>()
   // const [check, setChecked] = useState<boolean[]>(Array(pollChoices?.length).fill(false))
@@ -53,39 +53,39 @@ const CreateBoardForm = ({
   //   initialValue.title && setValue('lines', initialValue.lines)
   // }
 
-  const [createHashtag] = useCreateHashtagMutation({
-    // update(cache, { data }) {
-    //   const res = cache.readQuery<BoardQuery>({
-    //     query: BoardDocument,
-    //   })
-    //   if (data?.createHashtag && res?.board) {
-    //     cache.writeQuery({
-    //       query: BoardDocument,
-    //       data: { board: data.createHashtag },
-    //     })
-    //   }
-    //   // handleboardId(data?.createBoard.id)
+  // const [createHashtag] = useCreateHashtagMutation({
+  //   // update(cache, { data }) {
+  //   //   const res = cache.readQuery<BoardQuery>({
+  //   //     query: BoardDocument,
+  //   //   })
+  //   //   if (data?.createHashtag && res?.board) {
+  //   //     cache.writeQuery({
+  //   //       query: BoardDocument,
+  //   //       data: { board: data.createHashtag },
+  //   //     })
+  //   //   }
+  //   //   // handleboardId(data?.createBoard.id)
 
-    //   // refetch()
-    //   console.log('createHashtag')
-    // },
-    onCompleted(data) {
-      // console.log('oncompelet', data)
-      handleboardId(data)
-    },
-    refetchQueries: [{ query: CardDocument, variables: { symbol: context.symbol } }],
-    // refetchQueries: [{ query: BoardDocument }],
-  })
+  //   //   // refetch()
+  //   //   console.log('createHashtag')
+  //   // },
+  //   onCompleted(data) {
+  //     // console.log('oncompelet', data)
+  //     handleboardId(data)
+  //   },
+  //   refetchQueries: [{ query: CardDocument, variables: { symbol: context.symbol } }],
+  //   // refetchQueries: [{ query: BoardDocument }],
+  // })
 
   const myHandleSubmit = (d: BoardFormInputs) => {
     if (d.hashtag) {
-      createHashtag({
-        variables: {
-          bulletId,
-          cardId,
-          data: { content: d.description ?? '', hashtag: d.hashtag, meta: '' },
-        },
-      })
+      // createHashtag({
+      //   variables: {
+      //     bulletId,
+      //     cardId,
+      //     data: { content: d.description ?? '', hashtag: d.hashtag, meta: '' },
+      //   },
+      // })
       // console.log(bulletId, cardId, d.hashtag)
     }
 

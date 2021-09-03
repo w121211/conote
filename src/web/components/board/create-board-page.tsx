@@ -7,7 +7,7 @@ import {
   Board,
   useCommentsQuery,
   Comment,
-  CreateHashtagMutation,
+  // CreateHashtagMutation,
 } from '../../apollo/query.graphql'
 
 import useMeasure from 'react-use-measure'
@@ -45,10 +45,10 @@ const CreateBoardPage = ({
   const [commentsList, setCommentsList] = useState<Comment[]>()
   const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
 
-  const handleBoardId = (d: CreateHashtagMutation) => {
-    setTitle(d.createHashtag.board.hashtag)
-    setBoardId(d.createHashtag.board.id)
-  }
+  // const handleBoardId = (d: CreateHashtagMutation) => {
+  //   setTitle(d.createHashtag.board.hashtag)
+  //   setBoardId(d.createHashtag.board.id)
+  // }
   // console.log(boardId)
 
   return (
@@ -61,7 +61,8 @@ const CreateBoardPage = ({
             {/* {console.log(boardId)} */}
           </>
         ) : (
-          <CreateBoardFrom bulletId={bulletId} cardId={cardId} handleboardId={handleBoardId} />
+          <span />
+          // <CreateBoardFrom bulletId={bulletId} cardId={cardId} handleboardId={handleBoardId} />
         )}
       </div>
     </Popover>

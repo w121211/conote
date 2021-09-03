@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react'
 import { useMeQuery, useCardQuery } from '../apollo/query.graphql'
-import { CardItem } from './card'
+// import { CardItem } from './card'
 
 export const SymbolContext = createContext({ symbol: '' })
 
@@ -41,7 +41,7 @@ const CardPage = ({
     // <div>
     <SymbolContext.Provider value={{ symbol: pathSymbol }}>
       {/* <div>{(user === undefined || meData === undefined) && <a href="/api/auth/login">Login</a>}</div> */}
-      <button
+      {/* <button
         onClick={() => {
           setSymbol('')
           handlePathPush('')
@@ -84,9 +84,9 @@ const CardPage = ({
         }}
       >
         [[https://www.youtube.com/watch?v=F57gz9O0ABw]]
-      </button>
+      </button> */}
       {/* {console.log(data?.card)} */}
-      {data && data.card && <CardItem card={data.card} handleSymbol={handleSymbol} />}
+      {/* {data && data.card && <CardItem card={data.card} handleSymbol={handleSymbol} />} */}
       {/* <BoardPage boardId={}/> */}
     </SymbolContext.Provider>
     // {/* </div> */}

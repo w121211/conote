@@ -3,12 +3,12 @@ import { CardType } from '@prisma/client'
 export type SymbolParsed = {
   symbolName: string
   cardType: CardType
-  oauthorName?: string
+  authorName?: string // not implemented
 }
 
-const regexTicker = /^\$[A-Z0-9]+$/
-
-const regexTopic = /^\[\[[^\]]+\]\]$/
+const reTicker = /^\$[A-Z0-9]+$/
+const reTopic = /^\[\[[^\]]+\]\]$/
+const reUrl = /^@[a-zA-Z0-9:/.]+/ // eg @https://regex101.com/ 非常簡單的 url regex，會捕捉到很多非 url 的 string
 
 /**
  * Parse symbol, symbol分為：
@@ -24,19 +24,21 @@ const regexTopic = /^\[\[[^\]]+\]\]$/
  */
 export function parse(symbol: string): SymbolParsed {
   let cardType: CardType
-  let oauthorName: string | undefined
+  let authorName: string | undefined
 
-  if (symbol.match(regexTicker) !== null) {
+  if (symbol.match(reTicker) !== null) {
     cardType = CardType.TICKER
-  } else if (symbol.match(regexTopic) !== null) {
+  } else if (symbol.match(reTopic) !== null) {
     cardType = CardType.TOPIC
+  } else if (symbol.match(reUrl) !== null) {
+    cardType = CardType.WEBPAGE
   } else {
     throw new Error(`symbol格式無法辨識: ${symbol}`)
   }
   return {
     symbolName: symbol,
     cardType,
-    oauthorName,
+    authorName,
   }
 }
 

@@ -20,7 +20,7 @@ export type Nav = {
 function getNavs(root: LiElement, destPath: number[]): Nav[] {
   const navs: Nav[] = []
   for (const [n, p] of Node.levels(root, destPath)) {
-    console.log(n, p)
+    // console.log(n, p)
     if (isLi(n)) {
       const [lc] = n.children
       navs.push({
@@ -32,7 +32,7 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
   return navs
 }
 
-export const hashtagTextToIcon = (text: string) => {
+export const hashtagTextToIcon = (text: string): JSX.Element | null => {
   switch (text) {
     case '#pin':
       return <PinIcon width="1em" height="1em" />
@@ -41,6 +41,7 @@ export const hashtagTextToIcon = (text: string) => {
     case '#down':
       return <UpIcon width="1em" height="1em" style={{ transform: 'rotate(180deg)' }} />
   }
+  return null
 }
 
 const CardSymbolPage = (): JSX.Element | null => {
@@ -48,7 +49,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [navs, setNavs] = useState<Nav[]>() // editor route
   const [readonly, setReadonly] = useState(false)
   const [location, setLocation] = useState<NavLocation>()
-  const { data, setLocalValue, submitting, submitValue, dropValue } = useLocalValue({ location })
+  const { data, setLocalValue, submitValue, dropValue } = useLocalValue({ location })
 
   useEffect(() => {
     if (router.isReady) {
@@ -70,7 +71,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   if (data === undefined || location === undefined) {
     return null
   }
-  const { mirror, openedLi, value } = data
+  const { card, mirror, openedLi, value } = data
   const [openedLiLc] = openedLi.children
 
   // console.log('symbol', navs)
@@ -89,13 +90,14 @@ const CardSymbolPage = (): JSX.Element | null => {
 
         <button
           onClick={() => {
-            if (!submitting) {
-              submitValue()
-            }
+            submitValue({
+              onFinish: () => {
+                // dropValue()
+                router.reload()
+              },
+            })
           }}
-        >
-          {submitting ? '...' : 'Submit'}
-        </button>
+        ></button>
 
         <button
           onClick={() => {
@@ -121,6 +123,8 @@ const CardSymbolPage = (): JSX.Element | null => {
           ))}
 
         <div>
+          <span>@{card.link?.authorName}</span>
+          <span>@{card.link?.url}</span>
           <h3>{Node.string(openedLiLc)}</h3>
           {openedLiLc.rootBulletDraft?.allHashtags
             ? openedLiLc.rootBulletDraft.allHashtags.map((e, i) => (

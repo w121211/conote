@@ -70,8 +70,6 @@ export function parseBulletHead(props: {
 
   const { beforeHashtagStr, newHashtags = [] } = parseHashtags(str)
 
-  console.log(beforeHashtagStr)
-
   const tokens = tokenizeBulletString(beforeHashtagStr)
   const inlines: (CustomText | CustomInlineElement)[] = tokens.map(e => tokenToInline(e))
 
