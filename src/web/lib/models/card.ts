@@ -8,6 +8,7 @@ import { HashtagDraft, HashtagGroupDraft } from '../hashtag/types'
 import { getOrCreateLink, linkToSymbol } from './link'
 import { parse } from './symbol'
 import { getBotId } from './user'
+import { inspect } from 'util'
 
 export type PinBoardCode = 'BUYSELL' | 'VS'
 
@@ -84,31 +85,6 @@ const defaultHashtags: (HashtagDraft | HashtagGroupDraft)[] = [
 
 export const templateTicker: CardTemplate = {
   name: '::Ticker',
-  // headDraft: {
-  //   draft: true,
-  //   op: 'CREATE',
-  //   root: true,
-  //   symbol: '%SYMBOL%',
-  //   head: '_%SYMBOL%',
-  //   freeze: true,
-  //   freezeChildren: true,
-  //   children: [
-  //     { draft: true, op: 'CREATE', head: 'template', body: '::Ticker', keyvalue: true, children: [] },
-  //     { draft: true, op: 'CREATE', head: 'title', body: '%TITLE%', keyvalue: true, children: [] },
-  //     { draft: true, op: 'CREATE', head: 'keywords', body: '', keyvalue: true, valueArray: true, children: [] },
-  //     { draft: true, op: 'CREATE', head: 'tags', body: '', keyvalue: true, valueArray: true, children: [] },
-  //     {
-  //       draft: true,
-  //       op: 'CREATE',
-  //       head: 'pinPrice',
-  //       body: 'true',
-  //       freeze: true,
-  //       keyvalue: true,
-  //       valueBoolean: true,
-  //       children: [],
-  //     },
-  //   ],
-  // },
   bodyDraft: {
     draft: true,
     op: 'CREATE',
@@ -132,62 +108,25 @@ export const templateTicker: CardTemplate = {
                 draft: true,
                 op: 'CREATE',
                 head: '%SYMBOL% 如何操作？',
-                hashtags: [{ op: 'CREATE', type: 'hashtag-group-draft', pollChoices: ['#buy', '#sell', '#hold'] }],
+                newHashtags: [{ op: 'CREATE', type: 'hashtag-group-draft', pollChoices: ['#buy', '#sell', '#hold'] }],
                 children: [],
               },
             ],
           },
         ],
       },
-      {
-        draft: true,
-        op: 'CREATE',
-        head: '[!]',
-        // children: [{ head: '', placeholder: 'a placeholder test', template: true }],
-        children: [],
-      },
-      {
-        draft: true,
-        op: 'CREATE',
-        head: '[?]',
-        children: [
-          // {
-          //   draft: true,
-          //   head: `%SYMBOL% <BUY> <SELL> <WATCH>`,
-          //   pin: true,
-          //   pinCode: 'BUYSELL',
-          //   poll: true,
-          //   pollChoices: ['BUY', 'SELL', 'WATCH'],
-          //   freeze: true,
-          //   op: 'CREATE',
-          //   hashtags: [{ text: '#Answer', linkBullet: true, op: 'CREATE' }],
-          //   children: [],
-          // },
-        ],
-      },
+      { draft: true, op: 'CREATE', head: '[!]', children: [] },
+      { draft: true, op: 'CREATE', head: '[?]', children: [] },
       { draft: true, op: 'CREATE', head: '[*]', children: [] },
       { draft: true, op: 'CREATE', head: '[+]', children: [] },
       { draft: true, op: 'CREATE', head: '[-]', children: [] },
+      { draft: true, op: 'CREATE', head: '[vs]', children: [] },
     ],
   },
 }
 
 export const templateWebpage: CardTemplate = {
   name: '::Webpage',
-  // headDraft: {
-  //   draft: true,
-  //   root: true,
-  //   symbol: '%SYMBOL%',
-  //   head: '_%SYMBOL%',
-  //   freeze: true,
-  //   op: 'CREATE',
-  //   children: [
-  //     { draft: true, head: 'template', body: '::Webpage', keyvalue: true, op: 'CREATE', children: [] },
-  //     { draft: true, head: 'title', body: '%TITLE%', keyvalue: true, op: 'CREATE', children: [] },
-  //     { draft: true, head: 'keywords', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
-  //     { draft: true, head: 'tags', body: '', keyvalue: true, valueArray: true, op: 'CREATE', children: [] },
-  //   ],
-  // },
   bodyDraft: {
     draft: true,
     op: 'CREATE',
@@ -200,7 +139,7 @@ export const templateWebpage: CardTemplate = {
       {
         draft: true,
         op: 'CREATE',
-        head: '隨筆區',
+        head: '筆記區',
         children: [],
       },
     ],
@@ -346,6 +285,7 @@ async function _createCardBody(props: {
   })
 
   const nextContent: CardBodyContent = { value: nextRoot }
+
   const body = await prisma.cardBody.create({
     data: {
       timestamp,
@@ -375,7 +315,7 @@ async function checkDraft(draft: RootBulletDraft): Promise<{
   if (!BulletNode.hasAnyOp(draft)) {
     // console.log(`${symbol}的draft沒有op，不用create，返回`)
     // return { cardSymbol: symbol }
-    console.error(draft)
+    console.error(inspect(draft, { depth: null }))
     throw new Error('draft沒有op')
   }
 
@@ -563,7 +503,7 @@ export const templateDict: { [key in CardType]: CardTemplate } = {
 
 /**
  * 搜尋、創新 symbol card
- * TODO: 當 symbol為url 時，應導向 webpage card
+ * TODO: 當 symbol 為 url 時，應導向 webpage card
  */
 export async function getOrCreateCardBySymbol(symbol: string): Promise<
   Card & {
@@ -572,13 +512,12 @@ export async function getOrCreateCardBySymbol(symbol: string): Promise<
     body: CardBody
   }
 > {
-  const { symbolName, cardType, oauthorName } = parse(symbol)
+  const { symbolName, cardType } = parse(symbol)
   const template = templateDict[cardType]
   const card = await prisma.card.findUnique({
     where: { symbol: symbolName },
     include: { link: true },
   })
-
   if (card === null) {
     return await _createCard({
       symbol: symbolName,

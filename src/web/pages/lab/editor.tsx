@@ -143,11 +143,7 @@ const initialValue: LiElement[] = [
 ]
 
 const TestPage = (): JSX.Element => {
-  return (
-    <div>
-      <BulletEditor initialValue={initialValue} />
-    </div>
-  )
+  return <div>{/* <BulletEditor initialValue={initialValue} /> */}</div>
 }
 
 export default TestPage

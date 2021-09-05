@@ -10,8 +10,13 @@ import { Hashtag as PrismaHashtag, Poll, PollCount } from '@prisma/client'
 
 export type HashtagOperation = 'CREATE' | 'UPDATE' | 'DELETE'
 
-export type Hashtag = Omit<PrismaHashtag, 'status' | 'pollId' | 'createdAt' | 'updatedAt'> & {
+export type Hashtag = {
   type: 'hashtag'
+  id: number
+  userId: string
+  authorName: string | null
+  bulletId: number
+  text: string
 }
 
 export type HashtagDraft = Partial<Omit<Hashtag, 'type'>> & {
@@ -23,9 +28,18 @@ export type HashtagDraft = Partial<Omit<Hashtag, 'type'>> & {
 /** eg (#buy #sell #hold) */
 export type HashtagGroup = Omit<Hashtag, 'type'> & {
   type: 'hashtag-group'
-  poll: Omit<Poll, 'type' | 'status' | 'createdAt' | 'updatedAt'> & {
-    count: Omit<PollCount, 'pollId' | 'nJudgments' | 'createdAt' | 'updatedAt'>
+  poll: {
+    id: number
+    userId: string
+    // type: PollType
+    // status: PollStatus
+    choices: string[]
+    createdAt: Date
+    updatedAt: Date
   }
+  // Omit<Poll, 'type' | 'status' | 'createdAt' | 'updatedAt'> & {
+  //   count: Omit<PollCount, 'pollId' | 'nJudgments' | 'createdAt' | 'updatedAt'>
+  // }
 }
 
 export type HashtagGroupDraft = Partial<Omit<HashtagGroup, 'type'>> & {

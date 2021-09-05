@@ -2,7 +2,7 @@ import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
 import { cloneDeep } from '@apollo/client/utilities'
-import { Card, CardBody, Link, PrismaClient } from '@prisma/client'
+import { Card, CardBody, HashtagStatus, Link, Poll, PrismaClient } from '@prisma/client'
 import { Editor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../../packages/fetcher/src'
 import { BulletNode } from '../../lib/bullet/node'
@@ -16,57 +16,80 @@ import {
 } from '../../lib/models/card'
 import { createAuthorVote } from '../../lib/models/vote'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
+import { getBotId } from '../../lib/models/user'
+import { injectHashtags, prismaToHashtag } from '../../lib/hashtag/inject'
+import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 
 const IGNORE_FILE_STARTS_WITH = '_'
+const includeFiles: string[] = [
+  '20210425-j.txt',
+  // '20210615-j.txt',
+  // '20210716-j.txt',
+  // '20210816-j.txt',
+]
 
 const seedDirPath = resolve(process.cwd(), process.argv[2])
 const fetcher = new FetchClient(resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'))
 const prisma = new PrismaClient({ errorFormat: 'pretty' })
 
+const NEAT_REPLY_CHOICE = [
+  { options: ['<BUY>', '<B>', '<買>', '<LONG>', '<L>', '<多>', '<看多>'], choiceIdx: 0 },
+  { options: ['<SELL>', '<S>', '<買>', '<SHORT>', '<空>', '<看空>'], choiceIdx: 1 },
+  { options: ['<觀望>'], choiceIdx: 2 },
+]
+
+const BUYSELL_HASHTAG_TEXT = '(#buy #sell #hold)'
+const BUYSELL_HASHTAG_CHOICES = ['#buy', '#sell', '#hold']
+
 /**
  * search tree
  */
-function search({
-  node,
-  depth,
-  byHead,
-  inDepth,
-}: {
+function searchTree(props: {
   node: BulletDraft
   depth: number
-  byHead?: string
-  // byPinCode?: PinBoardCode
   inDepth?: number
-}): BulletDraft | null {
+  where: {
+    // userId?: string
+    head?: string
+    hashtag?: { text: string }
+    hashtagGroup?: { text: string }
+  }
+}): [BulletDraft | null, Hashtag | HashtagGroup | undefined] {
+  const { node, depth, where, inDepth } = props
   const nextDepth = depth + 1
 
-  if (byHead && byHead === node.head) {
-    return node
+  if (where.head && where.head === node.head) {
+    return [node, undefined]
   }
-  // if (byPinCode && byPinCode === node.pinCode) {
-  //   return node
-  // }
+  if (where.hashtag) {
+    const text = where.hashtag.text
+    const hashtag = node.curHashtags?.find((e): e is Hashtag => e.type === 'hashtag' && e.text === text)
+    if (hashtag) {
+      return [node, hashtag]
+    }
+  }
+  if (where.hashtagGroup) {
+    const text = where.hashtagGroup.text
+    const hashtagGroup = node.curHashtags?.find((e): e is HashtagGroup => e.type === 'hashtag-group' && e.text === text)
+    if (hashtagGroup) {
+      return [node, hashtagGroup]
+    }
+  }
   if (inDepth === undefined || nextDepth <= inDepth) {
-    for (const e of node.children ?? []) {
-      const res = search({
+    for (const e of node.children) {
+      const res = searchTree({
         node: e,
         depth: depth + 1,
-        byHead,
-        // byPinCode,
         inDepth,
+        where,
       })
-      if (res) {
+      if (res[0] !== null) {
         return res
       }
     }
   }
-  return null
+  return [null, undefined]
 }
-
-const NEAT_REPLY_CHOICE = [
-  { options: ['<BUY>', '<B>', '<買>', '<LONG>', '<L>', '<多>', '<看多>'], choiceIdx: 0 },
-  { options: ['<SELL>', '<S>', '<買>', '<SHORT>', '<空>', '<看空>'], choiceIdx: 1 },
-]
 
 /**
  * 將markerlines插入(in-place)至對應的children裡，並對neat-reply創新comment/vote
@@ -78,77 +101,86 @@ async function insertMarkerlines(
 ): Promise<RootBulletDraft> {
   const _root = cloneDeep(root)
 
-  // async function _insertNeatReply(e: Markerline) {
-  //   if (!e.neatReply) throw new Error('非neatReply')
-  //   if (!e.src) throw new Error('缺src，無法創neat-reply')
-  //   if (!e.stampId) throw new Error('缺stampId，無法創neat-reply')
-  //   if (!e.pollChoices) throw new Error('缺pollChoices，無法創neat-reply')
-  //   if (e.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1，無法創neat-reply')
-  //   if (!e.nestedCard) throw new Error('缺nestedCard，無法創neat-reply')
-  //   if (!e.oauthor) throw new Error('缺oauthor，無法創neat-reply')
-  //   // 取得並檢查choice-index
-  //   const choice = e.pollChoices[0]
-  //   let choiceIdx: number | undefined
-  //   for (const e of NEAT_REPLY_CHOICE) {
-  //     if (e.options.indexOf(choice)) {
-  //       choiceIdx = e.choiceIdx
-  //       break
-  //     }
-  //   }
-  //   if (choiceIdx === undefined) {
-  //     console.error(e)
-  //     throw new Error('所給的vote-choice非預設的那幾個')
-  //   }
-  //   // 取得node
-  //   const node = search({ node: _root, depth: 0, byPinCode: 'BUYSELL' })
-  //   if (node === null) {
-  //     throw new Error('找不到buysell的node')
-  //   }
-  //   if (node.boardId === undefined || node.pollId === undefined) {
-  //     console.error(node)
-  //     throw new Error('node需要boardId, pollId才能創neat-reply')
-  //   }
-  //   const vote = await createAuthorVote({
-  //     choiceIdx,
-  //     pollId: node.pollId,
-  //     authorName: e.oauthor,
-  //     userId,
-  //   })
-  //   const comment = await prisma.comment.create({
-  //     data: {
-  //       content: `${e.str} ^[[${e.src}]]`,
-  //       user: { connect: { id: userId } },
-  //       author: { connect: { name: e.oauthor } },
-  //       count: { create: {} },
-  //       board: { connect: { id: node.boardId } },
-  //       vote: { connect: { id: vote.id } },
-  //     },
-  //   })
-  //   // oauther的board comment直接創造一個bullet
-  //   const child: BulletDraft = {
-  //     head: e.str,
-  //     sourceUrl: e.src,
-  //     authorName: e.oauthor,
-  //     // commentId: comment.id,
-  //     voteId: vote.id,
-  //     op: 'CREATE',
-  //     children: [],
-  //   }
-  //   node.children.push(child)
-  // }
+  async function _insertNeatReply(e: Markerline) {
+    if (!e.neatReply) throw new Error('非neatReply')
+    if (!e.src) throw new Error('缺src，無法創neat-reply')
+    if (!e.stampId) throw new Error('缺stampId，無法創neat-reply')
+    if (!e.pollChoices) throw new Error('缺pollChoices，無法創neat-reply')
+    if (e.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1，無法創neat-reply')
+    if (!e.nestedCard) throw new Error('缺nestedCard，無法創neat-reply')
+    if (!e.oauthor) throw new Error('缺oauthor，無法創neat-reply')
+
+    // 取得並檢查choice-index
+    const choice = e.pollChoices[0]
+    let choiceIdx: number | undefined
+    for (const e of NEAT_REPLY_CHOICE) {
+      if (e.options.indexOf(choice)) {
+        choiceIdx = e.choiceIdx
+        break
+      }
+    }
+    if (choiceIdx === undefined) {
+      console.error(e)
+      throw new Error('所給的 vote-choice 非預設的那幾個')
+    }
+
+    // 取得 buysell node
+    // const botId = await getBotId()
+    // console.log(inspect(_root, { depth: null }))
+    const [node, hashtag] = searchTree({
+      node: _root,
+      depth: 0,
+      where: { hashtagGroup: { text: BUYSELL_HASHTAG_TEXT } },
+    })
+
+    if (node === null || hashtag === undefined) {
+      throw new Error('找不到 buysell 的 node')
+    }
+    if (hashtag && hashtag.type === 'hashtag-group' && hashtag.poll) {
+      const vote = await createAuthorVote({
+        choiceIdx,
+        pollId: hashtag.poll.id,
+        authorName: e.oauthor,
+        userId,
+      })
+    }
+
+    // const comment = await prisma.comment.create({
+    //   data: {
+    //     content: `${e.str} ^[[${e.src}]]`,
+    //     user: { connect: { id: userId } },
+    //     author: { connect: { name: e.oauthor } },
+    //     count: { create: {} },
+    //     board: { connect: { id: node.boardId } },
+    //     vote: { connect: { id: vote.id } },
+    //   },
+    // })
+
+    // auther 的 comment 併入 node children
+    const child: BulletDraft = {
+      head: `(${BUYSELL_HASHTAG_CHOICES[choiceIdx]}) ${e.str}`,
+      sourceUrl: e.src,
+      authorName: e.oauthor,
+      // commentId: comment.id,
+      // voteId: vote.id,
+      op: 'CREATE',
+      children: [],
+    }
+    node.children.push(child)
+  }
 
   for (const e of markerlines) {
     if (e.new && e.marker?.key && e.marker.value) {
       if (e.neatReply) {
-        // _insertNeatReply(e)
-        continue
+        _insertNeatReply(e)
       }
+
       // 依照 markerline key 找對應的 subtitle node（PS. 僅找第一層）
-      const node = search({
+      const [node] = searchTree({
         node: _root,
         depth: 0,
-        byHead: e.marker.key,
         inDepth: 1,
+        where: { head: e.marker.key },
       })
       const child: BulletDraft = {
         head: e.marker.value,
@@ -184,8 +216,13 @@ async function main() {
       console.log(`Skip: ${filename}`)
       continue
     }
+    if (includeFiles.length > 0 && !includeFiles.includes(filename)) {
+      console.log(`Skip: ${filename}`)
+      continue
+    }
+
     const filepath = join(seedDirPath, filename)
-    console.log(`Seed file: ${filepath}`)
+    console.log(`*\n*\n* Seed file: ${filepath}`)
 
     for (const [url, text] of splitByUrl(readFileSync(filepath, { encoding: 'utf8' }))) {
       let card: Card & { link: Link; body: CardBody }
@@ -204,14 +241,29 @@ async function main() {
       editor.setText(text)
       editor.flush()
 
+      // console.log(url, text)
+      // console.log(editor.getNestedMarkerlines())
+
       for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
         const mirrorCard = await getOrCreateCardBySymbol(cardlabel.symbol)
         const { value: mirrorRoot }: CardBodyContent = JSON.parse(mirrorCard.body.content)
 
-        const draft = BulletNode.toDraft(mirrorRoot)
-        // console.log(markerlines)
+        const hashtags = (
+          await prisma.hashtag.findMany({
+            where: { AND: [{ card: { id: mirrorCard.id } }, { status: HashtagStatus.ACTIVE }] },
+            include: { count: true, poll: { include: { count: true } } },
+          })
+        ).map(e => prismaToHashtag(e))
 
-        const mirror = await insertMarkerlines(draft, markerlines, TESTUSERS[0].id)
+        // console.log(inspect(mirrorRoot, { depth: null }))
+
+        const draft = BulletNode.toDraft(mirrorRoot)
+        const draftWithHashtags = injectHashtags({ root: draft, hashtags })
+
+        // console.log(inspect(draftWithHashtags, { depth: null }))
+
+        const mirror = await insertMarkerlines(draftWithHashtags, markerlines, TESTUSERS[0].id)
+        // console.log(inspect(mirror, { depth: null }))
 
         const body = await createCardBody({ cardId: mirrorCard.id, root: mirror, userId: TESTUSERS[0].id })
         // console.log(inspect(body[1], { depth: null }))
@@ -225,6 +277,7 @@ async function main() {
         })
       }
 
+      // console.log(inspect(selfRootDraft, { depth: null }))
       const body = await createCardBody({
         cardId: card.id,
         root: selfRootDraft,

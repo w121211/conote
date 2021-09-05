@@ -20,7 +20,7 @@ import {
   WebpageCardDocument,
 } from '../../apollo/query.graphql'
 import { BulletNode } from '../../lib/bullet/node'
-import { injectHashtags } from '../../lib/hashtag/inject'
+import { gqlToHashtag, injectHashtags } from '../../lib/hashtag/inject'
 import { CardBodyContent } from '../../lib/models/card'
 import { Serializer } from './serializer'
 import { LiElement } from './slate-custom-types'
@@ -37,24 +37,72 @@ const defaultLi: LiElement = {
   ],
 }
 
-/** Local storage (非常簡易、未確認什麼時候資料會消失) */
-
-const editorCurrentCard = {
-  key: 'editorCurrentCard',
-  get: (): Card | null => {
-    const data = window.sessionStorage.getItem(editorCurrentCard.key)
-    // console.log('get', editorCurrentSymbol.key, data)
+/** Local storage (非常簡易、 TODO: 未確認什麼時候資料會消失) */
+const store = {
+  _toKey: (symbol: string, type: 'card' | 'rootLi'): string => {
+    return `${type}-${symbol}`
+  },
+  _get: <T extends Card | LiElement>(key: string): T | null => {
+    const data = window.sessionStorage.getItem(key)
     if (data) {
-      const parsed: Card = JSON.parse(data)
+      const parsed: T = JSON.parse(data)
       return parsed
     }
     return null
   },
-  set: (data: Card | null): void => {
-    // console.log('set', editorCurrentSymbol.key, data)
-    window.sessionStorage.setItem(editorCurrentCard.key, JSON.stringify(data))
+  _set: <T extends Card | LiElement>(key: string, data: T): void => {
+    window.sessionStorage.setItem(key, JSON.stringify(data))
+  },
+  getCard: (symbol: string): Card | null => {
+    return store._get<Card>(store._toKey(symbol, 'card'))
+  },
+  setCard: (symbol: string, data: Card): void => {
+    return store._set<Card>(store._toKey(symbol, 'card'), data)
+  },
+  getRootLi: (symbol: string): LiElement | null => {
+    return store._get<LiElement>(store._toKey(symbol, 'rootLi'))
+  },
+  setRootLi: (symbol: string, data: LiElement): void => {
+    return store._set<LiElement>(store._toKey(symbol, 'rootLi'), data)
+  },
+  clear() {
+    window.sessionStorage.clear()
   },
 }
+
+// const localSelfCard = {
+//   key: 'localSelfCard',
+//   get: (): Card | null => {
+//     const data = window.sessionStorage.getItem(localSelfCard.key)
+//     // console.log('get', editorCurrentSymbol.key, data)
+//     if (data) {
+//       const parsed: Card = JSON.parse(data)
+//       return parsed
+//     }
+//     return null
+//   },
+//   set: (data: Card | null): void => {
+//     // console.log('set', editorCurrentSymbol.key, data)
+//     window.sessionStorage.setItem(localSelfCard.key, JSON.stringify(data))
+//   },
+// }
+
+// const localCardRecord = {
+//   key: 'localCardRecord',
+//   get: (): Record<string, Card> | null => {
+//     const data = window.sessionStorage.getItem(localCardRecord.key)
+//     // console.log('get', editorCurrentSymbol.key, data)
+//     if (data) {
+//       const parsed: Record<string, Card> = JSON.parse(data)
+//       return parsed
+//     }
+//     return null
+//   },
+//   set: (data: Record<string, Card> | null): void => {
+//     // console.log('set', editorCurrentSymbol.key, data)
+//     window.sessionStorage.setItem(localCardRecord.key, JSON.stringify(data))
+//   },
+// }
 
 // const editorCurrentSymbol = {
 //   key: 'editorCurrentSymbol',
@@ -69,22 +117,22 @@ const editorCurrentCard = {
 //   },
 // }
 
-const editorRootDict = {
-  key: 'editorRootDict',
-  get: (): Record<string, LiElement> | null => {
-    const data = window.sessionStorage.getItem(editorRootDict.key)
-    // console.log('get', editorRootDict.key, data)
-    if (data) {
-      const parsed: Record<string, LiElement> = JSON.parse(data)
-      return parsed
-    }
-    return null
-  },
-  set: (data: Record<string, LiElement> | null): void => {
-    // console.log('set', editorRootDict.key, data)
-    window.sessionStorage.setItem(editorRootDict.key, JSON.stringify(data))
-  },
-}
+// const localRootRecord = {
+//   key: 'localRootRecord',
+//   get: (): Record<string, LiElement> | null => {
+//     const data = window.sessionStorage.getItem(localRootRecord.key)
+//     // console.log('get', editorRootDict.key, data)
+//     if (data) {
+//       const parsed: Record<string, LiElement> = JSON.parse(data)
+//       return parsed
+//     }
+//     return null
+//   },
+//   set: (data: Record<string, LiElement> | null): void => {
+//     // console.log('set', editorRootDict.key, data)
+//     window.sessionStorage.setItem(localRootRecord.key, JSON.stringify(data))
+//   },
+// }
 
 /**
  * 用 client.query(...) 而非使用 useQuery(...)，適用在非 component 但需要取得 card 的情況，例如取得 mirror
@@ -95,24 +143,25 @@ const editorRootDict = {
 async function getLocalOrQueryRoot(props: {
   // eslint-disable-next-line @typescript-eslint/ban-types
   client: ApolloClient<object>
-  symbol: string
+  selfSymbol?: string
+  mirrorSymbol?: string
   // url?: string
 }): Promise<{ card: Card; rootLi: LiElement }> {
-  const { client, symbol } = props
+  const { client, selfSymbol, mirrorSymbol } = props
 
-  // 讀取 local cache
-  const localCard = editorCurrentCard.get()
-  const localRootDict = editorRootDict.get() ?? {}
-  // console.log('localRootDict', localRootDict)
+  const symbol = selfSymbol ?? mirrorSymbol?.substring(2)
+  if (symbol === undefined) {
+    throw '需至少提供 selfSymbol 或 mirrorSymbol'
+  }
 
-  if (symbol && localRootDict[symbol]) {
-    if (localCard && localCard.symbol === symbol) {
-      return { card: localCard, rootLi: localRootDict[symbol] }
-    } else {
-      console.error(symbol)
-      console.error(localCard)
-      throw 'Unexpected error'
-    }
+  // 讀取 local storage
+  // const _localCard = localCardRecord.get() ?? {}
+  // const _localRootRecord = localRootRecord.get() ?? {}
+  const localCard = store.getCard(symbol)
+  const localRootLi = store.getRootLi(symbol)
+
+  if (localCard && localRootLi) {
+    return { card: localCard, rootLi: localRootLi }
   }
 
   // local 沒有，query card & hashtags
@@ -170,12 +219,15 @@ async function getLocalOrQueryRoot(props: {
     const parsed: CardBodyContent = JSON.parse(card.body.content)
     const rootBullet = parsed.value
     const rootBulletDraft = BulletNode.toDraft(rootBullet)
-    const rootBulletWithHashtags = injectHashtags({ root: rootBulletDraft, gqlHashtags }) // 合併 hashtags 與 bullet
+    const rootBulletWithHashtags = injectHashtags({
+      root: rootBulletDraft,
+      hashtags: gqlHashtags.map(e => gqlToHashtag(e)),
+    }) // 合併 hashtags 與 bullet
     const rootLi = Serializer.toRootLi(rootBulletWithHashtags)
 
-    localRootDict[card.symbol] = rootLi // 存入 local cache
-    // editorRootDict(localRootDict)
-    editorRootDict.set(localRootDict)
+    store.setCard(symbol, card) // 存入 local storage
+    store.setRootLi(symbol, rootLi)
+
     return { card, rootLi }
   }
 
@@ -195,39 +247,12 @@ export const useLocalValue = (props: {
 }): {
   data?: LocalValueData
   setLocalValue: (value: LiElement[]) => void
-  submitting: boolean
-  submitValue: () => void // 將 value 發送至後端（搭配 createCardBody() )
+  submitValue: (props: { onFinish?: () => void }) => void // 將 value 發送至後端（搭配 createCardBody() )
   dropValue: () => void // 將 value 從 local 刪除
 } => {
   const { location } = props
   const client = useApolloClient()
   const [data, setData] = useState<LocalValueData | undefined>()
-  const [submitting, setSubmitting] = useState(false)
-
-  // const [createCardBody] = useCreateCardBodyMutation({
-  //   update: (cache, { data }) => {
-  //     // 更新 apollo cache
-  //     if (data?.createCardBody) {
-  //       const cardData = cache.readQuery<CardQuery, CardQueryVariables>({
-  //         query: CardDocument,
-  //         variables: { symbol: data.createCardBody.symbol },
-  //       })
-  //       if (cardData && cardData.card) {
-  //         cache.writeQuery<CardQuery, CardQueryVariables>({
-  //           query: CardDocument,
-  //           variables: { symbol: data.createCardBody.symbol },
-  //           data: {
-  //             ...cardData,
-  //             card: {
-  //               ...cardData.card,
-  //               body: data.createCardBody.body,
-  //             },
-  //           },
-  //         })
-  //       }
-  //     }
-  //   },
-  // })
 
   const setLocalValue = useCallback(
     (value: LiElement[]) => {
@@ -235,50 +260,91 @@ export const useLocalValue = (props: {
         const { openedLi, self, mirror } = data
         openedLi.children = [openedLi.children[0], { type: 'ul', children: value }] // shallow copy
 
-        const [key, localRoot] = mirror ? [mirror.symbol, mirror.rootLi] : [self.symbol, self.rootLi] // 若目前有 mirror（等同於 location 指向 mirror）則存入 mirror
-        // const localRootDict = editorRootDict() ?? {}
-        const localRootDict = editorRootDict.get() ?? {}
-        localRootDict[key] = localRoot
-        // editorRootDict(localRootDict)
-        editorRootDict.set(localRootDict)
+        const [symbol, rootLi] = mirror ? [mirror.symbol, mirror.rootLi] : [self.symbol, self.rootLi] // 若目前有 mirror（等同於 location 指向 mirror）則存入 mirror
+
+        store.setRootLi(symbol, rootLi) // TODO: 每次 input 都需要轉換 string <-> json，相當耗時
       }
     },
     [data],
   )
 
-  const submitValue = useCallback(() => {
-    if (data) {
-      setSubmitting(true)
-
-      // TODO: 用 root 檢查哪些是新增的 mirrors （有些 mirror 可能新增後又刪掉，這些 mirror 不應該被創）
-
-      // 從 local 取得目前的 root/mirror value 並依序 submit
-      const rootDict = editorRootDict.get()
-      const promises = []
-      for (const k in rootDict) {
-        const root = rootDict[k]
-        promises.push(
-          client.mutate<CreateCardBodyMutation, CreateCardBodyMutationVariables>({
-            mutation: CreateCardBodyDocument,
-            variables: { cardSymbol: k, data: Serializer.toRootBulletDraft(root) },
-          }),
-        )
-      }
-      Promise.all(promises).then(res => {
-        // 清除 local storage
-        editorCurrentCard.set(null)
-        editorRootDict.set(null)
-        setSubmitting(false)
-
-        // TODO: 更新 apollo cache
-      })
-    }
-  }, [data])
-
   const dropValue = useCallback(() => {
-    editorCurrentCard.set(null)
-    editorRootDict.set(null)
+    store.clear()
   }, [])
+
+  const submitValue = useCallback(
+    (props: { onFinish?: () => void }) => {
+      const { onFinish } = props
+      if (data) {
+        const selfSymbol = data.self.symbol
+        const rootLi = store.getRootLi(data.self.symbol)
+        const mirrorSymbols = []
+        const promises = []
+
+        if (rootLi) {
+          // TODO: 用 root 檢查哪些是新增的 mirrors （有些 mirror 可能新增後又刪掉，這些 mirror 不應該被創）
+          for (const [element] of Node.elements(rootLi)) {
+            if (element.type === 'mirror-inline') {
+              mirrorSymbols.push(element.mirrorSymbol)
+            }
+          }
+          promises.push(
+            client.mutate<CreateCardBodyMutation, CreateCardBodyMutationVariables>({
+              mutation: CreateCardBodyDocument,
+              variables: { cardSymbol: selfSymbol, data: { root: Serializer.toRootBulletDraft(rootLi) } },
+            }),
+          )
+        }
+        for (const e of mirrorSymbols) {
+          const mirrorRootLi = store.getRootLi(e)
+          const mirrorSymbol = e.substring(2) // trick，要消掉 mirror 前綴
+          if (mirrorRootLi) {
+            promises.push(
+              client.mutate<CreateCardBodyMutation, CreateCardBodyMutationVariables>({
+                mutation: CreateCardBodyDocument,
+                variables: { cardSymbol: mirrorSymbol, data: { root: Serializer.toRootBulletDraft(mirrorRootLi) } },
+              }),
+            )
+          }
+        }
+        Promise.all(promises).then(res => {
+          store.clear() // 清除 local storage
+
+          // TODO: 更新 apollo cache
+
+          // const [createCardBody] = useCreateCardBodyMutation({
+          //   update: (cache, { data }) => {
+          //     // 更新 apollo cache
+          //     if (data?.createCardBody) {
+          //       const cardData = cache.readQuery<CardQuery, CardQueryVariables>({
+          //         query: CardDocument,
+          //         variables: { symbol: data.createCardBody.symbol },
+          //       })
+          //       if (cardData && cardData.card) {
+          //         cache.writeQuery<CardQuery, CardQueryVariables>({
+          //           query: CardDocument,
+          //           variables: { symbol: data.createCardBody.symbol },
+          //           data: {
+          //             ...cardData,
+          //             card: {
+          //               ...cardData.card,
+          //               body: data.createCardBody.body,
+          //             },
+          //           },
+          //         })
+          //       }
+          //     }
+          //   },
+          // })
+
+          if (onFinish) {
+            onFinish()
+          }
+        })
+      }
+    },
+    [data],
+  )
 
   useEffect(() => {
     const asyncRun = async () => {
@@ -286,19 +352,17 @@ export const useLocalValue = (props: {
         console.log(location)
         const { selfSymbol, mirrorSymbol, openedLiPath = [] } = location
 
-        // 若 self symbol 和 local 不同，代表 symbol 有所變動，清除 & 更新 local
-        if (editorCurrentCard.get()?.symbol !== selfSymbol) {
-          // editorCurrentSymbol.set(selfSymbol)
-          editorCurrentCard.set(null)
-          editorRootDict.set(null)
+        // 若在 local 找不到 self symbol，代表 symbol 有所變動，清除 & 更新 local
+        const selfCard = store.getCard(selfSymbol)
+        if (selfCard === null) {
+          store.clear()
         }
 
-        const { card, rootLi: selfRootLi } = await getLocalOrQueryRoot({ client, symbol: selfSymbol })
-        const mirrorRootLi = mirrorSymbol
-          ? (await getLocalOrQueryRoot({ client, symbol: mirrorSymbol })).rootLi
-          : undefined
+        const { card, rootLi: selfRootLi } = await getLocalOrQueryRoot({ client, selfSymbol })
 
-        editorCurrentCard.set(card)
+        const { card: _, rootLi: mirrorRootLi } = mirrorSymbol
+          ? await getLocalOrQueryRoot({ client, mirrorSymbol })
+          : { card: undefined, rootLi: undefined }
 
         // 按照 root/mirror + path 取得對應的 opened-li
         let openedLi: LiElement, value: LiElement[]
@@ -329,7 +393,6 @@ export const useLocalValue = (props: {
   return {
     data,
     setLocalValue,
-    submitting,
     submitValue,
     dropValue,
   }

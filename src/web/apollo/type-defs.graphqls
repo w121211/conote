@@ -12,9 +12,9 @@ type Query {
 
   link(url: String!): Link
 
-  # 以 symbol 查找，若無返回 null
+  # 以 symbol 查找，若無創新 symbol card
   # @cardBodyId 若給予，返回該card及指定的body，否則返回 latest body
-  card(symbol: String!, cardBodyId: String): Card
+  card(symbol: String!, cardBodyId: String): Card!
 
   # 以 url 查找，若無會 fetch, resolve url 並創新 card
   webpageCard(url: String!): Card!

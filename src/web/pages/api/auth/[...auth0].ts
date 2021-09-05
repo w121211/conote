@@ -26,8 +26,8 @@ export default handleAuth({
   async callback(req, res) {
     try {
       await handleCallback(req, res, { afterCallback })
-    } catch (error) {
-      res.status(error.status || 500).end(error.message)
+    } catch (err: any) {
+      res.status(err.status || 500).end(err.message)
     }
   },
 })

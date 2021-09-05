@@ -1,9 +1,24 @@
 import { cloneDeep } from '@apollo/client/utilities'
+import { Hashtag as PrismaHashtag, Poll } from '@prisma/client'
 import { Hashtag as GqlHashtag } from '../../apollo/query.graphql'
 import { BulletDraft, RootBulletDraft } from '../bullet/types'
 import { Hashtag, HashtagGroup } from './types'
 
-function toHashtag(gqlHashtag: GqlHashtag): Hashtag | HashtagGroup {
+export function prismaToHashtag(prismalHashtag: PrismaHashtag & { poll: Poll | null }): Hashtag | HashtagGroup {
+  if (prismalHashtag.poll) {
+    return {
+      ...prismalHashtag,
+      type: 'hashtag-group',
+      poll: prismalHashtag.poll ?? undefined,
+    }
+  }
+  return {
+    ...prismalHashtag,
+    type: 'hashtag',
+  }
+}
+
+export function gqlToHashtag(gqlHashtag: GqlHashtag): Hashtag | HashtagGroup {
   if (gqlHashtag.poll) {
     return {
       ...gqlHashtag,
@@ -13,10 +28,6 @@ function toHashtag(gqlHashtag: GqlHashtag): Hashtag | HashtagGroup {
       poll: {
         ...gqlHashtag.poll,
         id: parseInt(gqlHashtag.poll.id),
-        count: {
-          ...gqlHashtag.poll.count,
-          id: parseInt(gqlHashtag.poll.count.id),
-        },
       },
     }
   }
@@ -28,9 +39,11 @@ function toHashtag(gqlHashtag: GqlHashtag): Hashtag | HashtagGroup {
   }
 }
 
-export function injectHashtags(props: { root: RootBulletDraft; gqlHashtags: GqlHashtag[] }): RootBulletDraft {
-  const { root, gqlHashtags } = props
-  const hashtags = gqlHashtags.map(e => toHashtag(e))
+export function injectHashtags(props: {
+  root: RootBulletDraft
+  hashtags: (Hashtag | HashtagGroup)[]
+}): RootBulletDraft {
+  const { root, hashtags } = props
 
   function _inject<T extends BulletDraft | RootBulletDraft>(node: T): T {
     const found = hashtags.filter(e => e.bulletId === node.id)
