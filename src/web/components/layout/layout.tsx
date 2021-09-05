@@ -295,12 +295,12 @@ export default function Layout({
                     // }
                   >
                     {typeof e !== 'string' && e.path.length > 0 && (
-                      <a href={`/card/${router.query.symbol}?p=${e.path.join('.')}`} data-type="ui">
+                      <a className="ui" href={`/card/${router.query.symbol}?p=${e.path.join('.')}`}>
                         {e.text}
                       </a>
                     )}
                     {typeof e !== 'string' && e.path.length === 0 && (
-                      <a href={`/card/${router.query.symbol}`} data-type="ui">
+                      <a className="ui" href={`/card/${router.query.symbol}`}>
                         {e.text}
                       </a>
                     )}
@@ -327,10 +327,10 @@ export default function Layout({
                             >
                               {typeof el !== 'string' && (
                                 <a
+                                  className="ui"
                                   href={`/card/${router.query.symbol}${
                                     el.path.length > 0 ? '?p=' + el.path.join('.') : ''
                                   }`}
-                                  data-type="ui"
                                 >
                                   {el.text}
                                 </a>

@@ -292,7 +292,7 @@ const HashtagInline = (props: RenderElementProps & { element: HashtagInlineEleme
   const readonly = useReadOnly()
   if (readonly) {
     return (
-      <button {...attributes} data-type="inline">
+      <button {...attributes} className=".inline">
         {children}
       </button>
     )

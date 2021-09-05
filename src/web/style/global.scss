@@ -82,7 +82,7 @@ a {
     color: $secondaryHover;
     border-bottom: 1px solid $secondaryHover;
   }
-  &[data-type='ui'] {
+  &.ui {
     border-bottom: 0;
     &:hover {
       border-bottom: 0;
@@ -106,11 +106,11 @@ button {
 
   // box-sizing: content-box;
 
-  &[data-type='inline'] {
+  &.inline {
     margin: 0;
     padding: 3px 6px;
   }
-  &[data-type='secondary'] {
+  &.secondary {
     padding: 4px 10px;
     border: 1px solid $gray-text;
     background: inherit;
@@ -118,7 +118,7 @@ button {
       background: $gray;
     }
   }
-  &[data-type='primary'] {
+  &.primary {
     padding: 4px 10px;
     border: 1px solid;
     border-color: $secondary;

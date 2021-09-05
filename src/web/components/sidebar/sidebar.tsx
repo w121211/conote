@@ -32,7 +32,7 @@ const SideBar = ({ style, showMenuHandler }: { style: React.CSSProperties; showM
             </>
           ) : (
             <>
-              Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
+              Welcome ! <a href="/api/auth/logout">Logout</a>
             </>
           )}
         </>
