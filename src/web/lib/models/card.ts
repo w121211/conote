@@ -4,7 +4,6 @@ import prisma from '../prisma'
 import { checkBulletDraft, BulletNode } from '../bullet/node'
 import { runBulletOp } from '../bullet/operation'
 import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../bullet/types'
-import { HashtagDraft, HashtagGroupDraft } from '../hashtag/types'
 import { getOrCreateLink, linkToSymbol } from './link'
 import { parse } from './symbol'
 import { getBotId } from './user'
@@ -77,12 +76,6 @@ export type CardTemplateProps = {
   ticker?: string
 }
 
-const defaultHashtags: (HashtagDraft | HashtagGroupDraft)[] = [
-  { type: 'hashtag-draft', op: 'CREATE', text: '#up' },
-  { type: 'hashtag-draft', op: 'CREATE', text: '#down' },
-  { type: 'hashtag-draft', op: 'CREATE', text: '#pin' },
-]
-
 export const templateTicker: CardTemplate = {
   name: '::Ticker',
   bodyDraft: {
@@ -92,7 +85,6 @@ export const templateTicker: CardTemplate = {
     symbol: '%SYMBOL%',
     head: '%SYMBOL%',
     freeze: true,
-    newHashtags: defaultHashtags,
     children: [
       {
         draft: true,
@@ -107,8 +99,7 @@ export const templateTicker: CardTemplate = {
               {
                 draft: true,
                 op: 'CREATE',
-                head: '%SYMBOL% 如何操作？',
-                newHashtags: [{ op: 'CREATE', type: 'hashtag-group-draft', pollChoices: ['#buy', '#sell', '#hold'] }],
+                head: '%SYMBOL% 如何操作？ !((poll))(#buy #sell #hold)',
                 children: [],
               },
             ],
@@ -134,7 +125,6 @@ export const templateWebpage: CardTemplate = {
     freeze: true,
     root: true,
     symbol: '%SYMBOL%',
-    newHashtags: defaultHashtags,
     children: [
       {
         draft: true,
@@ -206,28 +196,28 @@ interface KeyValue<T> {
   [k: string]: T | KeyValue<T>
 }
 
-function bulletToKeyValue(node: Bullet): KeyValue<string | string[] | boolean | undefined> {
-  if (node.children && node.children.length > 0) {
-    const obj: KeyValue<string | string[] | boolean | undefined> = {}
-    for (const e of node.children) {
-      const kv = bulletToKeyValue(e)
-      if (e.head in kv) {
-        obj[e.head] = kv[e.head]
-      }
-    }
-    return obj
-  }
-  if (node.keyvalue) {
-    if (node.valueBoolean) {
-      return { [node.head]: node.body === 'true' }
-    }
-    if (node.valueArray) {
-      return { [node.head]: node.body?.split(' ') }
-    }
-    return { [node.head]: node.body }
-  }
-  return {}
-}
+// function bulletToKeyValue(node: Bullet): KeyValue<string | string[] | boolean | undefined> {
+//   if (node.children && node.children.length > 0) {
+//     const obj: KeyValue<string | string[] | boolean | undefined> = {}
+//     for (const e of node.children) {
+//       const kv = bulletToKeyValue(e)
+//       if (e.head in kv) {
+//         obj[e.head] = kv[e.head]
+//       }
+//     }
+//     return obj
+//   }
+//   if (node.keyvalue) {
+//     if (node.valueBoolean) {
+//       return { [node.head]: node.body === 'true' }
+//     }
+//     if (node.valueArray) {
+//       return { [node.head]: node.body?.split(' ') }
+//     }
+//     return { [node.head]: node.body }
+//   }
+//   return {}
+// }
 
 // export async function createCardHead(prop: {
 //   cardId: number
@@ -481,17 +471,13 @@ async function _createCard(props: {
     },
     include: { link: true },
   })
-  // 依template建card-head, card-body
-  // const head = await createCardHead({
-  //   cardId: card.id,
-  //   draft: replaceBulletDraft(template.headDraft, templateProps),
-  //   userId: await getBotId(),
-  // })
-  const [body] = await _createCardBody({
+  // 依 template 建 card-body
+  const [body, { value: rootBullet }] = await _createCardBody({
     cardId: card.id,
     root: replaceBulletDraft(template.bodyDraft, templateProps),
     userId: await getBotId(),
   })
+  // TODO: (pending) 對 root bullet 創 default emojis
   return { ...card, body }
 }
 

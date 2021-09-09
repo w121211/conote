@@ -19,9 +19,11 @@ export class BulletNode {
         return acc.concat(items)
       }, [])
       node.children = [] // 將children設為空
-      return [{ ..._node, path }, ...children]
+      // return [{ ..._node, path }, ...children]
+      return [{ ..._node }, ...children]
     }
-    return [{ ..._node, path }]
+    // return [{ ..._node, path }]
+    return [{ ..._node }]
   }
 
   public static toDict(node: Bullet): Record<string, Bullet> {
@@ -257,7 +259,7 @@ export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDra
           head: _draft.head,
           body: _draft.body,
           sourceUrl: _draft.sourceUrl,
-          authorName: _draft.authorName,
+          author: _draft.author,
           op: 'CREATE',
         }
         break

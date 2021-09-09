@@ -28,7 +28,7 @@ const HashtagUpDown = ({
   hashtagId: number
   children?: React.ReactNode
   text: string
-}) => {
+}): JSX.Element | null => {
   const router = useRouter()
   const symbol = router.query['symbol'] as string
   const { data, loading, error } = useMyHashtagLikeQuery({

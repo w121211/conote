@@ -1,65 +1,103 @@
 import { Grammar, Token, tokenize as prismTokenize, tokenize, TokenStream } from 'prismjs'
+import { Hashtag as GQLHashtag } from '../../apollo/query.graphql'
+import { InlineHashtag, InlineItem, InlineNewHashtag, InlineText } from '../bullet/types'
 import { tokenToString } from '../token'
-import { Hashtag, HashtagDraft, HashtagGroup, HashtagGroupDraft } from './types'
+// import { Hashtag, HashtagDraft, HashtagGroup, HashtagGroupDraft } from './types'
 
-export const defaultCurHashtagsPlacer = '#(...)'
+// export const defaultCurHashtagsPlacer = '#(...)'
 
-const reHashtag = /(\s#\(\.{3}\))?(\s#[a-zA-Z0-9])+$/
+// const reHashtag = /(\s#\(\.{3}\))?(\s#[a-zA-Z0-9])+$/
 
-export function hashtagGroupToString(group: HashtagGroupDraft): string {
-  return `(${group.pollChoices.join(' ')})`
-}
+// export function hashtagGroupToString(group: HashtagGroupDraft): string {
+//   return `(${group.pollChoices.join(' ')})`
+// }
 
-function isHashtagText(text: string): boolean {
-  return reHashtag.test(text)
-}
+// function isHashtagText(text: string): boolean {
+//   return reHashtag.test(text)
+// }
 
-/**
- * 檢查 hashtag
- * @throw 檢查有問題時丟相關錯誤
- */
-// async function checkHashtag(draft: HashtagDraft, bulletHashtags: Hashtag[]) {}
+// /**
+//  * 檢查 hashtag
+//  * @throw 檢查有問題時丟相關錯誤
+//  */
+// // async function checkHashtag(draft: HashtagDraft, bulletHashtags: Hashtag[]) {}
 
-function checkHashtagGroup(draft: HashtagGroupDraft): draft is HashtagGroupDraft {
-  if (draft.pollChoices.length === 0) {
-    throw 'poll choices 的數量需大於0'
+// function checkHashtagGroup(draft: HashtagGroupDraft): draft is HashtagGroupDraft {
+//   if (draft.pollChoices.length === 0) {
+//     throw 'poll choices 的數量需大於0'
+//   }
+//   for (const e of draft.pollChoices) {
+//     if (!isHashtagText(e)) {
+//       throw `poll choice 格式不符 hashtag: ${e}`
+//     }
+//   }
+//   return true
+// }
+
+// export const grammar: Grammar = {
+//   'hashtag-string': {
+//     pattern: /(?:\s#\(\.{3}\))?(?:(?:\s#[a-zA-Z0-9]+)|(?:\s\((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+\)))*$/,
+//     inside: {
+//       'cur-hashtags-placer': {
+//         pattern: /\B#\(\.{3}\)/,
+//       },
+//       hashtag: {
+//         pattern: /\B#[a-zA-Z0-9]+/,
+//       },
+//       'hashtag-group': {
+//         pattern: /\((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+\)/,
+//         inside: {
+//           hashtag: {
+//             pattern: /\B#[a-zA-Z0-9]+/,
+//           },
+//         },
+//       },
+//     },
+//   },
+// }
+
+function addSpaceInBetween<T extends InlineItem>(items: T[]): (T | InlineText)[] {
+  const spacedItems = items.reduce<(T | InlineText)[]>((acc, cur) => [...acc, cur, { type: 'text', str: ' ' }], [])
+  if (spacedItems.length > 0 && spacedItems[spacedItems.length - 1].type === 'text') {
+    spacedItems.pop()
   }
-  for (const e of draft.pollChoices) {
-    if (!isHashtagText(e)) {
-      throw `poll choice 格式不符 hashtag: ${e}`
-    }
-  }
-  return true
+  return spacedItems
 }
 
-export const grammar: Grammar = {
+function toInlines(hashtags: (InlineHashtag | InlineNewHashtag)[]): (InlineText | InlineHashtag | InlineNewHashtag)[] {
+  if (hashtags.length === 0) {
+    return []
+  }
+  return [{ type: 'text', str: '|| ' }, ...addSpaceInBetween(hashtags)]
+}
+
+const grammar: Grammar = {
   'hashtag-string': {
-    pattern: /(\s#\(\.{3}\))?(\s#[a-zA-Z0-9]+)*$/,
+    pattern: /\B\/\/(?:\s#[a-zA-Z0-9]+)+$/,
     inside: {
-      'cur-hashtags-placer': {
-        pattern: /\B#\(\.{3}\)/,
-      },
-      hashtag: {
-        pattern: /\B#[a-zA-Z0-9]+/,
-      },
+      breaker: { pattern: /\B\/\// },
+      hashtag: { pattern: /\B#[a-zA-Z0-9]+/ },
     },
   },
 }
 
 /**
- * ... some text ...  #(...) #A #B #C
+ * @param createdHashtags 用此判斷 parsed hashtags 是新的還是既有的
+ * ...some text #(...) #Aaa #Bbb (#aaa #bbb #ccc) #ccc #012
  */
-export function parseHashtags(str: string): {
+export function parseHashtags(props: { str: string; connectedHashtags?: InlineHashtag[] }): {
   beforeHashtagStr: string
-  newHashtags?: (HashtagDraft | HashtagGroupDraft)[]
+  inlines: (InlineText | InlineHashtag | InlineNewHashtag)[]
 } {
-  const [beforeHashtagStr, hashtagStr] = tokenize(str, grammar) // 基於 grammar 可以安全的假設傳回值為 [beforeStr, hashtagStr]
+  const { str, connectedHashtags = [] } = props
+  const [beforeHashtagStr, hashtagStr] = tokenize(str, grammar) // 可以安全的假設傳回值為 [beforeStr, hashtagStr]
 
   if (typeof beforeHashtagStr === 'string' && hashtagStr === undefined) {
-    return { beforeHashtagStr }
+    return { beforeHashtagStr, inlines: toInlines(connectedHashtags) }
   }
   if (typeof beforeHashtagStr !== 'string' && beforeHashtagStr.type === 'hashtag-string') {
-    return { beforeHashtagStr: tokenToString(beforeHashtagStr) } // 缺內文，將 hashtags 視為內文
+    // 缺內文，將 hashtags 視為內文 eg '// #Cc3 #Dd4'
+    return { beforeHashtagStr: tokenToString(beforeHashtagStr), inlines: toInlines(connectedHashtags) }
   }
   if (
     typeof beforeHashtagStr === 'string' &&
@@ -67,21 +105,15 @@ export function parseHashtags(str: string): {
     hashtagStr.type === 'hashtag-string' &&
     Array.isArray(hashtagStr.content)
   ) {
-    // TODO: 檢查 new hashtags，eg 與現有的重複？
+    const createdHashtagNames = connectedHashtags.map(e => e.str)
     const newHashtags = hashtagStr.content
       .filter((e): e is Token => typeof e !== 'string' && e.type === 'hashtag')
-      .map<HashtagDraft | HashtagGroupDraft>(e => {
-        if (e.type === 'hashtag') {
-          return {
-            type: 'hashtag-draft',
-            op: 'CREATE',
-            text: tokenToString(e.content),
-          }
-        }
-        throw 'Unexpected error'
-      })
-    return { beforeHashtagStr, newHashtags }
+      .map((e): string => tokenToString(e.content))
+      .filter(e => !createdHashtagNames.includes(e))
+      .map<InlineNewHashtag>(e => ({ type: 'new-hashtag', str: e }))
+    return { beforeHashtagStr, inlines: toInlines([...connectedHashtags, ...newHashtags]) }
   }
+  console.error(str, connectedHashtags)
   console.error(beforeHashtagStr, hashtagStr)
   throw 'Unexpected error'
 }

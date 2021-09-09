@@ -9,37 +9,43 @@ import { ParsedUrlQuery } from 'querystring'
 
 export type NavLocation = {
   selfSymbol: string
-  mirrorSymbol?: string // 包括前綴的mirror符號，eg ::$XX, ::[[Hello World]]
-  openedLiPath: number[]
+  openedLiPath: number[] // 若有 mirror 對應到的是以 mirror 為 root 的 path，若無則是 self root 的 payh
+  mirrorSymbol?: string // 包括前綴符號，eg ::$XX, ::[[Hello World]]
+  author?: string // 包括前綴符號，eg @cnyes
 }
 
 /** URL search params */
+const AUTHOR_KEY = 'a'
 const MIRROR_KEY = 'm'
 const PATH_KEY = 'p'
 const PATH_SPLITTER = '.'
 
 export function getNavLocation(query: ParsedUrlQuery): NavLocation {
-  const s = query['symbol']
-  const m = query[MIRROR_KEY]
-  const p = query[PATH_KEY]
+  const symbol = query['symbol']
+  const path = query[PATH_KEY]
+  const mirror = query[MIRROR_KEY]
+  const author = query[AUTHOR_KEY]
 
-  if (typeof s !== 'string') {
+  if (typeof symbol !== 'string') {
     throw 'Unexpected error'
   }
-
   return {
-    selfSymbol: s,
-    mirrorSymbol: typeof m === 'string' ? m : undefined,
-    openedLiPath: typeof p === 'string' ? p.split(PATH_SPLITTER).map(e => parseInt(e)) : [],
+    selfSymbol: symbol,
+    openedLiPath: typeof path === 'string' ? path.split(PATH_SPLITTER).map(e => parseInt(e)) : [],
+    mirrorSymbol: typeof mirror === 'string' ? mirror : undefined,
+    author: typeof author === 'string' ? author : undefined,
   }
 }
 
-export function pathToHref(lcation: NavLocation, joinLiPath?: number[]): string {
-  const { selfSymbol, mirrorSymbol, openedLiPath } = lcation
+export function locationToHref(lcation: NavLocation, joinLiPath?: number[]): string {
+  const { selfSymbol, mirrorSymbol, openedLiPath, author } = lcation
 
   const params = new URLSearchParams()
   if (mirrorSymbol) {
     params.set(MIRROR_KEY, mirrorSymbol)
+  }
+  if (author && mirrorSymbol) {
+    params.set(AUTHOR_KEY, author)
   }
   if (joinLiPath) {
     const merged = [...openedLiPath, 1, ...joinLiPath]

@@ -10,13 +10,13 @@ import {
   HashtagsQuery,
   HashtagsQueryVariables,
   HashtagsDocument,
-  Hashtag as GqlHashtag,
+  Hashtag as GQLHashtag,
   CreateCardBodyMutation,
   CreateCardBodyMutationVariables,
   CreateCardBodyDocument,
 } from '../../apollo/query.graphql'
 import { BulletNode } from '../../lib/bullet/node'
-import { gqlToHashtag, injectHashtags } from '../../lib/hashtag/inject'
+import { injectHashtags } from '../../lib/hashtag/inject'
 import { CardBodyContent } from '../../lib/models/card'
 import { Serializer } from './serializer'
 import { LiElement } from './slate-custom-types'
@@ -162,7 +162,7 @@ async function getLocalOrQueryRoot(props: {
 
   // local 沒有，query card & hashtags
   let card: Card | undefined
-  let gqlHashtags: GqlHashtag[] = []
+  let gqlHashtags: GQLHashtag[] = []
 
   const queryCard = await client.query<CardQuery, CardQueryVariables>({
     query: CardDocument,
@@ -206,7 +206,7 @@ async function getLocalOrQueryRoot(props: {
     const rootBulletDraft = BulletNode.toDraft(rootBullet)
     const rootBulletWithHashtags = injectHashtags({
       root: rootBulletDraft,
-      hashtags: gqlHashtags.map(e => gqlToHashtag(e)),
+      hashtags: gqlHashtags,
     }) // 合併 hashtags 與 bullet
     const rootLi = Serializer.toRootLi(rootBulletWithHashtags)
 
@@ -219,7 +219,7 @@ async function getLocalOrQueryRoot(props: {
 }
 
 export type LocalValueData = {
-  card: Card // router symbol 所對應的卡片
+  selfCard: Card // router symbol 所對應的卡片
   self: { symbol: string; rootLi: LiElement } // router symbol 所對應的卡片裡的 root
   mirror?: { symbol: string; rootLi: LiElement }
   openedLi: LiElement // li opened by given location
@@ -268,7 +268,7 @@ export const useLocalValue = (props: {
         if (rootLi) {
           // TODO: 用 root 檢查哪些是新增的 mirrors （有些 mirror 可能新增後又刪掉，這些 mirror 不應該被創）
           for (const [element] of Node.elements(rootLi)) {
-            if (element.type === 'mirror-inline') {
+            if (element.type === 'mirror') {
               mirrorSymbols.push(element.mirrorSymbol)
             }
           }
@@ -336,16 +336,15 @@ export const useLocalValue = (props: {
         const { selfSymbol, mirrorSymbol, openedLiPath = [] } = location
 
         // 若在 local 找不到 self symbol，代表 symbol 有所變動，清除 & 更新 local
-        const selfCard = store.getCard(selfSymbol)
-        if (selfCard === null) {
+        if (store.getCard(selfSymbol) === null) {
           store.clear()
         }
 
-        const { card, rootLi: selfRootLi } = await getLocalOrQueryRoot({ client, selfSymbol })
+        const { card: selfCard, rootLi: selfRootLi } = await getLocalOrQueryRoot({ client, selfSymbol })
 
-        const { card: _, rootLi: mirrorRootLi } = mirrorSymbol
+        const { rootLi: mirrorRootLi } = mirrorSymbol
           ? await getLocalOrQueryRoot({ client, mirrorSymbol })
-          : { card: undefined, rootLi: undefined }
+          : { rootLi: undefined }
 
         // 按照 root/mirror + path 取得對應的 opened-li
         let openedLi: LiElement, value: LiElement[]
@@ -359,7 +358,7 @@ export const useLocalValue = (props: {
         }
 
         setData({
-          card,
+          selfCard,
           self: { symbol: selfSymbol, rootLi: selfRootLi },
           mirror: mirrorSymbol && mirrorRootLi ? { symbol: mirrorSymbol, rootLi: mirrorRootLi } : undefined,
           openedLi,

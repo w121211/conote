@@ -2,23 +2,17 @@ import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
 import { cloneDeep } from '@apollo/client/utilities'
-import { Card, CardBody, HashtagStatus, Link, Poll, PrismaClient } from '@prisma/client'
+import { Card, CardBody, Hashtag, HashtagCount, HashtagStatus, Link, Poll, PrismaClient } from '@prisma/client'
 import { Editor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../../packages/fetcher/src'
 import { BulletNode } from '../../lib/bullet/node'
-import { BulletDraft, RootBulletDraft } from '../../lib/bullet/types'
-import {
-  CardBodyContent,
-  createCardBody,
-  getOrCreateCardBySymbol,
-  getOrCreateCardByUrl,
-  PinBoardCode,
-} from '../../lib/models/card'
+import { BulletDraft, InlineItem, InlinePoll, RootBulletDraft } from '../../lib/bullet/types'
+import { parseBulletHead } from '../../lib/bullet/text'
+import { CardBodyContent, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../../lib/models/card'
 import { createAuthorVote } from '../../lib/models/vote'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
 import { getBotId } from '../../lib/models/user'
-import { injectHashtags, prismaToHashtag } from '../../lib/hashtag/inject'
-import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
+import { injectHashtags, toGQLHashtag } from '../../lib/hashtag/inject'
 
 const IGNORE_FILE_STARTS_WITH = '_'
 const includeFiles: string[] = [
@@ -38,12 +32,9 @@ const NEAT_REPLY_CHOICE = [
   { options: ['<觀望>'], choiceIdx: 2 },
 ]
 
-const BUYSELL_HASHTAG_TEXT = '(#buy #sell #hold)'
-const BUYSELL_HASHTAG_CHOICES = ['#buy', '#sell', '#hold']
+const BUYSELL_POLL_TEXT = '(#buy #sell #hold)'
+const BUYSELL_POLL_CHOICES = ['#buy', '#sell', '#hold']
 
-/**
- * search tree
- */
 function searchTree(props: {
   node: BulletDraft
   depth: number
@@ -52,27 +43,29 @@ function searchTree(props: {
     // userId?: string
     head?: string
     hashtag?: { text: string }
-    hashtagGroup?: { text: string }
+    // hashtagGroup?: { text: string }
+    poll?: { text: string }
   }
-}): [BulletDraft | null, Hashtag | HashtagGroup | undefined] {
+}): [BulletDraft | null, InlineItem | undefined] {
   const { node, depth, where, inDepth } = props
   const nextDepth = depth + 1
 
   if (where.head && where.head === node.head) {
     return [node, undefined]
   }
-  if (where.hashtag) {
-    const text = where.hashtag.text
-    const hashtag = node.curHashtags?.find((e): e is Hashtag => e.type === 'hashtag' && e.text === text)
-    if (hashtag) {
-      return [node, hashtag]
-    }
-  }
-  if (where.hashtagGroup) {
-    const text = where.hashtagGroup.text
-    const hashtagGroup = node.curHashtags?.find((e): e is HashtagGroup => e.type === 'hashtag-group' && e.text === text)
-    if (hashtagGroup) {
-      return [node, hashtagGroup]
+  // if (where.hashtag) {
+  //   const text = where.hashtag.text
+  //   const hashtag = node.curHashtags?.find((e): e is Hashtag => e.type === 'hashtag' && e.text === text)
+  //   if (hashtag) {
+  //     return [node, hashtag]
+  //   }
+  // }
+  if (where.poll) {
+    const text = where.poll.text
+    const { headInlines } = parseBulletHead({ str: node.head })
+    const poll = headInlines.find((e): e is InlinePoll => e.type === 'poll' && e.str.includes(text))
+    if (poll) {
+      return [node, poll]
     }
   }
   if (inDepth === undefined || nextDepth <= inDepth) {
@@ -125,42 +118,39 @@ async function insertMarkerlines(
     }
 
     // 取得 buysell node
-    // const botId = await getBotId()
-    // console.log(inspect(_root, { depth: null }))
-    const [node, hashtag] = searchTree({
+    const [node, poll] = searchTree({
       node: _root,
       depth: 0,
-      where: { hashtagGroup: { text: BUYSELL_HASHTAG_TEXT } },
+      where: { poll: { text: BUYSELL_POLL_TEXT } },
     })
 
-    if (node === null || hashtag === undefined) {
-      throw new Error('找不到 buysell 的 node')
-    }
-    if (hashtag && hashtag.type === 'hashtag-group' && hashtag.poll) {
+    if (node && poll && poll.type === 'poll' && poll.id) {
       const vote = await createAuthorVote({
         choiceIdx,
-        pollId: hashtag.poll.id,
+        pollId: poll.id,
         authorName: e.oauthor,
         userId,
       })
+      // const comment = await prisma.comment.create({
+      //   data: {
+      //     content: `${e.str} ^[[${e.src}]]`,
+      //     user: { connect: { id: userId } },
+      //     author: { connect: { name: e.oauthor } },
+      //     count: { create: {} },
+      //     board: { connect: { id: node.boardId } },
+      //     vote: { connect: { id: vote.id } },
+      //   },
+      // })
+    } else {
+      console.error(inspect(_root, { depth: null }))
+      throw new Error('找不到 buysell 的 node')
     }
-
-    // const comment = await prisma.comment.create({
-    //   data: {
-    //     content: `${e.str} ^[[${e.src}]]`,
-    //     user: { connect: { id: userId } },
-    //     author: { connect: { name: e.oauthor } },
-    //     count: { create: {} },
-    //     board: { connect: { id: node.boardId } },
-    //     vote: { connect: { id: vote.id } },
-    //   },
-    // })
 
     // auther 的 comment 併入 node children
     const child: BulletDraft = {
-      head: `(${BUYSELL_HASHTAG_CHOICES[choiceIdx]}) ${e.str}`,
+      head: `(${BUYSELL_POLL_CHOICES[choiceIdx]}) ${e.str}`,
       sourceUrl: e.src,
-      authorName: e.oauthor,
+      author: e.oauthor,
       // commentId: comment.id,
       // voteId: vote.id,
       op: 'CREATE',
@@ -185,7 +175,7 @@ async function insertMarkerlines(
       const child: BulletDraft = {
         head: e.marker.value,
         sourceUrl: e.src,
-        authorName: e.oauthor,
+        author: e.oauthor,
         op: 'CREATE',
         children: [],
       }
@@ -247,19 +237,27 @@ async function main() {
       for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
         const mirrorCard = await getOrCreateCardBySymbol(cardlabel.symbol)
         const { value: mirrorRoot }: CardBodyContent = JSON.parse(mirrorCard.body.content)
+        // console.log(inspect(mirrorRoot, { depth: null }))
 
         const hashtags = (
           await prisma.hashtag.findMany({
             where: { AND: [{ card: { id: mirrorCard.id } }, { status: HashtagStatus.ACTIVE }] },
-            include: { count: true, poll: { include: { count: true } } },
+            include: { count: true },
           })
-        ).map(e => prismaToHashtag(e))
-
-        // console.log(inspect(mirrorRoot, { depth: null }))
+        ).map(e => {
+          const hasCount = (
+            obj: Hashtag & { count: HashtagCount | null },
+          ): obj is Hashtag & { count: HashtagCount } => {
+            return obj.count !== null
+          }
+          if (hasCount(e)) {
+            return toGQLHashtag(e)
+          }
+          throw ''
+        })
 
         const draft = BulletNode.toDraft(mirrorRoot)
         const draftWithHashtags = injectHashtags({ root: draft, hashtags })
-
         // console.log(inspect(draftWithHashtags, { depth: null }))
 
         const mirror = await insertMarkerlines(draftWithHashtags, markerlines, TESTUSERS[0].id)
@@ -272,7 +270,7 @@ async function main() {
           draft: true,
           op: 'CREATE',
           head: `::${cardlabel.symbol}`,
-          mirror: true,
+          // mirror: true,
           children: [],
         })
       }

@@ -1,22 +1,23 @@
-/**
- * https://immerjs.github.io/immer/
- */
 import { inspect } from 'util'
+import { Hashtag, HashtagCount } from '@prisma/client'
 import { getBotId } from '../models/user'
 import prisma from '../prisma'
 import {
   Bullet,
   BulletDraft,
+  InlineItem,
   isBullet,
   isBulletDraft,
   isRootBullet,
   isRootBulletDraft,
   RootBullet,
   RootBulletDraft,
+  // toInlineHashtag,
 } from './types'
 import { BulletNode } from './node'
 import { cloneDeep } from '@apollo/client/utilities'
-import { runHastagOpBatch } from '../hashtag/operation'
+import { inlinesToString, parseBulletHead } from './text'
+import { toGQLHashtag } from '../hashtag/inject'
 
 /**
  * 使用conditional type，輸入是bullet draft時返回bullet，輸入是root bullet draft時返回root bullet
@@ -38,7 +39,7 @@ async function isBotOrThrow(userId: string, msg: string): Promise<void> {
   throw msg
 }
 
-function _returnOrThrow<T extends BulletDraft | RootBulletDraft>(
+function returnOrThrow<T extends BulletDraft | RootBulletDraft>(
   node: Bullet | RootBullet,
   draft: T,
 ): BulletOrRootBullet<T> {
@@ -48,6 +49,58 @@ function _returnOrThrow<T extends BulletDraft | RootBulletDraft>(
   console.error(node)
   console.error(draft)
   throw new Error('Root bullet draft應返回root bullet，bullet draft應返回bullet')
+}
+
+async function createInlineItem(props: {
+  draft: InlineItem
+  bulletId: number
+  cardId: number
+  userId: string
+}): Promise<InlineItem> {
+  const { draft, bulletId, cardId, userId } = props
+  switch (draft.type) {
+    // case 'new-hashtag': {
+    //   const hashtag = await prisma.hashtag.create({
+    //     data: {
+    //       userId,
+    //       bulletId,
+    //       cardId,
+    //       text: draft.str,
+    //       count: { create: {} },
+    //     },
+    //     include: { count: true },
+    //   })
+    //   const hasCount = (obj: Hashtag & { count: HashtagCount | null }): obj is Hashtag & { count: HashtagCount } => {
+    //     return obj.count !== null
+    //   }
+    //   if (hasCount(hashtag)) {
+    //     return {
+    //       type: 'hashtag',
+    //       str: hashtag.text,
+    //       id: hashtag.id,
+    //       hashtag: toGQLHashtag(hashtag),
+    //     }
+    //   }
+    //   throw 'Hashtag.count shoud exist'
+    // }
+    case 'new-poll': {
+      const poll = await prisma.poll.create({
+        data: {
+          userId,
+          choices: draft.choices,
+          count: { create: {} },
+        },
+      })
+      return {
+        type: 'poll',
+        str: `!((poll:${poll.id}))(${draft.choices.join(' ')})`,
+        id: poll.id,
+        choices: draft.choices,
+      }
+    }
+    default:
+      return draft
+  }
 }
 
 /**
@@ -65,7 +118,7 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
     console.warn(draft)
     throw new Error('權限不足: 無法創freeze bullet')
   }
-  const bullet = await prisma.bullet.create({
+  const dbBullet = await prisma.bullet.create({
     data: {
       card: { connect: { id: cardId } },
       count: { create: {} },
@@ -107,134 +160,160 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
   //   children: undefined,
   // }
 
-  // 將 draft-flag, hashtags 取出，不存入 bulllet
-  const { draft: _, newHashtags: _hashtags, ...included } = draft
+  // tokenize & parse
+  const { headInlines } = parseBulletHead({ str: draft.head })
 
-  const node: Bullet | RootBullet = {
+  const producedHeadInlines = await Promise.all(
+    headInlines.map(e => createInlineItem({ draft: e, userId, bulletId: dbBullet.id, cardId })),
+  )
+
+  // 將 draft-flag, hashtags 取出，不存入 bulllet
+  // const { draft: _, newHashtags: _hashtags, ...included } = draft
+  if (isRootBulletDraft(draft)) {
+    const produced: RootBullet = {
+      id: dbBullet.id,
+      userIds: [userId],
+      root: true,
+      symbol: draft.symbol,
+      head: inlinesToString(producedHeadInlines).trim(),
+      body: draft.body,
+      timestamp,
+      children: [],
+    }
+    return produced
+  }
+  const node: Bullet = {
     // TODO: 不應該直接copy input
-    ...included,
-    id: bullet.id,
-    // boardId: board?.id,
-    // pollId: board?.poll?.id,
+    id: dbBullet.id,
     userIds: [userId],
+    head: inlinesToString(producedHeadInlines).trim(),
+    body: draft.body,
     timestamp,
     children: [],
   }
-
-  if (_hashtags) {
-    await runHastagOpBatch({
-      hashtags: _hashtags,
-      bulletId: node.id,
-      cardId,
-      userId,
-    })
-  }
-
-  return _returnOrThrow(node, draft)
+  return returnOrThrow(node, draft)
 }
 
 /**
  * (Recursive) Bullet operation
- * Step: current -> draft -> next
+ * current -> draft (string -> inlines -> create) -> produced
  * @param current - 若沒給予視為第一次創建body
  * @param timestamp - 若沒給予視為只執行hashtag ops、或沒有ops
  */
 export async function runBulletOp(props: {
-  cardId: number
   draft: RootBulletDraft
+  cardId: number
   userId: string
+  timestamp: number
   current?: RootBullet
-  timestamp?: number
 }): Promise<RootBullet> {
-  const { cardId, current, draft, timestamp, userId } = props
+  const { draft: rootDraft, cardId, userId, timestamp, current } = props
 
   const curDict = current && BulletNode.toDict(current)
 
-  async function _run<T extends BulletDraft | RootBulletDraft>(draft: T): Promise<BulletOrRootBullet<T> | null> {
-    if (draft.op === 'CREATE') {
-      if (timestamp === undefined) {
-        throw '執行bullet op需要給予timestamp'
-      }
-      const childlessNext = await createOneBullet({ cardId, draft, timestamp, userId })
+  async function _run(node: BulletDraft): Promise<Bullet | null> {
+    if (node.op === 'CREATE') {
+      const childlessProduced = await createOneBullet({ cardId, draft: node, timestamp, userId })
       const children =
-        draft.children && (await Promise.all(draft.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
+        node.children && (await Promise.all(node.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
       const next = {
-        ...childlessNext,
+        ...childlessProduced,
         draft: undefined,
         children,
       }
-      return _returnOrThrow(next, draft)
+      return next
     }
 
-    const cur = draft.id && curDict && curDict[draft.id] // draft有對應的current node嗎？
+    const cur = node.id && curDict && curDict[node.id] // 有對應的 current node？
     if (cur) {
+      // current 被標記刪除
       if (cur.op === 'DELETE') {
         return null
       }
+      delete cur.op
 
-      delete cur.path, cur.op
-      let _timestamp = cur.timestamp,
-        userIds = cur.userIds,
-        head = cur.head,
-        body = cur.body,
-        prevHead: string | undefined,
-        prevBody: string | undefined
-
-      switch (draft.op) {
-        case 'DELETE':
-        case 'UPDATE':
-        case 'UPDATE_MOVE': {
-          if (timestamp === undefined) {
-            throw '執行bullet op需要給予timestamp'
-          }
-          _timestamp = timestamp
-          userIds = [...userIds, userId]
-          head = draft.head
-          body = draft.body
-          prevHead = cur.head
-          prevBody = cur.body
-          break
+      if (node.op === undefined) {
+        const children = (await Promise.all(node.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
+        const next = { ...cur, children }
+        return next
+      }
+      if (node.op === 'MOVE' || node.op === 'DELETE') {
+        const children = (await Promise.all(node.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
+        const next = {
+          ...cur,
+          op: node.op,
+          userIds: [...cur.userIds, userId],
+          timestamp,
+          children,
         }
+        return next
       }
 
-      if (draft.newHashtags) {
-        await runHastagOpBatch({
-          hashtags: draft.newHashtags,
-          bulletId: cur.id,
-          cardId,
-          userId,
+      if (node.op === 'UPDATE' || node.op === 'UPDATE_MOVE') {
+        const head = node.head
+        const dbBullet = await prisma.bullet.findUnique({
+          where: { id: cur.id },
+          include: { hashtags: true },
         })
+        if (dbBullet) {
+          // tokenize & parse
+          const { headInlines } = parseBulletHead({
+            str: head,
+            // connected: { hashtags: dbBullet.hashtags.map(e => toInlineHashtag(e)) },
+          })
+          const producedHeadInlines = await Promise.all(
+            headInlines.map(e => createInlineItem({ draft: e, userId, bulletId: dbBullet.id, cardId })),
+          )
+          // if (connectedInlines) {
+          //   const producedConnectedInlines = await Promise.all(
+          //     connectedInlines.map(e => createInlineItem({ draft: e, userId, bulletId: dbBullet.id, cardId })),
+          //   )
+          // }
+          const children = (await Promise.all(node.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
+          const next = {
+            ...cur,
+            op: node.op,
+            userIds: [...cur.userIds, userId],
+            timestamp,
+            children,
+            head: inlinesToString(producedHeadInlines).trim(),
+            body: node.body,
+          }
+          return next
+        }
+        throw '找不到 db-bullet'
       }
-      const children = (await Promise.all(draft.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
-      const next = {
-        ...cur,
-        draft: undefined,
-        hashtags: undefined,
-        timestamp: _timestamp,
-        op: draft.op,
-        children,
-        userIds,
-        head,
-        body,
-        prevHead,
-        prevBody,
-      }
-      return _returnOrThrow(next, draft)
     }
 
     // 其他未處理到的情形
-    console.error(inspect(draft, { depth: null }))
+    console.error(inspect(node, { depth: null }))
     console.error(inspect(cur, { depth: null }))
-    throw new Error('bullet-input必須是新創("create")，或是已經創建並能在latest card body中用bullet id找到')
+    throw 'bullet-input必須是新創("create")，或是已經創建並能在latest card body中用bullet id找到'
   }
 
-  const next = await _run(cloneDeep(draft))
+  async function _runRoot(node: RootBulletDraft): Promise<RootBullet> {
+    if (node.op === 'CREATE') {
+      const childlessProduced = await createOneBullet({ cardId, draft: node, timestamp, userId })
+      const children =
+        node.children && (await Promise.all(node.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
+      const next = {
+        ...childlessProduced,
+        children,
+      }
+      return next
+    }
 
-  if (next === null) {
-    console.error(inspect(draft, { depth: null }))
-    console.error(inspect(current, { depth: null }))
-    throw new Error('輸入值有異常')
+    const cur = node.id && curDict && curDict[node.id] // 有對應的 current node？
+    if (cur) {
+      if (node.op === undefined) {
+        const children = (await Promise.all(node.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
+        const next = { ...cur, children }
+        return returnOrThrow(next, node)
+      }
+      throw 'root bullet 目前只能 create，不接受其他 op'
+    }
+    throw '找不到對應的 current node'
   }
 
-  return next
+  return await _runRoot(cloneDeep(rootDraft))
 }

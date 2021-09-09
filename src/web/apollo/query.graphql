@@ -121,9 +121,6 @@ fragment hashtag on Hashtag {
   bulletId
   cardId
   text
-  poll {
-    ...poll
-  }
   count {
     ...hashtagCount
   }
@@ -223,6 +220,12 @@ query Bullet($id: ID!) {
   }
 }
 
+query Poll($id: ID!) {
+  poll(id: $id) {
+    ...poll
+  }
+}
+
 query Board($id: ID!) {
   board(id: $id) {
     ...board
@@ -259,7 +262,7 @@ query MyBoardLikes {
   }
 }
 
-query MyHashtagLike($hashtagId: Int!) {
+query MyHashtagLike($hashtagId: ID!) {
   myHashtagLike(hashtagId: $hashtagId) {
     ...hashtagLike
   }
@@ -283,16 +286,11 @@ mutation CreateCardBody($cardSymbol: String!, $data: CardBodyInput!) {
   }
 }
 
-# mutation createHashtag($cardId: ID!, $bulletId: Int!, $data: BoardInput!) {
-#   createHashtag(cardId: $cardId, bulletId: $bulletId, data: $data) {
-#     board {
-#       ...board
-#     }
-#     cardBody {
-#       ...cardBody
-#     }
-#   }
-# }
+mutation CreateEmoji($bulletId: Int!, $cardId: ID!, $emoji: EmojiText!) {
+  createEmoji(bulletId: $bulletId, cardId: $cardId, emoji: $emoji) {
+    ...hashtag
+  }
+}
 
 mutation CreateVote($pollId: ID!, $data: VoteInput!) {
   createVote(pollId: $pollId, data: $data) {
@@ -306,20 +304,20 @@ mutation CreateComment($boardId: ID!, $pollId: ID, $data: CommentInput!) {
   }
 }
 
-mutation CreateOauthorVote($pollId: ID!, $oauthorName: String!, $data: VoteInput!) {
-  createOauthorVote(pollId: $pollId, oauthorName: $oauthorName, data: $data) {
+mutation createAuthorVote($pollId: ID!, $authorName: String!, $data: VoteInput!) {
+  createAuthorVote(pollId: $pollId, authorName: $authorName, data: $data) {
     ...vote
   }
 }
 
-mutation CreateOauthorComment($boardId: ID!, $pollId: ID, $oauthorName: String!, $data: CommentInput!) {
-  createOauthorComment(boardId: $boardId, pollId: $pollId, oauthorName: $oauthorName, data: $data) {
-    ...comment
-  }
-}
+# mutation CreateOauthorComment($boardId: ID!, $pollId: ID, $oauthorName: String!, $data: CommentInput!) {
+#   createOauthorComment(boardId: $boardId, pollId: $pollId, oauthorName: $oauthorName, data: $data) {
+#     ...comment
+#   }
+# }
 
-mutation CreateHashtagLike($hashtagId: ID!, $data: LikeInput!) {
-  createHashtagLike(hashtagId: $hashtagId, data: $data) {
+mutation CreateEmojiLike($hashtagId: ID!, $data: LikeInput!) {
+  createEmojiLike(hashtagId: $hashtagId, data: $data) {
     like {
       ...hashtagLike
     }
@@ -329,8 +327,8 @@ mutation CreateHashtagLike($hashtagId: ID!, $data: LikeInput!) {
   }
 }
 
-mutation UpdateHashtagLike($id: ID!, $data: LikeInput!) {
-  updateHashtagLike(id: $id, data: $data) {
+mutation UpdateEmojiLike($id: ID!, $data: LikeInput!) {
+  updateEmojiLike(id: $id, data: $data) {
     like {
       ...hashtagLike
     }
