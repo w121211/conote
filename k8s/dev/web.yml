@@ -51,10 +51,10 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-release-postgresql
+                  name: conote-release-postgresql
                   key: postgresql-password
             - name: DATABASE_URL
-              value: 'postgresql://postgres:$(POSTGRES_PASSWORD)@postgres-release-postgresql:5432/prisma?schema=public'
+              value: 'postgresql://postgresuser:$(POSTGRES_PASSWORD)@conote-release-postgresql:5432/prisma?schema=public'
           #     - name: DATABASE_URL
           #       valueFrom:
           #         secretKeyRef:
@@ -114,14 +114,13 @@ metadata:
   name: web
 spec:
   # type: ClusterIP
-  # type: NodePort
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: web
   ports:
     - port: 31251
       targetPort: 3000
-      # nodePort: 31251 # GKE needs to open firewall @see https://stackoverflow.com/questions/68452384/how-can-i-visit-nodeport-service-in-gke
+      nodePort: 31251 # GKE needs to open firewall @see https://stackoverflow.com/questions/68452384/how-can-i-visit-nodeport-service-in-gke
   # ports:
   #   - name: http
   #     port: 80

@@ -2,14 +2,14 @@
 
 Install [docker-sync](https://github.com/EugenMayer/docker-sync) for much better performance
 
-```
+```sh
 # from project-root
 docker-sync start
 ```
 
 Run vscode devcontainer: Vscode remote-container extension, specify in `./.devcontainer`, cmd+shift+p > rebuild & open in container
 
-```
+```sh
 sudo docker exec -it <container_app> zsh
 ```
 
@@ -17,20 +17,15 @@ sudo docker exec -it <container_app> zsh
 
 kubectl Cheat Sheet: https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 
-### Skafford: dev locally
+### skaffold: dev locally
 
-```
-# install skaffold, helm
-brew install skaffold, helm...
+```sh
+# install minikube, skaffold, helm
+brew install minikube, skaffold, helm...
 
 # 確認context是在local
 kubectl config get-contexts
 kubectl config use-context docker-desktop
-
-# 用 helm 裝postgres chart
-helm repo add ...
-helm repo update
-helm install ...
 
 # from project root folder, first test dockerfile works
 docker build --progress=plain .
@@ -57,10 +52,11 @@ GCP Samples
 
 步驟
 
-- 在 cloud 建立 k8s cluster https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
--
+- 在 cloud 建立 gke cluster https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
+- 修改 .env.local 的 url （對應到 gke 的 external IP）
+- 至 auth0 網站修改 url
 
-```
+```sh
 # switch context to cloud cluster
 kubectl config get-contexts
 kubectl config use-context ...
@@ -69,11 +65,11 @@ kubectl config use-context ...
 skaffold dev --default-repo=gcr.io/conote-try --port-forward
 
 # deploy
-skaffold run --tail --profile=dev --default-repo=gcr.io/conote-try
+skaffold run --default-repo=gcr.io/conote-try --tail
 skaffold delete # remove deploy
 ```
 
-### Postgresql backup, dump, restore
+### Postgresql install, dump, restore
 
 See:
 
@@ -82,24 +78,42 @@ https://cwienczek.com/2020/06/simple-backup-of-postgres-database-in-kubernetes/
 https://simplebackups.io/blog/postgresql-pgdump-and-pgrestore-guide-examples/#summary-of-the-pg_restore-command
 https://github.com/rinormaloku/postgre-backup-container
 
-Naive dump & restore
+```sh
+# 用 helm 裝 postgres chart https://bitnami.com/stack/postgresql/helm
+helm repo add ...
+helm repo update
+helm install conote-release --set postgresqlUsername=postgresuser bitnami/postgresql
 
-```
-# 先開一個 postgres client （不要關）
-export POSTGRES_PASSWORD=$(kubectl get secret --namespace default postgres-release-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
-kubectl run postgres-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.12.0-debian-10-r44 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host postgres-release-postgresql -U postgres -d postgres -p 5432
+# 刪除 chart，需另外刪掉 PVC
+helm list
+helm delete ...
+kubectl get pvc
+kubectl delete pvc ...
 
-# dump
-kubectl exec -i postgres-release-postgresql-client -- pg_dump --host postgres-release-postgresql -U postgres -d prisma -p 5432 -Ft > prisma_dump.tar
+export POSTGRES_ADMIN_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.postgresql-postgres-password}" | base64 --decode)
+
+export POSTGRES_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+
+# 另外開一個 conote-release-postgresql-client （保持 psql 開啟狀態，然後執行後面的 dump/restore ）
+kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.13.0-debian-10-r12 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
+
+# dump (from docker)
+docker exec -i 8ac632cf6317 sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma  -p 5432 -Ft" > prisma_dump.tar
+
+# dump (from k8s)
+kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > prisma_dump.tar
+
+# psql (若沒有 database 需要先建立)
+CREATE DATABASE prisma;
 
 # restore
-kubectl exec postgres-release-postgresql-client -i -- pg_restore --host postgres-release-postgresql -U postgres -d prisma -p 5432 -Ft --clean --if-exists < prisma_dump.tar
+kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft --clean --if-exists < prisma_dump.tar
 ```
 
 Troubleshoots:
 
 - postgres 密碼錯誤，無法登入？ 若重裝 postgres chart，需要另外刪除 pvc
-  ```
+  ```sh
   kubectl get pvc
   kubectl delete pvc ...
   ```
@@ -109,7 +123,7 @@ Troubleshoots:
 
 Sample app: https://github.com/okteto/movies
 
-```
+```sh
 # install okteto, see: https://okteto.com/docs/getting-started
 ...
 
@@ -132,7 +146,7 @@ okteto pipeline destroy
 
 # Hints
 
-```
+```sh
 # 當修改了 editor 時，需要先 build、更新 package 才能導入（只有 frontend/web 需要，backend 可同步編譯）
 # Build lib
 cd src/lib/editor

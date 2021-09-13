@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { Node } from 'slate'
+import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import { BulletEditor } from '../../components/editor/editor'
 import { LiElement } from '../../components/editor/slate-custom-types'
 import { useLocalValue } from '../../components/editor/use-local-value'
 import { isLi } from '../../components/editor/with-list'
-import { getNavLocation, NavLocation, pathToHref } from '../../components/editor/with-location'
+import { getNavLocation, locationToHref, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 
 import HashtagUpDown from '../../components/upDown/hashtag-up-down'
 import NavPath from '../../components/nav-path/nav-path'
+import { Poll, useCreateVoteMutation } from '../../apollo/query.graphql'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -30,6 +32,93 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
     }
   }
   return navs
+}
+
+// @lisa TODO: 移到 hashtag component、需要考慮非預設的text
+export const hashtagTextToIcon = (text: string): JSX.Element | null => {
+  switch (text) {
+    case '#pin':
+      return <PinIcon width="1em" height="1em" />
+    case '#up':
+      return <UpIcon width="1em" height="1em" />
+    case '#down':
+      return <UpIcon width="1em" height="1em" style={{ transform: 'rotate(180deg)' }} />
+  }
+  return null
+}
+
+/**
+ * @param poll
+ * @param author 若給予視為代表 author 投票
+ */
+const PollComponent = (props: { poll: Poll; author?: string }): JSX.Element => {
+  const { poll, author } = props
+  const [createVote] = useCreateVoteMutation({
+    update(cache, { data }) {
+      // const res = cache.readQuery<MyVotesQuery>({
+      //   query: MyVotesDocument,
+      // })
+      // if (data?.createVote && res?.myVotes) {
+      //   cache.writeQuery({
+      //     query: MyVotesDocument,
+      //     data: { myVotes: res.myVotes.concat([data.createVote]) },
+      //   })
+      // }
+      // refetch()
+    },
+    // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
+  })
+  const onVote = () => {
+    // 已經投票且生效，不能再投
+    // 尚未投票，可以投
+    // 送出按鈕
+  }
+
+  return (
+    <>
+      {poll.choices.map((e, i) => (
+        <button
+          key={i}
+          onClick={event => {
+            createVote({
+              variables: {
+                pollId: poll.id,
+                data: { choiceIdx: i },
+              },
+            })
+          }}
+        >
+          {e}
+        </button>
+      ))}
+    </>
+  )
+}
+
+const HashtagComponent = (props: { hashtag: Hashtag | HashtagGroup }): JSX.Element => {
+  const { hashtag } = props
+  // if (hashtag.type === 'hashtag' || hashtag.typ === 'hashtag-group')
+  // const hashtagLike = useHashtagLike({ hashtag })
+  switch (hashtag.type) {
+    case 'hashtag':
+      return (
+        <div>
+          {/* <HashtagUpDown hashtagId={e.id} text={e.text} /> */}
+          {/* <HashtagLike hashtag={hashtag} /> */}
+          <button>{hashtag.text}</button>
+        </div>
+      )
+    case 'hashtag-group':
+      return (
+        <div>
+          (
+          {hashtag.poll.choices.map((e, i) => (
+            <button key={i}>{e}</button>
+          ))}
+          )
+        </div>
+      )
+  }
 }
 
 const CardSymbolPage = (): JSX.Element | null => {
@@ -59,7 +148,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   if (data === undefined || location === undefined) {
     return null
   }
-  const { card, mirror, openedLi, value } = data
+  const { selfCard, mirror, openedLi, value } = data
   const [openedLiLc] = openedLi.children
 
   // console.log('symbol', navs)
@@ -109,15 +198,15 @@ const CardSymbolPage = (): JSX.Element | null => {
 
         {/* {mirror && (
           <span>
-            <a href={pathToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>Home</a>
-         
+            <a href={locationToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>Home</a>
+            ...
           </span>
         )} */}
 
         {/* {navs &&
           navs.map((e, i) => (
             <span key={i}>
-              <a href={pathToHref({ ...location, openedLiPath: e.path })}>{e.text}</a>
+              <a href={locationToHref({ ...location, openedLiPath: e.path })}>{e.text}</a>|
             </span>
           ))} */}
 
@@ -140,7 +229,7 @@ const CardSymbolPage = (): JSX.Element | null => {
             setLocalValue(value)
           }}
           readOnly={readonly}
-          // sourceUrl={data.card.link}
+          selfCard={selfCard}
         />
       </div>
     </Layout>

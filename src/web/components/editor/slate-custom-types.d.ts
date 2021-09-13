@@ -1,8 +1,14 @@
 import { BaseEditor, BaseRange } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-import { BulletDraft, Hashtag, HashtagDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
-import { HashtagGroup, HashtagGroupDraft } from '../../lib/hashtag/types'
+import {
+  BulletDraft,
+  InlineMirror,
+  InlineNewPoll,
+  InlinePoll,
+  InlineSymbol,
+  RootBulletDraft,
+} from '../../lib/bullet/types'
 
 export type CommentInput = {
   boardCode: !PinBoardCode
@@ -23,33 +29,28 @@ export type CustomText = {
   placeholder?: boolean
 }
 
-export type LabelInlineElement = {
-  type: 'label-inline'
+export type InlineSymbolElement = InlineSymbol & {
   children: CustomText[]
 }
 
-export type MirrorInlineElement = {
-  type: 'mirror-inline'
+export type InlineMirrorElement = InlineMirror & {
   children: CustomText[]
-  mirrorSymbol: string
 }
 
-export type CurHashtagsPlacerInlineElement = {
-  type: 'cur-hashtags-placer-inline'
+// export type InlineHashtagElement = InlineHashtag & {
+//   children: CustomText[]
+// }
+
+// export type InlineNewHashtagElement = InlineNewHashtag & {
+//   children: CustomText[]
+// }
+
+export type InlinePollElement = InlinePoll & {
   children: CustomText[]
-  hashtags: (Hashtag | HashtagGroup)[]
 }
 
-export type HashtagInlineElement = {
-  type: 'hashtag-inline'
+export type InlineNewPollElement = InlineNewPoll & {
   children: CustomText[]
-  hashtagDraft?: HashtagDraft
-}
-
-export type HashtagGroupInlineElement = {
-  type: 'hashtag-group-inline'
-  children: CustomText[]
-  hashtagGroupDraft?: HashtagGroupDraft
 }
 
 /**
@@ -62,8 +63,8 @@ export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
   body?: string
   editingBody?: true
 
-  asAuthor?: true // 若沒有的話視為self author
-  banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
+  // asAuthor?: true // 若沒有的話視為self author
+  // banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
   // banDeleteBackward?: true
   // banDeleteForward?: true
   // banInsertBreak?: true
@@ -75,11 +76,12 @@ export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
   // comment?: CommentInput
 
   // 新增mirror時需要先暫時存放
-  root?: true
-  mirror?: true
-  symbol?: string
+  // root?: true
+  // mirror?: true
+  // symbol?: string
+  // newSymbol?: true // 找不到symbol，視為創新card
+
   rootBulletDraft?: RootBulletDraft // 只有 root 會存 root bullet，用此幫助 serialize
-  newSymbol?: true // 找不到symbol，視為創新card
 }
 
 /**
@@ -99,12 +101,7 @@ export type UlElement = {
   folded?: true
 }
 
-type CustomInlineElement =
-  | LabelInlineElement
-  | MirrorInlineElement
-  | CurHashtagsPlacerInlineElement
-  | HashtagInlineElement
-  | HashtagGroupInlineElement
+export type CustomInlineElement = InlineSymbolElement | InlineMirrorElement | InlinePollElement | InlineNewPollElement
 
 type CustomElement = CustomInlineElement | LcElement | LiElement | UlElement
 

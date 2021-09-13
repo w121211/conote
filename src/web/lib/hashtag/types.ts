@@ -19,12 +19,6 @@ export type Hashtag = {
   text: string
 }
 
-export type HashtagDraft = Partial<Omit<Hashtag, 'type'>> & {
-  type: 'hashtag-draft'
-  op: HashtagOperation // 編輯狀態
-  text: string
-}
-
 /** eg (#buy #sell #hold) */
 export type HashtagGroup = Omit<Hashtag, 'type'> & {
   type: 'hashtag-group'
@@ -43,8 +37,15 @@ export type HashtagGroup = Omit<Hashtag, 'type'> & {
   // }
 }
 
-export type HashtagGroupDraft = Partial<Omit<HashtagGroup, 'type'>> & {
+export type HashtagDraft = Partial<Omit<Hashtag, 'type'>> & {
+  type: 'hashtag-draft'
+  op: HashtagOperation // 編輯狀態
+  text: string
+}
+
+export type HashtagGroupDraft = Partial<Omit<HashtagGroup, 'type' | 'text'>> & {
   type: 'hashtag-group-draft'
   op: HashtagOperation // 編輯狀態
+  text: string
   pollChoices: string[]
 }

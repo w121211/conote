@@ -28,11 +28,11 @@ services:
     # - twint_default
 
   postgresql:
-    image: postgres:13.2-alpine
+    image: bitnami/postgresql:11.13.0-debian-10-r21
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgresuser
-      POSTGRES_PASSWORD: postgrespassword
+      POSTGRESQL_USERNAME: postgresuser
+      POSTGRESQL_PASSWORD: postgrespassword
+      POSTGRESQL_DATABASE: postgres
 
   pgadmin:
     image: dpage/pgadmin4:latest

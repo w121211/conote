@@ -1,14 +1,17 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
-import { CustomInlineElement, CustomText } from '../../components/editor/slate-custom-types'
-import { defaultCurHashtagsPlacer, hashtagGroupToString, parseHashtags } from '../hashtag/text'
-import { Hashtag, HashtagGroup } from '../hashtag/types'
+// import { parseHashtags } from '../hashtag/text'
 import { tokenToString } from '../token'
+import { InlineItem, InlineText } from './types'
 
 /**
- * @see
- * url https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
- * hashtag https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
+ * Regex
+ * url @see https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
+ * hashtag @see https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
  */
+
+const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
+const reNewPoll = /\B!\(\(poll\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
+
 const grammar: Grammar = {
   'mirror-ticker': { pattern: /^::\$[A-Z-=]+\b/ },
   'mirror-topic': { pattern: /^::\[\[[^\]\n]+\]\]\B/u },
@@ -17,15 +20,18 @@ const grammar: Grammar = {
   url: {
     pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
   },
-  hashtag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
   user: { pattern: /(?<=\s|^)@(?:[a-zA-Z0-9]+|\(author\))(?=\s|$)/ },
+  poll: { pattern: rePoll },
+  'new-poll': { pattern: reNewPoll },
+  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
 }
 
-/**
- *
- */
 export function tokenizeBulletString(text: string): (string | Token)[] {
   return prismTokenize(text, grammar)
+}
+
+export function inlinesToString(inlines: InlineItem[]): string {
+  return inlines.reduce((acc, cur) => `${acc}${cur.str}`, '')
 }
 
 /**
@@ -34,74 +40,75 @@ export function tokenizeBulletString(text: string): (string | Token)[] {
  */
 export function parseBulletHead(props: {
   str: string
-  curHashtags?: (Hashtag | HashtagGroup)[]
-}): (CustomText | CustomInlineElement)[] {
-  const { str, curHashtags } = props
+  // connected?: { hashtags?: InlineHashtag[] }
+}): {
+  headInlines: InlineItem[]
+  // connectedInlines?: (InlineText | InlineHashtag | InlineNewHashtag)[]
+} {
+  // const { str, connected } = props
+  const { str } = props
 
   // TODO: validate
-
-  function tokenToInline(token: string | Token): CustomText | CustomInlineElement {
+  function tokenToInline(token: string | Token): InlineItem {
     if (typeof token === 'string') {
-      return { text: token }
+      return { type: 'text', str: token }
     }
+
+    const str = tokenToString(token.content)
     switch (token.type) {
       case 'mirror-ticker':
       case 'mirror-topic': {
-        const mirrorSymbol = tokenToString(token.content)
-        return {
-          type: 'mirror-inline',
-          mirrorSymbol,
-          children: [{ text: mirrorSymbol }],
-        }
+        return { type: 'mirror', str, mirrorSymbol: str }
       }
       case 'url':
       case 'ticker':
       case 'topic':
-      case 'hashtag':
-      case 'user': {
-        return {
-          type: 'label-inline',
-          children: [{ text: tokenToString(token.content) }],
+      case 'user':
+      case 'filtertag': {
+        return { type: 'symbol', str, symbol: str }
+      }
+      case 'poll': {
+        const match = rePoll.exec(str)
+        if (match) {
+          return {
+            type: 'poll',
+            str,
+            id: parseInt(match[1]),
+            choices: match[2].split(' '),
+          }
+        } else {
+          console.error(str)
+          throw 'Parse error'
+        }
+      }
+      case 'new-poll': {
+        const match = reNewPoll.exec(str)
+        if (match) {
+          return {
+            type: 'new-poll',
+            str,
+            choices: match[1].split(' '),
+          }
+        } else {
+          console.error(str)
+          throw 'Parse error'
         }
       }
     }
-    throw new Error()
+
+    console.error(token)
+    throw 'Parse error'
   }
 
-  const { beforeHashtagStr, newHashtags = [] } = parseHashtags(str)
+  // const { beforeHashtagStr, inlines: hashtagInlines } = parseHashtags({ str, connectedHashtags: connected?.hashtags })
+  // const tokens = tokenizeBulletString(beforeHashtagStr)
+  // const beforeHashtagInlines = tokens.map(e => tokenToInline(e))
+  // return {
+  //   headInlines: beforeHashtagInlines,
+  //   connectedInlines: hashtagInlines,
+  // }
 
-  const tokens = tokenizeBulletString(beforeHashtagStr)
-  const inlines: (CustomText | CustomInlineElement)[] = tokens.map(e => tokenToInline(e))
-
-  // 若有 current hashtags，插入 hashtags placer
-  if (curHashtags && curHashtags.length > 0) {
-    inlines.push({ text: ' ' }) // pad 前方要有一個空格
-    inlines.push({
-      type: 'cur-hashtags-placer-inline',
-      children: [{ text: defaultCurHashtagsPlacer }],
-      hashtags: curHashtags,
-    })
-  }
-
-  // 若有 new hashtags，逐一插入
-  for (const e of newHashtags) {
-    inlines.push({ text: ' ' }) // hashtag 前方要有一個空格
-    if (e.type === 'hashtag-draft') {
-      inlines.push({
-        type: 'hashtag-inline',
-        children: [{ text: e.text }],
-        hashtagDraft: e,
-      })
-      continue
-    }
-    if (e.type === 'hashtag-group-draft') {
-      inlines.push({
-        type: 'hashtag-group-inline',
-        children: [{ text: hashtagGroupToString(e) }],
-        hashtagGroupDraft: e,
-      })
-    }
-  }
-
-  return inlines
+  const tokens = tokenizeBulletString(str)
+  const inlines = tokens.map(e => tokenToInline(e))
+  return { headInlines: inlines }
 }

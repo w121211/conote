@@ -22,11 +22,10 @@ type Query {
   # 以 card symbol 找該 card 所有的 active hashtags
   hashtags(symbol: String!): [Hashtag!]
 
-  # 若找不到，@throw error
-  bullet(id: ID!): Bullet!
-
+  bullet(id: ID!): Bullet! # 找不到 @throw error
+  # hashtag(id: ID!): Hashtag! # 找不到 @throw error
+  poll(id: ID!): Poll! # 找不到 @throw error
   board(id: ID!): Board!
-
   comments(boardId: ID!, afterId: ID): [Comment!]!
 
   me: User!
@@ -36,8 +35,9 @@ type Query {
   myBoardLikes(after: String): [BoardLike!]!
   myBulletLikes(after: String): [BulletLike!]!
 
-  # 會有找不到的可能 TODO: 整合成對單張卡片搜尋？
-  myHashtagLike(hashtagId: Int!): HashtagLike
+  # 若沒有 like 過會返回 null TODO: 整合成對單張卡片搜尋？
+  myHashtagLike(hashtagId: ID!): HashtagLike
+  # myVotes(after: String): [Vote!]!
 
   # --- NEXT ---
 
@@ -121,15 +121,18 @@ type Mutation {
   # （尚未開放）一般的 hashtag 需透過 editor 編輯來創造，但對於內建、常用的 hashtag 可直接創造
   # createQuickHashtag(cardId: ID!, bulletId: Int!, data: BoardInput!): CreateHashtagResponse!
 
-  createHashtagLike(hashtagId: ID!, data: LikeInput!): HashtagLikeResponse!
-  updateHashtagLike(id: ID!, data: LikeInput!): HashtagLikeResponse!
+  # TODO 不能讓 user 同時指定 cardId & bulletId
+  createEmoji(bulletId: Int!, cardId: ID!, emoji: EmojiText!): Hashtag!
+
+  createEmojiLike(hashtagId: ID!, data: LikeInput!): HashtagLikeResponse!
+  updateEmojiLike(id: ID!, data: LikeInput!): HashtagLikeResponse!
 
   createVote(pollId: ID!, data: VoteInput!): Vote!
 
   createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
 
-  createOauthorVote(pollId: ID!, oauthorName: String!, data: VoteInput!): Vote!
-  createOauthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
+  createAuthorVote(pollId: ID!, authorName: String!, data: VoteInput!): Vote!
+  # createAuthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
 
   # createOauthorComment(boardId: ID!, data: CommentInput!)
   # updateComment(id: ID!, data: CommentInput!): Comment!
@@ -262,7 +265,7 @@ type Hashtag {
   # pollId: Int
   # status: HashtagStatus
   text: String!
-  poll: Poll
+  # poll: Poll
   count: HashtagCount!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -679,4 +682,10 @@ enum BulletOperation {
   UPDATE
   DELETE
   UPDATE_MOVE
+}
+
+enum EmojiText {
+  UP
+  DOWN
+  PIN
 }

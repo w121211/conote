@@ -63,6 +63,7 @@ function removePrevUl(editor: Editor, path: Path) {
 }
 
 export function insertNextLi(editor: Editor, entry: NodeEntry<LiElement>): void {
+  console.log('insertNextLi')
   const [, path] = entry
   Transforms.insertNodes<LiElement>(
     editor,
@@ -345,11 +346,6 @@ export function withList(editor: Editor): Editor {
           return
         }
 
-        // li root: 由with-nested-card負責
-        // if (node.children[0].root) {}
-
-        // li
-
         // 此行為空 & 此行是最後一行 & 此行不是第一層，unindent
         if (
           Node.string(node).length === 0 &&
@@ -361,7 +357,7 @@ export function withList(editor: Editor): Editor {
           return
         }
 
-        // cursor在行尾
+        // cursor 在行尾
         if (Editor.isEnd(editor, point, lcPath(path))) {
           if (node.children[1]) {
             // 後行是indent，插入indent後行
@@ -369,18 +365,18 @@ export function withList(editor: Editor): Editor {
             return
           }
 
-          // 後行不是indent，插入後行
+          // 後行不是 indent，插入後行
           insertNextLi(editor, li)
           return
         }
 
-        // cursor在行首，插入前行
+        // cursor 在行首，插入前行
         if (Editor.isStart(editor, point, lcPath(path))) {
           insertPrevLi(editor, li)
           return
         }
 
-        // cursor在行中，拆分本行並插入後行，若此行有indent，會併入後行
+        // cursor 在行中，拆分本行並插入後行，若此行有 indent，會併入後行
         const insertAt = Path.next(path)
         Transforms.splitNodes(editor, {
           always: true,
@@ -404,6 +400,8 @@ export function withList(editor: Editor): Editor {
         return
       }
     }
+
+    console.log('original insertBreak')
     insertBreak()
   }
 
@@ -463,12 +461,12 @@ export function withList(editor: Editor): Editor {
       node.children[1] && assert(isUl(node.children[1]))
 
       // 只有第0層的li是root（lv0=ul, lv1=li）
-      if (path.length === 1 && node.children[0].root === undefined) {
-        Transforms.setNodes(editor, { root: true }, { at: lcPath(path) })
-      }
-      if (path.length > 1 && node.children[0].root) {
-        Transforms.setNodes(editor, { root: undefined }, { at: lcPath(path) })
-      }
+      // if (path.length === 1 && node.children[0].root === undefined) {
+      //   Transforms.setNodes(editor, { root: true }, { at: lcPath(path) })
+      // }
+      // if (path.length > 1 && node.children[0].root) {
+      //   Transforms.setNodes(editor, { root: undefined }, { at: lcPath(path) })
+      // }
     }
     normalizeNode([node, path])
   }

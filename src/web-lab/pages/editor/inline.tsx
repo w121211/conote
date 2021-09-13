@@ -343,13 +343,10 @@ function parseLcHead(
 
   // const inlines = tokens.map((e) => _toInlineElement(e))
   const inlines: (CustomText | LabelInlineElement | MirrorInlineElement)[] = [
-    { text: '11' },
+    { text: '11 22 33 44 55 66 77 88' },
     { type: 'label', children: [{ text: '22' }] },
     { type: 'label', children: [{ text: '33' }] },
   ]
-
-  console.log(inlines)
-
   Transforms.removeNodes(editor, {
     at: path,
     match: (n, p) => Path.isChild(p, path),
@@ -374,6 +371,16 @@ const LcHead = (
     if ((focused && !selected) || readonly) {
       const path = ReactEditor.findPath(editor, element)
       parseLcHead(editor, [element, path])
+      console.log('parseLcHead', path)
+    }
+    if (selected) {
+      const path = ReactEditor.findPath(editor, element)
+      // parseLcHead(editor, [element, path])
+      Transforms.unwrapNodes(editor, {
+        at: path,
+        match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+      })
+      console.log('unwrapNodes', path)
     }
   }, [selected, readonly])
 
@@ -410,26 +417,40 @@ const Mirror = (
   return <span {...attributes}>{children}</span>
 }
 
-const Label = (
-  props: RenderElementProps & {
-    element: LabelInlineElement
-    oauthorName?: string
-    sourceUrl?: string
-  }
-) => {
-  const { attributes, children, element, oauthorName, sourceUrl } = props
+const Label = (props: RenderElementProps & { element: LabelInlineElement }) => {
+  const { attributes, children, element } = props
+  const editor = useSlateStatic()
   const readonly = useReadOnly()
-  const focused = useFocused()
   const selected = useSelected()
 
-  useEffect(() => {
-    // console.log(readonly, focused, selected)
-  }, [readonly, focused, selected])
+  // useEffect(() => {
+  //   // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
+  //   if (selected) {
+  //     const path = ReactEditor.findPath(editor, element)
+  //     // parseLcHead(editor, [element, path])
+  //     Transforms.unwrapNodes(editor, { at: path })
+  //   }
+  // }, [selected])
+
+  // useEffect(() => {
+  //   // console.log(readonly, focused, selected)
+  // }, [readonly, focused, selected])
 
   if (readonly) {
     return <button {...attributes}>{children}</button>
   }
-  return <span {...attributes}>{children}</span>
+  return (
+    <span {...attributes} style={{ color: 'red' }}>
+      <button
+        onClick={(event) => {
+          event.preventDefault()
+          console.log('clicked label')
+        }}
+      >
+        {children}
+      </button>
+    </span>
+  )
 }
 
 const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
