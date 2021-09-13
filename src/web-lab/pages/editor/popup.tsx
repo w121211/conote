@@ -41,6 +41,7 @@ import {
   LcHeadElement,
   LiElement,
   MirrorInlineElement,
+  PopupInlineElement,
   UlElement,
 } from './slate-custom-types'
 import {
@@ -62,74 +63,43 @@ const initialValueDemo: LiElement[] = [
           {
             type: 'lc-head',
             children: [
+              { text: '' },
               {
-                text: '::$XX this is [[some test]] ::$XX @someon #hashtag #Hashtag2 @https://developer.mozilla.org',
+                type: 'popup',
+                str: 'popup-before',
+                children: [{ text: 'popup-before' }],
               },
+              { text: '' },
+              // {
+              //   text: '::$XX this is [[some test]] ::$XX @someon #hashtag #Hashtag2 @https://developer.mozilla.org',
+              // },
             ],
           },
         ],
       },
     ],
   },
-  {
-    type: 'li',
-    children: [
-      {
-        type: 'lc',
-        children: [
-          {
-            type: 'lc-head',
-            // body: '__11',
-            children: [
-              { text: '::[[A mirror]] ' },
-              { type: 'label', children: [{ text: '#label' }] },
-            ],
-          },
-          // { type: 'lc-body', children: [{ text: '__11' }] },
-        ],
-      },
-    ],
-  },
-  {
-    type: 'li',
-    children: [
-      {
-        type: 'lc',
-        children: [
-          { type: 'lc-head', body: '__22', children: [{ text: '::$TICKER' }] },
-          // { type: 'lc-body', children: [{ text: '__22' }] },
-        ],
-      },
-      {
-        type: 'ul',
-        children: [
-          {
-            type: 'li',
-            children: [
-              {
-                type: 'lc',
-                children: [
-                  { type: 'lc-head', body: '__33', children: [{ text: '33' }] },
-                  { type: 'lc-body', children: [{ text: '__33' }] },
-                ],
-              },
-            ],
-          },
-          {
-            type: 'li',
-            children: [
-              {
-                type: 'lc',
-                children: [
-                  { type: 'lc-head', body: '__44', children: [{ text: '44' }] },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
+  // {
+  //   type: 'li',
+  //   children: [
+  //     {
+  //       type: 'lc',
+  //       children: [
+  //         {
+  //           type: 'lc-head',
+  //           children: [
+  //             { text: '' },
+  //             {
+  //               type: 'popup-before',
+  //               children: [{ text: 'popup-before' }],
+  //             },
+  //             { text: '' },
+  //           ],
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
 ]
 
 export function isUl(node: Node): node is UlElement {
@@ -150,6 +120,10 @@ export function isLiArray(nodes: Node[]): nodes is LiElement[] {
 }
 
 export function isLc(node: Node): node is LcElement {
+  return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'lc'
+}
+
+export function isPopup(node: Node): node is PopupInlineElement {
   return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'lc'
 }
 
@@ -222,16 +196,14 @@ const CustomElement = (
   const { attributes, children, element, oauthorName, sourceUrl } = props
 
   switch (element.type) {
-    case 'label':
-      return (
-        <Label {...{ attributes, children, element, oauthorName, sourceUrl }} />
-      )
-    case 'mirror':
-      return (
-        <Mirror
-          {...{ attributes, children, element, oauthorName, sourceUrl }}
-        />
-      )
+    case 'popup':
+      return <PopupInline {...{ attributes, children, element }} />
+    // case 'popup-after':
+    //   return (
+    //     <Mirror
+    //       {...{ attributes, children, element, oauthorName, sourceUrl }}
+    //     />
+    //   )
     // case 'mirror':
     //   return (
     //     <Mirror
@@ -361,62 +333,50 @@ const LcHead = (
   const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
   const readonly = useReadOnly()
 
-  useEffect(() => {
-    // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
-    if ((focused && !selected) || readonly) {
-      const path = ReactEditor.findPath(editor, element)
-      parseLcHead(editor, [element, path])
-      console.log('parseLcHead', path)
-    }
-    if (selected) {
-      const path = ReactEditor.findPath(editor, element)
-      // parseLcHead(editor, [element, path])
-      Transforms.unwrapNodes(editor, {
-        at: path,
-        match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
-      })
-      console.log('unwrapNodes', path)
-    }
-  }, [selected, readonly])
+  // useEffect(() => {
+  //   // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
+  //   if ((focused && !selected) || readonly) {
+  //     const path = ReactEditor.findPath(editor, element)
+  //     parseLcHead(editor, [element, path])
+  //     console.log('parseLcHead', path)
+  //   }
+  //   if (selected) {
+  //     const path = ReactEditor.findPath(editor, element)
+  //     // parseLcHead(editor, [element, path])
+  //     Transforms.unwrapNodes(editor, {
+  //       at: path,
+  //       match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+  //     })
+  //     console.log('unwrapNodes', path)
+  //   }
+  // }, [selected, readonly])
 
+  console.log('lc', element)
   return (
     <div {...attributes}>
       <li>
         <span>{children}</span>
       </li>
 
-      <div contentEditable={false} style={{ color: 'green' }}>
+      {/* <div contentEditable={false} style={{ color: 'green' }}>
         {!element.isEditingBody && (
           <span style={{ color: 'red' }}>{element.body}</span>
-        )}
-        {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>} */}
-        {/* {element.op === 'CREATE' && authorSwitcher} */}
-      </div>
+        )} */}
+      {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>} */}
+      {/* {element.op === 'CREATE' && authorSwitcher} */}
+      {/* </div> */}
     </div>
   )
 }
 
-const Mirror = (
-  props: RenderElementProps & {
-    element: MirrorInlineElement
-    oauthorName?: string
-    sourceUrl?: string
-  }
+const PopupInline = (
+  props: RenderElementProps & { element: PopupInlineElement }
 ) => {
-  const { attributes, children, element, oauthorName, sourceUrl } = props
-  const readonly = useReadOnly()
-
-  if (readonly) {
-    return <button {...attributes}>{children}</button>
-  }
-  return <span {...attributes}>{children}</span>
-}
-
-const Label = (props: RenderElementProps & { element: LabelInlineElement }) => {
   const { attributes, children, element } = props
   const editor = useSlateStatic()
   const readonly = useReadOnly()
   const selected = useSelected()
+  const [isOpen, setIsOpen] = useState(false)
 
   // useEffect(() => {
   //   // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
@@ -428,94 +388,87 @@ const Label = (props: RenderElementProps & { element: LabelInlineElement }) => {
   // }, [selected])
 
   // useEffect(() => {
-  //   // console.log(readonly, focused, selected)
-  // }, [readonly, focused, selected])
+  //   console.log(element)
+  //   if (isOpen) {
+  //     const path = ReactEditor.findPath(editor, element)
+  //     Transforms.setNodes<PopupInlineElement>(
+  //       editor,
+  //       { id: 'test', str: 'hello-world' },
+  //       { at: path }
+  //     )
+  //     Transforms.insertText(editor, 'hello-world', { at: [...path, 0] })
+  //     console.log('setNodes', element)
+  //     setIsOpen(false)
+  //   }
+  // }, [isOpen])
 
-  if (readonly) {
-    return <button {...attributes}>{children}</button>
+  function closeModal() {
+    setIsOpen(false)
   }
+
+  function create() {
+    const path = ReactEditor.findPath(editor, element)
+    Transforms.setNodes<PopupInlineElement>(
+      editor,
+      { id: 'test', str: 'hello-world' },
+      { at: path }
+    )
+    Transforms.insertText(editor, 'hello-world', { at: [...path, 0] })
+  }
+
+  // if (readonly) {
+  //   return <button {...attributes}>{children}</button>
+  // }
   return (
     <span {...attributes} style={{ color: 'red' }}>
-      <button
-        onClick={(event) => {
-          event.preventDefault()
-          console.log('clicked label')
-        }}
-      >
-        {children}
-      </button>
+      <span>{children}</span>
+      <span contentEditable={false}>
+        <button
+          onClick={(event) => {
+            event.preventDefault()
+            console.log('clicked')
+            setIsOpen(true)
+          }}
+        >
+          click
+        </button>
+      </span>
+      <span contentEditable={false}>
+        <Modal
+          ariaHideApp={false}
+          isOpen={isOpen}
+          // onAfterOpen={afterOpenModal}
+          onRequestClose={closeModal}
+          contentLabel="Example Modal"
+        >
+          <button onClick={create}>create</button>
+          <button onClick={closeModal}>close</button>
+        </Modal>
+      </span>
     </span>
   )
 }
 
-const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
-  let style: React.CSSProperties = {}
+const withPopup = (editor: Editor): Editor => {
+  const { isInline, isVoid, normalizeNode } = editor
 
-  switch (leaf.type) {
-    case 'url':
-    case 'ticker':
-    case 'topic':
-    case 'mirror-ticker':
-    case 'mirror-topic':
-    case 'hashtag':
-    case 'user': {
-      style = { color: 'brown' }
-      break
-    }
-  }
-  return (
-    <span {...attributes} style={style}>
-      {children}
-    </span>
-  )
-}
-
-function decorate([node, path]: NodeEntry): Range[] {
-  const ranges: Range[] = []
-
-  if (!Text.isText(node)) {
-    return ranges
-  }
-
-  function getLength(token: string | Token): number {
-    if (typeof token === 'string') {
-      return token.length
-    } else if (typeof token.content === 'string') {
-      return token.content.length
-    } else if (Array.isArray(token.content)) {
-      return token.content.reduce((l, t) => l + getLength(t), 0)
-    } else {
-      return 0
-    }
-  }
-
-  const tokens = tokenize(node.text)
-
-  let start = 0
-  for (const token of tokens) {
-    const length = getLength(token)
-    const end = start + length
-
-    if (typeof token !== 'string') {
-      ranges.push({
-        // [token.type]: true,
-        type: token.type,
-        anchor: { path, offset: start },
-        focus: { path, offset: end },
-      })
-    }
-    start = end
-  }
-
-  return ranges
-}
-
-const withLabel = (editor: Editor): Editor => {
-  const { isInline } = editor
+  // editor.isVoid = (element) => {
+  //   return ['popup'].includes(element.type) ? true : isVoid(element)
+  // }
 
   editor.isInline = (element) => {
-    return ['label', 'mirror'].includes(element.type) ? true : isInline(element)
+    return ['popup', 'label', 'mirror'].includes(element.type)
+      ? true
+      : isInline(element)
   }
+
+  // editor.normalizeNode = ([node, path]) => {
+  //   if (isPopup(node)) {
+  //     console.log(node)
+  //     Transforms.insertText(editor, node.str, { at: [...path, 0] })
+  //   }
+  //   normalizeNode([node, path])
+  // }
 
   return editor
 }
@@ -533,17 +486,9 @@ export const BulletEditor = (props: {
     withMirror: isWithMirror = false,
   } = props
 
-  function parse(value: LiElement[]) {
-    const editor = createEditor()
-    editor.children = value
-    Transforms.removeNodes(editor, { at: [0] })
-    console.log(editor.children)
-  }
-  parse(initialValue)
-
   const [value, setValue] = useState<LiElement[]>(initialValue)
   const editor = useMemo(
-    () => withLabel(withHistory(withReact(createEditor()))),
+    () => withPopup(withHistory(withReact(createEditor()))),
     []
   )
   const renderElement = useCallback(
@@ -552,10 +497,6 @@ export const BulletEditor = (props: {
         {...{ ...props, authorName, sourceUrl, withMirror: isWithMirror }}
       />
     ),
-    []
-  )
-  const renderLeaf = useCallback(
-    (props: RenderLeafProps) => <Leaf {...props} />,
     []
   )
 
@@ -579,13 +520,8 @@ export const BulletEditor = (props: {
       >
         <Editable
           autoCorrect="false"
-          decorate={decorate}
           readOnly={readonly}
           renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          onKeyDown={(event) => {
-            withLcbodyOnKeyDown(event, editor)
-          }}
         />
       </Slate>
     </div>

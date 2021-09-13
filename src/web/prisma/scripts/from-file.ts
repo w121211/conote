@@ -127,7 +127,7 @@ async function insertMarkerlines(
     if (node && poll && poll.type === 'poll' && poll.id) {
       const vote = await createAuthorVote({
         choiceIdx,
-        pollId: poll.id,
+        pollId: parseInt(poll.id),
         authorName: e.oauthor,
         userId,
       })

@@ -27,7 +27,6 @@ model User {
   HashtagLike  HashtagLike[]
 }
 
-// TODO: 非常像symbol，可以合併進symbol？ -> No!poll的情況需要以oauthor為代表
 model Author {
   id        Int       @id @default(autoincrement())
   name      String    @unique

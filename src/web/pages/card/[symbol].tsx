@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import { Node } from 'slate'
-import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import { BulletEditor } from '../../components/editor/editor'
 import { LiElement } from '../../components/editor/slate-custom-types'
 import { useLocalValue } from '../../components/editor/use-local-value'
 import { isLi } from '../../components/editor/with-list'
-import { getNavLocation, locationToHref, NavLocation } from '../../components/editor/with-location'
+import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
 import HashtagUpDown from '../../components/upDown/hashtag-up-down'
-import { Poll, useCreateVoteMutation } from '../../apollo/query.graphql'
+import { parseChildren } from '../../components/editor/with-parse'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -47,80 +47,6 @@ export const hashtagTextToIcon = (text: string): JSX.Element | null => {
   return null
 }
 
-/**
- * @param poll
- * @param author 若給予視為代表 author 投票
- */
-const PollComponent = (props: { poll: Poll; author?: string }): JSX.Element => {
-  const { poll, author } = props
-  const [createVote] = useCreateVoteMutation({
-    update(cache, { data }) {
-      // const res = cache.readQuery<MyVotesQuery>({
-      //   query: MyVotesDocument,
-      // })
-      // if (data?.createVote && res?.myVotes) {
-      //   cache.writeQuery({
-      //     query: MyVotesDocument,
-      //     data: { myVotes: res.myVotes.concat([data.createVote]) },
-      //   })
-      // }
-      // refetch()
-    },
-    // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
-  })
-  const onVote = () => {
-    // 已經投票且生效，不能再投
-    // 尚未投票，可以投
-    // 送出按鈕
-  }
-
-  return (
-    <>
-      {poll.choices.map((e, i) => (
-        <button
-          key={i}
-          onClick={event => {
-            createVote({
-              variables: {
-                pollId: poll.id,
-                data: { choiceIdx: i },
-              },
-            })
-          }}
-        >
-          {e}
-        </button>
-      ))}
-    </>
-  )
-}
-
-const HashtagComponent = (props: { hashtag: Hashtag | HashtagGroup }): JSX.Element => {
-  const { hashtag } = props
-  // if (hashtag.type === 'hashtag' || hashtag.typ === 'hashtag-group')
-  // const hashtagLike = useHashtagLike({ hashtag })
-  switch (hashtag.type) {
-    case 'hashtag':
-      return (
-        <div>
-          {/* <HashtagUpDown hashtagId={e.id} text={e.text} /> */}
-          {/* <HashtagLike hashtag={hashtag} /> */}
-          <button>{hashtag.text}</button>
-        </div>
-      )
-    case 'hashtag-group':
-      return (
-        <div>
-          (
-          {hashtag.poll.choices.map((e, i) => (
-            <button key={i}>{e}</button>
-          ))}
-          )
-        </div>
-      )
-  }
-}
-
 const CardSymbolPage = (): JSX.Element | null => {
   const router = useRouter()
   const [navs, setNavs] = useState<Nav[]>() // editor route
@@ -132,6 +58,7 @@ const CardSymbolPage = (): JSX.Element | null => {
     if (router.isReady) {
       const location = getNavLocation(router.query)
       setLocation(location)
+      // console.log(location)
     }
   }, [router])
 
@@ -150,13 +77,13 @@ const CardSymbolPage = (): JSX.Element | null => {
   }
   const { selfCard, mirror, openedLi, value } = data
   const [openedLiLc] = openedLi.children
-
+  // const parsedValue = parseChildren(value)
+  const parsedValue = value
   // console.log('symbol', navs)
   return (
     <Layout path={navs}>
+      <a href="/card?url=https://www.youtube.com/watch?v=q0ImE0kDlvw">https://www.youtube.com/watch?v=q0ImE0kDlvw</a>
       <div style={{ marginBottom: '3em' }}>
-        {/* <a href="/api/auth/login">Login</a> */}
-
         <button
           onClick={() => {
             setReadonly(!readonly)
@@ -187,41 +114,32 @@ const CardSymbolPage = (): JSX.Element | null => {
 
         {mirror && (
           <span>
-            <a href={locationToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>Home</a>
+            <Link href={locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>
+              <a>Home</a>
+            </Link>
             ...
           </span>
         )}
 
         {navs &&
           navs.map((e, i) => (
-            <span key={i}>
-              <a href={locationToHref({ ...location, openedLiPath: e.path })}>{e.text}</a>|
-            </span>
+            <Link href={locationToUrl({ ...location, openedLiPath: e.path })} key={i}>
+              <a>{e.text}</a>
+            </Link>
           ))}
-
-        {/* <div>
-          <span>@{card.link?.authorName}</span>
-          <span>@{card.link?.url}</span>
-          <h3>{Node.string(openedLiLc)}</h3>
-          {openedLiLc.rootBulletDraft?.allHashtags
-            ? openedLiLc.rootBulletDraft.allHashtags.map((e, i) => (
-                <HashtagUpDown key={i} hashtagId={e.id} text={e.text} />
-              ))
-            : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <button key={i}>{e.text}</button>)}
-        </div> */}
 
         <div>
           <span>@{selfCard.link?.authorName}</span>
           <span>@{selfCard.link?.url}</span>
           <h3>{Node.string(openedLiLc)}</h3>
-          {openedLiLc.rootBulletDraft?.allHashtags
-            ? openedLiLc.rootBulletDraft.allHashtags.map((e, i) => <HashtagComponent key={i} hashtag={e} />)
-            : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <HashtagComponent key={i} hashtag={e} />)}
+          {/* {openedLiLc.rootBulletDraft?.emojis
+            ? openedLiLc.rootBulletDraft.emojis.map((e, i) => <HashtagComponent key={i} hashtag={e} />)
+            : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <HashtagComponent key={i} hashtag={e} />)} */}
         </div>
         {/* {console.log(openedLiLc.rootBulletDraft?.allHashtags)} */}
 
         <BulletEditor
-          initialValue={value}
+          initialValue={parsedValue}
           location={location}
           onValueChange={value => {
             setLocalValue(value)

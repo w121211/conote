@@ -1,4 +1,5 @@
 import { ParsedUrlQuery } from 'querystring'
+import { UrlObject } from 'url'
 
 /**
  * localhost/card/$XX?m=$AA+p=0.1.2.0.1
@@ -37,25 +38,36 @@ export function getNavLocation(query: ParsedUrlQuery): NavLocation {
   }
 }
 
-export function locationToHref(lcation: NavLocation, joinLiPath?: number[]): string {
+export function locationToUrl(lcation: NavLocation, joinLiPath?: number[]): UrlObject {
   const { selfSymbol, mirrorSymbol, openedLiPath, author } = lcation
 
-  const params = new URLSearchParams()
+  // const params = new URLSearchParams()
+  const query: Record<string, string> = {}
   if (mirrorSymbol) {
-    params.set(MIRROR_KEY, mirrorSymbol)
+    // params.set(MIRROR_KEY, mirrorSymbol)
+    query[MIRROR_KEY] = mirrorSymbol
   }
   if (author && mirrorSymbol) {
-    params.set(AUTHOR_KEY, author)
+    // params.set(AUTHOR_KEY, author)
+    query[AUTHOR_KEY] = author
   }
   if (joinLiPath) {
-    const merged = [...openedLiPath, 1, ...joinLiPath]
-    params.set(PATH_KEY, merged.join(PATH_SPLITTER))
+    // const merged = [...openedLiPath, 1, ...joinLiPath]
+    // params.set(PATH_KEY, merged.join(PATH_SPLITTER))
+    query[PATH_KEY] = [...openedLiPath, 1, ...joinLiPath].join(PATH_SPLITTER)
   } else if (openedLiPath.length > 0) {
-    params.set(PATH_KEY, openedLiPath.join(PATH_SPLITTER))
+    // params.set(PATH_KEY, openedLiPath.join(PATH_SPLITTER))
+    query[PATH_KEY] = openedLiPath.join(PATH_SPLITTER)
   }
-  const _params = params.toString()
-
-  return _params.length > 0
-    ? `/card/${encodeURIComponent(selfSymbol)}?${params.toString()}`
-    : `/card/${encodeURIComponent(selfSymbol)}`
+  // const _params = params.toString()
+  // return _params.length > 0
+  //   ? `/card/${encodeURIComponent(selfSymbol)}?${params.toString()}`
+  //   : `/card/${encodeURIComponent(selfSymbol)}`
+  return {
+    pathname: '/card/[symbol]',
+    query: {
+      ...query,
+      symbol: selfSymbol,
+    },
+  }
 }

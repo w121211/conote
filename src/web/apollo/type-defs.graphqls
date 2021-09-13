@@ -30,14 +30,13 @@ type Query {
 
   me: User!
 
-  myVotes(after: String): [Vote!]!
-  myCommentLikes(after: String): [CommentLike!]!
-  myBoardLikes(after: String): [BoardLike!]!
-  myBulletLikes(after: String): [BulletLike!]!
-
-  # 若沒有 like 過會返回 null TODO: 整合成對單張卡片搜尋？
-  myHashtagLike(hashtagId: ID!): HashtagLike
   # myVotes(after: String): [Vote!]!
+  # myCommentLikes(after: String): [CommentLike!]!
+  # myBoardLikes(after: String): [BoardLike!]!
+  # myBulletLikes(after: String): [BulletLike!]!
+
+  myVotes(pollId: ID!): [Vote!]! # 因為目前可重複投票，所以同一個 poll 可能會有多個 votes
+  myHashtagLike(hashtagId: ID!): HashtagLike # 若沒有 like 過會返回 null TODO: 整合成對單張卡片搜尋？
 
   # --- NEXT ---
 
@@ -116,16 +115,11 @@ type Mutation {
   createCardBody(cardSymbol: String!, data: CardBodyInput!): CardBody!
 
   # 等價於create hashtag，會同步update card body hashtag
+  createEmoji(bulletId: Int!, emojiText: EmojiText!): CreateEmojiResponse! # 若 emoji 已經創，返回該 emoji 並 like
+  upsertEmojiLike(hashtagId: ID!, data: LikeInput!): UpsertEmojiLikeResponse!
+
   # createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): CreateBoardResponse!
-
-  # （尚未開放）一般的 hashtag 需透過 editor 編輯來創造，但對於內建、常用的 hashtag 可直接創造
-  # createQuickHashtag(cardId: ID!, bulletId: Int!, data: BoardInput!): CreateHashtagResponse!
-
-  # TODO 不能讓 user 同時指定 cardId & bulletId
-  createEmoji(bulletId: Int!, cardId: ID!, emoji: EmojiText!): Hashtag!
-
-  createEmojiLike(hashtagId: ID!, data: LikeInput!): HashtagLikeResponse!
-  updateEmojiLike(id: ID!, data: LikeInput!): HashtagLikeResponse!
+  createPoll(bulletId: Int!, data: PollInput!): Poll!
 
   createVote(pollId: ID!, data: VoteInput!): Vote!
 
@@ -256,6 +250,12 @@ type Poll {
   updatedAt: DateTime!
 }
 
+type HashtagCount {
+  id: ID!
+  nUps: Int!
+  nDowns: Int!
+}
+
 type Hashtag {
   id: ID!
   userId: String!
@@ -279,13 +279,12 @@ type HashtagLike {
   updatedAt: DateTime!
 }
 
-type HashtagCount {
-  id: ID!
-  nUps: Int!
-  nDowns: Int!
+type CreateEmojiResponse {
+  emoji: Hashtag!
+  like: HashtagLike! # 創 emoji 會同時創 emoji-like，表示 user 點讚此 emoji
 }
 
-type HashtagLikeResponse {
+type UpsertEmojiLikeResponse {
   like: HashtagLike!
   count: HashtagCount!
 }

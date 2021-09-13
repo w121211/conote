@@ -69,27 +69,27 @@ export function urlToSymbol(url: string): string | null {
 export function deltaLike<T extends CommentLike | BulletLike | BoardLike | HashtagLike>(
   like: T,
   prevLike?: T,
-): { deltaDown: number; deltaUp: number } {
+): { dDown: number; dUp: number } {
   // 計算up-down的變化值
-  let deltaUp = 0
-  let deltaDown = 0
+  let dUp = 0
+  let dDown = 0
   if (prevLike) {
     switch (prevLike.choice) {
       case LikeChoice.UP:
-        deltaUp -= 1
+        dUp -= 1
         break
       case LikeChoice.DOWN:
-        deltaDown -= 1
+        dDown -= 1
         break
     }
   }
   switch (like.choice) {
     case LikeChoice.UP:
-      deltaUp += 1
+      dUp += 1
       break
     case LikeChoice.DOWN:
-      deltaDown += 1
+      dDown += 1
       break
   }
-  return { deltaDown, deltaUp }
+  return { dDown, dUp }
 }

@@ -244,21 +244,27 @@ query Me {
   }
 }
 
-query MyVotes {
-  myVotes {
+# query MyVotes {
+#   myVotes {
+#     ...vote
+#   }
+# }
+
+# query MyCommentLikes {
+#   myCommentLikes {
+#     ...commentLike
+#   }
+# }
+
+# query MyBoardLikes {
+#   myBoardLikes {
+#     ...boardLike
+#   }
+# }
+
+query MyVotes($pollId: ID!) {
+  myVotes(pollId: $pollId) {
     ...vote
-  }
-}
-
-query MyCommentLikes {
-  myCommentLikes {
-    ...commentLike
-  }
-}
-
-query MyBoardLikes {
-  myBoardLikes {
-    ...boardLike
   }
 }
 
@@ -286,9 +292,9 @@ mutation CreateCardBody($cardSymbol: String!, $data: CardBodyInput!) {
   }
 }
 
-mutation CreateEmoji($bulletId: Int!, $cardId: ID!, $emoji: EmojiText!) {
-  createEmoji(bulletId: $bulletId, cardId: $cardId, emoji: $emoji) {
-    ...hashtag
+mutation CreatePoll($bulletId: Int!, $data: PollInput!) {
+  createPoll(bulletId: $bulletId, data: $data) {
+    ...poll
   }
 }
 
@@ -316,19 +322,19 @@ mutation createAuthorVote($pollId: ID!, $authorName: String!, $data: VoteInput!)
 #   }
 # }
 
-mutation CreateEmojiLike($hashtagId: ID!, $data: LikeInput!) {
-  createEmojiLike(hashtagId: $hashtagId, data: $data) {
+mutation CreateEmoji($bulletId: Int!, $emojiText: EmojiText!) {
+  createEmoji(bulletId: $bulletId, emojiText: $emojiText) {
+    emoji {
+      ...hashtag
+    }
     like {
       ...hashtagLike
-    }
-    count {
-      ...hashtagCount
     }
   }
 }
 
-mutation UpdateEmojiLike($id: ID!, $data: LikeInput!) {
-  updateEmojiLike(id: $id, data: $data) {
+mutation UpsertEmojiLike($hashtagId: ID!, $data: LikeInput!) {
+  upsertEmojiLike(hashtagId: $hashtagId, data: $data) {
     like {
       ...hashtagLike
     }

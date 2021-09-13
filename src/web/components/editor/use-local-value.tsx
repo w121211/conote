@@ -22,6 +22,7 @@ import { Serializer } from './serializer'
 import { LiElement } from './slate-custom-types'
 import { isLi } from './with-list'
 import { NavLocation } from './with-location'
+import { parseLcAndReplace } from './with-parse'
 
 const defaultLi: LiElement = {
   type: 'li',
@@ -226,7 +227,9 @@ export type LocalValueData = {
   value: LiElement[] // opened li 對應的 value，也就是導入 editor 的 value
 }
 
-export const useLocalValue = (props: {
+export const useLocalValue = ({
+  location,
+}: {
   location: NavLocation | undefined
 }): {
   data?: LocalValueData
@@ -234,18 +237,17 @@ export const useLocalValue = (props: {
   submitValue: (props: { onFinish?: () => void }) => void // 將 value 發送至後端（搭配 createCardBody() )
   dropValue: () => void // 將 value 從 local 刪除
 } => {
-  const { location } = props
+  // console.log('useLocalValue', location)
   const client = useApolloClient()
   const [data, setData] = useState<LocalValueData | undefined>()
 
   const setLocalValue = useCallback(
     (value: LiElement[]) => {
       if (data) {
+        // console.log('setLocalValue', value)
         const { openedLi, self, mirror } = data
         openedLi.children = [openedLi.children[0], { type: 'ul', children: value }] // shallow copy
-
         const [symbol, rootLi] = mirror ? [mirror.symbol, mirror.rootLi] : [self.symbol, self.rootLi] // 若目前有 mirror（等同於 location 指向 mirror）則存入 mirror
-
         store.setRootLi(symbol, rootLi) // TODO: 每次 input 都需要轉換 string <-> json，相當耗時
       }
     },
@@ -335,6 +337,8 @@ export const useLocalValue = (props: {
       if (window && location) {
         const { selfSymbol, mirrorSymbol, openedLiPath = [] } = location
 
+        // console.log('useEffect')
+
         // 若在 local 找不到 self symbol，代表 symbol 有所變動，清除 & 更新 local
         if (store.getCard(selfSymbol) === null) {
           store.clear()
@@ -366,7 +370,6 @@ export const useLocalValue = (props: {
         })
       }
     }
-
     asyncRun().catch(err => {
       console.error(err)
     })

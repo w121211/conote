@@ -1,14 +1,7 @@
 import { BaseEditor, BaseRange } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-import {
-  BulletDraft,
-  InlineMirror,
-  InlineNewPoll,
-  InlinePoll,
-  InlineSymbol,
-  RootBulletDraft,
-} from '../../lib/bullet/types'
+import { BulletDraft, InlineMirror, InlinePoll, InlineSymbol, RootBulletDraft } from '../../lib/bullet/types'
 
 export type CommentInput = {
   boardCode: !PinBoardCode
@@ -41,15 +34,7 @@ export type InlineMirrorElement = InlineMirror & {
 //   children: CustomText[]
 // }
 
-// export type InlineNewHashtagElement = InlineNewHashtag & {
-//   children: CustomText[]
-// }
-
 export type InlinePollElement = InlinePoll & {
-  children: CustomText[]
-}
-
-export type InlineNewPollElement = InlineNewPoll & {
   children: CustomText[]
 }
 
@@ -101,7 +86,7 @@ export type UlElement = {
   folded?: true
 }
 
-export type CustomInlineElement = InlineSymbolElement | InlineMirrorElement | InlinePollElement | InlineNewPollElement
+export type CustomInlineElement = InlineSymbolElement | InlineMirrorElement | InlinePollElement
 
 type CustomElement = CustomInlineElement | LcElement | LiElement | UlElement
 
