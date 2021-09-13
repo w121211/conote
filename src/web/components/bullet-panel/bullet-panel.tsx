@@ -101,8 +101,8 @@ const BulletPanel = ({
           {myChildren.map((e, i) => {
             if (e.authorName)
               return (
-                <div key={i} className={classes.title}>
-                  <div className={`${classes.panelElement} ${classes.title}`}>{e.authorName}</div>
+                <div key={i} className={classes.titleContainer}>
+                  <div className={` ${classes.title}`}>{e.authorName}</div>
                   <div role="none" className={classes.divider}></div>
                 </div>
               )

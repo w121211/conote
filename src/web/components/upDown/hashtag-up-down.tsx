@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
   useMyHashtagLikeQuery,
   useCreateHashtagLikeMutation,
@@ -10,29 +10,86 @@ import {
   LikeChoice,
   HashtagsDocument,
 } from '../../apollo/query.graphql'
-import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
-import { hashtagTextToIcon } from '../../pages/card/[symbol]'
+import PinIcon from '../../assets/svg/like.svg'
+import UpIcon from '../../assets/svg/arrow-up.svg'
 import classes from './upDown.module.scss'
+import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
+import HashtagTextToIcon from './hashtag-text-to-icon'
+import MyHashtagGroup from './hashtag-group'
+
+const hashtagTextToIcon = (hashtag: Hashtag | HashtagGroup): JSX.Element | null => {
+  if (hashtag.type === 'hashtag') {
+    switch (hashtag.text) {
+      case '#pin':
+        return <PinIcon width="1em" height="1em" />
+      case '#up':
+        return <UpIcon width="1em" height="1em" />
+      case '#down':
+        return <UpIcon width="1em" height="1em" style={{ transform: 'rotate(180deg)' }} />
+    }
+  }
+
+  if (hashtag.type === 'hashtag-group') {
+    const newText = hashtag.text.substring(1, hashtag.text.length - 1)
+    const textArr = newText.split(' ')
+    return (
+      <>
+        {textArr.map((e, i) => {
+          //first child
+          if (i === 0) {
+            return (
+              <span
+                key={i}
+                onClick={ev => {
+                  ev.stopPropagation()
+                  console.log(e)
+                }}
+              >
+                {e}
+              </span>
+            )
+          }
+          //others
+          return (
+            <span
+              className={classes.HashtagGroupChildren}
+              key={i}
+              onClick={ev => {
+                ev.stopPropagation()
+                console.log(e)
+              }}
+            >
+              {e}
+            </span>
+          )
+        })}
+      </>
+    )
+  }
+  return <span>{hashtag.text}</span>
+}
 
 const HashtagUpDown = ({
   // choice,
   // commentId,
   // bulletId,
-  hashtagId,
+  hashtag,
   children,
-  text,
+  // text,
+  inline,
 }: {
   // choice: CommentCount | BulletCount
   // commentId?: string
   // bulletId?: string
-  hashtagId: number
+  hashtag: Hashtag | HashtagGroup
   children?: React.ReactNode
-  text: string
-}) => {
+  // text: string
+  inline?: boolean
+}): JSX.Element => {
   const router = useRouter()
   const symbol = router.query['symbol'] as string
   const { data, loading, error } = useMyHashtagLikeQuery({
-    variables: { hashtagId },
+    variables: { hashtagId: typeof hashtag.id === 'string' ? parseInt(hashtag.id) : hashtag.id },
   })
 
   const [createHashtagLike] = useCreateHashtagLikeMutation({
@@ -46,7 +103,7 @@ const HashtagUpDown = ({
         })
       }
     },
-    refetchQueries: [{ query: HashtagsDocument, variables: { symbol } }],
+    // refetchQueries: [{ query: HashtagsDocument, variables: { symbol } }],
   })
   const [updateHashtagLike] = useUpdateHashtagLikeMutation({
     update(cache, { data }) {
@@ -59,7 +116,7 @@ const HashtagUpDown = ({
         })
       }
     },
-    refetchQueries: [{ query: HashtagsDocument, variables: { symbol } }],
+    // refetchQueries: [{ query: HashtagsDocument, variables: { symbol } }],
   })
 
   function handleClickLike(choice: LikeChoice) {
@@ -86,43 +143,66 @@ const HashtagUpDown = ({
     if (myHashtagLike === null) {
       createHashtagLike({
         variables: {
-          hashtagId: hashtagId.toString(),
+          hashtagId: typeof hashtag.id === 'string' ? hashtag.id : hashtag.id.toString(),
           data: { choice },
         },
       })
     }
   }
-  if (loading) {
-    return null
-  }
-  if (error || data === undefined) {
-    return <div>Error</div>
-  }
+  // if (loading) {
+  //   return <span>Loading...</span>
+  // }
+  // if (error || data === undefined) {
+  //   return <div>Error</div>
+  // }
   return (
+    // <div>
     <>
-      <button
-        className={`${classes.button} ${data.myHashtagLike?.choice === 'UP' && classes.clicked}`}
-        onClick={() => {
-          handleClickLike('UP')
-        }}
-      >
-        {hashtagTextToIcon(text)}{' '}
-      </button>
-      {/* <button
-        onClick={() => {
-          handleClickLike('UP')
-        }}
-      >
-        {data.myHashtagLike?.choice === 'UP' ? 'up*' : 'up'}
-      </button>
-      <button
-        onClick={() => {
-          handleClickLike('DOWN')
-        }}
-      >
-        {data.myHashtagLike?.choice === 'DOWN' ? 'down*' : 'down'}
-      </button> */}
+      {hashtag.type === 'hashtag' ? (
+        <button
+          className={`${classes.button} ${inline && 'inline'} ${
+            data?.myHashtagLike?.choice === 'UP' && classes.clicked
+          }`}
+          onClick={() => {
+            handleClickLike('UP')
+          }}
+        >
+          <HashtagTextToIcon hashtag={hashtag} />
+        </button>
+      ) : (
+        // <button
+        //   className={`${classes.button} ${inline && 'inline'} ${
+        //     data?.myHashtagLike?.choice === 'UP' && classes.clicked
+        //   }`}
+        // onClick={() => {
+        //   // handleClickLike('UP')
+        //   console.log('group')
+        // }}
+        // >
+        <MyHashtagGroup
+          className={`${classes.button} ${inline && 'inline'} ${
+            data?.myHashtagLike?.choice === 'UP' && classes.clicked
+          }`}
+          hashtag={hashtag}
+        />
+        // {/* </button> */}
+      )}
     </>
+    //   {/* <button
+    //     onClick={() => {
+    //       handleClickLike('UP')
+    //     }}
+    //   >
+    //     {data.myHashtagLike?.choice === 'UP' ? 'up*' : 'up'}
+    //   </button>
+    //   <button
+    //     onClick={() => {
+    //       handleClickLike('DOWN')
+    //     }}
+    //   >
+    //     {data.myHashtagLike?.choice === 'DOWN' ? 'down*' : 'down'}
+    //   </button> */}
+    // {/* </div> */}
   )
 }
 

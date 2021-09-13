@@ -1,5 +1,5 @@
 .formContainer {
-  border-bottom: 1px solid $gray-text;
+  // border-bottom: 1px solid $gray-text;
 }
 .form {
   display: flex;
@@ -84,4 +84,5 @@
 .votedCount {
   display: block;
   text-align: end;
+  color: $gray-text;
 }

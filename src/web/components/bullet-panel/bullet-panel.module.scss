@@ -71,11 +71,16 @@
   //   }
   // }
 }
+.titleContainer {
+  font-size: 13px;
+  width: 100%;
+}
 .title {
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: -8px;
+  padding: 3px 10px;
   font-weight: bold;
   color: $text;
 }

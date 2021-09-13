@@ -36,6 +36,7 @@ export type HashtagGroup = Omit<Hashtag, 'type'> & {
     choices: string[]
     createdAt: Date
     updatedAt: Date
+    count: PollCount
   }
   // Omit<Poll, 'type' | 'status' | 'createdAt' | 'updatedAt'> & {
   //   count: Omit<PollCount, 'pollId' | 'nJudgments' | 'createdAt' | 'updatedAt'>

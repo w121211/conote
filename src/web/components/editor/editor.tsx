@@ -44,6 +44,8 @@ import { NavLocation, pathToHref } from './with-location'
 import { parseLcAndReplaceChildren, withInline } from './with-inline'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
+import HashtagUpDown from '../upDown/hashtag-up-down'
+import { spawn } from 'child_process'
 
 const HashtagLike = (props: { hashtag: Hashtag | HashtagGroup }): JSX.Element | null => {
   const { hashtag } = props
@@ -137,10 +139,10 @@ const HashtagButton = (props: { hashtag: Hashtag | HashtagGroup }): JSX.Element 
   // if (hashtag.type === 'hashtag' || hashtag.typ === 'hashtag-group')
   // const hashtagLike = useHashtagLike({ hashtag })
   return (
-    <div>
-      {hashtag.text}
-      <HashtagLike hashtag={hashtag} />
-    </div>
+    <span>
+      {/* {hashtag.text} */}
+      <HashtagUpDown hashtagId={hashtag.id} text={hashtag.text} inline />
+    </span>
   )
 }
 
@@ -165,59 +167,60 @@ const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element
   return [author, switcher]
 }
 
-const Leaf = (props: RenderLeafProps): JSX.Element => {
-  const { attributes, children, leaf } = props
-  // let style: React.CSSProperties = {}
-  if (leaf.placeholder) {
-    return (
-      <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
-        <span {...attributes}>
-          {/* <DefaultLeaf {...props} /> */}
-          {children}
-        </span>
-        <span style={{ opacity: 0.3, position: 'absolute', top: 0 }} contentEditable={false}>
-          Type / to open menu
-        </span>
-      </span>
-    )
-  }
-  // switch (leaf.type) {
-  //   case 'sect-symbol': {
-  //     style = { fontWeight: 'bold' }
-  //     break
-  //   }
-  //   case 'multiline-marker':
-  //   case 'inline-marker': {
-  //     style = { color: 'red' }
-  //     break
-  //   }
-  //   case 'inline-value':
-  //   case 'line-value': {
-  //     style = { color: 'blue' }
-  //     break
-  //   }
-  //   case 'line-mark':
-  //   case 'inline-mark': {
-  //     style = { color: 'orange' }
-  //     break
-  //   }
-  //   case 'mark':
-  //   case 'ticker':
-  //   case 'topic': {
-  //     style = { color: 'brown' }
-  //     break
-  //   }
-  //   case 'stamp': {
-  //     style = { color: 'yellow' }
-  //     break
-  //   }
-  // }
+// const Leaf = (props: RenderLeafProps): JSX.Element => {
+//   const { attributes, children, leaf } = props
+//   console.log(children)
+//   // let style: React.CSSProperties = {}
+//   // if (leaf.placeholder) {
+//   //   return (
+//   //     <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
+//   //       <span {...attributes}>
+//   //         {/* <DefaultLeaf {...props} /> */}
+//   //         {children}
+//   //       </span>
+//   //       {/* <span style={{ opacity: 0.3, position: 'absolute', top: 0 }} contentEditable={false}>
+//   //         Type / to open menu
+//   //       </span> */}
+//   //     </span>
+//   //   )
+//   // }
+//   // switch (leaf.type) {
+//   //   case 'sect-symbol': {
+//   //     style = { fontWeight: 'bold' }
+//   //     break
+//   //   }
+//   //   case 'multiline-marker':
+//   //   case 'inline-marker': {
+//   //     style = { color: 'red' }
+//   //     break
+//   //   }
+//   //   case 'inline-value':
+//   //   case 'line-value': {
+//   //     style = { color: 'blue' }
+//   //     break
+//   //   }
+//   //   case 'line-mark':
+//   //   case 'inline-mark': {
+//   //     style = { color: 'orange' }
+//   //     break
+//   //   }
+//   //   case 'mark':
+//   //   case 'ticker':
+//   //   case 'topic': {
+//   //     style = { color: 'brown' }
+//   //     break
+//   //   }
+//   //   case 'stamp': {
+//   //     style = { color: 'yellow' }
+//   //     break
+//   //   }
+//   // }
 
-  return (
-    // <span {...attributes} style={style}>
-    <span {...attributes}>{children}</span>
-  )
-}
+//   return (
+//     // <span {...attributes} style={style}>
+//     <>{children !== '' && <span {...attributes}>{children}</span>}</>
+//   )
+// }
 
 const LabelInline = (
   props: RenderElementProps & {
@@ -237,7 +240,7 @@ const LabelInline = (
   if (readonly) {
     // console.log(Node.string(element))
     return (
-      <a href={`/card/${Node.string(element)}`} {...attributes}>
+      <a href={`/card/${Node.string(element)}`} className="inline" {...attributes}>
         {children}
       </a>
     )
@@ -273,7 +276,8 @@ const CurHashtagsPlacerInline = (
   if (readonly) {
     return (
       <span {...attributes}>
-        {/* {children} */}
+        {children}
+        {/* {console.log(element.hashtags)} */}
         {element.hashtags.map((e, i) => (
           <HashtagButton key={i} hashtag={e} />
         ))}
@@ -292,7 +296,7 @@ const HashtagInline = (props: RenderElementProps & { element: HashtagInlineEleme
   const readonly = useReadOnly()
   if (readonly) {
     return (
-      <button {...attributes} className=".inline">
+      <button {...attributes} className="inline">
         {children}
       </button>
     )
@@ -344,16 +348,16 @@ const Lc = (
   return (
     <div {...attributes}>
       <span className={classes.lcText}>{children}</span>
-      {readonly && (
+      {/* {readonly && (
         <div contentEditable={false} style={{ color: 'green' }}>
-          {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>}
+          {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>}
         {element.op === 'CREATE' && authorSwitcher}
         {sourceUrl}
         {element.id}
         {element.error}
-        {element.freeze && 'freeze'} */}
+        {element.freeze && 'freeze'}
         </div>
-      )}
+      )} */}
     </div>
   )
 }
@@ -397,7 +401,7 @@ const Li = (
         setShowPanelIcon(false)
       }}
     >
-      <div contentEditable={false}></div>
+      {/* <div contentEditable={false}></div> */}
       <div className={classes.arrowBulletWrapper} contentEditable={false}>
         <BulletPanel
           visible={showPanelIcon}
@@ -516,65 +520,65 @@ export const BulletEditor = (props: {
   const { initialValue, location, authorName, sourceUrl, readOnly, onValueChange } = props
   const [value, setValue] = useState<LiElement[]>(initialValue)
   const editor = useMemo(() => withInline(withOperation(withList(withHistory(withReact(createEditor()))))), [])
-  const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
+  // const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, authorName, sourceUrl }} />,
     [],
   )
-  const decorate = useCallback(([node, path]: NodeEntry) => {
-    const ranges: CustomRange[] = []
-    if (editor.selection != null) {
-      if (
-        !Editor.isEditor(node) &&
-        // Editor.string(editor, [path[0]]) === '' &&
-        Editor.string(editor, path) === '' &&
-        Range.includes(editor.selection, path) &&
-        Range.isCollapsed(editor.selection)
-      ) {
-        // ranges.push({
-        //   ...editor.selection,
-        //   placeholder: true,
-        // })
-        // console.log(editor.selection)
-        return [{ ...editor.selection, placeholder: true }]
-      }
-    }
-    //   if (!Text.isText(node)) {
-    //     return ranges
-    // }
+  // const decorate = useCallback(([node, path]: NodeEntry) => {
+  //   const ranges: CustomRange[] = []
+  //   if (editor.selection != null) {
+  //     if (
+  //       !Editor.isEditor(node) &&
+  //       // Editor.string(editor, [path[0]]) === '' &&
+  //       Editor.string(editor, path) === '' &&
+  //       Range.includes(editor.selection, path) &&
+  //       Range.isCollapsed(editor.selection)
+  //     ) {
+  //       // ranges.push({
+  //       //   ...editor.selection,
+  //       //   placeholder: true,
+  //       // })
+  //       // console.log(editor.selection)
+  //       return [{ ...editor.selection, placeholder: true }]
+  //     }
+  //   }
+  //   //   if (!Text.isText(node)) {
+  //   //     return ranges
+  //   // }
 
-    //   function getLength(token: string | Token): number {
-    //     if (typeof token === 'string') {
-    //       return token.length
-    //     } else if (typeof token.content === 'string') {
-    //       return token.content.length
-    //     } else if (Array.isArray(token.content)) {
-    //       return token.content.reduce((l, t) => l + getLength(t), 0)
-    //     } else {
-    //       return 0
-    //     }
-    //   }
+  //   //   function getLength(token: string | Token): number {
+  //   //     if (typeof token === 'string') {
+  //   //       return token.length
+  //   //     } else if (typeof token.content === 'string') {
+  //   //       return token.content.length
+  //   //     } else if (Array.isArray(token.content)) {
+  //   //       return token.content.reduce((l, t) => l + getLength(t), 0)
+  //   //     } else {
+  //   //       return 0
+  //   //     }
+  //   //   }
 
-    // const tokens = tokenize(node.text, LINE_VALUE_GRAMMAR)
-    // let start = 0
+  //   // const tokens = tokenize(node.text, LINE_VALUE_GRAMMAR)
+  //   // let start = 0
 
-    // for (const token of tokens) {
-    //   const length = getLength(token)
-    //   const end = start + length
+  //   // for (const token of tokens) {
+  //   //   const length = getLength(token)
+  //   //   const end = start + length
 
-    //   if (typeof token !== 'string') {
-    //     ranges.push({
-    //       // [token.type]: true,
-    //       type: token.type,
-    //       anchor: { path, offset: start },
-    //       focus: { path, offset: end },
-    //     })
-    //   }
-    //   start = end
-    // }
+  //   //   if (typeof token !== 'string') {
+  //   //     ranges.push({
+  //   //       // [token.type]: true,
+  //   //       type: token.type,
+  //   //       anchor: { path, offset: start },
+  //   //       focus: { path, offset: end },
+  //   //     })
+  //   //   }
+  //   //   start = end
+  //   // }
 
-    return ranges
-  }, [])
+  //   return ranges
+  // }, [])
   const withListOnKeyDownMemo = useCallback((event: React.KeyboardEvent) => {
     withListOnKeyDown(event, editor)
   }, [])
@@ -608,10 +612,10 @@ export const BulletEditor = (props: {
       >
         <Editable
           autoCorrect="false"
-          decorate={decorate}
+          // decorate={decorate}
           readOnly={readOnly}
           renderElement={renderElement}
-          renderLeaf={renderLeaf}
+          // renderLeaf={renderLeaf}
           onKeyDown={event => {
             withListOnKeyDownMemo(event)
             // if (search) {

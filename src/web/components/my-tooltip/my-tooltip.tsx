@@ -25,7 +25,7 @@ const MyTooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
     const newStyle: React.CSSProperties = {}
 
     if (visible !== undefined) {
-      newStyle.visibility = `${visible === true ? 'visible' : 'hidden'}`
+      // newStyle.visibility = `${visible === true ? 'visible' : 'hidden'}`
       newStyle.opacity = `${visible === true ? 1 : 0}`
       // newStyle.transform = `${ visible === true ? 'visible' : 'hidden'}`
     }

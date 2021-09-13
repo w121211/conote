@@ -7,9 +7,9 @@ import { useLocalValue } from '../../components/editor/use-local-value'
 import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, NavLocation, pathToHref } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
-import PinIcon from '../../assets/svg/like.svg'
-import UpIcon from '../../assets/svg/arrow-up.svg'
+
 import HashtagUpDown from '../../components/upDown/hashtag-up-down'
+import NavPath from '../../components/nav-path/nav-path'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -30,18 +30,6 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
     }
   }
   return navs
-}
-
-export const hashtagTextToIcon = (text: string): JSX.Element | null => {
-  switch (text) {
-    case '#pin':
-      return <PinIcon width="1em" height="1em" />
-    case '#up':
-      return <UpIcon width="1em" height="1em" />
-    case '#down':
-      return <UpIcon width="1em" height="1em" style={{ transform: 'rotate(180deg)' }} />
-  }
-  return null
 }
 
 const CardSymbolPage = (): JSX.Element | null => {
@@ -76,11 +64,19 @@ const CardSymbolPage = (): JSX.Element | null => {
 
   // console.log('symbol', navs)
   return (
-    <Layout path={navs}>
+    <Layout
+      navPath={
+        <NavPath
+          path={navs}
+          mirrorHomeUrl={mirror && pathToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
+        />
+      }
+    >
       <div style={{ marginBottom: '3em' }}>
         {/* <a href="/api/auth/login">Login</a> */}
 
         <button
+          className="noBg"
           onClick={() => {
             setReadonly(!readonly)
           }}
@@ -89,6 +85,7 @@ const CardSymbolPage = (): JSX.Element | null => {
         </button>
 
         <button
+          className="primary"
           onClick={() => {
             submitValue({
               onFinish: () => {
@@ -97,7 +94,9 @@ const CardSymbolPage = (): JSX.Element | null => {
               },
             })
           }}
-        ></button>
+        >
+          Submit
+        </button>
 
         <button
           onClick={() => {
@@ -108,29 +107,29 @@ const CardSymbolPage = (): JSX.Element | null => {
           {'Drop'}
         </button>
 
-        {mirror && (
+        {/* {mirror && (
           <span>
             <a href={pathToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>Home</a>
-            ...
+         
           </span>
-        )}
+        )} */}
 
-        {navs &&
+        {/* {navs &&
           navs.map((e, i) => (
             <span key={i}>
-              <a href={pathToHref({ ...location, openedLiPath: e.path })}>{e.text}</a>|
+              <a href={pathToHref({ ...location, openedLiPath: e.path })}>{e.text}</a>
             </span>
-          ))}
+          ))} */}
 
         <div>
-          <span>@{card.link?.authorName}</span>
-          <span>@{card.link?.url}</span>
+          {card.link?.authorName && <span>@{card.link?.authorName}</span>}
+          {card.link?.url && <span>@{card.link?.url}</span>}
           <h3>{Node.string(openedLiLc)}</h3>
-          {openedLiLc.rootBulletDraft?.allHashtags
-            ? openedLiLc.rootBulletDraft.allHashtags.map((e, i) => (
-                <HashtagUpDown key={i} hashtagId={e.id} text={e.text} />
-              ))
-            : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <button key={i}>{e.text}</button>)}
+          <div className="hashtagContainer">
+            {openedLiLc.rootBulletDraft?.allHashtags
+              ? openedLiLc.rootBulletDraft.allHashtags.map((e, i) => <HashtagUpDown key={i} hashtag={e} />)
+              : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <HashtagUpDown key={i} hashtag={e} />)}
+          </div>
         </div>
         {/* {console.log(openedLiLc.rootBulletDraft?.allHashtags)} */}
 

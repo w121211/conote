@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, CSSProperties } from 'react'
 import { useRouter } from 'next/router'
 import Creatable from 'react-select/creatable'
 import { toUrlParams } from '../lib/helper'
 import { useSearchAllLazyQuery } from '../apollo/query.graphql'
-import { ActionMeta } from 'react-select'
+import { ActionMeta, GroupTypeBase, Styles } from 'react-select'
 const components = {
   DropdownIndicator: null,
 }
@@ -51,9 +51,31 @@ export function SearchAllForm(): JSX.Element {
     }
   }
 
+  const customStyles: Partial<Styles<Option, false, GroupTypeBase<Option>>> = {
+    menu: (provided: any, state: any) => ({
+      ...provided,
+      width: '100%',
+      minHeight: '30px',
+    }),
+    control: (provided, { isFocused }) => ({
+      ...provided,
+      width: '100%',
+      maxHeight: '30px',
+      whiteSpace: 'nowrap',
+
+      borderColor: isFocused ? '#5c6cda' : 'hsl(0, 0%, 80%)',
+      boxShadow: isFocused ? '0 0 0 1px #5c6cda' : 'none',
+    }),
+    valueContainer: (provided, state) => ({
+      ...provided,
+      padding: '0 8px',
+    }),
+  }
+
   return (
     <Creatable
       components={components}
+      styles={customStyles}
       isClearable
       options={options}
       inputValue={inputValue}
@@ -62,7 +84,7 @@ export function SearchAllForm(): JSX.Element {
       onChange={handleChange}
       onCreateOption={handleCreate}
       menuIsOpen={openMenu}
-      placeholder="搜尋全站: $BA, Google, 自動駕駛"
+      placeholder="搜尋全站"
 
       // onClick={() => {
       //   setOpenMenu(prev => !prev)

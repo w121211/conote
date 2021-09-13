@@ -74,18 +74,20 @@ svg {
 
 a {
   color: $text;
-  border-bottom: 1px solid $text;
-  padding-bottom: 1px;
   text-decoration: none;
-  &:hover {
-    // cursor: pointer;
-    color: $secondaryHover;
-    border-bottom: 1px solid $secondaryHover;
-  }
   &.ui {
-    border-bottom: 0;
+    // border-bottom: 0;
+    // &:hover {
+    //   border-bottom: 0;
+    // }
+  }
+  &.inline {
+    padding-bottom: 1px;
+    border-bottom: 1px solid $text;
     &:hover {
-      border-bottom: 0;
+      // cursor: pointer;
+      color: $secondaryHover;
+      border-bottom: 1px solid $secondaryHover;
     }
   }
 }
@@ -98,8 +100,11 @@ button {
   cursor: pointer;
   padding: 6px 12px;
   background: $gray;
+  line-height: 1;
+  font-size: 1em;
 
   svg {
+    height: 15px;
     fill: $text;
     stroke: $text;
   }
@@ -108,7 +113,11 @@ button {
 
   &.inline {
     margin: 0;
-    padding: 3px 6px;
+    padding: 5px 10px;
+    @media screen and(max-width:500px) {
+      font-size: 13px;
+    }
+    font-size: 14px;
   }
   &.secondary {
     padding: 4px 10px;
@@ -129,8 +138,14 @@ button {
       border-color: $secondaryHover;
     }
   }
+  &.noBg {
+    background: none;
+  }
 }
 footer {
   min-height: 100px;
   border-top: 1px solid $gray;
+}
+.hashtagContainer {
+  display: flex;
 }
