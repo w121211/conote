@@ -34,19 +34,6 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
   return navs
 }
 
-// @lisa TODO: 移到 hashtag component、需要考慮非預設的text
-export const hashtagTextToIcon = (text: string): JSX.Element | null => {
-  switch (text) {
-    case '#pin':
-      return <PinIcon width="1em" height="1em" />
-    case '#up':
-      return <UpIcon width="1em" height="1em" />
-    case '#down':
-      return <UpIcon width="1em" height="1em" style={{ transform: 'rotate(180deg)' }} />
-  }
-  return null
-}
-
 /**
  * @param poll
  * @param author 若給予視為代表 author 投票
@@ -157,7 +144,7 @@ const CardSymbolPage = (): JSX.Element | null => {
       navPath={
         <NavPath
           path={navs}
-          mirrorHomeUrl={mirror && pathToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
+          mirrorHomeUrl={mirror && locationToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
         />
       }
     >
@@ -211,13 +198,13 @@ const CardSymbolPage = (): JSX.Element | null => {
           ))} */}
 
         <div>
-          {card.link?.authorName && <span>@{card.link?.authorName}</span>}
-          {card.link?.url && <span>@{card.link?.url}</span>}
+          {selfCard.link?.authorName && <span>@{selfCard.link?.authorName}</span>}
+          {selfCard.link?.url && <span>@{selfCard.link?.url}</span>}
           <h3>{Node.string(openedLiLc)}</h3>
           <div className="hashtagContainer">
-            {openedLiLc.rootBulletDraft?.allHashtags
+            {/* {openedLiLc.rootBulletDraft?.allHashtags
               ? openedLiLc.rootBulletDraft.allHashtags.map((e, i) => <HashtagUpDown key={i} hashtag={e} />)
-              : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <HashtagUpDown key={i} hashtag={e} />)}
+              : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <HashtagUpDown key={i} hashtag={e} />)} */}
           </div>
         </div>
         {/* {console.log(openedLiLc.rootBulletDraft?.allHashtags)} */}

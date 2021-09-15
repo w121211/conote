@@ -6,12 +6,16 @@ import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import Popover from '../popover/popover'
 import PollPage from '../board/poll-page'
 
-const MyHashtagGroup = ({ hashtag }: { hashtag: HashtagGroup } & HtmlHTMLAttributes<HTMLElement>): JSX.Element => {
+const MyHashtagGroup = ({
+  choices,
+  pollId,
+  inline,
+}: { choices: string[]; pollId: string; inline?: boolean } & HtmlHTMLAttributes<HTMLElement>): JSX.Element => {
   const [showPopover, setShowPopover] = useState(false)
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()
 
-  const newText = hashtag.text.substring(1, hashtag.text.length - 1)
-  const textArr = newText.split(' ')
+  // const newText = hashtag.text.substring(1, hashtag.text.length - 1)
+  // const textArr = newText.split(' ')
 
   const handleHideBoard = () => {
     setClickedIdx(undefined)
@@ -20,8 +24,8 @@ const MyHashtagGroup = ({ hashtag }: { hashtag: HashtagGroup } & HtmlHTMLAttribu
 
   return (
     <>
-      <button>
-        {textArr.map((e, i) => {
+      <button className={inline ? 'inline' : undefined}>
+        {choices.map((e, i) => {
           //first child
           if (i === 0) {
             return (
@@ -31,7 +35,7 @@ const MyHashtagGroup = ({ hashtag }: { hashtag: HashtagGroup } & HtmlHTMLAttribu
                   ev.stopPropagation()
                   setClickedIdx(i)
                   setShowPopover(true)
-                  console.log(e)
+                  // console.log(e)
                 }}
               >
                 {e}
@@ -47,7 +51,7 @@ const MyHashtagGroup = ({ hashtag }: { hashtag: HashtagGroup } & HtmlHTMLAttribu
                 ev.stopPropagation()
                 setClickedIdx(i)
                 setShowPopover(true)
-                console.log(e)
+                // console.log(e)
               }}
             >
               {e}
@@ -57,7 +61,7 @@ const MyHashtagGroup = ({ hashtag }: { hashtag: HashtagGroup } & HtmlHTMLAttribu
       </button>
       {showPopover && (
         <Popover visible={showPopover} hideBoard={handleHideBoard}>
-          <PollPage poll={hashtag.poll} clickedChoiceIdx={clickedIdx} />
+          <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />
         </Popover>
       )}
     </>

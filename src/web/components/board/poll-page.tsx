@@ -8,6 +8,7 @@ import {
   useCommentsQuery,
   Comment,
   Poll,
+  usePollQuery,
 } from '../../apollo/query.graphql'
 
 import useMeasure from 'react-use-measure'
@@ -25,14 +26,14 @@ import BarChart from '../bar/bar'
 import classes from './board-page.module.scss'
 
 const BoardPage = ({
-  poll,
+  pollId,
   // description,
   clickedChoiceIdx,
 
   title,
 }: {
   // boardId: string
-  poll: Poll
+  pollId: string
   clickedChoiceIdx?: number
   //  description?:string
 
@@ -45,13 +46,13 @@ const BoardPage = ({
   const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
   // const [form] = Form.useForm()
 
-  // const { data, loading, error } = useCommentQuery({
-  //   variables: { id: commentId },
-  // })
+  const { data, loading, error } = usePollQuery({
+    variables: { id: pollId },
+  })
 
-  // if (loading) {
-  //   return <p>loading...</p>
-  // }
+  if (loading) {
+    return <p>loading...</p>
+  }
   // if (error) {
   //   console.error(error)
   //   return <p>API error</p>
@@ -107,43 +108,43 @@ const BoardPage = ({
   //   // setFilterCommentsList(newCommentList)
   //   // console.log(commentsList, newCommentList)
   // }
-
-  return (
-    <>
-      <div className={classes.containerinner}>
-        {/* <div ref={measureRef}> */}
-        {/* <div className={classes.tabs}> */}
-        {/* <span onClick={discussClickLHandler}>討論</span>
+  if (data) {
+    return (
+      <>
+        <div className={classes.containerinner}>
+          {/* <div ref={measureRef}> */}
+          {/* <div className={classes.tabs}> */}
+          {/* <span onClick={discussClickLHandler}>討論</span>
             <span onClick={discussClickRHandler}>Q&A</span> */}
-        {/* </div> */}
-        <div className={classes.title}>{poll.choices}</div>
+          {/* </div> */}
+          <div className={classes.title}>{data.poll.choices}</div>
 
-        {/* tabs底線 */}
-        {/* <div className={classes.underLine}> */}
-        {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
-        {/* </div> */}
-        {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}
-        <PollForm
-          // boardId={boardId}
-          poll={poll}
-          initialValue={{ title: '', choice: undefined, lines: '' }}
-          // filterComments={filterComments}
-          clickedChoiceIdx={clickedChoiceIdx}
-        />
-        {/* <CommentForm
+          {/* tabs底線 */}
+          {/* <div className={classes.underLine}> */}
+          {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
+          {/* </div> */}
+          {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}
+          <PollForm
+            // boardId={boardId}
+            poll={data.poll}
+            initialValue={{ title: '', choice: undefined, lines: '' }}
+            // filterComments={filterComments}
+            clickedChoiceIdx={clickedChoiceIdx}
+          />
+          {/* <CommentForm
         boardId={boardId}
         pollId={pollId}
         // anchorId={anchorId}
         // ref={ref}
         // switchTab={switchTab}
       /> */}
-        {/* {switchTab || <PollForm commentId={pollClick} />} */}
-        {/* </div> */}
-        {/* content */}
-        {/* <div className={classes.outer} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
-        {/* <div className={classes.inner}> */}
-        {/* <div className={classes.element} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
-        {/* <CommentList
+          {/* {switchTab || <PollForm commentId={pollClick} />} */}
+          {/* </div> */}
+          {/* content */}
+          {/* <div className={classes.outer} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
+          {/* <div className={classes.inner}> */}
+          {/* <div className={classes.element} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
+          {/* <CommentList
           commentsList={commentsList}
           // filterCommentsList={filterCommentsList}
           // pollId={pollId}
@@ -152,12 +153,14 @@ const BoardPage = ({
           // myScrollIntoView={myScrollIntoView}
           // resetHighLight={resetHighLight}
         /> */}
-        {/* </div>
+          {/* </div>
           </div>
         </div> */}
-      </div>
-    </>
-  )
+        </div>
+      </>
+    )
+  }
+  return <h4>好像出錯了...</h4>
 }
 
 // Discuss.displayName = 'Discuss'

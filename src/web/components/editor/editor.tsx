@@ -45,7 +45,7 @@ import { NavLocation, locationToHref } from './with-location'
 import { parseLcAndReplace, withParse } from './with-parse'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
-import HashtagUpDown from '../upDown/hashtag-up-down'
+import MyHashtagGroup from '../upDown/hashtag-group'
 import { spawn } from 'child_process'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
@@ -245,7 +245,11 @@ const InlineSymbol = (
   //   )
   // }
   // return <span {...attributes}>{children}</span>
-  return <button {...attributes}>{children}</button>
+  return (
+    <a href="#" {...attributes} className="inline">
+      {children}
+    </a>
+  )
 }
 
 const InlineMirror = (
@@ -362,10 +366,33 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
   const { attributes, children, element } = props
   const readonly = useReadOnly()
   const queryPoll = usePollQuery({ variables: { id: element.id.toString() } })
+  console.log(children, element)
   if (readonly) {
-    return <button {...attributes}>{children}</button>
+    if (element.type === 'poll') {
+      return <MyHashtagGroup {...attributes} choices={element.choices} pollId={element.id.toString()} />
+    }
+    return (
+      <button {...attributes} className="inline">
+        {children}
+      </button>
+    )
   }
-  return <span {...attributes}>{children}</span>
+  if (element.type === 'poll') {
+    return (
+      <span {...attributes}>
+        <span style={{ display: 'none' }}>{children}</span>
+        <span contentEditable={false}>
+          <MyHashtagGroup choices={element.choices} pollId={element.id.toString()} inline />
+        </span>
+      </span>
+    )
+  }
+  return (
+    <button {...attributes} className="inline">
+      {children}
+    </button>
+  )
+  // return <span {...attributes}>{children}</span>
 }
 
 const Lc = (
@@ -581,7 +608,7 @@ export const BulletEditor = (props: {
   const { initialValue, location, selfCard, readOnly, onValueChange } = props
   const [value, setValue] = useState<LiElement[]>(initialValue)
   const editor = useMemo(() => withParse(withOperation(withList(withHistory(withReact(createEditor()))))), [])
-  const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
+  // const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
     [],
