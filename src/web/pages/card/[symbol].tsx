@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import { Node } from 'slate'
-import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import { BulletEditor } from '../../components/editor/editor'
 import { LiElement } from '../../components/editor/slate-custom-types'
 import { useLocalValue } from '../../components/editor/use-local-value'
 import { isLi } from '../../components/editor/with-list'
-import { getNavLocation, locationToHref, NavLocation } from '../../components/editor/with-location'
+import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 
 import HashtagUpDown from '../../components/upDown/hashtag-up-down'
 import NavPath from '../../components/nav-path/nav-path'
 import { Poll, useCreateVoteMutation } from '../../apollo/query.graphql'
+import { parseChildren } from '../../components/editor/with-parse'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -119,6 +120,7 @@ const CardSymbolPage = (): JSX.Element | null => {
     if (router.isReady) {
       const location = getNavLocation(router.query)
       setLocation(location)
+      // console.log(location)
     }
   }, [router])
 
@@ -137,7 +139,8 @@ const CardSymbolPage = (): JSX.Element | null => {
   }
   const { selfCard, mirror, openedLi, value } = data
   const [openedLiLc] = openedLi.children
-
+  // const parsedValue = parseChildren(value)
+  const parsedValue = value
   // console.log('symbol', navs)
   return (
     <Layout
@@ -149,8 +152,6 @@ const CardSymbolPage = (): JSX.Element | null => {
       }
     >
       <div style={{ marginBottom: '3em' }}>
-        {/* <a href="/api/auth/login">Login</a> */}
-
         <button
           className="noBg"
           onClick={() => {
@@ -185,32 +186,32 @@ const CardSymbolPage = (): JSX.Element | null => {
 
         {/* {mirror && (
           <span>
-            <a href={locationToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>Home</a>
+            <Link href={locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>
+              <a>Home</a>
+            </Link>
             ...
           </span>
         )} */}
 
         {/* {navs &&
           navs.map((e, i) => (
-            <span key={i}>
-              <a href={locationToHref({ ...location, openedLiPath: e.path })}>{e.text}</a>|
-            </span>
-          ))} */}
+            <Link href={locationToUrl({ ...location, openedLiPath: e.path })} key={i}>
+              <a>{e.text}</a>
+            </Link>
+          ))}
 
         <div>
           {selfCard.link?.authorName && <span>@{selfCard.link?.authorName}</span>}
           {selfCard.link?.url && <span>@{selfCard.link?.url}</span>}
           <h3>{Node.string(openedLiLc)}</h3>
-          <div className="hashtagContainer">
-            {/* {openedLiLc.rootBulletDraft?.allHashtags
-              ? openedLiLc.rootBulletDraft.allHashtags.map((e, i) => <HashtagUpDown key={i} hashtag={e} />)
-              : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <HashtagUpDown key={i} hashtag={e} />)} */}
-          </div>
+          {/* {openedLiLc.rootBulletDraft?.emojis
+            ? openedLiLc.rootBulletDraft.emojis.map((e, i) => <HashtagComponent key={i} hashtag={e} />)
+            : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <HashtagComponent key={i} hashtag={e} />)} */}
         </div>
         {/* {console.log(openedLiLc.rootBulletDraft?.allHashtags)} */}
 
         <BulletEditor
-          initialValue={value}
+          initialValue={parsedValue}
           location={location}
           onValueChange={value => {
             setLocalValue(value)

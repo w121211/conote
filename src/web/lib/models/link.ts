@@ -2,15 +2,12 @@ import { Card, Link, Author } from '@prisma/client'
 import { parseUrl, tryFetch, FetchClient, FetchResult } from '../../../packages/fetcher/src/index'
 import prisma from '../prisma'
 
-type ExtFetchResult = FetchResult & {
-  oauthorName?: string
-}
-
 const bannedCharMatcher = /[^a-zA-Z0-9_\p{Letter}]/gu
 
 function toAuthorName(domain: string, domainAuthorName: string) {
-  const author = domainAuthorName.replace(bannedCharMatcher, '_')
-  return `${author}:${domain}`
+  const author = domainAuthorName.trim().replace(bannedCharMatcher, '_')
+  // return `${author}:${domain}`
+  return author
 }
 
 export function linkToSymbol(link: Link): string {
@@ -24,7 +21,7 @@ export function linkToSymbol(link: Link): string {
 export async function getOrCreateLink(props: {
   fetcher?: FetchClient
   url: string
-}): Promise<[Link & { card: Card | null }, { fetchResult?: ExtFetchResult }]> {
+}): Promise<[Link & { card: Card | null }, { fetchResult?: FetchResult }]> {
   const { fetcher, url } = props
 
   // TODO: 這個url尚未resolved, 需要考慮redirect、不同url指向同一個頁面的情況
@@ -35,14 +32,14 @@ export async function getOrCreateLink(props: {
   })
 
   if (found !== null) {
-    return [found, { fetchResult: found.fetchResult as unknown as ExtFetchResult }]
+    return [found, { fetchResult: found.fetchResult as unknown as FetchResult }]
   }
 
-  // Link未存在，嘗試fetch取得來源資訊，建立link, cocard, oauthor後返回
+  // Link 未存在，嘗試 fetch 取得來源資訊，建立 link, cocard, oauthor 後返回
   // TODO: 可能在fetch後發現resolved-url已經存在
-  let res: ExtFetchResult = fetcher ? await fetcher.fetch(url) : await tryFetch(url)
+  let res: FetchResult = fetcher ? await fetcher.fetch(url) : await tryFetch(url)
 
-  // TODO: Oauthor的辨識太低，而且沒有統一
+  // TODO: Author 的辨識太低，而且沒有統一
   let author: Author | undefined
   if (res.authorName) {
     const authorName = toAuthorName(res.domain, res.authorName)

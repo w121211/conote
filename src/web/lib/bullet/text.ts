@@ -9,18 +9,22 @@ import { InlineItem, InlineText } from './types'
  * hashtag @see https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
  */
 
+const reMirrorTicker = /^(::\$[A-Z-=]+)\b(?:\s@([\p{Letter}\d_]+))?/u
+const reMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B(?:\s@([\p{Letter}\d_]+))?/u
 const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const reNewPoll = /\B!\(\(poll\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 
 const grammar: Grammar = {
-  'mirror-ticker': { pattern: /^::\$[A-Z-=]+\b/ },
-  'mirror-topic': { pattern: /^::\[\[[^\]\n]+\]\]\B/u },
+  // 'mirror-ticker': { pattern: /^::\$[A-Z-=]+\b/ },
+  // 'mirror-topic': { pattern: /^::\[\[[^\]\n]+\]\]\B/u },
+  'mirror-ticker': { pattern: reMirrorTicker },
+  'mirror-topic': { pattern: reMirrorTopic },
   ticker: { pattern: /\$[A-Z-=]+/ },
   topic: { pattern: /\[\[[^\]\n]+\]\]/u },
   url: {
     pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
   },
-  user: { pattern: /(?<=\s|^)@(?:[a-zA-Z0-9]+|\(author\))(?=\s|$)/ },
+  user: { pattern: /\B@[\p{L}\d_]+\b/u },
   poll: { pattern: rePoll },
   'new-poll': { pattern: reNewPoll },
   filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
@@ -58,7 +62,18 @@ export function parseBulletHead(props: {
     switch (token.type) {
       case 'mirror-ticker':
       case 'mirror-topic': {
-        return { type: 'mirror', str, mirrorSymbol: str }
+        const match = token.type === 'mirror-ticker' ? reMirrorTicker.exec(str) : reMirrorTopic.exec(str)
+        if (match) {
+          return {
+            type: 'mirror',
+            str,
+            mirrorSymbol: match[1],
+            author: match[2], // 沒有 match 到時會返回 undefined
+          }
+        } else {
+          console.error(str)
+          throw 'Parse error'
+        }
       }
       case 'url':
       case 'ticker':
@@ -73,7 +88,7 @@ export function parseBulletHead(props: {
           return {
             type: 'poll',
             str,
-            id: parseInt(match[1]),
+            id: match[1],
             choices: match[2].split(' '),
           }
         } else {
@@ -85,7 +100,7 @@ export function parseBulletHead(props: {
         const match = reNewPoll.exec(str)
         if (match) {
           return {
-            type: 'new-poll',
+            type: 'poll',
             str,
             choices: match[1].split(' '),
           }
@@ -95,7 +110,6 @@ export function parseBulletHead(props: {
         }
       }
     }
-
     console.error(token)
     throw 'Parse error'
   }

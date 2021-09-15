@@ -1,5 +1,4 @@
-import { Hashtag, Poll } from '@prisma/client'
-import { Hashtag as GQLHashtag } from '../../apollo/query.graphql'
+import { Hashtag as GQLHashtag, Poll as GQLPoll } from '../../apollo/query.graphql'
 
 /**
  * Bullet operation flow:
@@ -56,16 +55,10 @@ export type InlineMirror = {
 export type InlinePoll = {
   type: 'poll'
   str: string
-  id: number
+  id?: string
   choices: string[]
-  poll?: Poll
-}
-
-export type InlineNewPoll = {
-  type: 'new-poll'
-  str: string
-  choices: string[]
-  choosedIndex?: number
+  poll?: GQLPoll
+  // vote?: author vote
 }
 
 export type InlineItem =
@@ -77,7 +70,6 @@ export type InlineItem =
   // | InlineHashtag
   // | InlineNewHashtag
   | InlinePoll
-  | InlineNewPoll
 
 export type BulletOperation = 'CREATE' | 'MOVE' | 'UPDATE' | 'DELETE' | 'UPDATE_MOVE'
 
@@ -196,3 +188,14 @@ export function isBulletDraft(node: BulletDraft | RootBulletDraft): node is Bull
 //     id: hashtag.id,
 //   }
 // }
+
+export function toInlinePoll(props: { id: string | number; choices: string[] }): InlinePoll {
+  const { id, choices } = props
+  const _id = typeof id === 'number' ? id.toString() : id
+  return {
+    type: 'poll',
+    str: `!((poll:${_id}))(${choices.join(' ')})`,
+    id: _id,
+    choices: choices,
+  }
+}

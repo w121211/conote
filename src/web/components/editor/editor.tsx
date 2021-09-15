@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
+import Link from 'next/link'
+import Modal from 'react-modal'
 import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element } from 'slate'
 import {
   Editable,
@@ -22,31 +24,36 @@ import {
   LiElement,
   UlElement,
 } from './slate-custom-types'
-import { isLiArray, isUl, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
-import { withOperation } from './with-operation'
 import BulletSvg from '../bullet-svg/bullet-svg'
 import classes from './editor.module.scss'
 import Popover from '../popover/popover'
 import MyTooltip from '../my-tooltip/my-tooltip'
 import {
   Card,
+  EmojiText,
   Hashtag,
+  HashtagLike,
   LikeChoice,
   MyHashtagLikeDocument,
   MyHashtagLikeQuery,
   MyHashtagLikeQueryVariables,
   Poll,
-  useCreateEmojiLikeMutation,
+  useCreateEmojiMutation,
+  useCreateVoteMutation,
   useMyHashtagLikeQuery,
+  useMyVotesLazyQuery,
   usePollQuery,
-  useUpdateEmojiLikeMutation,
+  useUpsertEmojiLikeMutation,
 } from '../../apollo/query.graphql'
-import { NavLocation, locationToHref } from './with-location'
-import { parseLcAndReplace, withParse } from './with-parse'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
 import MyHashtagGroup from '../upDown/hashtag-group'
 import { spawn } from 'child_process'
+import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
+import { NavLocation, locationToUrl } from './with-location'
+import { withOperation } from './with-operation'
+import { parseLcAndReplace, withParse } from './with-parse'
+import { toInlinePoll } from '../../lib/bullet/types'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
   const { authorName } = props
@@ -69,59 +76,96 @@ const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element
   return [author, switcher]
 }
 
-const HashtagLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
+const Leaf = (props: RenderLeafProps): JSX.Element => {
+  const { attributes, children, leaf } = props
+  // let style: React.CSSProperties = {}
+  if (leaf.placeholder) {
+    return (
+      <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
+        <span {...attributes}>
+          {/* <DefaultLeaf {...props} /> */}
+          {children}
+        </span>
+        <span style={{ opacity: 0.3, position: 'absolute', top: 0 }} contentEditable={false}>
+          Type / to open menu
+        </span>
+      </span>
+    )
+  }
+  // switch (leaf.type) {
+  //   case 'sect-symbol': {
+  //     style = { fontWeight: 'bold' }
+  //     break
+  //   }
+  //   case 'multiline-marker':
+  //   case 'inline-marker': {
+  //     style = { color: 'red' }
+  //     break
+  //   }
+  //   case 'inline-value':
+  //   case 'line-value': {
+  //     style = { color: 'blue' }
+  //     break
+  //   }
+  //   case 'line-mark':
+  //   case 'inline-mark': {
+  //     style = { color: 'orange' }
+  //     break
+  //   }
+  //   case 'mark':
+  //   case 'ticker':
+  //   case 'topic': {
+  //     style = { color: 'brown' }
+  //     break
+  //   }
+  //   case 'stamp': {
+  //     style = { color: 'yellow' }
+  //     break
+  //   }
+  // }
+  return (
+    // <span {...attributes} style={style}>
+    <span {...attributes}>{children}</span>
+  )
+}
+
+const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
   const { hashtag } = props
   const { data, loading, error } = useMyHashtagLikeQuery({
     variables: { hashtagId: hashtag.id.toString() },
   })
-  const [createEmojiLike] = useCreateEmojiLikeMutation({
+  const [upsertEmojiLike] = useUpsertEmojiLikeMutation({
     update(cache, { data }) {
       // TODO: 這裡忽略了更新 count
-      if (data?.createEmojiLike) {
+      if (data?.upsertEmojiLike) {
         cache.writeQuery<MyHashtagLikeQuery, MyHashtagLikeQueryVariables>({
           query: MyHashtagLikeDocument,
-          variables: { hashtagId: data.createEmojiLike.like.hashtagId.toString() },
-          data: { myHashtagLike: data.createEmojiLike.like },
+          variables: { hashtagId: data.upsertEmojiLike.like.hashtagId.toString() },
+          data: { myHashtagLike: data.upsertEmojiLike.like },
         })
       }
     },
   })
-  const [updateEmojiLike] = useUpdateEmojiLikeMutation({
-    update(cache, { data }) {
-      // TODO: 這裡忽略了更新 count
-      if (data?.updateEmojiLike) {
-        cache.writeQuery<MyHashtagLikeQuery, MyHashtagLikeQueryVariables>({
-          query: MyHashtagLikeDocument,
-          variables: { hashtagId: data.updateEmojiLike.like.hashtagId.toString() },
-          data: { myHashtagLike: data.updateEmojiLike.like },
-        })
-      }
-    },
-  })
-
   function handleClickLike(choice: LikeChoice) {
-    if (data === undefined) {
-      return
-    }
-    const { myHashtagLike } = data
-    if (myHashtagLike && myHashtagLike.choice === choice) {
-      updateEmojiLike({
+    const myLike = data?.myHashtagLike
+    if (myLike && myLike.choice === choice) {
+      upsertEmojiLike({
         variables: {
-          id: myHashtagLike.id,
+          hashtagId: hashtag.id.toString(),
           data: { choice: 'NEUTRAL' },
         },
       })
     }
-    if (myHashtagLike && myHashtagLike.choice !== choice) {
-      updateEmojiLike({
+    if (myLike && myLike.choice !== choice) {
+      upsertEmojiLike({
         variables: {
-          id: myHashtagLike.id,
+          hashtagId: hashtag.id.toString(),
           data: { choice },
         },
       })
     }
-    if (myHashtagLike === null) {
-      createEmojiLike({
+    if (myLike === null) {
+      upsertEmojiLike({
         variables: {
           hashtagId: hashtag.id.toString(),
           data: { choice },
@@ -129,12 +173,11 @@ const HashtagLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
       })
     }
   }
-
   if (loading) {
     return null
   }
   if (error || data === undefined) {
-    return <div>Error</div>
+    return <span>Error</span>
   }
   return (
     <>
@@ -145,129 +188,72 @@ const HashtagLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
       >
         {data.myHashtagLike?.choice === 'UP' ? 'up*' : 'up'}
       </button>
-      <button
-        onClick={() => {
-          handleClickLike('DOWN')
-        }}
-      >
-        {data.myHashtagLike?.choice === 'DOWN' ? 'down*' : 'down'}
-      </button>
     </>
   )
 }
 
-const EmojiComponent = (props: { hashtag: Hashtag }): JSX.Element => {
-  const { hashtag } = props
+/**
+ * @returns 若 emoji 目前沒有人點贊，返回 null
+ */
+const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null => {
+  // console.log(emoji)
+  // if (emoji.count.nUps === 0) {
+  //   return null
+  // }
   return (
     <span>
-      {hashtag.text}
-      <HashtagLike hashtag={hashtag} />
+      <EmojiLike hashtag={emoji} />
     </span>
   )
 }
 
-// const Leaf = (props: RenderLeafProps): JSX.Element => {
-//   const { attributes, children, leaf } = props
-//   console.log(children)
-//   // let style: React.CSSProperties = {}
-//   // if (leaf.placeholder) {
-//   //   return (
-//   //     <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
-//   //       <span {...attributes}>
-//   //         {/* <DefaultLeaf {...props} /> */}
-//   //         {children}
-//   //       </span>
-//   //       {/* <span style={{ opacity: 0.3, position: 'absolute', top: 0 }} contentEditable={false}>
-//   //         Type / to open menu
-//   //       </span> */}
-//   //     </span>
-//   //   )
-//   // }
-//   // switch (leaf.type) {
-//   //   case 'sect-symbol': {
-//   //     style = { fontWeight: 'bold' }
-//   //     break
-//   //   }
-//   //   case 'multiline-marker':
-//   //   case 'inline-marker': {
-//   //     style = { color: 'red' }
-//   //     break
-//   //   }
-//   //   case 'inline-value':
-//   //   case 'line-value': {
-//   //     style = { color: 'blue' }
-//   //     break
-//   //   }
-//   //   case 'line-mark':
-//   //   case 'inline-mark': {
-//   //     style = { color: 'orange' }
-//   //     break
-//   //   }
-//   //   case 'mark':
-//   //   case 'ticker':
-//   //   case 'topic': {
-//   //     style = { color: 'brown' }
-//   //     break
-//   //   }
-//   //   case 'stamp': {
-//   //     style = { color: 'yellow' }
-//   //     break
-//   //   }
-//   // }
-
-//   return (
-//     // <span {...attributes} style={style}>
-//     <>{children !== '' && <span {...attributes}>{children}</span>}</>
-//   )
-// }
+const AddEmojiButotn = (props: {
+  bulletId: number
+  emojiText: EmojiText
+  // curEmojis: Hashtag[]
+  onCreated: (emoji: Hashtag, myEmojiLike: HashtagLike) => void
+}): JSX.Element => {
+  const { bulletId, emojiText, onCreated } = props
+  const [createEmoji] = useCreateEmojiMutation({
+    variables: { bulletId, emojiText },
+    onCompleted(data) {
+      const { emoji, like } = data.createEmoji
+      onCreated(emoji, like)
+    },
+  })
+  return (
+    <button
+      onClick={() => {
+        createEmoji()
+      }}
+    >
+      {emojiText}
+    </button>
+  )
+}
 
 const InlineSymbol = (
   props: RenderElementProps & {
     element: InlineSymbolElement
-    authorName?: string
-    sourceUrl?: string
   },
 ): JSX.Element => {
-  const { attributes, children, element, authorName, sourceUrl } = props
-  const readonly = useReadOnly()
-  const focused = useFocused()
-  const selected = useSelected()
+  const { attributes, children, element } = props
 
-  useEffect(() => {
-    // console.log(readonly, focused, selected)
-  }, [readonly, focused, selected])
-  // if (readonly) {
-  //   // console.log(Node.string(element))
-  //   return (
-  //     <a href={`/card/${Node.string(element)}`} {...attributes}>
-  //       {children}
-  //     </a>
-  //   )
-  // }
-  // return <span {...attributes}>{children}</span>
-  return (
-    <a href="#" {...attributes} className="inline">
-      {children}
-    </a>
-  )
+  return <button {...attributes}>{children}</button>
 }
 
 const InlineMirror = (
   props: RenderElementProps & { element: InlineMirrorElement; location: NavLocation; selfCard: Card },
 ): JSX.Element => {
   const { attributes, children, element, location, selfCard } = props
-  const readonly = useReadOnly()
   const editor = useSlateStatic()
-  const href = locationToHref({
+  const href = locationToUrl({
     ...location,
     mirrorSymbol: element.mirrorSymbol,
     openedLiPath: [],
-    author: '@tester',
+    author: element.author,
   })
   const authorName = selfCard.link?.authorName
-
-  const focused = useFocused() // 整個editor是否focus
-  const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
 
   useEffect(() => {
     // 若有 sourceUrl 且未設有 author 的情況，設一個預設 author
@@ -278,89 +264,58 @@ const InlineMirror = (
     }
   }, [authorName, element])
 
-  useEffect(() => {
-    // cursor 進入 inline
-    if (focused && selected) {
-      console.log('setInlinesToText')
-      // const path = ReactEditor.findPath(editor, element)
-      // setInlinesToText(editor, [element, path])
-      // Transforms.setNodes<LcElement>(editor, { parsed: undefined }, { at: path })
-      // return
-    }
-  }, [selected, readonly])
-
-  if (readonly) {
-    return (
-      <a {...attributes} href={href}>
-        {children}
-      </a>
-    )
-  }
   return (
-    <span {...attributes} style={{ color: 'blue' }}>
-      {children}
+    <span {...attributes}>
+      <Link href={href}>
+        <a>{children}</a>
+      </Link>
     </span>
   )
 }
 
-// const CurHashtagsPlacerInline = (
-//   props: RenderElementProps & { element: CurHashtagsPlacerInlineElement; location: NavLocation },
-// ): JSX.Element => {
-//   const { attributes, children, element, location } = props
-//   const readonly = useReadOnly()
-//   if (readonly) {
-//     return (
-//       <span {...attributes}>
-//         {/* {children} */}
-//         {element.hashtags.map((e, i) => {
-//           switch (e.type) {
-//             case 'hashtag':
-//               return <HashtagComponent key={i} hashtag={e} />
-//             case 'hashtag-group':
-//               return (
-//                 <HashtagGroupComponent
-//                   key={i}
-//                   hashtagGroup={e}
-//                   onClick={text => {
-//                     if (location.author) {
-//                       // 新增表示投票的 child lc
-//                       // const editor = useSlateStatic()
-//                       // const lcPath = ReactEditor.findPath(editor, element)
-//                       // Editor.insertNode(editor, {})
-//                     }
-//                   }}
-//                 />
-//               )
-//           }
-//         })}
-//       </span>
-//     )
-//   }
-//   return (
-//     <span {...attributes} style={{ color: 'blue' }}>
-//       {children}
-//     </span>
-//   )
-// }
+const PollForm = ({ id }: { id: string }): JSX.Element => {
+  const { data, loading, error } = usePollQuery({ variables: { id } })
+  const [createVote, createVoteResult] = useCreateVoteMutation()
+  if (loading || createVoteResult.loading) {
+    return <div>loading...</div>
+  }
+  if (error || data === undefined || createVoteResult.error) {
+    return <div>error</div>
+  }
+  if (createVoteResult.data) {
+    const vote = createVoteResult.data.createVote
+    const voted = data.poll.choices[vote.choiceIdx]
+    return (
+      <div>
+        {data.poll.choices.join(' ')}[{voted}]
+      </div>
+    )
+  }
+  return (
+    <div>
+      {data.poll.choices.map((e, i) => (
+        <button
+          key={i}
+          onClick={() => {
+            createVote({
+              variables: {
+                pollId: id,
+                data: { choiceIdx: i },
+              },
+            })
+          }}
+        >
+          {e}
+        </button>
+      ))}
+    </div>
+  )
+}
 
-// const InlineHashtag = (props: RenderElementProps & { element: InlineHashtagElement }): JSX.Element => {
-//   const { attributes, children, element } = props
-//   const readonly = useReadOnly()
-//   const queryMyHashtagLike = useMyHashtagLikeQuery({ variables: { hashtagId: element.id.toString() } })
-//   if (readonly) {
-//     const { data, error } = queryMyHashtagLike
-//     if (error) {
-//       return <div>{error}</div>
-//     }
-//     return (
-//       <button {...attributes} data-type="inline">
-//         {/* {children} */}
-//         {data?.myHashtagLike?.choice === 'UP' ? `${element.str}*` : element.str}({element.hashtag?.count.nUps})
-//       </button>
-//     )
-//   }
-//   return <span {...attributes}>{children}</span>
-// }
+const NewPollForm = ({ choices }: { choices?: string[]; onCreated: (poll: Poll) => void }): JSX.Element => {
+  // const queryPoll = usePollQuery({ variables: { id } })
+  return <div></div>
+}
 
 const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }): JSX.Element => {
   const { attributes, children, element } = props
@@ -393,6 +348,71 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
     </button>
   )
   // return <span {...attributes}>{children}</span>
+  const editor = useSlateStatic()
+  const [isOpen, setIsOpen] = useState(false)
+  const [queryMyVotes, { data, loading, error }] = useMyVotesLazyQuery() // 若已投票可展現投票結果
+
+  useEffect(() => {
+    // console.log('inline poll')
+    if (element.id) {
+      queryMyVotes({ variables: { pollId: element.id } })
+    }
+  }, [element])
+
+  // useEffect(() => {
+  //   console.log(element)
+  //   if (isOpen) {
+  //     const path = ReactEditor.findPath(editor, element)
+  //     Transforms.setNodes<PopupInlineElement>(
+  //       editor,
+  //       { id: 'test', str: 'hello-world' },
+  //       { at: path }
+  //     )
+  //     Transforms.insertText(editor, 'hello-world', { at: [...path, 0] })
+  //     console.log('setNodes', element)
+  //     setIsOpen(false)
+  //   }
+  // }, [isOpen])
+
+  function closeModal() {
+    setIsOpen(false)
+  }
+
+  function onCreated(poll: Poll) {
+    const path = ReactEditor.findPath(editor, element)
+    const inlinePoll = toInlinePoll({ id: poll.id, choices: poll.choices })
+    Transforms.setNodes<InlinePollElement>(editor, inlinePoll, { at: path })
+    Transforms.insertText(editor, inlinePoll.str, { at: path })
+  }
+
+  return (
+    <span {...attributes}>
+      <span style={{ display: 'none' }}>{children}</span>
+
+      <span contentEditable={false}>
+        <button
+          onClick={event => {
+            event.preventDefault()
+            setIsOpen(true)
+          }}
+        >
+          {element.choices.join(' ')}
+          {data?.myVotes && data.myVotes.length > 0 && `[${data.myVotes[data.myVotes.length - 1].choiceIdx}]`}
+        </button>
+
+        <Modal
+          ariaHideApp={false}
+          isOpen={isOpen}
+          // onAfterOpen={afterOpenModal}
+          onRequestClose={closeModal}
+          contentLabel="Example Modal"
+        >
+          <button onClick={closeModal}>close</button>
+          {element.id ? <PollForm id={element.id} /> : <NewPollForm choices={element.choices} onCreated={onCreated} />}
+        </Modal>
+      </span>
+    </span>
+  )
 }
 
 const Lc = (
@@ -410,23 +430,27 @@ const Lc = (
   // }, [element])
   const author = location.author
 
+  // console.log('lc entry', element)
+
   useEffect(() => {
-    if (author && element.op === 'CREATE') {
-      const lcPath = ReactEditor.findPath(editor, element)
-      if (author === '@self') {
-        Transforms.setNodes<LcElement>(editor, { author: undefined }, { at: lcPath })
-      } else {
+    if (element.op === 'CREATE') {
+      let lcPath: number[] | undefined
+      if (author && element.author === undefined) {
+        lcPath = ReactEditor.findPath(editor, element)
         Transforms.setNodes<LcElement>(editor, { author }, { at: lcPath })
       }
+      if (sourceUrl && element.sourceUrl === undefined) {
+        Transforms.setNodes<LcElement>(editor, { sourceUrl }, { at: lcPath ?? ReactEditor.findPath(editor, element) })
+      }
     }
-  }, [author, element])
+  }, [author, element, sourceUrl])
 
   useEffect(() => {
     // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
     if ((focused && !selected) || readonly) {
       const path = ReactEditor.findPath(editor, element)
-      parseLcAndReplace(editor, [element, path])
-      console.log('parseLcAndReplace', path)
+      parseLcAndReplace({ editor, lcEntry: [element, path] })
+      // console.log('parseLcAndReplace', path)
     }
     // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
     if (selected) {
@@ -435,19 +459,20 @@ const Lc = (
         at: path,
         match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
       })
-      console.log('unwrapNodes', path)
+      // console.log('unwrapNodes', path)
     }
   }, [selected, readonly])
 
   return (
     <div {...attributes}>
       <span className={classes.lcText}>{children}</span>
-      {readonly && (
+      {((focused && !selected) || readonly) && (
         <span contentEditable={false} style={{ color: 'green' }}>
-          {author === element.author && author}
+          {author === element.author && element.author}
           {sourceUrl === element.sourceUrl && sourceUrl}
-          {/* {element.op === 'CREATE' && authorSwitcher} */}
-          {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>} */}
+          {element.emojis?.map((e, i) => (
+            <EmojiButotn key={i} emoji={e} />
+          ))}
         </span>
       )}
     </div>
@@ -483,9 +508,16 @@ const Li = (props: RenderElementProps & { element: LiElement; location: NavLocat
   //   // }
   // }, [editor, element])
 
-  const [, ul] = element.children
+  const [lc, ul] = element.children
   const hasUl = ul !== undefined
-  const href = locationToHref(location, ReactEditor.findPath(editor, element))
+  const href = locationToUrl(location, ReactEditor.findPath(editor, element))
+
+  function onEmojiCreated(emoji: Hashtag, myEmojiLike: HashtagLike) {
+    const curEmojis = lc.emojis ?? []
+    const path = ReactEditor.findPath(editor, element)
+    Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
+  }
+
   return (
     <div
       {...attributes}
@@ -550,9 +582,14 @@ const Li = (props: RenderElementProps & { element: LiElement; location: NavLocat
               null} */}
           </span>
         )}
-        <a href={href}>
-          <BulletSvg />
-        </a>
+
+        <Link href={href}>
+          <a>
+            <BulletSvg />
+          </a>
+        </Link>
+
+        {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />}
       </div>
 
       <div>{children}</div>
@@ -562,13 +599,10 @@ const Li = (props: RenderElementProps & { element: LiElement; location: NavLocat
 
 const Ul = (props: RenderElementProps & { element: UlElement }): JSX.Element => {
   const { attributes, children, element } = props
-  // { display: 'none', visibility: 'hidden', height: 0 }
-  const style: CSSProperties = element.folded ? { display: 'none' } : {}
+  const style: CSSProperties = element.folded ? { display: 'none' } : {} // { display: 'none', visibility: 'hidden', height: 0 }
   return (
-    <div {...attributes}>
-      <div className={classes.bulletUl} style={style}>
-        {children}
-      </div>
+    <div {...attributes} className={classes.bulletUl} style={style}>
+      {children}
     </div>
   )
 }
@@ -583,8 +617,6 @@ const CustomElement = (props: RenderElementProps & { location: NavLocation; self
       return <InlineMirror {...{ attributes, children, element, location, selfCard }} />
     // case 'hashtag':
     //   return <InlineHashtag {...{ attributes, children, element, location }} />
-    // case 'new-hashtag':
-    //   return <InlineNewHashtag {...{ attributes, children, element, location }} />
     case 'poll':
       return <InlinePoll {...{ attributes, children, element, location }} />
     case 'lc':
@@ -606,12 +638,10 @@ export const BulletEditor = (props: {
   onValueChange?: (value: LiElement[]) => void
 }): JSX.Element => {
   const { initialValue, location, selfCard, readOnly, onValueChange } = props
-  const [value, setValue] = useState<LiElement[]>(initialValue)
   const editor = useMemo(() => withParse(withOperation(withList(withHistory(withReact(createEditor()))))), [])
-  // const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
-    [],
+    [location, selfCard],
   )
   // const decorate = useCallback(([node, path]: NodeEntry) => {
   //   const ranges: CustomRange[] = []
@@ -673,6 +703,14 @@ export const BulletEditor = (props: {
   }, [])
 
   // const [searchPanel, onValueChange] = useSearch(editor)
+  const [value, setValue] = useState<LiElement[]>(initialValue)
+
+  useEffect(() => {
+    // 當 initialValue 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
+    Transforms.deselect(editor)
+    setValue(initialValue)
+    // console.log('initial value setted')
+  }, [initialValue])
 
   // useEffect(() => {
   //   if (searchAllResult.data) {
@@ -681,7 +719,6 @@ export const BulletEditor = (props: {
   //     setSuggestions(null)
   //   }
   // }, [searchAllResult])
-  // console.log(initialValue)
 
   return (
     <div className={classes.bulletEditorContainer}>
@@ -694,6 +731,8 @@ export const BulletEditor = (props: {
         onChange={value => {
           if (isLiArray(value)) {
             setValue(value)
+
+            // TODO: 每字都儲存會有效能問題
             if (onValueChange) {
               onValueChange(value)
             }
@@ -709,7 +748,8 @@ export const BulletEditor = (props: {
           renderElement={renderElement}
           // renderLeaf={renderLeaf}
           onKeyDown={event => {
-            withListOnKeyDownMemo(event)
+            // withListOnKeyDownMemo(event)
+            withListOnKeyDown(event, editor)
             // if (search) {
             //   onKeyDownForSuggest(event)
             // } else {

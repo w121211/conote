@@ -12,6 +12,7 @@ import {
   isRootBulletDraft,
   RootBullet,
   RootBulletDraft,
+  toInlinePoll,
   // toInlineHashtag,
 } from './types'
 import { BulletNode } from './node'
@@ -52,13 +53,13 @@ function returnOrThrow<T extends BulletDraft | RootBulletDraft>(
 }
 
 async function createInlineItem(props: {
-  draft: InlineItem
+  inline: InlineItem
   bulletId: number
   cardId: number
   userId: string
 }): Promise<InlineItem> {
-  const { draft, bulletId, cardId, userId } = props
-  switch (draft.type) {
+  const { inline, bulletId, cardId, userId } = props
+  switch (inline.type) {
     // case 'new-hashtag': {
     //   const hashtag = await prisma.hashtag.create({
     //     data: {
@@ -83,47 +84,23 @@ async function createInlineItem(props: {
     //   }
     //   throw 'Hashtag.count shoud exist'
     // }
-    case 'new-poll': {
-      const poll = await prisma.poll.create({
-        data: {
-          userId,
-          choices: draft.choices,
-          count: { create: {} },
-        },
-      })
-      return {
-        type: 'poll',
-        str: `!((poll:${poll.id}))(${draft.choices.join(' ')})`,
-        id: poll.id,
-        choices: draft.choices,
+    case 'poll': {
+      if (inline.id === undefined) {
+        // 沒有 id 的情況視為新增一個
+        const poll = await prisma.poll.create({
+          data: {
+            userId,
+            choices: inline.choices,
+            count: { create: {} },
+          },
+        })
+        return toInlinePoll({ id: poll.id, choices: poll.choices })
       }
+      return inline
     }
     default:
-      return draft
+      return inline
   }
-}
-
-/**
- * 在資料庫創一個bullet
- */
-async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
-  cardId: number
-  draft: T
-  timestamp: number
-  userId: string
-}): Promise<BulletOrRootBullet<T>> {
-  const { cardId, draft, timestamp, userId } = props
-
-  if (draft.freeze && userId !== (await getBotId())) {
-    console.warn(draft)
-    throw new Error('權限不足: 無法創freeze bullet')
-  }
-  const dbBullet = await prisma.bullet.create({
-    data: {
-      card: { connect: { id: cardId } },
-      count: { create: {} },
-    },
-  })
 
   // let board: (Board & { poll: Poll | null }) | undefined
   // if (draft.board || draft.poll) {
@@ -159,16 +136,36 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
   //   hashtags,
   //   children: undefined,
   // }
+}
+
+/**
+ * 在資料庫創一個bullet
+ */
+async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
+  cardId: number
+  draft: T
+  timestamp: number
+  userId: string
+}): Promise<BulletOrRootBullet<T>> {
+  const { cardId, draft, timestamp, userId } = props
+
+  if (draft.freeze && userId !== (await getBotId())) {
+    console.warn(draft)
+    throw new Error('權限不足: 無法創freeze bullet')
+  }
+  const dbBullet = await prisma.bullet.create({
+    data: {
+      card: { connect: { id: cardId } },
+      count: { create: {} },
+    },
+  })
 
   // tokenize & parse
   const { headInlines } = parseBulletHead({ str: draft.head })
-
   const producedHeadInlines = await Promise.all(
-    headInlines.map(e => createInlineItem({ draft: e, userId, bulletId: dbBullet.id, cardId })),
+    headInlines.map(e => createInlineItem({ inline: e, userId, bulletId: dbBullet.id, cardId })),
   )
 
-  // 將 draft-flag, hashtags 取出，不存入 bulllet
-  // const { draft: _, newHashtags: _hashtags, ...included } = draft
   if (isRootBulletDraft(draft)) {
     const produced: RootBullet = {
       id: dbBullet.id,
@@ -183,13 +180,14 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
     return produced
   }
   const node: Bullet = {
-    // TODO: 不應該直接copy input
     id: dbBullet.id,
     userIds: [userId],
     head: inlinesToString(producedHeadInlines).trim(),
     body: draft.body,
     timestamp,
     children: [],
+    author: draft.author,
+    sourceUrl: draft.sourceUrl,
   }
   return returnOrThrow(node, draft)
 }
@@ -226,8 +224,8 @@ export async function runBulletOp(props: {
 
     const cur = node.id && curDict && curDict[node.id] // 有對應的 current node？
     if (cur) {
-      // current 被標記刪除
       if (cur.op === 'DELETE') {
+        // current 被標記刪除
         return null
       }
       delete cur.op
@@ -248,7 +246,6 @@ export async function runBulletOp(props: {
         }
         return next
       }
-
       if (node.op === 'UPDATE' || node.op === 'UPDATE_MOVE') {
         const head = node.head
         const dbBullet = await prisma.bullet.findUnique({
@@ -256,19 +253,13 @@ export async function runBulletOp(props: {
           include: { hashtags: true },
         })
         if (dbBullet) {
-          // tokenize & parse
-          const { headInlines } = parseBulletHead({
-            str: head,
-            // connected: { hashtags: dbBullet.hashtags.map(e => toInlineHashtag(e)) },
-          })
-          const producedHeadInlines = await Promise.all(
-            headInlines.map(e => createInlineItem({ draft: e, userId, bulletId: dbBullet.id, cardId })),
-          )
-          // if (connectedInlines) {
-          //   const producedConnectedInlines = await Promise.all(
-          //     connectedInlines.map(e => createInlineItem({ draft: e, userId, bulletId: dbBullet.id, cardId })),
-          //   )
-          // }
+          // const { headInlines } = parseBulletHead({
+          //   str: head,
+          //   // connected: { hashtags: dbBullet.hashtags.map(e => toInlineHashtag(e)) },
+          // })
+          // const producedHeadInlines = await Promise.all(
+          //   headInlines.map(e => createInlineItem({ draft: e, userId, bulletId: dbBullet.id, cardId })),
+          // )
           const children = (await Promise.all(node.children.map(e => _run(e)))).filter((e): e is Bullet => e !== null)
           const next = {
             ...cur,
@@ -276,7 +267,7 @@ export async function runBulletOp(props: {
             userIds: [...cur.userIds, userId],
             timestamp,
             children,
-            head: inlinesToString(producedHeadInlines).trim(),
+            head,
             body: node.body,
           }
           return next

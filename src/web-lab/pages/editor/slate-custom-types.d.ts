@@ -48,6 +48,13 @@ export type MirrorInlineElement = {
   mirrorSymbol: string
 }
 
+export type PopupInlineElement = {
+  type: 'popup'
+  children: CustomText[]
+  str: string
+  id?: string
+}
+
 export type LcBodyElement = {
   type: 'lc-body'
   children: CustomText[]
@@ -58,7 +65,12 @@ export type LcBodyElement = {
  */
 export type LcHeadElement = Omit<BulletDraft, 'head' | 'children'> & {
   type: 'lc-head'
-  children: (CustomText | LabelInlineElement | MirrorInlineElement)[]
+  children: (
+    | CustomText
+    | LabelInlineElement
+    | MirrorInlineElement
+    | PopupInlineElement
+  )[]
 
   body?: string
   isEditingBody?: true
@@ -113,6 +125,7 @@ type CustomElement =
   | LcElement
   | LcHeadElement
   | LcBodyElement
+  | PopupInlineElement
 
 type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 

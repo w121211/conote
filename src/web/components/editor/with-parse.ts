@@ -1,22 +1,12 @@
-import { Editor, Transforms, Node, Path, NodeEntry } from 'slate'
+import { Editor, Transforms, Node, Path, NodeEntry, createEditor } from 'slate'
 import { parseBulletHead } from '../../lib/bullet/text'
 import { InlineItem } from '../../lib/bullet/types'
-import { LcElement, CustomElement, CustomInlineElement, CustomText } from './slate-custom-types'
+import { LcElement, CustomElement, CustomInlineElement, CustomText, LiElement } from './slate-custom-types'
+import { isLc, isLiArray } from './with-list'
 
 function isInlineElement(element: CustomElement): element is CustomInlineElement {
-  const inlineTypes = ['symbol', 'mirror', 'hashtag', 'new-hashtag', 'poll', 'new-poll']
+  const inlineTypes = ['symbol', 'mirror', 'poll']
   return inlineTypes.includes(element.type)
-}
-
-export function setInlinesToText(editor: Editor, lcEntry: NodeEntry<LcElement>): void {
-  const [node, path] = lcEntry
-
-  // 移除 lc 原本的 children 並插入 text
-  Transforms.removeNodes(editor, {
-    at: path,
-    match: (n, p) => Path.isChild(p, path),
-  })
-  Transforms.insertNodes(editor, { text: Node.string(node) }, { at: [...path, 0] })
 }
 
 function toSlateInline(item: InlineItem): CustomInlineElement | CustomText {
@@ -29,21 +19,6 @@ function toSlateInline(item: InlineItem): CustomInlineElement | CustomText {
   }
 }
 
-export function parseLcAndReplace(editor: Editor, lcEntry: NodeEntry<LcElement>): void {
-  const [node, path] = lcEntry
-  const { headInlines } = parseBulletHead({
-    str: Node.string(node),
-  })
-  const inlines = headInlines.map(e => toSlateInline(e))
-  // 移除 lc 原本的 children 並插入新的 inlines
-  Transforms.removeNodes(editor, {
-    at: path,
-    match: (n, p) => Path.isChild(p, path),
-  })
-  // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
-  Transforms.insertNodes(editor, inlines, { at: [...path, 0] })
-}
-
 export function withParse(editor: Editor): Editor {
   const { isInline } = editor
 
@@ -52,4 +27,35 @@ export function withParse(editor: Editor): Editor {
   }
 
   return editor
+}
+
+export function parseLcAndReplace(props: { editor: Editor; lcEntry: NodeEntry<LcElement> }): void {
+  const {
+    editor,
+    lcEntry: [lcNode, lcPath],
+  } = props
+  const { headInlines } = parseBulletHead({ str: Node.string(lcNode) })
+  const inlines = headInlines.map(e => toSlateInline(e))
+
+  // 移除 lc 原本的 children 並插入新的 inlines
+  Transforms.removeNodes(editor, {
+    at: lcPath,
+    match: (n, p) => Path.isChild(p, lcPath),
+  })
+  // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
+  Transforms.insertNodes(editor, inlines, { at: [...lcPath, 0] })
+}
+
+export function parseChildren(lis: LiElement[]): LiElement[] {
+  const editor = withParse(createEditor())
+  editor.children = lis
+  for (const [n, p] of Editor.nodes(editor, { at: [] })) {
+    if (isLc(n)) {
+      parseLcAndReplace({ editor, lcEntry: [n, p] })
+    }
+  }
+  if (isLiArray(editor.children)) {
+    return editor.children
+  }
+  throw ''
 }
