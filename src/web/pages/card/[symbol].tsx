@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Node } from 'slate'
@@ -49,7 +49,7 @@ export const hashtagTextToIcon = (text: string): JSX.Element | null => {
 
 const CardSymbolPage = (): JSX.Element | null => {
   const router = useRouter()
-  const [navs, setNavs] = useState<Nav[]>() // editor route
+  // const [navs, setNavs] = useState<Nav[]>() // editor route
   const [readonly, setReadonly] = useState(false)
   const [location, setLocation] = useState<NavLocation>()
   const { data, setLocalValue, submitValue, dropValue } = useLocalValue({ location })
@@ -62,24 +62,48 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
   }, [router])
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   if (data && location) {
+  //     const { self, mirror } = data
+  //     // const navs = mirror ? getNavs(mirror.rootLi, location.openedLiPath) : getNavs(self.rootLi, location.openedLiPath)
+  //     // navs.pop() // 最後一個是當前的 li ，不需要
+  //     // setNavs(navs)
+  //     // console.log('navs effect')
+  //   }
+  // }, [data])
+
+  const navs = useMemo(() => {
     if (data && location) {
       const { self, mirror } = data
-      const navs = mirror ? getNavs(mirror.rootLi, location.openedLiPath) : getNavs(self.rootLi, location.openedLiPath)
-      // navs.pop() // 最後一個是當前的 li ，不需要
-      setNavs(navs)
-      // console.log('navs effect')
+      return mirror ? getNavs(mirror.rootLi, location.openedLiPath) : getNavs(self.rootLi, location.openedLiPath)
     }
-  }, [data, location])
+  }, [data])
+
+  const editor = useMemo(() => {
+    console.log('hello up~')
+    if (data && location) {
+      console.log('hello~')
+      const { selfCard, mirror, openedLi, value } = data
+      const parsedValue = parseChildren(value)
+      // const parsedValue = value
+      return (
+        <BulletEditor
+          initialValue={parsedValue}
+          location={location}
+          onValueChange={value => {
+            setLocalValue(value)
+          }}
+          readOnly={readonly}
+          selfCard={selfCard}
+        />
+      )
+    }
+    return null
+  }, [data])
 
   if (data === undefined || location === undefined) {
     return null
   }
-  const { selfCard, mirror, openedLi, value } = data
-  const [openedLiLc] = openedLi.children
-  // const parsedValue = parseChildren(value)
-  const parsedValue = value
-  // console.log('symbol', navs)
   return (
     <Layout path={navs}>
       <a href="/card?url=https://www.youtube.com/watch?v=q0ImE0kDlvw">https://www.youtube.com/watch?v=q0ImE0kDlvw</a>
@@ -112,7 +136,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           {'Drop'}
         </button>
 
-        {mirror && (
+        {data.mirror && (
           <span>
             <Link href={locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>
               <a>Home</a>
@@ -128,25 +152,13 @@ const CardSymbolPage = (): JSX.Element | null => {
             </Link>
           ))}
 
-        <div>
+        {/* <div>
           <span>@{selfCard.link?.authorName}</span>
           <span>@{selfCard.link?.url}</span>
           <h3>{Node.string(openedLiLc)}</h3>
-          {/* {openedLiLc.rootBulletDraft?.emojis
-            ? openedLiLc.rootBulletDraft.emojis.map((e, i) => <HashtagComponent key={i} hashtag={e} />)
-            : openedLiLc.curHashtags && openedLiLc.curHashtags.map((e, i) => <HashtagComponent key={i} hashtag={e} />)} */}
-        </div>
-        {/* {console.log(openedLiLc.rootBulletDraft?.allHashtags)} */}
+        </div> */}
 
-        <BulletEditor
-          initialValue={parsedValue}
-          location={location}
-          onValueChange={value => {
-            setLocalValue(value)
-          }}
-          readOnly={readonly}
-          selfCard={selfCard}
-        />
+        {editor}
       </div>
     </Layout>
   )

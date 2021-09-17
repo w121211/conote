@@ -230,13 +230,13 @@ const AddEmojiButotn = (props: {
   )
 }
 
-const InlineSymbol = (
-  props: RenderElementProps & {
-    element: InlineSymbolElement
-  },
-): JSX.Element => {
-  const { attributes, children, element } = props
-
+const InlineSymbol = ({
+  attributes,
+  children,
+  element,
+}: RenderElementProps & {
+  element: InlineSymbolElement
+}): JSX.Element => {
   return <button {...attributes}>{children}</button>
 }
 
@@ -448,8 +448,12 @@ const Lc = (
   )
 }
 
-const Li = (props: RenderElementProps & { element: LiElement; location: NavLocation }): JSX.Element => {
-  const { attributes, children, element, location } = props
+const Li = ({
+  attributes,
+  children,
+  element,
+  location,
+}: RenderElementProps & { element: LiElement; location: NavLocation }): JSX.Element => {
   const editor = useSlateStatic()
   // const [hasUl, setHasUl] = useState(false)
   const [ulFolded, setUlFolded] = useState<true | undefined>()
@@ -566,8 +570,7 @@ const Li = (props: RenderElementProps & { element: LiElement; location: NavLocat
   )
 }
 
-const Ul = (props: RenderElementProps & { element: UlElement }): JSX.Element => {
-  const { attributes, children, element } = props
+const Ul = ({ attributes, children, element }: RenderElementProps & { element: UlElement }): JSX.Element => {
   const style: CSSProperties = element.folded ? { display: 'none' } : {} // { display: 'none', visibility: 'hidden', height: 0 }
   return (
     <div {...attributes} className={classes.bulletUl} style={style}>
@@ -576,8 +579,13 @@ const Ul = (props: RenderElementProps & { element: UlElement }): JSX.Element => 
   )
 }
 
-const CustomElement = (props: RenderElementProps & { location: NavLocation; selfCard: Card }): JSX.Element => {
-  const { attributes, children, element, location, selfCard } = props
+const CustomElement = ({
+  attributes,
+  children,
+  element,
+  location,
+  selfCard,
+}: RenderElementProps & { location: NavLocation; selfCard: Card }): JSX.Element => {
   const sourceUrl = selfCard.link?.url
   switch (element.type) {
     case 'symbol':
@@ -599,14 +607,21 @@ const CustomElement = (props: RenderElementProps & { location: NavLocation; self
   }
 }
 
-export const BulletEditor = (props: {
+export const BulletEditor = ({
+  initialValue,
+  location,
+  selfCard,
+  readOnly,
+  onValueChange,
+}: {
   initialValue: LiElement[]
   location: NavLocation
   selfCard: Card
   readOnly?: boolean
   onValueChange?: (value: LiElement[]) => void
 }): JSX.Element => {
-  const { initialValue, location, selfCard, readOnly, onValueChange } = props
+  console.log('editor entry', initialValue)
+
   const editor = useMemo(() => withParse(withOperation(withList(withHistory(withReact(createEditor()))))), [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
@@ -674,6 +689,7 @@ export const BulletEditor = (props: {
   const [value, setValue] = useState<LiElement[]>(initialValue)
 
   useEffect(() => {
+    console.log('use effect deps initialValue')
     // 當 initialValue 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
     Transforms.deselect(editor)
     setValue(initialValue)
@@ -711,12 +727,11 @@ export const BulletEditor = (props: {
       >
         <Editable
           autoCorrect="false"
-          decorate={decorate}
+          // decorate={decorate}
           readOnly={readOnly}
           renderElement={renderElement}
-          renderLeaf={renderLeaf}
+          // renderLeaf={renderLeaf}
           onKeyDown={event => {
-            // withListOnKeyDownMemo(event)
             withListOnKeyDown(event, editor)
             // if (search) {
             //   onKeyDownForSuggest(event)

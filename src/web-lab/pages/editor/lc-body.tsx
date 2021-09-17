@@ -640,8 +640,6 @@ export const BulletEditor = (props: {
         onChange={(value) => {
           if (isLiArray(value)) {
             setValue(value)
-
-            sessionStorage.setItem('editorValue', JSON.stringify(value))
           } else {
             throw new Error('value 需為 li array')
           }

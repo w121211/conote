@@ -260,51 +260,56 @@ export function withList(editor: Editor): Editor {
 
     // TODO: 還未考慮一次刪除整段的情況
     if (selection && Range.isCollapsed(selection)) {
-      const li = Editor.above<LiElement>(editor, { match: n => isLi(n) })
+      const liEntry = Editor.above<LiElement>(editor, { match: n => isLi(n) })
 
-      if (li) {
-        const [node, path] = li
-        const lc = node.children[0]
+      if (liEntry) {
+        const [li, liPath] = liEntry
+        const [lc, ul] = li.children
         // const input = Editor.string(editor, path)
         const point = Editor.point(editor, selection)
 
-        // 此行freeze，不動作
+        // 此行 freeze，不動作
         if (lc.freeze) return
 
         // TODO: 需要考慮op
 
-        // cursor在行首
-        if (Editor.isStart(editor, point, path)) {
+        if (Editor.isStart(editor, point, lcPath(liPath))) {
+          // cursor 在 lc 行首
+
           // if (lc.root) {
           //   // li root，刪除ul & li
           //   removePrevRootLi(editor, path)
           //   return
           // }
-          const prev = Editor.previous<LiElement>(editor, { at: path })
+          const prevLiEntry = Editor.previous<LiElement>(editor, { at: liPath })
 
-          // 有前行
-          if (prev) {
-            // 前行有indent-list，不動作
-            if (prev[0].children[1]) return
+          if (prevLiEntry) {
+            // 有同階層的前行
+            const [prevLi, prevLiPath] = prevLiEntry
 
-            // 此行有子層，與前行合併，並將此行子層移至前行子層
-            if (node.children[1]) {
+            if (prevLi.children[1]) {
+              // 前行有 indent-list
+              if (Node.string(lc).length === 0 && ul === undefined) {
+                // 此行沒有子層、沒有內文，刪除此行，cursor 移至前行
+              } else {
+                return // 此行有子層、或有內文，不動作
+              }
+            }
+            if (ul) {
+              // 此行有子層，與前行合併，並將此行子層移至前行子層
               Editor.withoutNormalizing(editor, () => {
                 Transforms.delete(editor, { unit, reverse: true })
-                Transforms.moveNodes(editor, { at: lcPath(path), to: ulPath(prev[1]) })
-                Transforms.removeNodes(editor, { at: path })
+                Transforms.moveNodes(editor, { at: lcPath(liPath), to: ulPath(prevLiPath) })
+                Transforms.removeNodes(editor, { at: liPath })
               })
               return
             }
-
-            // 此行沒子層，與前行合併，delete backward
+            // else: 此行沒子層，與前行合併 => 原生 delete backward
           } else {
-            // 沒有前行
+            // 沒有同階層的前行
 
-            // 此行有子層，不動作
-            if (node.children[1]) return
-
-            // 此行沒有子層，與前行合併，delete backward
+            if (ul) return // 此行有子層，不動作
+            // else: 此行沒有子層，與前行合併 => 原生 delete backward
           }
         }
       }
@@ -428,11 +433,7 @@ export function withList(editor: Editor): Editor {
    */
   editor.normalizeNode = ([node, path]) => {
     if (isUl(node)) {
-      // 檢查ul不應為空  Trick: 在沒有children的情況下，slate會自動增加一個text node
-      const child = node.children[0]
-      assert(!Text.isText(child))
-
-      // 檢查ul只能有li
+      // 檢查 ul children 只能是 li, trick: 在沒有children的情況下，slate會自動增加一個text node
       for (const e of node.children) {
         assert(isLi(e))
       }
@@ -457,8 +458,10 @@ export function withList(editor: Editor): Editor {
       // console.log(node)
 
       // 檢查li只能有lc, ul?
-      assert(isLc(node.children[0]))
-      node.children[1] && assert(isUl(node.children[1]))
+      assert(node.children.length <= 2)
+      const [lc, ul] = node.children
+      assert(isLc(lc))
+      if (ul) assert(isUl(ul))
 
       // 只有第0層的li是root（lv0=ul, lv1=li）
       // if (path.length === 1 && node.children[0].root === undefined) {

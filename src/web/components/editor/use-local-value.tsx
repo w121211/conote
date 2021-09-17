@@ -233,6 +233,7 @@ export const useLocalValue = ({
   location: NavLocation | undefined
 }): {
   data?: LocalValueData
+  isReady?: boolean
   setLocalValue: (value: LiElement[]) => void
   submitValue: (props: { onFinish?: () => void }) => void // 將 value 發送至後端（搭配 createCardBody() )
   dropValue: () => void // 將 value 從 local 刪除
@@ -336,9 +337,6 @@ export const useLocalValue = ({
     const asyncRun = async () => {
       if (window && location) {
         const { selfSymbol, mirrorSymbol, openedLiPath = [] } = location
-
-        // console.log('useEffect')
-
         // 若在 local 找不到 self symbol，代表 symbol 有所變動，清除 & 更新 local
         if (store.getCard(selfSymbol) === null) {
           store.clear()
