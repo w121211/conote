@@ -69,5 +69,17 @@
 .bulletEditorContainer {
   margin-left: 2em;
 }
-.lcText {
+
+.hashtag {
+  svg {
+    fill: $gray-text;
+  }
+  color: $gray-text;
+}
+
+.clicked {
+  svg {
+    fill: $text;
+  }
+  color: $text;
 }

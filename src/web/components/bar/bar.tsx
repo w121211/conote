@@ -34,7 +34,7 @@ const BarChart = ({
         <div
           className={`${classes.voteColorBlock} ${voted ? classes.voted : ''}`}
           style={{
-            clipPath: `polygon(0% 0, ${persentage(count, total)}% 0, ${persentage(count, total)}% 100%,0% 100%) `,
+            clipPath: `inset(0  ${100 - persentage(count, total)}% 0 0 round 4px) `,
 
             // width: `${persentage(count, total)}%`,
           }}

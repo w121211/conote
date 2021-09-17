@@ -26,8 +26,37 @@
     fill: $gray-text;
   }
 }
+.default {
+  svg {
+    fill: $gray-text;
+  }
+  color: $text;
+}
 .clicked {
   svg {
-    fill: $black;
+    fill: $secondary;
+  }
+  // color: $secondary;
+}
+.divider {
+  display: inline-block;
+  // height: 100%;
+  width: 0;
+  border-right: 1px solid $gray-text;
+  margin: 3px 0;
+}
+.groupContainer {
+  display: inline-flex;
+  background: $gray;
+  border-radius: 3px;
+  & :first-child {
+    span {
+      border-radius: 3px 0 0 3px;
+    }
+  }
+  & :last-child {
+    span {
+      border-radius: 0 3px 3px 0;
+    }
   }
 }

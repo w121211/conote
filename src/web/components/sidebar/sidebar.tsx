@@ -24,21 +24,6 @@ const SideBar = ({ style, showMenuHandler }: { style: React.CSSProperties; showM
       >
         <MenuIcon className={classes.menuIcon} />
       </div>
-      {data ? (
-        <>
-          {window.location.protocol.includes('extension') ? (
-            <>
-              Welcome {data.me.id}! <a href="http://localhost:3000/api/auth/logout">Logout</a>
-            </>
-          ) : (
-            <>
-              Welcome {data.me.id}! <a href="/api/auth/logout">Logout</a>
-            </>
-          )}
-        </>
-      ) : (
-        <a href="/api/auth/login">Login</a>
-      )}
 
       <div className="searchBar">
         <SearchAllForm />
@@ -66,9 +51,24 @@ const SideBar = ({ style, showMenuHandler }: { style: React.CSSProperties; showM
           <a href="https://www.notion.so/Work-Log-491e5e9bdff942cf96ab0e9dfbf86c4e">測試說明: 3/4 上線測試A1</a>
         </li> */}
       </ul>
-      <span className="logo">
+      {/* <span className="logo">
         <Link href="/">COCARD</Link>
-      </span>
+      </span> */}
+      {data ? (
+        <>
+          {window.location.protocol.includes('extension') ? (
+            <>
+              Welcome {data.me.id}! <a href="http://localhost:3000/api/auth/logout">Logout</a>
+            </>
+          ) : (
+            <>
+              Welcome ! <a href="/api/auth/logout">Logout</a>
+            </>
+          )}
+        </>
+      ) : (
+        <a href="/api/auth/login">Login</a>
+      )}
       {/* <Search
           className="search"
           placeholder="Search..."

@@ -1,5 +1,6 @@
 import { ApolloClient, useApolloClient } from '@apollo/client'
 import { useCallback, useEffect, useState } from 'react'
+import { set } from 'react-hook-form'
 import { Node } from 'slate'
 // import { editorCurrentSymbol, editorRootDict } from '../../apollo/cache'
 import {
@@ -14,6 +15,9 @@ import {
   CreateCardBodyMutation,
   CreateCardBodyMutationVariables,
   CreateCardBodyDocument,
+  WebpageCardQuery,
+  WebpageCardQueryVariables,
+  WebpageCardDocument,
 } from '../../apollo/query.graphql'
 import { BulletNode } from '../../lib/bullet/node'
 import { injectHashtags } from '../../lib/hashtag/inject'
@@ -173,11 +177,22 @@ async function getLocalOrQueryRoot(props: {
     query: HashtagsDocument,
     variables: { symbol },
   })
+
   if (queryCard.data && queryCard.data.card) {
-    card = queryCard.data.card
+    if (queryCard.data.card) {
+      card = queryCard.data.card
+    }
   }
   if (queryCard.error) {
-    throw queryCard.error
+    const queryWebCard = await client.query<WebpageCardQuery, WebpageCardQueryVariables>({
+      query: WebpageCardDocument,
+      variables: { url: symbol },
+    })
+    card = queryWebCard.data.webpageCard
+    // throw queryCard.error
+    if (queryWebCard.error) {
+      throw queryWebCard.error
+    }
   }
   if (queryHashtags.data && queryHashtags.data.hashtags) {
     gqlHashtags = queryHashtags.data.hashtags
@@ -216,6 +231,7 @@ async function getLocalOrQueryRoot(props: {
 
     return { card, rootLi }
   }
+
   throw 'unexpected error'
 }
 
@@ -336,6 +352,7 @@ export const useLocalValue = ({
   useEffect(() => {
     const asyncRun = async () => {
       if (window && location) {
+        console.log(location)
         const { selfSymbol, mirrorSymbol, openedLiPath = [] } = location
         // 若在 local 找不到 self symbol，代表 symbol 有所變動，清除 & 更新 local
         if (store.getCard(selfSymbol) === null) {

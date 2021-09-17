@@ -1,0 +1,66 @@
+.pathUl {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+  // flex-grow: 1;
+  list-style: none;
+  // width: fit-content;
+  align-items: center;
+  // justify-content: space-between;
+  height: 100%;
+  span {
+    cursor: pointer;
+    display: flex;
+    position: relative;
+    align-items: center;
+    height: 100%;
+    max-width: 80px;
+    // flex-shrink: 0;
+    flex-grow: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    // max-width: 60px;
+    // width: fit-content;
+    // span {
+    //   display: inline-block;
+    //   height: fit-content;
+    //   overflow: hidden;
+    //   white-space: nowrap;
+    //   text-overflow: ellipsis;
+    //   line-height: normal;
+    // }
+  }
+  & > li {
+    display: flex;
+    height: 100%;
+  }
+  a {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+.rightArrow {
+  display: flex;
+  width: 1em;
+  margin: 0 6px;
+  flex-shrink: 0;
+  svg {
+    stroke: $black;
+    stroke-width: 7px;
+  }
+  @media screen and(max-width:500px) {
+    width: 13px;
+  }
+}
+.tooltip {
+  height: 100%;
+  box-shadow: 0 2px 19px -4px #00000042;
+  span {
+    overflow: visible;
+    padding: 0 10px;
+    // display: block;
+    // height: 100%;
+  }
+}

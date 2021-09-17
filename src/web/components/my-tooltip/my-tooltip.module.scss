@@ -6,6 +6,7 @@
   // padding: 0.5em;
   background-color: $white;
   -webkit-box-shadow: 0 6px 19px -4px #00000042;
+  border-radius: 3px;
   // box-shadow: 0 4px 25px -6px #00000066;
   z-index: 100;
 
@@ -25,4 +26,11 @@
   opacity: 0;
   transform: translateY(0);
   transition: all 0.1s;
+
+  & :first-child {
+    border-radius: 3px 3px 0 0;
+  }
+  & :last-child {
+    border-radius: 0 0 3px 3px;
+  }
 }

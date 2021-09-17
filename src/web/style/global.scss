@@ -74,43 +74,68 @@ svg {
 
 a {
   color: $text;
-  border-bottom: 1px solid $text;
-  padding-bottom: 1px;
   text-decoration: none;
-  &:hover {
-    // cursor: pointer;
-    color: $secondaryHover;
-    border-bottom: 1px solid $secondaryHover;
+  &.ui {
+    // border-bottom: 0;
+    // &:hover {
+    //   border-bottom: 0;
+    // }
   }
-  &[data-type='ui'] {
-    border-bottom: 0;
+  &.inline {
+    padding-bottom: 1px;
+    border-bottom: 1px solid $text;
     &:hover {
-      border-bottom: 0;
+      // cursor: pointer;
+      color: $secondaryHover;
+      border-bottom: 1px solid $secondaryHover;
     }
   }
 }
 button {
   display: inline-flex;
+  height: 30px;
   border: 0;
   border-radius: 3px;
   margin: 10px 6px;
   margin-left: 0px;
   cursor: pointer;
-  padding: 6px 12px;
-  background: $gray;
-
-  svg {
-    fill: $text;
-    stroke: $text;
-  }
+  padding: 0 12px;
+  background: none;
+  line-height: 1;
+  font-size: 1em;
+  background-color: $gray;
+  align-items: center;
 
   // box-sizing: content-box;
-
-  &[data-type='inline'] {
-    margin: 0;
-    padding: 3px 6px;
+  &.hashtag {
+    margin: 0 3px;
+    padding: 2px 6px;
+    svg {
+      width: 1em;
+      height: 13px;
+    }
   }
-  &[data-type='secondary'] {
+
+  &.inline {
+    height: 20px;
+    margin: 0;
+    padding: 0px 10px;
+    & > span {
+      // padding: 5px 10px;
+    }
+    svg {
+      width: 10px;
+      height: 10px;
+    }
+    @media screen and(max-width:500px) {
+      font-size: 13px;
+    }
+    font-size: 14px;
+    &.mR {
+      margin: 0 3px;
+    }
+  }
+  &.secondary {
     padding: 4px 10px;
     border: 1px solid $gray-text;
     background: inherit;
@@ -118,7 +143,7 @@ button {
       background: $gray;
     }
   }
-  &[data-type='primary'] {
+  &.primary {
     padding: 4px 10px;
     border: 1px solid;
     border-color: $secondary;
@@ -129,8 +154,14 @@ button {
       border-color: $secondaryHover;
     }
   }
+  &.noBg {
+    background: none;
+  }
 }
 footer {
   min-height: 100px;
   border-top: 1px solid $gray;
+}
+.hashtagContainer {
+  display: flex;
 }

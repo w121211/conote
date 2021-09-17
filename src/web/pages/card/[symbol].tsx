@@ -8,9 +8,10 @@ import { useLocalValue } from '../../components/editor/use-local-value'
 import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
-import PinIcon from '../../assets/svg/like.svg'
-import UpIcon from '../../assets/svg/arrow-up.svg'
+
 import HashtagUpDown from '../../components/upDown/hashtag-up-down'
+import NavPath from '../../components/nav-path/nav-path'
+import { Poll, useCreateVoteMutation } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 
 // TODO: 與 li-location 合併
@@ -34,17 +35,78 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
   return navs
 }
 
-// @lisa TODO: 移到 hashtag component、需要考慮非預設的text
-export const hashtagTextToIcon = (text: string): JSX.Element | null => {
-  switch (text) {
-    case '#pin':
-      return <PinIcon width="1em" height="1em" />
-    case '#up':
-      return <UpIcon width="1em" height="1em" />
-    case '#down':
-      return <UpIcon width="1em" height="1em" style={{ transform: 'rotate(180deg)' }} />
+/**
+ * @param poll
+ * @param author 若給予視為代表 author 投票
+ */
+const PollComponent = (props: { poll: Poll; author?: string }): JSX.Element => {
+  const { poll, author } = props
+  const [createVote] = useCreateVoteMutation({
+    update(cache, { data }) {
+      // const res = cache.readQuery<MyVotesQuery>({
+      //   query: MyVotesDocument,
+      // })
+      // if (data?.createVote && res?.myVotes) {
+      //   cache.writeQuery({
+      //     query: MyVotesDocument,
+      //     data: { myVotes: res.myVotes.concat([data.createVote]) },
+      //   })
+      // }
+      // refetch()
+    },
+    // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
+  })
+  const onVote = () => {
+    // 已經投票且生效，不能再投
+    // 尚未投票，可以投
+    // 送出按鈕
   }
-  return null
+
+  return (
+    <>
+      {poll.choices.map((e, i) => (
+        <button
+          key={i}
+          onClick={event => {
+            createVote({
+              variables: {
+                pollId: poll.id,
+                data: { choiceIdx: i },
+              },
+            })
+          }}
+        >
+          {e}
+        </button>
+      ))}
+    </>
+  )
+}
+
+const HashtagComponent = (props: { hashtag: Hashtag | HashtagGroup }): JSX.Element => {
+  const { hashtag } = props
+  // if (hashtag.type === 'hashtag' || hashtag.typ === 'hashtag-group')
+  // const hashtagLike = useHashtagLike({ hashtag })
+  switch (hashtag.type) {
+    case 'hashtag':
+      return (
+        <div>
+          {/* <HashtagUpDown hashtagId={e.id} text={e.text} /> */}
+          {/* <HashtagLike hashtag={hashtag} /> */}
+          <button>{hashtag.text}</button>
+        </div>
+      )
+    case 'hashtag-group':
+      return (
+        <div>
+          (
+          {hashtag.poll.choices.map((e, i) => (
+            <button key={i}>{e}</button>
+          ))}
+          )
+        </div>
+      )
+  }
 }
 
 const CardSymbolPage = (): JSX.Element | null => {
@@ -105,10 +167,17 @@ const CardSymbolPage = (): JSX.Element | null => {
     return null
   }
   return (
-    <Layout path={navs}>
-      <a href="/card?url=https://www.youtube.com/watch?v=q0ImE0kDlvw">https://www.youtube.com/watch?v=q0ImE0kDlvw</a>
+    <Layout
+      navPath={
+        <NavPath
+          path={navs}
+          mirrorHomeUrl={mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
+        />
+      }
+    >
       <div style={{ marginBottom: '3em' }}>
         <button
+          className="noBg"
           onClick={() => {
             setReadonly(!readonly)
           }}
@@ -117,6 +186,7 @@ const CardSymbolPage = (): JSX.Element | null => {
         </button>
 
         <button
+          className="primary"
           onClick={() => {
             submitValue({
               onFinish: () => {
@@ -125,7 +195,9 @@ const CardSymbolPage = (): JSX.Element | null => {
               },
             })
           }}
-        ></button>
+        >
+          Submit
+        </button>
 
         <button
           onClick={() => {
@@ -136,27 +208,27 @@ const CardSymbolPage = (): JSX.Element | null => {
           {'Drop'}
         </button>
 
-        {data.mirror && (
+        {/* {mirror && (
           <span>
             <Link href={locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>
               <a>Home</a>
             </Link>
             ...
           </span>
-        )}
+        )} */}
 
-        {navs &&
+        {/* {/* {navs &&
           navs.map((e, i) => (
             <Link href={locationToUrl({ ...location, openedLiPath: e.path })} key={i}>
               <a>{e.text}</a>
             </Link>
-          ))}
+          ))} */}
 
-        {/* <div>
-          <span>@{selfCard.link?.authorName}</span>
-          <span>@{selfCard.link?.url}</span>
+        <div>
+          {selfCard.link?.authorName && <span>@{selfCard.link?.authorName}</span>}
+          {selfCard.link?.url && <span>@{selfCard.link?.url}</span>}
           <h3>{Node.string(openedLiLc)}</h3>
-        </div> */}
+        </div>
 
         {editor}
       </div>

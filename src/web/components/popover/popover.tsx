@@ -14,7 +14,7 @@ const Popover = ({
   hideBoard: () => void
   subTitle?: string
   // width?: number
-}) => {
+}): JSX.Element => {
   return (
     <div
       className={classes.containerOuter}
@@ -23,19 +23,29 @@ const Popover = ({
         // width: `${typeof width === 'number' ? width + 'px' : 'initial'}`,
       }}
     >
-      <div className={classes.topBar}>
-        <span
-          className={classes.cancelIconWrapper}
-          onClick={(e: any) => {
-            e.stopPropagation()
-            hideBoard()
-          }}
-        >
-          <CancelIcon />
-        </span>
-        <span className={classes.subTitle}>{subTitle && subTitle} </span>
+      <div
+        className={classes.mask}
+        onClick={e => {
+          // e.preventDefault()
+          e.stopPropagation()
+          hideBoard()
+        }}
+      ></div>
+      <div className={classes.containerInner}>
+        <div className={classes.topBar}>
+          <span
+            className={classes.cancelIconWrapper}
+            onClick={(e: any) => {
+              e.stopPropagation()
+              hideBoard()
+            }}
+          >
+            <CancelIcon />
+          </span>
+          <span className={classes.subTitle}>{subTitle && subTitle} </span>
+        </div>
+        <div className={classes.children}>{children}</div>
       </div>
-      <div className={classes.children}>{children}</div>
     </div>
   )
 }

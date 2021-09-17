@@ -13,6 +13,7 @@ import {
   BoardDocument,
   useMyVotesQuery,
   Vote,
+  Poll,
 } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
 import classes from './board-form.module.scss'
@@ -60,6 +61,7 @@ export const RadioInput = ({
         value={value}
         checked={checked}
         onClick={e => {
+          e.stopPropagation()
           // handleChange(e.target)
           // setChecked(prev => !prev)
           choiceValue && choiceValue(value)
@@ -101,35 +103,32 @@ export const RadioInput = ({
   )
 }
 
-const BoardForm = ({
-  pollId,
-  boardId,
+const PollForm = ({
+  poll,
+
   initialValue,
   clickedChoiceIdx,
-  // pollChoices,
-  refetch,
-  filterComments,
 }: {
-  pollId?: string
-  boardId: string
+  poll: Poll
+  // boardId: string
   initialValue: FormInputs
   clickedChoiceIdx?: number
   // pollChoices?: string[]
-  refetch: () => void
-  filterComments: (i: number) => void
+  // refetch: () => void
+  // filterComments: (i: number) => void
 }): JSX.Element => {
   // const { field, fieldState } = useController({ name: 'choice' })
-  const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
-  const { data: myVotesData } = useMyVotesQuery()
+  // const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
+  const { data: myVotesData } = useMyVotesQuery({ variables: { pollId: poll.id } })
   const methods = useForm<FormInputs>()
   const { register, handleSubmit, setValue, reset, getValues } = methods
   const [choiceValue, setChoiceValue] = useState<number | null | undefined>()
-  const [check, setChecked] = useState<boolean[]>(Array(boardData?.board.poll?.choices.length).fill(false))
+  const [check, setChecked] = useState<boolean[]>(Array(3).fill(false))
   const [myVote, setMyVote] = useState<Vote>()
 
   useEffect(() => {
     if (myVotesData) {
-      setMyVote(myVotesData?.myVotes.find(e => e.pollId.toString() === pollId))
+      setMyVote(myVotesData?.myVotes.find(e => e.pollId.toString() === poll.id))
     }
   }, [myVotesData])
   useEffect(() => {
@@ -179,31 +178,31 @@ const BoardForm = ({
   })
 
   const myHandleSubmit = (d: FormInputs) => {
-    if (d.lines) {
-      createComment({
-        variables: {
-          boardId,
-          pollId,
-          data: {
-            content: `${
-              boardData?.board.poll?.choices && d.choice
-                ? '<' + boardData?.board.poll?.choices[parseInt(d.choice)] + '>'
-                : ''
-            } ${d.lines}`,
-          },
-        },
-      })
-    }
-    if (d.choice && pollId) {
+    // if (d.lines) {
+    //   createComment({
+    //     variables: {
+    //       boardId,
+    //       pollId,
+    //       data: {
+    //         content: `${
+    //           boardData?.board.poll?.choices && d.choice
+    //             ? '<' + boardData?.board.poll?.choices[parseInt(d.choice)] + '>'
+    //             : ''
+    //         } ${d.lines}`,
+    //       },
+    //     },
+    //   })
+    // }
+    if (d.choice && poll.id) {
       createVote({
         variables: {
-          pollId,
+          pollId: poll.id,
           data: { choiceIdx: parseInt(d.choice) },
         },
       })
       // console.log(typeof d.choice, pollId)
     }
-    setChecked(Array(boardData?.board.poll?.choices?.length).fill(false))
+    setChecked(Array(3).fill(false))
     setChoiceValue(null)
     reset({ title: '', lines: '' })
   }
@@ -234,10 +233,10 @@ const BoardForm = ({
   // },[choiceValue])
 
   useEffect(() => {
-    filterComments(
-      check.findIndex((e, i) => e),
-      // check,
-    )
+    // filterComments(
+    //   check.findIndex((e, i) => e),
+    //   // check,
+    // )
   }, [choiceValue])
   // console.log(pollChoices)
 
@@ -250,30 +249,29 @@ const BoardForm = ({
           {/* <input type="text" {...register('title')} placeholder="Symbol 或 Topic" /> */}
           {/* </div> */}
           <div className={classes.section}>
-            {boardData?.board.poll?.choices && pollId && (
-              <div className={classes.choiceWrapper}>
-                {/* <label>@作者</label> */}
-                <div className={classes.radioWrapper}>
-                  {boardData?.board.poll?.choices.map((e, i) => (
-                    <RadioInput
-                      value={`${i}`}
-                      content={e}
-                      total={boardData.board.poll ? boardData.board.poll.count.nVotes.reduce((a, b) => a + b) : 0}
-                      count={boardData?.board.poll?.count.nVotes[i]}
-                      // filterComments={filterComments}
-                      key={i}
-                      choiceValue={handleChoiceValue}
-                      checked={check[i]}
-                      myVote={myVote}
-                    />
-                  ))}
-                </div>
-                <span className={classes.votedCount}>
-                  共 {boardData.board.poll?.count.nVotes.reduce((a, b) => a + b)} 人參與投票
-                </span>
+            <div className={classes.choiceWrapper}>
+              {/* <label>@作者</label> */}
+              <div className={classes.radioWrapper}>
+                {poll.choices.map((e, i) => (
+                  <RadioInput
+                    value={`${i}`}
+                    content={e}
+                    total={poll.count.nVotes.length > 0 ? poll.count.nVotes.reduce((a, b) => a + b) : 0}
+                    count={poll.count.nVotes[i]}
+                    // filterComments={filterComments}
+                    key={i}
+                    choiceValue={handleChoiceValue}
+                    checked={check[i]}
+                    myVote={myVote}
+                  />
+                ))}
               </div>
-            )}
-            <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." />
+              <span className={classes.votedCount}>
+                共 {poll.count.nVotes.length > 0 ? poll.count.nVotes.reduce((a, b) => a + b) : 0} 人參與投票
+              </span>
+            </div>
+
+            {/* <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." /> */}
           </div>
           <button>送出</button>
         </form>
@@ -281,4 +279,4 @@ const BoardForm = ({
     </FormProvider>
   )
 }
-export default BoardForm
+export default PollForm
