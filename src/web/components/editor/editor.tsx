@@ -38,7 +38,10 @@ import {
   MyHashtagLikeQuery,
   MyHashtagLikeQueryVariables,
   Poll,
+  PollDocument,
+  PollQuery,
   useCreateEmojiMutation,
+  useCreatePollMutation,
   useCreateVoteMutation,
   useMyHashtagLikeQuery,
   useMyVotesLazyQuery,
@@ -54,6 +57,8 @@ import { NavLocation, locationToUrl } from './with-location'
 import { withOperation } from './with-operation'
 import { parseLcAndReplace, withParse } from './with-parse'
 import { toInlinePoll } from '../../lib/bullet/types'
+import CreatePollForm from '../board-form/create-poll-form'
+import HashtagTextToIcon from '../upDown/hashtag-text-to-icon'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
   const { authorName } = props
@@ -134,6 +139,9 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
   const { data, loading, error } = useMyHashtagLikeQuery({
     variables: { hashtagId: hashtag.id.toString() },
   })
+
+  console.log(data?.myHashtagLike, hashtag)
+
   const [upsertEmojiLike] = useUpsertEmojiLikeMutation({
     update(cache, { data }) {
       // TODO: 這裡忽略了更新 count
@@ -180,15 +188,18 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
     return <span>Error</span>
   }
   return (
-    <>
-      <button
-        onClick={() => {
-          handleClickLike('UP')
-        }}
-      >
-        {data.myHashtagLike?.choice === 'UP' ? 'up*' : 'up'}
-      </button>
-    </>
+    <button
+      className={`inline mR ${data.myHashtagLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
+      onClick={() => {
+        handleClickLike('UP')
+      }}
+    >
+      {/* {data.myHashtagLike?.choice && hashtag.text} */}
+      {/* {hashtag.text} */}
+      <HashtagTextToIcon hashtag={hashtag} />
+
+      <span style={{ marginLeft: '3px' }}>{hashtag.count.nUps}</span>
+    </button>
   )
 }
 
@@ -201,36 +212,36 @@ const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null => {
   //   return null
   // }
   return (
-    <span>
-      <EmojiLike hashtag={emoji} />
-    </span>
+    // <span>
+    <EmojiLike hashtag={emoji} />
+    // {/* </span> */}
   )
 }
 
-const AddEmojiButotn = (props: {
-  bulletId: number
-  emojiText: EmojiText
-  // curEmojis: Hashtag[]
-  onCreated: (emoji: Hashtag, myEmojiLike: HashtagLike) => void
-}): JSX.Element => {
-  const { bulletId, emojiText, onCreated } = props
-  const [createEmoji] = useCreateEmojiMutation({
-    variables: { bulletId, emojiText },
-    onCompleted(data) {
-      const { emoji, like } = data.createEmoji
-      onCreated(emoji, like)
-    },
-  })
-  return (
-    <button
-      onClick={() => {
-        createEmoji()
-      }}
-    >
-      {emojiText}
-    </button>
-  )
-}
+// const AddEmojiButotn = (props: {
+//   bulletId: number
+//   emojiText: EmojiText
+//   // curEmojis: Hashtag[]
+//   onCreated: (emoji: Hashtag, myEmojiLike: HashtagLike) => void
+// }): JSX.Element => {
+//   const { bulletId, emojiText, onCreated } = props
+//   const [createEmoji] = useCreateEmojiMutation({
+//     variables: { bulletId, emojiText },
+//     onCompleted(data) {
+//       const { emoji, like } = data.createEmoji
+//       onCreated(emoji, like)
+//     },
+//   })
+//   return (
+//     <button
+//       onClick={() => {
+//         createEmoji()
+//       }}
+//     >
+//       {emojiText}
+//     </button>
+//   )
+// }
 
 const InlineSymbol = (
   props: RenderElementProps & {
@@ -239,7 +250,11 @@ const InlineSymbol = (
 ): JSX.Element => {
   const { attributes, children, element } = props
 
-  return <button {...attributes}>{children}</button>
+  return (
+    <button {...attributes} className="inline">
+      {children}
+    </button>
+  )
 }
 
 const InlineMirror = (
@@ -273,91 +288,151 @@ const InlineMirror = (
   )
 }
 
-const PollForm = ({ id }: { id: string }): JSX.Element => {
-  const { data, loading, error } = usePollQuery({ variables: { id } })
-  const [createVote, createVoteResult] = useCreateVoteMutation()
-  if (loading || createVoteResult.loading) {
-    return <div>loading...</div>
-  }
-  if (error || data === undefined || createVoteResult.error) {
-    return <div>error</div>
-  }
-  if (createVoteResult.data) {
-    const vote = createVoteResult.data.createVote
-    const voted = data.poll.choices[vote.choiceIdx]
-    return (
-      <div>
-        {data.poll.choices.join(' ')}[{voted}]
-      </div>
-    )
-  }
-  return (
-    <div>
-      {data.poll.choices.map((e, i) => (
-        <button
-          key={i}
-          onClick={() => {
-            createVote({
-              variables: {
-                pollId: id,
-                data: { choiceIdx: i },
-              },
-            })
-          }}
-        >
-          {e}
-        </button>
-      ))}
-    </div>
-  )
-}
+// const PollForm = ({ id }: { id: string }): JSX.Element => {
+//   const { data, loading, error } = usePollQuery({ variables: { id } })
+//   const [createVote, createVoteResult] = useCreateVoteMutation()
+//   if (loading || createVoteResult.loading) {
+//     return <div>loading...</div>
+//   }
+//   if (error || data === undefined || createVoteResult.error) {
+//     return <div>error</div>
+//   }
+//   if (createVoteResult.data) {
+//     const vote = createVoteResult.data.createVote
+//     const voted = data.poll.choices[vote.choiceIdx]
+//     return (
+//       <div>
+//         {data.poll.choices.join(' ')}[{voted}]
+//       </div>
+//     )
+//   }
+//   return (
+//     <div>
+//       {data.poll.choices.map((e, i) => (
+//         <button
+//           key={i}
+//           onClick={() => {
+//             createVote({
+//               variables: {
+//                 pollId: id,
+//                 data: { choiceIdx: i },
+//               },
+//             })
+//           }}
+//         >
+//           {e}
+//         </button>
+//       ))}
+//     </div>
+//   )
+// }
 
-const NewPollForm = ({ choices }: { choices?: string[]; onCreated: (poll: Poll) => void }): JSX.Element => {
-  // const queryPoll = usePollQuery({ variables: { id } })
-  return <div></div>
-}
+// const NewPollForm = ({ choices }: { choices?: string[]; onCreated: (poll: Poll) => void }): JSX.Element => {
+//   // const queryPoll = usePollQuery({ variables: { id } })
+//   return <div></div>
+// }
 
 const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }): JSX.Element => {
   const { attributes, children, element } = props
+  const editor = useSlateStatic()
+  const path = ReactEditor.findPath(editor, element)
   const readonly = useReadOnly()
-  const queryPoll = usePollQuery({ variables: { id: element.id.toString() } })
-  console.log(children, element)
+  const [showPopover, setShowPopover] = useState(false)
+
+  function onCreated(poll: Poll) {
+    // const editor = useSlateStatic()
+    // const path = ReactEditor.findPath(editor, element)
+    const inlinePoll = toInlinePoll({ id: poll.id, choices: poll.choices })
+    Transforms.setNodes<InlinePollElement>(editor, inlinePoll, { at: path })
+    Transforms.insertText(editor, inlinePoll.str, { at: path })
+  }
+
+  const [createPoll, { called: pollMutationCalled }] = useCreatePollMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<PollQuery>({
+        query: PollDocument,
+      })
+      if (data?.createPoll && res?.poll) {
+        cache.writeQuery({
+          query: PollDocument,
+          data: { board: data.createPoll },
+        })
+      }
+    },
+    onCompleted(data) {
+      onCreated(data.createPoll)
+      // Transforms.insertText(editor, ':' + data.createPoll.id, { at: { path, offset: 7 } })
+      // console.log(data.createPoll.id)
+    },
+  })
+
+  const handleCreatePoll = () => {
+    const parent = Node.parent(editor, path) as LcElement
+    if (parent.id) {
+      createPoll({ variables: { bulletId: parent.id, data: { choices: element.choices } } })
+    }
+  }
+  // const queryPoll = usePollQuery({ variables: { id: element.id.toString() } })
+
   if (readonly) {
     if (element.type === 'poll') {
-      return <MyHashtagGroup {...attributes} choices={element.choices} pollId={element.id.toString()} />
+      return <MyHashtagGroup {...attributes} choices={element.choices} pollId={element.id?.toString() ?? ''} />
     }
     return (
-      <button {...attributes} className="inline">
+      <button {...attributes} className="inline mR">
         {children}
       </button>
     )
   }
-  if (element.type === 'poll') {
-    return (
-      <span {...attributes}>
-        <span style={{ display: 'none' }}>{children}</span>
-        <span contentEditable={false}>
-          <MyHashtagGroup choices={element.choices} pollId={element.id.toString()} inline />
-        </span>
-      </span>
-    )
-  }
+  // if (element.type === 'poll') {
   return (
-    <button {...attributes} className="inline">
-      {children}
-    </button>
-  )
-  // return <span {...attributes}>{children}</span>
-  const editor = useSlateStatic()
-  const [isOpen, setIsOpen] = useState(false)
-  const [queryMyVotes, { data, loading, error }] = useMyVotesLazyQuery() // 若已投票可展現投票結果
+    <span {...attributes}>
+      <span style={{ display: 'none' }}>{children}</span>
+      <span contentEditable={false}>
+        {element.id ? (
+          <MyHashtagGroup choices={element.choices} pollId={element.id.toString()} inline />
+        ) : (
+          <>
+            <button
+              className="inline mR"
+              onClick={() => {
+                handleCreatePoll()
+                setShowPopover(true)
+              }}
+            >
+              創建{element.choices}
+            </button>
 
-  useEffect(() => {
-    // console.log('inline poll')
-    if (element.id) {
-      queryMyVotes({ variables: { pollId: element.id } })
-    }
-  }, [element])
+            {/* <Popover
+              visible={showPopover}
+              hideBoard={() => {
+                setShowPopover(false)
+              }}
+            >
+              <CreatePollForm bulletId={element.id ?? ''} choices={element.choices}></CreatePollForm>
+            </Popover> */}
+          </>
+        )}
+      </span>
+    </span>
+  )
+  // }
+  // return (
+  //   <button {...attributes} className="inline">
+  //     {children}
+  //   </button>
+  // )
+  // return <span {...attributes}>{children}</span>
+
+  // const [isOpen, setIsOpen] = useState(false)
+  // const [queryMyVotes, { data, loading, error }] = useMyVotesLazyQuery() // 若已投票可展現投票結果
+
+  // useEffect(() => {
+  //   // console.log('inline poll')
+  //   if (element.id) {
+  //     queryMyVotes({ variables: { pollId: element.id } })
+  //   }
+  // }, [element])
 
   // useEffect(() => {
   //   console.log(element)
@@ -374,45 +449,38 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
   //   }
   // }, [isOpen])
 
-  function closeModal() {
-    setIsOpen(false)
-  }
+  // function closeModal() {
+  //   setIsOpen(false)
+  // }
 
-  function onCreated(poll: Poll) {
-    const path = ReactEditor.findPath(editor, element)
-    const inlinePoll = toInlinePoll({ id: poll.id, choices: poll.choices })
-    Transforms.setNodes<InlinePollElement>(editor, inlinePoll, { at: path })
-    Transforms.insertText(editor, inlinePoll.str, { at: path })
-  }
+  // return (
+  //   <span {...attributes}>
+  //     <span style={{ display: 'none' }}>{children}</span>
 
-  return (
-    <span {...attributes}>
-      <span style={{ display: 'none' }}>{children}</span>
+  //     <span contentEditable={false}>
+  //       <button
+  //         onClick={event => {
+  //           event.preventDefault()
+  //           setIsOpen(true)
+  //         }}
+  //       >
+  //         {element.choices.join(' ')}
+  //         {data?.myVotes && data.myVotes.length > 0 && `[${data.myVotes[data.myVotes.length - 1].choiceIdx}]`}
+  //       </button>
 
-      <span contentEditable={false}>
-        <button
-          onClick={event => {
-            event.preventDefault()
-            setIsOpen(true)
-          }}
-        >
-          {element.choices.join(' ')}
-          {data?.myVotes && data.myVotes.length > 0 && `[${data.myVotes[data.myVotes.length - 1].choiceIdx}]`}
-        </button>
-
-        <Modal
-          ariaHideApp={false}
-          isOpen={isOpen}
-          // onAfterOpen={afterOpenModal}
-          onRequestClose={closeModal}
-          contentLabel="Example Modal"
-        >
-          <button onClick={closeModal}>close</button>
-          {element.id ? <PollForm id={element.id} /> : <NewPollForm choices={element.choices} onCreated={onCreated} />}
-        </Modal>
-      </span>
-    </span>
-  )
+  //       <Modal
+  //         ariaHideApp={false}
+  //         isOpen={isOpen}
+  //         // onAfterOpen={afterOpenModal}
+  //         onRequestClose={closeModal}
+  //         contentLabel="Example Modal"
+  //       >
+  //         <button onClick={closeModal}>close</button>
+  //         {element.id ? <PollForm id={element.id} /> : <NewPollForm choices={element.choices} onCreated={onCreated} />}
+  //       </Modal>
+  //     </span>
+  //   </span>
+  // )
 }
 
 const Lc = (
@@ -517,6 +585,7 @@ const Li = (props: RenderElementProps & { element: LiElement; location: NavLocat
     const path = ReactEditor.findPath(editor, element)
     Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
   }
+  // console.log(lc.emojis)
 
   return (
     <div
@@ -533,9 +602,12 @@ const Li = (props: RenderElementProps & { element: LiElement; location: NavLocat
       {/* <div contentEditable={false}></div> */}
       <div className={classes.arrowBulletWrapper} contentEditable={false}>
         <BulletPanel
+          bulletId={lc.id}
+          emoji={lc.emojis}
           visible={showPanelIcon}
           sourceUrl={element.children[0].sourceUrl}
           authorName={element.children[0].author}
+          onEmojiCreated={onEmojiCreated}
         >
           {/* <span className={classes.oauthorName}> @{authorName}</span> */}
         </BulletPanel>
@@ -563,23 +635,12 @@ const Li = (props: RenderElementProps & { element: LiElement; location: NavLocat
               <ArrowUpIcon
                 style={ulFolded === undefined ? { transform: 'rotate(180deg)' } : { transform: 'rotate(90deg)' }}
               />
-              {/* {authorName ? (
-              ) : // <MyTooltip className={classes.bulletTooltip}>
-              //   <span className={classes.oauthorName}> @{authorName}</span>
-              // </MyTooltip>
-              null} */}
             </span>
             {/* <BulletPanel><span className={classes.oauthorName}> @{authorName}</span></BulletPanel> */}
           </>
         ) : (
           <span className={classes.arrowWrapper}>
             <ArrowUpIcon style={{ opacity: 0 }} />
-            {/* <BulletSvg /> */}
-            {/* {authorName ? (
-              ) : // <MyTooltip className={classes.bulletTooltip}>
-              //   <span className={classes.oauthorName}> @{authorName}</span>
-              // </MyTooltip>
-              null} */}
           </span>
         )}
 
@@ -589,7 +650,7 @@ const Li = (props: RenderElementProps & { element: LiElement; location: NavLocat
           </a>
         </Link>
 
-        {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />}
+        {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>
 
       <div>{children}</div>

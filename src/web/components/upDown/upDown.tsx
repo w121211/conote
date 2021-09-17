@@ -15,150 +15,126 @@ import {
   // useCreateBulletLikeMutation,
   // useUpdateBulletLikeMutation,
   CommentLike,
+  useCreateEmojiMutation,
+  useUpsertEmojiLikeMutation,
+  MyHashtagLikeQuery,
+  MyHashtagLikeQueryVariables,
+  MyHashtagLikeDocument,
+  useMyHashtagLikeQuery,
+  Hashtag,
+  EmojiText,
+  HashtagLike,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import classes from './upDown.module.scss'
 
 const UpDown = ({
-  choice,
-  commentId,
+  // choice,
+
   bulletId,
+  children,
+  foundEmoji,
+  emojiText,
+  onEmojiCreated,
+  className,
 }: {
-  choice: CommentCount | BulletCount
-  commentId?: string
-  bulletId?: string
-}) => {
+  // choice: CommentCount | BulletCount
+  // commentId?: string
+  className?: string
+  bulletId?: number
+  children?: React.ReactNode
+  foundEmoji?: Hashtag
+  emojiText?: EmojiText
+  onEmojiCreated: (emoji: Hashtag, myEmojiLike: HashtagLike) => void
+} & React.HTMLAttributes<HTMLElement>): JSX.Element => {
   const [myChoice, setMyChoice] = useState<any>()
-  const { data: myCommentLikeData, loading, error } = useMyCommentLikesQuery()
-  // const {
-  //   data: myBulletLikeData,
-  //   loading: myBulletLikeLoading,
-  //   error: myBulletLikeLoadingError,
-  // } = useMyBulletLikesQuery()
-  // const [createBulletLike] = useCreateBulletLikeMutation({
-  //   update(cache, { data }) {
-  //     const res = cache.readQuery<MyBulletLikesQuery>({ query: MyCommentLikesDocument })
-  //     if (res?.myBulletLikes && data?.createBulletLike) {
-  //       cache.writeQuery<MyBulletLikesQuery>({
-  //         query: MyBulletLikesDocument,
-  //         data: { myBulletLikes: res.myBulletLikes.concat([data.createBulletLike.like]) },
-  //       })
-  //     }
-  //   },
-  // })
-  const [createCommentLike] = useCreateCommentLikeMutation({
+  const [createEmoji] = useCreateEmojiMutation({
+    // variables: { bulletId, emojiText },
+    onCompleted(data) {
+      const { emoji, like } = data.createEmoji
+      onEmojiCreated(emoji, like)
+    },
+  })
+
+  const [upsertEmojiLike] = useUpsertEmojiLikeMutation({
     update(cache, { data }) {
-      const res = cache.readQuery<MyCommentLikesQuery>({ query: MyCommentLikesDocument })
-      if (res?.myCommentLikes && data?.createCommentLike) {
-        cache.writeQuery<MyCommentLikesQuery>({
-          query: MyCommentLikesDocument,
-          data: { myCommentLikes: res.myCommentLikes.concat([data.createCommentLike.like]) },
+      // TODO: 這裡忽略了更新 count
+      if (data?.upsertEmojiLike) {
+        cache.writeQuery<MyHashtagLikeQuery, MyHashtagLikeQueryVariables>({
+          query: MyHashtagLikeDocument,
+          variables: { hashtagId: data.upsertEmojiLike.like.hashtagId.toString() },
+          data: { myHashtagLike: data.upsertEmojiLike.like },
         })
       }
     },
   })
 
-  const [updateCommentLike] = useUpdateCommentLikeMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<MyCommentLikesQuery>({
-        query: MyCommentLikesDocument,
-      })
-      if (res?.myCommentLikes && data?.updateCommentLike) {
-        cache.writeQuery<MyCommentLikesQuery>({
-          query: MyCommentLikesDocument,
-          data: { myCommentLikes: res.myCommentLikes.concat([data.updateCommentLike.like]) },
-        })
-      }
-    },
+  const { data, loading, error } = useMyHashtagLikeQuery({
+    variables: { hashtagId: foundEmoji?.id.toString() ?? '' },
   })
-  // const [updateBulletLike] = useUpdateBulletLikeMutation({
-  //   update(cache, { data }) {
-  //     const res = cache.readQuery<MyBulletLikesQuery>({
-  //       query: MyBulletLikesDocument,
-  //     })
-  //     if (res?.myBulletLikes && data?.updateBulletLike) {
-  //       cache.writeQuery<MyBulletLikesQuery>({
-  //         query: MyBulletLikesDocument,
-  //         data: { myBulletLikes: res.myBulletLikes.concat([data.updateBulletLike.like]) },
-  //       })
-  //     }
-  //   },
-  // })
 
-  const handleMyChoice = () => {
-    if (commentId) {
-      return myCommentLikeData?.myCommentLikes.find(e => e.commentId === parseInt(commentId))
-    }
-    // if (bulletId) {
-    //   return myBulletLikeData?.myBulletLikes.find(e => e.bulletId === parseInt(bulletId))
-    // }
-    return undefined
-  }
+  // const handleMyChoice = () => {
+  //   if (commentId) {
+  //     return myCommentLikeData?.myCommentLikes.find(e => e.commentId === parseInt(commentId))
+  //   }
+  //   // if (bulletId) {
+  //   //   return myBulletLikeData?.myBulletLikes.find(e => e.bulletId === parseInt(bulletId))
+  //   // }
+  //   return undefined
+  // }
   // useEffect(() => {
   //   const res = handleMyChoice()
   //   setMyChoice(res)
   // }, [myCommentLikeData, myBulletLikeData])
 
-  const handleLike = (choiceValue: LikeChoice) => {
-    if (myChoice && myChoice.choice === choiceValue) {
-      if (commentId) {
-        updateCommentLike({
-          variables: {
-            id: myChoice.id,
-            data: { choice: 'NEUTRAL' },
-          },
-        })
+  const handleLike = (choice: LikeChoice = 'UP') => {
+    if (bulletId && emojiText) {
+      // const findEmoji = emoji?.find(el => el.text === e.emojiText)
+      //   console.log(findEmoji?.id)
+      if (foundEmoji) {
+        const myLike = data?.myHashtagLike
+        if (myLike && myLike.choice === choice) {
+          upsertEmojiLike({
+            variables: {
+              hashtagId: foundEmoji.id.toString(),
+              data: { choice: 'NEUTRAL' },
+            },
+          })
+        }
+        if (myLike && myLike.choice !== choice) {
+          upsertEmojiLike({
+            variables: {
+              hashtagId: foundEmoji.id.toString(),
+              data: { choice },
+            },
+          })
+        }
+        if (myLike === null) {
+          upsertEmojiLike({
+            variables: {
+              hashtagId: foundEmoji.id.toString(),
+              data: { choice },
+            },
+          })
+        }
+        // upsertEmojiLike({variables:{hashtagId:foundEmoji.id,data:{choice:}}})
+      } else {
+        createEmoji({ variables: { bulletId, emojiText } })
       }
-      // if (bulletId) {
-      //   updateBulletLike({
-      //     variables: {
-      //       id: myChoice.id,
-      //       data: { choice: 'NEUTRAL' },
-      //     },
-      //   })
-      // }
-    }
-    if (myChoice && myChoice.choice !== choiceValue) {
-      if (commentId) {
-        updateCommentLike({
-          variables: {
-            id: myChoice.id,
-            data: { choice: choiceValue },
-          },
-        })
-      }
-      // if (bulletId) {
-      //   updateBulletLike({
-      //     variables: {
-      //       id: myChoice.id,
-      //       data: { choice: choiceValue },
-      //     },
-      //   })
-      // }
-    }
-    if (!myChoice) {
-      if (commentId) {
-        createCommentLike({
-          variables: {
-            commentId,
-            data: { choice: choiceValue },
-          },
-        })
-      }
-      // if (bulletId) {
-      //   createBulletLike({
-      //     variables: {
-      //       bulletId,
-      //       data: { choice: choiceValue },
-      //     },
-      //   })
-      // }
     }
   }
+
   return (
-    <>
-      <span className={classes.upDownWrapper}>
-        <span
+    <div
+      className={`${className} ${classes.default} ${data?.myHashtagLike?.choice === 'UP' && classes.clicked}`}
+      onClick={() => {
+        handleLike()
+      }}
+      // style={{ width: '100%' }}
+    >
+      {/* <span className={classes.upDownWrapper}> */}
+      {children}
+      {/* <span
           className={`${classes.arrowUpIcon} ${myChoice && myChoice.choice === 'UP' && classes.liked}`}
           onClick={() => {
             handleLike('UP')
@@ -175,9 +151,9 @@ const UpDown = ({
         >
           <ArrowUpIcon />
           {choice.nDowns}
-        </span>
-      </span>
-    </>
+        </span> */}
+      {/* </span> */}
+    </div>
   )
 }
 

@@ -26,30 +26,37 @@
     fill: $gray-text;
   }
 }
+.default {
+  svg {
+    fill: $gray-text;
+  }
+  color: $text;
+}
 .clicked {
   svg {
-    fill: $black;
+    fill: $secondary;
   }
+  // color: $secondary;
 }
-.HashtagGroupChildren {
-  &:before {
-    content: '';
-    // background-color: $gray-text;
-    height: 100%;
-    // width: 1px;
-    margin: 0 12px;
-    padding: 2px 0;
-    border-left: 1px solid $gray-light;
+.divider {
+  display: inline-block;
+  // height: 100%;
+  width: 0;
+  border-right: 1px solid $gray-text;
+  margin: 3px 0;
+}
+.groupContainer {
+  display: inline-flex;
+  background: $gray;
+  border-radius: 3px;
+  & :first-child {
+    span {
+      border-radius: 3px 0 0 3px;
+    }
   }
-}
-button:global(.inline) .HashtagGroupChildren {
-  &:before {
-    // content: '';
-    // background-color: $gray-text;
-    // height: 100%;
-    // width: 1px;
-    margin: 0 10px;
-    padding: 0;
-    // border-left: 1px solid $gray-text;
+  & :last-child {
+    span {
+      border-radius: 0 3px 3px 0;
+    }
   }
 }

@@ -25,7 +25,7 @@ import PollForm, { FormInputs } from '../board-form/poll-form'
 import BarChart from '../bar/bar'
 import classes from './board-page.module.scss'
 
-const BoardPage = ({
+const PollPage = ({
   pollId,
   // description,
   clickedChoiceIdx,
@@ -53,10 +53,10 @@ const BoardPage = ({
   if (loading) {
     return <p>loading...</p>
   }
-  // if (error) {
-  //   console.error(error)
-  //   return <p>API error</p>
-  // }
+  if (error) {
+    console.error(error)
+    return <p>API error</p>
+  }
   // if (!data || !data.comment) {
   //   return <p>Comment not found</p>
   // }
@@ -164,4 +164,4 @@ const BoardPage = ({
 }
 
 // Discuss.displayName = 'Discuss'
-export default BoardPage
+export default PollPage

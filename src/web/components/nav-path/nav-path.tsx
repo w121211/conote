@@ -5,6 +5,8 @@ import MyTooltip from '../my-tooltip/my-tooltip'
 import RightArrow from '../../assets/svg/right-arrow.svg'
 
 import classes from './nav-path.module.scss'
+import { UrlObject } from 'url'
+import Link from 'next/link'
 
 function getTextWidth(text: string, font?: any) {
   const canvas = document.createElement('canvas')
@@ -18,7 +20,7 @@ function getTextWidth(text: string, font?: any) {
 
 export interface NavPathProps {
   path?: Nav[]
-  mirrorHomeUrl?: string
+  mirrorHomeUrl?: UrlObject
 }
 
 const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element => {
@@ -98,7 +100,9 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
       {mirrorHomeUrl && (
         <li>
           <span>
-            <a href={mirrorHomeUrl}>Home</a>
+            <Link href={mirrorHomeUrl}>
+              <a>Home</a>
+            </Link>
           </span>
           <div className={classes.rightArrow}>
             <RightArrow />
@@ -132,14 +136,14 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
                 }}
               >
                 {typeof e !== 'string' && e.path.length > 0 && (
-                  <a className="ui" href={`/card/${router.query.symbol}?p=${e.path.join('.')}`}>
-                    {e.text}
-                  </a>
+                  <Link href={`/card/${router.query.symbol}?p=${e.path.join('.')}`}>
+                    <a className="ui">{e.text}</a>
+                  </Link>
                 )}
                 {typeof e !== 'string' && e.path.length === 0 && (
-                  <a className="ui" href={`/card/${encodeURIComponent(e.text)}`}>
-                    {e.text}
-                  </a>
+                  <Link href={`/card/${encodeURIComponent(e.text)}`}>
+                    <a className="ui">{e.text}</a>
+                  </Link>
                 )}
                 {e === '...' && e}
                 {showTooltip && e === '...' && (
@@ -160,14 +164,13 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
                           }}
                         >
                           {typeof el !== 'string' && (
-                            <a
-                              className="ui"
+                            <Link
                               href={`/card/${router.query.symbol}${
                                 el.path.length > 0 ? '?p=' + el.path.join('.') : ''
                               }`}
                             >
-                              {el.text}
-                            </a>
+                              <a className="ui">{el.text}</a>
+                            </Link>
                           )}
                         </span>
                       )

@@ -147,7 +147,7 @@ const CardSymbolPage = (): JSX.Element | null => {
       navPath={
         <NavPath
           path={navs}
-          mirrorHomeUrl={mirror && locationToHref({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
+          mirrorHomeUrl={mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
         />
       }
     >
@@ -193,12 +193,12 @@ const CardSymbolPage = (): JSX.Element | null => {
           </span>
         )} */}
 
-        {/* {navs &&
+        {/* {/* {navs &&
           navs.map((e, i) => (
             <Link href={locationToUrl({ ...location, openedLiPath: e.path })} key={i}>
               <a>{e.text}</a>
             </Link>
-          ))}
+          ))} */}
 
         <div>
           {selfCard.link?.authorName && <span>@{selfCard.link?.authorName}</span>}

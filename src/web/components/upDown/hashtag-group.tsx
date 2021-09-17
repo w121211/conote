@@ -24,12 +24,14 @@ const MyHashtagGroup = ({
 
   return (
     <>
-      <button className={inline ? 'inline' : undefined}>
+      <span className={classes.groupContainer}>
+        {/* <button className={inline ? 'inline mR' : undefined}> */}
         {choices.map((e, i) => {
           //first child
           if (i === 0) {
             return (
-              <span
+              <button
+                className="inline"
                 key={i}
                 onClick={ev => {
                   ev.stopPropagation()
@@ -38,27 +40,31 @@ const MyHashtagGroup = ({
                   // console.log(e)
                 }}
               >
-                {e}
-              </span>
+                <span>{e}</span>
+              </button>
             )
           }
           //others
           return (
-            <span
-              className={classes.HashtagGroupChildren}
-              key={i}
-              onClick={ev => {
-                ev.stopPropagation()
-                setClickedIdx(i)
-                setShowPopover(true)
-                // console.log(e)
-              }}
-            >
-              {e}
-            </span>
+            <>
+              <div className={classes.divider}></div>
+              <button
+                className="inline"
+                key={i}
+                onClick={ev => {
+                  ev.stopPropagation()
+                  setClickedIdx(i)
+                  setShowPopover(true)
+                  // console.log(e)
+                }}
+              >
+                <span>{e}</span>
+              </button>
+            </>
           )
         })}
-      </button>
+      </span>
+      {/* </button> */}
       {showPopover && (
         <Popover visible={showPopover} hideBoard={handleHideBoard}>
           <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />

@@ -5,10 +5,23 @@ import SrcIcon from '../../assets/svg/foreign.svg'
 import classes from './bullet-panel.module.scss'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
+import {
+  EmojiText,
+  Hashtag,
+  HashtagLike,
+  MyHashtagLikeDocument,
+  MyHashtagLikeQuery,
+  MyHashtagLikeQueryVariables,
+  useCreateEmojiMutation,
+  useMyHashtagLikeQuery,
+  useUpsertEmojiLikeMutation,
+} from '../../apollo/query.graphql'
+import UpDown from '../upDown/upDown'
 
 interface Child {
   icon?: SVGComponentTransferFunctionElement | SVGElement | Element | string | ReactElement
   text?: string | React.ReactNode
+  emojiText?: EmojiText
   sourceUrl?: string
   authorName?: string
 }
@@ -20,6 +33,9 @@ export interface BulletPanelType {
   className?: string
   sourceUrl?: string
   authorName?: string
+  bulletId?: number
+  onEmojiCreated: (emoji: Hashtag, myEmojiLike: HashtagLike) => void
+  emoji?: Hashtag[]
 }
 
 const BulletPanel = ({
@@ -29,26 +45,35 @@ const BulletPanel = ({
   className,
   sourceUrl,
   authorName,
+  bulletId,
+  onEmojiCreated,
+  emoji,
 }: BulletPanelType): JSX.Element => {
   const [showPanel, setShowPanel] = useState<boolean>(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const myChildren: Child[] = [
-    {
-      icon: <PinIcon />,
-      text: 'Pin',
-    },
-    {
-      icon: <UpIcon />,
-      text: 'Up',
-    },
-    {
-      icon: <UpIcon style={{ transform: 'rotate(180deg)' }} />,
-      text: 'Down',
-    },
-  ]
+  const myChildren: Child[] = []
   if (authorName) {
     myChildren.unshift({ authorName: '@' + authorName.split(':')[0] })
+  }
+  if (bulletId) {
+    myChildren.push(
+      {
+        icon: <PinIcon />,
+        emojiText: 'PIN',
+        text: 'Pin',
+      },
+      {
+        icon: <UpIcon />,
+        emojiText: 'UP',
+        text: 'Up',
+      },
+      {
+        icon: <UpIcon style={{ transform: 'rotate(180deg)' }} />,
+        emojiText: 'DOWN',
+        text: 'Down',
+      },
+    )
   }
   if (sourceUrl) {
     myChildren.push({ icon: <SrcIcon />, text: '來源連結', sourceUrl })
@@ -115,7 +140,24 @@ const BulletPanel = ({
                   </a>
                 </div>
               )
+            if (bulletId && e.emojiText !== undefined) {
+              return (
+                <UpDown
+                  className={classes.panelElement}
+                  key={i}
+                  bulletId={bulletId}
+                  foundEmoji={emoji?.find(el => el.text === e.emojiText)}
+                  emojiText={e.emojiText}
+                  onEmojiCreated={onEmojiCreated}
+                >
+                  {/* <div className={classes.panelElement} key={i}> */}
+                  <span className={classes.panelIcon}>{e.icon}</span>
 
+                  {e.text}
+                  {/* </div> */}
+                </UpDown>
+              )
+            }
             return (
               <div className={classes.panelElement} key={i}>
                 <span className={classes.panelIcon}>{e.icon}</span>
