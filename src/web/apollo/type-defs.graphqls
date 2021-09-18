@@ -120,12 +120,10 @@ type Mutation {
 
   # createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): CreateBoardResponse!
   createPoll(bulletId: Int!, data: PollInput!): Poll!
-
   createVote(pollId: ID!, data: VoteInput!): Vote!
+  createAuthorVote(pollId: ID!, authorName: String!, data: VoteInput!): Vote!
 
   createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
-
-  createAuthorVote(pollId: ID!, authorName: String!, data: VoteInput!): Vote!
   # createAuthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
 
   # createOauthorComment(boardId: ID!, data: CommentInput!)

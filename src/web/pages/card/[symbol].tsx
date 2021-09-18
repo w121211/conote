@@ -8,7 +8,6 @@ import { useLocalValue } from '../../components/editor/use-local-value'
 import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
-
 import HashtagUpDown from '../../components/upDown/hashtag-up-down'
 import NavPath from '../../components/nav-path/nav-path'
 import { Poll, useCreateVoteMutation } from '../../apollo/query.graphql'
@@ -83,32 +82,6 @@ const PollComponent = (props: { poll: Poll; author?: string }): JSX.Element => {
   )
 }
 
-const HashtagComponent = (props: { hashtag: Hashtag | HashtagGroup }): JSX.Element => {
-  const { hashtag } = props
-  // if (hashtag.type === 'hashtag' || hashtag.typ === 'hashtag-group')
-  // const hashtagLike = useHashtagLike({ hashtag })
-  switch (hashtag.type) {
-    case 'hashtag':
-      return (
-        <div>
-          {/* <HashtagUpDown hashtagId={e.id} text={e.text} /> */}
-          {/* <HashtagLike hashtag={hashtag} /> */}
-          <button>{hashtag.text}</button>
-        </div>
-      )
-    case 'hashtag-group':
-      return (
-        <div>
-          (
-          {hashtag.poll.choices.map((e, i) => (
-            <button key={i}>{e}</button>
-          ))}
-          )
-        </div>
-      )
-  }
-}
-
 const CardSymbolPage = (): JSX.Element | null => {
   const router = useRouter()
   // const [navs, setNavs] = useState<Nav[]>() // editor route
@@ -142,9 +115,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   }, [data])
 
   const editor = useMemo(() => {
-    console.log('hello up~')
     if (data && location) {
-      console.log('hello~')
       const { selfCard, mirror, openedLi, value } = data
       const parsedValue = parseChildren(value)
       // const parsedValue = value
@@ -171,7 +142,7 @@ const CardSymbolPage = (): JSX.Element | null => {
       navPath={
         <NavPath
           path={navs}
-          mirrorHomeUrl={mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
+          mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
         />
       }
     >
@@ -225,9 +196,9 @@ const CardSymbolPage = (): JSX.Element | null => {
           ))} */}
 
         <div>
-          {selfCard.link?.authorName && <span>@{selfCard.link?.authorName}</span>}
-          {selfCard.link?.url && <span>@{selfCard.link?.url}</span>}
-          <h3>{Node.string(openedLiLc)}</h3>
+          {data.selfCard.link?.authorName && <span>@{data.selfCard.link?.authorName}</span>}
+          {data.selfCard.link?.url && <span>@{data.selfCard.link?.url}</span>}
+          {/* <h3>{Node.string(data.openedLiLc)}</h3> */}
         </div>
 
         {editor}

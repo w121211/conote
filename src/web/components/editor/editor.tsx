@@ -140,7 +140,7 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
     variables: { hashtagId: hashtag.id.toString() },
   })
 
-  console.log(data?.myHashtagLike, hashtag)
+  // console.log(data?.myHashtagLike, hashtag)
 
   const [upsertEmojiLike] = useUpsertEmojiLikeMutation({
     update(cache, { data }) {
@@ -250,7 +250,11 @@ const InlineSymbol = ({
 }: RenderElementProps & {
   element: InlineSymbolElement
 }): JSX.Element => {
-  return <button {...attributes} className="inline">{children}</button>
+  return (
+    <button {...attributes} className="inline">
+      {children}
+    </button>
+  )
 }
 
 const InlineMirror = (
@@ -708,8 +712,6 @@ export const BulletEditor = ({
   readOnly?: boolean
   onValueChange?: (value: LiElement[]) => void
 }): JSX.Element => {
-  console.log('editor entry', initialValue)
-
   const editor = useMemo(() => withParse(withOperation(withList(withHistory(withReact(createEditor()))))), [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
@@ -778,7 +780,7 @@ export const BulletEditor = ({
   const [value, setValue] = useState<LiElement[]>(initialValue)
 
   useEffect(() => {
-    console.log('use effect deps initialValue')
+    // console.log('use effect deps initialValue')
     // 當 initialValue 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
     Transforms.deselect(editor)
     setValue(initialValue)

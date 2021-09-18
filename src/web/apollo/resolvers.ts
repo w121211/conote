@@ -7,8 +7,8 @@ import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
 import { QueryResolvers, MutationResolvers } from './type-defs.graphqls'
 import { deltaLike } from '../lib/helper'
-import { attachLatestHeadBody, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
-import { getBotId, getOrCreateUser } from '../lib/models/user'
+import { createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
+import { getOrCreateUser } from '../lib/models/user'
 import { createAuthorVote, createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
 import { ResolverContext } from './apollo-client'
@@ -540,16 +540,14 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createAuthorVote(_parent, { pollId, authorName, data }, { req, res }, _info) {
-    throw 'Consider to remove'
-    //   const { userId } = isAuthenticated(req, res)
-    //   const vote = await createOauthorVote({
-    //     choiceIdx: data.choiceIdx,
-    //     pollId: parseInt(pollId),
-    //     oauthorName,
-    //     userId,
-    //   })
-    //   return _toStringId(vote)
-    // },
+    const { userId } = isAuthenticated(req, res)
+    const vote = await createAuthorVote({
+      choiceIdx: data.choiceIdx,
+      pollId: parseInt(pollId),
+      authorName,
+      userId,
+    })
+    return _toStringId(vote)
   },
 
   // async createOauthorComment(_parent, { boardId, pollId, oauthorName, data }, { req, res }, _info) {
