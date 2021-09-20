@@ -62,11 +62,11 @@ export const Serializer: SerializerInterface = {
       children: [
         {
           ...lc,
-          root: true,
-          symbol: root.symbol,
-          rootBulletDraft: root,
-          mirror: root.mirror,
-          newSymbol: options?.newSymbol,
+          // root: true,
+          // symbol: root.symbol,
+          // rootBulletDraft: root,
+          // mirror: root.mirror,
+          // newSymbol: options?.newSymbol,
           // boardId: root.boardId,
           // pollId: root.pollId,
         },

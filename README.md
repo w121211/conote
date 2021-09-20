@@ -94,20 +94,26 @@ export POSTGRES_ADMIN_PASSWORD=$(kubectl get secret --namespace default conote-r
 
 export POSTGRES_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
 
-# 另外開一個 conote-release-postgresql-client （保持 psql 開啟狀態，然後執行後面的 dump/restore ）
-kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.13.0-debian-10-r12 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
+# 另外開一個 temp-pg-client （保持 psql 開啟狀態，然後執行後面的 dump/restore ）
+kubectl run temp-pg-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.13.0-debian-10-r12 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
+
+# psql commands
+\l # list databases
+\c prisma # change to prisma database
+\dt # list tables
+SELECT * FROM "User"
 
 # dump (from docker)
-docker exec -i 8ac632cf6317 sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma  -p 5432 -Ft" > prisma_dump.tar
+#docker exec -i 8ac632cf6317 sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > prisma_dump.tar
 
 # dump (from k8s)
-kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > prisma_dump.tar
+kubectl exec -i temp-pg-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > prisma_dump.tar
 
 # psql (若沒有 database 需要先建立)
 CREATE DATABASE prisma;
 
 # restore
-kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft --clean --if-exists < prisma_dump.tar
+kubectl exec -i temp-pg-client -- pg_restore --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft --clean --if-exists < prisma_dump.tar
 ```
 
 Troubleshoots:

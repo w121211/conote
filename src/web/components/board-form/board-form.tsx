@@ -110,7 +110,7 @@ const BoardForm = ({
   refetch,
   filterComments,
 }: {
-  pollId?: string
+  pollId: string
   boardId: string
   initialValue: FormInputs
   clickedChoiceIdx?: number
@@ -120,7 +120,7 @@ const BoardForm = ({
 }): JSX.Element => {
   // const { field, fieldState } = useController({ name: 'choice' })
   const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
-  const { data: myVotesData } = useMyVotesQuery()
+  const { data: myVotesData } = useMyVotesQuery({ variables: { pollId: pollId } })
   const methods = useForm<FormInputs>()
   const { register, handleSubmit, setValue, reset, getValues } = methods
   const [choiceValue, setChoiceValue] = useState<number | null | undefined>()

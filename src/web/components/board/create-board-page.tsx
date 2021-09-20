@@ -55,15 +55,13 @@ const CreateBoardPage = ({
     <Popover visible={visible} hideBoard={hideBoard} subTitle={subTitle}>
       <div className={classes.containerinner}>
         {/* {pollId && <LineChart />} */}
-        {boardId ? (
+        {/* {boardId ? (
           <>
             <BoardPage boardId={boardId} title={title} />
-            {/* {console.log(boardId)} */}
           </>
         ) : (
-          <span />
-          // <CreateBoardFrom bulletId={bulletId} cardId={cardId} handleboardId={handleBoardId} />
-        )}
+          <CreateBoardFrom bulletId={bulletId} cardId={cardId} handleboardId={handleBoardId} />
+        )} */}
       </div>
     </Popover>
   )

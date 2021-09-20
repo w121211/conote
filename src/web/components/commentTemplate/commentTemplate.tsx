@@ -117,7 +117,7 @@ const CommenTemplate = ({ id, content, floor, className, clicked, updatedAt, cho
     // </MyTooltip>
     <li className={classes.comment}>
       <span className={classes.floor}>{floor}</span>
-      <UpDown commentId={commentId} choice={choice} />
+      {/* <UpDown commentId={commentId} choice={choice} /> */}
       <span>{content}</span>
     </li>
   )

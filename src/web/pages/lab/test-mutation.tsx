@@ -4,27 +4,7 @@ import { useUser } from '@auth0/nextjs-auth0'
 import { BoardStatus, CardType } from '@prisma/client'
 import { Token } from 'prismjs'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  Board,
-  BoardQuery,
-  Card,
-  CardDocument,
-  CardQuery,
-  CardQueryVariables,
-  Comment,
-  CommentsDocument,
-  CommentsQuery,
-  CommentsQueryVariables,
-  CreateSymbolCardDocument,
-  CreateSymbolCardMutation,
-  CreateSymbolCardMutationVariables,
-  useBoardQuery,
-  useCardQuery,
-  useCommentsQuery,
-  useCreateCardBodyMutation,
-  useCreateOauthorCommentMutation,
-  useMeQuery,
-} from '../../apollo/query.graphql'
+import { useCreateCardBodyMutation } from '../../apollo/query.graphql'
 import { BulletEditor } from '../../components/editor/editor'
 import { Serializer } from '../../components/editor/serializer'
 import { LiElement, UlElement } from '../../components/editor/slate-custom-types'

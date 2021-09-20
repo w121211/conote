@@ -1,20 +1,7 @@
 import { BulletLike } from '@prisma/client'
 import React, { useEffect, useState } from 'react'
 import {
-  CommentCount,
-  useCreateCommentLikeMutation,
-  MyCommentLikesDocument,
-  MyCommentLikesQuery,
-  useMyCommentLikesQuery,
-  useUpdateCommentLikeMutation,
   LikeChoice,
-  BulletCount,
-  // useMyBulletLikesQuery,
-  // MyBulletLikesQuery,
-  // MyBulletLikesDocument,
-  // useCreateBulletLikeMutation,
-  // useUpdateBulletLikeMutation,
-  CommentLike,
   useCreateEmojiMutation,
   useUpsertEmojiLikeMutation,
   MyHashtagLikeQuery,
