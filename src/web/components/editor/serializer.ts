@@ -64,7 +64,7 @@ export const Serializer: SerializerInterface = {
           ...lc,
           // root: true,
           // symbol: root.symbol,
-          // rootBulletDraft: root,
+          rootBulletDraft: root,
           // mirror: root.mirror,
           // newSymbol: options?.newSymbol,
           // boardId: root.boardId,

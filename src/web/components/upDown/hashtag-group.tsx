@@ -46,7 +46,7 @@ const MyHashtagGroup = ({
           }
           //others
           return (
-            <>
+            <div key={i}>
               <div className={classes.divider}></div>
               <button
                 className="inline"
@@ -60,7 +60,7 @@ const MyHashtagGroup = ({
               >
                 <span>{e}</span>
               </button>
-            </>
+            </div>
           )
         })}
       </span>
