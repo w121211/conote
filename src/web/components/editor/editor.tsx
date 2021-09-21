@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
+import React, { useState, useMemo, useCallback, useEffect, CSSProperties, useContext } from 'react'
 import Link from 'next/link'
 import Modal from 'react-modal'
 import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element } from 'slate'
@@ -59,6 +59,9 @@ import { parseLcAndReplace, withParse } from './with-parse'
 import { toInlinePoll } from '../../lib/bullet/types'
 import CreatePollForm from '../board-form/create-poll-form'
 import HashtagTextToIcon from '../upDown/hashtag-text-to-icon'
+import PollPage from '../board/poll-page'
+import { AuthorContext } from '../../pages/card/[symbol]'
+import AuthorPollPage from '../board/author-poll-page'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
   const { authorName } = props
@@ -332,12 +335,15 @@ const InlineMirror = (
 //   return <div></div>
 // }
 
-const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }): JSX.Element => {
-  const { attributes, children, element } = props
+const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; location: NavLocation }): JSX.Element => {
+  const { attributes, children, element, location } = props
   const editor = useSlateStatic()
   const path = ReactEditor.findPath(editor, element)
   const readonly = useReadOnly()
   const [showPopover, setShowPopover] = useState(false)
+  const [clickedIdx, setClickedIdx] = useState<number | undefined>()
+  const [pollId, setPollId] = useState(element.id)
+  const authorContext = useContext(AuthorContext)
 
   function onCreated(poll: Poll) {
     // const editor = useSlateStatic()
@@ -347,7 +353,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
     Transforms.insertText(editor, inlinePoll.str, { at: path })
   }
 
-  const [createPoll, { called: pollMutationCalled }] = useCreatePollMutation({
+  const [createPoll, { data: pollData, called: pollMutationCalled }] = useCreatePollMutation({
     update(cache, { data }) {
       const res = cache.readQuery<PollQuery>({
         query: PollDocument,
@@ -360,7 +366,8 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
       }
     },
     onCompleted(data) {
-      onCreated(data.createPoll)
+      setPollId(data.createPoll.id)
+      // onCreated(data.createPoll)
       // Transforms.insertText(editor, ':' + data.createPoll.id, { at: { path, offset: 7 } })
       // console.log(data.createPoll.id)
     },
@@ -371,6 +378,20 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
     if (parent.id) {
       createPoll({ variables: { bulletId: parent.id, data: { choices: element.choices } } })
     }
+  }
+
+  useEffect(() => {
+    // if (showPopover && !pollId) {
+    //   handleCreatePoll()
+    // }
+    if (!showPopover && !element.id && pollId && pollData?.createPoll) {
+      onCreated(pollData.createPoll)
+    }
+  }, [showPopover])
+
+  const handleHideBoard = () => {
+    setClickedIdx(undefined)
+    setShowPopover(false)
   }
   // const queryPoll = usePollQuery({ variables: { id: element.id.toString() } })
 
@@ -389,7 +410,33 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
     <span {...attributes}>
       <span style={{ display: 'none' }}>{children}</span>
       <span contentEditable={false}>
-        {element.id ? (
+        <MyHashtagGroup
+          choices={element.choices}
+          pollId={element.id?.toString()}
+          handleShowPopover={b => {
+            setShowPopover(b)
+          }}
+          handleCreatePoll={handleCreatePoll}
+          handleClickedIdx={i => {
+            setClickedIdx(i)
+          }}
+          inline
+        />
+        {showPopover && !authorContext.author && (
+          <Popover visible={showPopover} hideBoard={handleHideBoard}>
+            {pollId ? <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} /> : <span>loading</span>}
+          </Popover>
+        )}
+        {showPopover && authorContext.author && (
+          <Popover visible={showPopover} hideBoard={handleHideBoard}>
+            {pollId ? (
+              <AuthorPollPage author={authorContext.author} pollId={pollId} clickedChoiceIdx={clickedIdx} />
+            ) : (
+              <span>loading</span>
+            )}
+          </Popover>
+        )}
+        {/* {element.id ? (
           <MyHashtagGroup choices={element.choices} pollId={element.id.toString()} inline />
         ) : (
           <>
@@ -403,16 +450,16 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
               創建{element.choices}
             </button>
 
-            {/* <Popover
+            <Popover
               visible={showPopover}
               hideBoard={() => {
                 setShowPopover(false)
               }}
             >
               <CreatePollForm bulletId={element.id ?? ''} choices={element.choices}></CreatePollForm>
-            </Popover> */}
+            </Popover>
           </>
-        )}
+        )} */}
       </span>
     </span>
   )

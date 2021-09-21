@@ -16,6 +16,7 @@ import {
   Poll,
   PollDocument,
   usePollQuery,
+  useCreateAuthorVoteMutation,
 } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
 import classes from './board-form.module.scss'
@@ -105,13 +106,15 @@ export const RadioInput = ({
   )
 }
 
-const PollForm = ({
+const AuthorPollForm = ({
   pollId,
 
   initialValue,
   clickedChoiceIdx,
+  author,
 }: {
   pollId: string
+  author: string
   // boardId: string
   initialValue: FormInputs
   clickedChoiceIdx?: number
@@ -158,32 +161,32 @@ const PollForm = ({
     initialValue.title && setValue('lines', initialValue.lines)
   }
 
-  const [createComment] = useCreateCommentMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<CommentsQuery>({
-        query: CommentsDocument,
-      })
-      if (data?.createComment && res?.comments) {
-        cache.writeQuery({
-          query: CommentsDocument,
-          data: { comments: res.comments.concat([data.createComment]) },
-        })
-      }
-      // refetch()
-    },
+  // const [createComment] = useCreateCommentMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<CommentsQuery>({
+  //       query: CommentsDocument,
+  //     })
+  //     if (data?.createComment && res?.comments) {
+  //       cache.writeQuery({
+  //         query: CommentsDocument,
+  //         data: { comments: res.comments.concat([data.createComment]) },
+  //       })
+  //     }
+  //     // refetch()
+  //   },
 
-    // refetchQueries: [{ query: CommentsDocument, variables: { boardId: boardId } }],
-  })
+  //   // refetchQueries: [{ query: CommentsDocument, variables: { boardId: boardId } }],
+  // })
 
-  const [createVote] = useCreateVoteMutation({
+  const [createAuthorVote] = useCreateAuthorVoteMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyVotesQuery>({
         query: MyVotesDocument,
       })
-      if (data?.createVote && res?.myVotes) {
+      if (data?.createAuthorVote && res?.myVotes) {
         cache.writeQuery({
           query: MyVotesDocument,
-          data: { myVotes: res.myVotes.concat([data.createVote]) },
+          data: { myVotes: res.myVotes.concat([data.createAuthorVote]) },
         })
       }
       // refetch()
@@ -224,9 +227,10 @@ const PollForm = ({
         }
         return prev
       })
-      createVote({
+      createAuthorVote({
         variables: {
           pollId: pollId,
+          authorName: author,
           data: { choiceIdx: parseInt(d.choice) },
         },
       })
@@ -315,4 +319,4 @@ const PollForm = ({
     </FormProvider>
   )
 }
-export default PollForm
+export default AuthorPollForm

@@ -101,10 +101,14 @@ button {
   cursor: pointer;
   padding: 0 12px;
   background: none;
-  line-height: 1;
+  // line-height: 1;
   font-size: 1em;
   background-color: $gray;
   align-items: center;
+
+  &:hover {
+    background-color: $gray-hover;
+  }
 
   // box-sizing: content-box;
   &.hashtag {
@@ -128,7 +132,7 @@ button {
       height: 10px;
     }
     @media screen and(max-width:500px) {
-      font-size: 13px;
+      // font-size: 13px;
     }
     font-size: 14px;
     &.mR {

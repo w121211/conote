@@ -84,6 +84,7 @@
   // mix-blend-mode: color-burn;
 }
 .voteColorBlock {
+  display: flex;
   // background-color: #313d9214;
   // background-color: #4d4e5414;
   background-color: $secondaryHover;
