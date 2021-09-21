@@ -24,15 +24,17 @@ import PollForm, { FormInputs } from '../board-form/poll-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import BarChart from '../bar/bar'
 import classes from './board-page.module.scss'
+import AuthorPollForm from '../board-form/author-poll-form'
 
-const PollPage = ({
+const AuthorPollPage = ({
   pollId,
   // description,
   clickedChoiceIdx,
-
+  author,
   title,
 }: {
   // boardId: string
+  author: string
   pollId: string
   clickedChoiceIdx?: number
   //  description?:string
@@ -124,8 +126,9 @@ const PollPage = ({
           {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
           {/* </div> */}
           {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}
-          <PollForm
+          <AuthorPollForm
             // boardId={boardId}
+            author={author}
             pollId={pollId}
             initialValue={{ title: '', choice: undefined, lines: '' }}
             // filterComments={filterComments}
@@ -164,4 +167,4 @@ const PollPage = ({
 }
 
 // Discuss.displayName = 'Discuss'
-export default PollPage
+export default AuthorPollPage

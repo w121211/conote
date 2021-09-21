@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Node } from 'slate'
@@ -38,49 +38,52 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
  * @param poll
  * @param author 若給予視為代表 author 投票
  */
-const PollComponent = (props: { poll: Poll; author?: string }): JSX.Element => {
-  const { poll, author } = props
-  const [createVote] = useCreateVoteMutation({
-    update(cache, { data }) {
-      // const res = cache.readQuery<MyVotesQuery>({
-      //   query: MyVotesDocument,
-      // })
-      // if (data?.createVote && res?.myVotes) {
-      //   cache.writeQuery({
-      //     query: MyVotesDocument,
-      //     data: { myVotes: res.myVotes.concat([data.createVote]) },
-      //   })
-      // }
-      // refetch()
-    },
-    // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
-  })
-  const onVote = () => {
-    // 已經投票且生效，不能再投
-    // 尚未投票，可以投
-    // 送出按鈕
-  }
+// const PollComponent = (props: { poll: Poll; author?: string }): JSX.Element => {
+//   const { poll, author } = props
+//   const [createVote] = useCreateVoteMutation({
+//     update(cache, { data }) {
+//       // const res = cache.readQuery<MyVotesQuery>({
+//       //   query: MyVotesDocument,
+//       // })
+//       // if (data?.createVote && res?.myVotes) {
+//       //   cache.writeQuery({
+//       //     query: MyVotesDocument,
+//       //     data: { myVotes: res.myVotes.concat([data.createVote]) },
+//       //   })
+//       // }
+//       // refetch()
+//     },
+//     // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
+//   })
+//   const onVote = () => {
+//     // 已經投票且生效，不能再投
+//     // 尚未投票，可以投
+//     // 送出按鈕
+//   }
 
-  return (
-    <>
-      {poll.choices.map((e, i) => (
-        <button
-          key={i}
-          onClick={event => {
-            createVote({
-              variables: {
-                pollId: poll.id,
-                data: { choiceIdx: i },
-              },
-            })
-          }}
-        >
-          {e}
-        </button>
-      ))}
-    </>
-  )
-}
+//   return (
+//     <>
+//       {poll.choices.map((e, i) => (
+//         <button
+//           key={i}
+//           onClick={event => {
+//             createVote({
+//               variables: {
+//                 pollId: poll.id,
+//                 data: { choiceIdx: i },
+//               },
+//             })
+//           }}
+//         >
+//           {e}
+//         </button>
+//       ))}
+//     </>
+//   )
+// }
+const router = useRouter()
+
+export const AuthorContext = createContext({ author: router.query.a as string | undefined })
 
 const CardSymbolPage = (): JSX.Element | null => {
   const router = useRouter()
@@ -88,6 +91,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [readonly, setReadonly] = useState(false)
   const [location, setLocation] = useState<NavLocation>()
   const { data, setLocalValue, submitValue, dropValue } = useLocalValue({ location })
+  const [authorName, setAuthorName] = useState<string | undefined>(location?.author)
 
   useEffect(() => {
     if (router.isReady) {
@@ -178,6 +182,21 @@ const CardSymbolPage = (): JSX.Element | null => {
         >
           {'Drop'}
         </button>
+        {location.author && (
+          <button
+            onClick={() => {
+              setAuthorName(prev => {
+                if (prev) {
+                  return undefined
+                } else {
+                  return location.author
+                }
+              })
+            }}
+          >
+            {location.author}
+          </button>
+        )}
 
         {/* {mirror && (
           <span>
@@ -200,8 +219,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           {data.selfCard.link?.url && <span>@{data.selfCard.link?.url}</span>}
           {/* <h3>{Node.string(data.openedLiLc)}</h3> */}
         </div>
-
-        {editor}
+        <AuthorContext.Provider value={{ author: authorName }}>{editor}</AuthorContext.Provider>
       </div>
     </Layout>
   )

@@ -1,4 +1,4 @@
-import React, { HtmlHTMLAttributes, useState } from 'react'
+import React, { HtmlHTMLAttributes, useEffect, useState } from 'react'
 // import PinIcon from '../../assets/svg/like.svg'
 // import UpIcon from '../../assets/svg/arrow-up.svg'
 import classes from './upDown.module.scss'
@@ -10,12 +10,26 @@ const MyHashtagGroup = ({
   choices,
   pollId,
   inline,
-}: { choices: string[]; pollId: string; inline?: boolean } & HtmlHTMLAttributes<HTMLElement>): JSX.Element => {
+  handleCreatePoll,
+  handleClickedIdx,
+  handleShowPopover,
+}: {
+  choices: string[]
+  pollId?: string
+  inline?: boolean
+  handleCreatePoll?: () => void
+  handleClickedIdx?: (i: number) => void
+  handleShowPopover?: (b: boolean) => void
+} & HtmlHTMLAttributes<HTMLElement>): JSX.Element => {
   const [showPopover, setShowPopover] = useState(false)
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()
 
   // const newText = hashtag.text.substring(1, hashtag.text.length - 1)
   // const textArr = newText.split(' ')
+
+  // useEffect(() => {
+  //   console.log(showPopover)
+  // })
 
   const handleHideBoard = () => {
     setClickedIdx(undefined)
@@ -35,9 +49,13 @@ const MyHashtagGroup = ({
                 key={i}
                 onClick={ev => {
                   ev.stopPropagation()
+                  handleClickedIdx && handleClickedIdx(i)
+                  handleShowPopover && handleShowPopover(true)
                   setClickedIdx(i)
                   setShowPopover(true)
-                  // console.log(e)
+                  if (!pollId) {
+                    handleCreatePoll && handleCreatePoll()
+                  }
                 }}
               >
                 <span>{e}</span>
@@ -46,30 +64,35 @@ const MyHashtagGroup = ({
           }
           //others
           return (
-            <>
+            <span key={i} className={classes.hasDividerDiv}>
               <div className={classes.divider}></div>
               <button
                 className="inline"
-                key={i}
                 onClick={ev => {
                   ev.stopPropagation()
+                  handleClickedIdx && handleClickedIdx(i)
+                  handleShowPopover && handleShowPopover(true)
                   setClickedIdx(i)
                   setShowPopover(true)
+                  if (!pollId) {
+                    handleCreatePoll && handleCreatePoll()
+                  }
                   // console.log(e)
                 }}
               >
                 <span>{e}</span>
               </button>
-            </>
+            </span>
           )
         })}
       </span>
       {/* </button> */}
-      {showPopover && (
+      {/* {showPopover && (
         <Popover visible={showPopover} hideBoard={handleHideBoard}>
-          <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />
+          {pollId && <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />}
+          {!pollId && <span>loading</span>}
         </Popover>
-      )}
+      )} */}
     </>
   )
 }
