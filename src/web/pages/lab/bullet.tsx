@@ -1,11 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import {
-  HashtagLike,
-  LikeChoice,
-  useCreateHashtagLikeMutation,
-  useMyHashtagLikeQuery,
-  useUpdateHashtagLikeMutation,
-} from '../../apollo/query.graphql'
 import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import { Bullet, RootBullet } from '../../lib/bullet/types'
 

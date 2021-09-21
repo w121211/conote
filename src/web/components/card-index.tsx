@@ -153,13 +153,14 @@ const CardIndex = ({ mySymbol, webPageUrl }: { webPageUrl?: string; mySymbol?: s
 
   return (
     // <UserProvider>
-    <Layout handlePath={handlePath}>
-      {/* {window.location.protocol.includes('extension') ? (
-        <CardPage pathSymbol={symbol} handlePathPush={handlePathPush} />
-      ) : ( */}
-      {/* <TestPage webPageUrl={webPageUrl} handlePathPush={handlePathPush} /> */}
-      {/* // )} */}
-    </Layout>
+    <div></div>
+    // <Layout handlePath={handlePath}>
+    //   {window.location.protocol.includes('extension') ? (
+    //     <CardPage pathSymbol={symbol} handlePathPush={handlePathPush} />
+    //   ) : (
+    //   <TestPage webPageUrl={webPageUrl} handlePathPush={handlePathPush} />
+    //   )}
+    // </Layout>
     // </UserProvider>
   )
 }

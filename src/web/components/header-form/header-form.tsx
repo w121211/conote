@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { title } from 'process'
 import { FormProvider, useForm } from 'react-hook-form'
 import classes from './header-form.module.scss'
-import {
-  useBoardQuery,
-  useCreateOauthorCommentMutation,
-  useCreateOauthorVoteMutation,
-} from '../../apollo/query.graphql'
+import { useBoardQuery } from '../../apollo/query.graphql'
 import { RadioInput } from '../board-form/board-form'
 type FormInputs = {
   // title: string
@@ -45,30 +41,30 @@ const HeaderForm = ({
     setAuthorName(watch('authorName'))
   }, [watch('authorName')])
   const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
-  const [createAuthorComment] = useCreateOauthorCommentMutation()
-  const [createAuthorVote] = useCreateOauthorVoteMutation()
+  // const [createAuthorComment] = useCreateOauthorCommentMutation()
+  // const [createAuthorVote] = useCreateOauthorVoteMutation()
 
   const onSubmit = (d: FormInputs) => {
     if (d.authorChoice) {
-      createAuthorVote({
-        variables: {
-          pollId,
-          oauthorName: authorName,
-          data: { choiceIdx: parseInt(d.authorChoice) },
-        },
-      })
+      // createAuthorVote({
+      //   variables: {
+      //     pollId,
+      //     oauthorName: authorName,
+      //     data: { choiceIdx: parseInt(d.authorChoice) },
+      //   },
+      // })
     }
     if (d.authorLines) {
-      createAuthorComment({
-        variables: {
-          boardId,
-          pollId,
-          oauthorName: authorName,
-          data: {
-            content: `<${boardData?.board.poll?.choices[parseInt(d.authorChoice)] ?? ''}>${d.authorLines}`,
-          },
-        },
-      })
+      //   createAuthorComment({
+      //     variables: {
+      //       boardId,
+      //       pollId,
+      //       oauthorName: authorName,
+      //       data: {
+      //         content: `<${boardData?.board.poll?.choices[parseInt(d.authorChoice)] ?? ''}>${d.authorLines}`,
+      //       },
+      //     },
+      //   })
     }
   }
 
@@ -103,4 +99,5 @@ const HeaderForm = ({
     </FormProvider>
   )
 }
+
 export default HeaderForm

@@ -54,7 +54,9 @@ const CreatePollForm = ({
         })
       }
     },
-    onCompleted(data) {},
+    onCompleted(data) {
+      //
+    },
   })
   if (!pollMutationCalled) {
     createPoll()

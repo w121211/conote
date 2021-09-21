@@ -1,6 +1,5 @@
 import { Hashtag as PrismaHashtag, HashtagStatus, Poll, PollCount } from '@prisma/client'
 import prisma from '../prisma'
-import { hashtagGroupToString } from './text'
 import { Hashtag, HashtagDraft, HashtagGroup, HashtagGroupDraft } from './types'
 
 // class HashtagOperation {
@@ -9,119 +8,119 @@ import { Hashtag, HashtagDraft, HashtagGroup, HashtagGroupDraft } from './types'
 //   pubkic static
 // }
 
-async function runHashtagGroupOp(props: {
-  draft: HashtagGroupDraft
-  bulletId: number
-  cardId: number
-  userId: string
-}): Promise<HashtagGroup> {
-  const { draft, bulletId, cardId, userId } = props
+// async function runHashtagGroupOp(props: {
+//   draft: HashtagGroupDraft
+//   bulletId: number
+//   cardId: number
+//   userId: string
+// }): Promise<HashtagGroup> {
+//   const { draft, bulletId, cardId, userId } = props
 
-  switch (draft.op) {
-    // case 'DELETE':
-    //   throw 'Not implemented'
-    // case 'UPDATE':
-    //   throw 'Not implemented'
-    case 'CREATE': {
-      const hashtag = await prisma.hashtag.create({
-        data: {
-          bullet: { connect: { id: bulletId } },
-          card: { connect: { id: cardId } },
-          user: { connect: { id: userId } },
-          count: { create: {} },
-          poll: { create: { user: { connect: { id: userId } }, choices: draft.pollChoices, count: { create: {} } } },
-          text: hashtagGroupToString(draft),
-        },
-        include: { poll: true },
-      })
-      if (hashtag.poll) {
-        return {
-          type: 'hashtag-group',
-          ...hashtag,
-          poll: { ...hashtag.poll },
-        }
-      }
-      throw 'Database unexpected error'
-    }
-  }
-  throw 'Not implemented'
-}
+//   switch (draft.op) {
+//     // case 'DELETE':
+//     //   throw 'Not implemented'
+//     // case 'UPDATE':
+//     //   throw 'Not implemented'
+//     case 'CREATE': {
+//       const hashtag = await prisma.hashtag.create({
+//         data: {
+//           bullet: { connect: { id: bulletId } },
+//           card: { connect: { id: cardId } },
+//           user: { connect: { id: userId } },
+//           count: { create: {} },
+//           poll: { create: { user: { connect: { id: userId } }, choices: draft.pollChoices, count: { create: {} } } },
+//           text: hashtagGroupToString(draft),
+//         },
+//         include: { poll: true },
+//       })
+//       if (hashtag.poll) {
+//         return {
+//           type: 'hashtag-group',
+//           ...hashtag,
+//           poll: { ...hashtag.poll },
+//         }
+//       }
+//       throw 'Database unexpected error'
+//     }
+//   }
+//   throw 'Not implemented'
+// }
 
-async function runHashtagOp(props: {
-  draft: HashtagDraft
-  bulletId: number
-  cardId: number
-  userId: string
-}): Promise<Hashtag> {
-  const { draft, bulletId, cardId, userId } = props
+// async function runHashtagOp(props: {
+//   draft: HashtagDraft
+//   bulletId: number
+//   cardId: number
+//   userId: string
+// }): Promise<Hashtag> {
+//   const { draft, bulletId, cardId, userId } = props
 
-  let hashtag = draft.id ? await prisma.hashtag.findUnique({ where: { id: draft.id } }) : undefined
+//   let hashtag = draft.id ? await prisma.hashtag.findUnique({ where: { id: draft.id } }) : undefined
 
-  if (hashtag === null) {
-    throw new Error('給予的 id 找不到 hashtag')
-  }
-  if (hashtag !== undefined && hashtag !== null && hashtag.userId !== userId) {
-    throw new Error('權限不足: 只可以修改自己創的 hashtag')
-  }
+//   if (hashtag === null) {
+//     throw new Error('給予的 id 找不到 hashtag')
+//   }
+//   if (hashtag !== undefined && hashtag !== null && hashtag.userId !== userId) {
+//     throw new Error('權限不足: 只可以修改自己創的 hashtag')
+//   }
 
-  switch (draft.op) {
-    case 'DELETE':
-      if (hashtag) {
-        hashtag = await prisma.hashtag.update({
-          data: { status: HashtagStatus.DELETE },
-          where: { id: hashtag.id },
-        })
-      }
-      break
-    case 'UPDATE':
-      if (hashtag) {
-        hashtag = await prisma.hashtag.update({
-          data: { text: draft.text },
-          where: { id: hashtag.id },
-        })
-      }
-      break
-    case 'CREATE':
-      hashtag = await prisma.hashtag.create({
-        data: {
-          bullet: { connect: { id: bulletId } },
-          card: { connect: { id: cardId } },
-          user: { connect: { id: userId } },
-          count: { create: {} },
-          text: draft.text,
-        },
-      })
-      break
-  }
+//   switch (draft.op) {
+//     case 'DELETE':
+//       if (hashtag) {
+//         hashtag = await prisma.hashtag.update({
+//           data: { status: HashtagStatus.DELETE },
+//           where: { id: hashtag.id },
+//         })
+//       }
+//       break
+//     case 'UPDATE':
+//       if (hashtag) {
+//         hashtag = await prisma.hashtag.update({
+//           data: { text: draft.text },
+//           where: { id: hashtag.id },
+//         })
+//       }
+//       break
+//     case 'CREATE':
+//       hashtag = await prisma.hashtag.create({
+//         data: {
+//           bullet: { connect: { id: bulletId } },
+//           card: { connect: { id: cardId } },
+//           user: { connect: { id: userId } },
+//           count: { create: {} },
+//           text: draft.text,
+//         },
+//       })
+//       break
+//   }
 
-  if (hashtag) {
-    return {
-      type: 'hashtag',
-      ...hashtag,
-    }
-  }
-  throw 'unexpected error'
-}
+//   if (hashtag) {
+//     return {
+//       type: 'hashtag',
+//       ...hashtag,
+//     }
+//   }
+//   throw 'unexpected error'
+// }
 
-export async function runHastagOpBatch(props: {
-  hashtags: (Hashtag | HashtagDraft | HashtagGroup | HashtagGroupDraft)[]
-  bulletId: number
-  cardId: number
-  userId: string
-}): Promise<(Hashtag | HashtagGroup)[]> {
-  const { hashtags, bulletId, cardId, userId } = props
-  return await Promise.all(
-    hashtags.map(e => {
-      if (e.type === 'hashtag-group-draft') {
-        return runHashtagGroupOp({ draft: e, bulletId, cardId, userId })
-      }
-      if (e.type === 'hashtag-draft') {
-        return runHashtagOp({ draft: e, bulletId, cardId, userId })
-      }
-      return e
-    }),
-  )
-}
+// export async function runHastagOpBatch(props: {
+//   hashtags: (Hashtag | HashtagDraft | HashtagGroup | HashtagGroupDraft)[]
+//   bulletId: number
+//   cardId: number
+//   userId: string
+// }): Promise<(Hashtag | HashtagGroup)[]> {
+//   const { hashtags, bulletId, cardId, userId } = props
+//   return await Promise.all(
+//     hashtags.map(e => {
+//       if (e.type === 'hashtag-group-draft') {
+//         return runHashtagGroupOp({ draft: e, bulletId, cardId, userId })
+//       }
+//       if (e.type === 'hashtag-draft') {
+//         return runHashtagOp({ draft: e, bulletId, cardId, userId })
+//       }
+//       return e
+//     }),
+//   )
+// }
 
 // export function getLinkHashtag(bullet: Bullet | BulletDraft) {
 //   return bullet.hashtags?.find(e => e.linkBullet)

@@ -1,6 +1,6 @@
 import { Grammar, Token, tokenize as prismTokenize, tokenize, TokenStream } from 'prismjs'
 import { Hashtag as GQLHashtag } from '../../apollo/query.graphql'
-import { InlineHashtag, InlineItem, InlineNewHashtag, InlineText } from '../bullet/types'
+import { InlineItem, InlineText } from '../bullet/types'
 import { tokenToString } from '../token'
 // import { Hashtag, HashtagDraft, HashtagGroup, HashtagGroupDraft } from './types'
 
@@ -56,64 +56,64 @@ import { tokenToString } from '../token'
 //   },
 // }
 
-function addSpaceInBetween<T extends InlineItem>(items: T[]): (T | InlineText)[] {
-  const spacedItems = items.reduce<(T | InlineText)[]>((acc, cur) => [...acc, cur, { type: 'text', str: ' ' }], [])
-  if (spacedItems.length > 0 && spacedItems[spacedItems.length - 1].type === 'text') {
-    spacedItems.pop()
-  }
-  return spacedItems
-}
+// function addSpaceInBetween<T extends InlineItem>(items: T[]): (T | InlineText)[] {
+//   const spacedItems = items.reduce<(T | InlineText)[]>((acc, cur) => [...acc, cur, { type: 'text', str: ' ' }], [])
+//   if (spacedItems.length > 0 && spacedItems[spacedItems.length - 1].type === 'text') {
+//     spacedItems.pop()
+//   }
+//   return spacedItems
+// }
 
-function toInlines(hashtags: (InlineHashtag | InlineNewHashtag)[]): (InlineText | InlineHashtag | InlineNewHashtag)[] {
-  if (hashtags.length === 0) {
-    return []
-  }
-  return [{ type: 'text', str: '|| ' }, ...addSpaceInBetween(hashtags)]
-}
+// function toInlines(hashtags: (InlineHashtag | InlineNewHashtag)[]): (InlineText | InlineHashtag | InlineNewHashtag)[] {
+//   if (hashtags.length === 0) {
+//     return []
+//   }
+//   return [{ type: 'text', str: '|| ' }, ...addSpaceInBetween(hashtags)]
+// }
 
-const grammar: Grammar = {
-  'hashtag-string': {
-    pattern: /\B\/\/(?:\s#[a-zA-Z0-9]+)+$/,
-    inside: {
-      breaker: { pattern: /\B\/\// },
-      hashtag: { pattern: /\B#[a-zA-Z0-9]+/ },
-    },
-  },
-}
+// const grammar: Grammar = {
+//   'hashtag-string': {
+//     pattern: /\B\/\/(?:\s#[a-zA-Z0-9]+)+$/,
+//     inside: {
+//       breaker: { pattern: /\B\/\// },
+//       hashtag: { pattern: /\B#[a-zA-Z0-9]+/ },
+//     },
+//   },
+// }
 
-/**
- * @param createdHashtags 用此判斷 parsed hashtags 是新的還是既有的
- * ...some text #(...) #Aaa #Bbb (#aaa #bbb #ccc) #ccc #012
- */
-export function parseHashtags(props: { str: string; connectedHashtags?: InlineHashtag[] }): {
-  beforeHashtagStr: string
-  inlines: (InlineText | InlineHashtag | InlineNewHashtag)[]
-} {
-  const { str, connectedHashtags = [] } = props
-  const [beforeHashtagStr, hashtagStr] = tokenize(str, grammar) // 可以安全的假設傳回值為 [beforeStr, hashtagStr]
+// /**
+//  * @param createdHashtags 用此判斷 parsed hashtags 是新的還是既有的
+//  * ...some text #(...) #Aaa #Bbb (#aaa #bbb #ccc) #ccc #012
+//  */
+// export function parseHashtags(props: { str: string; connectedHashtags?: InlineHashtag[] }): {
+//   beforeHashtagStr: string
+//   inlines: (InlineText | InlineHashtag | InlineNewHashtag)[]
+// } {
+//   const { str, connectedHashtags = [] } = props
+//   const [beforeHashtagStr, hashtagStr] = tokenize(str, grammar) // 可以安全的假設傳回值為 [beforeStr, hashtagStr]
 
-  if (typeof beforeHashtagStr === 'string' && hashtagStr === undefined) {
-    return { beforeHashtagStr, inlines: toInlines(connectedHashtags) }
-  }
-  if (typeof beforeHashtagStr !== 'string' && beforeHashtagStr.type === 'hashtag-string') {
-    // 缺內文，將 hashtags 視為內文 eg '// #Cc3 #Dd4'
-    return { beforeHashtagStr: tokenToString(beforeHashtagStr), inlines: toInlines(connectedHashtags) }
-  }
-  if (
-    typeof beforeHashtagStr === 'string' &&
-    typeof hashtagStr !== 'string' &&
-    hashtagStr.type === 'hashtag-string' &&
-    Array.isArray(hashtagStr.content)
-  ) {
-    const createdHashtagNames = connectedHashtags.map(e => e.str)
-    const newHashtags = hashtagStr.content
-      .filter((e): e is Token => typeof e !== 'string' && e.type === 'hashtag')
-      .map((e): string => tokenToString(e.content))
-      .filter(e => !createdHashtagNames.includes(e))
-      .map<InlineNewHashtag>(e => ({ type: 'new-hashtag', str: e }))
-    return { beforeHashtagStr, inlines: toInlines([...connectedHashtags, ...newHashtags]) }
-  }
-  console.error(str, connectedHashtags)
-  console.error(beforeHashtagStr, hashtagStr)
-  throw 'Unexpected error'
-}
+//   if (typeof beforeHashtagStr === 'string' && hashtagStr === undefined) {
+//     return { beforeHashtagStr, inlines: toInlines(connectedHashtags) }
+//   }
+//   if (typeof beforeHashtagStr !== 'string' && beforeHashtagStr.type === 'hashtag-string') {
+//     // 缺內文，將 hashtags 視為內文 eg '// #Cc3 #Dd4'
+//     return { beforeHashtagStr: tokenToString(beforeHashtagStr), inlines: toInlines(connectedHashtags) }
+//   }
+//   if (
+//     typeof beforeHashtagStr === 'string' &&
+//     typeof hashtagStr !== 'string' &&
+//     hashtagStr.type === 'hashtag-string' &&
+//     Array.isArray(hashtagStr.content)
+//   ) {
+//     const createdHashtagNames = connectedHashtags.map(e => e.str)
+//     const newHashtags = hashtagStr.content
+//       .filter((e): e is Token => typeof e !== 'string' && e.type === 'hashtag')
+//       .map((e): string => tokenToString(e.content))
+//       .filter(e => !createdHashtagNames.includes(e))
+//       .map<InlineNewHashtag>(e => ({ type: 'new-hashtag', str: e }))
+//     return { beforeHashtagStr, inlines: toInlines([...connectedHashtags, ...newHashtags]) }
+//   }
+//   console.error(str, connectedHashtags)
+//   console.error(beforeHashtagStr, hashtagStr)
+//   throw 'Unexpected error'
+// }

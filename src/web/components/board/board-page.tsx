@@ -31,7 +31,7 @@ const BoardPage = ({
   title,
 }: {
   boardId: string
-  pollId?: string
+  pollId: string
   clickedChoiceIdx?: number
   //  description?:string
 

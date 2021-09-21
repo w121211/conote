@@ -2,8 +2,8 @@ import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import {
   useMyHashtagLikeQuery,
-  useCreateHashtagLikeMutation,
-  useUpdateHashtagLikeMutation,
+  // useCreateHashtagLikeMutation,
+  // useUpdateHashtagLikeMutation,
   MyHashtagLikeQuery,
   MyHashtagLikeQueryVariables,
   MyHashtagLikeDocument,
@@ -69,141 +69,141 @@ const hashtagTextToIcon = (hashtag: Hashtag | HashtagGroup): JSX.Element | null 
   return <span>{hashtag.text}</span>
 }
 
-const HashtagUpDown = ({
-  // choice,
-  // commentId,
-  // bulletId,
-  hashtag,
-  children,
-  // text,
-  inline,
-}: {
-  // choice: CommentCount | BulletCount
-  // commentId?: string
-  // bulletId?: string
-  hashtag: Hashtag | HashtagGroup
-  children?: React.ReactNode
-  // text: string
-  inline?: boolean
-}): JSX.Element => {
-  const router = useRouter()
-  const symbol = router.query['symbol'] as string
-  const { data, loading, error } = useMyHashtagLikeQuery({
-    variables: { hashtagId: typeof hashtag.id === 'string' ? parseInt(hashtag.id) : hashtag.id },
-  })
+// const HashtagUpDown = ({
+//   // choice,
+//   // commentId,
+//   // bulletId,
+//   hashtag,
+//   children,
+//   // text,
+//   inline,
+// }: {
+//   // choice: CommentCount | BulletCount
+//   // commentId?: string
+//   // bulletId?: string
+//   hashtag: Hashtag | HashtagGroup
+//   children?: React.ReactNode
+//   // text: string
+//   inline?: boolean
+// }): JSX.Element => {
+//   const router = useRouter()
+//   const symbol = router.query['symbol'] as string
+//   const { data, loading, error } = useMyHashtagLikeQuery({
+//     variables: { hashtagId: typeof hashtag.id === 'string' ? parseInt(hashtag.id) : hashtag.id },
+//   })
 
-  const [createHashtagLike] = useCreateHashtagLikeMutation({
-    update(cache, { data }) {
-      // TODO: 這裡忽略了更新 count
-      if (data?.createHashtagLike) {
-        cache.writeQuery<MyHashtagLikeQuery, MyHashtagLikeQueryVariables>({
-          query: MyHashtagLikeDocument,
-          variables: { hashtagId: data.createHashtagLike.like.hashtagId },
-          data: { myHashtagLike: data.createHashtagLike.like },
-        })
-      }
-    },
-    // refetchQueries: [{ query: HashtagsDocument, variables: { symbol } }],
-  })
-  const [updateHashtagLike] = useUpdateHashtagLikeMutation({
-    update(cache, { data }) {
-      // TODO: 這裡忽略了更新 count
-      if (data?.updateHashtagLike) {
-        cache.writeQuery<MyHashtagLikeQuery, MyHashtagLikeQueryVariables>({
-          query: MyHashtagLikeDocument,
-          variables: { hashtagId: data.updateHashtagLike.like.hashtagId },
-          data: { myHashtagLike: data.updateHashtagLike.like },
-        })
-      }
-    },
-    // refetchQueries: [{ query: HashtagsDocument, variables: { symbol } }],
-  })
+//   const [createHashtagLike] = useCreateHashtagLikeMutation({
+//     update(cache, { data }) {
+//       // TODO: 這裡忽略了更新 count
+//       if (data?.createHashtagLike) {
+//         cache.writeQuery<MyHashtagLikeQuery, MyHashtagLikeQueryVariables>({
+//           query: MyHashtagLikeDocument,
+//           variables: { hashtagId: data.createHashtagLike.like.hashtagId },
+//           data: { myHashtagLike: data.createHashtagLike.like },
+//         })
+//       }
+//     },
+//     // refetchQueries: [{ query: HashtagsDocument, variables: { symbol } }],
+//   })
+//   const [updateHashtagLike] = useUpdateHashtagLikeMutation({
+//     update(cache, { data }) {
+//       // TODO: 這裡忽略了更新 count
+//       if (data?.updateHashtagLike) {
+//         cache.writeQuery<MyHashtagLikeQuery, MyHashtagLikeQueryVariables>({
+//           query: MyHashtagLikeDocument,
+//           variables: { hashtagId: data.updateHashtagLike.like.hashtagId },
+//           data: { myHashtagLike: data.updateHashtagLike.like },
+//         })
+//       }
+//     },
+//     // refetchQueries: [{ query: HashtagsDocument, variables: { symbol } }],
+//   })
 
-  function handleClickLike(choice: LikeChoice) {
-    if (data === undefined) {
-      return
-    }
-    const { myHashtagLike } = data
-    if (myHashtagLike && myHashtagLike.choice === choice) {
-      updateHashtagLike({
-        variables: {
-          id: myHashtagLike.id,
-          data: { choice: 'NEUTRAL' },
-        },
-      })
-    }
-    if (myHashtagLike && myHashtagLike.choice !== choice) {
-      updateHashtagLike({
-        variables: {
-          id: myHashtagLike.id,
-          data: { choice },
-        },
-      })
-    }
-    if (myHashtagLike === null) {
-      createHashtagLike({
-        variables: {
-          hashtagId: typeof hashtag.id === 'string' ? hashtag.id : hashtag.id.toString(),
-          data: { choice },
-        },
-      })
-    }
-  }
-  // if (loading) {
-  //   return <span>Loading...</span>
-  // }
-  // if (error || data === undefined) {
-  //   return <div>Error</div>
-  // }
-  return (
-    // <div>
-    <>
-      {hashtag.type === 'hashtag' ? (
-        <button
-          className={`${classes.button} ${inline && 'inline'} ${
-            data?.myHashtagLike?.choice === 'UP' && classes.clicked
-          }`}
-          onClick={() => {
-            handleClickLike('UP')
-          }}
-        >
-          <HashtagTextToIcon hashtag={hashtag} />
-        </button>
-      ) : (
-        // <button
-        //   className={`${classes.button} ${inline && 'inline'} ${
-        //     data?.myHashtagLike?.choice === 'UP' && classes.clicked
-        //   }`}
-        // onClick={() => {
-        //   // handleClickLike('UP')
-        //   console.log('group')
-        // }}
-        // >
-        <MyHashtagGroup
-          className={`${classes.button} ${inline && 'inline'} ${
-            data?.myHashtagLike?.choice === 'UP' && classes.clicked
-          }`}
-          hashtag={hashtag}
-        />
-        // {/* </button> */}
-      )}
-    </>
-    //   {/* <button
-    //     onClick={() => {
-    //       handleClickLike('UP')
-    //     }}
-    //   >
-    //     {data.myHashtagLike?.choice === 'UP' ? 'up*' : 'up'}
-    //   </button>
-    //   <button
-    //     onClick={() => {
-    //       handleClickLike('DOWN')
-    //     }}
-    //   >
-    //     {data.myHashtagLike?.choice === 'DOWN' ? 'down*' : 'down'}
-    //   </button> */}
-    // {/* </div> */}
-  )
-}
+//   function handleClickLike(choice: LikeChoice) {
+//     if (data === undefined) {
+//       return
+//     }
+//     const { myHashtagLike } = data
+//     if (myHashtagLike && myHashtagLike.choice === choice) {
+//       updateHashtagLike({
+//         variables: {
+//           id: myHashtagLike.id,
+//           data: { choice: 'NEUTRAL' },
+//         },
+//       })
+//     }
+//     if (myHashtagLike && myHashtagLike.choice !== choice) {
+//       updateHashtagLike({
+//         variables: {
+//           id: myHashtagLike.id,
+//           data: { choice },
+//         },
+//       })
+//     }
+//     if (myHashtagLike === null) {
+//       createHashtagLike({
+//         variables: {
+//           hashtagId: typeof hashtag.id === 'string' ? hashtag.id : hashtag.id.toString(),
+//           data: { choice },
+//         },
+//       })
+//     }
+//   }
+//   // if (loading) {
+//   //   return <span>Loading...</span>
+//   // }
+//   // if (error || data === undefined) {
+//   //   return <div>Error</div>
+//   // }
+//   return (
+//     // <div>
+//     <>
+//       {hashtag.type === 'hashtag' ? (
+//         <button
+//           className={`${classes.button} ${inline && 'inline'} ${
+//             data?.myHashtagLike?.choice === 'UP' && classes.clicked
+//           }`}
+//           onClick={() => {
+//             handleClickLike('UP')
+//           }}
+//         >
+//           <HashtagTextToIcon hashtag={hashtag} />
+//         </button>
+//       ) : (
+//         // <button
+//         //   className={`${classes.button} ${inline && 'inline'} ${
+//         //     data?.myHashtagLike?.choice === 'UP' && classes.clicked
+//         //   }`}
+//         // onClick={() => {
+//         //   // handleClickLike('UP')
+//         //   console.log('group')
+//         // }}
+//         // >
+//         <MyHashtagGroup
+//           className={`${classes.button} ${inline && 'inline'} ${
+//             data?.myHashtagLike?.choice === 'UP' && classes.clicked
+//           }`}
+//           hashtag={hashtag}
+//         />
+//         // {/* </button> */}
+//       )}
+//     </>
+//     //   {/* <button
+//     //     onClick={() => {
+//     //       handleClickLike('UP')
+//     //     }}
+//     //   >
+//     //     {data.myHashtagLike?.choice === 'UP' ? 'up*' : 'up'}
+//     //   </button>
+//     //   <button
+//     //     onClick={() => {
+//     //       handleClickLike('DOWN')
+//     //     }}
+//     //   >
+//     //     {data.myHashtagLike?.choice === 'DOWN' ? 'down*' : 'down'}
+//     //   </button> */}
+//     // {/* </div> */}
+//   )
+// }
 
-export default HashtagUpDown
+// export default HashtagUpDown
