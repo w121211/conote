@@ -429,6 +429,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
         )}
         {showPopover && authorContext.author && (
           <Popover visible={showPopover} hideBoard={handleHideBoard}>
+            {console.log(authorContext.author)}
             {pollId ? (
               <AuthorPollPage author={authorContext.author} pollId={pollId} clickedChoiceIdx={clickedIdx} />
             ) : (

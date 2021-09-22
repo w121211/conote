@@ -11,6 +11,7 @@ import Layout from '../../components/layout/layout'
 import NavPath from '../../components/nav-path/nav-path'
 import { Poll, useCreateVoteMutation } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
+import classes from '../../style/symbol.module.scss'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -80,9 +81,8 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
 //     </>
 //   )
 // }
-const router = useRouter()
 
-export const AuthorContext = createContext({ author: router.query.a as string | undefined })
+export const AuthorContext = createContext({ author: '' as string | undefined })
 
 const CardSymbolPage = (): JSX.Element | null => {
   const router = useRouter()
@@ -90,7 +90,9 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [readonly, setReadonly] = useState(false)
   const [location, setLocation] = useState<NavLocation>()
   const { data, setLocalValue, submitValue, dropValue } = useLocalValue({ location })
-  const [authorName, setAuthorName] = useState<string | undefined>(location?.author)
+  const [authorName, setAuthorName] = useState<string | undefined>(
+    data?.selfCard.link?.authorName?.split(':', 1)[0] ?? undefined,
+  )
 
   useEffect(() => {
     if (router.isReady) {
@@ -181,7 +183,7 @@ const CardSymbolPage = (): JSX.Element | null => {
         >
           {'Drop'}
         </button>
-        {location.author && (
+        {/* {location.author && (
           <button
             onClick={() => {
               setAuthorName(prev => {
@@ -195,7 +197,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           >
             {location.author}
           </button>
-        )}
+        )} */}
 
         {/* {mirror && (
           <span>
@@ -214,9 +216,27 @@ const CardSymbolPage = (): JSX.Element | null => {
           ))} */}
 
         <div>
-          {data.selfCard.link?.authorName && <span>@{data.selfCard.link?.authorName}</span>}
-          {data.selfCard.link?.url && <span>@{data.selfCard.link?.url}</span>}
-          {/* <h3>{Node.string(data.openedLiLc)}</h3> */}
+          {/* {data.selfCard.link?.authorName && <span>@{data.selfCard.link?.authorName}</span>} */}
+          {data.selfCard.link?.url && <div>@{data.selfCard.link?.url}</div>}
+          {data.selfCard.link?.authorName && (
+            <button
+              className="transparent"
+              onClick={() => {
+                setAuthorName(prev => {
+                  if (prev) {
+                    return undefined
+                  } else {
+                    return data.selfCard.link?.authorName?.split(':', 1)[0] ?? undefined
+                  }
+                })
+              }}
+            >
+              {authorName}
+              <div className={classes.toggle}></div>
+            </button>
+          )}
+          <h3>{Node.string(data.openedLi.children[0])}</h3>
+          {/* {console.log(location)} */}
         </div>
         <AuthorContext.Provider value={{ author: authorName }}>{editor}</AuthorContext.Provider>
       </div>

@@ -111,12 +111,11 @@ button {
   }
 
   // box-sizing: content-box;
-  &.hashtag {
-    margin: 0 3px;
-    padding: 2px 6px;
-    svg {
-      width: 1em;
-      height: 13px;
+  &.transparent {
+    background: none;
+    padding: 0;
+    &:hover {
+      background: none;
     }
   }
 
