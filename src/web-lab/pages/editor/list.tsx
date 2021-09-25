@@ -6,7 +6,6 @@ import React, {
   CSSProperties,
   useRef,
 } from 'react'
-import Modal from 'react-modal'
 import {
   Editor,
   Transforms,
@@ -41,37 +40,12 @@ import {
   LiElement,
   UlElement,
 } from './slate-custom-types'
-import { withList } from '../../../web/components/editor/with-list'
+import {
+  isLiArray,
+  onKeyDown as withListOnKeyDown,
+  withList,
+} from './with-list'
 // import { useSearch } from './search'
-
-export function isUl(node: Node): node is UlElement {
-  return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'ul'
-}
-
-export function isLi(node: Node): node is LiElement {
-  return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'li'
-}
-
-export function isLiArray(nodes: Node[]): nodes is LiElement[] {
-  for (const e of nodes) {
-    if (!isLi(e)) {
-      return false
-    }
-  }
-  return true
-}
-
-export function isLc(node: Node): node is LcElement {
-  return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'lc'
-}
-
-export function lcPath(liPath: Path): Path {
-  return [...liPath, 0]
-}
-
-export function ulPath(liPath: Path): Path {
-  return [...liPath, 1]
-}
 
 const initialValueDemo: LiElement[] = [
   {
@@ -81,8 +55,7 @@ const initialValueDemo: LiElement[] = [
         type: 'lc',
         children: [
           {
-            type: 'lc-mirror',
-            children: [{ text: '::$XX' }],
+            text: '::$XX',
           },
         ],
       },
@@ -93,14 +66,7 @@ const initialValueDemo: LiElement[] = [
     children: [
       {
         type: 'lc',
-        children: [
-          {
-            type: 'lc-head',
-            // body: '__11',
-            children: [{ text: '11' }, { text: '11' }, { text: '' }],
-          },
-          // { type: 'lc-body', children: [{ text: '__11' }] },
-        ],
+        children: [{ text: '11' }, { text: '11' }, { text: '' }],
       },
     ],
   },
@@ -109,10 +75,7 @@ const initialValueDemo: LiElement[] = [
     children: [
       {
         type: 'lc',
-        children: [
-          { type: 'lc-head', body: '__22', children: [{ text: '22' }] },
-          // { type: 'lc-body', children: [{ text: '__22' }] },
-        ],
+        children: [{ text: '22' }],
       },
       {
         type: 'ul',
@@ -122,9 +85,7 @@ const initialValueDemo: LiElement[] = [
             children: [
               {
                 type: 'lc',
-                children: [
-                  { type: 'lc-head', body: '__33', children: [{ text: '33' }] },
-                ],
+                children: [{ text: '33' }],
               },
             ],
           },
@@ -133,9 +94,7 @@ const initialValueDemo: LiElement[] = [
             children: [
               {
                 type: 'lc',
-                children: [
-                  { type: 'lc-head', body: '__44', children: [{ text: '44' }] },
-                ],
+                children: [{ text: '44' }],
               },
             ],
           },
@@ -145,30 +104,73 @@ const initialValueDemo: LiElement[] = [
   },
 ]
 
-const LcHead = (
-  props: RenderElementProps & {
-    element: LcHeadElement
-  }
-) => {
-  const { attributes, children, element } = props
+const Lc = (
+  props: RenderElementProps & { element: LcElement; sourceUrl?: string }
+): JSX.Element => {
+  const { attributes, children, element, sourceUrl } = props
+  const editor = useSlateStatic()
+  const readonly = useReadOnly()
+  const focused = useFocused() // 整個editor是否focus
+  const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
+  // const [author, authorSwitcher] = useAuthorSwitcher({ authorName })
+  // const [placeholder, setPlaceholder] = useState<string | undefined>()
+  // useEffect(() => {
+  //   setPlaceholder(element.placeholder)
+  // }, [element])
+  // const author = location.author
+
+  // console.log('lc entry', element)
+
+  // useEffect(() => {
+  //   if (element.op === 'CREATE') {
+  //     let lcPath: number[] | undefined
+  //     if (author && element.author === undefined) {
+  //       lcPath = ReactEditor.findPath(editor, element)
+  //       Transforms.setNodes<LcElement>(editor, { author }, { at: lcPath })
+  //     }
+  //     if (sourceUrl && element.sourceUrl === undefined) {
+  //       Transforms.setNodes<LcElement>(editor, { sourceUrl }, { at: lcPath ?? ReactEditor.findPath(editor, element) })
+  //     }
+  //   }
+  // }, [author, element, sourceUrl])
+
+  // useEffect(() => {
+  //   // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
+  //   if ((focused && !selected) || readonly) {
+  //     const path = ReactEditor.findPath(editor, element)
+  //     parseLcAndReplace({ editor, lcEntry: [element, path] })
+  //     // console.log('parseLcAndReplace', path)
+  //   }
+  //   // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
+  //   if (selected) {
+  //     const path = ReactEditor.findPath(editor, element)
+  //     Transforms.unwrapNodes(editor, {
+  //       at: path,
+  //       match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+  //     })
+  //     // console.log('unwrapNodes', path)
+  //   }
+  // }, [selected, readonly])
+
   return (
     <div {...attributes}>
-      <li>
-        <span>{children}</span>
-      </li>
-
-      <div contentEditable={false} style={{ color: 'green' }}>
-        {!element.isEditingBody && (
-          <span style={{ color: 'red' }}>{element.body}</span>
-        )}
-      </div>
+      <span>{children}</span>
+      {((focused && !selected) || readonly) && (
+        <span contentEditable={false} style={{ color: 'green' }}>
+          {/* {author === element.author && element.author} */}
+          {sourceUrl === element.sourceUrl && sourceUrl}
+          {/* {element.emojis?.map((e, i) => (
+            <EmojiButotn key={i} emoji={e} />
+          ))} */}
+        </span>
+      )}
     </div>
   )
 }
 
 const Li = (props: RenderElementProps & { element: LiElement }) => {
   const { attributes, children } = props
-  return <div {...attributes}>{children}</div>
+  return <li {...attributes}>{children}</li>
 }
 
 const Ul = (props: RenderElementProps & { element: UlElement }) => {
@@ -209,11 +211,9 @@ const CustomElement = ({
   sourceUrl?: string
 }) => {
   switch (element.type) {
-    case 'lc-head':
+    case 'lc':
       return (
-        <LcHead
-          {...{ attributes, children, element, oauthorName, sourceUrl }}
-        />
+        <Lc {...{ attributes, children, element, oauthorName, sourceUrl }} />
       )
     case 'li':
       return <Li {...{ attributes, children, element }} />
@@ -260,7 +260,7 @@ export const BulletEditor = (props: {
           autoCorrect="false"
           renderElement={renderElement}
           onKeyDown={(event) => {
-            withLcbodyOnKeyDown(event, editor)
+            withListOnKeyDown(event, editor)
           }}
         />
       </Slate>
