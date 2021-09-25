@@ -18,6 +18,7 @@ export type NavLocation = {
 /** URL search params */
 const AUTHOR_KEY = 'a'
 const MIRROR_KEY = 'm'
+// const MIRROR_KEY_NEW = 'mirror'
 const PATH_KEY = 'p'
 const PATH_SPLITTER = '.'
 
@@ -25,6 +26,7 @@ export function getNavLocation(query: ParsedUrlQuery): NavLocation {
   const symbol = query['symbol']
   const path = query[PATH_KEY]
   const mirror = query[MIRROR_KEY]
+
   const author = query[AUTHOR_KEY]
 
   if (typeof symbol !== 'string') {
@@ -34,6 +36,7 @@ export function getNavLocation(query: ParsedUrlQuery): NavLocation {
     selfSymbol: symbol,
     openedLiPath: typeof path === 'string' ? path.split(PATH_SPLITTER).map(e => parseInt(e)) : [],
     mirrorSymbol: typeof mirror === 'string' ? mirror : undefined,
+    // mirrorSymbol: typeof mirror === 'string' ? mirror : undefined,
     author: typeof author === 'string' ? author : undefined,
   }
 }
@@ -45,7 +48,7 @@ export function locationToUrl(lcation: NavLocation, joinLiPath?: number[]): UrlO
   const query: Record<string, string> = {}
   if (mirrorSymbol) {
     // params.set(MIRROR_KEY, mirrorSymbol)
-    query[MIRROR_KEY] = mirrorSymbol
+    query[MIRROR_KEY] = encodeURIComponent(mirrorSymbol)
   }
   if (author && mirrorSymbol) {
     // params.set(AUTHOR_KEY, author)
@@ -65,6 +68,7 @@ export function locationToUrl(lcation: NavLocation, joinLiPath?: number[]): UrlO
   //   : `/card/${encodeURIComponent(selfSymbol)}`
   return {
     pathname: '/card/[symbol]',
+    // pathname: query[MIRROR_KEY_NEW] ? `/card/[symbol]?mirror=${query[MIRROR_KEY_NEW]}&` : '/card/[symbol]',
     query: {
       ...query,
       symbol: selfSymbol,

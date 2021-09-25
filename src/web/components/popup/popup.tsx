@@ -1,16 +1,16 @@
 import React from 'react'
 import CancelIcon from '../../assets/svg/cancel.svg'
-import classes from './popover.module.scss'
+import classes from './popup.module.scss'
 
-const Popover = ({
+const Popup = ({
   children,
   visible,
   hideBoard,
   subTitle,
   mask,
   buttons,
-  center,
-}: // width,
+}: // center
+// width,
 {
   children: React.ReactNode
   visible: boolean
@@ -18,7 +18,7 @@ const Popover = ({
   subTitle?: string
   mask?: boolean
   buttons?: React.ReactNode
-  center?: boolean
+  // center?:boolean
   // width?: number
 }): JSX.Element => {
   // console.log(mask)
@@ -60,9 +60,9 @@ const Popover = ({
   )
 }
 
-Popover.defaultProps = {
+Popup.defaultProps = {
   mask: true,
-  center: false,
+  // center:false
 }
 
-export default Popover
+export default Popup

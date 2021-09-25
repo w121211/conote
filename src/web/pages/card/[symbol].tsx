@@ -11,6 +11,7 @@ import NavPath from '../../components/nav-path/nav-path'
 import { Poll, useCreateVoteMutation } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/symbol.module.scss'
+import Popover from '../../components/popover/popover'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -92,6 +93,15 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [authorName, setAuthorName] = useState<string | undefined>(
     data?.selfCard.link?.authorName?.split(':', 1)[0] ?? undefined,
   )
+  const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
+
+  if (
+    data?.selfCard.link?.authorName?.split(':', 1)[0] !== undefined &&
+    data?.selfCard.link?.authorName?.split(':', 1)[0] !== prevAuthor
+  ) {
+    setAuthorName(data?.selfCard.link?.authorName?.split(':', 1)[0])
+    setPrevAuthor(data?.selfCard.link?.authorName?.split(':', 1)[0])
+  }
 
   useEffect(() => {
     if (router.isReady) {
@@ -230,14 +240,25 @@ const CardSymbolPage = (): JSX.Element | null => {
                 })
               }}
             >
-              {authorName}
-              <div className={classes.toggle}></div>
+              {data.selfCard.link?.authorName?.split(':', 1)[0]}
+
+              <div className={`${classes.toggle} ${authorName && classes.toggleClicked}`}></div>
             </button>
           )}
           <h3>{Node.string(data.openedLi.children[0])}</h3>
-          {/* {console.log(location)} */}
+          {/* {console.log(data.openedLi)} */}
         </div>
-        <AuthorContext.Provider value={{ author: authorName }}>{editor}</AuthorContext.Provider>
+        <AuthorContext.Provider value={{ author: authorName }}>
+          {editor}
+          <Popover
+            visible={!!router.query.m}
+            hideBoard={() => {
+              router.push(`/card/${encodeURIComponent(location.selfSymbol)}`)
+            }}
+          >
+            {editor}
+          </Popover>
+        </AuthorContext.Provider>
       </div>
     </Layout>
   )

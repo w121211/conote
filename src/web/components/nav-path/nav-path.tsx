@@ -136,7 +136,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
                 }}
               >
                 {typeof e !== 'string' && e.path.length > 0 && (
-                  <Link href={`/card/${router.query.symbol}?p=${e.path.join('.')}`}>
+                  <Link href={`/card/${encodeURIComponent(router.query.symbol as string)}?p=${e.path.join('.')}`}>
                     <a className="ui">{e.text}</a>
                   </Link>
                 )}
@@ -165,7 +165,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
                         >
                           {typeof el !== 'string' && (
                             <Link
-                              href={`/card/${router.query.symbol}${
+                              href={`/card/${encodeURIComponent(router.query.symbol as string)}${
                                 el.path.length > 0 ? '?p=' + el.path.join('.') : ''
                               }`}
                             >

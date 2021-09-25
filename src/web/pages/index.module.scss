@@ -5,14 +5,22 @@
   align-items: center;
   width: 100%;
   height: 100vh;
-  background: $white;
+  overflow: auto;
+  // background: $bg;
 }
 .search {
+  display: flex;
+  width: 80vw;
+  max-width: 1024px;
+  align-items: center;
   text-align: center;
-  margin: 3rem 0;
+  margin-bottom: 2rem;
+  // margin: 3rem 0;
   h1 {
-    font-size: 5rem;
-    margin-bottom: 0;
+    font-size: 3rem;
+    margin: 0;
+    margin-right: 20px;
+    color: $secondary;
   }
   :global(.ant-select) {
     width: min(450px, 100%);
@@ -22,30 +30,103 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+  align-items: center;
   @media screen and (max-width: 500px) {
     width: 85vw;
   }
 }
 .inner {
   display: flex;
-  flex-direction: column;
-  overflow: auto;
-  /* flex: auto; */
-  height: 100%;
-  padding-bottom: 11vh;
-  // word-break: break-all;
-  // flex-grow: 1;
-  // /* flex-shrink: 1;
+  justify-content: center;
+  width: 100vw;
+
+  padding: 3vh 0 9vh;
+  background: $bg;
+
+  h3 {
+    color: $black;
+  }
+  .new {
+    margin: 0 15px;
+    max-width: 36vw;
+    // flex: 1;
+    // width: 75vw;
+    // height: 50%;
+    // background: #fff;
+    // padding: 10px 20px;
+  }
+  .hot {
+    margin: 0 15px;
+    max-width: 36vw;
+    // flex: 1;
+    // width: 75vw;
+    // height: 50%;
+    // margin-left: 20px;
+    // background: #fff;
+    // padding: 10px 20px;
+  }
+  &.battle {
+    background: $white;
+    // flex-direction: column;
+  }
 }
+
+.battleInner {
+  max-width: 1024px;
+}
+
+.battleBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px;
+  padding: 20px;
+  width: 23vw;
+  // border-bottom: 1px solid $gray;
+  box-shadow: 0 0 13px #666a7d2e;
+  // background: $bg;
+  color: $gray-text-dark;
+  h4 {
+    margin: 0;
+    color: $secondary;
+  }
+  // max-width: 25vw;
+}
+
+.battleBlockWrapper {
+  max-width: 75vw;
+  display: flex;
+  flex-wrap: wrap;
+  // justify-content: space-between;
+}
+
 .latestCards {
-  overflow: auto;
+  // overflow: auto;
+  // column-count: 2;
+  background: $white;
+  padding: 10px 20px;
+  & :first-child .latestCardsListIndex {
+    color: #ff0979;
+    font-weight: bold;
+  }
+  & :nth-child(2) .latestCardsListIndex {
+    color: #2562ef;
+    font-weight: bold;
+  }
+  & :nth-child(3) .latestCardsListIndex {
+    color: #ffb50a;
+    font-weight: bold;
+  }
 }
 .latestCardsListText {
   // font-family: 'jf-openhuninn-1.1';
   display: flex;
-  color: #4f565f;
+  color: $black;
+  margin: 16px 0;
+
   a {
-    color: #4f565f;
+    color: $black;
     display: block;
     /* display: -webkit-box; */
     white-space: nowrap;
@@ -61,8 +142,11 @@
   display: inline-flex;
   min-width: 1.5em;
   /* justify-items: stretch; */
-  justify-content: flex-end;
-  margin-right: 10px;
+  justify-content: center;
+  margin-right: 16px;
+
+  color: $gray-text-dark;
+  font-style: italic;
 }
 .newCardBtn {
   // display: block;
@@ -101,5 +185,57 @@
     z-index: 1;
   }
 }
-.newCardBtnWrapper {
+.bulletSvg {
+  svg {
+    width: 10px;
+    height: 10px;
+    fill: $gray-text;
+  }
+}
+.navUl {
+  max-width: 1024px;
+  list-style: none;
+  display: flex;
+  padding-inline-start: 0;
+  color: $gray-text-dark;
+  font-size: 13px;
+  li {
+    margin: 0 10px;
+  }
+}
+.nav {
+  display: flex;
+  width: 100vw;
+  padding: 0 10vw;
+}
+.lcElementInfo {
+  display: flex;
+  font-size: 13px;
+  color: $gray-text;
+  line-height: 1.5;
+}
+.lcElementUrl {
+  width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  // font-size: 13px;
+  // color: $gray-text;
+}
+.lcElementAuthor {
+  color: $secondary;
+}
+.lcElementHashtag {
+  display: inline-block;
+  padding: 0 8px;
+  background: $bg;
+  font-size: 12px;
+  color: $gray-text-dark;
+}
+.lcElementSymbol {
+  color: $black;
+  font-weight: bold;
+}
+.moreBtn {
+  width: 100%;
+  justify-content: center;
 }

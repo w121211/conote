@@ -1,9 +1,9 @@
 import React from 'react'
 import classes from './bullet-svg.module.scss'
 
-const BulletSvg = () => {
+const BulletSvg = ({ className }: { className?: string }) => {
   return (
-    <span className={classes.bulletWrapper}>
+    <span className={`${classes.bulletWrapper} ${className ? className : ''}`}>
       <span
         className={classes.bullet}
         // onClick={() => {

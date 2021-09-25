@@ -90,7 +90,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       // where: { createdAt: { gte: maxDate.toDate() } },
       orderBy: { updatedAt: 'desc' },
       cursor: afterId ? { id: parseInt(afterId) } : undefined,
-      take: 30,
+      take: 10,
       skip: afterId ? 1 : 0,
     })
     return cards.map(e => {

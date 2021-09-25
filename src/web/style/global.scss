@@ -37,7 +37,7 @@ body {
   font-size: 15px;
   line-height: 2;
   box-sizing: border-box;
-  background-color: $white;
+  // background-color: $white;
   @media screen and (max-width: 500px) {
     font-size: 14px;
   }
@@ -103,7 +103,7 @@ button {
   background: none;
   // line-height: 1;
   font-size: 1em;
-  background-color: $gray;
+  background-color: $bg;
   align-items: center;
 
   &:hover {

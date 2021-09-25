@@ -52,19 +52,32 @@ export function SearchAllForm(): JSX.Element {
   }
 
   const customStyles: Partial<Styles<Option, false, GroupTypeBase<Option>>> = {
+    container: (provided: any, state: any) => ({
+      ...provided,
+      flex: '1',
+    }),
     menu: (provided: any, state: any) => ({
       ...provided,
       width: '100%',
       minHeight: '30px',
+      border: 'none',
+      borderRadius: '10px',
+      boxShadow: '0 1px 6px 0 #17171730',
     }),
     control: (provided, { isFocused }) => ({
       ...provided,
       width: '100%',
       maxHeight: '30px',
       whiteSpace: 'nowrap',
+      borderRadius: '99px',
 
-      borderColor: isFocused ? '#5c6cda' : 'hsl(0, 0%, 80%)',
-      boxShadow: isFocused ? '0 0 0 1px #5c6cda' : 'none',
+      // borderColor: isFocused ? '#5c6cda' : 'hsl(0, 0%, 80%)',
+      ':hover': {
+        borderColor: '#fff',
+        boxShadow: '0 1px 6px 0 #17171730',
+      },
+      borderColor: isFocused ? '#fff' : 'hsl(0, 0%, 80%)',
+      boxShadow: isFocused ? '0 1px 6px 0 #17171730' : 'none',
     }),
     valueContainer: (provided, state) => ({
       ...provided,
