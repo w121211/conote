@@ -62,6 +62,9 @@ import HashtagTextToIcon from '../upDown/hashtag-text-to-icon'
 import PollPage from '../board/poll-page'
 import { AuthorContext } from '../../pages/card/[symbol]'
 import AuthorPollPage from '../board/author-poll-page'
+import { useRouter } from 'next/router'
+import Popup from '../popup/popup'
+// import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
   const { authorName } = props
@@ -253,10 +256,56 @@ const InlineSymbol = ({
 }: RenderElementProps & {
   element: InlineSymbolElement
 }): JSX.Element => {
+  const [showPopover, setShowPopover] = useState(false)
+  const router = useRouter()
   return (
-    <button {...attributes} className="inline">
-      {children}
-    </button>
+    <span {...attributes} className="inline">
+      <span contentEditable={false}>
+        {/* <Link href={`/card/${encodeURI(element.symbol)}`}> */}
+        <a
+          className="inline"
+          onClick={e => {
+            e.preventDefault()
+            setShowPopover(true)
+          }}
+        >
+          {children}
+        </a>
+        {/* </Link> */}
+        {showPopover && (
+          <Popup
+            visible={showPopover}
+            hideBoard={() => {
+              setShowPopover(false)
+            }}
+            buttons={
+              <>
+                <button
+                  className="primary"
+                  onClick={() => {
+                    setShowPopover(false)
+                  }}
+                >
+                  取消
+                </button>
+                <button
+                  className="secondary"
+                  onClick={() => {
+                    setShowPopover(false)
+                    router.push(`/card/${encodeURI(element.symbol)}`)
+                  }}
+                >
+                  確定
+                </button>
+              </>
+            }
+            mask={false}
+          >
+            即將離開本頁！尚未儲存的內容將丟失，確定要離開嗎？
+          </Popup>
+        )}
+      </span>
+    </span>
   )
 }
 
@@ -264,6 +313,7 @@ const InlineMirror = (
   props: RenderElementProps & { element: InlineMirrorElement; location: NavLocation; selfCard: Card },
 ): JSX.Element => {
   const { attributes, children, element, location, selfCard } = props
+  const [showPopover, setShowPopover] = useState(false)
   const editor = useSlateStatic()
   const href = locationToUrl({
     ...location,
@@ -284,9 +334,14 @@ const InlineMirror = (
 
   return (
     <span {...attributes}>
-      <Link href={href}>
-        <a>{children}</a>
-      </Link>
+      <span contentEditable={false}>
+        <Link
+          href={href}
+          as={`/card/${encodeURIComponent(location.selfSymbol)}/${encodeURIComponent(element.mirrorSymbol)}`}
+        >
+          <a className="inline">{children}</a>
+        </Link>
+      </span>
     </span>
   )
 }
@@ -429,7 +484,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
         )}
         {showPopover && authorContext.author && (
           <Popover visible={showPopover} hideBoard={handleHideBoard}>
-            {console.log(authorContext.author)}
+            {/* {console.log(authorContext.author)} */}
             {pollId ? (
               <AuthorPollPage author={authorContext.author} pollId={pollId} clickedChoiceIdx={clickedIdx} />
             ) : (

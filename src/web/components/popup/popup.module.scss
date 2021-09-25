@@ -3,6 +3,7 @@
   display: flex;
   // align-items: center;
   justify-content: center;
+  align-items: center;
   width: 100vw;
   height: 100vh;
   top: 0;
@@ -14,11 +15,12 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  width: 60vw;
+  min-width: 200px;
+  max-width: 60vw;
   max-height: 90vh;
-  margin-top: 5vh;
+  margin-top: -40vh;
   background-color: $white;
-  box-shadow: 0 13px 42px -14px #00000066;
+  box-shadow: 0 13px 60px -25px #00000091;
   padding: 1em;
   padding-top: 10px;
   box-sizing: border-box;
@@ -60,6 +62,7 @@
   }
 }
 .children {
+  margin: 20px 20px;
   // margin-top: 50px;
 }
 .mask {
@@ -74,4 +77,5 @@
 }
 .buttons {
   display: flex;
+  justify-content: center;
 }
