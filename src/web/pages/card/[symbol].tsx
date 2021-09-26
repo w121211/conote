@@ -250,14 +250,14 @@ const CardSymbolPage = (): JSX.Element | null => {
         </div>
         <AuthorContext.Provider value={{ author: authorName }}>
           {editor}
-          <Popover
+          {/* <Popover
             visible={!!router.query.m}
             hideBoard={() => {
               router.push(`/card/${encodeURIComponent(location.selfSymbol)}`)
             }}
           >
             {editor}
-          </Popover>
+          </Popover> */}
         </AuthorContext.Provider>
       </div>
     </Layout>
