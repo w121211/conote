@@ -337,7 +337,7 @@ const InlineMirror = (
       <span contentEditable={false}>
         <Link
           href={href}
-          as={`/card/${encodeURIComponent(location.selfSymbol)}/${encodeURIComponent(element.mirrorSymbol)}`}
+          // as={`/card/${encodeURIComponent(location.selfSymbol)}/${encodeURIComponent(element.mirrorSymbol)}`}
         >
           <a className="inline">{children}</a>
         </Link>
