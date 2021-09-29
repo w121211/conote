@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import SideBar from '../sidebar/sidebar'
 import classes from './layout.module.scss'
 import MenuIcon from '../../assets/svg/menu.svg'
+import Link from 'next/link'
 
 export default function Layout({
   children,
@@ -10,47 +11,48 @@ export default function Layout({
 // handleSymbol,
 {
   children: React.ReactNode
-  navPath: React.ReactNode
+  navPath?: React.ReactNode
   // handlePath?: (i: number) => void
   // handleSymbol?: (e: string) => void
 }): JSX.Element {
   const [showNav, setShowNav] = useState(true)
-
   const [showMenu, setShowMenu] = useState(false)
-
   const [scroll, setScroll] = useState(0)
 
   const layoutRef = useRef<HTMLDivElement>(null)
+
+  const childrenWithCallback = useCallback(() => children, [children])
 
   const showMenuHandler = () => {
     setShowMenu(false)
   }
 
-  const handleScroll = () => {
-    if (layoutRef.current) {
-      //getBoundingClientRect().top 總是<=0
-      const clientRectTop = layoutRef.current.getBoundingClientRect().top
-      // console.log(clientRectTop, scroll, clientRectTop > scroll)
-
-      if (scroll < clientRectTop) {
-        setShowNav(true)
-        setScroll(clientRectTop)
-      }
-      if (scroll > clientRectTop) {
-        setShowNav(false)
-        setScroll(clientRectTop)
-      }
-      if (clientRectTop === 0) {
-        setShowNav(true)
-        setScroll(clientRectTop)
-      }
-    }
+  const handleScroll = (e: any) => {
+    // console.log(e.target.scrollTop)
+    // if (e.target) {
+    //   //getBoundingClientRect().top 總是<=0
+    //   const clientRectTop = e.target.scrollTop
+    //   // console.log(clientRectTop, scroll, clientRectTop > scroll)
+    //   if (scroll > clientRectTop && clientRectTop > 45) {
+    //     setShowNav(true)
+    //     setScroll(clientRectTop)
+    //   }
+    //   if (scroll < clientRectTop) {
+    //     setShowNav(false)
+    //     setScroll(clientRectTop)
+    //   }
+    //   if (clientRectTop === 0) {
+    //     setShowNav(true)
+    //     setScroll(clientRectTop)
+    //   }
+    // }
   }
 
   return (
     <div className={classes.layout} onScroll={handleScroll}>
       <div className={classes.children} ref={layoutRef}>
-        {children}
+        {/* {children} */}
+        {childrenWithCallback()}
         {/* <footer>footer</footer> */}
       </div>
       <nav
@@ -65,7 +67,10 @@ export default function Layout({
         >
           <MenuIcon className={classes.menuIcon} />
         </div>
-        {navPath}
+        <Link href="/">
+          <a>Conote</a>
+        </Link>
+        {/* {navPath} */}
       </nav>
 
       {/* <div className={classes.sideBarContainer} style={showMenu ? { visibility: 'visible' } : { visibility: 'hidden' }}> */}

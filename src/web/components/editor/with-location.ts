@@ -48,7 +48,7 @@ export function locationToUrl(lcation: NavLocation, joinLiPath?: number[]): UrlO
   const query: Record<string, string> = {}
   if (mirrorSymbol) {
     // params.set(MIRROR_KEY, mirrorSymbol)
-    query[MIRROR_KEY] = encodeURIComponent(mirrorSymbol)
+    query[MIRROR_KEY] = mirrorSymbol
   }
   if (author && mirrorSymbol) {
     // params.set(AUTHOR_KEY, author)

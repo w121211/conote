@@ -11,6 +11,7 @@ import {
   Hashtag,
   EmojiText,
   HashtagLike,
+  useMyHashtagLikeLazyQuery,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import classes from './upDown.module.scss'
@@ -56,10 +57,12 @@ const UpDown = ({
     },
   })
 
-  const { data, loading, error } = useMyHashtagLikeQuery({
-    variables: { hashtagId: foundEmoji?.id.toString() ?? '' },
-  })
-
+  const [queryMyHashtag, { data, loading, error }] = useMyHashtagLikeLazyQuery()
+  if (foundEmoji) {
+    queryMyHashtag({
+      variables: { hashtagId: foundEmoji.id.toString() },
+    })
+  }
   // const handleMyChoice = () => {
   //   if (commentId) {
   //     return myCommentLikeData?.myCommentLikes.find(e => e.commentId === parseInt(commentId))

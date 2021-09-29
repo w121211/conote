@@ -48,6 +48,7 @@ export const Serializer: SerializerInterface = {
     if (ul?.children === undefined) {
       throw 'ul 沒有 children'
     }
+    console.log(lc.rootBulletDraft)
     return {
       ...lc.rootBulletDraft,
       children: ul.children.map(e => Serializer._toBulletDraft(e)),
@@ -64,7 +65,7 @@ export const Serializer: SerializerInterface = {
           ...lc,
           // root: true,
           // symbol: root.symbol,
-          // rootBulletDraft: root,
+          rootBulletDraft: root,
           // mirror: root.mirror,
           // newSymbol: options?.newSymbol,
           // boardId: root.boardId,

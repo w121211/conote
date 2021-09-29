@@ -42,7 +42,7 @@ const hashtagTextToIcon = (hashtag: Hashtag | HashtagGroup): JSX.Element | null 
                 key={i}
                 onClick={ev => {
                   ev.stopPropagation()
-                  console.log(e)
+                  // console.log(e)
                 }}
               >
                 {e}
@@ -56,7 +56,7 @@ const hashtagTextToIcon = (hashtag: Hashtag | HashtagGroup): JSX.Element | null 
               key={i}
               onClick={ev => {
                 ev.stopPropagation()
-                console.log(e)
+                // console.log(e)
               }}
             >
               {e}

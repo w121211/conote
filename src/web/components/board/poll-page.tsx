@@ -24,6 +24,7 @@ import PollForm, { FormInputs } from '../board-form/poll-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import BarChart from '../bar/bar'
 import classes from './board-page.module.scss'
+import AuthorPollForm from '../board-form/author-poll-form'
 
 const PollPage = ({
   pollId,
@@ -31,10 +32,12 @@ const PollPage = ({
   clickedChoiceIdx,
 
   title,
+  author,
 }: {
   // boardId: string
   pollId: string
   clickedChoiceIdx?: number
+  author?: string
   //  description?:string
 
   title?: string
@@ -120,17 +123,28 @@ const PollPage = ({
           <div className={classes.title}>{data.poll.choices}</div>
 
           {/* tabs底線 */}
-          {/* <div className={classes.underLine}> */}
+          <div className={classes.underLine} />
+          <h5>投票身份</h5>
+          <span>{author ? author : '我'}</span>
           {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
           {/* </div> */}
           {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}
-          <PollForm
-            // boardId={boardId}
-            pollId={pollId}
-            initialValue={{ title: '', choice: undefined, lines: '' }}
-            // filterComments={filterComments}
-            clickedChoiceIdx={clickedChoiceIdx}
-          />
+          {author ? (
+            <AuthorPollForm
+              pollId={pollId}
+              author={author}
+              clickedChoiceIdx={clickedChoiceIdx}
+              initialValue={{ title: '', choice: undefined, lines: '' }}
+            />
+          ) : (
+            <PollForm
+              // boardId={boardId}
+              pollId={pollId}
+              initialValue={{ title: '', choice: undefined, lines: '' }}
+              // filterComments={filterComments}
+              clickedChoiceIdx={clickedChoiceIdx}
+            />
+          )}
           {/* <CommentForm
         boardId={boardId}
         pollId={pollId}

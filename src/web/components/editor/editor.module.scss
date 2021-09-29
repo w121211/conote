@@ -67,7 +67,19 @@
   }
 }
 .bulletEditorContainer {
-  margin-left: 2em;
+  // margin-left: 2em;
+  // background: $bg;
+  // padding: 10px 3.5em 10px 3.5em;
+  box-shadow: 0 0px 0 1px $gray;
+  border-radius: 3px;
+  color: $text;
+  @media screen and (max-width: 500px) {
+    padding: 10 3em;
+  }
+}
+.focused {
+  box-shadow: 0 0 0 1px $secondaryHover;
+  background: white;
 }
 
 .hashtag {

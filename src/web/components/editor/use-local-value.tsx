@@ -281,7 +281,7 @@ export const useLocalValue = ({
       if (data) {
         const selfSymbol = data.self.symbol
         const rootLi = store.getRootLi(data.self.symbol)
-        console.log(rootLi)
+        // console.log(rootLi)
         const mirrorSymbols = []
         const promises = []
 
@@ -292,6 +292,7 @@ export const useLocalValue = ({
               mirrorSymbols.push(element.mirrorSymbol)
             }
           }
+          // Serializer.toRootBulletDraft(rootLi)
           promises.push(
             client.mutate<CreateCardBodyMutation, CreateCardBodyMutationVariables>({
               mutation: CreateCardBodyDocument,

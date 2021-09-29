@@ -301,7 +301,7 @@ const InlineSymbol = ({
             }
             mask={false}
           >
-            即將離開本頁！尚未儲存的內容將丟失，確定要離開嗎？
+            尚有未儲存內容，確定要離開本頁嗎？
           </Popup>
         )}
       </span>
@@ -399,7 +399,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()
   const [pollId, setPollId] = useState(element.id)
   const authorContext = useContext(AuthorContext)
-
+  // console.log(authorContext)
   function onCreated(poll: Poll) {
     // const editor = useSlateStatic()
     // const path = ReactEditor.findPath(editor, element)
@@ -452,7 +452,11 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
 
   if (readonly) {
     if (element.type === 'poll') {
-      return <MyHashtagGroup {...attributes} choices={element.choices} pollId={element.id?.toString() ?? ''} />
+      return (
+        <span {...attributes}>
+          <MyHashtagGroup choices={element.choices} pollId={element.id?.toString() ?? ''} />
+        </span>
+      )
     }
     return (
       <button {...attributes} className="inline mR">
@@ -477,21 +481,25 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
           }}
           inline
         />
-        {showPopover && !authorContext.author && (
+        {showPopover && (
           <Popover visible={showPopover} hideBoard={handleHideBoard}>
-            {pollId ? <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} /> : <span>loading</span>}
+            {pollId ? (
+              <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} author={authorContext.author} />
+            ) : (
+              <span>loading</span>
+            )}
           </Popover>
         )}
-        {showPopover && authorContext.author && (
+        {/* {showPopover && authorContext.author && (
           <Popover visible={showPopover} hideBoard={handleHideBoard}>
-            {/* {console.log(authorContext.author)} */}
+            
             {pollId ? (
               <AuthorPollPage author={authorContext.author} pollId={pollId} clickedChoiceIdx={clickedIdx} />
             ) : (
               <span>loading</span>
             )}
           </Popover>
-        )}
+        )} */}
         {/* {element.id ? (
           <MyHashtagGroup choices={element.choices} pollId={element.id.toString()} inline />
         ) : (
@@ -637,7 +645,7 @@ const Lc = (
   return (
     <div {...attributes}>
       <span className={classes.lcText}>{children}</span>
-      {((focused && !selected) || readonly) && (
+      {/* {((focused && !selected) || readonly) && (
         <span contentEditable={false} style={{ color: 'green' }}>
           {author === element.author && element.author}
           {sourceUrl === element.sourceUrl && sourceUrl}
@@ -645,7 +653,7 @@ const Lc = (
             <EmojiButotn key={i} emoji={e} />
           ))}
         </span>
-      )}
+      )} */}
     </div>
   )
 }
@@ -760,7 +768,7 @@ const Li = ({
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>
 
-      <div>{children}</div>
+      <div style={{ width: '100%' }}>{children}</div>
     </div>
   )
 }
@@ -820,6 +828,8 @@ export const BulletEditor = ({
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
     [location, selfCard],
   )
+  // const isFocused = useFocused()
+
   // const decorate = useCallback(([node, path]: NodeEntry) => {
   //   const ranges: CustomRange[] = []
   //   if (editor.selection != null) {
@@ -899,10 +909,18 @@ export const BulletEditor = ({
   // }, [searchAllResult])
 
   return (
-    <div className={classes.bulletEditorContainer}>
-      <div>
+    <div
+      className={`${classes.bulletEditorContainer} `}
+      onFocus={e => {
+        e.currentTarget.classList.add(classes.focused)
+      }}
+      onBlur={e => {
+        e.currentTarget.classList.remove(classes.focused)
+      }}
+    >
+      {/* <div>
         @{selfCard.link?.url ?? 'undefined'}; @{location.author ?? 'undefined'}
-      </div>
+      </div> */}
       <Slate
         editor={editor}
         value={value}
@@ -920,6 +938,7 @@ export const BulletEditor = ({
         }}
       >
         <Editable
+          style={{ padding: '10px 10px 10px 3.5em' }}
           autoCorrect="false"
           // decorate={decorate}
           readOnly={readOnly}

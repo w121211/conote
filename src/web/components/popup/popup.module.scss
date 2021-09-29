@@ -62,7 +62,7 @@
   }
 }
 .children {
-  margin: 20px 20px;
+  margin: 10px auto;
   // margin-top: 50px;
 }
 .mask {
@@ -78,4 +78,7 @@
 .buttons {
   display: flex;
   justify-content: center;
+  button {
+    margin: 10px 6px;
+  }
 }
