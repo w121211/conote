@@ -109,7 +109,7 @@ type Query {
 type Mutation {
   # 若 symbol 已存在會直接返回現有的 card，不另外創新
   createSymbolCard(data: CardInput!): Card!
-  # createCardHead(cardId: ID!, data: CardBulletRootInput!): CardHead!
+  updateCardMeta(symbol: String!, data: CardMetaInput!): Card!
 
   # 若該 symbol 尚未有 card 時，需要給 template，會同步創 card, body
   createCardBody(cardSymbol: String!, data: CardBodyInput!): CardBody!
@@ -338,8 +338,18 @@ type CardBody {
   prevId: Int
 }
 
+type CardMeta {
+  url: String
+  title: String
+  author: String
+  keywords: [String!]
+  redirects: [String!]
+  duplicates: [String!]
+}
+
 type Card {
   id: ID!
+  meta: CardMeta!
   type: CardType!
   symbol: String!
   link: Link
@@ -493,6 +503,15 @@ input BoardInput {
 #   symbol: String!
 #   root: BulletInput!
 # }
+
+input CardMetaInput {
+  url: String
+  title: String
+  author: String
+  keywords: [String!]
+  redirects: [String!]
+  duplicates: [String!]
+}
 
 input CardBodyInput {
   root: JSON!

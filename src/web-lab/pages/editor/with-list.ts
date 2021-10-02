@@ -437,27 +437,9 @@ export function withList(editor: Editor): Editor {
   }
 
   editor.insertData = (data) => {
-    console.log(data)
-    // const html = data.getData('text/html')
-    // if (html) {
-    //   const parsed = new DOMParser().parseFromString(html, 'text/html')
-    //   const fragment = deserialize(parsed.body)
-    //   Transforms.insertFragment(editor, fragment)
-    //   return
-    // }
-
-    // const html = data.getData('text/html')
-    // if (html) {
-    //   const parsed = new DOMParser().parseFromString(html, 'text/html')
-    //   const fragment = deserialize(parsed.body)
-    //   Transforms.insertFragment(editor, fragment)
-    //   return
-    // }
-
     // @see https://github.com/ianstormtaylor/slate/blob/c1433f56cfe13feb826264989bb4f68a0eefab62/packages/slate-react/src/plugin/with-react.ts
     const text = data.getData('text/plain')
     if (text) {
-      console.log(text)
       const lines = text.trim().split(/\r\n|\r|\n/)
       for (let i = 0; i < lines.length; i++) {
         editor.insertText(lines[i])

@@ -3,7 +3,7 @@ import { FetchClient } from '../../../packages/fetcher/src'
 import prisma from '../prisma'
 import { checkBulletDraft, BulletNode } from '../bullet/node'
 import { runBulletOp } from '../bullet/operation'
-import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../bullet/types'
+import { Bullet, BulletDraft, isRootBullet, isRootBulletDraft, RootBullet, RootBulletDraft } from '../bullet/types'
 import { getOrCreateLink, linkToSymbol } from './link'
 import { parse } from './symbol'
 import { getBotId } from './user'
@@ -17,35 +17,14 @@ export type PinBoard = {
   pollId?: number
 }
 
-/**
- * card head content是以bullet形式儲存，但需要能導出此資料格式
- * 用於讓前端知道有什麼可用的property
- */
-export type CardHeadContentValue = {
-  template: string
-  title: string
-  keywords: string[]
-  tags: string[]
-
-  // links
-  link?: {
-    official?: string
-    yahooFinance?: string
-    sec?: string
-    wiki?: string
-  }
-
-  // pins
-  pinPrice?: true
-}
-
-export type CardHeadContentValueInjected = CardHeadContentValue & {
-  pinBoards: PinBoard[]
-}
-
-export type CardHeadContent = {
-  self: RootBullet
-  value: CardHeadContentValue
+export type CardMeta = {
+  url?: string
+  // template: string
+  title?: string
+  author?: string
+  keywords?: string[]
+  redirects?: string[]
+  duplicates?: string[]
 }
 
 // export type MirrorOperation = BulletOperation
@@ -303,10 +282,8 @@ async function checkDraft(draft: RootBulletDraft): Promise<{
 
   // draft沒有op，不用create，返回
   if (!BulletNode.hasAnyOp(draft)) {
-    // console.log(`${symbol}的draft沒有op，不用create，返回`)
-    // return { cardSymbol: symbol }
     console.error(inspect(draft, { depth: null }))
-    throw new Error('draft沒有op')
+    throw 'draft 中所有的 bullet 皆沒有 op，無需創新 card body'
   }
 
   // 檢查是否有card，沒有的話需要創
@@ -366,10 +343,6 @@ export async function createCardBody(props: {
 }): Promise<[CardBody, CardBodyContent]> {
   const { cardId, root, userId } = props
 
-  // if (self === undefined && mirrors === undefined) {
-  //   throw new Error('self、mirrors需至少要給一個')
-  // }
-
   const body = await getLatestCardBody(cardId)
   if (body === null) {
     throw new Error('Card body not found')
@@ -384,53 +357,23 @@ export async function createCardBody(props: {
   //   throw new Error('Card not allow to have mirrors')
   // }
 
-  const checked = root && (await checkDraft(root))
-  // const checkedMirrors = mirrors && (await Promise.all(mirrors.map(async e => await checkDraft(e))))
-
-  // const bodyContent: CardBodyContent = JSON.parse(body.content)
-  // 若mirror有更新，創mirror body並更新entry，沒有更新的返回原entry
-  // TODO: 目前忽略了將mirror entry被刪除的情況 -> 會直接從entries移除
-  // const nextMirrors: RootBulletChildless[] | undefined =
-  //   checkedMirrors &&
-  //   (
-  //     await Promise.all(
-  //       checkedMirrors.map(async (checked): Promise<RootBulletChildless | undefined> => {
-  //         if (checked.draft === undefined) {
-  //           // 沒有draft，代表雖然有此mirror但沒更新，找current mirror填補，若找不到表示新增了一個symbol，但卻沒有更新，忽略此mirror
-  //           return bodyContent.mirrors?.find(e => e.symbol === checked.cardSymbol)
-  //         }
-  //         if (checked.cardId && checked.draft) {
-  //           const [body, bodyContent] = await _createCardBody({
-  //             cardId: checked.cardId,
-  //             self: checked.draft,
-  //             userId,
-  //           })
-  //           // mirror不需要完全記錄原本的node，因為會依symbol, body id抓原本的bullet
-  //           return {
-  //             id: bodyContent.self.id,
-  //             timestamp: bodyContent.self.timestamp,
-  //             userIds: bodyContent.self.userIds,
-  //             head: bodyContent.self.head,
-  //             root: true,
-  //             mirror: true,
-  //             symbol: bodyContent.self.symbol,
-  //             cardBodyId: body.id,
-  //             children: [],
-  //           }
-  //         }
-  //         return undefined
-  //       }),
-  //     )
-  //   ).filter((e): e is RootBulletChildless => e !== undefined)
-
-  // 更新self
-  return await _createCardBody({
-    cardId: card.id,
-    root: checked.draft,
-    userId,
-  })
+  const pruned = BulletNode.prune(root)
+  console.log(pruned)
+  if (pruned && isRootBulletDraft(pruned)) {
+    const checked = await checkDraft(pruned)
+    return await _createCardBody({
+      cardId: card.id,
+      root: checked.draft,
+      userId,
+    })
+  } else {
+    throw 'Require pruned bullet to be root bulletdraft'
+  }
 }
 
+/**
+ * TODO: latest body 需要有驗證機制，才可以回朔
+ */
 export async function attachLatestHeadBody(card: Card): Promise<
   Card & {
     // head: CardHead
@@ -449,23 +392,31 @@ export async function attachLatestHeadBody(card: Card): Promise<
 /**
  * 僅供內部使用，會載入 template 並創第一個 card body
  */
-async function _createCard(props: {
+async function _createCard({
+  link,
+  symbol,
+  template,
+  templateProps,
+  type,
+  meta,
+}: {
   link?: Link
   symbol: string
   template: CardTemplate
   templateProps: CardTemplateProps
   type: CardType
+  meta: CardMeta
 }): Promise<
-  Card & {
+  Omit<Card, 'meta'> & {
     link: Link | null
-    // head: CardHead
+    meta: CardMeta
     body: CardBody
   }
 > {
-  const { link, symbol, template, templateProps, type } = props
   const card = await prisma.card.create({
     data: {
       link: link && { connect: { id: link.id } },
+      meta: JSON.stringify(meta),
       type,
       symbol,
     },
@@ -478,7 +429,7 @@ async function _createCard(props: {
     userId: await getBotId(),
   })
   // TODO: (pending) 對 root bullet 創 default emojis
-  return { ...card, body }
+  return { ...card, meta, body }
 }
 
 export const templateDict: { [key in CardType]: CardTemplate } = {
@@ -492,9 +443,9 @@ export const templateDict: { [key in CardType]: CardTemplate } = {
  * TODO: 當 symbol 為 url 時，應導向 webpage card
  */
 export async function getOrCreateCardBySymbol(symbol: string): Promise<
-  Card & {
+  Omit<Card, 'meta'> & {
     link: Link | null
-    // head: CardHead
+    meta: CardMeta
     body: CardBody
   }
 > {
@@ -514,11 +465,14 @@ export async function getOrCreateCardBySymbol(symbol: string): Promise<
         title: '',
       },
       type: cardType,
+      meta: {},
     })
   } else {
+    const meta: CardMeta = card.meta ? JSON.parse(card.meta) : {}
     return {
       ...(await attachLatestHeadBody(card)),
       link: card.link,
+      meta,
     }
   }
 }
@@ -528,27 +482,34 @@ export async function getOrCreateCardBySymbol(symbol: string): Promise<
  * 若給予的 url 在資料庫中找不到對應的 link，會 fetch url 並創一個 link
  */
 export async function getOrCreateCardByUrl({ fetcher, url }: { fetcher?: FetchClient; url: string }): Promise<
-  Card & {
+  Omit<Card, 'meta'> & {
     link: Link
-    // head: CardHead
+    meta: CardMeta
     body: CardBody
   }
 > {
   const [link, { fetchResult }] = await getOrCreateLink({ fetcher, url })
   const template = templateDict[CardType.WEBPAGE]
   const symbol = linkToSymbol(link)
-  const card = link.card
-    ? await attachLatestHeadBody(link.card)
-    : await _createCard({
-        link,
-        symbol,
-        template: template,
-        templateProps: {
-          symbol,
-          template: template.name,
-          title: fetchResult?.srcTitle ?? '',
-        },
-        type: CardType.WEBPAGE,
-      })
+  if (link.card) {
+    const card = await attachLatestHeadBody(link.card)
+    const meta: CardMeta = card.meta ? JSON.parse(card.meta) : {}
+    return { ...card, link, meta }
+  }
+  const card = await _createCard({
+    link,
+    symbol,
+    template: template,
+    templateProps: {
+      symbol,
+      template: template.name,
+      title: fetchResult?.srcTitle ?? '',
+    },
+    type: CardType.WEBPAGE,
+    meta: {
+      url: link.url,
+      title: fetchResult?.srcTitle,
+    },
+  })
   return { ...card, link }
 }

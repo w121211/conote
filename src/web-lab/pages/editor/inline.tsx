@@ -59,14 +59,8 @@ const initialValueDemo: LiElement[] = [
       {
         type: 'lc',
         children: [
-          {
-            type: 'lc-head',
-            children: [
-              {
-                text: '::$XX this is [[some test]] ::$XX @someon #hashtag #Hashtag2 @https://developer.mozilla.org',
-              },
-            ],
-          },
+          { type: 'mirror', children: [{ text: '::$AA' }] },
+          { text: 'Hello world' },
         ],
       },
     ],
@@ -77,15 +71,8 @@ const initialValueDemo: LiElement[] = [
       {
         type: 'lc',
         children: [
-          {
-            type: 'lc-head',
-            // body: '__11',
-            children: [
-              { text: '::[[A mirror]] ' },
-              { type: 'label', children: [{ text: '#label' }] },
-            ],
-          },
-          // { type: 'lc-body', children: [{ text: '__11' }] },
+          { text: '::[[A mirror]] ' },
+          { type: 'label', children: [{ text: '#label' }] },
         ],
       },
     ],
@@ -95,10 +82,7 @@ const initialValueDemo: LiElement[] = [
     children: [
       {
         type: 'lc',
-        children: [
-          { type: 'lc-head', body: '__22', children: [{ text: '::$TICKER' }] },
-          // { type: 'lc-body', children: [{ text: '__22' }] },
-        ],
+        children: [{ text: '::$TICKER' }],
       },
       {
         type: 'ul',
@@ -108,10 +92,7 @@ const initialValueDemo: LiElement[] = [
             children: [
               {
                 type: 'lc',
-                children: [
-                  { type: 'lc-head', body: '__33', children: [{ text: '33' }] },
-                  { type: 'lc-body', children: [{ text: '__33' }] },
-                ],
+                children: [{ text: '33' }],
               },
             ],
           },
@@ -120,9 +101,7 @@ const initialValueDemo: LiElement[] = [
             children: [
               {
                 type: 'lc',
-                children: [
-                  { type: 'lc-head', body: '__44', children: [{ text: '44' }] },
-                ],
+                children: [{ text: '44' }],
               },
             ],
           },
@@ -213,56 +192,27 @@ const Ul = (props: RenderElementProps & { element: UlElement }) => {
   )
 }
 
-const CustomElement = (
-  props: RenderElementProps & {
-    oauthorName?: string
-    sourceUrl?: string
-  }
-) => {
-  const { attributes, children, element, oauthorName, sourceUrl } = props
+const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
+  let style: React.CSSProperties = {}
 
-  switch (element.type) {
-    case 'label':
-      return (
-        <Label {...{ attributes, children, element, oauthorName, sourceUrl }} />
-      )
-    case 'mirror':
-      return (
-        <Mirror
-          {...{ attributes, children, element, oauthorName, sourceUrl }}
-        />
-      )
-    // case 'mirror':
-    //   return (
-    //     <Mirror
-    //       {...{ attributes, children, element, oauthorName, sourceUrl }}
-    //     />
-    //   )
+  switch (leaf.type) {
+    case 'url':
+    case 'ticker':
+    case 'topic':
+    case 'mirror-ticker':
+    case 'mirror-topic':
+    case 'hashtag':
+    case 'user': {
+      style = { color: 'brown' }
+      break
+    }
   }
-
-  if (isLcHead(element)) {
-    return (
-      <LcHead {...{ attributes, children, element, oauthorName, sourceUrl }} />
-    )
-  }
-  if (isLcBody(element)) {
-    return (
-      <LcBody {...{ attributes, children, element, oauthorName, sourceUrl }} />
-    )
-  }
-  if (isLc(element)) {
-    return <span {...attributes}>{children}</span>
-  }
-  if (isLi(element)) {
-    return <Li {...{ attributes, children, element }} />
-  }
-  if (isUl(element)) {
-    return <Ul {...{ attributes, children, element }} />
-  }
-  return <span {...attributes}>{children}</span>
+  return (
+    <span {...attributes} style={style}>
+      {children}
+    </span>
+  )
 }
-
-// ------ Main code start ------
 
 function streamToString(stream: TokenStream, ignoreTokenType?: string): string {
   let t = ''
@@ -318,7 +268,6 @@ function parseLcHead(
         const mirrorSymbol = streamToString(token.content)
         return {
           type: 'mirror',
-          mirrorSymbol,
           children: [{ text: mirrorSymbol }],
         }
       }
@@ -348,68 +297,6 @@ function parseLcHead(
   })
   // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
   Transforms.insertNodes(editor, inlines, { at: [...path, 0] })
-}
-
-const LcHead = (
-  props: RenderElementProps & {
-    element: LcHeadElement
-  }
-) => {
-  const { attributes, children, element } = props
-  const editor = useSlateStatic()
-  const focused = useFocused() // 整個editor是否focus
-  const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
-  const readonly = useReadOnly()
-
-  useEffect(() => {
-    // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
-    if ((focused && !selected) || readonly) {
-      const path = ReactEditor.findPath(editor, element)
-      parseLcHead(editor, [element, path])
-      console.log('parseLcHead', path)
-    }
-    if (selected) {
-      const path = ReactEditor.findPath(editor, element)
-      // parseLcHead(editor, [element, path])
-      Transforms.unwrapNodes(editor, {
-        at: path,
-        match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
-      })
-      console.log('unwrapNodes', path)
-    }
-  }, [selected, readonly])
-
-  return (
-    <div {...attributes}>
-      <li>
-        <span>{children}</span>
-      </li>
-
-      <div contentEditable={false} style={{ color: 'green' }}>
-        {!element.isEditingBody && (
-          <span style={{ color: 'red' }}>{element.body}</span>
-        )}
-        {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>} */}
-        {/* {element.op === 'CREATE' && authorSwitcher} */}
-      </div>
-    </div>
-  )
-}
-
-const Mirror = (
-  props: RenderElementProps & {
-    element: MirrorInlineElement
-    oauthorName?: string
-    sourceUrl?: string
-  }
-) => {
-  const { attributes, children, element, oauthorName, sourceUrl } = props
-  const readonly = useReadOnly()
-
-  if (readonly) {
-    return <button {...attributes}>{children}</button>
-  }
-  return <span {...attributes}>{children}</span>
 }
 
 const Label = (props: RenderElementProps & { element: LabelInlineElement }) => {
@@ -448,26 +335,89 @@ const Label = (props: RenderElementProps & { element: LabelInlineElement }) => {
   )
 }
 
-const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
-  let style: React.CSSProperties = {}
-
-  switch (leaf.type) {
-    case 'url':
-    case 'ticker':
-    case 'topic':
-    case 'mirror-ticker':
-    case 'mirror-topic':
-    case 'hashtag':
-    case 'user': {
-      style = { color: 'brown' }
-      break
-    }
-  }
+const Mirror = (
+  props: RenderElementProps & { element: MirrorInlineElement }
+) => {
+  const { attributes, children, element } = props
   return (
-    <span {...attributes} style={style}>
-      {children}
-    </span>
+    <>
+      <button {...attributes}>{children}</button>
+      <div contentEditable={false}>Mirror block</div>
+    </>
   )
+}
+
+const Lc = (
+  props: RenderElementProps & {
+    element: LcElement
+  }
+) => {
+  const { attributes, children, element } = props
+  const editor = useSlateStatic()
+  const focused = useFocused() // 整個editor是否focus
+  const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
+  const readonly = useReadOnly()
+  console.log(element.children)
+
+  useEffect(() => {
+    // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
+    if ((focused && !selected) || readonly) {
+      const path = ReactEditor.findPath(editor, element)
+      // parseLcHead(editor, [element, path])
+      console.log('parseLcHead', path)
+    }
+    if (selected) {
+      const path = ReactEditor.findPath(editor, element)
+      // parseLcHead(editor, [element, path])
+      Transforms.unwrapNodes(editor, {
+        at: path,
+        match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+      })
+      console.log('unwrapNodes', path)
+    }
+  }, [selected, readonly])
+
+  return (
+    <div {...attributes}>
+      <li>
+        <span>{children}</span>
+      </li>
+
+      <div contentEditable={false} style={{ color: 'green' }}>
+        {!element.isEditingBody && (
+          <span style={{ color: 'red' }}>{element.body}</span>
+        )}
+        {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>} */}
+        {/* {element.op === 'CREATE' && authorSwitcher} */}
+      </div>
+    </div>
+  )
+}
+
+const CustomElement = (
+  props: RenderElementProps & {
+    oauthorName?: string
+    sourceUrl?: string
+  }
+) => {
+  const { attributes, children, element, oauthorName, sourceUrl } = props
+
+  switch (element.type) {
+    case 'label':
+      return <Label {...{ attributes, children, element }} />
+    case 'mirror':
+      return <Mirror {...{ attributes, children, element }} />
+    case 'lc':
+      return (
+        <Lc {...{ attributes, children, element, oauthorName, sourceUrl }} />
+      )
+    case 'li':
+      return <Li {...{ attributes, children, element }} />
+    case 'ul':
+      return <Ul {...{ attributes, children, element }} />
+    default:
+      return <span {...attributes}>{children}</span>
+  }
 }
 
 function decorate([node, path]: NodeEntry): Range[] {
@@ -510,7 +460,7 @@ function decorate([node, path]: NodeEntry): Range[] {
   return ranges
 }
 
-const withLabel = (editor: Editor): Editor => {
+const withInline = (editor: Editor): Editor => {
   const { isInline } = editor
 
   editor.isInline = (element) => {
@@ -524,33 +474,24 @@ export const BulletEditor = (props: {
   initialValue?: LiElement[]
   authorName?: string
   sourceUrl?: string
-  withMirror?: boolean
 }): JSX.Element => {
-  const {
-    initialValue = initialValueDemo,
-    authorName,
-    sourceUrl,
-    withMirror: isWithMirror = false,
-  } = props
+  const { initialValue = initialValueDemo, authorName, sourceUrl } = props
 
   function parse(value: LiElement[]) {
     const editor = createEditor()
     editor.children = value
     Transforms.removeNodes(editor, { at: [0] })
-    console.log(editor.children)
   }
   parse(initialValue)
 
   const [value, setValue] = useState<LiElement[]>(initialValue)
   const editor = useMemo(
-    () => withLabel(withHistory(withReact(createEditor()))),
+    () => withInline(withHistory(withReact(createEditor()))),
     []
   )
   const renderElement = useCallback(
     (props: RenderElementProps) => (
-      <CustomElement
-        {...{ ...props, authorName, sourceUrl, withMirror: isWithMirror }}
-      />
+      <CustomElement {...{ ...props, authorName, sourceUrl }} />
     ),
     []
   )

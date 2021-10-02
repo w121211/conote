@@ -451,11 +451,28 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
+  async updateCardMeta(_parent, { symbol, data }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const _card = await prisma.card.update({
+      where: { symbol },
+      data: {
+        // TODO 需要檢查 input
+        meta: JSON.stringify(data),
+      },
+    })
+    const card = await getOrCreateCardBySymbol(symbol)
+    return {
+      ..._toStringId(card),
+      body: { ..._toStringId(card.body) },
+      link: card.link && _toStringId(card.link),
+    }
+  },
+
   async createCardBody(_parent, { cardSymbol, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
     const card = await prisma.card.findUnique({ where: { symbol: cardSymbol } })
     if (card === null) {
-      throw 'Card symbol not found'
+      throw 'Card not found'
     }
     const [body] = await createCardBody({
       cardId: card.id,

@@ -8,10 +8,8 @@ import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 import NavPath from '../../components/nav-path/nav-path'
-import { Poll, useCreateVoteMutation } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/symbol.module.scss'
-import Popover from '../../components/popover/popover'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -89,7 +87,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   // const [navs, setNavs] = useState<Nav[]>() // editor route
   const [readonly, setReadonly] = useState(false)
   const [location, setLocation] = useState<NavLocation>()
-  const { data, setLocalValue, submitValue, dropValue } = useLocalValue({ location })
+  const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [authorName, setAuthorName] = useState<string | undefined>(
     data?.selfCard.link?.authorName?.split(':', 1)[0] ?? undefined,
   )
@@ -132,13 +130,12 @@ const CardSymbolPage = (): JSX.Element | null => {
     if (data && location) {
       const { selfCard, mirror, openedLi, value } = data
       const parsedValue = parseChildren(value)
-      // const parsedValue = value
       return (
         <BulletEditor
           initialValue={parsedValue}
           location={location}
           onValueChange={value => {
-            setLocalValue(value)
+            setValue(value)
           }}
           readOnly={readonly}
           selfCard={selfCard}
@@ -181,7 +178,7 @@ const CardSymbolPage = (): JSX.Element | null => {
             })
           }}
         >
-          Submit
+          Submit {isValueModified ? '*' : ''}
         </button>
 
         <button

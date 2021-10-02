@@ -238,7 +238,7 @@ export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
 }
 
 export function withList(editor: Editor): Editor {
-  const { deleteBackward, insertBreak, insertText, normalizeNode } = editor
+  const { deleteBackward, insertBreak, insertData, insertText, normalizeNode } = editor
 
   /**
    * - 此行freeze，不動作
@@ -405,9 +405,24 @@ export function withList(editor: Editor): Editor {
         return
       }
     }
-
     console.log('original insertBreak')
     insertBreak()
+  }
+
+  editor.insertData = data => {
+    // @see https://github.com/ianstormtaylor/slate/blob/c1433f56cfe13feb826264989bb4f68a0eefab62/packages/slate-react/src/plugin/with-react.ts
+    const text = data.getData('text/plain')
+    if (text) {
+      const lines = text.trim().split(/\r\n|\r|\n/)
+      for (let i = 0; i < lines.length; i++) {
+        editor.insertText(lines[i])
+        if (i < lines.length - 1) {
+          editor.insertBreak()
+        }
+      }
+      return
+    }
+    insertData(data)
   }
 
   editor.insertText = (...args) => {
