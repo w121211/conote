@@ -134,7 +134,7 @@ const BulletPanel = ({
             if (e.sourceUrl)
               return (
                 <div className={classes.panelElement} key={i}>
-                  <a className="ui" href={e.sourceUrl}>
+                  <a className="ui" href={e.sourceUrl} target="_blank" rel="noreferrer">
                     <span className={classes.panelIcon}>{e.icon}</span>
                     {e.text}
                   </a>

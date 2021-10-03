@@ -138,7 +138,7 @@ const AuthorPollForm = ({
   const [check, setChecked] = useState<boolean[]>(Array(3).fill(false))
   const [myVote, setMyVote] = useState<Vote>()
   const [pollCount, setPollCount] = useState<number[] | undefined>(pollData?.poll.count.nVotes)
-
+  console.log('authorPoll')
   useEffect(() => {
     if (myVotesData) {
       setMyVote(myVotesData?.myVotes.find(e => e.pollId.toString() === pollId))

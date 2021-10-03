@@ -309,7 +309,9 @@ const PollForm = ({
 
             {/* <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." /> */}
           </div>
-          <button>送出</button>
+          <button className="primary" disabled={myVote !== undefined}>
+            {myVote ? '已投票' : '送出'}
+          </button>
         </form>
       </div>
     </FormProvider>

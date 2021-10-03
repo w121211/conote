@@ -8,8 +8,12 @@ import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 import NavPath from '../../components/nav-path/nav-path'
+import { Poll, useCreateVoteMutation, useMeQuery } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/symbol.module.scss'
+import Popover from '../../components/popover/popover'
+import { useUser } from '@auth0/nextjs-auth0'
+import Popup from '../../components/popup/popup'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -85,29 +89,41 @@ export const AuthorContext = createContext({ author: '' as string | undefined })
 const CardSymbolPage = (): JSX.Element | null => {
   const router = useRouter()
   // const [navs, setNavs] = useState<Nav[]>() // editor route
-  const [readonly, setReadonly] = useState(false)
+  const [readonly, setReadonly] = useState(true)
   const [location, setLocation] = useState<NavLocation>()
-  const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
-  const [authorName, setAuthorName] = useState<string | undefined>(
-    data?.selfCard.link?.authorName?.split(':', 1)[0] ?? undefined,
-  )
-  const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
+  const { data, setLocalValue, submitValue, dropValue } = useLocalValue({ location })
+  const [authorName, setAuthorName] = useState<string | undefined>((router.query.a as string) ?? undefined)
+  // const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
+  const [disableSubmit, setDisableSubmit] = useState(true)
+  const { data: meData, loading: meLoading } = useMeQuery()
+  const { user, error, isLoading } = useUser()
+  const [showLoginPopup, setShowLoginPopup] = useState(false)
 
-  if (
-    data?.selfCard.link?.authorName?.split(':', 1)[0] !== undefined &&
-    data?.selfCard.link?.authorName?.split(':', 1)[0] !== prevAuthor
-  ) {
-    setAuthorName(data?.selfCard.link?.authorName?.split(':', 1)[0])
-    setPrevAuthor(data?.selfCard.link?.authorName?.split(':', 1)[0])
-  }
+  // if (
+  //   data?.selfCard.link?.authorName?.split(':', 1)[0] !== undefined &&
+  //   data?.selfCard.link?.authorName?.split(':', 1)[0] !== prevAuthor
+  // ) {
+  //   setAuthorName(data?.selfCard.link?.authorName?.split(':', 1)[0])
+  //   setPrevAuthor(data?.selfCard.link?.authorName?.split(':', 1)[0])
+  // }
 
   useEffect(() => {
     if (router.isReady) {
       const location = getNavLocation(router.query)
       setLocation(location)
       // console.log(location)
+      if (router.query.a) {
+        setAuthorName(router.query.a as string)
+      }
     }
   }, [router])
+
+  useEffect(() => {
+    if (meData || user) {
+      // console.log(meData, user)
+      setReadonly(false)
+    }
+  }, [meData, user])
 
   // useEffect(() => {
   //   if (data && location) {
@@ -130,12 +146,15 @@ const CardSymbolPage = (): JSX.Element | null => {
     if (data && location) {
       const { selfCard, mirror, openedLi, value } = data
       const parsedValue = parseChildren(value)
+      // const parsedValue = value
+
       return (
         <BulletEditor
           initialValue={parsedValue}
           location={location}
           onValueChange={value => {
-            setValue(value)
+            setLocalValue(value)
+            setDisableSubmit(false)
           }}
           readOnly={readonly}
           selfCard={selfCard}
@@ -143,53 +162,72 @@ const CardSymbolPage = (): JSX.Element | null => {
       )
     }
     return null
-  }, [data])
+  }, [data, readonly])
 
   if (data === undefined || location === undefined) {
     return null
   }
   return (
-    <Layout
-      navPath={
-        <NavPath
-          path={navs}
-          mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
-        />
-      }
-    >
+    <Layout>
       <div style={{ marginBottom: '3em' }}>
-        <button
-          className="noBg"
-          onClick={() => {
-            setReadonly(!readonly)
-          }}
-        >
-          {readonly ? '編輯' : '鎖定'}
-        </button>
+        <div>
+          <button
+            className="noBg"
+            onClick={() => {
+              if (meData || user) {
+                setReadonly(!readonly)
+              } else {
+                setShowLoginPopup(true)
+              }
+            }}
+          >
+            {readonly && (meData || user) ? '編輯' : '鎖定'}
+          </button>
+          {showLoginPopup && (
+            <Popup
+              visible={showLoginPopup}
+              hideBoard={() => {
+                setShowLoginPopup(false)
+              }}
+              buttons={
+                <button className="primary" onClick={() => setShowLoginPopup(false)}>
+                  確定
+                </button>
+              }
+            >
+              請先登入！
+            </Popup>
+          )}
 
-        <button
-          className="primary"
-          onClick={() => {
-            submitValue({
-              onFinish: () => {
-                // dropValue()
-                router.reload()
-              },
-            })
-          }}
-        >
-          Submit {isValueModified ? '*' : ''}
-        </button>
+          <button
+            className="primary"
+            onClick={() => {
+              submitValue({
+                onFinish: () => {
+                  // dropValue()
+                  // router.reload()
+                },
+              })
+            }}
+            disabled={disableSubmit}
+          >
+            Submit
+          </button>
 
-        <button
-          onClick={() => {
-            dropValue()
-            router.reload()
-          }}
-        >
-          {'Drop'}
-        </button>
-        {/* {location.author && (
+          <button
+            onClick={() => {
+              dropValue()
+              router.reload()
+            }}
+          >
+            {'Drop'}
+          </button>
+          {data.selfCard.link?.url && (
+            <a href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
+              來源連結
+            </a>
+          )}
+          {/* {location.author && (
           <button
             onClick={() => {
               setAuthorName(prev => {
@@ -205,7 +243,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           </button>
         )} */}
 
-        {/* {mirror && (
+          {/* {mirror && (
           <span>
             <Link href={locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>
               <a>Home</a>
@@ -214,17 +252,19 @@ const CardSymbolPage = (): JSX.Element | null => {
           </span>
         )} */}
 
-        {/* {/* {navs &&
+          {/* {/* {navs &&
           navs.map((e, i) => (
             <Link href={locationToUrl({ ...location, openedLiPath: e.path })} key={i}>
               <a>{e.text}</a>
             </Link>
           ))} */}
-
-        <div>
+          <NavPath
+            path={navs}
+            mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
+          />
           {/* {data.selfCard.link?.authorName && <span>@{data.selfCard.link?.authorName}</span>} */}
-          {data.selfCard.link?.url && <div>@{data.selfCard.link?.url}</div>}
-          {data.selfCard.link?.authorName && (
+
+          {router.query.a && (
             <button
               className="transparent"
               onClick={() => {
@@ -232,17 +272,18 @@ const CardSymbolPage = (): JSX.Element | null => {
                   if (prev) {
                     return undefined
                   } else {
-                    return data.selfCard.link?.authorName?.split(':', 1)[0] ?? undefined
+                    return (router.query.a as string) ?? undefined
                   }
                 })
               }}
             >
-              {data.selfCard.link?.authorName?.split(':', 1)[0]}
+              {router.query.a}
 
               <div className={`${classes.toggle} ${authorName && classes.toggleClicked}`}></div>
             </button>
           )}
           <h3>{Node.string(data.openedLi.children[0])}</h3>
+
           {/* {console.log(data.openedLi)} */}
         </div>
         <AuthorContext.Provider value={{ author: authorName }}>

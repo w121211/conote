@@ -23,6 +23,8 @@ export interface NavPathProps {
   mirrorHomeUrl?: UrlObject
 }
 
+const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
+
 const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element => {
   const [myPath, setMyPath] = useState<(Nav | string)[] | undefined>(path)
   const [hiddenPath, setHiddenPath] = useState<(Nav | string)[]>([])
@@ -40,13 +42,13 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
     setPrevPath(path)
   }
 
+  // useEffect(() => {
+  // }, [])
+
   useEffect(() => {
     if (window) {
       setViewPortWidth(window.innerWidth)
     }
-  }, [])
-
-  useEffect(() => {
     window.addEventListener('resize', () => {
       setViewPortWidth(window.innerWidth)
     })
@@ -84,19 +86,38 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
           const newCopyArr: (Nav | string)[] = [...path]
           newCopyArr.splice(1, indx - 1, '...')
 
+          newCopyArr.forEach(e => {
+            if (typeof e !== 'string') {
+              e.text.replace(rePoll, '')
+            }
+          })
+
           setHiddenPath(filterCopyArr)
           setMyPath(newCopyArr)
         } else {
-          setMyPath([...path])
+          const newPath = JSON.parse(JSON.stringify(path)) as Nav[]
+          newPath.forEach(e => {
+            if (typeof e !== 'string') {
+              e.text = e.text.replace(rePoll, '').trimEnd()
+            }
+          })
+          setMyPath(newPath)
         }
       } else {
-        setMyPath([...path])
+        const newPath = JSON.parse(JSON.stringify(path)) as Nav[]
+        newPath.forEach(e => {
+          if (typeof e !== 'string') {
+            //去掉 !((poll))
+            e.text = e.text.replace(rePoll, '').trimEnd()
+          }
+        })
+        setMyPath(newPath)
       }
     }
   }, [viewPortWidth, path])
 
   return (
-    <ul className={classes.pathUl} ref={pathRef} style={{ width: `${viewPortWidth - 62}px` }}>
+    <ul className={classes.pathUl} ref={pathRef} style={{ width: `calc(${viewPortWidth}px - 40vw)` }}>
       {mirrorHomeUrl && (
         <li>
           <span>

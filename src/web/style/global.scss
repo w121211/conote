@@ -156,6 +156,12 @@ button {
       background: $secondaryHover;
       border-color: $secondaryHover;
     }
+    &:disabled {
+      background: $gray;
+      color: $gray-text;
+      border-color: $gray;
+      cursor: default;
+    }
   }
   &.noBg {
     background: none;

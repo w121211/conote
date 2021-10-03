@@ -36,7 +36,7 @@ function LatestCards(): JSX.Element | null {
           <div key={i} className={classes.latestCardsListText}>
             <span className={classes.latestCardsListIndex}>{i + 1} </span>
             {/* <BulletSvg className={classes.bulletSvg} /> */}
-            {console.log(e)}
+            {/* {console.log(e)} */}
             <Link href={`/card/${encodeURI(e.symbol)}`}>
               {/* <a>{e.link.url.substring(0, 50).replace('//', '').replace('[[', '').replace(']]', '')}</a> */}
               <a>
@@ -81,6 +81,7 @@ function HomePage(): JSX.Element {
   const router = useRouter()
   const { user, error, isLoading } = useUser()
   const { data, loading } = useMeQuery()
+  const [switchList, setSwitchList] = useState('new')
   // console.log(data)
   if (loading || isLoading) return <h1>Loading</h1>
 
@@ -102,41 +103,93 @@ function HomePage(): JSX.Element {
           <>
             <div className={classes.inner}>
               <div className={classes.new}>
-                <h3>最新</h3>
+                <div className={classes.newHotList}>
+                  <h3
+                    className={`${switchList === 'new' && classes.clickedTab}`}
+                    onClick={() => {
+                      setSwitchList('new')
+                    }}
+                  >
+                    最新
+                  </h3>
+                  <h3
+                    className={`${switchList === 'hot' && classes.clickedTab}`}
+                    onClick={() => {
+                      setSwitchList('hot')
+                    }}
+                  >
+                    熱門
+                  </h3>
+                </div>
                 <div className={classes.latestCards}>
-                  <LatestCards />
+                  {switchList === 'new' && <LatestCards />}
+                  {switchList === 'hot' && <LatestCards />}
                 </div>
               </div>
               <div className={classes.hot}>
-                <h3>熱門</h3>
+                <h3>Battle</h3>
                 <div className={classes.latestCards}>
-                  <LatestCards />
+                  <div className={classes.latestCardsListText}>
+                    <div>
+                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
+                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
+                    </div>
+                  </div>
+                  <div className={classes.latestCardsListText}>
+                    <div>
+                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
+                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
+                    </div>
+                  </div>
+                  <div className={classes.latestCardsListText}>
+                    <div>
+                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
+                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
+                    </div>
+                  </div>
+                  <div className={classes.latestCardsListText}>
+                    <div>
+                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
+                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
+                    </div>
+                  </div>
+                  <div className={classes.latestCardsListText}>
+                    <div>
+                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
+                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
+                    </div>
+                  </div>
+                  <div className={classes.latestCardsListText}>
+                    <div>
+                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
+                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
+                    </div>
+                  </div>
+                  <div className={classes.latestCardsListText}>
+                    <div>
+                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
+                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
+                    </div>
+                  </div>
+                  <div className={classes.latestCardsListText}>
+                    <div>
+                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
+                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
+                    </div>
+                  </div>
+
+                  {/* <LatestCards /> */}
                 </div>
               </div>
-            </div>
-            <div className={`${classes.inner} ${classes.battle}`}>
-              <div className={classes.battleInner}>
-                <h1>Battle</h1>
-                <div className={classes.battleBlockWrapper}>
-                  <div className={classes.battleBlock}>
-                    <h4>美航空公司比較 $AAL vs $DAL vs $LUV</h4>
-                    <div>#pin #up(30) #down(1) #new #trending </div>
-                  </div>
-                  <div className={classes.battleBlock}>
-                    <h4>$BA_vs_[[Airbus]]</h4>
-                    <div>#pin #up(30) #down(1) #new #trending*</div>
-                  </div>
-                  <div className={classes.battleBlock}>
-                    <h4>美航空公司比較 $AAL vs $DAL vs $LUV </h4>
-                    <div>#pin #up(30) #down(1) #new #trending </div>
-                  </div>
-                  <div className={classes.battleBlock}>
-                    <h4>美航空公司比較 $AAL vs $DAL vs $LUV </h4>
-                    <div>#pin #up(30) #down(1) #new #trending </div>
-                  </div>
-                  <div className={classes.battleBlock}>
-                    <h4>美航空公司比較 $AAL vs $DAL vs $LUV </h4>
-                    <div>#pin #up(30) #down(1) #new #trending </div>
+              <div className={classes.tickerList}>
+                <h3>自選股</h3>
+                <div className={classes.latestCards}>
+                  <div className={classes.latestCardsListText}>
+                    <div className={classes.tickerElement}>
+                      <div className={classes.lcElementSymbol}>$BA</div>
+
+                      <span>221.39 +0.29 (+0.13%)</span>
+                    </div>
                   </div>
                 </div>
               </div>

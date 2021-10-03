@@ -122,7 +122,9 @@ const AuthorPollPage = ({
           <div className={classes.title}>{data.poll.choices}</div>
 
           {/* tabs底線 */}
-          {/* <div className={classes.underLine}> */}
+          <div className={classes.underLine} />
+          <h5>投票身份</h5>
+          <span>{author ? author : '我'}</span>
           {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
           {/* </div> */}
           {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}

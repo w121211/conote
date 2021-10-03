@@ -296,6 +296,7 @@ export const useLocalValue = ({
               mirrorSymbols.push(element.mirrorSymbol)
             }
           }
+          // Serializer.toRootBulletDraft(rootLi)
           promises.push(
             client.mutate<CreateCardBodyMutation, CreateCardBodyMutationVariables>({
               mutation: CreateCardBodyDocument,
