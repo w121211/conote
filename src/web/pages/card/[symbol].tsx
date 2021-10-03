@@ -89,7 +89,7 @@ export const Context = createContext({
   author: '' as string | undefined,
   login: false,
   showLoginPopup: (b: boolean) => {
-    ;('')
+    '_'
   },
 })
 
@@ -98,7 +98,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   // const [navs, setNavs] = useState<Nav[]>() // editor route
   const [readonly, setReadonly] = useState(true)
   const [location, setLocation] = useState<NavLocation>()
-  const { data, setLocalValue, submitValue, dropValue } = useLocalValue({ location })
+
   const [authorName, setAuthorName] = useState<string | undefined>((router.query.a as string) ?? undefined)
   // const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
   const [disableSubmit, setDisableSubmit] = useState(true)
@@ -107,9 +107,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [showLoginPopup, setShowLoginPopup] = useState(false)
   const [showHeaderForm, setShowHeaderForm] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
-  const [authorName, setAuthorName] = useState<string | undefined>(
-    data?.selfCard.link?.authorName?.split(':', 1)[0] ?? undefined,
-  )
+
   const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
 
   // if (
@@ -164,8 +162,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           initialValue={parsedValue}
           location={location}
           onValueChange={value => {
-            setLocalValue(value)
-            setDisableSubmit(false)
+            // setDisableSubmit(false)
             setValue(value)
           }}
           readOnly={readonly}
@@ -219,15 +216,16 @@ const CardSymbolPage = (): JSX.Element | null => {
               submitValue({
                 onFinish: () => {
                   // dropValue()
-                  // router.reload()
+                  router.reload()
                 },
               })
             }}
-            disabled={disableSubmit}
+            disabled={!isValueModified}
           >
             Submit
+            {/* {console.log(isValueModified)} */}
           </button>
-        <button
+          {/* <button
           className="primary"
           onClick={() => {
             submitValue({
@@ -239,7 +237,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           }}
         >
           Submit {isValueModified ? '*' : ''}
-        </button>
+        </button> */}
 
           <button
             onClick={() => {
@@ -310,24 +308,50 @@ const CardSymbolPage = (): JSX.Element | null => {
             </button>
           )}
           <h3>{Node.string(data.openedLi.children[0])}</h3>
-          <button
-            className="secondary"
-            onClick={() => {
-              setShowHeaderForm(true)
-            }}
-          >
-            詳細資訊
-          </button>
-          {
+          {data.selfCard.meta && (
+            <button
+              className="secondary"
+              onClick={() => {
+                setShowHeaderForm(true)
+              }}
+            >
+              詳細資訊
+            </button>
+          )}
+          {showHeaderForm && (
             <Popover
               visible={showHeaderForm}
               hideBoard={() => {
                 setShowHeaderForm(false)
               }}
             >
-              <HeaderForm initialValue={{ authorName: `${authorName ?? ''}`, props: [{ title: '', value: '' }] }} />
+              {data.selfCard.meta ? (
+                <HeaderForm
+                  symbol={router.query.symbol as string}
+                  initialValue={{
+                    author: data.selfCard.meta.author,
+                    title: data.selfCard.meta.title,
+                    url: data.selfCard.meta.url,
+                    keywords: data.selfCard.meta.keywords,
+                    redirects: data.selfCard.meta.redirects,
+                    duplicates: data.selfCard.meta.duplicates,
+                  }}
+                />
+              ) : (
+                <HeaderForm
+                  symbol={router.query.symbol as string}
+                  initialValue={{
+                    author: data.selfCard.link?.authorName,
+                    title: Node.string(data.openedLi.children[0]),
+                    url: data.selfCard.link?.url,
+                    keywords: [''],
+                    redirects: [''],
+                    duplicates: [''],
+                  }}
+                />
+              )}
             </Popover>
-          }
+          )}
           {/* {console.log(data.openedLi)} */}
         </div>
         <Context.Provider
