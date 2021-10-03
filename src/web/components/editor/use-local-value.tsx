@@ -249,26 +249,30 @@ export const useLocalValue = ({
   location: NavLocation | undefined
 }): {
   data?: LocalValueData
-  isReady?: boolean
-  setLocalValue: (value: LiElement[]) => void
-  submitValue: (props: { onFinish?: () => void }) => void // 將 value 發送至後端（搭配 createCardBody() )
+  isValueModified: boolean
   dropValue: () => void // 將 value 從 local 刪除
+  setValue: (value: LiElement[]) => void
+  submitValue: (props: { onFinish?: () => void }) => void // 將 value 發送至後端（搭配 createCardBody() )
 } => {
   // console.log('useLocalValue', location)
   const client = useApolloClient()
   const [data, setData] = useState<LocalValueData | undefined>()
+  const [isValueModified, setIsValueModified] = useState(false)
 
-  const setLocalValue = useCallback(
+  const setValue = useCallback(
     (value: LiElement[]) => {
       if (data) {
-        // console.log('setLocalValue', value)
         const { openedLi, self, mirror } = data
         openedLi.children = [openedLi.children[0], { type: 'ul', children: value }] // shallow copy
         const [symbol, rootLi] = mirror ? [mirror.symbol, mirror.rootLi] : [self.symbol, self.rootLi] // 若目前有 mirror（等同於 location 指向 mirror）則存入 mirror
         store.setRootLi(symbol, rootLi) // TODO: 每次 input 都需要轉換 string <-> json，相當耗時
+
+        if (!isValueModified) {
+          setIsValueModified(true)
+        }
       }
     },
-    [data],
+    [data, isValueModified],
   )
 
   const dropValue = useCallback(() => {
@@ -316,7 +320,6 @@ export const useLocalValue = ({
           store.clear() // 清除 local storage
 
           // TODO: 更新 apollo cache
-
           // const [createCardBody] = useCreateCardBodyMutation({
           //   update: (cache, { data }) => {
           //     // 更新 apollo cache
@@ -394,7 +397,8 @@ export const useLocalValue = ({
 
   return {
     data,
-    setLocalValue,
+    isValueModified,
+    setValue,
     submitValue,
     dropValue,
   }

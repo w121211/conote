@@ -1,4 +1,4 @@
-import { Descendant, BaseEditor, BaseRange, Node } from 'slate'
+import { BaseEditor, BaseRange } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
 import { BulletDraft, RootBullet } from '../../lib/bullet/types'
@@ -44,8 +44,6 @@ export type LabelInlineElement = {
 export type MirrorInlineElement = {
   type: 'mirror'
   children: CustomText[]
-
-  mirrorSymbol: string
 }
 
 export type PopupInlineElement = {
@@ -60,9 +58,6 @@ export type LcBodyElement = {
   children: CustomText[]
 }
 
-/**
- * li的content，實際文字輸入、操作的element，所以將bullet properties集中在此
- */
 export type LcHeadElement = Omit<BulletDraft, 'head' | 'children'> & {
   type: 'lc-head'
   children: (
@@ -95,9 +90,37 @@ export type LcHeadElement = Omit<BulletDraft, 'head' | 'children'> & {
   newSymbol?: true // 找不到symbol，視為創新card
 }
 
-export type LcElement = {
-  type: 'lc'
+export type LcHeadBodyElement = {
+  type: 'lc-head-body'
   children: [LcHeadElement, LcBodyElement?]
+}
+
+export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
+  type: 'lc'
+  children: (CustomText | LabelInlineElement | MirrorInlineElement)[]
+
+  body?: string
+  editingBody?: true
+
+  // asAuthor?: true // 若沒有的話視為self author
+  // banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
+  // banDeleteBackward?: true
+  // banDeleteForward?: true
+  // banInsertBreak?: true
+  // insertBreakAsIndent?: true
+
+  // rootBullet?: Bullet // query card 取得的 body bullet root，保持靜態不修改
+
+  // comments?: CommentInput[]
+  // comment?: CommentInput
+
+  // 新增mirror時需要先暫時存放
+  // root?: true
+  // mirror?: true
+  // symbol?: string
+  // newSymbol?: true // 找不到symbol，視為創新card
+
+  rootBulletDraft?: RootBulletDraft // 只有 root 會存 root bullet，用此幫助 serialize
 }
 
 /**

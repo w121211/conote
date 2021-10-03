@@ -1,6 +1,14 @@
-/* eslint-disable no-console */
 import assert from 'assert'
-import { Editor, Transforms, Range, Element, Node, Path, Text, NodeEntry } from 'slate'
+import {
+  Editor,
+  Transforms,
+  Range,
+  Element,
+  Node,
+  Path,
+  Text,
+  NodeEntry,
+} from 'slate'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 
 export function isUl(node: Node): node is UlElement {
@@ -32,15 +40,21 @@ export function ulPath(liPath: Path): Path {
   return [...liPath, 1]
 }
 
-export function insertNextUl(editor: Editor, entry: NodeEntry<LiElement>, root?: true): void {
+export function insertNextUl(
+  editor: Editor,
+  entry: NodeEntry<LiElement>,
+  root?: true
+): void {
   const insertPath = Path.next(Path.parent(entry[1]))
   Transforms.insertNodes<UlElement>(
     editor,
     {
       type: 'ul',
-      children: [{ type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] }],
+      children: [
+        { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
+      ],
     },
-    { at: insertPath },
+    { at: insertPath }
   )
   Transforms.select(editor, [...insertPath, 0, 0]) // 移動cursor至新的位置
 }
@@ -62,13 +76,16 @@ function removePrevUl(editor: Editor, path: Path) {
   Transforms.collapse(editor, { edge: 'end' })
 }
 
-export function insertNextLi(editor: Editor, entry: NodeEntry<LiElement>): void {
+export function insertNextLi(
+  editor: Editor,
+  entry: NodeEntry<LiElement>
+): void {
   console.log('insertNextLi')
   const [, path] = entry
   Transforms.insertNodes<LiElement>(
     editor,
     { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
-    { at: Path.next(path) },
+    { at: Path.next(path) }
   )
   Transforms.move(editor)
 }
@@ -78,7 +95,7 @@ function insertPrevLi(editor: Editor, entry: NodeEntry<LiElement>) {
   Transforms.insertNodes<LiElement>(
     editor,
     { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
-    { at: path },
+    { at: path }
   )
   // Transforms.move(editor)
 }
@@ -91,16 +108,18 @@ function insertNextIndentLi(editor: Editor, entry: NodeEntry<LiElement>) {
       editor,
       {
         type: 'ul',
-        children: [{ type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] }],
+        children: [
+          { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
+        ],
       },
-      { at: [...ulPath(path)] },
+      { at: [...ulPath(path)] }
     )
   } else {
     // 有子ul，插入至第1個
     Transforms.insertNodes<LiElement>(
       editor,
       { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
-      { at: [...ulPath(path), 0] },
+      { at: [...ulPath(path), 0] }
     )
   }
   Transforms.move(editor)
@@ -132,7 +151,11 @@ export function indent(editor: Editor, entry: NodeEntry<LiElement>): void {
   } else {
     // prev沒有ul，創一個，然後搬運
     Editor.withoutNormalizing(editor, () => {
-      Transforms.insertNodes<UlElement>(editor, { type: 'ul', children: [] }, { at: ulPath(prevPath) })
+      Transforms.insertNodes<UlElement>(
+        editor,
+        { type: 'ul', children: [] },
+        { at: ulPath(prevPath) }
+      )
       Transforms.moveNodes(editor, {
         at: path,
         to: [...ulPath(prevPath), 0],
@@ -178,7 +201,7 @@ export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
     // 非tab、enter，略過
     if (!['Tab', 'Enter'].includes(event.key)) return
 
-    const li = Editor.above<LiElement>(editor, { match: n => isLi(n) })
+    const li = Editor.above<LiElement>(editor, { match: (n) => isLi(n) })
 
     if (li) {
       const [, path] = li
@@ -238,7 +261,8 @@ export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
 }
 
 export function withList(editor: Editor): Editor {
-  const { deleteBackward, insertBreak, insertData, insertText, normalizeNode } = editor
+  const { deleteBackward, insertBreak, insertData, insertText, normalizeNode } =
+    editor
 
   /**
    * - 此行freeze，不動作
@@ -260,7 +284,7 @@ export function withList(editor: Editor): Editor {
 
     // TODO: 還未考慮一次刪除整段的情況
     if (selection && Range.isCollapsed(selection)) {
-      const liEntry = Editor.above<LiElement>(editor, { match: n => isLi(n) })
+      const liEntry = Editor.above<LiElement>(editor, { match: (n) => isLi(n) })
 
       if (liEntry) {
         const [li, liPath] = liEntry
@@ -299,7 +323,10 @@ export function withList(editor: Editor): Editor {
               // 此行有子層，與前行合併，並將此行子層移至前行子層
               Editor.withoutNormalizing(editor, () => {
                 Transforms.delete(editor, { unit, reverse: true })
-                Transforms.moveNodes(editor, { at: lcPath(liPath), to: ulPath(prevLiPath) })
+                Transforms.moveNodes(editor, {
+                  at: lcPath(liPath),
+                  to: ulPath(prevLiPath),
+                })
                 Transforms.removeNodes(editor, { at: liPath })
               })
               return
@@ -334,7 +361,7 @@ export function withList(editor: Editor): Editor {
     const { selection } = editor
 
     if (selection) {
-      const li = Editor.above<LiElement>(editor, { match: n => isLi(n) })
+      const li = Editor.above<LiElement>(editor, { match: (n) => isLi(n) })
 
       if (li) {
         const [node, path] = li
@@ -385,7 +412,7 @@ export function withList(editor: Editor): Editor {
         const insertAt = Path.next(path)
         Transforms.splitNodes(editor, {
           always: true,
-          match: n => isLi(n),
+          match: (n) => isLi(n),
           // at: Path.parent(li[1]),
           // match: (n, p) => {
           //   console.log(n, p)
@@ -400,16 +427,16 @@ export function withList(editor: Editor): Editor {
             error: undefined,
             // op: 'CREATE',
           },
-          { at: lcPath(insertAt) },
+          { at: lcPath(insertAt) }
         )
         return
       }
     }
-    console.log('original insertBreak')
+    // console.log('original insertBreak')
     insertBreak()
   }
 
-  editor.insertData = data => {
+  editor.insertData = (data) => {
     // @see https://github.com/ianstormtaylor/slate/blob/c1433f56cfe13feb826264989bb4f68a0eefab62/packages/slate-react/src/plugin/with-react.ts
     const text = data.getData('text/plain')
     if (text) {
@@ -422,15 +449,17 @@ export function withList(editor: Editor): Editor {
       }
       return
     }
+
     insertData(data)
   }
 
   editor.insertText = (...args) => {
-    const { selection } = editor
+    console.log(...args)
 
+    const { selection } = editor
     if (selection) {
       const lc = Editor.above<LcElement>(editor, {
-        match: n => isLc(n),
+        match: (n) => isLc(n),
       })
       // lc freeze，不動作
       if (lc && lc[0].freeze) {
@@ -470,14 +499,15 @@ export function withList(editor: Editor): Editor {
 
     if (isLi(node)) {
       // console.log(editor.children)
-      // console.log(node)
+      console.log(node)
 
       // 檢查li只能有lc, ul?
       assert(node.children.length <= 2)
       const [lc, ul] = node.children
       assert(isLc(lc))
-      if (ul) assert(isUl(ul))
-
+      if (ul) {
+        assert(isUl(ul))
+      }
       // 只有第0層的li是root（lv0=ul, lv1=li）
       // if (path.length === 1 && node.children[0].root === undefined) {
       //   Transforms.setNodes(editor, { root: true }, { at: lcPath(path) })

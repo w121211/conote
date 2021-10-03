@@ -77,22 +77,6 @@ export class BulletNode {
   }
 
   /**
-   * （Recursive）若node的head為空且沒有children，移除，若仍有children @throws error
-   */
-  public static removeEmptryNode(node: BulletDraft): BulletDraft | null {
-    if (node.head.length === 0) {
-      if (node.children.length > 0) {
-        throw new Error('node沒有head，但有children，無法移除')
-      }
-      return null
-    }
-    return {
-      ...node,
-      children: node.children.map(e => BulletNode.removeEmptryNode(e)).filter((e): e is BulletDraft => e !== null),
-    }
-  }
-
-  /**
    * Search in a bullet tree and return the first found
    */
   public static find(
@@ -150,6 +134,38 @@ export class BulletNode {
       setter(e)
     }
     return _node
+  }
+
+  /**
+   * 移除空的 leaf-node，若仍有 children @throws error
+   */
+  public static prune(node: BulletDraft): BulletDraft | null {
+    if (node.head.length === 0) {
+      if (node.children.length > 0) {
+        throw new Error('node沒有head，但有children，無法移除')
+      }
+      return null
+    }
+    return {
+      ...node,
+      children: node.children.map(e => BulletNode.prune(e)).filter((e): e is BulletDraft => e !== null),
+    }
+  }
+
+  /**
+   * 依照 matcher 找對應的 nodes
+   */
+  public static filter({ node, matcher }: { node: Bullet | BulletDraft; matcher: Matcher }): BulletDraft | null {
+    if (node.head.length === 0) {
+      if (node.children.length > 0) {
+        throw new Error('node沒有head，但有children，無法移除')
+      }
+      return null
+    }
+    return {
+      ...node,
+      children: node.children.map(e => BulletNode.prune(e)).filter((e): e is BulletDraft => e !== null),
+    }
   }
 }
 

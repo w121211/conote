@@ -19,7 +19,7 @@ export function withOperation(editor: Editor): Editor {
       let op: BulletOperation | undefined
       const input = Node.string(node)
 
-      // CREATE: 沒有id、有head input
+      // CREATE: 沒有 id、有 input
       if (node.id === undefined && input.length > 0) {
         op = 'CREATE'
       }

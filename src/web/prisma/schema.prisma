@@ -213,29 +213,13 @@ model Bullet {
   hashtags  Hashtag[]
 }
 
-// model CardHead {
-//   id        Int       @id @default(autoincrement())
-//   card      Card      @relation(fields: [cardId], references: [id])
-//   cardId    Int
-//   user      User      @relation(fields: [userId], references: [id])
-//   userId    String
-//   content   String
-//   timestamp Int
-//   prev      CardHead? @relation("CardHeadHistory", fields: [prevId], references: [id])
-//   prevId    Int?
-//   next      CardHead? @relation("CardHeadHistory")
-//   createdAt DateTime  @default(now())
-//   updatedAt DateTime  @updatedAt
-//   @@unique([cardId, timestamp])
-// }
-
 model CardBody {
   id        Int       @id @default(autoincrement())
   card      Card      @relation(fields: [cardId], references: [id])
   cardId    Int
   user      User      @relation(fields: [userId], references: [id])
   userId    String
-  content   String
+  content   String // json string
   timestamp Int
   prev      CardBody? @relation("CardBodyHistory", fields: [prevId], references: [id])
   prevId    Int?
@@ -252,6 +236,7 @@ model Card {
   link      Link?      @relation(fields: [linkUrl], references: [url])
   linkUrl   String?    @unique
   type      CardType
+  meta      String? // json string
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   bullets   Bullet[]

@@ -1,6 +1,5 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
 import { Node } from 'slate'
 import { BulletEditor } from '../../components/editor/editor'
 import { LiElement } from '../../components/editor/slate-custom-types'
@@ -107,6 +106,11 @@ const CardSymbolPage = (): JSX.Element | null => {
   const { user, error, isLoading } = useUser()
   const [showLoginPopup, setShowLoginPopup] = useState(false)
   const [showHeaderForm, setShowHeaderForm] = useState(false)
+  const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
+  const [authorName, setAuthorName] = useState<string | undefined>(
+    data?.selfCard.link?.authorName?.split(':', 1)[0] ?? undefined,
+  )
+  const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
 
   // if (
   //   data?.selfCard.link?.authorName?.split(':', 1)[0] !== undefined &&
@@ -155,8 +159,6 @@ const CardSymbolPage = (): JSX.Element | null => {
     if (data && location) {
       const { selfCard, mirror, openedLi, value } = data
       const parsedValue = parseChildren(value)
-      // const parsedValue = value
-
       return (
         <BulletEditor
           initialValue={parsedValue}
@@ -164,6 +166,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           onValueChange={value => {
             setLocalValue(value)
             setDisableSubmit(false)
+            setValue(value)
           }}
           readOnly={readonly}
           selfCard={selfCard}
@@ -224,6 +227,19 @@ const CardSymbolPage = (): JSX.Element | null => {
           >
             Submit
           </button>
+        <button
+          className="primary"
+          onClick={() => {
+            submitValue({
+              onFinish: () => {
+                // dropValue()
+                router.reload()
+              },
+            })
+          }}
+        >
+          Submit {isValueModified ? '*' : ''}
+        </button>
 
           <button
             onClick={() => {
