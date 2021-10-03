@@ -15,6 +15,7 @@ import classes from '../../style/symbol.module.scss'
 import Popover from '../../components/popover/popover'
 import { useUser } from '@auth0/nextjs-auth0'
 import Popup from '../../components/popup/popup'
+import HeaderForm from '../../components/header-form/header-form'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -85,7 +86,13 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
 //   )
 // }
 
-export const AuthorContext = createContext({ author: '' as string | undefined })
+export const Context = createContext({
+  author: '' as string | undefined,
+  login: false,
+  showLoginPopup: (b: boolean) => {
+    ;('')
+  },
+})
 
 const CardSymbolPage = (): JSX.Element | null => {
   const router = useRouter()
@@ -96,9 +103,10 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [authorName, setAuthorName] = useState<string | undefined>((router.query.a as string) ?? undefined)
   // const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
   const [disableSubmit, setDisableSubmit] = useState(true)
-  const { data: meData, loading: meLoading } = useMeQuery()
+  const { data: meData, loading: meLoading } = useMeQuery({ fetchPolicy: 'cache-first' })
   const { user, error, isLoading } = useUser()
   const [showLoginPopup, setShowLoginPopup] = useState(false)
+  const [showHeaderForm, setShowHeaderForm] = useState(false)
 
   // if (
   //   data?.selfCard.link?.authorName?.split(':', 1)[0] !== undefined &&
@@ -177,12 +185,14 @@ const CardSymbolPage = (): JSX.Element | null => {
             onClick={() => {
               if (meData || user) {
                 setReadonly(!readonly)
-              } else {
+              }
+              if (!meData && !user) {
+                setReadonly(true)
                 setShowLoginPopup(true)
               }
             }}
           >
-            {readonly && (meData || user) ? '編輯' : '鎖定'}
+            {readonly || !meData || !user ? '編輯' : '鎖定'}
           </button>
           {showLoginPopup && (
             <Popup
@@ -284,11 +294,45 @@ const CardSymbolPage = (): JSX.Element | null => {
             </button>
           )}
           <h3>{Node.string(data.openedLi.children[0])}</h3>
-
+          <button
+            className="secondary"
+            onClick={() => {
+              setShowHeaderForm(true)
+            }}
+          >
+            詳細資訊
+          </button>
+          {
+            <Popover
+              visible={showHeaderForm}
+              hideBoard={() => {
+                setShowHeaderForm(false)
+              }}
+            >
+              <HeaderForm initialValue={{ authorName: `${authorName ?? ''}`, props: [{ title: '', value: '' }] }} />
+            </Popover>
+          }
           {/* {console.log(data.openedLi)} */}
         </div>
-        <AuthorContext.Provider value={{ author: authorName }}>
-          {editor}
+        <Context.Provider
+          value={{
+            author: authorName,
+            login: meData || user ? true : false,
+            showLoginPopup: (b: boolean) => {
+              setShowLoginPopup(b)
+            },
+          }}
+        >
+          <div
+            onClick={e => {
+              e.preventDefault()
+              if (!meData && !user) {
+                setShowLoginPopup(true)
+              }
+            }}
+          >
+            {editor}
+          </div>
           {/* <Popover
             visible={!!router.query.m}
             hideBoard={() => {
@@ -297,7 +341,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           >
             {editor}
           </Popover> */}
-        </AuthorContext.Provider>
+        </Context.Provider>
       </div>
     </Layout>
   )

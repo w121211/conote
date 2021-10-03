@@ -58,3 +58,13 @@
   transition: opacity 0.1s;
   // transition: visibility 0.2s;
 }
+.navLinks {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  button {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}

@@ -60,7 +60,7 @@ import { toInlinePoll } from '../../lib/bullet/types'
 import CreatePollForm from '../board-form/create-poll-form'
 import HashtagTextToIcon from '../upDown/hashtag-text-to-icon'
 import PollPage from '../board/poll-page'
-import { AuthorContext } from '../../pages/card/[symbol]'
+import { Context } from '../../pages/card/[symbol]'
 import AuthorPollPage from '../board/author-poll-page'
 import { useRouter } from 'next/router'
 import Popup from '../popup/popup'
@@ -398,7 +398,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   const [showPopover, setShowPopover] = useState(false)
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()
   const [pollId, setPollId] = useState(element.id)
-  const authorContext = useContext(AuthorContext)
+  const context = useContext(Context)
   // console.log(authorContext)
   function onCreated(poll: Poll) {
     // const editor = useSlateStatic()
@@ -481,15 +481,18 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
           }}
           inline
         />
-        {showPopover && (
-          <Popover visible={showPopover} hideBoard={handleHideBoard}>
-            {pollId ? (
-              <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} author={authorContext.author} />
-            ) : (
-              <span>loading</span>
-            )}
-          </Popover>
-        )}
+        {context.login
+          ? showPopover && (
+              <Popover visible={showPopover} hideBoard={handleHideBoard}>
+                {pollId ? (
+                  <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} author={context.author} />
+                ) : (
+                  <span>loading</span>
+                )}
+              </Popover>
+            )
+          : context.showLoginPopup(true)}
+
         {/* {showPopover && authorContext.author && (
           <Popover visible={showPopover} hideBoard={handleHideBoard}>
             
@@ -828,6 +831,7 @@ export const BulletEditor = ({
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
     [location, selfCard],
   )
+  const context = useContext(Context)
   // const isFocused = useFocused()
 
   // const decorate = useCallback(([node, path]: NodeEntry) => {
@@ -913,6 +917,9 @@ export const BulletEditor = ({
       className={`${classes.bulletEditorContainer} `}
       onFocus={e => {
         e.currentTarget.classList.add(classes.focused)
+        if (!context.login) {
+          context.showLoginPopup(true)
+        }
       }}
       onBlur={e => {
         e.currentTarget.classList.remove(classes.focused)

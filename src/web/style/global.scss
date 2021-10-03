@@ -152,6 +152,9 @@ button {
     border-color: $secondary;
     background: $secondary;
     color: $white;
+    a {
+      color: $white;
+    }
     &:hover {
       background: $secondaryHover;
       border-color: $secondaryHover;
