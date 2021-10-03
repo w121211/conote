@@ -161,9 +161,14 @@ fragment card on Card {
   link {
     ...link
   }
-  # head {
-  #   ...cardHead
-  # }
+  meta {
+    url
+    title
+    author
+    keywords
+    redirects
+    duplicates
+  }
   body {
     ...cardBody
   }
