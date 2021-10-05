@@ -27,3 +27,11 @@
     }
   }
 }
+.header {
+  color: $black;
+  .author {
+    color: $gray-text-dark;
+    font-weight: 400;
+    font-size: 14px;
+  }
+}

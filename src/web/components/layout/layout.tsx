@@ -3,6 +3,7 @@ import SideBar from '../sidebar/sidebar'
 import classes from './layout.module.scss'
 import MenuIcon from '../../assets/svg/menu.svg'
 import Link from 'next/link'
+import { useMeQuery } from '../../apollo/query.graphql'
 
 export default function Layout({
   children,
@@ -15,6 +16,7 @@ export default function Layout({
   // handlePath?: (i: number) => void
   // handleSymbol?: (e: string) => void
 }): JSX.Element {
+  const { data: meData, error, loading } = useMeQuery()
   const [showNav, setShowNav] = useState(true)
   const [showMenu, setShowMenu] = useState(false)
   const [scroll, setScroll] = useState(0)
@@ -67,10 +69,22 @@ export default function Layout({
         >
           <MenuIcon className={classes.menuIcon} />
         </div>
-        <Link href="/">
-          <a>Conote</a>
-        </Link>
-        {/* {navPath} */}
+        <div className={classes.navLinks}>
+          <Link href="/">
+            <a>Conote</a>
+          </Link>
+          {/* {navPath} */}
+          {meData ? (
+            <button className="secondary">
+              <a href="/api/auth/logout">Logout</a>{' '}
+            </button>
+          ) : (
+            <button className="primary">
+              {' '}
+              <a href="/api/auth/login">Login</a>
+            </button>
+          )}
+        </div>
       </nav>
 
       {/* <div className={classes.sideBarContainer} style={showMenu ? { visibility: 'visible' } : { visibility: 'hidden' }}> */}

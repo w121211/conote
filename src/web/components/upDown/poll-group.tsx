@@ -1,39 +1,71 @@
-import React, { HtmlHTMLAttributes, useEffect, useState } from 'react'
+import React, { HtmlHTMLAttributes, useContext, useEffect, useState } from 'react'
 // import PinIcon from '../../assets/svg/like.svg'
 // import UpIcon from '../../assets/svg/arrow-up.svg'
 import classes from './upDown.module.scss'
 import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import Popover from '../popover/popover'
 import PollPage from '../board/poll-page'
+import { PollDocument, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'
+import { Context } from '../../pages/card/[symbol]'
 
-const MyHashtagGroup = ({
+const PollGroup = ({
   choices,
   pollId,
   inline,
-  handleCreatePoll,
+  bulletId,
+  onCreatePoll,
   handleClickedIdx,
   handleShowPopover,
+  handlePollId,
 }: {
   choices: string[]
   pollId?: string
   inline?: boolean
-  handleCreatePoll?: () => void
+  bulletId?: number
+  onCreatePoll?: () => void
   handleClickedIdx?: (i: number) => void
   handleShowPopover?: (b: boolean) => void
+  handlePollId?: (id: string) => void
 } & HtmlHTMLAttributes<HTMLElement>): JSX.Element => {
   const [showPopover, setShowPopover] = useState(false)
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()
+  const context = useContext(Context)
 
-  // const newText = hashtag.text.substring(1, hashtag.text.length - 1)
-  // const textArr = newText.split(' ')
-
-  // useEffect(() => {
-  //   console.log(showPopover)
-  // })
+  const [createPoll, { data: pollData, called: pollMutationCalled }] = useCreatePollMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<PollQuery>({
+        query: PollDocument,
+      })
+      if (data?.createPoll && res?.poll) {
+        cache.writeQuery({
+          query: PollDocument,
+          data: { board: data.createPoll },
+        })
+      }
+    },
+    onCompleted(data) {
+      handlePollId && handlePollId(data.createPoll.id)
+      // setPollId(data.createPoll.id)
+    },
+  })
 
   const handleHideBoard = () => {
     setClickedIdx(undefined)
     setShowPopover(false)
+  }
+
+  const handleClick = (ev: React.MouseEvent, i: number) => {
+    ev.stopPropagation()
+    if (context.login) {
+      handleClickedIdx && handleClickedIdx(i)
+      if (!pollId && bulletId) {
+        createPoll({ variables: { bulletId, data: { choices } } })
+      }
+      handleShowPopover && handleShowPopover(true)
+      setClickedIdx(i)
+    } else {
+      context.showLoginPopup(true)
+    }
   }
 
   return (
@@ -47,15 +79,8 @@ const MyHashtagGroup = ({
               <button
                 className="inline"
                 key={i}
-                onClick={ev => {
-                  ev.stopPropagation()
-                  handleClickedIdx && handleClickedIdx(i)
-                  handleShowPopover && handleShowPopover(true)
-                  setClickedIdx(i)
-                  setShowPopover(true)
-                  if (!pollId) {
-                    handleCreatePoll && handleCreatePoll()
-                  }
+                onClick={(ev: React.MouseEvent) => {
+                  handleClick(ev, i)
                 }}
               >
                 <span>{e}</span>
@@ -68,16 +93,8 @@ const MyHashtagGroup = ({
               <div className={classes.divider}></div>
               <button
                 className="inline"
-                onClick={ev => {
-                  ev.stopPropagation()
-                  handleClickedIdx && handleClickedIdx(i)
-                  handleShowPopover && handleShowPopover(true)
-                  setClickedIdx(i)
-                  setShowPopover(true)
-                  if (!pollId) {
-                    handleCreatePoll && handleCreatePoll()
-                  }
-                  // console.log(e)
+                onClick={(ev: React.MouseEvent) => {
+                  handleClick(ev, i)
                 }}
               >
                 <span>{e}</span>
@@ -97,4 +114,4 @@ const MyHashtagGroup = ({
   )
 }
 
-export default MyHashtagGroup
+export default PollGroup

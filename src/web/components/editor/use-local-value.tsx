@@ -357,7 +357,7 @@ export const useLocalValue = ({
   useEffect(() => {
     const asyncRun = async () => {
       if (window && location) {
-        console.log(location)
+        // console.log(location)
         const { selfSymbol, mirrorSymbol, openedLiPath = [] } = location
         // 若在 local 找不到 self symbol，代表 symbol 有所變動，清除 & 更新 local
         if (store.getCard(selfSymbol) === null) {

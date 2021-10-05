@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { Nav } from '../../pages/card/[symbol]'
 import MyTooltip from '../my-tooltip/my-tooltip'
 import RightArrow from '../../assets/svg/right-arrow.svg'
-
+import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import classes from './nav-path.module.scss'
 import { UrlObject } from 'url'
 import Link from 'next/link'
@@ -21,11 +21,12 @@ function getTextWidth(text: string, font?: any) {
 export interface NavPathProps {
   path?: Nav[]
   mirrorHomeUrl?: UrlObject
+  location: NavLocation
 }
 
 const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 
-const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element => {
+const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX.Element => {
   const [myPath, setMyPath] = useState<(Nav | string)[] | undefined>(path)
   const [hiddenPath, setHiddenPath] = useState<(Nav | string)[]>([])
 
@@ -122,9 +123,10 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
         <li>
           <span>
             <Link href={mirrorHomeUrl}>
-              <a>Home</a>
+              <a>{router.query.symbol}</a>
             </Link>
           </span>
+
           <div className={classes.rightArrow}>
             <RightArrow />
           </div>
@@ -156,12 +158,15 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
                   justifyContent: `${e === '...' ? 'center' : 'flex-start'}`,
                 }}
               >
-                {typeof e !== 'string' && e.path.length > 0 && (
-                  <Link href={`/card/${encodeURIComponent(router.query.symbol as string)}?p=${e.path.join('.')}`}>
-                    <a className="ui">{e.text}</a>
+                {typeof e !== 'string' && (
+                  <Link href={locationToUrl({ ...location, openedLiPath: e.path })}>
+                    <a className="ui">
+                      {router.query.m && e.path.length === 0 && '::'}
+                      {e.text}
+                    </a>
                   </Link>
                 )}
-                {typeof e !== 'string' && e.path.length === 0 && (
+                {/* {typeof e !== 'string' && e.path.length === 0 && (
                   <Link href={`/card/${encodeURIComponent(e.text)}`}>
                     <a className="ui">{e.text}</a>
                   </Link>
@@ -197,7 +202,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl }): JSX.Element =
                       )
                     })}
                   </MyTooltip>
-                )}
+                )} */}
               </span>
             }
           </li>

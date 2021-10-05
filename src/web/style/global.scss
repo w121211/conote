@@ -75,6 +75,7 @@ svg {
 a {
   color: $text;
   text-decoration: none;
+  cursor: pointer;
   &.ui {
     // border-bottom: 0;
     // &:hover {
@@ -152,6 +153,9 @@ button {
     border-color: $secondary;
     background: $secondary;
     color: $white;
+    a {
+      color: $white;
+    }
     &:hover {
       background: $secondaryHover;
       border-color: $secondaryHover;
