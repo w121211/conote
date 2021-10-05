@@ -75,6 +75,7 @@ svg {
 a {
   color: $text;
   text-decoration: none;
+  cursor: pointer;
   &.ui {
     // border-bottom: 0;
     // &:hover {

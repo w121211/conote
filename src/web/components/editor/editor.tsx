@@ -45,12 +45,13 @@ import {
   useCreateVoteMutation,
   useMyHashtagLikeQuery,
   useMyVotesLazyQuery,
+  usePollLazyQuery,
   usePollQuery,
   useUpsertEmojiLikeMutation,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
-import MyHashtagGroup from '../upDown/hashtag-group'
+import MyHashtagGroup from '../upDown/poll-group'
 import { spawn } from 'child_process'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { NavLocation, locationToUrl } from './with-location'
@@ -64,6 +65,7 @@ import { Context } from '../../pages/card/[symbol]'
 import AuthorPollPage from '../board/author-poll-page'
 import { useRouter } from 'next/router'
 import Popup from '../popup/popup'
+import PollGroup from '../upDown/poll-group'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
@@ -272,38 +274,59 @@ const InlineSymbol = ({
           {children}
         </a>
         {/* </Link> */}
-        {showPopover && (
-          <Popup
-            visible={showPopover}
-            hideBoard={() => {
-              setShowPopover(false)
-            }}
-            buttons={
-              <>
+        {showPopover &&
+          (router.query.symbol !== element.symbol && router.query.m !== '::' + element.symbol ? (
+            <Popup
+              visible={showPopover}
+              hideBoard={() => {
+                setShowPopover(false)
+              }}
+              buttons={
+                <>
+                  <button
+                    className="primary"
+                    onClick={() => {
+                      setShowPopover(false)
+                    }}
+                  >
+                    取消
+                  </button>
+                  <button
+                    className="secondary"
+                    onClick={() => {
+                      setShowPopover(false)
+                      router.push(`/card/${encodeURI(element.symbol)}`)
+                    }}
+                  >
+                    確定
+                  </button>
+                </>
+              }
+              mask={false}
+            >
+              尚有未儲存內容，確定要離開本頁嗎？
+            </Popup>
+          ) : (
+            <Popup
+              visible={showPopover}
+              hideBoard={() => {
+                setShowPopover(false)
+              }}
+              buttons={
                 <button
                   className="primary"
                   onClick={() => {
                     setShowPopover(false)
                   }}
                 >
-                  取消
-                </button>
-                <button
-                  className="secondary"
-                  onClick={() => {
-                    setShowPopover(false)
-                    router.push(`/card/${encodeURI(element.symbol)}`)
-                  }}
-                >
                   確定
                 </button>
-              </>
-            }
-            mask={false}
-          >
-            尚有未儲存內容，確定要離開本頁嗎？
-          </Popup>
-        )}
+              }
+              mask={false}
+            >
+              你就在這頁了！
+            </Popup>
+          ))}
       </span>
     </span>
   )
@@ -399,7 +422,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()
   const [pollId, setPollId] = useState(element.id)
   const context = useContext(Context)
-  // console.log(authorContext)
+  // console.log(clickedIdx)
   function onCreated(poll: Poll) {
     // const editor = useSlateStatic()
     // const path = ReactEditor.findPath(editor, element)
@@ -408,39 +431,25 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
     Transforms.insertText(editor, inlinePoll.str, { at: path })
   }
 
-  const [createPoll, { data: pollData, called: pollMutationCalled }] = useCreatePollMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<PollQuery>({
-        query: PollDocument,
-      })
-      if (data?.createPoll && res?.poll) {
-        cache.writeQuery({
-          query: PollDocument,
-          data: { board: data.createPoll },
-        })
-      }
-    },
-    onCompleted(data) {
-      setPollId(data.createPoll.id)
-      // onCreated(data.createPoll)
-      // Transforms.insertText(editor, ':' + data.createPoll.id, { at: { path, offset: 7 } })
-      // console.log(data.createPoll.id)
-    },
-  })
+  const [queryPoll, { data: pollData, error, loading }] = usePollLazyQuery()
 
+  const parent = Node.parent(editor, path) as LcElement
   const handleCreatePoll = () => {
-    const parent = Node.parent(editor, path) as LcElement
-    if (parent.id) {
-      createPoll({ variables: { bulletId: parent.id, data: { choices: element.choices } } })
-    }
+    // if (parent.id) {
+    //   createPoll({ variables: { bulletId: parent.id, data: { choices: element.choices } } })
+    // }
   }
 
   useEffect(() => {
     // if (showPopover && !pollId) {
     //   handleCreatePoll()
     // }
-    if (!showPopover && !element.id && pollId && pollData?.createPoll) {
-      onCreated(pollData.createPoll)
+    if (!showPopover && !element.id && pollId) {
+      const queryPollData = async () => {
+        await queryPoll({ variables: { id: pollId } })
+      }
+      queryPollData()
+      pollData?.poll && onCreated(pollData.poll)
     }
   }, [showPopover])
 
@@ -450,48 +459,50 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   }
   // const queryPoll = usePollQuery({ variables: { id: element.id.toString() } })
 
-  if (readonly) {
-    if (element.type === 'poll') {
-      return (
-        <span {...attributes}>
-          <MyHashtagGroup choices={element.choices} pollId={element.id?.toString() ?? ''} />
-        </span>
-      )
-    }
-    return (
-      <button {...attributes} className="inline mR">
-        {children}
-      </button>
-    )
-  }
+  // if (readonly) {
+  //   if (element.type === 'poll') {
+  //     return (
+  //       <span {...attributes}>
+  //         <MyHashtagGroup choices={element.choices} pollId={element.id?.toString() ?? ''} />
+  //       </span>
+  //     )
+  //   }
+  //   return (
+  //     <button {...attributes} className="inline mR">
+  //       {children}
+  //     </button>
+  //   )
+  // }
   // if (element.type === 'poll') {
   return (
     <span {...attributes}>
       <span style={{ display: 'none' }}>{children}</span>
       <span contentEditable={false}>
-        <MyHashtagGroup
+        <PollGroup
+          bulletId={parent.id}
           choices={element.choices}
           pollId={element.id?.toString()}
           handleShowPopover={b => {
             setShowPopover(b)
           }}
-          handleCreatePoll={handleCreatePoll}
+          onCreatePoll={handleCreatePoll}
           handleClickedIdx={i => {
             setClickedIdx(i)
           }}
+          handlePollId={(id: string) => {
+            setPollId(id)
+          }}
           inline
         />
-        {context.login
-          ? showPopover && (
-              <Popover visible={showPopover} hideBoard={handleHideBoard}>
-                {pollId ? (
-                  <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} author={context.author} />
-                ) : (
-                  <span>loading</span>
-                )}
-              </Popover>
-            )
-          : context.showLoginPopup(true)}
+        {showPopover && (
+          <Popover visible={showPopover} hideBoard={handleHideBoard}>
+            {pollId ? (
+              <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} author={context.author} />
+            ) : (
+              <span>loading</span>
+            )}
+          </Popover>
+        )}
 
         {/* {showPopover && authorContext.author && (
           <Popover visible={showPopover} hideBoard={handleHideBoard}>

@@ -87,7 +87,7 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
 
 export const Context = createContext({
   author: '' as string | undefined,
-  login: false,
+  login: true,
   showLoginPopup: (b: boolean) => {
     '_'
   },
@@ -106,17 +106,9 @@ const CardSymbolPage = (): JSX.Element | null => {
   const { user, error, isLoading } = useUser()
   const [showLoginPopup, setShowLoginPopup] = useState(false)
   const [showHeaderForm, setShowHeaderForm] = useState(false)
+  const [headerFormSubmited, setHeaderFormSubmited] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
-
-  const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
-
-  // if (
-  //   data?.selfCard.link?.authorName?.split(':', 1)[0] !== undefined &&
-  //   data?.selfCard.link?.authorName?.split(':', 1)[0] !== prevAuthor
-  // ) {
-  //   setAuthorName(data?.selfCard.link?.authorName?.split(':', 1)[0])
-  //   setPrevAuthor(data?.selfCard.link?.authorName?.split(':', 1)[0])
-  // }
+  const [submitFinished, setSubmitFinished] = useState(false)
 
   useEffect(() => {
     if (router.isReady) {
@@ -130,11 +122,18 @@ const CardSymbolPage = (): JSX.Element | null => {
   }, [router])
 
   useEffect(() => {
-    if (meData || user) {
+    if (!meLoading && (meData || user)) {
       // console.log(meData, user)
       setReadonly(false)
     }
-  }, [meData, user])
+  }, [meData, user, meLoading])
+
+  useEffect(() => {
+    if (!showHeaderForm && headerFormSubmited) {
+      dropValue()
+      router.reload()
+    }
+  }, [headerFormSubmited, showHeaderForm])
 
   // useEffect(() => {
   //   if (data && location) {
@@ -163,6 +162,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           location={location}
           onValueChange={value => {
             // setDisableSubmit(false)
+            setSubmitFinished(false)
             setValue(value)
           }}
           readOnly={readonly}
@@ -181,7 +181,7 @@ const CardSymbolPage = (): JSX.Element | null => {
       <div style={{ marginBottom: '3em' }}>
         <div>
           <button
-            className="noBg"
+            // className="noBg"
             onClick={() => {
               if (meData || user) {
                 setReadonly(!readonly)
@@ -215,14 +215,17 @@ const CardSymbolPage = (): JSX.Element | null => {
             onClick={() => {
               submitValue({
                 onFinish: () => {
-                  // dropValue()
+                  setSubmitFinished(true)
+                  setDisableSubmit(true)
+                  dropValue()
+
                   router.reload()
                 },
               })
             }}
             disabled={!isValueModified}
           >
-            Submit
+            {submitFinished ? '已儲存' : '儲存'}
             {/* {console.log(isValueModified)} */}
           </button>
           {/* <button
@@ -248,9 +251,11 @@ const CardSymbolPage = (): JSX.Element | null => {
             {'Drop'}
           </button>
           {data.selfCard.link?.url && (
-            <a href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
-              來源連結
-            </a>
+            <button>
+              <a href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
+                來源連結
+              </a>
+            </button>
           )}
           {/* {location.author && (
           <button
@@ -285,6 +290,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           ))} */}
           <NavPath
             path={navs}
+            location={{ ...location }}
             mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
           />
           {/* {data.selfCard.link?.authorName && <span>@{data.selfCard.link?.authorName}</span>} */}
@@ -307,17 +313,15 @@ const CardSymbolPage = (): JSX.Element | null => {
               <div className={`${classes.toggle} ${authorName && classes.toggleClicked}`}></div>
             </button>
           )}
-          <h3>{Node.string(data.openedLi.children[0])}</h3>
-          {data.selfCard.meta && (
-            <button
-              className="secondary"
-              onClick={() => {
-                setShowHeaderForm(true)
-              }}
-            >
-              詳細資訊
-            </button>
-          )}
+          <button
+            className="secondary"
+            onClick={() => {
+              setShowHeaderForm(true)
+            }}
+          >
+            編輯詳細資訊
+          </button>
+          {/* // )} */}
           {showHeaderForm && (
             <Popover
               visible={showHeaderForm}
@@ -325,39 +329,35 @@ const CardSymbolPage = (): JSX.Element | null => {
                 setShowHeaderForm(false)
               }}
             >
-              {data.selfCard.meta ? (
-                <HeaderForm
-                  symbol={router.query.symbol as string}
-                  initialValue={{
-                    author: data.selfCard.meta.author,
-                    title: data.selfCard.meta.title,
-                    url: data.selfCard.meta.url,
-                    keywords: data.selfCard.meta.keywords,
-                    redirects: data.selfCard.meta.redirects,
-                    duplicates: data.selfCard.meta.duplicates,
-                  }}
-                />
-              ) : (
-                <HeaderForm
-                  symbol={router.query.symbol as string}
-                  initialValue={{
-                    author: data.selfCard.link?.authorName,
-                    title: Node.string(data.openedLi.children[0]),
-                    url: data.selfCard.link?.url,
-                    keywords: [''],
-                    redirects: [''],
-                    duplicates: [''],
-                  }}
-                />
-              )}
+              <HeaderForm
+                symbol={router.query.symbol as string}
+                initialValue={{
+                  author: data.selfCard.meta.author ?? '',
+                  title: data.selfCard.meta.title ?? '',
+                  url: data.selfCard.meta.url ?? '',
+                  keywords: data.selfCard.meta.keywords?.join(' ') ?? '',
+                  redirects: data.selfCard.meta.redirects?.join(' ') ?? '',
+                  duplicates: data.selfCard.meta.duplicates?.join(' ') ?? '',
+                }}
+                handleSubmitted={isSubmitted => {
+                  setHeaderFormSubmited(isSubmitted)
+                }}
+              />
             </Popover>
           )}
+          <h3 className={classes.header}>
+            {data.selfCard.meta.title}
+            <span className={classes.author}>@{data.selfCard.meta.author}</span>
+          </h3>
+          {/* <h3>{Node.string(data.openedLi.children[0])}</h3> */}
+          {/* {data.selfCard.meta && ( */}
+          {/* {console.log(data.selfCard.meta)} */}
           {/* {console.log(data.openedLi)} */}
         </div>
         <Context.Provider
           value={{
             author: authorName,
-            login: meData || user ? true : false,
+            login: meData ? true : false,
             showLoginPopup: (b: boolean) => {
               setShowLoginPopup(b)
             },
@@ -365,8 +365,8 @@ const CardSymbolPage = (): JSX.Element | null => {
         >
           <div
             onClick={e => {
-              e.preventDefault()
-              if (!meData && !user) {
+              // e.preventDefault()
+              if (!meLoading && !meData && !user) {
                 setShowLoginPopup(true)
               }
             }}

@@ -15,7 +15,7 @@ import UpIcon from '../../assets/svg/arrow-up.svg'
 import classes from './upDown.module.scss'
 import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import HashtagTextToIcon from './hashtag-text-to-icon'
-import MyHashtagGroup from './hashtag-group'
+import MyHashtagGroup from './poll-group'
 
 const hashtagTextToIcon = (hashtag: Hashtag | HashtagGroup): JSX.Element | null => {
   if (hashtag.type === 'hashtag') {

@@ -54,7 +54,7 @@ export const RadioInput = ({
   const methods = useFormContext()
 
   // const [checkedTarget, setCheckedTarget] = useState<any>(null)
-  console.log(myVote)
+  // console.log(myVote)
   return (
     <label className={classes.radioLabel}>
       <input

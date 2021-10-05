@@ -4,7 +4,15 @@ import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import classes from './header-form.module.scss'
 import { CardDocument, CardMeta, CardQuery, useBoardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
 import { RadioInput } from '../board-form/board-form'
-type FormInputs = CardMeta
+import router from 'next/router'
+type FormInputs = {
+  title: string
+  author: string
+  url: string
+  keywords: string
+  redirects: string
+  duplicates: string
+}
 // type FormInputs = {
 //   // title: string
 //   // authorChoice: string
@@ -13,34 +21,73 @@ type FormInputs = CardMeta
 //   props: { title: string; value: string }[]
 // }
 
-const HeaderForm = ({ initialValue, symbol }: { initialValue: FormInputs; symbol: string }): JSX.Element => {
-  // const [authorName, setAuthorName] = useState('')
+const HeaderForm = ({
+  initialValue,
+  symbol,
+  handleSubmitted,
+}: {
+  initialValue: FormInputs
+  symbol: string
+  handleSubmitted: (isSubmitted: boolean) => void
+}): JSX.Element => {
   const methods = useForm<FormInputs>({
     defaultValues: initialValue,
   })
-  const { register, handleSubmit, setValue, watch, control } = methods
-  if (initialValue) {
-    // initialValue.title && setValue('title', initialValue.title)
-    // setValue('authorChoice', initialValue.authorChoice)
-    // setValue('authorLines', initialValue.authorLines)
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    control,
+    formState: { isDirty, isSubmitSuccessful, isSubmitted },
+  } = methods
+
+  // useEffect(() => {
+  //   setSubmitDisable(false)
+  //   setSubmitFinished(false)
+  // }, [watch()])
   // const { fields, append, remove } = useFieldArray({
   //   name: `props`,
   //   control,
   // })
 
-  const [updateCardMeta] = useUpdateCardMetaMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<CardQuery>({ query: CardDocument })
-      if (data?.updateCardMeta && res?.card) {
-        cache.writeQuery({
-          query: CardDocument,
-          data: {
-            card: data.updateCardMeta,
+  const [updateCardMeta, { data }] = useUpdateCardMetaMutation({
+    // update(cache, { data }) {
+    //   const res = cache.readQuery<CardQuery>({ query: CardDocument })
+    //   if (data?.updateCardMeta && res?.card) {
+    //     cache.writeQuery({
+    //       query: CardDocument,
+    //       data: {
+    //         card: data.updateCardMeta,
+    //       },
+    //     })
+    //   }
+    // },
+    onCompleted(data) {
+      if (data.updateCardMeta.meta) {
+        const newData = data.updateCardMeta.meta
+        // setValue('title', newData.title ?? '', { shouldDirty: false })
+        // setValue('author', newData.author ?? '', { shouldDirty: false })
+        // setValue('url', newData.url ?? '', { shouldDirty: false })
+        // setValue('redirects', newData.redirects?.join(' ') ?? '', { shouldDirty: false })
+        // setValue('keywords', newData.keywords?.join(' ') ?? '', { shouldDirty: false })
+        // setValue('duplicates', newData.duplicates?.join(' ') ?? '', { shouldDirty: false })
+        reset(
+          {
+            title: newData.title ?? '',
+            author: newData.author ?? '',
+            url: newData.url ?? '',
+            redirects: newData.redirects?.join(' ') ?? '',
+            keywords: newData.keywords?.join(' ') ?? '',
+            duplicates: newData.duplicates?.join(' ') ?? '',
           },
-        })
+          { keepIsSubmitted: true },
+        )
+        handleSubmitted(isSubmitted)
       }
     },
+    // refetchQueries: [{ query: CardDocument, variables: { symbol } }],
   })
 
   const onSubmit = (d: FormInputs) => {
@@ -52,20 +99,26 @@ const HeaderForm = ({ initialValue, symbol }: { initialValue: FormInputs; symbol
             author: d.author,
             title: d.title,
             url: d.url,
-            redirects: d.redirects,
-            duplicates: d.duplicates,
-            keywords: d.keywords,
+            redirects: d.redirects.split(' '),
+            duplicates: d.duplicates.split(' '),
+            keywords: d.keywords.split(' '),
           },
         },
       })
-      console.log(d)
     }
   }
 
   return (
     <FormProvider {...methods}>
       <div className={classes.formContainer}>
-        <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className={classes.form}
+          onSubmit={handleSubmit(onSubmit)}
+          // onChange={() => {
+          //   setSubmitDisable(false)
+          //   setSubmitFinished(false)
+          // }}
+        >
           {/* <div className={classes.section}> */}
           {/* <label>Symbol/Topic</label> */}
           {/* <input type="text" {...register('title')} placeholder="Symbol 或 Topic" /> */}
@@ -84,16 +137,16 @@ const HeaderForm = ({ initialValue, symbol }: { initialValue: FormInputs; symbol
             <input {...register('url')} type="text" placeholder="來源網址" />
           </label>
           <label>
-            <h5>關鍵詞</h5>
-            <input {...register('keywords')} type="text" placeholder="關鍵詞" />
+            <h5>Keywords</h5>
+            <input {...register('keywords')} type="text" placeholder="請使用 '空格' 分隔" />
           </label>
           <label>
-            <h5>重新導向</h5>
-            <input {...register('redirects')} type="text" placeholder="重新導向" />
+            <h5>Redirects</h5>
+            <input {...register('redirects')} type="text" placeholder="請使用 '空格' 分隔" />
           </label>
           <label>
-            <h5>副本</h5>
-            <input {...register('duplicates')} type="text" placeholder="副本" />
+            <h5>Duplicates</h5>
+            <input {...register('duplicates')} type="text" placeholder="請使用 '空格' 分隔" />
           </label>
           {/* <div className={classes.choiceWrapper}>
             <div>
@@ -108,7 +161,10 @@ const HeaderForm = ({ initialValue, symbol }: { initialValue: FormInputs; symbol
           {/* <input type="text" {...register('authorLines')} placeholder="來源作者看法" /> */}
           {/* </div> */}
           <div className={classes.submitBtn}>
-            <button className="primary">送出</button>
+            <button className="primary" type="submit" disabled={!isDirty}>
+              {isSubmitted ? (isDirty ? '提交' : '已提交') : '提交'}
+              {/* {console.log(isDirty, isSubmitSuccessful, isSubmitted)} */}
+            </button>
           </div>
         </form>
       </div>

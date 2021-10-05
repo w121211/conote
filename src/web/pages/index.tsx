@@ -37,7 +37,7 @@ function LatestCards(): JSX.Element | null {
             <span className={classes.latestCardsListIndex}>{i + 1} </span>
             {/* <BulletSvg className={classes.bulletSvg} /> */}
             {/* {console.log(e)} */}
-            <Link href={`/card/${encodeURI(e.symbol)}`}>
+            <Link href={`/card/${encodeURIComponent(e.symbol)}`}>
               {/* <a>{e.link.url.substring(0, 50).replace('//', '').replace('[[', '').replace(']]', '')}</a> */}
               <a>
                 <div>
