@@ -1,4 +1,6 @@
-/** 一個簡易的cache，用於開發時避免重複call同樣的url */
+/**
+ * 一個簡易的cache，用於開發時避免重複call同樣的url
+ */
 import { readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
 import { FetchResult } from './index'

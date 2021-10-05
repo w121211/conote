@@ -91,7 +91,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   // const [navs, setNavs] = useState<Nav[]>() // editor route
   const [readonly, setReadonly] = useState(true)
   const [location, setLocation] = useState<NavLocation>()
-  const { data, setLocalValue, submitValue, dropValue } = useLocalValue({ location })
+  const { data, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [authorName, setAuthorName] = useState<string | undefined>((router.query.a as string) ?? undefined)
   // const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
   const [disableSubmit, setDisableSubmit] = useState(true)
@@ -153,7 +153,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           initialValue={parsedValue}
           location={location}
           onValueChange={value => {
-            setLocalValue(value)
+            setValue(value)
             setDisableSubmit(false)
           }}
           readOnly={readonly}

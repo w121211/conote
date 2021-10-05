@@ -156,15 +156,21 @@ export class BulletNode {
    * 依照 matcher 找對應的 nodes
    */
   public static filter({ node, matcher }: { node: Bullet | BulletDraft; matcher: Matcher }): BulletDraft | null {
-    if (node.head.length === 0) {
-      if (node.children.length > 0) {
-        throw new Error('node沒有head，但有children，無法移除')
+    const filtered = node.children
+      .map(e => BulletNode.filter({ node: e, matcher }))
+      .filter((e): e is BulletDraft => e !== null)
+    if (filtered.length > 0) {
+      return {
+        ...node,
+        children: filtered,
       }
+    } else if (matcher(node)) {
+      return {
+        ...node,
+        children: [],
+      }
+    } else {
       return null
-    }
-    return {
-      ...node,
-      children: node.children.map(e => BulletNode.prune(e)).filter((e): e is BulletDraft => e !== null),
     }
   }
 }

@@ -1,6 +1,5 @@
 export * from './fetch-client'
-export * from './domain/index'
-export * from './domain/common'
+export * from './vendors/index'
 
 export type SrcType = 'VIDEO' | 'POST' | 'AUTHOR' | 'OTHER'
 

@@ -5,11 +5,6 @@ import { BoardStatus, CardType } from '@prisma/client'
 import { Token } from 'prismjs'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useCreateCardBodyMutation } from '../../apollo/query.graphql'
-import { BulletEditor } from '../../components/editor/editor'
-import { Serializer } from '../../components/editor/serializer'
-import { LiElement, UlElement } from '../../components/editor/slate-custom-types'
-import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
-import { CardBodyContent, CardHeadContent, CardHeadContentValueInjected, PinBoard } from '../../lib/models/card'
 
 const TestPage = (): JSX.Element => {
   const [createCardBody, { error }] = useCreateCardBodyMutation({

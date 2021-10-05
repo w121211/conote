@@ -34,7 +34,9 @@
     "@keyv/redis": "^2.1.2",
     "googleapis": "^74.2.0",
     "got": "^11.8.2",
-    "keyv": "^4.0.3"
+    "keyv": "^4.0.3",
+    "metascraper": "^5.24.8",
+    "metascraper-author": "^5.24.8"
   },
   "engines": {
     "node": ">=10.0.0"

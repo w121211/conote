@@ -1,7 +1,12 @@
 import { BaseEditor, BaseRange } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-import { BulletDraft, RootBullet } from '../../lib/bullet/types'
+import {
+  Bullet,
+  BulletDraft,
+  RootBullet,
+  RootBulletDraft,
+} from '../../../web/lib/bullet/types'
 
 export type CommentInput = {
   boardCode: !PinBoardCode
@@ -44,6 +49,7 @@ export type LabelInlineElement = {
 export type MirrorInlineElement = {
   type: 'mirror'
   children: CustomText[]
+  root?: RootBulletDraft
 }
 
 export type PopupInlineElement = {

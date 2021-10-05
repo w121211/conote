@@ -1,6 +1,6 @@
 import { FetchResult } from './index'
 import { LocalCache } from './local-cache'
-import { tryFetch } from './domain/index'
+import { tryFetch } from './vendors/index'
 
 export class FetchClient {
   // 有cache支援

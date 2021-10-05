@@ -50,7 +50,41 @@ import {
   removeLcBody,
 } from './with-lcbody'
 import { CustomText } from '../../../web/components/editor/slate-custom-types'
+import { BulletDraft, RootBulletDraft } from '../../../web/lib/bullet/types'
+import { BulletNode } from '../../../web/lib/bullet/node'
 // import { useSearch } from './search'
+
+const rootDemo: RootBulletDraft = {
+  root: true,
+  symbol: '$AA',
+  head: 'root',
+  children: [
+    {
+      head: 'a1',
+      sourceUrl: 'http://hello.world',
+      children: [
+        {
+          head: 'b1',
+          children: [],
+        },
+      ],
+    },
+    {
+      head: 'a2',
+      children: [],
+    },
+    {
+      head: 'a3',
+      children: [
+        {
+          head: 'b1',
+          sourceUrl: 'http://hello.world',
+          children: [],
+        },
+      ],
+    },
+  ],
+}
 
 const initialValueDemo: LiElement[] = [
   {
@@ -59,7 +93,11 @@ const initialValueDemo: LiElement[] = [
       {
         type: 'lc',
         children: [
-          { type: 'mirror', children: [{ text: '::$AA' }] },
+          {
+            type: 'mirror',
+            children: [{ text: '::$AA' }],
+            root: rootDemo,
+          },
           { text: 'Hello world' },
         ],
       },
@@ -138,26 +176,6 @@ export function lcPath(liPath: Path): Path {
 
 export function ulPath(liPath: Path): Path {
   return [...liPath, 1]
-}
-
-const LcBody = (
-  props: RenderElementProps & {
-    element: LcBodyElement
-  }
-) => {
-  const { attributes, children, element } = props
-  const editor = useSlateStatic()
-  const focused = useFocused() // 整個editor是否focus
-  const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
-
-  useEffect(() => {
-    if (focused && !selected) {
-      const path = ReactEditor.findPath(editor, element)
-      removeLcBody(editor, [element, path])
-    }
-  }, [selected])
-
-  return <div {...attributes}>{children}</div>
 }
 
 const Li = (props: RenderElementProps & { element: LiElement }) => {
@@ -339,25 +357,37 @@ const Mirror = (
   props: RenderElementProps & { element: MirrorInlineElement }
 ) => {
   const { attributes, children, element } = props
+  return <button {...attributes}>{children}</button>
+}
+
+const BulletComponent = ({ bullet }: { bullet: BulletDraft }) => {
   return (
     <>
-      <button {...attributes}>{children}</button>
-      <div contentEditable={false}>Mirror block</div>
+      <li>{bullet.head}</li>
+      {bullet.children.length > 0 && (
+        <ul>
+          {bullet.children.map((e, i) => (
+            <BulletComponent key={i} bullet={e} />
+          ))}
+        </ul>
+      )}
     </>
   )
 }
 
-const Lc = (
-  props: RenderElementProps & {
-    element: LcElement
-  }
-) => {
-  const { attributes, children, element } = props
+const Lc = ({
+  attributes,
+  children,
+  element,
+  sourceUrl,
+}: RenderElementProps & {
+  element: LcElement
+  sourceUrl?: string
+}): JSX.Element => {
   const editor = useSlateStatic()
   const focused = useFocused() // 整個editor是否focus
   const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
   const readonly = useReadOnly()
-  console.log(element.children)
 
   useEffect(() => {
     // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
@@ -377,19 +407,49 @@ const Lc = (
     }
   }, [selected, readonly])
 
+  // 若有 mirror，增加 filter block
+  let mirrorBlock: JSX.Element | null = null
+  const mirrors = element.children.filter(
+    (e): e is MirrorInlineElement => e.type === 'mirror'
+  )
+  if (mirrors.length === 1) {
+    const mirror = mirrors[0]
+    if (mirror.root) {
+      const filtered = BulletNode.filter({
+        node: mirror.root,
+        matcher: (e) => e.sourceUrl === 'http://hello.world',
+      })
+      if (filtered) {
+        mirrorBlock = (
+          <ul>
+            {filtered.children.map((e, i) => (
+              <BulletComponent key={i} bullet={e} />
+            ))}
+          </ul>
+        )
+      }
+    } else {
+      mirrorBlock = <div>Click to edit</div>
+    }
+  } else if (mirrors.length > 1) {
+    mirrorBlock = <div>一行只允許一個 mirror</div>
+  }
+
+  console.log(mirrorBlock)
+
   return (
     <div {...attributes}>
       <li>
         <span>{children}</span>
       </li>
-
-      <div contentEditable={false} style={{ color: 'green' }}>
-        {!element.isEditingBody && (
-          <span style={{ color: 'red' }}>{element.body}</span>
-        )}
-        {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>} */}
-        {/* {element.op === 'CREATE' && authorSwitcher} */}
-      </div>
+      {!selected && (
+        <div contentEditable={false} style={{ backgroundColor: 'gray' }}>
+          {mirrorBlock}
+          {/* <span style={{ color: 'red' }}>hello world</span> */}
+          {/* {placeholder && Node.string(element).length === 0 && <span style={{ color: 'grey' }}>{placeholder}</span>} */}
+          {/* {element.op === 'CREATE' && authorSwitcher} */}
+        </div>
+      )}
     </div>
   )
 }

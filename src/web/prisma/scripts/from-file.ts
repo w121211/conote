@@ -8,7 +8,13 @@ import { FetchClient } from '../../../packages/fetcher/src'
 import { BulletNode } from '../../lib/bullet/node'
 import { BulletDraft, InlineItem, InlinePoll, RootBulletDraft } from '../../lib/bullet/types'
 import { parseBulletHead } from '../../lib/bullet/text'
-import { CardBodyContent, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../../lib/models/card'
+import {
+  CardBodyContent,
+  CardMeta,
+  createCardBody,
+  getOrCreateCardBySymbol,
+  getOrCreateCardByUrl,
+} from '../../lib/models/card'
 import { createAuthorVote } from '../../lib/models/vote'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
 import { getBotId } from '../../lib/models/user'
@@ -215,7 +221,7 @@ async function main() {
     console.log(`*\n*\n* Seed file: ${filepath}`)
 
     for (const [url, text] of splitByUrl(readFileSync(filepath, { encoding: 'utf8' }))) {
-      let card: Card & { link: Link; body: CardBody }
+      let card: Omit<Card, 'meta'> & { link: Link; meta: CardMeta; body: CardBody }
       try {
         card = await getOrCreateCardByUrl({ fetcher, url })
       } catch (err) {

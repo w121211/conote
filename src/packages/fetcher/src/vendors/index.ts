@@ -1,4 +1,4 @@
-import { common } from './common'
+import { webpage } from './webpage'
 import { youtube } from './youtube'
 import { FetchResult } from '../index'
 
@@ -12,13 +12,13 @@ export class DomainNotFitError extends Error {
 }
 
 // 依序嘗試執行，若失敗則嘗試下一個
-const fetchFns: DomainFetchFunction[] = [youtube, common]
+const fetchers: DomainFetchFunction[] = [youtube, webpage]
 
 export async function tryFetch(url: string): Promise<FetchResult> {
-  for (const fn of fetchFns) {
+  for (const fetcher of fetchers) {
     try {
       // eslint-disable-next-line no-await-in-loop
-      return await fn(url)
+      return await fetcher(url)
     } catch (err) {
       if (err instanceof DomainNotFitError) {
         continue

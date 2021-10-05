@@ -27,32 +27,11 @@ function parseUrl(url: string): { vid: string } {
       return { vid: result[1] }
     }
   }
-  throw new DomainNotFitError()
+  throw new DomainNotFitError(`找不到 video_id: ${url}`)
 }
 
-// function determineInput(value) {
-//   const parsed = {
-//     type: 'unknown',
-//     mayHideOthers: true,
-//     original: value,
-//   }
-//   for (const k in patterns) {
-//     for (let i = 0; i < patterns[k].length; i++) {
-//       const regex = patterns[k][i]
-//       const result = regex.exec(value)
-//       if (result) {
-//         parsed.type = type
-//         parsed.value = result[1]
-//         return parsed
-//       }
-//     }
-//   }
-//   return parsed
-// }
-
 export const youtube: DomainFetchFunction = async function (url) {
-  // 測試domain
-  const { vid } = parseUrl(url)
+  const { vid } = parseUrl(url) // 測試 domain
 
   const resp = await youtubeApi.videos.list({
     part: ['snippet'],

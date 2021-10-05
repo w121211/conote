@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fetch webpage get metadata of https://news.cnyes.com/news/id/4700195 1`] = `
+Object {
+  "domain": "news.cnyes.com",
+  "resolvedUrl": "https://news.cnyes.com/news/id/4700195",
+  "srcType": "OTHER",
+}
+`;

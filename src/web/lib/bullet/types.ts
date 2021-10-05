@@ -81,7 +81,7 @@ export type Bullet = {
   body?: string
   children: Bullet[] // 空 array 表示為無children
 
-  sourceUrl?: string // 等同於 card symbol 的 url
+  sourceUrl?: string // as URL, 等同於 card symbol 的 url
   author?: string // 等同於 author name，沒有的話代表是 user 自己的創作
 
   placeholder?: string
