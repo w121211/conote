@@ -16,6 +16,9 @@ type Query {
   # @cardBodyId 若給予，返回該card及指定的body，否則返回 latest body
   card(symbol: String!, cardBodyId: String): Card!
 
+  # 若找不到 card,throws error
+  cardMeta(symbol: String!): CardMeta!
+
   # 以 url 查找，若無會 fetch, resolve url 並創新 card
   webpageCard(url: String!): Card!
 
@@ -109,7 +112,8 @@ type Query {
 type Mutation {
   # 若 symbol 已存在會直接返回現有的 card，不另外創新
   createSymbolCard(data: CardInput!): Card!
-  updateCardMeta(symbol: String!, data: CardMetaInput!): Card!
+
+  updateCardMeta(symbol: String!, data: CardMetaInput!): CardMeta!
 
   # 若該 symbol 尚未有 card 時，需要給 template，會同步創 card, body
   createCardBody(cardSymbol: String!, data: CardBodyInput!): CardBody!
@@ -339,12 +343,14 @@ type CardBody {
 }
 
 type CardMeta {
-  url: String
-  title: String
-  author: String
-  keywords: [String!]
   redirects: [String!]
   duplicates: [String!]
+  url: String
+  author: String
+  date: String
+  description: String
+  keywords: [String!]
+  title: String
 }
 
 type Card {
@@ -505,12 +511,14 @@ input BoardInput {
 # }
 
 input CardMetaInput {
-  url: String
-  title: String
-  author: String
-  keywords: [String!]
   redirects: [String!]
   duplicates: [String!]
+  url: String
+  author: String
+  date: String
+  description: String
+  keywords: [String!]
+  title: String
 }
 
 input CardBodyInput {

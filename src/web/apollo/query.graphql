@@ -153,6 +153,17 @@ fragment cardBody on CardBody {
   prevId
 }
 
+fragment cardMeta on CardMeta {
+  redirects
+  duplicates
+  url
+  author
+  date
+  description
+  keywords
+  title
+}
+
 fragment card on Card {
   __typename
   id
@@ -162,12 +173,7 @@ fragment card on Card {
     ...link
   }
   meta {
-    url
-    title
-    author
-    keywords
-    redirects
-    duplicates
+    ...cardMeta
   }
   body {
     ...cardBody
@@ -204,6 +210,12 @@ query Link($url: String!) {
 query Card($symbol: String!) {
   card(symbol: $symbol) {
     ...card
+  }
+}
+
+query CardMeta($symbol: String!) {
+  cardMeta(symbol: $symbol) {
+    ...cardMeta
   }
 }
 
@@ -287,7 +299,7 @@ mutation CreateSymbolCard($data: CardInput!) {
 
 mutation UpdateCardMeta($symbol: String!, $data: CardMetaInput!) {
   updateCardMeta(symbol: $symbol, data: $data) {
-    ...card
+    ...cardMeta
   }
 }
 

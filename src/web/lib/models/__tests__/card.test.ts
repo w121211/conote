@@ -17,7 +17,7 @@ import {
 } from '../card'
 import prisma from '../../prisma'
 import { clean, createTestUsers, TESTUSERS, TESTOAUTHORS, omitDeep } from '../../test-helper'
-import { FetchClient } from '../../../../packages/fetcher/src'
+import { FetchClient } from '../../fetcher/fetcher'
 import { getBotId } from '../user'
 import { symbolToUrl, SYMBOL_DOMAIN } from '../symbol'
 

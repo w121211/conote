@@ -1,5 +1,7 @@
 import { Card, Link, Author } from '@prisma/client'
-import { parseUrl, tryFetch, FetchClient, FetchResult } from '../../../packages/fetcher/src/index'
+import { FetchClient, FetchResult } from '../fetcher/fetcher'
+import { tryFetch } from '../fetcher/vendors'
+import { parseUrl } from '../fetcher/vendors/webpage'
 import prisma from '../prisma'
 
 const bannedCharMatcher = /[^a-zA-Z0-9_\p{Letter}]/gu
@@ -21,7 +23,7 @@ export function linkToSymbol(link: Link): string {
 export async function getOrCreateLink(props: {
   fetcher?: FetchClient
   url: string
-}): Promise<[Link & { card: Card | null }, { fetchResult?: FetchResult }]> {
+}): Promise<[Link & { card: Card | null }, { fetchResult: FetchResult }]> {
   const { fetcher, url } = props
 
   // TODO: 這個url尚未resolved, 需要考慮redirect、不同url指向同一個頁面的情況
@@ -53,7 +55,7 @@ export async function getOrCreateLink(props: {
 
   const link = await prisma.link.create({
     data: {
-      url: res.resolvedUrl,
+      url: res.finalUrl,
       domain: res.domain,
       sourceType: res.srcType,
       sourceId: res.srcId,

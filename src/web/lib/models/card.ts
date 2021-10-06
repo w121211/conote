@@ -1,5 +1,5 @@
 import { Card, CardBody, CardType, Link } from '@prisma/client'
-import { FetchClient } from '../../../packages/fetcher/src'
+import { FetchClient } from '../fetcher/fetcher'
 import prisma from '../prisma'
 import { checkBulletDraft, BulletNode } from '../bullet/node'
 import { runBulletOp } from '../bullet/operation'
@@ -18,13 +18,15 @@ export type PinBoard = {
 }
 
 export type CardMeta = {
-  url?: string
-  // template: string
-  title?: string
-  author?: string
-  keywords?: string[]
   redirects?: string[]
   duplicates?: string[]
+  url?: string
+  author?: string
+  date?: string
+  description?: string
+  keywords?: string[]
+  // lang?: string
+  title?: string
 }
 
 // export type MirrorOperation = BulletOperation
@@ -503,12 +505,16 @@ export async function getOrCreateCardByUrl({ fetcher, url }: { fetcher?: FetchCl
     templateProps: {
       symbol,
       template: template.name,
-      title: fetchResult?.srcTitle ?? '',
+      title: fetchResult.title ?? '',
     },
     type: CardType.WEBPAGE,
     meta: {
       url: link.url,
-      title: fetchResult?.srcTitle,
+      author: fetchResult?.authorName,
+      date: fetchResult?.date,
+      description: fetchResult?.date,
+      keywords: fetchResult?.keywords,
+      title: fetchResult?.title,
     },
   })
   return { ...card, link }

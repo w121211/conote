@@ -4,7 +4,6 @@
 // import { prisma, foo } from '../context'
 import { existsSync, readFileSync, unlinkSync } from 'fs'
 import { resolve } from 'path'
-import { FetchClient } from '../index'
 // import * as domainFetchers from '../domain/general'
 // import { IexClient } from '../domain/iex'
 

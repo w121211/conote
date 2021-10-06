@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, unlinkSync } from 'fs'
 import { resolve } from 'path'
-import { FetchClient } from '../index'
-import { tryFetch } from '../domain/index'
+import { FetchClient } from '../fetcher'
+import { tryFetch } from '../vendors/index'
 
 describe('function tryFetch', () => {
   it('fetch youtube', async () => {

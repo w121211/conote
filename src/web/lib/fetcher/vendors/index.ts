@@ -1,6 +1,6 @@
 import { webpage } from './webpage'
 import { youtube } from './youtube'
-import { FetchResult } from '../index'
+import { FetchResult } from '../fetcher'
 
 export type DomainFetchFunction = (url: string, domain?: string) => Promise<FetchResult>
 

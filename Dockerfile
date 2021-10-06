@@ -12,16 +12,10 @@ COPY src/packages/editor ./
 RUN yarn install --frozen-lockfile
 RUN yarn build
 
-WORKDIR /app/src/packages/fetcher
-COPY src/packages/fetcher ./
-RUN yarn install --frozen-lockfile
-RUN yarn build
-
 # Rebuild the source code only when needed
 FROM node:14-alpine AS deps
 COPY tsconfig.base.json /app/
 COPY --from=packages-deps /app/src/packages/editor /app/src/packages/editor
-COPY --from=packages-deps /app/src/packages/fetcher /app/src/packages/fetcher
 WORKDIR /app/src/web
 COPY src/web ./
 RUN yarn install --frozen-lockfile

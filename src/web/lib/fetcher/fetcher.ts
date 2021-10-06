@@ -1,6 +1,22 @@
-import { FetchResult } from './index'
 import { LocalCache } from './local-cache'
 import { tryFetch } from './vendors/index'
+
+export type SrcType = 'VIDEO' | 'POST' | 'AUTHOR' | 'OTHER'
+
+export type FetchResult = {
+  domain: string
+  finalUrl: string
+  srcId?: string
+  srcType: SrcType
+  // metadata
+  authorId?: string
+  authorName?: string
+  date?: string
+  description?: string
+  keywords?: string[]
+  lang?: string
+  title?: string
+}
 
 export class FetchClient {
   // 有cache支援

@@ -3,7 +3,7 @@
  */
 import { readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
-import { FetchResult } from './index'
+import { FetchResult } from './fetcher'
 
 export class LocalCache {
   private filepath: string

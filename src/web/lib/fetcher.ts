@@ -1,5 +1,5 @@
 import { resolve } from 'path'
-import { FetchClient } from '../../packages/fetcher/src'
+import { FetchClient } from './fetcher/fetcher'
 
 const fetchClientPropertyName = `__prevent-name-collision__fetcher`
 

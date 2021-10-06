@@ -41,15 +41,15 @@ export const youtube: DomainFetchFunction = async function (url) {
     const e = resp.data.items[0]
     return {
       domain: 'youtube.com',
-      resolvedUrl: url, // TODO: Bug 可能會有redirect, short-url, mobile-url
+      finalUrl: url, // TODO: Bug 可能會有redirect, short-url, mobile-url
       srcType: 'VIDEO',
       srcId: vid,
       srcTitle: e.snippet?.title ?? undefined,
-      srcPublishDate: e.snippet?.publishedAt ? new Date(e.snippet?.publishedAt).toISOString() : undefined,
       authorId: e.snippet?.channelId ?? undefined,
       authorName: e.snippet?.channelTitle ?? undefined,
+      date: e.snippet?.publishedAt ? new Date(e.snippet.publishedAt).toISOString() : undefined,
       description: e.snippet?.description ?? undefined,
-      tags: e.snippet?.tags ?? undefined,
+      keywords: e.snippet?.tags ?? undefined,
     }
   }
 

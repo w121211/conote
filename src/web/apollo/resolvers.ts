@@ -7,7 +7,7 @@ import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
 import { QueryResolvers, MutationResolvers } from './type-defs.graphqls'
 import { deltaLike } from '../lib/helper'
-import { createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
+import { CardMeta, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
 import { getOrCreateUser } from '../lib/models/user'
 import { createAuthorVote, createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
@@ -126,6 +126,18 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     //   }
     // }
     // return null
+  },
+
+  async cardMeta(_parent, { symbol }, _context, _info) {
+    const card = await prisma.card.findUnique({
+      where: { symbol },
+      include: { link: true },
+    })
+    if (card === null) {
+      throw `Card ${symbol} not found`
+    }
+    const meta: CardMeta = card.meta ? JSON.parse(card.meta) : {}
+    return meta
   },
 
   async webpageCard(_parent, { url }, _context, _info) {
@@ -453,19 +465,15 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   async updateCardMeta(_parent, { symbol, data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const _card = await prisma.card.update({
+    const card = await prisma.card.update({
       where: { symbol },
       data: {
         // TODO 需要檢查 input
         meta: JSON.stringify(data),
       },
     })
-    const card = await getOrCreateCardBySymbol(symbol)
-    return {
-      ..._toStringId(card),
-      body: { ..._toStringId(card.body) },
-      link: card.link && _toStringId(card.link),
-    }
+    const meta: CardMeta = card.meta ? JSON.parse(card.meta) : {}
+    return meta
   },
 
   async createCardBody(_parent, { cardSymbol, data }, { req, res }, _info) {

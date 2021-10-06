@@ -4,20 +4,20 @@ import { DomainFetchFunction } from './index'
 
 import createMetascraper, { Rule } from 'metascraper'
 import metascraperAuthor from 'metascraper-author'
+import metascraperDate from 'metascraper-date'
+import metascraperDescription from 'metascraper-description'
+// import metascraperLang from 'metascraper-lang'
+import metascraperTitle from 'metascraper-title'
+import metascraperUrl from 'metascraper-url'
 
-// const metascraper = require('metascraper')([
-//   require('metascraper-author')(),
-//   require('metascraper-date')(),
-//   require('metascraper-description')(),
-//   require('metascraper-image')(),
-//   require('metascraper-logo')(),
-//   require('metascraper-clearbit')(),
-//   require('metascraper-publisher')(),
-//   require('metascraper-title')(),
-//   require('metascraper-url')()
-// ])
-
-const metascraper = createMetascraper([metascraperAuthor()])
+const metascraper = createMetascraper([
+  metascraperAuthor(),
+  metascraperDate(),
+  metascraperDescription(),
+  // metascraperLang(),
+  metascraperTitle(),
+  metascraperUrl(),
+])
 
 // const rule: Rule = () => {
 //   return {
@@ -42,16 +42,20 @@ export function parseUrl(url: string): ParseUrlResult {
 export const webpage: DomainFetchFunction = async function (url) {
   const { body: html, url: finalUrl } = await got(url)
   const metadata = await metascraper({ html, url: finalUrl })
-  console.log(metadata)
 
-  const { domain } = parseUrl(finalUrl)
+  const { domain } = parseUrl(metadata.url)
   if (domain === undefined) {
     throw new Error(`Fetch error: ${url} ${finalUrl}`)
   }
-
   return {
     domain,
-    resolvedUrl: url,
+    finalUrl: metadata.url,
     srcType: 'OTHER',
+    authorName: metadata.author,
+    date: metadata.date,
+    description: metadata.description,
+    // keywords?: string[]
+    // lang: metadata.lang,
+    title: metadata.title,
   }
 }
