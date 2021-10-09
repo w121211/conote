@@ -117,7 +117,8 @@ const UpDown = ({
   return (
     <div
       className={`${className} ${classes.default} ${data?.myHashtagLike?.choice === 'UP' && classes.clicked}`}
-      onClick={() => {
+      onClick={e => {
+        e.stopPropagation()
         handleLike()
       }}
       // style={{ width: '100%' }}

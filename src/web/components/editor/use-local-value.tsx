@@ -264,7 +264,7 @@ export const useLocalValue = ({
       if (data) {
         const { openedLi, self, mirror } = data
         openedLi.children = [openedLi.children[0], { type: 'ul', children: value }] // shallow copy
-        const [symbol, rootLi] = mirror ? [mirror.symbol, mirror.rootLi] : [self.symbol, self.rootLi] // 若目前有 mirror（等同於 location 指向 mirror）則存入 mirror
+        const [symbol, rootLi] = mirror ? [mirror.symbol.substring(2), mirror.rootLi] : [self.symbol, self.rootLi] // 若目前有 mirror（等同於 location 指向 mirror）則存入 mirror
         store.setRootLi(symbol, rootLi) // TODO: 每次 input 都需要轉換 string <-> json，相當耗時
 
         if (!isValueModified) {
@@ -369,7 +369,6 @@ export const useLocalValue = ({
         const { rootLi: mirrorRootLi } = mirrorSymbol
           ? await getLocalOrQueryRoot({ client, mirrorSymbol })
           : { rootLi: undefined }
-
         // 按照 root/mirror + path 取得對應的 opened-li
         let openedLi: LiElement, value: LiElement[]
         const node = mirrorRootLi ? Node.get(mirrorRootLi, openedLiPath) : Node.get(selfRootLi, openedLiPath)

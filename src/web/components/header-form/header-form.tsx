@@ -52,40 +52,40 @@ const HeaderForm = ({
   //   control,
   // })
 
-  const [updateCardMeta, { data }] = useUpdateCardMetaMutation({
-    // update(cache, { data }) {
-    //   const res = cache.readQuery<CardQuery>({ query: CardDocument })
-    //   if (data?.updateCardMeta && res?.card) {
-    //     cache.writeQuery({
-    //       query: CardDocument,
-    //       data: {
-    //         card: data.updateCardMeta,
-    //       },
-    //     })
-    //   }
-    // },
+  const [updateCardMeta] = useUpdateCardMetaMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<CardQuery>({ query: CardDocument })
+      if (data?.updateCardMeta && res?.card) {
+        cache.writeQuery({
+          query: CardDocument,
+          data: {
+            card: data.updateCardMeta,
+          },
+        })
+      }
+    },
     onCompleted(data) {
-      // if (data.updateCardMeta.meta) {
-      //   const newData = data.updateCardMeta.meta
-      //   // setValue('title', newData.title ?? '', { shouldDirty: false })
-      //   // setValue('author', newData.author ?? '', { shouldDirty: false })
-      //   // setValue('url', newData.url ?? '', { shouldDirty: false })
-      //   // setValue('redirects', newData.redirects?.join(' ') ?? '', { shouldDirty: false })
-      //   // setValue('keywords', newData.keywords?.join(' ') ?? '', { shouldDirty: false })
-      //   // setValue('duplicates', newData.duplicates?.join(' ') ?? '', { shouldDirty: false })
-      //   reset(
-      //     {
-      //       title: newData.title ?? '',
-      //       author: newData.author ?? '',
-      //       url: newData.url ?? '',
-      //       redirects: newData.redirects?.join(' ') ?? '',
-      //       keywords: newData.keywords?.join(' ') ?? '',
-      //       duplicates: newData.duplicates?.join(' ') ?? '',
-      //     },
-      //     { keepIsSubmitted: true },
-      //   )
-      //   handleSubmitted(isSubmitted)
-      // }
+      if (data.updateCardMeta) {
+        const newData = data.updateCardMeta
+        // setValue('title', newData.title ?? '', { shouldDirty: false })
+        // setValue('author', newData.author ?? '', { shouldDirty: false })
+        // setValue('url', newData.url ?? '', { shouldDirty: false })
+        // setValue('redirects', newData.redirects?.join(' ') ?? '', { shouldDirty: false })
+        // setValue('keywords', newData.keywords?.join(' ') ?? '', { shouldDirty: false })
+        // setValue('duplicates', newData.duplicates?.join(' ') ?? '', { shouldDirty: false })
+        reset(
+          {
+            title: newData.title ?? '',
+            author: newData.author ?? '',
+            url: newData.url ?? '',
+            redirects: newData.redirects?.join(' ') ?? '',
+            keywords: newData.keywords?.join(' ') ?? '',
+            duplicates: newData.duplicates?.join(' ') ?? '',
+          },
+          { keepIsSubmitted: true },
+        )
+        handleSubmitted(isSubmitted)
+      }
     },
     // refetchQueries: [{ query: CardDocument, variables: { symbol } }],
   })
@@ -163,7 +163,6 @@ const HeaderForm = ({
           <div className={classes.submitBtn}>
             <button className="primary" type="submit" disabled={!isDirty}>
               {isSubmitted ? (isDirty ? '提交' : '已提交') : '提交'}
-              {/* {console.log(isDirty, isSubmitSuccessful, isSubmitted)} */}
             </button>
           </div>
         </form>

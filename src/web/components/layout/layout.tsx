@@ -53,8 +53,8 @@ export default function Layout({
   return (
     <div className={classes.layout} onScroll={handleScroll}>
       <div className={classes.children} ref={layoutRef}>
-        {/* {children} */}
-        {childrenWithCallback()}
+        {children}
+        {/* {childrenWithCallback()} */}
         {/* <footer>footer</footer> */}
       </div>
       <nav
@@ -80,7 +80,6 @@ export default function Layout({
             </button>
           ) : (
             <button className="primary">
-              {' '}
               <a href="/api/auth/login">Login</a>
             </button>
           )}

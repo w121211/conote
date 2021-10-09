@@ -9,6 +9,7 @@ const Popup = ({
   subTitle,
   mask,
   buttons,
+  noMask,
 }: // center
 // width,
 {
@@ -18,6 +19,7 @@ const Popup = ({
   subTitle?: string
   mask?: boolean
   buttons?: React.ReactNode
+  noMask?: boolean
   // center?:boolean
   // width?: number
 }): JSX.Element => {
@@ -27,18 +29,22 @@ const Popup = ({
       className={classes.containerOuter}
       style={{
         visibility: `${visible ? 'visible' : 'hidden'}`,
+        width: `${noMask ? 'fit-content' : '100vw'}`,
+        height: `${noMask ? 'fit-content' : '100vh'}`,
         // width: `${typeof width === 'number' ? width + 'px' : 'initial'}`,
       }}
     >
-      <div
-        className={classes.mask}
-        onClick={e => {
-          // e.preventDefault()
-          e.stopPropagation()
-          hideBoard()
-        }}
-        style={mask ? undefined : { background: 'none' }}
-      ></div>
+      {!noMask && (
+        <div
+          className={classes.mask}
+          onClick={e => {
+            // e.preventDefault()
+            e.stopPropagation()
+            hideBoard()
+          }}
+          style={mask ? undefined : { background: 'none' }}
+        ></div>
+      )}
 
       <div className={classes.containerInner}>
         <div className={classes.topBar}>
@@ -62,6 +68,7 @@ const Popup = ({
 
 Popup.defaultProps = {
   mask: true,
+  noMask: false,
   // center:false
 }
 

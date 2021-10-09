@@ -24,7 +24,7 @@ export interface NavPathProps {
   location: NavLocation
 }
 
-const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
+const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/g
 
 const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX.Element => {
   const [myPath, setMyPath] = useState<(Nav | string)[] | undefined>(path)

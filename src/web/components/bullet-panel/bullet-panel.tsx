@@ -97,14 +97,14 @@ const BulletPanel = ({
         e.stopPropagation()
         // e.preventDefault()
 
+        setShowPanel(false)
         // if (!e.currentTarget.contains(containerRef.current)) {
-        setTimeout(
-          () => {
-            setShowPanel(false)
-          },
-          100,
-          false,
-        )
+        //  setTimeout(
+        //   () => {
+        //   },
+        //   100,
+        //   false,
+        // )
         // }
         // console.log('mouseout')
       }}
