@@ -16,6 +16,7 @@ import {
 } from 'slate-react'
 import { withHistory } from 'slate-history'
 import {
+  CustomRange,
   InlineMirrorElement,
   InlinePollElement,
   InlineSymbolElement,
@@ -60,7 +61,7 @@ import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll } from '../../lib/bu
 import CreatePollForm from '../board-form/create-poll-form'
 import HashtagTextToIcon from '../upDown/hashtag-text-to-icon'
 import PollPage from '../board/poll-page'
-import { Context } from '../../pages/card/[symbol]'
+// import { Context } from '../../pages/card/[symbol]'
 import AuthorPollPage from '../board/author-poll-page'
 import { useRouter } from 'next/router'
 import Popup from '../popup/popup'
@@ -70,8 +71,7 @@ import { useApolloClient } from '@apollo/client'
 import { Serializer } from './serializer'
 import { BulletNode } from '../../lib/bullet/node'
 import { Token, tokenize } from 'prismjs'
-import { LINE_VALUE_GRAMMAR } from '../../../packages/editor/src'
-import { grammar, tokenizeBulletString } from '../../lib/bullet/text'
+import { tokenizeBulletString } from '../../lib/bullet/text'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
