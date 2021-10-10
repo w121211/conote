@@ -1,30 +1,20 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import { Node } from 'slate'
-import { BulletEditor, EmojiButotn } from '../../components/editor/editor'
+import { BulletEditor } from '../../components/editor/editor'
 import { LiElement } from '../../components/editor/slate-custom-types'
 import { useLocalValue } from '../../components/editor/use-local-value'
 import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 import NavPath from '../../components/nav-path/nav-path'
-import {
-  Hashtag,
-  HashtagsDocument,
-  HashtagsQuery,
-  Poll,
-  useCreateVoteMutation,
-  useHashtagsLazyQuery,
-  useHashtagsQuery,
-  useMeQuery,
-} from '../../apollo/query.graphql'
+import { Poll, useCreateVoteMutation, useMeQuery } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/symbol.module.scss'
 import Popover from '../../components/popover/popover'
 import { useUser } from '@auth0/nextjs-auth0'
 import Popup from '../../components/popup/popup'
 import HeaderForm from '../../components/header-form/header-form'
-import Link from 'next/link'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -47,69 +37,21 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
   return navs
 }
 
-/**
- * @param poll
- * @param author 若給予視為代表 author 投票
- */
-// const PollComponent = (props: { poll: Poll; author?: string }): JSX.Element => {
-//   const { poll, author } = props
-//   const [createVote] = useCreateVoteMutation({
-//     update(cache, { data }) {
-//       // const res = cache.readQuery<MyVotesQuery>({
-//       //   query: MyVotesDocument,
-//       // })
-//       // if (data?.createVote && res?.myVotes) {
-//       //   cache.writeQuery({
-//       //     query: MyVotesDocument,
-//       //     data: { myVotes: res.myVotes.concat([data.createVote]) },
-//       //   })
-//       // }
-//       // refetch()
-//     },
-//     // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
-//   })
-//   const onVote = () => {
-//     // 已經投票且生效，不能再投
-//     // 尚未投票，可以投
-//     // 送出按鈕
-//   }
+export const Context = createContext({
+  author: '' as string | undefined,
+  login: true,
+  showLoginPopup: (b: boolean) => {
+    '_'
+  },
+})
 
-//   return (
-//     <>
-//       {poll.choices.map((e, i) => (
-//         <button
-//           key={i}
-//           onClick={event => {
-//             createVote({
-//               variables: {
-//                 pollId: poll.id,
-//                 data: { choiceIdx: i },
-//               },
-//             })
-//           }}
-//         >
-//           {e}
-//         </button>
-//       ))}
-//     </>
-//   )
-// }
-
-// export const Context = createContext({
-//   author: '' as string | undefined,
-//   login: true,
-//   showLoginPopup: (b: boolean) => {
-//     '_'
-//   },
-// })
-const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/g
-
-const CardSymbolPage = (): JSX.Element | null => {
+const AuthorPage = (): JSX.Element | null => {
   const router = useRouter()
   // const [navs, setNavs] = useState<Nav[]>() // editor route
   const [readonly, setReadonly] = useState(true)
   const [location, setLocation] = useState<NavLocation>()
-  const [authorName, setAuthorName] = useState<string | undefined>((router.query.a as string) ?? undefined)
+  const [showMentionedPopup, setShowMentionedPopup] = useState(false)
+  const [mentionedPopupContents, setMentionedPopupContents] = useState<undefined | JSX.Element>()
   // const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
   const [disableSubmit, setDisableSubmit] = useState(true)
   const { data: meData, loading: meLoading } = useMeQuery({ fetchPolicy: 'cache-first' })
@@ -119,21 +61,17 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [headerFormSubmited, setHeaderFormSubmited] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [submitFinished, setSubmitFinished] = useState(false)
-  const [queryHashtags, { data: hashtagData }] = useHashtagsLazyQuery({
-    fetchPolicy: 'cache-first',
-    variables: { symbol: data?.self.symbol ?? '' },
-  })
 
-  useEffect(() => {
-    if (router.isReady) {
-      const location = getNavLocation(router.query)
-      setLocation(location)
-      // console.log(location)
-      if (router.query.a) {
-        setAuthorName(router.query.a as string)
-      }
-    }
-  }, [router])
+  //   useEffect(() => {
+  //     if (router.isReady) {
+  //       const location = getNavLocation(router.query)
+  //       setLocation(location)
+  //       // console.log(location)
+  //       if (router.query.a) {
+  //         setAuthorName(router.query.a as string)
+  //       }
+  //     }
+  //   }, [router])
 
   useEffect(() => {
     if (!meLoading && (meData || user)) {
@@ -142,27 +80,12 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
   }, [meData, user, meLoading])
 
-  useEffect(() => {
-    if (!showHeaderForm && headerFormSubmited) {
-      dropValue()
-      router.reload()
-    }
-  }, [headerFormSubmited, showHeaderForm])
-
-  let hashtags: Hashtag[] | undefined
-
-  useEffect(() => {
-    queryHashtags()
-    if (hashtagData?.hashtags && data) {
-      hashtagData?.hashtags?.forEach(e => {
-        if (e.bulletId === data.openedLi.children[0].id) {
-          hashtags?.push(e)
-        }
-      })
-
-      console.log(hashtags)
-    }
-  }, [data?.openedLi.children])
+  //   useEffect(() => {
+  //     if (!showHeaderForm && headerFormSubmited) {
+  //       dropValue()
+  //       router.reload()
+  //     }
+  //   }, [headerFormSubmited, showHeaderForm])
 
   // useEffect(() => {
   //   if (data && location) {
@@ -202,10 +125,9 @@ const CardSymbolPage = (): JSX.Element | null => {
     return null
   }, [data, readonly])
 
-  if (data === undefined || location === undefined) {
-    return null
-  }
-
+  //   if (data === undefined || location === undefined) {
+  //     return null
+  //   }
   return (
     <Layout>
       <div style={{ marginBottom: '3em' }}>
@@ -280,13 +202,13 @@ const CardSymbolPage = (): JSX.Element | null => {
           >
             {'Drop'}
           </button>
-          {data.selfCard.link?.url && (
+          {/* {data.selfCard.link?.url && (
             <button>
               <a href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
                 來源連結
               </a>
             </button>
-          )}
+          )} */}
           {/* {location.author && (
           <button
             onClick={() => {
@@ -318,14 +240,14 @@ const CardSymbolPage = (): JSX.Element | null => {
               <a>{e.text}</a>
             </Link>
           ))} */}
-          <NavPath
+          {/* <NavPath
             path={navs}
             location={{ ...location }}
             mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
-          />
+          /> */}
           {/* {data.selfCard.link?.authorName && <span>@{data.selfCard.link?.authorName}</span>} */}
 
-          {router.query.a && (
+          {/* {router.query.a && (
             <button
               className="transparent"
               onClick={() => {
@@ -342,17 +264,17 @@ const CardSymbolPage = (): JSX.Element | null => {
 
               <div className={`${classes.toggle} ${authorName && classes.toggleClicked}`}></div>
             </button>
-          )}
-          <button
+          )} */}
+          {/* <button
             className="secondary"
             onClick={() => {
               setShowHeaderForm(true)
             }}
           >
             編輯詳細資訊
-          </button>
+          </button> */}
           {/* // )} */}
-          {showHeaderForm && (
+          {/* {showHeaderForm && (
             <Popover
               visible={showHeaderForm}
               hideBoard={() => {
@@ -374,58 +296,68 @@ const CardSymbolPage = (): JSX.Element | null => {
                 }}
               />
             </Popover>
-          )}
-
+          )} */}
           <h3 className={classes.header}>
-            {router.query.p && Node.string(data.openedLi.children[0]).replace(rePoll, '').trimEnd()}
-            {data.mirror && !router.query.p && data.mirror.symbol}
-            {!router.query.p && !data.mirror && (
-              <>
-                {data.selfCard.meta.title ?? data.selfCard.symbol}
-                {data.selfCard.meta.author && (
-                  <Link href={`/author/${encodeURIComponent('@' + data.selfCard.meta.author)}`}>
-                    <a className={classes.author}>@{data.selfCard.meta.author}</a>
-                  </Link>
-                )}
-              </>
-            )}
+            {router.query.authorName}
+            {/* <span className={classes.author}>@{data.selfCard.meta.author}</span> */}
           </h3>
-          {/* {hashtags && <div>{hashtags.text}</div>} */}
-          {hashtags && (
-            <div>
-              {hashtags.map((e, i) => {
-                return <EmojiButotn key={i} emoji={e} />
-              })}
-            </div>
-          )}
-
-          {/* {console.log(data.openedLi.children[0].id)} */}
+          <table>
+            <th>網址</th>
+            <td>www.xxx.yyy.com</td>
+          </table>
+          <h4>最新</h4>
+          <ul>
+            <li>$AA #buy</li>
+            <li>$BB #sell</li>
+          </ul>
+          <h4>文章</h4>
+          <ul>
+            <li>晶片荒惡化費半大跌 交期拉長至逾20周</li>
+            <li>哈哈晶片荒惡化費</li>
+          </ul>
+          <h4>Mention in</h4>
+          <ul>
+            <li
+              onMouseOver={e => {
+                e.stopPropagation()
+                setShowMentionedPopup(true)
+              }}
+              //   onMouseLeave={e => {
+              //     e.stopPropagation
+              //     setShowMentionedPopup(false)
+              //   }}
+              style={{ position: 'relative', display: 'block' }}
+            >
+              @ARK OOOOOOO
+            </li>
+            <li>xxxxxxx @ARK OOOOOOO</li>
+          </ul>
 
           {/* <h3>{Node.string(data.openedLi.children[0])}</h3> */}
           {/* {data.selfCard.meta && ( */}
           {/* {console.log(data.selfCard.meta)} */}
           {/* {console.log(data.openedLi)} */}
         </div>
-        <div
-        // onClick={e => {
-        //   // e.preventDefault()
-        //   if (!meLoading && !meData && !user) {
-        //     setShowLoginPopup(true)
-        //   }
-        // }}
-        >
-          {editor}
-        </div>
         {/* <Context.Provider
-                value={{
-                  author: authorName,
-                  login: meData ? true : false,
-                  showLoginPopup: (b: boolean) => {
-                    setShowLoginPopup(b)
-                  },
-                }}
-              >
-        <Popover
+          value={{
+            author: authorName,
+            login: meData ? true : false,
+            showLoginPopup: (b: boolean) => {
+              setShowLoginPopup(b)
+            },
+          }}
+        >
+          <div
+            onClick={e => {
+              e.preventDefault()
+              if (!meLoading && !meData && !user) {
+                setShowLoginPopup(true)
+              }
+            }}
+          >
+            {editor}
+          </div>
+          <Popover
             visible={!!router.query.m}
             hideBoard={() => {
               router.push(`/card/${encodeURIComponent(location.selfSymbol)}`)
@@ -435,8 +367,19 @@ const CardSymbolPage = (): JSX.Element | null => {
           </Popover>
         </Context.Provider> */}
       </div>
+      {showMentionedPopup && (
+        <Popup
+          visible={showMentionedPopup}
+          hideBoard={() => {
+            setShowMentionedPopup(false)
+          }}
+          noMask={true}
+        >
+          文章peek
+        </Popup>
+      )}
     </Layout>
   )
 }
 
-export default CardSymbolPage
+export default AuthorPage

@@ -25,6 +25,10 @@
   :global(.ant-select) {
     width: min(450px, 100%);
   }
+  @media screen and(max-width:500px) {
+    width: 100%;
+    flex-direction: column;
+  }
 }
 .outer {
   height: 100vh;
@@ -41,11 +45,9 @@
   width: 100vw;
 
   padding: 3vh 5vw 9vh;
-  // background: $bg;
-
-  // h3 {
-  //   color: $black;
-  // }
+  @media screen and (max-width: 500px) {
+    flex-direction: column;
+  }
   .new {
     margin: 0 20px;
     // max-width: 36vw;
@@ -229,7 +231,8 @@
   line-height: 1.5;
 }
 .lcElementUrl {
-  width: 40%;
+  max-width: 50%;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   // font-size: 13px;

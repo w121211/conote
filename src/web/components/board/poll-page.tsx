@@ -42,11 +42,11 @@ const PollPage = ({
 
   title?: string
 }): JSX.Element => {
-  const [measureRef, bounds] = useMeasure()
-  const [boardValue, setBoardValue] = useState<Board>()
-  const [pollValue, setPollValue] = useState([''])
-  const [commentsList, setCommentsList] = useState<Comment[]>()
-  const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
+  // const [measureRef, bounds] = useMeasure()
+  // const [boardValue, setBoardValue] = useState<Board>()
+  // const [pollValue, setPollValue] = useState([''])
+  // const [commentsList, setCommentsList] = useState<Comment[]>()
+  // const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
   // const [form] = Form.useForm()
 
   const { data, loading, error } = usePollQuery({

@@ -69,6 +69,9 @@ import { getLocalOrQueryRoot } from './use-local-value'
 import { useApolloClient } from '@apollo/client'
 import { Serializer } from './serializer'
 import { BulletNode } from '../../lib/bullet/node'
+import { Token, tokenize } from 'prismjs'
+import { LINE_VALUE_GRAMMAR } from '../../../packages/editor/src'
+import { grammar, tokenizeBulletString } from '../../lib/bullet/text'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
@@ -92,56 +95,132 @@ const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element
   return [author, switcher]
 }
 
+const decorate = ([node, path]: NodeEntry) => {
+  // const focused = useFocused() // 整個editor是否focus
+  // const selected = useSelected()
+  const ranges: CustomRange[] = []
+  //   if (editor.selection != null) {
+  //     if (
+  //       !Editor.isEditor(node) &&
+  //       // Editor.string(editor, [path[0]]) === '' &&
+  //       Editor.string(editor, path) === '' &&
+  //       Range.includes(editor.selection, path) &&
+  //       Range.isCollapsed(editor.selection)
+  //     ) {
+  //       // ranges.push({
+  //       //   ...editor.selection,
+  //       //   placeholder: true,
+  //       // })
+  //       // console.log(editor.selection)
+  //       return [{ ...editor.selection, placeholder: true }]
+  //     }
+  //   }
+  //   //   if (!Text.isText(node)) {
+  //   //     return ranges
+  //   // }
+
+  function getLength(token: string | Token): number {
+    if (typeof token === 'string') {
+      return token.length
+    } else if (typeof token.content === 'string') {
+      return token.content.length
+    } else if (Array.isArray(token.content)) {
+      return token.content.reduce((l, t) => l + getLength(t), 0)
+    } else {
+      return 0
+    }
+  }
+  // if (selected) {
+  if (!Text.isText(node)) {
+    return ranges
+  }
+  // const tokens = tokenize(Node.string(node), LINE_VALUE_GRAMMAR)
+  const tokens = tokenizeBulletString(Node.string(node))
+  let start = 0
+
+  for (const token of tokens) {
+    const length = getLength(token)
+    const end = start + length
+
+    if (typeof token !== 'string') {
+      ranges.push({
+        // [token.type]: true,
+        type: token.type,
+        anchor: { path, offset: start },
+        focus: { path, offset: end },
+      })
+    }
+    start = end
+  }
+  // }
+
+  return ranges
+}
+
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, children, leaf } = props
-  // let style: React.CSSProperties = {}
-  if (leaf.placeholder) {
-    return (
-      <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
-        <span {...attributes}>
-          {/* <DefaultLeaf {...props} /> */}
-          {children}
-        </span>
-        <span style={{ opacity: 0.3, position: 'absolute', top: 0 }} contentEditable={false}>
-          Type / to open menu
-        </span>
-      </span>
-    )
-  }
-  // switch (leaf.type) {
-  //   case 'sect-symbol': {
-  //     style = { fontWeight: 'bold' }
-  //     break
-  //   }
-  //   case 'multiline-marker':
-  //   case 'inline-marker': {
-  //     style = { color: 'red' }
-  //     break
-  //   }
-  //   case 'inline-value':
-  //   case 'line-value': {
-  //     style = { color: 'blue' }
-  //     break
-  //   }
-  //   case 'line-mark':
-  //   case 'inline-mark': {
-  //     style = { color: 'orange' }
-  //     break
-  //   }
-  //   case 'mark':
-  //   case 'ticker':
-  //   case 'topic': {
-  //     style = { color: 'brown' }
-  //     break
-  //   }
-  //   case 'stamp': {
-  //     style = { color: 'yellow' }
-  //     break
-  //   }
+  let style: React.CSSProperties = {}
+  // if (leaf.placeholder) {
+  //   return (
+  //     <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
+  //       <span {...attributes}>
+  //         {/* <DefaultLeaf {...props} /> */}
+  //         {children}
+  //       </span>
+  //       <span style={{ opacity: 0.3, position: 'absolute', top: 0 }} contentEditable={false}>
+  //         Type / to open menu
+  //       </span>
+  //     </span>
+  //   )
   // }
+
+  /* grammer 參考 */
+  // 'mirror-ticker': { pattern: reMirrorTicker },
+  // 'mirror-topic': { pattern: reMirrorTopic },
+  // ticker: { pattern: /\$[A-Z-=]+/ },
+  // topic: { pattern: /\[\[[^\]\n]+\]\]/u },
+  // url: {
+  //   pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
+  // },
+  // user: { pattern: /\B@[\p{L}\d_]+\b/u },
+  // poll: { pattern: rePoll },
+  // 'new-poll': { pattern: reNewPoll },
+  // filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
+  // console.log(leaf.type, children)
+  // console.log(leaf)
+  switch (leaf.type) {
+    case 'ticker':
+    case 'topic': {
+      style = { color: '#ff619b', fontWeight: 'bold' }
+      break
+    }
+    case 'mirror-ticker':
+    case 'mirror-topic': {
+      style = { color: '#0cb26e' }
+      break
+    }
+    case 'user': {
+      style = { color: '#5395f0' }
+      break
+    }
+    case 'poll':
+    case 'new-poll': {
+      style = { color: '#329ead' }
+      break
+    }
+    case 'filtertag': {
+      style = { color: '#6a53fe' }
+      break
+    }
+    default: {
+      style = { color: '#3d434a' }
+    }
+  }
   return (
-    // <span {...attributes} style={style}>
-    <span {...attributes}>{children}</span>
+    // {/* <span {...attributes}>{children}</span> */}
+    <span {...attributes} style={style}>
+      {children}
+    </span>
   )
 }
 
@@ -217,7 +296,7 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
 /**
  * @returns 若 emoji 目前沒有人點贊，返回 null
  */
-const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null => {
+export const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null => {
   // console.log(emoji)
   // if (emoji.count.nUps === 0) {
   //   return null
@@ -421,13 +500,14 @@ const InlineMirror = ({
 
 const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; location: NavLocation }): JSX.Element => {
   const { attributes, children, element, location } = props
+  // const context = useContext(Context)
   const editor = useSlateStatic()
   const path = ReactEditor.findPath(editor, element)
   const readonly = useReadOnly()
   const [showPopover, setShowPopover] = useState(false)
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()
   const [pollId, setPollId] = useState(element.id)
-  const context = useContext(Context)
+  // const [pollData, setPollData] = useState<Poll | undefined>()
   // console.log(clickedIdx)
   function onCreated(poll: Poll) {
     // const editor = useSlateStatic()
@@ -440,6 +520,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   const [queryPoll, { data: pollData, error, loading }] = usePollLazyQuery()
 
   const parent = Node.parent(editor, path) as LcElement
+
   const handleCreatePoll = () => {
     // if (parent.id) {
     //   createPoll({ variables: { bulletId: parent.id, data: { choices: element.choices } } })
@@ -455,9 +536,9 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
         await queryPoll({ variables: { id: pollId } })
       }
       queryPollData()
-      pollData?.poll && onCreated(pollData.poll)
+      pollData && onCreated(pollData.poll)
     }
-  }, [showPopover])
+  }, [showPopover, pollData, pollId])
 
   const handleHideBoard = () => {
     setClickedIdx(undefined)
@@ -498,15 +579,15 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
           handlePollId={(id: string) => {
             setPollId(id)
           }}
+          handlePollData={(data: Poll) => {
+            // setPollData(data)
+          }}
           inline
         />
-        {showPopover && (
+        {/* parent.id = bullet id */}
+        {showPopover && parent.id && (
           <Popover visible={showPopover} hideBoard={handleHideBoard}>
-            {pollId ? (
-              <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} author={context.author} />
-            ) : (
-              <span>loading</span>
-            )}
+            {pollId ? <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} /> : <span>loading</span>}
           </Popover>
         )}
 
@@ -793,9 +874,12 @@ const Li = ({
       className={classes.bulletLi}
       onMouseOver={event => {
         event.stopPropagation()
+        event.preventDefault()
         setShowPanelIcon(true)
       }}
       onMouseOut={event => {
+        event.stopPropagation()
+        event.preventDefault()
         setShowPanelIcon(false)
       }}
     >
@@ -908,68 +992,15 @@ export const BulletEditor = ({
   readOnly?: boolean
   onValueChange?: (value: LiElement[]) => void
 }): JSX.Element => {
+  // const context = useContext(Context)
   const editor = useMemo(() => withParse(withOperation(withList(withHistory(withReact(createEditor()))))), [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
     [location, selfCard],
   )
-  const context = useContext(Context)
-  // const isFocused = useFocused()
+  const renderLeaf = useCallback(props => <Leaf {...props} />, [])
+  const renderDecorate = useCallback(([node, path]) => decorate([node, path]), [])
 
-  // const decorate = useCallback(([node, path]: NodeEntry) => {
-  //   const ranges: CustomRange[] = []
-  //   if (editor.selection != null) {
-  //     if (
-  //       !Editor.isEditor(node) &&
-  //       // Editor.string(editor, [path[0]]) === '' &&
-  //       Editor.string(editor, path) === '' &&
-  //       Range.includes(editor.selection, path) &&
-  //       Range.isCollapsed(editor.selection)
-  //     ) {
-  //       // ranges.push({
-  //       //   ...editor.selection,
-  //       //   placeholder: true,
-  //       // })
-  //       // console.log(editor.selection)
-  //       return [{ ...editor.selection, placeholder: true }]
-  //     }
-  //   }
-  //   //   if (!Text.isText(node)) {
-  //   //     return ranges
-  //   // }
-
-  //   //   function getLength(token: string | Token): number {
-  //   //     if (typeof token === 'string') {
-  //   //       return token.length
-  //   //     } else if (typeof token.content === 'string') {
-  //   //       return token.content.length
-  //   //     } else if (Array.isArray(token.content)) {
-  //   //       return token.content.reduce((l, t) => l + getLength(t), 0)
-  //   //     } else {
-  //   //       return 0
-  //   //     }
-  //   //   }
-
-  //   // const tokens = tokenize(node.text, LINE_VALUE_GRAMMAR)
-  //   // let start = 0
-
-  //   // for (const token of tokens) {
-  //   //   const length = getLength(token)
-  //   //   const end = start + length
-
-  //   //   if (typeof token !== 'string') {
-  //   //     ranges.push({
-  //   //       // [token.type]: true,
-  //   //       type: token.type,
-  //   //       anchor: { path, offset: start },
-  //   //       focus: { path, offset: end },
-  //   //     })
-  //   //   }
-  //   //   start = end
-  //   // }
-
-  //   return ranges
-  // }, [])
   const withListOnKeyDownMemo = useCallback((event: React.KeyboardEvent) => {
     withListOnKeyDown(event, editor)
     // console.log(editor.children)
@@ -997,15 +1028,17 @@ export const BulletEditor = ({
   return (
     <div
       className={`${classes.bulletEditorContainer} `}
-      onFocus={e => {
-        e.currentTarget.classList.add(classes.focused)
-        if (!context.login) {
-          context.showLoginPopup(true)
-        }
-      }}
-      onBlur={e => {
-        e.currentTarget.classList.remove(classes.focused)
-      }}
+      // onFocus={e => {
+      //   if (!e.currentTarget.classList.contains(classes.focused)) {
+      //     e.currentTarget.classList.add(classes.focused)
+      //   }
+      //   // if (!context.login) {
+      //   //   context.showLoginPopup(true)
+      //   // }
+      // }}
+      // onBlur={e => {
+      //   e.currentTarget.classList.remove(classes.focused)
+      // }}
     >
       {/* <div>
         @{selfCard.link?.url ?? 'undefined'}; @{location.author ?? 'undefined'}
@@ -1029,10 +1062,10 @@ export const BulletEditor = ({
         <Editable
           style={{ padding: '10px 10px 10px 3.5em' }}
           autoCorrect="false"
-          // decorate={decorate}
+          decorate={renderDecorate}
           readOnly={readOnly}
           renderElement={renderElement}
-          // renderLeaf={renderLeaf}
+          renderLeaf={renderLeaf}
           onKeyDown={event => {
             withListOnKeyDown(event, editor)
             // if (search) {
