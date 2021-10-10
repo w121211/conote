@@ -51,10 +51,9 @@
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/packages/fetcher",
+      "directory": "./src/packages/scraper",
       "changeProcessCWD": true
     }
   ],
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "jest.autoEnable": false
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }

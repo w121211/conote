@@ -435,8 +435,6 @@ const Lc = ({
     mirrorBlock = <div>一行只允許一個 mirror</div>
   }
 
-  console.log(mirrorBlock)
-
   return (
     <div {...attributes}>
       <li>

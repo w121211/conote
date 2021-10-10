@@ -141,7 +141,7 @@ const store = {
  * @returns 當有 card 時返回 card body bullet root; 找不到 card 時 root 為 undefined
  * @throws apoollo query error
  */
-async function getLocalOrQueryRoot(props: {
+export async function getLocalOrQueryRoot(props: {
   // eslint-disable-next-line @typescript-eslint/ban-types
   client: ApolloClient<object>
   selfSymbol?: string
