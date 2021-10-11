@@ -119,6 +119,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [headerFormSubmited, setHeaderFormSubmited] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [submitFinished, setSubmitFinished] = useState(false)
+  const [openLiHashtags, setOpenLiHashtags] = useState<Hashtag[]>([])
   const [queryHashtags, { data: hashtagData }] = useHashtagsLazyQuery({
     fetchPolicy: 'cache-first',
     variables: { symbol: data?.self.symbol ?? '' },
@@ -149,20 +150,19 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
   }, [headerFormSubmited, showHeaderForm])
 
-  let hashtags: Hashtag[] | undefined
-
   useEffect(() => {
     queryHashtags()
+
     if (hashtagData?.hashtags && data) {
+      const newHashtagsArr: Hashtag[] = []
       hashtagData?.hashtags?.forEach(e => {
         if (e.bulletId === data.openedLi.children[0].id) {
-          hashtags?.push(e)
+          newHashtagsArr.push(e)
         }
       })
-
-      console.log(hashtags)
+      setOpenLiHashtags(newHashtagsArr)
     }
-  }, [data?.openedLi.children])
+  }, [data?.openedLi])
 
   // useEffect(() => {
   //   if (data && location) {
@@ -391,9 +391,9 @@ const CardSymbolPage = (): JSX.Element | null => {
             )}
           </h3>
           {/* {hashtags && <div>{hashtags.text}</div>} */}
-          {hashtags && (
+          {openLiHashtags.length > 0 && (
             <div>
-              {hashtags.map((e, i) => {
+              {openLiHashtags.map((e, i) => {
                 return <EmojiButotn key={i} emoji={e} />
               })}
             </div>

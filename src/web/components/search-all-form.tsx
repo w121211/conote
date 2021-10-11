@@ -54,6 +54,7 @@ export function SearchAllForm(): JSX.Element {
   const customStyles: Partial<Styles<Option, false, GroupTypeBase<Option>>> = {
     container: (provided: any, state: any) => ({
       ...provided,
+      width: '100%',
       flex: '1',
     }),
     menu: (provided: any, state: any) => ({

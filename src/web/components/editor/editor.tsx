@@ -17,6 +17,7 @@ import {
 import { withHistory } from 'slate-history'
 import {
   CustomRange,
+  InlineFiltertagElement,
   InlineMirrorElement,
   InlinePollElement,
   InlineSymbolElement,
@@ -274,6 +275,7 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
   if (error || data === undefined) {
     return <span>Error</span>
   }
+
   return (
     <button
       className={`inline mR ${data.myHashtagLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
@@ -298,6 +300,7 @@ export const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null =
   // if (emoji.count.nUps === 0) {
   //   return null
   // }
+
   return (
     // <span>
     <EmojiLike hashtag={emoji} />
@@ -329,6 +332,22 @@ export const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null =
 //     </button>
 //   )
 // }
+
+const InlineFiltertag = ({
+  attributes,
+  children,
+  element,
+}: RenderElementProps & { element: InlineFiltertagElement }): JSX.Element => {
+  console.log('inlineFiltertag', children, element)
+  return (
+    <span {...attributes}>
+      {children}
+      <span contentEditable={false}>
+        <button>{children}</button>
+      </span>
+    </span>
+  )
+}
 
 const InlineSymbol = ({
   attributes,
@@ -363,14 +382,6 @@ const InlineSymbol = ({
               buttons={
                 <>
                   <button
-                    className="primary"
-                    onClick={() => {
-                      setShowPopover(false)
-                    }}
-                  >
-                    取消
-                  </button>
-                  <button
                     className="secondary"
                     onClick={() => {
                       setShowPopover(false)
@@ -378,6 +389,14 @@ const InlineSymbol = ({
                     }}
                   >
                     確定
+                  </button>
+                  <button
+                    className="primary"
+                    onClick={() => {
+                      setShowPopover(false)
+                    }}
+                  >
+                    取消
                   </button>
                 </>
               }
@@ -724,7 +743,6 @@ const Lc = (
     if ((focused && !selected) || readonly) {
       const path = ReactEditor.findPath(editor, element)
       parseLcAndReplace({ editor, lcEntry: [element, path] })
-      // console.log('parseLcAndReplace', path)
     }
     // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
     if (selected) {
@@ -791,9 +809,9 @@ const Li = ({
   const href = locationToUrl(location, ReactEditor.findPath(editor, element))
 
   function onEmojiCreated(emoji: Hashtag, myEmojiLike: HashtagLike) {
-    const curEmojis = lc.emojis ?? []
-    const path = ReactEditor.findPath(editor, element)
-    Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
+    // const curEmojis = lc.emojis ?? []
+    // const path = ReactEditor.findPath(editor, element)
+    // Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
   }
   // console.log(lc.emojis)
 
@@ -888,6 +906,7 @@ const CustomElement = ({
   selfCard,
 }: RenderElementProps & { location: NavLocation; selfCard: Card }): JSX.Element => {
   const sourceUrl = selfCard.link?.url
+
   switch (element.type) {
     case 'symbol':
       return <InlineSymbol {...{ attributes, children, element }} />
@@ -895,6 +914,8 @@ const CustomElement = ({
       return <InlineMirror {...{ attributes, children, element, location, selfCard }} />
     // case 'hashtag':
     //   return <InlineHashtag {...{ attributes, children, element, location }} />
+    case 'filtertag':
+      return <InlineFiltertag {...{ attributes, children, element }} />
     case 'poll':
       return <InlinePoll {...{ attributes, children, element, location }} />
     case 'lc':

@@ -3,7 +3,7 @@
   /* justify-content: space-evenly; */
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   overflow: auto;
   // background: $bg;
@@ -28,6 +28,7 @@
   @media screen and(max-width:500px) {
     width: 100%;
     flex-direction: column;
+    align-items: stretch;
   }
 }
 .outer {
@@ -54,6 +55,7 @@
     // flex-basis: 30vw;
     flex-grow: 2;
     flex-shrink: 1;
+    min-width: 0;
     // flex: 1;
     // width: 75vw;
     // height: 50%;
@@ -66,6 +68,7 @@
     // flex-basis: 30vw;
     flex-grow: 2;
     flex-shrink: 1;
+    min-width: 0;
     // width: 75vw;
     // height: 50%;
     // margin-left: 20px;
@@ -136,6 +139,7 @@
 .latestCardsListText {
   // font-family: 'jf-openhuninn-1.1';
   display: flex;
+  overflow: hidden;
   color: $black;
   // margin: 16px 0;
   padding-bottom: 10px;
@@ -143,7 +147,7 @@
 
   a {
     color: $black;
-    display: block;
+    // display: block;
     /* display: -webkit-box; */
     // white-space: nowrap;
     // text-overflow: ellipsis;
@@ -231,7 +235,7 @@
   line-height: 1.5;
 }
 .lcElementUrl {
-  max-width: 50%;
+  // max-width: min(400px, 50vw, 100%);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -243,13 +247,14 @@
 }
 .lcElementHashtag {
   display: inline-block;
+  width: fit-content;
   padding: 0 8px;
   background: $bg;
   font-size: 12px;
   color: $gray-text-dark;
 }
 .lcElementSymbol {
-  max-width: 30vw;
+  // max-width: min(400px, 50vw, 100%);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -283,4 +288,9 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
+}
+.latestCardsLink {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }

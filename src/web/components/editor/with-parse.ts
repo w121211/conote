@@ -44,6 +44,7 @@ export function parseLcAndReplace(props: { editor: Editor; lcEntry: NodeEntry<Lc
   })
   // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
   Transforms.insertNodes(editor, inlines, { at: [...lcPath, 0] })
+  console.log(inlines)
 }
 
 export function parseChildren(lis: LiElement[]): LiElement[] {

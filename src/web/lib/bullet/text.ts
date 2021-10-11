@@ -78,9 +78,11 @@ export function parseBulletHead(props: {
       case 'url':
       case 'ticker':
       case 'topic':
-      case 'user':
-      case 'filtertag': {
+      case 'user': {
         return { type: 'symbol', str, symbol: str }
+      }
+      case 'filtertag': {
+        return { type: 'filtertag', str }
       }
       case 'poll': {
         const match = rePoll.exec(str)
