@@ -35,6 +35,7 @@ export type InlineSymbolElement = InlineSymbol & {
 
 export type InlineMirrorElement = InlineMirror & {
   children: CustomText[]
+  root?: RootBulletDraft
 }
 
 // export type InlineHashtagElement = InlineHashtag & {

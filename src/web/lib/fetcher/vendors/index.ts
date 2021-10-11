@@ -11,7 +11,7 @@ export class DomainNotFitError extends Error {
   }
 }
 
-// 依序嘗試執行，若失敗則嘗試下一個
+// fallback 依序嘗試執行，若失敗則嘗試下一個
 const fetchers: DomainFetchFunction[] = [youtube, webpage]
 
 export async function tryFetch(url: string): Promise<FetchResult> {

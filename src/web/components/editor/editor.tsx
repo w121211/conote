@@ -58,18 +58,21 @@ import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withLi
 import { NavLocation, locationToUrl } from './with-location'
 import { withOperation } from './with-operation'
 import { parseLcAndReplace, withParse } from './with-parse'
-import { toInlinePoll } from '../../lib/bullet/types'
+import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll } from '../../lib/bullet/types'
 import CreatePollForm from '../board-form/create-poll-form'
 import HashtagTextToIcon from '../upDown/hashtag-text-to-icon'
 import PollPage from '../board/poll-page'
-import { Context } from '../../pages/card/[symbol]'
+// import { Context } from '../../pages/card/[symbol]'
 import AuthorPollPage from '../board/author-poll-page'
 import { useRouter } from 'next/router'
 import Popup from '../popup/popup'
 import PollGroup from '../upDown/poll-group'
+import { getLocalOrQueryRoot } from './use-local-value'
+import { useApolloClient } from '@apollo/client'
+import { Serializer } from './serializer'
+import { BulletNode } from '../../lib/bullet/node'
 import { Token, tokenize } from 'prismjs'
-import { LINE_VALUE_GRAMMAR } from '../../../packages/editor/src'
-import { grammar, tokenizeBulletString } from '../../lib/bullet/text'
+import { tokenizeBulletString } from '../../lib/bullet/text'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
@@ -430,10 +433,13 @@ const InlineSymbol = ({
   )
 }
 
-const InlineMirror = (
-  props: RenderElementProps & { element: InlineMirrorElement; location: NavLocation; selfCard: Card },
-): JSX.Element => {
-  const { attributes, children, element, location, selfCard } = props
+const InlineMirror = ({
+  attributes,
+  children,
+  element,
+  location,
+  selfCard,
+}: RenderElementProps & { element: InlineMirrorElement; location: NavLocation; selfCard: Card }): JSX.Element => {
   const [showPopover, setShowPopover] = useState(false)
   const editor = useSlateStatic()
   const href = locationToUrl({
@@ -708,6 +714,71 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   // )
 }
 
+const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
+  return (
+    <>
+      <li>{bullet.head}</li>
+      {bullet.children.length > 0 && (
+        <ul>
+          {bullet.children.map((e, i) => (
+            <BulletComponent key={i} bullet={e} />
+          ))}
+        </ul>
+      )}
+    </>
+  )
+}
+
+const FilterMirror = ({
+  mirrors,
+  sourceUrl,
+}: {
+  mirrors: InlineMirrorElement[]
+  sourceUrl: string
+}): JSX.Element | null => {
+  const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
+  const client = useApolloClient()
+
+  useEffect(() => {
+    const asyncRun = async () => {
+      if (mirrors.length === 1) {
+        const mirror = mirrors[0]
+        const { rootLi } = await getLocalOrQueryRoot({ client, mirrorSymbol: mirror.mirrorSymbol })
+        const rootBulletDraft = Serializer.toRootBulletDraft(rootLi)
+        const filtered = BulletNode.filter({
+          node: rootBulletDraft,
+          matcher: e => e.sourceUrl === sourceUrl,
+        })
+        setFilteredBullet(filtered)
+      }
+    }
+    asyncRun().catch(err => {
+      console.error(err)
+    })
+  }, [])
+
+  if (mirrors.length === 0) {
+    return null
+  }
+  if (mirrors.length > 1) {
+    return <div>一行只允許一個 mirror</div>
+  }
+  if (filteredBullet === undefined) {
+    return null
+  }
+  if (filteredBullet === null) {
+    return <div>Click to edit</div>
+  }
+  return (
+    <ul>
+      {/* 忽略 root，從 root children 開始 render */}
+      {filteredBullet.children.map((e, i) => (
+        <BulletComponent key={i} bullet={e} />
+      ))}
+    </ul>
+  )
+}
+
 const Lc = (
   props: RenderElementProps & { element: LcElement; location: NavLocation; sourceUrl?: string },
 ): JSX.Element => {
@@ -723,8 +794,6 @@ const Lc = (
   // }, [element])
   const author = location.author
 
-  // console.log('lc entry', element)
-
   useEffect(() => {
     if (element.op === 'CREATE') {
       let lcPath: number[] | undefined
@@ -739,13 +808,14 @@ const Lc = (
   }, [author, element, sourceUrl])
 
   useEffect(() => {
-    // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
     if ((focused && !selected) || readonly) {
+      // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
       const path = ReactEditor.findPath(editor, element)
       parseLcAndReplace({ editor, lcEntry: [element, path] })
+      return
     }
-    // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
     if (selected) {
+      // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
       const path = ReactEditor.findPath(editor, element)
       Transforms.unwrapNodes(editor, {
         at: path,
@@ -755,18 +825,20 @@ const Lc = (
     }
   }, [selected, readonly])
 
+  const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
   return (
     <div {...attributes}>
       <span className={classes.lcText}>{children}</span>
-      {/* {((focused && !selected) || readonly) && (
-        <span contentEditable={false} style={{ color: 'green' }}>
-          {author === element.author && element.author}
+      {((focused && !selected) || readonly) && mirrors.length > 0 && sourceUrl && (
+        <span contentEditable={false}>
+          {/* {author === element.author && element.author}
           {sourceUrl === element.sourceUrl && sourceUrl}
           {element.emojis?.map((e, i) => (
             <EmojiButotn key={i} emoji={e} />
-          ))}
+          ))} */}
+          <FilterMirror mirrors={mirrors} sourceUrl={sourceUrl} />
         </span>
-      )} */}
+      )}
     </div>
   )
 }

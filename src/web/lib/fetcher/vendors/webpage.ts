@@ -2,28 +2,40 @@
 import got from 'got'
 import { DomainFetchFunction } from './index'
 
-import createMetascraper, { Rule } from 'metascraper'
+// import { $filter, toRule, memoizeOne } from '@metascraper/helpers'
+
+import createMetascraper, { Rule, RuleSet, CheckOptions } from 'metascraper'
 import metascraperAuthor from 'metascraper-author'
 import metascraperDate from 'metascraper-date'
 import metascraperDescription from 'metascraper-description'
-// import metascraperLang from 'metascraper-lang'
+import metascraperLang from 'metascraper-lang'
 import metascraperTitle from 'metascraper-title'
 import metascraperUrl from 'metascraper-url'
 
-const metascraper = createMetascraper([
-  metascraperAuthor(),
-  metascraperDate(),
-  metascraperDescription(),
-  // metascraperLang(),
-  metascraperTitle(),
-  metascraperUrl(),
-])
+const keywordsRule: Rule = () => ({
+  keywords: [
+    ({ htmlDom: $, url }) => {
+      console.log('~~~~~')
+      console.log($)
 
-// const rule: Rule = () => {
-//   return {
-//     keywords: () => 'hello world',
-//   }
-// }
+      const a = ($ as any)('h2.title')
+      console.log($)
+      console.log(a)
+
+      return 'hello world'
+    },
+  ],
+})
+
+const metascraper = createMetascraper([
+  // metascraperAuthor(),
+  // metascraperDate(),
+  // metascraperDescription(),
+  // metascraperLang(),
+  // metascraperTitle(),
+  // metascraperUrl(),
+  keywordsRule,
+])
 
 export type ParseUrlResult = {
   resolvedUrl: string
@@ -43,19 +55,23 @@ export const webpage: DomainFetchFunction = async function (url) {
   const { body: html, url: finalUrl } = await got(url)
   const metadata = await metascraper({ html, url: finalUrl })
 
-  const { domain } = parseUrl(metadata.url)
-  if (domain === undefined) {
-    throw new Error(`Fetch error: ${url} ${finalUrl}`)
-  }
+  // const { domain } = parseUrl(metadata.url)
+  // if (domain === undefined) {
+  //   throw new Error(`Fetch error: ${url} ${finalUrl}`)
+  // }
+
+  console.log(metadata)
+
   return {
-    domain,
+    domain: 'domain',
     finalUrl: metadata.url,
     srcType: 'OTHER',
     authorName: metadata.author,
     date: metadata.date,
     description: metadata.description,
-    // keywords?: string[]
-    // lang: metadata.lang,
+    lang: metadata.lang,
     title: metadata.title,
+    // keywords: metadata.keywords,
+    // keywords?: string[]
   }
 }
