@@ -305,8 +305,9 @@ export const useLocalValue = ({
           )
         }
         for (const e of mirrorSymbols) {
-          const mirrorRootLi = store.getRootLi(e)
           const mirrorSymbol = e.substring(2) // trick，要消掉 mirror 前綴
+          const mirrorRootLi = store.getRootLi(mirrorSymbol)
+
           if (mirrorRootLi) {
             promises.push(
               client.mutate<CreateCardBodyMutation, CreateCardBodyMutationVariables>({

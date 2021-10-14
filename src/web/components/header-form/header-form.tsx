@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from 'react'
 
-import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
+import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-form'
+
+import CreatableSelect from 'react-select/creatable'
 import classes from './header-form.module.scss'
 import { CardDocument, CardMeta, CardQuery, useBoardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
 import { RadioInput } from '../board-form/board-form'
 import router from 'next/router'
+import { GroupTypeBase, Styles } from 'react-select'
 type FormInputs = {
   title: string
   author: string
   url: string
-  keywords: string
+  keywords: { label: string; value: string }[]
   redirects: string
   duplicates: string
+}
+const components = {
+  DropdownIndicator: null,
+  ClearIndicator: null,
 }
 // type FormInputs = {
 //   // title: string
@@ -79,7 +86,9 @@ const HeaderForm = ({
             author: newData.author ?? '',
             url: newData.url ?? '',
             redirects: newData.redirects?.join(' ') ?? '',
-            keywords: newData.keywords?.join(' ') ?? '',
+            keywords: newData.keywords?.map(e => {
+              return { label: e, value: e }
+            }) ?? [{ label: '', value: '' }],
             duplicates: newData.duplicates?.join(' ') ?? '',
           },
           { keepIsSubmitted: true },
@@ -92,6 +101,12 @@ const HeaderForm = ({
 
   const onSubmit = (d: FormInputs) => {
     if (d) {
+      const keywordArr: string[] = []
+      if (d.keywords) {
+        d.keywords.forEach(e => {
+          keywordArr.push(e.value)
+        })
+      }
       updateCardMeta({
         variables: {
           symbol,
@@ -101,11 +116,81 @@ const HeaderForm = ({
             url: d.url,
             redirects: d.redirects.split(' '),
             duplicates: d.duplicates.split(' '),
-            keywords: d.keywords.split(' '),
+            keywords: keywordArr,
           },
         },
       })
     }
+  }
+
+  const customStyles: Partial<
+    Styles<{ label: string; value: string }, true, GroupTypeBase<{ label: string; value: string }>>
+  > = {
+    valueContainer: (provided, state) => ({
+      ...provided,
+      height: '100%',
+      padding: '0',
+    }),
+    control: (provided, { isFocused }) => ({
+      ...provided,
+      height: '44px',
+      // height: '100%',
+      padding: '0 8px',
+      border: 'none',
+      borderRadius: '6px',
+      background: '#f6f7fb',
+      ':hover': {
+        background: '#eef1fd',
+      },
+      boxShadow: isFocused ? 'none' : 'none',
+    }),
+    placeholder: (provided, state) => ({
+      ...provided,
+      fontSize: '14px',
+    }),
+    container: (provided: any, state: any) => ({
+      ...provided,
+      margin: '0.5em 0 1em',
+    }),
+    input: (provided, state) => ({
+      ...provided,
+      // height: '100%',
+    }),
+    multiValue: (provided, state) => ({
+      ...provided,
+      // height: '100%',
+      padding: '0',
+      color: '#5c6cda',
+      backgroundColor: '#d6daff',
+      // mixBlendMode: 'multiply',
+    }),
+    multiValueLabel: (provided, state) => ({
+      ...provided,
+      // height: '100%',
+      paddingTop: '0',
+      paddingBottom: '0',
+      color: '#5c6cda',
+
+      // mixBlendMode: 'multiply',
+    }),
+    multiValueRemove: (provided, state) => ({
+      ...provided,
+      // height: '100%',
+      // padding: '0',
+      color: '#5c6cda',
+      backgroundColor: 'none',
+      // mixBlendMode: 'multiply',
+      ':hover': {
+        color: 'white',
+
+        backgroundColor: '#5c6cda',
+      },
+    }),
+    option: provided => ({
+      ...provided,
+      height: '30px',
+      padding: '0 8px',
+    }),
   }
 
   return (
@@ -138,7 +223,25 @@ const HeaderForm = ({
           </label>
           <label>
             <h5>Keywords</h5>
-            <input {...register('keywords')} type="text" placeholder="請使用 '空格' 分隔" />
+            {/* <input {...register('keywords')} type="text" placeholder="請使用 '空格' 分隔" /> */}
+            <Controller
+              control={control}
+              name="keywords"
+              render={({ field: { onChange, value, ref } }) => (
+                <CreatableSelect
+                  styles={customStyles}
+                  isMulti
+                  onChange={e => {
+                    onChange(e)
+                    console.log(e)
+                  }}
+                  value={value}
+                  components={components}
+                  noOptionsMessage={() => null}
+                  placeholder="新增keyword"
+                />
+              )}
+            ></Controller>
           </label>
           <label>
             <h5>Redirects</h5>

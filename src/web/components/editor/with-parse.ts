@@ -5,7 +5,7 @@ import { LcElement, CustomElement, CustomInlineElement, CustomText, LiElement } 
 import { isLc, isLiArray } from './with-list'
 
 function isInlineElement(element: CustomElement): element is CustomInlineElement {
-  const inlineTypes = ['symbol', 'mirror', 'poll']
+  const inlineTypes = ['mirror', 'poll', 'filtertag']
   return inlineTypes.includes(element.type)
 }
 
@@ -44,7 +44,6 @@ export function parseLcAndReplace(props: { editor: Editor; lcEntry: NodeEntry<Lc
   })
   // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
   Transforms.insertNodes(editor, inlines, { at: [...lcPath, 0] })
-  console.log(inlines)
 }
 
 export function parseChildren(lis: LiElement[]): LiElement[] {

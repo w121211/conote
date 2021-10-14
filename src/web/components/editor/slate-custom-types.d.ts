@@ -97,7 +97,7 @@ export type UlElement = {
   folded?: true
 }
 
-export type CustomInlineElement = InlineSymbolElement | InlineMirrorElement | InlinePollElement | InlineFiltertag
+export type CustomInlineElement = InlineSymbolElement | InlineMirrorElement | InlinePollElement | InlineFiltertagElement
 
 type CustomElement = CustomInlineElement | LcElement | LiElement | UlElement
 

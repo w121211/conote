@@ -7,6 +7,7 @@ import { getNavLocation, locationToUrl, NavLocation } from '../../components/edi
 import classes from './nav-path.module.scss'
 import { UrlObject } from 'url'
 import Link from 'next/link'
+import { useCardMetaQuery } from '../../apollo/query.graphql'
 
 function getTextWidth(text: string, font?: any) {
   const canvas = document.createElement('canvas')
@@ -37,6 +38,10 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
   const router = useRouter()
 
   const pathRef = useRef<HTMLUListElement>(null)
+  const { data } = useCardMetaQuery({
+    fetchPolicy: 'cache-first',
+    variables: { symbol: router.query.symbol as string },
+  })
 
   if (prevPath !== path && path !== undefined) {
     setMyPath(path)
@@ -50,14 +55,14 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
     if (window) {
       setViewPortWidth(window.innerWidth)
     }
-    window.addEventListener('resize', () => {
-      setViewPortWidth(window.innerWidth)
-    })
+    // window.addEventListener('resize', () => {
+    //   setViewPortWidth(window.innerWidth)
+    // })
 
     return () => {
-      window.removeEventListener('resize', () => {
-        setViewPortWidth(window.innerWidth)
-      })
+      // window.removeEventListener('resize', () => {
+      //   setViewPortWidth(window.innerWidth)
+      // })
     }
   }, [])
 
@@ -118,29 +123,25 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
   }, [viewPortWidth, path])
 
   return (
-    <ul className={classes.pathUl} ref={pathRef} style={{ width: `calc(${viewPortWidth}px - 40vw)` }}>
+    // <ul className={classes.pathUl} ref={pathRef} style={{ width: `calc(${viewPortWidth}px - 40vw)` }}>
+    <ul className={classes.pathUl} ref={pathRef}>
       {mirrorHomeUrl && (
         <li>
           <span>
             <Link href={mirrorHomeUrl}>
-              <a>{router.query.symbol}</a>
+              <a>{data?.cardMeta.title}</a>
             </Link>
+            {/* {console.log(path, location)} */}
           </span>
 
-          <div className={classes.rightArrow}>
-            <RightArrow />
-          </div>
+          <div className={classes.rightArrow}>/{/* <RightArrow /> */}</div>
         </li>
       )}
       {myPath &&
         myPath.length !== 0 &&
         myPath.map((e, i) => (
           <li key={i}>
-            {i !== 0 && (
-              <div className={classes.rightArrow}>
-                <RightArrow />
-              </div>
-            )}
+            {i !== 0 && <div className={classes.rightArrow}>{/* <RightArrow /> */}/</div>}
 
             {
               <span
@@ -160,9 +161,9 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
               >
                 {typeof e !== 'string' && (
                   <Link href={locationToUrl({ ...location, openedLiPath: e.path })}>
-                    <a className="ui">
-                      {router.query.m && e.path.length === 0 && '::'}
-                      {e.text}
+                    <a>
+                      {mirrorHomeUrl && e.path.length === 0 && '::'}
+                      {!mirrorHomeUrl && i === 0 ? data?.cardMeta.title : e.text}
                     </a>
                   </Link>
                 )}

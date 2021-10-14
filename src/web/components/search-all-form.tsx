@@ -1,16 +1,9 @@
 import React, { useState, useEffect, CSSProperties } from 'react'
-import { useRouter } from 'next/router'
+import router, { useRouter } from 'next/router'
 import Creatable from 'react-select/creatable'
 import { toUrlParams } from '../lib/helper'
 import { useSearchAllLazyQuery } from '../apollo/query.graphql'
 import { ActionMeta, GroupTypeBase, Styles } from 'react-select'
-const components = {
-  DropdownIndicator: null,
-}
-const createOption = (label: string) => ({
-  label,
-  value: label.toUpperCase().replace(/\W/g, ''),
-})
 
 type Option = {
   label: string
@@ -25,6 +18,14 @@ export function SearchAllForm(): JSX.Element {
   const [inputValue, setInputValue] = useState('')
   const [openMenu, setOpenMenu] = useState(false)
 
+  const components = {
+    DropdownIndicator: null,
+  }
+  const createOption = (label: string) => ({
+    label,
+    value: label.toUpperCase().replace(/\W/g, ''),
+  })
+
   // console.log(data?.searchAll)
   useEffect(() => {
     if (data && data.searchAll) {
@@ -33,13 +34,25 @@ export function SearchAllForm(): JSX.Element {
   }, [data])
 
   const handleChange = (value: Option | null, action: ActionMeta<Option>) => {
+    if (action.action === 'select-option' && value) {
+      router.push(`/card/${encodeURIComponent(value.value)}`)
+    }
     setValue(value)
+
+    console.log(action)
   }
 
   const handleCreate = (inputValue: string) => {
-    // const newOption = createOption(inputValue)
-    // setOptions(prev => [...prev, newOption])
+    const newOption = createOption(inputValue)
+    if (inputValue.startsWith('http')) {
+      router.push(`/card?url=${encodeURIComponent(inputValue)}`)
+    } else {
+      router.push(`/card/${encodeURIComponent(inputValue)}`)
+    }
+    // setOptions([...options, newOption])
+    // setValue(newOption)
   }
+
   const handleInput = (value: string, action: any) => {
     setInputValue(value)
     if (value) {
@@ -68,7 +81,7 @@ export function SearchAllForm(): JSX.Element {
     control: (provided, { isFocused }) => ({
       ...provided,
       width: '100%',
-      maxHeight: '30px',
+      // maxHeight: '30px',
       whiteSpace: 'nowrap',
       borderRadius: '99px',
 

@@ -16,39 +16,40 @@
     // display: flex;
 
     // margin-right: 1em;
-    font-weight: 700;
+    // font-weight: 700;
     h5 {
       margin: 0;
       color: $black;
     }
-  }
-  input {
-    display: block;
-    width: 100%;
-    background: $white;
-    line-height: 2;
-    margin: 0.5em 0 1em;
-    &[type='text'] {
-      border: 0;
-      background: $bg;
-      padding: 8px;
-      border-radius: 6px;
-      // box-shadow: 0 1px 0 $gray;
-      // border-bottom: 1px solid $primary;
-      // display: block;
-      // width: 100%;
-      color: $text;
+    & > input {
+      display: block;
+      width: 100%;
+      background: $white;
+      line-height: 2;
+      margin: 0.5em 0 1em;
+      font-size: 14px;
+      &[type='text'] {
+        border: 0;
+        background: $bg;
+        padding: 8px;
+        border-radius: 6px;
+        // box-shadow: 0 1px 0 $gray;
+        // border-bottom: 1px solid $primary;
+        // display: block;
+        // width: 100%;
+        color: $text;
 
-      &:hover {
-        background: #e8ebf5;
+        &:hover {
+          background: #eef1fd;
+        }
+        &:focus-visible {
+          outline: 0;
+          border-bottom-width: 2px;
+        }
       }
-      &:focus-visible {
-        outline: 0;
-        border-bottom-width: 2px;
+      &::placeholder {
+        color: $gray-text;
       }
-    }
-    &::placeholder {
-      color: $gray-text;
     }
   }
   .radioLabel {
