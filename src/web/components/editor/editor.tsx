@@ -17,6 +17,7 @@ import {
 import { withHistory } from 'slate-history'
 import {
   CustomRange,
+  InlineFiltertagElement,
   InlineMirrorElement,
   InlinePollElement,
   InlineSymbolElement,
@@ -63,7 +64,7 @@ import HashtagTextToIcon from '../upDown/hashtag-text-to-icon'
 import PollPage from '../board/poll-page'
 // import { Context } from '../../pages/card/[symbol]'
 import AuthorPollPage from '../board/author-poll-page'
-import { useRouter } from 'next/router'
+import router, { useRouter } from 'next/router'
 import Popup from '../popup/popup'
 import PollGroup from '../upDown/poll-group'
 import { getLocalOrQueryRoot } from './use-local-value'
@@ -160,6 +161,7 @@ const decorate = ([node, path]: NodeEntry) => {
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, children, leaf } = props
   let style: React.CSSProperties = {}
+  let className = ''
   // if (leaf.placeholder) {
   //   return (
   //     <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
@@ -188,19 +190,23 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   // filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
   // console.log(leaf.type, children)
   // console.log(leaf)
+
   switch (leaf.type) {
     case 'ticker':
     case 'topic': {
-      style = { color: '#ff619b', fontWeight: 'bold' }
+      className = classes.topicLeaf
+
+      // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
       break
     }
     case 'mirror-ticker':
     case 'mirror-topic': {
-      style = { color: '#0cb26e' }
+      className = classes.mirrorLeaf
+      // style = { color: '#5395f0' }
       break
     }
     case 'user': {
-      style = { color: '#5395f0' }
+      style = { color: '#0cb26e' }
       break
     }
     case 'poll':
@@ -209,6 +215,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       break
     }
     case 'filtertag': {
+      className = classes.filtertagLeaf
       style = { color: '#6a53fe' }
       break
     }
@@ -216,9 +223,30 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       style = { color: '#3d434a' }
     }
   }
+
   return (
     // {/* <span {...attributes}>{children}</span> */}
-    <span {...attributes} style={style}>
+    <span
+      {...attributes}
+      className={className}
+      style={style}
+      // onFocus={e => {
+      //   e.preventDefault
+      // }}
+
+      ref={e => {
+        if (
+          leaf.type === 'ticker' ||
+          leaf.type === 'topic' ||
+          leaf.type === 'mirror-ticker' ||
+          leaf.type === 'mirror-topic' ||
+          leaf.type === 'filtertag'
+        ) {
+          e && (e.onselectstart = ev => false)
+        }
+      }}
+    >
+      {/* {leaf.text} */}
       {children}
     </span>
   )
@@ -277,6 +305,7 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
   if (error || data === undefined) {
     return <span>Error</span>
   }
+
   return (
     <button
       className={`inline mR ${data.myHashtagLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
@@ -301,6 +330,7 @@ export const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null =
   // if (emoji.count.nUps === 0) {
   //   return null
   // }
+
   return (
     // <span>
     <EmojiLike hashtag={emoji} />
@@ -333,6 +363,14 @@ export const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null =
 //   )
 // }
 
+const InlineFiltertag = ({
+  attributes,
+  children,
+  element,
+}: RenderElementProps & { element: InlineFiltertagElement }): JSX.Element => {
+  return <span {...attributes}>{children}</span>
+}
+
 const InlineSymbol = ({
   attributes,
   children,
@@ -343,10 +381,10 @@ const InlineSymbol = ({
   const [showPopover, setShowPopover] = useState(false)
   const router = useRouter()
   return (
-    <span {...attributes} className="inline">
-      <span contentEditable={false}>
-        {/* <Link href={`/card/${encodeURI(element.symbol)}`}> */}
-        <a
+    <span {...attributes}>
+      {/* <span contentEditable={false}> */}
+      {/* <Link href={`/card/${encodeURI(element.symbol)}`}> */}
+      {/* <a
           className="inline"
           onClick={e => {
             e.preventDefault()
@@ -354,8 +392,21 @@ const InlineSymbol = ({
           }}
         >
           {children}
-        </a>
-        {/* </Link> */}
+        </a> */}
+      <span
+        className="inline"
+        onClick={e => {
+          // e.preventDefault()
+          // e.stopPropagation()
+          // router.push(`/card/${encodeURIComponent(element.symbol)}`)
+
+          setShowPopover(true)
+        }}
+      >
+        {children}
+      </span>
+      {/* </Link> */}
+      <div contentEditable={false}>
         {showPopover &&
           (router.query.symbol !== element.symbol && router.query.m !== '::' + element.symbol ? (
             <Popup
@@ -366,21 +417,25 @@ const InlineSymbol = ({
               buttons={
                 <>
                   <button
-                    className="primary"
-                    onClick={() => {
-                      setShowPopover(false)
-                    }}
-                  >
-                    取消
-                  </button>
-                  <button
                     className="secondary"
-                    onClick={() => {
+                    onClick={e => {
+                      // e.preventDefault()
+                      // e.stopPropagation()
                       setShowPopover(false)
                       router.push(`/card/${encodeURI(element.symbol)}`)
                     }}
                   >
                     確定
+                  </button>
+                  <button
+                    className="primary"
+                    onClick={e => {
+                      // e.preventDefault()
+                      // e.stopPropagation()
+                      setShowPopover(false)
+                    }}
+                  >
+                    取消
                   </button>
                 </>
               }
@@ -409,7 +464,8 @@ const InlineSymbol = ({
               你就在這頁了！
             </Popup>
           ))}
-      </span>
+      </div>
+      {/* </span> */}
     </span>
   )
 }
@@ -436,20 +492,20 @@ const InlineMirror = ({
     if (authorName && element.author === undefined) {
       const path = ReactEditor.findPath(editor, element)
       Transforms.setNodes<InlineMirrorElement>(editor, { author: authorName }, { at: path })
-      Transforms.insertNodes(editor, { text: ` @${authorName}` }, { at: Path.next(path) })
+      Transforms.insertNodes(editor, { text: ` @${authorName.split(':', 1)}` }, { at: Path.next(path) })
     }
   }, [authorName, element])
 
   return (
     <span {...attributes}>
-      <span contentEditable={false}>
-        <Link
-          href={href}
-          // as={`/card/${encodeURIComponent(location.selfSymbol)}/${encodeURIComponent(element.mirrorSymbol)}`}
-        >
-          <a className="inline">{children}</a>
-        </Link>
-      </span>
+      {/* <span contentEditable={false}> */}
+      <Link
+        href={href}
+        // as={`/card/${encodeURIComponent(location.selfSymbol)}/${encodeURIComponent(element.mirrorSymbol)}`}
+      >
+        <a className="ui">{children}</a>
+      </Link>
+      {/* </span> */}
     </span>
   )
 }
@@ -500,6 +556,7 @@ const InlineMirror = ({
 
 const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; location: NavLocation }): JSX.Element => {
   const { attributes, children, element, location } = props
+  const selected = useSelected()
   // const context = useContext(Context)
   const editor = useSlateStatic()
   const path = ReactEditor.findPath(editor, element)
@@ -563,35 +620,36 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   // if (element.type === 'poll') {
   return (
     <span {...attributes}>
-      <span style={{ display: 'none' }}>{children}</span>
-      <span contentEditable={false}>
-        <PollGroup
-          bulletId={parent.id}
-          choices={element.choices}
-          pollId={element.id?.toString()}
-          handleShowPopover={b => {
-            setShowPopover(b)
-          }}
-          onCreatePoll={handleCreatePoll}
-          handleClickedIdx={i => {
-            setClickedIdx(i)
-          }}
-          handlePollId={(id: string) => {
-            setPollId(id)
-          }}
-          handlePollData={(data: Poll) => {
-            // setPollData(data)
-          }}
-          inline
-        />
-        {/* parent.id = bullet id */}
-        {showPopover && parent.id && (
-          <Popover visible={showPopover} hideBoard={handleHideBoard}>
-            {pollId ? <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} /> : <span>loading</span>}
-          </Popover>
-        )}
+      <span style={selected ? undefined : { display: 'none' }}>{children}</span>
+      {selected || (
+        <span contentEditable={false}>
+          <PollGroup
+            bulletId={parent.id}
+            choices={element.choices}
+            pollId={element.id?.toString()}
+            handleShowPopover={b => {
+              setShowPopover(b)
+            }}
+            onCreatePoll={handleCreatePoll}
+            handleClickedIdx={i => {
+              setClickedIdx(i)
+            }}
+            handlePollId={(id: string) => {
+              setPollId(id)
+            }}
+            handlePollData={(data: Poll) => {
+              // setPollData(data)
+            }}
+            inline
+          />
+          {/* parent.id = bullet id */}
+          {showPopover && parent.id && (
+            <Popover visible={showPopover} hideBoard={handleHideBoard}>
+              {pollId ? <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} /> : <span>loading</span>}
+            </Popover>
+          )}
 
-        {/* {showPopover && authorContext.author && (
+          {/* {showPopover && authorContext.author && (
           <Popover visible={showPopover} hideBoard={handleHideBoard}>
             
             {pollId ? (
@@ -601,7 +659,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
             )}
           </Popover>
         )} */}
-        {/* {element.id ? (
+          {/* {element.id ? (
           <MyHashtagGroup choices={element.choices} pollId={element.id.toString()} inline />
         ) : (
           <>
@@ -625,7 +683,8 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
             </Popover>
           </>
         )} */}
-      </span>
+        </span>
+      )}
     </span>
   )
   // }
@@ -751,7 +810,7 @@ const FilterMirror = ({
     return <div>Click to edit</div>
   }
   return (
-    <ul>
+    <ul style={{ background: '#f3f4f9', borderRadius: '6px' }}>
       {/* 忽略 root，從 root children 開始 render */}
       {filteredBullet.children.map((e, i) => (
         <BulletComponent key={i} bullet={e} />
@@ -792,16 +851,17 @@ const Lc = (
     if ((focused && !selected) || readonly) {
       // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
       const path = ReactEditor.findPath(editor, element)
-      parseLcAndReplace({ editor, lcEntry: [element, path] })
-      return
+
+      // parseLcAndReplace({ editor, lcEntry: [element, path] })
+      // return
     }
     if (selected) {
       // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
       const path = ReactEditor.findPath(editor, element)
-      Transforms.unwrapNodes(editor, {
-        at: path,
-        match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
-      })
+      // Transforms.unwrapNodes(editor, {
+      //   at: path,
+      //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+      // })
       // console.log('unwrapNodes', path)
     }
   }, [selected, readonly])
@@ -810,7 +870,7 @@ const Lc = (
   return (
     <div {...attributes}>
       <span className={classes.lcText}>{children}</span>
-      {((focused && !selected) || readonly) && mirrors.length > 0 && sourceUrl && (
+      {(!selected || readonly) && mirrors.length > 0 && sourceUrl && (
         <span contentEditable={false}>
           {/* {author === element.author && element.author}
           {sourceUrl === element.sourceUrl && sourceUrl}
@@ -862,9 +922,9 @@ const Li = ({
   const href = locationToUrl(location, ReactEditor.findPath(editor, element))
 
   function onEmojiCreated(emoji: Hashtag, myEmojiLike: HashtagLike) {
-    const curEmojis = lc.emojis ?? []
-    const path = ReactEditor.findPath(editor, element)
-    Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
+    // const curEmojis = lc.emojis ?? []
+    // const path = ReactEditor.findPath(editor, element)
+    // Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
   }
   // console.log(lc.emojis)
 
@@ -959,6 +1019,7 @@ const CustomElement = ({
   selfCard,
 }: RenderElementProps & { location: NavLocation; selfCard: Card }): JSX.Element => {
   const sourceUrl = selfCard.link?.url
+
   switch (element.type) {
     case 'symbol':
       return <InlineSymbol {...{ attributes, children, element }} />
@@ -966,6 +1027,8 @@ const CustomElement = ({
       return <InlineMirror {...{ attributes, children, element, location, selfCard }} />
     // case 'hashtag':
     //   return <InlineHashtag {...{ attributes, children, element, location }} />
+    case 'filtertag':
+      return <InlineFiltertag {...{ attributes, children, element, location }} />
     case 'poll':
       return <InlinePoll {...{ attributes, children, element, location }} />
     case 'lc':
@@ -1028,6 +1091,10 @@ export const BulletEditor = ({
   return (
     <div
       className={`${classes.bulletEditorContainer} `}
+      onClick={e => {
+        e.stopPropagation()
+        console.log('editor div', e.target)
+      }}
       // onFocus={e => {
       //   if (!e.currentTarget.classList.contains(classes.focused)) {
       //     e.currentTarget.classList.add(classes.focused)
@@ -1061,7 +1128,15 @@ export const BulletEditor = ({
       >
         <Editable
           style={{ padding: '10px 10px 10px 3.5em' }}
+          onFocus={e => {
+            console.log('focus', e.target)
+          }}
+          // onClick={e => {
+          //   e.stopPropagation()
+          //   console.log(e.target)
+          // }}
           autoCorrect="false"
+          autoFocus={false}
           decorate={renderDecorate}
           readOnly={readOnly}
           renderElement={renderElement}

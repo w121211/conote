@@ -9,6 +9,7 @@ import { getNavLocation, locationToUrl, NavLocation } from '../../components/edi
 import Layout from '../../components/layout/layout'
 import NavPath from '../../components/nav-path/nav-path'
 import {
+  CardMeta,
   Hashtag,
   HashtagsDocument,
   HashtagsQuery,
@@ -32,18 +33,23 @@ export type Nav = {
   path: number[]
 }
 
-function getNavs(root: LiElement, destPath: number[]): Nav[] {
+function getNavs(root: LiElement, destPath: number[], meta: CardMeta): Nav[] {
   const navs: Nav[] = []
   for (const [n, p] of Node.levels(root, destPath)) {
-    // console.log(n, p)
     if (isLi(n)) {
       const [lc] = n.children
+      // console.log(s)
+      // if (lc.rootBulletDraft?.root) {
+      //   navs.push({ text: meta.title || Node.string(lc), path: p })
+      // } else {
       navs.push({
         text: Node.string(lc),
         path: p,
       })
+      // }
     }
   }
+
   return navs
 }
 
@@ -119,6 +125,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [headerFormSubmited, setHeaderFormSubmited] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [submitFinished, setSubmitFinished] = useState(false)
+  const [openLiHashtags, setOpenLiHashtags] = useState<Hashtag[]>([])
   const [queryHashtags, { data: hashtagData }] = useHashtagsLazyQuery({
     fetchPolicy: 'cache-first',
     variables: { symbol: data?.self.symbol ?? '' },
@@ -149,20 +156,19 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
   }, [headerFormSubmited, showHeaderForm])
 
-  let hashtags: Hashtag[] | undefined
-
   useEffect(() => {
     queryHashtags()
+
     if (hashtagData?.hashtags && data) {
+      const newHashtagsArr: Hashtag[] = []
       hashtagData?.hashtags?.forEach(e => {
         if (e.bulletId === data.openedLi.children[0].id) {
-          hashtags?.push(e)
+          newHashtagsArr.push(e)
         }
       })
-
-      console.log(hashtags)
+      setOpenLiHashtags(newHashtagsArr)
     }
-  }, [data?.openedLi.children])
+  }, [data?.openedLi])
 
   // useEffect(() => {
   //   if (data && location) {
@@ -177,7 +183,10 @@ const CardSymbolPage = (): JSX.Element | null => {
   const navs = useMemo(() => {
     if (data && location) {
       const { self, mirror } = data
-      return mirror ? getNavs(mirror.rootLi, location.openedLiPath) : getNavs(self.rootLi, location.openedLiPath)
+
+      return mirror
+        ? getNavs(mirror.rootLi, location.openedLiPath, data.selfCard.meta)
+        : getNavs(self.rootLi, location.openedLiPath, data.selfCard.meta)
     }
   }, [data])
 
@@ -210,6 +219,11 @@ const CardSymbolPage = (): JSX.Element | null => {
     <Layout>
       <div style={{ marginBottom: '3em' }}>
         <div>
+          <NavPath
+            path={navs}
+            location={{ ...location }}
+            mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
+          />
           <button
             // className="noBg"
             onClick={() => {
@@ -318,11 +332,6 @@ const CardSymbolPage = (): JSX.Element | null => {
               <a>{e.text}</a>
             </Link>
           ))} */}
-          <NavPath
-            path={navs}
-            location={{ ...location }}
-            mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
-          />
           {/* {data.selfCard.link?.authorName && <span>@{data.selfCard.link?.authorName}</span>} */}
 
           {router.query.a && (
@@ -343,14 +352,17 @@ const CardSymbolPage = (): JSX.Element | null => {
               <div className={`${classes.toggle} ${authorName && classes.toggleClicked}`}></div>
             </button>
           )}
-          <button
-            className="secondary"
-            onClick={() => {
-              setShowHeaderForm(true)
-            }}
-          >
-            編輯詳細資訊
-          </button>
+
+          {data.openedLi.children[0].rootBulletDraft && (
+            <button
+              className="secondary"
+              onClick={() => {
+                setShowHeaderForm(true)
+              }}
+            >
+              編輯卡片資訊
+            </button>
+          )}
           {/* // )} */}
           {showHeaderForm && (
             <Popover
@@ -362,10 +374,12 @@ const CardSymbolPage = (): JSX.Element | null => {
               <HeaderForm
                 symbol={router.query.symbol as string}
                 initialValue={{
-                  author: data.selfCard.meta.author ?? '',
-                  title: data.selfCard.meta.title ?? '',
-                  url: data.selfCard.meta.url ?? '',
-                  keywords: data.selfCard.meta.keywords?.join(' ') ?? '',
+                  author: (data.selfCard.meta.author || data.selfCard.link?.authorName) ?? '',
+                  title: (data.selfCard.meta.title || data.selfCard.link?.url) ?? '',
+                  url: (data.selfCard.meta.url || data.selfCard.link?.url) ?? '',
+                  keywords: data.selfCard.meta.keywords?.map(e => {
+                    return { label: e, value: e }
+                  }) ?? [{ label: '', value: '' }],
                   redirects: data.selfCard.meta.redirects?.join(' ') ?? '',
                   duplicates: data.selfCard.meta.duplicates?.join(' ') ?? '',
                 }}
@@ -391,9 +405,9 @@ const CardSymbolPage = (): JSX.Element | null => {
             )}
           </h3>
           {/* {hashtags && <div>{hashtags.text}</div>} */}
-          {hashtags && (
+          {openLiHashtags.length > 0 && (
             <div>
-              {hashtags.map((e, i) => {
+              {openLiHashtags.map((e, i) => {
                 return <EmojiButotn key={i} emoji={e} />
               })}
             </div>
@@ -406,16 +420,16 @@ const CardSymbolPage = (): JSX.Element | null => {
           {/* {console.log(data.selfCard.meta)} */}
           {/* {console.log(data.openedLi)} */}
         </div>
-        <div
+        {/* <div
         // onClick={e => {
         //   // e.preventDefault()
         //   if (!meLoading && !meData && !user) {
         //     setShowLoginPopup(true)
         //   }
         // }}
-        >
-          {editor}
-        </div>
+        > */}
+        {editor}
+        {/* </div> */}
         {/* <Context.Provider
                 value={{
                   author: authorName,

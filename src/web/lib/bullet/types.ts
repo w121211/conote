@@ -27,10 +27,10 @@ export type InlineSymbol = {
 //   authorName: string
 // }
 
-// export type InlineFiltertag = {
-//   type: 'filtertag'
-//   str: string
-// }
+export type InlineFiltertag = {
+  type: 'filtertag'
+  str: string
+}
 
 export type InlineMirror = {
   type: 'mirror'
@@ -74,7 +74,7 @@ export type InlineItem =
   | InlineText
   | InlineSymbol
   // | InlineAuthor
-  // | InlineFiltertag
+  | InlineFiltertag
   | InlineMirror
   // | InlineHashtag
   // | InlineNewHashtag

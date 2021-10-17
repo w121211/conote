@@ -5,7 +5,7 @@ import { LcElement, CustomElement, CustomInlineElement, CustomText, LiElement } 
 import { isLc, isLiArray } from './with-list'
 
 function isInlineElement(element: CustomElement): element is CustomInlineElement {
-  const inlineTypes = ['symbol', 'mirror', 'poll']
+  const inlineTypes = ['mirror', 'poll', 'filtertag']
   return inlineTypes.includes(element.type)
 }
 

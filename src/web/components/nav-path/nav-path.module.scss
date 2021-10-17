@@ -8,7 +8,9 @@
   align-items: center;
   flex-wrap: wrap;
   // justify-content: space-between;
-  height: 100%;
+  // height: 100%;
+  line-height: 1;
+  color: $gray-text-dark;
   span {
     cursor: pointer;
     display: flex;
@@ -43,16 +45,19 @@
   }
   a {
     // max-width: 80px;
+    color: $black;
     overflow: hidden;
     text-overflow: ellipsis;
+    border-bottom-color: $black;
   }
 }
 .rightArrow {
   display: flex;
   align-items: center;
-  width: 13px;
-  margin: 0 6px;
+  // width: 13px;
+  margin: 0 8px;
   flex-shrink: 0;
+  color: $gray-text;
   svg {
     stroke: $black;
     stroke-width: 7px;

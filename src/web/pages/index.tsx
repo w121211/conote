@@ -39,7 +39,7 @@ function LatestCards(): JSX.Element | null {
             {/* {console.log(e)} */}
             <Link href={`/card/${encodeURIComponent(e.symbol)}`}>
               {/* <a>{e.link.url.substring(0, 50).replace('//', '').replace('[[', '').replace(']]', '')}</a> */}
-              <a>
+              <a className={classes.latestCardsLink}>
                 <div>
                   <div className={classes.lcElementSymbol}>{e.symbol}</div>
                   <div className={classes.lcElementInfo}>
