@@ -32,19 +32,19 @@ import MyTooltip from '../my-tooltip/my-tooltip'
 import {
   Card,
   EmojiText,
-  Hashtag,
-  HashtagLike,
+  Emoji,
+  EmojiLike,
   LikeChoice,
-  MyHashtagLikeDocument,
-  MyHashtagLikeQuery,
-  MyHashtagLikeQueryVariables,
+  MyEmojiLikeDocument,
+  MyEmojiLikeQuery,
+  MyEmojiLikeQueryVariables,
   Poll,
   PollDocument,
   PollQuery,
   useCreateEmojiMutation,
   useCreatePollMutation,
   useCreateVoteMutation,
-  useMyHashtagLikeQuery,
+  useMyEmojiLikeQuery,
   useMyVotesLazyQuery,
   usePollLazyQuery,
   usePollQuery,
@@ -252,32 +252,29 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   )
 }
 
-const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
-  const { hashtag } = props
-  const { data, loading, error } = useMyHashtagLikeQuery({
-    variables: { hashtagId: hashtag.id.toString() },
+const EmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
+  const { data, loading, error } = useMyEmojiLikeQuery({
+    variables: { emojiId: emoji.id },
   })
-
-  // console.log(data?.myHashtagLike, hashtag)
 
   const [upsertEmojiLike] = useUpsertEmojiLikeMutation({
     update(cache, { data }) {
       // TODO: 這裡忽略了更新 count
       if (data?.upsertEmojiLike) {
-        cache.writeQuery<MyHashtagLikeQuery, MyHashtagLikeQueryVariables>({
-          query: MyHashtagLikeDocument,
-          variables: { hashtagId: data.upsertEmojiLike.like.hashtagId.toString() },
-          data: { myHashtagLike: data.upsertEmojiLike.like },
+        cache.writeQuery<MyEmojiLikeQuery, MyEmojiLikeQueryVariables>({
+          query: MyEmojiLikeDocument,
+          variables: { emojiId: data.upsertEmojiLike.like.emojiId },
+          data: { myEmojiLike: data.upsertEmojiLike.like },
         })
       }
     },
   })
   function handleClickLike(choice: LikeChoice) {
-    const myLike = data?.myHashtagLike
+    const myLike = data?.myEmojiLike
     if (myLike && myLike.choice === choice) {
       upsertEmojiLike({
         variables: {
-          hashtagId: hashtag.id.toString(),
+          emojiId: emoji.id,
           data: { choice: 'NEUTRAL' },
         },
       })
@@ -285,7 +282,7 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
     if (myLike && myLike.choice !== choice) {
       upsertEmojiLike({
         variables: {
-          hashtagId: hashtag.id.toString(),
+          emojiId: emoji.id,
           data: { choice },
         },
       })
@@ -293,7 +290,7 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
     if (myLike === null) {
       upsertEmojiLike({
         variables: {
-          hashtagId: hashtag.id.toString(),
+          emojiId: emoji.id,
           data: { choice },
         },
       })
@@ -308,16 +305,16 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
 
   return (
     <button
-      className={`inline mR ${data.myHashtagLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
+      className={`inline mR ${data.myEmojiLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
       onClick={() => {
         handleClickLike('UP')
       }}
     >
       {/* {data.myHashtagLike?.choice && hashtag.text} */}
       {/* {hashtag.text} */}
-      <HashtagTextToIcon hashtag={hashtag} />
+      <HashtagTextToIcon emoji={emoji} />
 
-      <span style={{ marginLeft: '3px' }}>{hashtag.count.nUps}</span>
+      <span style={{ marginLeft: '3px' }}>{emoji.count.nUps}</span>
     </button>
   )
 }
@@ -325,7 +322,7 @@ const EmojiLike = (props: { hashtag: Hashtag }): JSX.Element | null => {
 /**
  * @returns 若 emoji 目前沒有人點贊，返回 null
  */
-export const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null => {
+export const EmojiButotn = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
   // console.log(emoji)
   // if (emoji.count.nUps === 0) {
   //   return null
@@ -333,7 +330,7 @@ export const EmojiButotn = ({ emoji }: { emoji: Hashtag }): JSX.Element | null =
 
   return (
     // <span>
-    <EmojiLike hashtag={emoji} />
+    <EmojiLike emoji={emoji} />
     // {/* </span> */}
   )
 }
@@ -478,23 +475,22 @@ const InlineMirror = ({
   selfCard,
 }: RenderElementProps & { element: InlineMirrorElement; location: NavLocation; selfCard: Card }): JSX.Element => {
   const [showPopover, setShowPopover] = useState(false)
-  const editor = useSlateStatic()
+  // const editor = useSlateStatic()
   const href = locationToUrl({
     ...location,
     mirrorSymbol: element.mirrorSymbol,
     openedLiPath: [],
     author: element.author,
   })
-  const authorName = selfCard.link?.authorName
-
-  useEffect(() => {
-    // 若有 sourceUrl 且未設有 author 的情況，設一個預設 author
-    if (authorName && element.author === undefined) {
-      const path = ReactEditor.findPath(editor, element)
-      Transforms.setNodes<InlineMirrorElement>(editor, { author: authorName }, { at: path })
-      Transforms.insertNodes(editor, { text: ` @${authorName.split(':', 1)}` }, { at: Path.next(path) })
-    }
-  }, [authorName, element])
+  // const authorName = selfCard.link?.authorName
+  // useEffect(() => {
+  //   // 若有 sourceUrl 且未設有 author 的情況，設一個預設 author
+  //   if (authorName && element.author === undefined) {
+  //     const path = ReactEditor.findPath(editor, element)
+  //     Transforms.setNodes<InlineMirrorElement>(editor, { author: authorName }, { at: path })
+  //     Transforms.insertNodes(editor, { text: ` @${authorName.split(':', 1)}` }, { at: Path.next(path) })
+  //   }
+  // }, [authorName, element])
 
   return (
     <span {...attributes}>
@@ -589,11 +585,14 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
     //   handleCreatePoll()
     // }
     if (!showPopover && !element.id && pollId) {
-      const queryPollData = async () => {
-        await queryPoll({ variables: { id: pollId } })
+      // const queryPollData = async () => {
+      //   queryPoll({ variables: { id: pollId } })
+      // }
+      // queryPollData()
+      queryPoll({ variables: { id: pollId } })
+      if (pollData?.poll) {
+        onCreated(pollData.poll)
       }
-      queryPollData()
-      pollData && onCreated(pollData.poll)
     }
   }, [showPopover, pollData, pollId])
 
@@ -624,7 +623,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
       {selected || (
         <span contentEditable={false}>
           <PollGroup
-            bulletId={parent.id}
+            // bulletId={parent.id}
             choices={element.choices}
             pollId={element.id?.toString()}
             handleShowPopover={b => {
@@ -771,10 +770,10 @@ const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
 
 const FilterMirror = ({
   mirrors,
-  sourceUrl,
+  sourceCardId,
 }: {
   mirrors: InlineMirrorElement[]
-  sourceUrl: string
+  sourceCardId: string
 }): JSX.Element | null => {
   const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
   const client = useApolloClient()
@@ -787,7 +786,7 @@ const FilterMirror = ({
         const rootBulletDraft = Serializer.toRootBulletDraft(rootLi)
         const filtered = BulletNode.filter({
           node: rootBulletDraft,
-          matcher: e => e.sourceUrl === sourceUrl,
+          match: ({ node }) => node.sourceCardId === sourceCardId,
         })
         setFilteredBullet(filtered)
       }
@@ -819,10 +818,19 @@ const FilterMirror = ({
   )
 }
 
-const Lc = (
-  props: RenderElementProps & { element: LcElement; location: NavLocation; sourceUrl?: string },
-): JSX.Element => {
-  const { attributes, children, element, location, sourceUrl } = props
+const Lc = ({
+  attributes,
+  children,
+  element,
+  location,
+  sourceCardId,
+  sourceLinkId,
+}: RenderElementProps & {
+  element: LcElement
+  location: NavLocation
+  sourceCardId?: string
+  sourceLinkId?: string
+}): JSX.Element => {
   const editor = useSlateStatic()
   const readonly = useReadOnly()
   const focused = useFocused() // 整個editor是否focus

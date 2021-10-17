@@ -7,24 +7,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id         String      @id @default(cuid())
-  email      String      @unique
-  // profile      Profile
-  // dailyProfile DailyProfile
-  votes      Vote[]
-  // boards       Board[]
-  // boardLikes   BoardLike[]
-  // bulletLikes BulletLike[]
-  polls      Poll[]
-  // comments     Comment[]
-  // commentLikes CommentLike[]
-  cardBodies CardBody[]
-  emojis     Emoji[]
-  emojiLikes EmojiLike[]
-  Shot       Shot[]
-}
-
 model Author {
   id        String   @id @default(cuid())
   name      String   @unique
@@ -34,29 +16,90 @@ model Author {
   shots     Shot[]
 }
 
-// model Profile {
-//   id               Int    @id @default(autoincrement())
-//   user             User   @relation(fields: [userId], references: [id])
-//   userId           String
-//   lv               Int    @default(0)
-//   exp              Int    @default(0)
-//   nGotLikes        Int    @default(0)
-//   nCommits         Int    @default(0)
-//   nFollowedEvents  Int    @default(0)
-//   nFollowedTickers Int    @default(0)
-// }
+model Bullet {
+  id        String   @id @default(cuid())
+  card      Card     @relation(fields: [cardId], references: [id])
+  cardId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // likes     BulletLike[]
+  // count     BulletCount? // 1-to-1
+  // boards    Board[]
+  emojis    Emoji[]
+}
 
-// model DailyProfile {
-//   id             Int      @id @default(autoincrement())
-//   user           User     @relation(fields: [userId], references: [id])
-//   userId         String
-//   nLikes         Int      @default(0)
-//   nFeeds         Int      @default(0)
-//   nEventFollows  Int      @default(0)
-//   nTickerFollows Int      @default(0)
-//   createdAt      DateTime @default(now())
-//   updatedAt      DateTime @updatedAt
-// }
+model Card {
+  id        String     @id @default(cuid())
+  symbol    String     @unique
+  link      Link?      @relation(fields: [linkId], references: [id])
+  linkId    String?    @unique
+  type      CardType
+  meta      Json       @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  bullets   Bullet[]
+  bodies    CardBody[]
+  // boards    Board[]
+  // ticks     Tick[]
+  // hashtags  Hashtag[]
+  shots     Shot[]
+}
+
+model CardBody {
+  id        Int       @id @default(autoincrement())
+  card      Card      @relation(fields: [cardId], references: [id])
+  cardId    String
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  content   Json
+  timestamp Int
+  prev      CardBody? @relation("CardBodyHistory", fields: [prevId], references: [id])
+  prevId    Int?      @unique
+  next      CardBody? @relation("CardBodyHistory")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([cardId, timestamp])
+}
+
+model Emoji {
+  id        String      @id @default(cuid())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  bullet    Bullet      @relation(fields: [bulletId], references: [id])
+  bulletId  String
+  text      String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  count     EmojiCount?
+  likes     EmojiLike[]
+
+  @@unique([bulletId, text])
+}
+
+model EmojiCount {
+  id        Int      @id @default(autoincrement())
+  emoji     Emoji    @relation(fields: [emojiId], references: [id])
+  emojiId   String   @unique
+  nViews    Int      @default(0)
+  nUps      Int      @default(0)
+  nDowns    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EmojiLike {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  emoji     Emoji      @relation(fields: [emojiId], references: [id])
+  emojiId   String
+  choice    LikeChoice
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, emojiId])
+}
 
 model Link {
   id         String  @id @default(cuid())
@@ -67,6 +110,36 @@ model Link {
   authorId   String?
   card       Card? // 1-to-1
   shots      Shot[] // Shots form this link(source)
+}
+
+// Poll建立後不能修改？或者允許user修改？目前不行
+model Poll {
+  id        String     @id @default(cuid())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  type      PollType   @default(FIXED)
+  status    PollStatus @default(OPEN)
+  meta      Json       @default("{}")
+  choices   String[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  count     PollCount? // 1-to-1
+  // board     Board?
+  votes     Vote[]
+}
+
+model PollCount {
+  id         Int      @id @default(autoincrement())
+  poll       Poll     @relation(fields: [pollId], references: [id])
+  pollId     String   @unique
+  nVotes     Int[]
+  nJudgments Int[]
+  // judgeStartedAt DateTime?
+  // judgeEndedAt   DateTime?
+  // verdictValid   Boolean?
+  // verdictChoice  Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Shot {
@@ -99,74 +172,47 @@ model Vote {
   // @@unique([userId, pollId])
 }
 
-model PollCount {
-  id         Int      @id @default(autoincrement())
-  poll       Poll     @relation(fields: [pollId], references: [id])
-  pollId     String   @unique
-  nVotes     Int[]
-  nJudgments Int[]
-  // judgeStartedAt DateTime?
-  // judgeEndedAt   DateTime?
-  // verdictValid   Boolean?
-  // verdictChoice  Int?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model User {
+  id         String      @id @default(cuid())
+  email      String      @unique
+  // profile      Profile
+  // dailyProfile DailyProfile
+  votes      Vote[]
+  // boards       Board[]
+  // boardLikes   BoardLike[]
+  // bulletLikes BulletLike[]
+  polls      Poll[]
+  // comments     Comment[]
+  // commentLikes CommentLike[]
+  cardBodies CardBody[]
+  emojis     Emoji[]
+  emojiLikes EmojiLike[]
+  Shot       Shot[]
 }
 
-// Poll建立後不能修改？或者允許user修改？目前不行
-model Poll {
-  id        String     @id @default(cuid())
-  user      User       @relation(fields: [userId], references: [id])
-  userId    String
-  type      PollType   @default(FIXED)
-  status    PollStatus @default(OPEN)
-  meta      Json       @default("{}")
-  choices   String[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  count     PollCount? // 1-to-1
-  // board     Board?
-  votes     Vote[]
-}
+// model Profile {
+//   id               Int    @id @default(autoincrement())
+//   user             User   @relation(fields: [userId], references: [id])
+//   userId           String
+//   lv               Int    @default(0)
+//   exp              Int    @default(0)
+//   nGotLikes        Int    @default(0)
+//   nCommits         Int    @default(0)
+//   nFollowedEvents  Int    @default(0)
+//   nFollowedTickers Int    @default(0)
+// }
 
-model EmojiLike {
-  id        Int        @id @default(autoincrement())
-  user      User       @relation(fields: [userId], references: [id])
-  userId    String
-  emoji     Emoji      @relation(fields: [emojiId], references: [id])
-  emojiId   String
-  choice    LikeChoice
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  @@unique([userId, emojiId])
-}
-
-model EmojiCount {
-  id        Int      @id @default(autoincrement())
-  emoji     Emoji    @relation(fields: [emojiId], references: [id])
-  emojiId   String   @unique
-  nViews    Int      @default(0)
-  nUps      Int      @default(0)
-  nDowns    Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Emoji {
-  id        String      @id @default(cuid())
-  user      User        @relation(fields: [userId], references: [id])
-  userId    String
-  bullet    Bullet      @relation(fields: [bulletId], references: [id])
-  bulletId  String
-  text      String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  count     EmojiCount?
-  likes     EmojiLike[]
-
-  @@unique([bulletId, text])
-}
+// model DailyProfile {
+//   id             Int      @id @default(autoincrement())
+//   user           User     @relation(fields: [userId], references: [id])
+//   userId         String
+//   nLikes         Int      @default(0)
+//   nFeeds         Int      @default(0)
+//   nEventFollows  Int      @default(0)
+//   nTickerFollows Int      @default(0)
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @updatedAt
+// }
 
 // model BulletLike {
 //   id        Int        @id @default(autoincrement())
@@ -189,52 +235,6 @@ model Emoji {
 //   createdAt DateTime @default(now())
 //   updatedAt DateTime @updatedAt
 // }
-
-model Bullet {
-  id        String   @id @default(cuid())
-  card      Card     @relation(fields: [cardId], references: [id])
-  cardId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  // likes     BulletLike[]
-  // count     BulletCount? // 1-to-1
-  // boards    Board[]
-  emojis    Emoji[]
-}
-
-model CardBody {
-  id        Int       @id @default(autoincrement())
-  card      Card      @relation(fields: [cardId], references: [id])
-  cardId    String
-  user      User      @relation(fields: [userId], references: [id])
-  userId    String
-  content   Json
-  timestamp Int
-  prev      CardBody? @relation("CardBodyHistory", fields: [prevId], references: [id])
-  prevId    Int?      @unique
-  next      CardBody? @relation("CardBodyHistory")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@unique([cardId, timestamp])
-}
-
-model Card {
-  id        String     @id @default(cuid())
-  symbol    String     @unique
-  link      Link?      @relation(fields: [linkId], references: [id])
-  linkId    String?    @unique
-  type      CardType
-  meta      Json       @default("{}")
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  bullets   Bullet[]
-  bodies    CardBody[]
-  // boards    Board[]
-  // ticks     Tick[]
-  // hashtags  Hashtag[]
-  shots     Shot[]
-}
 
 // model CommentLike {
 //   id        Int        @id @default(autoincrement())
@@ -359,49 +359,10 @@ enum CardType {
   WEBPAGE
 }
 
-enum CardStatus {
-  ACTIVE
-  ARCHIVE
-  REDIRECT
-  REPORTED
-  DUPLICATED
-}
-
-enum HashtagStatus {
-  ACTIVE
-  LOCK
-  DELETE
-  ARCHIVE
-  REPORTED
-}
-
-enum BoardStatus {
-  ACTIVE
-  LOCK
-  DELETE
-  ARCHIVE
-  REPORTED
-}
-
-enum CommentStatus {
-  ACTIVE
-  LOCK
-  DELETE
-  ARCHIVE
-  REPORTED
-}
-
-enum PollType {
-  FIXED // 固定的選項
-  ADD // 可以簡易新增選項
-  ADD_BY_POST // 需要reply才能新增選項
-}
-
-enum PollStatus {
-  OPEN
-  JUDGE
-  CLOSE_SUCCESS
-  CLOSE_FAIL
+enum LikeChoice {
+  UP
+  DOWN
+  NEUTRAL
 }
 
 enum PollFailReason {
@@ -416,10 +377,17 @@ enum PollFailReason {
   OTHER
 }
 
-enum LikeChoice {
-  UP
-  DOWN
-  NEUTRAL
+enum PollStatus {
+  OPEN
+  JUDGE
+  CLOSE_SUCCESS
+  CLOSE_FAIL
+}
+
+enum PollType {
+  FIXED // 固定的選項
+  ADD // 可以簡易新增選項
+  ADD_BY_POST // 需要reply才能新增選項
 }
 
 enum ShotChoice {
@@ -427,6 +395,38 @@ enum ShotChoice {
   SHORT
   HOLD
 }
+
+// enum CardStatus {
+//   ACTIVE
+//   ARCHIVE
+//   REDIRECT
+//   REPORTED
+//   DUPLICATED
+// }
+
+// enum BoardStatus {
+//   ACTIVE
+//   LOCK
+//   DELETE
+//   ARCHIVE
+//   REPORTED
+// }
+
+// enum CommentStatus {
+//   ACTIVE
+//   LOCK
+//   DELETE
+//   ARCHIVE
+//   REPORTED
+// }
+
+// enum HashtagStatus {
+//   ACTIVE
+//   LOCK
+//   DELETE
+//   ARCHIVE
+//   REPORTED
+// }
 
 // enum NoticeCat {
 //   POLL_REVOTE

@@ -1,6 +1,6 @@
 // import * as QT from './graphql/query-types'
 // import { SymbolCat, CardTemplate, CocardFragment } from '../apollo/query.graphql'
-import { BulletLike, EmojiLike, LikeChoice } from '.prisma/client'
+import { EmojiLike, LikeChoice } from '.prisma/client'
 
 export function hasCount<T, U>(v: T & { count: U | null }): v is T & { count: U } {
   return v.count !== null

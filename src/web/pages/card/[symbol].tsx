@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import { Node } from 'slate'
 import { BulletEditor, EmojiButotn } from '../../components/editor/editor'
@@ -8,17 +8,7 @@ import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 import NavPath from '../../components/nav-path/nav-path'
-import {
-  CardMeta,
-  Hashtag,
-  HashtagsDocument,
-  HashtagsQuery,
-  Poll,
-  useCreateVoteMutation,
-  useHashtagsLazyQuery,
-  useHashtagsQuery,
-  useMeQuery,
-} from '../../apollo/query.graphql'
+import { CardMeta, useMeQuery } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/symbol.module.scss'
 import Popover from '../../components/popover/popover'
@@ -125,11 +115,11 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [headerFormSubmited, setHeaderFormSubmited] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [submitFinished, setSubmitFinished] = useState(false)
-  const [openLiHashtags, setOpenLiHashtags] = useState<Hashtag[]>([])
-  const [queryHashtags, { data: hashtagData }] = useHashtagsLazyQuery({
-    fetchPolicy: 'cache-first',
-    variables: { symbol: data?.self.symbol ?? '' },
-  })
+  // const [openLiHashtags, setOpenLiHashtags] = useState<Hashtag[]>([])
+  // const [queryHashtags, { data: hashtagData }] = useHashtagsLazyQuery({
+  //   fetchPolicy: 'cache-first',
+  //   variables: { symbol: data?.self.symbol ?? '' },
+  // })
 
   useEffect(() => {
     if (router.isReady) {
@@ -156,19 +146,18 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
   }, [headerFormSubmited, showHeaderForm])
 
-  useEffect(() => {
-    queryHashtags()
-
-    if (hashtagData?.hashtags && data) {
-      const newHashtagsArr: Hashtag[] = []
-      hashtagData?.hashtags?.forEach(e => {
-        if (e.bulletId === data.openedLi.children[0].id) {
-          newHashtagsArr.push(e)
-        }
-      })
-      setOpenLiHashtags(newHashtagsArr)
-    }
-  }, [data?.openedLi])
+  // useEffect(() => {
+  //   queryHashtags()
+  //   if (hashtagData?.hashtags && data) {
+  //     const newHashtagsArr: Hashtag[] = []
+  //     hashtagData?.hashtags?.forEach(e => {
+  //       if (e.bulletId === data.openedLi.children[0].id) {
+  //         newHashtagsArr.push(e)
+  //       }
+  //     })
+  //     setOpenLiHashtags(newHashtagsArr)
+  //   }
+  // }, [data?.openedLi])
 
   // useEffect(() => {
   //   if (data && location) {
@@ -405,14 +394,14 @@ const CardSymbolPage = (): JSX.Element | null => {
             )}
           </h3>
           {/* {hashtags && <div>{hashtags.text}</div>} */}
-          {openLiHashtags.length > 0 && (
+          {/* {openLiHashtags.length > 0 && (
             <div>
               {openLiHashtags.map((e, i) => {
                 return <EmojiButotn key={i} emoji={e} />
               })}
             </div>
           )}
-
+ */}
           {/* {console.log(data.openedLi.children[0].id)} */}
 
           {/* <h3>{Node.string(data.openedLi.children[0])}</h3> */}
