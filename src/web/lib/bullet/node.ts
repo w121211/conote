@@ -5,7 +5,7 @@ export type BulletDraftOrRootBulletDraft<T extends Bullet | RootBullet> = T exte
   ? RootBulletDraft
   : BulletDraft
 
-export type Matcher = (node: Bullet | BulletDraft) => boolean
+export type Match = (params: { node: Bullet | BulletDraft; depth: number }) => boolean
 
 export class BulletNode {
   /**
@@ -79,44 +79,24 @@ export class BulletNode {
   /**
    * Search in a bullet tree and return the first found
    */
-  public static find(
-    // node: Bullet | BulletDraft,
-    // where: {
-    //   id?: number
-    //   head?: string
-    //   pin?: true
-    //   pinCode?: PinBoardCode
-    //   inDepth?: number
-    // },
-    // curDepth = 0,
-    props: { node: Bullet | BulletDraft; matcher: Matcher; depth?: { stopAfter?: number; cur: number } },
-  ): (Bullet | BulletDraft)[] {
-    const { node, matcher, depth = { cur: 0 } } = props
-    const nextDepth = depth.cur + 1
+  public static find({
+    node,
+    match,
+    curDepth = 0,
+  }: {
+    node: Bullet | BulletDraft
+    match: Match
+    curDepth?: number
+  }): (Bullet | BulletDraft)[] {
     let found: (Bullet | BulletDraft)[] = []
-
-    if (matcher(node)) {
+    if (match({ node, depth: curDepth })) {
       found.push(node)
     }
-
-    // if (where.id !== undefined && where.id === node.id) {
-    //   found.push(node)
-    // } else if (where.head !== undefined && where.head === node.head) {
-    //   found.push(node)
-    // } else if (where.pin && where.pin === node.pin) {
-    //   found.push(node)
-    // } else if (where.pinCode !== undefined && where.pinCode === node.pinCode) {
-    //   found.push(node)
+    // if (depth.stopAfter === undefined || nextDepth <= depth.stopAfter) {
     // }
-
-    if (depth.stopAfter === undefined || nextDepth <= depth.stopAfter) {
-      for (const e of node.children ?? []) {
-        found = found.concat(
-          BulletNode.find({ node: e, matcher, depth: { stopAfter: depth.stopAfter, cur: nextDepth } }),
-        )
-      }
+    for (const e of node.children ?? []) {
+      found = found.concat(BulletNode.find({ node: e, match, curDepth: curDepth + 1 }))
     }
-
     return found
   }
 
@@ -125,12 +105,12 @@ export class BulletNode {
    */
   public static set<T extends Bullet | BulletDraft>(props: {
     node: T
-    matcher: Matcher
+    match: Match
     setter: (node: Bullet | BulletDraft) => void
   }): T {
-    const { node, matcher, setter } = props
+    const { node, match, setter } = props
     const _node = cloneDeep(node)
-    for (const e of BulletNode.find({ node: _node, matcher })) {
+    for (const e of BulletNode.find({ node: _node, match })) {
       setter(e)
     }
     return _node
@@ -153,25 +133,33 @@ export class BulletNode {
   }
 
   /**
-   * 依照 matcher 找對應的 nodes
+   * 依照 match 找對應的 nodes
    */
-  public static filter({ node, matcher }: { node: Bullet | BulletDraft; matcher: Matcher }): BulletDraft | null {
+  public static filter({
+    node,
+    match,
+    curDepth = 0,
+  }: {
+    node: Bullet | BulletDraft
+    match: Match
+    curDepth?: number
+  }): BulletDraft | null {
     const filtered = node.children
-      .map(e => BulletNode.filter({ node: e, matcher }))
+      .map(e => BulletNode.filter({ node: e, match }))
       .filter((e): e is BulletDraft => e !== null)
     if (filtered.length > 0) {
       return {
         ...node,
         children: filtered,
       }
-    } else if (matcher(node)) {
+    }
+    if (match({ node, depth: curDepth })) {
       return {
         ...node,
         children: [],
       }
-    } else {
-      return null
     }
+    return null
   }
 }
 
@@ -276,19 +264,20 @@ export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDra
     let checked: Omit<BulletDraft, 'children'>
     switch (_draft.op) {
       case 'CREATE': {
-        if (cur) throw new Error('node不能同時有 id 與 CREATE')
+        if (cur) throw 'node不能同時有 id 與 CREATE'
         checked = {
           head: _draft.head,
           body: _draft.body,
-          sourceUrl: _draft.sourceUrl,
-          author: _draft.author,
+          authorId: _draft.authorId,
+          sourceCardId: _draft.sourceCardId,
+          sourceLinkId: _draft.sourceLinkId,
           op: 'CREATE',
         }
         break
       }
       case 'UPDATE': {
-        if (cur === undefined) throw new Error('UPDATE 找不到原本的 node')
-        if (_draft.head === cur.head && _draft.body === _draft.body) throw new Error('UPDATE 沒有偵測到值變動')
+        if (cur === undefined) throw 'UPDATE 找不到原本的 node'
+        if (_draft.head === cur.head && _draft.body === _draft.body) throw 'UPDATE 沒有偵測到值變動'
         checked = {
           ...cur,
           head: _draft.head,
@@ -300,7 +289,7 @@ export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDra
         break
       }
       case 'DELETE':
-        if (cur === undefined) throw new Error('DELETE 找不到原本的 node')
+        if (cur === undefined) throw 'DELETE 找不到原本的 node'
         checked = {
           ...cur,
           head: '',
@@ -311,7 +300,7 @@ export function checkBulletDraft(draft: BulletDraft, cur: RootBullet): BulletDra
         }
         break
       default:
-        if (cur === undefined) throw new Error('無 op，但找不到原本的 node')
+        if (cur === undefined) throw '無 op，但找不到原本的 node'
         checked = cur
         break
     }

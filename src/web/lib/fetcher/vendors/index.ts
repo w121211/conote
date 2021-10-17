@@ -1,4 +1,4 @@
-import { webpage } from './webpage'
+import { base } from './base'
 import { youtube } from './youtube'
 import { FetchResult } from '../fetcher'
 
@@ -12,7 +12,7 @@ export class DomainNotFitError extends Error {
 }
 
 // fallback 依序嘗試執行，若失敗則嘗試下一個
-const fetchers: DomainFetchFunction[] = [youtube, webpage]
+const fetchers: DomainFetchFunction[] = [youtube, base]
 
 export async function tryFetch(url: string): Promise<FetchResult> {
   for (const fetcher of fetchers) {

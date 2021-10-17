@@ -8,14 +8,18 @@ export type FetchResult = {
   finalUrl: string
   srcId?: string
   srcType: SrcType
-  // metadata
+
+  // metascraper
   authorId?: string
   authorName?: string
   date?: string
   description?: string
-  keywords?: string[]
   lang?: string
   title?: string
+
+  // ./packages/scraper
+  keywords?: string[]
+  tickers?: string[]
 }
 
 export class FetchClient {

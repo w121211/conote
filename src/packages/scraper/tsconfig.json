@@ -3,9 +3,9 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "dist",
-    // "composite": true,
+    "composite": true,
     "declaration": true
   },
   "include": ["src"],
-  "exclude": ["**/__deprecated__", "node_modules"]
+  "exclude": ["**/__deprecated__", "node_modules", "**/__tests__"]
 }

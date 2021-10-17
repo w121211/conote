@@ -24,13 +24,12 @@ export async function createAuthorVote({
 }: {
   choiceIdx?: number
   choiceText?: string
-  pollId: number
+  pollId: string
   authorName: string
   userId: string
 }): Promise<Vote> {
   // 允許重複投票
   const poll = await prisma.poll.findUnique({ where: { id: pollId }, include: { count: true } })
-
   if (!poll || !poll.count) {
     throw new Error('Poll not found')
   }
@@ -68,7 +67,7 @@ export async function createVote({
   userId,
 }: {
   choiceIdx: number
-  pollId: number
+  pollId: string
   userId: string
 }): Promise<Vote> {
   // TODO:

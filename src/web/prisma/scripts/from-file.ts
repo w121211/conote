@@ -2,12 +2,11 @@ import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
 import { cloneDeep } from '@apollo/client/utilities'
-import { Card, CardBody, Hashtag, HashtagCount, HashtagStatus, Link, Poll, PrismaClient } from '@prisma/client'
+import { Author, Card, CardBody, Link, PrismaClient, Shot, ShotChoice } from '.prisma/client'
 import { Editor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../lib/fetcher/fetcher'
 import { BulletNode } from '../../lib/bullet/node'
-import { BulletDraft, InlineItem, InlinePoll, RootBulletDraft } from '../../lib/bullet/types'
-import { parseBulletHead } from '../../lib/bullet/text'
+import { BulletDraft, RootBulletDraft } from '../../lib/bullet/types'
 import {
   CardBodyContent,
   CardMeta,
@@ -15,10 +14,10 @@ import {
   getOrCreateCardBySymbol,
   getOrCreateCardByUrl,
 } from '../../lib/models/card'
-import { createAuthorVote } from '../../lib/models/vote'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
-import { getBotId } from '../../lib/models/user'
-import { injectHashtags, toGQLHashtag } from '../../lib/hashtag/inject'
+import { ShotContent, toShotInlineText } from '../../lib/models/shot'
+// import { getBotId } from '../../lib/models/user'
+// import { injectHashtags, toGQLHashtag } from '../../lib/hashtag/inject'
 
 const IGNORE_FILE_STARTS_WITH = '_'
 const includeFiles: string[] = [
@@ -29,167 +28,141 @@ const includeFiles: string[] = [
 ]
 
 const seedDirPath = resolve(process.cwd(), process.argv[2])
-const fetcher = new FetchClient(resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'))
+const scraper = new FetchClient(resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'))
 const prisma = new PrismaClient({ errorFormat: 'pretty' })
 
 const NEAT_REPLY_CHOICE = [
-  { options: ['<BUY>', '<B>', '<買>', '<LONG>', '<L>', '<多>', '<看多>'], choiceIdx: 0 },
-  { options: ['<SELL>', '<S>', '<買>', '<SHORT>', '<空>', '<看空>'], choiceIdx: 1 },
-  { options: ['<觀望>'], choiceIdx: 2 },
+  { options: ['<BUY>', '<B>', '<買>', '<LONG>', '<L>', '<多>', '<看多>'], choiceIdx: 0, shotChoice: ShotChoice.LONG },
+  { options: ['<SELL>', '<S>', '<買>', '<SHORT>', '<空>', '<看空>'], choiceIdx: 1, shotChoice: ShotChoice.SHORT },
+  { options: ['<觀望>'], choiceIdx: 2, shotChoice: ShotChoice.HOLD },
 ]
 
-const BUYSELL_POLL_TEXT = '(#buy #sell #hold)'
-const BUYSELL_POLL_CHOICES = ['#buy', '#sell', '#hold']
-
-function searchTree(props: {
-  node: BulletDraft
-  depth: number
-  inDepth?: number
-  where: {
-    // userId?: string
-    head?: string
-    hashtag?: { text: string }
-    // hashtagGroup?: { text: string }
-    poll?: { text: string }
+async function createNeatReply({
+  authorId,
+  neatReply,
+  linkId,
+  targetCardId,
+  userId,
+}: {
+  authorId: string
+  neatReply: Markerline
+  linkId: string
+  targetCardId: string
+  userId: string
+}): Promise<
+  Shot & {
+    author: Author
+    target: Card
   }
-}): [BulletDraft | null, InlineItem | undefined] {
-  const { node, depth, where, inDepth } = props
-  const nextDepth = depth + 1
+> {
+  if (!neatReply.neatReply) throw new Error('非neatReply')
+  if (!neatReply.src) throw new Error('缺src，無法創neat-reply')
+  if (!neatReply.stampId) throw new Error('缺stampId，無法創neat-reply')
+  if (!neatReply.pollChoices) throw new Error('缺pollChoices，無法創neat-reply')
+  if (neatReply.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1，無法創neat-reply')
+  if (!neatReply.nestedCard) throw new Error('缺nestedCard，無法創neat-reply')
+  if (!neatReply.oauthor) throw new Error('缺oauthor，無法創neat-reply')
 
-  if (where.head && where.head === node.head) {
-    return [node, undefined]
+  // 取得並檢查choice-index
+  const choice = neatReply.pollChoices[0]
+  let choiceIdx: number | undefined
+  let shotChoice: ShotChoice | undefined
+  for (const e of NEAT_REPLY_CHOICE) {
+    if (e.options.indexOf(choice) >= 0) {
+      choiceIdx = e.choiceIdx
+      shotChoice = e.shotChoice
+      break
+    }
   }
-  // if (where.hashtag) {
-  //   const text = where.hashtag.text
-  //   const hashtag = node.curHashtags?.find((e): e is Hashtag => e.type === 'hashtag' && e.text === text)
-  //   if (hashtag) {
-  //     return [node, hashtag]
-  //   }
+  if (choiceIdx === undefined || shotChoice === undefined) {
+    console.error(neatReply)
+    throw new Error('所給的 vote choice 非預設的那幾個')
+  }
+
+  // 創 shot
+  const shotContent: ShotContent = {
+    comment: neatReply.str,
+  }
+  const shot = await prisma.shot.create({
+    data: {
+      choice: shotChoice,
+      content: shotContent,
+      user: { connect: { id: userId } },
+      author: { connect: { id: authorId } },
+      link: { connect: { id: linkId } },
+      target: { connect: { id: targetCardId } },
+    },
+    include: {
+      author: true,
+      target: true,
+    },
+  })
+  if (shot.author) {
+    return {
+      ...shot,
+      author: shot.author,
+    }
+  }
+  throw 'shot must have an author'
+
+  // auther 的 comment 併入 node children
+  // const child: BulletDraft = {
+  //   head: `(${BUYSELL_POLL_CHOICES[choiceIdx]}) ${e.str}`,
+  //   sourceUrl: e.src,
+  //   author: e.oauthor,
+  //   op: 'CREATE',
+  //   children: [],
   // }
-  if (where.poll) {
-    const text = where.poll.text
-    const { headInlines } = parseBulletHead({ str: node.head })
-    const poll = headInlines.find((e): e is InlinePoll => e.type === 'poll' && e.str.includes(text))
-    if (poll) {
-      return [node, poll]
-    }
-  }
-  if (inDepth === undefined || nextDepth <= inDepth) {
-    for (const e of node.children) {
-      const res = searchTree({
-        node: e,
-        depth: depth + 1,
-        inDepth,
-        where,
-      })
-      if (res[0] !== null) {
-        return res
-      }
-    }
-  }
-  return [null, undefined]
+  // node.children.push(child)
 }
 
 /**
  * 將markerlines插入(in-place)至對應的children裡，並對neat-reply創新comment/vote
  */
-async function insertMarkerlines(
-  root: RootBulletDraft,
-  markerlines: Markerline[],
-  userId: string,
-): Promise<RootBulletDraft> {
-  const _root = cloneDeep(root)
-
-  async function _insertNeatReply(e: Markerline) {
-    if (!e.neatReply) throw new Error('非neatReply')
-    if (!e.src) throw new Error('缺src，無法創neat-reply')
-    if (!e.stampId) throw new Error('缺stampId，無法創neat-reply')
-    if (!e.pollChoices) throw new Error('缺pollChoices，無法創neat-reply')
-    if (e.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1，無法創neat-reply')
-    if (!e.nestedCard) throw new Error('缺nestedCard，無法創neat-reply')
-    if (!e.oauthor) throw new Error('缺oauthor，無法創neat-reply')
-
-    // 取得並檢查choice-index
-    const choice = e.pollChoices[0]
-    let choiceIdx: number | undefined
-    for (const e of NEAT_REPLY_CHOICE) {
-      if (e.options.indexOf(choice)) {
-        choiceIdx = e.choiceIdx
-        break
-      }
-    }
-    if (choiceIdx === undefined) {
-      console.error(e)
-      throw new Error('所給的 vote-choice 非預設的那幾個')
-    }
-
-    // 取得 buysell node
-    const [node, poll] = searchTree({
-      node: _root,
-      depth: 0,
-      where: { poll: { text: BUYSELL_POLL_TEXT } },
-    })
-
-    if (node && poll && poll.type === 'poll' && poll.id) {
-      const vote = await createAuthorVote({
-        choiceIdx,
-        pollId: parseInt(poll.id),
-        authorName: e.oauthor,
-        userId,
-      })
-      // const comment = await prisma.comment.create({
-      //   data: {
-      //     content: `${e.str} ^[[${e.src}]]`,
-      //     user: { connect: { id: userId } },
-      //     author: { connect: { name: e.oauthor } },
-      //     count: { create: {} },
-      //     board: { connect: { id: node.boardId } },
-      //     vote: { connect: { id: vote.id } },
-      //   },
-      // })
-    } else {
-      console.error(inspect(_root, { depth: null }))
-      throw new Error('找不到 buysell 的 node')
-    }
-
-    // auther 的 comment 併入 node children
-    const child: BulletDraft = {
-      head: `(${BUYSELL_POLL_CHOICES[choiceIdx]}) ${e.str}`,
-      sourceUrl: e.src,
-      author: e.oauthor,
-      // commentId: comment.id,
-      // voteId: vote.id,
-      op: 'CREATE',
-      children: [],
-    }
-    node.children.push(child)
-  }
-
+async function insertMarkerlines({
+  rootBullet,
+  markerlines,
+  authorId,
+  sourceCardId,
+}: {
+  authorId?: string
+  markerlines: Markerline[]
+  rootBullet: RootBulletDraft
+  sourceCardId: string
+  // userId: string
+}): Promise<RootBulletDraft> {
+  const root = cloneDeep(rootBullet)
   for (const e of markerlines) {
     if (e.new && e.marker?.key && e.marker.value) {
-      if (e.neatReply) {
-        _insertNeatReply(e)
-      }
+      // if (e.neatReply) {
+      //   _insertNeatReply(e)
+      // }
 
       // 依照 markerline key 找對應的 subtitle node（PS. 僅找第一層）
-      const [node] = searchTree({
-        node: _root,
-        depth: 0,
-        inDepth: 1,
-        where: { head: e.marker.key },
-      })
+      // const [node] = searchTree({
+      //   node: root,
+      //   depth: 0,
+      //   inDepth: 1,
+      //   where: { head: e.marker.key },
+      // })
+
+      const { key, value } = e.marker
+      const found = BulletNode.find({
+        node: root,
+        match: ({ node }) => node.head.includes(key),
+      }) as BulletDraft[]
       const child: BulletDraft = {
         head: e.marker.value,
-        sourceUrl: e.src,
-        author: e.oauthor,
+        sourceCardId,
+        authorId,
         op: 'CREATE',
         children: [],
       }
-      if (node) {
-        node.children.push(child)
+      if (found.length > 0) {
+        found[0].children.push(child)
       } else {
         // 創一個subtitle bullet
-        _root.children.push({
+        root.children.push({
           head: e.marker.key,
           op: 'CREATE',
           children: [child],
@@ -197,12 +170,14 @@ async function insertMarkerlines(
       }
     }
   }
-  return _root
+  return root
 }
 
 async function main() {
   console.log('Truncating databse...')
-  await prisma.$executeRaw('TRUNCATE "User", "Author", "Link", "Bullet", "Hashtag", "Card", "CardBody" CASCADE;')
+  await prisma.$executeRaw(
+    'TRUNCATE "User", "Author", "Link", "Card", "CardBody", "Bullet", "Emoji", "Poll", "Shot" CASCADE;',
+  )
 
   console.log('Creating test users...')
   await createTestUsers(prisma)
@@ -221,74 +196,76 @@ async function main() {
     console.log(`*\n*\n* Seed file: ${filepath}`)
 
     for (const [url, text] of splitByUrl(readFileSync(filepath, { encoding: 'utf8' }))) {
-      let card: Omit<Card, 'meta'> & { link: Link; meta: CardMeta; body: CardBody }
+      let sourceCard: Omit<Card, 'meta'> & { link: Link; meta: CardMeta; body: CardBody }
+
       try {
-        card = await getOrCreateCardByUrl({ fetcher, url })
+        sourceCard = await getOrCreateCardByUrl({ scraper, url })
       } catch (err) {
         console.warn(err)
         continue
       }
 
-      const { value: selfRoot }: CardBodyContent = JSON.parse(card.body.content)
+      const { value: sourceRoot } = sourceCard.body.content as unknown as CardBodyContent
+      const sourceRootDraft = BulletNode.toDraft(sourceRoot)
 
-      const selfRootDraft = BulletNode.toDraft(selfRoot)
-
-      const editor = new Editor('', [], card.link.url, card.link.authorName ?? undefined)
+      const editor = new Editor('', [], sourceCard.link.url, sourceCard.link.authorId ?? undefined)
       editor.setText(text)
       editor.flush()
 
-      // console.log(url, text)
-      // console.log(editor.getNestedMarkerlines())
-
       for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
         const mirrorCard = await getOrCreateCardBySymbol(cardlabel.symbol)
-        const { value: mirrorRoot }: CardBodyContent = JSON.parse(mirrorCard.body.content)
-        // console.log(inspect(mirrorRoot, { depth: null }))
+        const { value: mirrorRoot } = mirrorCard.body.content as unknown as CardBodyContent
 
-        const hashtags = (
-          await prisma.hashtag.findMany({
-            where: { AND: [{ card: { id: mirrorCard.id } }, { status: HashtagStatus.ACTIVE }] },
-            include: { count: true },
-          })
-        ).map(e => {
-          const hasCount = (
-            obj: Hashtag & { count: HashtagCount | null },
-          ): obj is Hashtag & { count: HashtagCount } => {
-            return obj.count !== null
-          }
-          if (hasCount(e)) {
-            return toGQLHashtag(e)
-          }
-          throw ''
+        const mirror = await insertMarkerlines({
+          authorId: sourceCard.link.authorId ?? undefined,
+          rootBullet: BulletNode.toDraft(mirrorRoot),
+          markerlines,
+          sourceCardId: sourceCard.id,
         })
-
-        const draft = BulletNode.toDraft(mirrorRoot)
-        const draftWithHashtags = injectHashtags({ root: draft, hashtags })
-        // console.log(inspect(draftWithHashtags, { depth: null }))
-
-        const mirror = await insertMarkerlines(draftWithHashtags, markerlines, TESTUSERS[0].id)
+        await createCardBody({ cardId: mirrorCard.id, root: mirror, userId: TESTUSERS[0].id })
         // console.log(inspect(mirror, { depth: null }))
 
-        const body = await createCardBody({ cardId: mirrorCard.id, root: mirror, userId: TESTUSERS[0].id })
+        let shotInlineText = ''
+        const neatReplies = markerlines.filter(e => e.neatReply)
+        if (neatReplies.length > 1) {
+          console.log(inspect(neatReplies, { depth: null }))
+          throw ''
+        } else if (neatReplies.length === 1) {
+          if (sourceCard.link.authorId && sourceCard.linkId) {
+            const shot = await createNeatReply({
+              authorId: sourceCard.link.authorId,
+              neatReply: neatReplies[0],
+              linkId: sourceCard.linkId,
+              targetCardId: mirrorCard.id,
+              userId: TESTUSERS[0].id,
+            })
+            shotInlineText = toShotInlineText({
+              author: shot.author.name,
+              choice: shot.choice,
+              targetSymbol: shot.target.symbol,
+              id: shot.id,
+            })
+          }
+        }
         // console.log(inspect(body[1], { depth: null }))
 
-        selfRootDraft.children.push({
+        // 在 root 上新增 mirror & shot (if any)
+        sourceRootDraft.children.push({
           draft: true,
           op: 'CREATE',
-          head: `::${cardlabel.symbol}`,
+          head: `::${mirrorCard.symbol} ${shotInlineText}`,
           // mirror: true,
           children: [],
         })
       }
 
       // console.log(inspect(selfRootDraft, { depth: null }))
-      const body = await createCardBody({
-        cardId: card.id,
-        root: selfRootDraft,
+      await createCardBody({
+        cardId: sourceCard.id,
+        root: sourceRootDraft,
         userId: TESTUSERS[0].id,
       })
       // console.log(inspect(body[1], { depth: null }))
-
       console.log(`Card and card-body created`)
     }
   }
@@ -301,7 +278,7 @@ main()
   })
   .finally(async () => {
     console.log('Done, closing primsa')
-    fetcher.dump()
+    scraper.dump()
     prisma.$disconnect()
     process.exit()
   })

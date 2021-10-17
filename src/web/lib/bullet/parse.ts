@@ -1,32 +1,36 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
 // import { parseHashtags } from '../hashtag/text'
 import { tokenToString } from '../token'
-import { InlineItem, InlineText } from './types'
+import { InlineItem } from './types'
 
 /**
  * Regex
  * url @see https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
  * hashtag @see https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
  */
-
+const reTicker = /\$[A-Z-=]+/
+const reTopic = /\[\[[^\]\n]+\]\]/u
+const reUser = /\B@[\p{L}\d_]+\b/u
 const reMirrorTicker = /^(::\$[A-Z-=]+)\b(?:\s@([\p{Letter}\d_]+))?/u
 const reMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B(?:\s@([\p{Letter}\d_]+))?/u
 const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const reNewPoll = /\B!\(\(poll\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
+const reShot = /\B!\(\(shot:([a-z0-9]{25,30})\)\)\([^)]*\)\B/
+const reNewShot = /\B!\(\(shot\)\)\(([^)]*)\)\B/
 
 const grammar: Grammar = {
-  // 'mirror-ticker': { pattern: /^::\$[A-Z-=]+\b/ },
-  // 'mirror-topic': { pattern: /^::\[\[[^\]\n]+\]\]\B/u },
-  'mirror-ticker': { pattern: reMirrorTicker },
+  'mirror-ticker': { pattern: reMirrorTicker }, // 順序重要，先 mirror 後 ticker
   'mirror-topic': { pattern: reMirrorTopic },
-  ticker: { pattern: /\$[A-Z-=]+/ },
-  topic: { pattern: /\[\[[^\]\n]+\]\]/u },
+  ticker: { pattern: reTicker },
+  topic: { pattern: reTopic },
   url: {
     pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
   },
-  user: { pattern: /\B@[\p{L}\d_]+\b/u },
+  user: { pattern: reUser },
   poll: { pattern: rePoll },
   'new-poll': { pattern: reNewPoll },
+  shot: { pattern: reShot },
+  'new-shot': { pattern: reNewShot },
   filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
 }
 

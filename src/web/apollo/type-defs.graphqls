@@ -23,13 +23,17 @@ type Query {
   webpageCard(url: String!): Card!
 
   # 以 card symbol 找該 card 所有的 active hashtags
-  hashtags(symbol: String!): [Hashtag!]
+  # hashtags(symbol: String!): [Hashtag!]
 
-  bullet(id: ID!): Bullet! # 找不到 @throw error
-  # hashtag(id: ID!): Hashtag! # 找不到 @throw error
-  poll(id: ID!): Poll! # 找不到 @throw error
-  board(id: ID!): Board!
-  comments(boardId: ID!, afterId: ID): [Comment!]!
+  shot(id: ID!): Shot!
+  shotsBySource(sourceId: ID!): [Shot!]!
+  shotsByAuthor(authorId: ID!, targetId: ID!): [Shot!]!
+
+  emojis(bulletId: ID!): [Emoji!]! # 找 bullet 所有的 emojis，沒有時為空的 array
+  bullet(id: ID!): Bullet
+  poll(id: ID!): Poll
+  # board(id: ID!): Board!
+  # comments(boardId: ID!, afterId: ID): [Comment!]!
 
   me: User!
 
@@ -38,8 +42,9 @@ type Query {
   # myBoardLikes(after: String): [BoardLike!]!
   # myBulletLikes(after: String): [BulletLike!]!
 
+  myShot(targetId: ID!): [Shot!]! # 可重複 shot
   myVotes(pollId: ID!): [Vote!]! # 因為目前可重複投票，所以同一個 poll 可能會有多個 votes
-  myHashtagLike(hashtagId: ID!): HashtagLike # 若沒有 like 過會返回 null TODO: 整合成對單張卡片搜尋？
+  myEmojiLike(emojiId: ID!): EmojiLike # 若沒有 like 過會返回 null TODO: 整合成對單張卡片搜尋？
 
   # --- NEXT ---
 
@@ -119,15 +124,21 @@ type Mutation {
   createCardBody(cardSymbol: String!, data: CardBodyInput!): CardBody!
 
   # 等價於create hashtag，會同步update card body hashtag
-  createEmoji(bulletId: Int!, emojiText: EmojiText!): CreateEmojiResponse! # 若 emoji 已經創，返回該 emoji 並 like
-  upsertEmojiLike(hashtagId: ID!, data: LikeInput!): UpsertEmojiLikeResponse!
+  createEmoji(bulletId: ID!, text: EmojiText!): CreateEmojiResponse! # 若 emoji 已經創，返回該 emoji 並 like
+  upsertEmojiLike(emojiId: ID!, data: LikeInput!): UpsertEmojiLikeResponse!
 
   # createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): CreateBoardResponse!
-  createPoll(bulletId: Int!, data: PollInput!): Poll!
+  createPoll(data: PollInput!): Poll!
   createVote(pollId: ID!, data: VoteInput!): Vote!
-  createAuthorVote(pollId: ID!, authorName: String!, data: VoteInput!): Vote!
+  # createAuthorVote(pollId: ID!, authorName: String!, data: VoteInput!): Vote!
 
-  createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
+  createShot(data: ShotInput!): Shot!
+  # updateShot(): Shot!
+
+  createAuthorShot(data: AuthorShotInput): Shot!
+  # updateAuthorShot(): Shot!
+
+  # createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
   # createAuthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
 
   # createOauthorComment(boardId: ID!, data: CommentInput!)
@@ -136,11 +147,11 @@ type Mutation {
   # createBulletLike(bulletId: ID!, data: LikeInput!): BulletLikeResponse!
   # updateBulletLike(id: ID!, data: LikeInput!): BulletLikeResponse!
 
-  createCommentLike(commentId: ID!, data: LikeInput!): CommentLikeResponse!
-  updateCommentLike(id: ID!, data: LikeInput!): CommentLikeResponse!
+  # createCommentLike(commentId: ID!, data: LikeInput!): CommentLikeResponse!
+  # updateCommentLike(id: ID!, data: LikeInput!): CommentLikeResponse!
 
-  createBoardLike(boardId: ID!, data: LikeInput!): BoardLikeResponse!
-  updateBoardLike(id: ID!, data: LikeInput!): BoardLikeResponse!
+  # createBoardLike(boardId: ID!, data: LikeInput!): BoardLikeResponse!
+  # updateBoardLike(id: ID!, data: LikeInput!): BoardLikeResponse!
 
   # signIn(email: String!, password: String!): AuthPayload!
   # signUp(email: String!, password: String!): User!
@@ -198,20 +209,22 @@ type Link {
   id: ID!
   url: String!
   domain: String!
-  sourceType: String!
-  sourceId: String
   authorName: String
 }
 
-# type Choice {
-#   id: ID!
-#   userId: ID!
-#   text: String!
-# }
+type Shot {
+  id: ID!
+  userId: String!
+  authorId: String
+  sourceId: String
+  targetId: String!
+  choice: ShotChoice!
+  # content   Json
+}
 
 type Vote {
   id: ID!
-  pollId: Int!
+  pollId: String!
   choiceIdx: Int!
   # reward: Float
   # createdAt: DateTime!
@@ -230,9 +243,15 @@ type PollCount {
   # failedMsg: String
 }
 
+type PollMeta {
+  code: String
+  text: String
+}
+
 type Poll {
   id: ID!
-  userId: ID!
+  userId: String!
+  meta: PollMeta!
   # type: PollType!
   # status: PollStatus!
   choices: [String!]!
@@ -252,92 +271,77 @@ type Poll {
   updatedAt: DateTime!
 }
 
-type HashtagCount {
+type EmojiCount {
   id: ID!
   nUps: Int!
   nDowns: Int!
 }
 
-type Hashtag {
+type Emoji {
   id: ID!
   userId: String!
-  authorName: String
-  bulletId: Int!
-  cardId: Int!
+  # authorName: String
+  # bulletId: String!
+  # cardId: Int!
   # pollId: Int
   # status: HashtagStatus
-  text: String!
   # poll: Poll
-  count: HashtagCount!
+  text: String!
+  count: EmojiCount!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-type HashtagLike {
+type EmojiLike {
   id: ID!
-  hashtagId: Int!
+  emojiId: String!
   choice: LikeChoice!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
 type CreateEmojiResponse {
-  emoji: Hashtag!
-  like: HashtagLike! # 創 emoji 會同時創 emoji-like，表示 user 點讚此 emoji
+  emoji: Emoji!
+  like: EmojiLike! # 創 emoji 會同時創 emoji-like，表示 user 點讚此 emoji
 }
 
 type UpsertEmojiLikeResponse {
-  like: HashtagLike!
-  count: HashtagCount!
+  like: EmojiLike!
+  count: EmojiCount!
 }
 
-# type CreateHashtagResponse {
-#   board: Board!
-#   # hashtag: Hashtag!
-#   cardBody: CardBody!
+# type BulletCount {
+#   id: ID!
+#   nUps: Int!
+#   nDowns: Int!
 # }
 
-type BulletCount {
-  id: ID!
-  nUps: Int!
-  nDowns: Int!
-}
+# type BulletLikeResponse {
+#   like: BulletLike!
+#   count: BulletCount!
+# }
 
-type BulletLikeResponse {
-  like: BulletLike!
-  count: BulletCount!
-}
-
-type BulletLike {
-  id: ID!
-  bulletId: Int!
-  choice: LikeChoice!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
+# type BulletLike {
+#   id: ID!
+#   bulletId: String!
+#   choice: LikeChoice!
+#   createdAt: DateTime!
+#   updatedAt: DateTime!
+# }
 
 type Bullet {
   id: ID!
-  cardId: Int!
-  count: BulletCount!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  cardId: String!
+  # count: BulletCount!
+  # createdAt: DateTime!
+  # updatedAt: DateTime!
 }
-
-# type CardHead {
-#   id: ID!
-#   userId: String!
-#   # content: JSONObject!
-#   content: String! # json
-#   timestamp: Int!
-#   prevId: Int
-# }
 
 type CardBody {
   id: ID!
   userId: String!
-  # content: JSONObject!
-  content: String! # in json
+  content: JSON!
+  # content: String! # in json
   timestamp: Int!
   prevId: Int
 }
@@ -372,80 +376,76 @@ type CardEntry {
   updatedAt: DateTime!
 }
 
-# Consider to remove
+# type CommentLike {
+#   id: ID!
+#   commentId: Int!
+#   choice: LikeChoice!
+#   createdAt: DateTime!
+#   updatedAt: DateTime!
+# }
 
-type CommentLike {
-  id: ID!
-  commentId: Int!
-  choice: LikeChoice!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
+# type CommentCount {
+#   id: ID!
+#   nViews: Int!
+#   nUps: Int!
+#   nDowns: Int!
+# }
 
-type CommentCount {
-  id: ID!
-  nViews: Int!
-  nUps: Int!
-  nDowns: Int!
-}
+# type CommentLikeResponse {
+#   like: CommentLike!
+#   count: CommentCount!
+# }
 
-type CommentLikeResponse {
-  like: CommentLike!
-  count: CommentCount!
-}
+# type Comment {
+#   id: ID!
+#   userId: String!
+#   oauthorName: String
+#   status: CommentStatus!
+#   content: String!
 
-type Comment {
-  id: ID!
-  userId: String!
-  oauthorName: String
-  status: CommentStatus!
-  content: String!
+#   # 若是投票的會一起記錄
+#   vote: Vote
 
-  # 若是投票的會一起記錄
-  vote: Vote
+#   count: CommentCount!
+#   createdAt: DateTime!
+#   updatedAt: DateTime!
+# }
 
-  count: CommentCount!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
+# type BoardLike {
+#   id: ID!
+#   boardId: Int!
+#   choice: LikeChoice!
+#   createdAt: DateTime!
+#   updatedAt: DateTime!
+# }
 
-type BoardLike {
-  id: ID!
-  boardId: Int!
-  choice: LikeChoice!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
+# type BoardCount {
+#   id: ID!
+#   nViews: Int!
+#   nUps: Int!
+#   nDowns: Int!
+#   # nComments: Int!
+# }
 
-type BoardCount {
-  id: ID!
-  nViews: Int!
-  nUps: Int!
-  nDowns: Int!
-  # nComments: Int!
-}
+# type BoardLikeResponse {
+#   like: BoardLike!
+#   count: BoardCount!
+# }
 
-type BoardLikeResponse {
-  like: BoardLike!
-  count: BoardCount!
-}
-
-type Board {
-  id: ID!
-  userId: String!
-  bulletId: Int
-  cardId: Int
-  status: BoardStatus!
-  hashtag: String!
-  # meta: JSONObject!
-  # content: JSONObject!
-  meta: String! # json
-  content: String! # json
-  poll: Poll
-  count: BoardCount!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
+# type Board {
+#  id: ID!
+#  userId: String!
+#  bulletId: Int
+#  cardId: Int
+#  status: BoardStatus!
+#  hashtag: String!
+#  meta: String! # json
+#  content: String! # json
+#  poll: Poll
+#  count: BoardCount!
+#  createdAt: DateTime!
+#  updatedAt: DateTime!
+# }
 
 # ------ Inputs ------
 
@@ -462,16 +462,26 @@ input PollInput {
   choices: [String!]!
 }
 
-input CommentInput {
-  content: String!
-  vote: VoteInput
+input ShotInput {
+  choice: ShotChoice!
 }
 
-input BoardInput {
-  hashtag: String!
-  meta: String!
-  content: String!
+input AuthorShotInput {
+  choice: ShotChoice!
+  authorId: ID!
+  sourceId: ID!
 }
+
+# input CommentInput {
+#   content: String!
+#   vote: VoteInput
+# }
+
+# input BoardInput {
+#   hashtag: String!
+#   meta: String!
+#   content: String!
+# }
 
 # input BulletInput {
 #   id: Int
@@ -539,12 +549,12 @@ input CardInput {
 
 # ------ NEXT ------
 
-type Tick {
-  id: ID!
-  symbolId: Int!
-  value: Float!
-  at: DateTime!
-}
+# type Tick {
+#   id: ID!
+#   symbolId: Int!
+#   value: Float!
+#   at: DateTime!
+# }
 
 # type PollJudgment {
 #   id: ID!
@@ -555,9 +565,9 @@ type Tick {
 #   updatedAt: DateTime!
 # }
 
-input PollJudgmentInput {
-  choice: Int!
-}
+# input PollJudgmentInput {
+#   choice: Int!
+# }
 
 # type Page {
 #   id: ID!
@@ -652,20 +662,33 @@ enum CardStatus {
   DUPLICATED
 }
 
-enum BoardStatus {
-  ACTIVE
-  LOCK
-  DELETE
-  ARCHIVE
-  REPORTED
+# enum BoardStatus {
+#   ACTIVE
+#   LOCK
+#   DELETE
+#   ARCHIVE
+#   REPORTED
+# }
+
+# enum CommentStatus {
+#   ACTIVE
+#   LOCK
+#   DELETE
+#   ARCHIVE
+#   REPORTED
+# }
+
+enum EmojiText {
+  UP
+  DOWN
+  PIN
+  REPORT
 }
 
-enum CommentStatus {
-  ACTIVE
-  LOCK
-  DELETE
-  ARCHIVE
-  REPORTED
+enum LikeChoice {
+  UP
+  DOWN
+  NEUTRAL
 }
 
 enum PollType {
@@ -689,27 +712,8 @@ enum PollFailReason {
   OTHER
 }
 
-enum LikeChoice {
-  UP
-  DOWN
-  NEUTRAL
-}
-
-enum PinCode {
-  VS
-  BUYSELL
-}
-
-enum BulletOperation {
-  CREATE
-  MOVE
-  UPDATE
-  DELETE
-  UPDATE_MOVE
-}
-
-enum EmojiText {
-  UP
-  DOWN
-  PIN
+enum ShotChoice {
+  LONG
+  SHORT
+  HOLD
 }

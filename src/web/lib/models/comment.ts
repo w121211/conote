@@ -1,4 +1,4 @@
-import { Comment, Poll } from '@prisma/client'
+// import { Comment, Poll } from '@prisma/client'
 import prisma from '../prisma'
 
 interface CardStamp {

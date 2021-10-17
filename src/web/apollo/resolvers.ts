@@ -2,30 +2,27 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { AuthenticationError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
 import { getSession } from '@auth0/nextjs-auth0'
-import { Hashtag, HashtagCount, HashtagStatus, Poll, PollCount, Vote } from '@prisma/client'
+import { Bullet, BulletCount, Emoji, EmojiCount, Poll, PollCount, Vote } from '.prisma/client'
 import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
 import { QueryResolvers, MutationResolvers } from './type-defs.graphqls'
-import { deltaLike } from '../lib/helper'
+import { deltaLike, hasCount, toStringId } from '../lib/helpers'
 import { CardMeta, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
 import { getOrCreateUser } from '../lib/models/user'
 import { createAuthorVote, createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
 import { ResolverContext } from './apollo-client'
 import { createEmoji, upsertEmojiLike } from '../lib/models/emoji'
+import { PollMeta } from '../lib/models/poll'
 
-function _toStringId<T extends { id: number }>(obj: T): T & { id: string } {
-  return { ...obj, id: obj.id.toString() }
-}
-
-function _deleteNull<T>(obj: T) {
-  let k: keyof T
-  for (k in obj) {
-    if (obj[k] === null) {
-      delete obj[k]
-    }
-  }
-}
+// function _deleteNull<T>(obj: T) {
+//   let k: keyof T
+//   for (k in obj) {
+//     if (obj[k] === null) {
+//       delete obj[k]
+//     }
+//   }
+// }
 
 // function isBulletInput(obj: GqlBulletInput): obj is BulletInput {
 //   _deleteNull(obj)
@@ -89,29 +86,27 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const cards = await prisma.card.findMany({
       // where: { createdAt: { gte: maxDate.toDate() } },
       orderBy: { updatedAt: 'desc' },
-      cursor: afterId ? { id: parseInt(afterId) } : undefined,
+      cursor: afterId ? { id: afterId } : undefined,
       take: 10,
       skip: afterId ? 1 : 0,
     })
-    return cards.map(e => {
-      return { ..._toStringId(e) }
-    })
+    return cards
   },
 
   async link(_parent, { url }, _context, _info) {
     const link = await prisma.link.findUnique({
       where: { url },
     })
-    if (link) return _toStringId(link)
+    if (link) return toStringId(link)
     return null
   },
 
   async card(_parent, { symbol }, _context, _info) {
     const card = await getOrCreateCardBySymbol(symbol)
     return {
-      ..._toStringId(card),
-      link: card.link ? _toStringId(card.link) : null,
-      body: _toStringId(card.body),
+      ...card,
+      link: card.link ? toStringId(card.link) : null,
+      body: toStringId(card.body),
     }
     // const card = await prisma.card.findUnique({
     //   where: { symbol },
@@ -136,60 +131,78 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     if (card === null) {
       throw `Card ${symbol} not found`
     }
-    const meta: CardMeta = card.meta ? JSON.parse(card.meta) : {}
-    return meta
+    return card.meta as unknown as CardMeta
+    // const meta: CardMeta = card.meta ? card.meta : {}
+    // return meta
   },
 
   async webpageCard(_parent, { url }, _context, _info) {
     const card = await getOrCreateCardByUrl({ fetcher, url })
     return {
-      ..._toStringId(card),
-      link: _toStringId(card.link),
-      body: _toStringId(card.body),
+      ...card,
+      link: toStringId(card.link),
+      body: toStringId(card.body),
     }
   },
 
-  async hashtags(_parent, { symbol }, _context, _info) {
-    const hashtags = (
-      await prisma.hashtag.findMany({
-        where: { AND: [{ card: { symbol } }, { status: HashtagStatus.ACTIVE }] },
-        include: { count: true, poll: { include: { count: true } } },
+  async emojis(_parent, { bulletId }, _context, _info) {
+    const emojis = (
+      await prisma.emoji.findMany({
+        // where: { AND: [{ card: { symbol } }, { status: HashtagStatus.ACTIVE }] },
+        where: { bulletId },
+        include: { count: true },
       })
     ).filter(
       (
         e,
-      ): e is Hashtag & {
-        count: HashtagCount
-        poll: (Poll & { count: PollCount }) | null
-      } => {
-        if (e.count === null || (e.poll && e.poll.count === null)) {
-          throw 'count 不應為 null, database error'
-        }
-        return true
-      },
+      ): e is Emoji & {
+        count: EmojiCount
+      } => e.count !== null,
     )
-    return hashtags.map(e => {
+    return emojis.map(e => {
       return {
-        ..._toStringId(e),
-        count: { ..._toStringId(e.count) },
-        poll: e.poll && {
-          ..._toStringId(e.poll),
-          count: _toStringId(e.poll.count),
-        },
+        ...e,
+        count: { ...toStringId(e.count) },
       }
     })
+    // const emojis = (
+    //   await prisma.emoji.findMany({
+    //     // where: { AND: [{ card: { symbol } }, { status: HashtagStatus.ACTIVE }] },
+    //     where: { bulletId },
+    //     include: { count: true },
+    //   })
+    // ).filter(
+    //   (
+    //     e,
+    //   ): e is Hashtag & {
+    //     count: HashtagCount
+    //     poll: (Poll & { count: PollCount }) | null
+    //   } => {
+    //     if (e.count === null || (e.poll && e.poll.count === null)) {
+    //       throw 'count 不應為 null, database error'
+    //     }
+    //     return true
+    //   },
+    // )
+    // return hashtags.map(e => {
+    //   return {
+    //     ..._toStringId(e),
+    //     count: { ..._toStringId(e.count) },
+    //     poll: e.poll && {
+    //       ..._toStringId(e.poll),
+    //       count: _toStringId(e.poll.count),
+    //     },
+    //   }
+    // })
   },
 
   async bullet(_parent, { id }, _context, _info) {
     const bullet = await prisma.bullet.findUnique({
       include: { count: true },
-      where: { id: parseInt(id) },
+      where: { id },
     })
-    if (bullet && bullet.count) {
-      return {
-        ..._toStringId(bullet),
-        count: _toStringId(bullet.count),
-      }
+    if (bullet && hasCount(bullet)) {
+      return bullet
     }
     throw new Error()
   },
@@ -197,66 +210,67 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   async poll(_parent, { id }, _context, _info) {
     const poll = await prisma.poll.findUnique({
       include: { count: true },
-      where: { id: parseInt(id) },
+      where: { id },
     })
-    if (poll && poll.count) {
+    if (poll && hasCount(poll)) {
       return {
-        ..._toStringId(poll),
-        count: _toStringId(poll.count),
+        ...poll,
+        meta: poll.meta as unknown as PollMeta,
+        count: { ...toStringId(poll.count) },
       }
     }
     throw new Error()
   },
 
-  async board(_parent, { id }, _context, _info) {
-    throw 'Consider to remove'
-    // const board = await prisma.board.findUnique({
-    //   include: {
-    //     count: true,
-    //     poll: { include: { count: true } },
-    //   },
-    //   where: { id: parseInt(id) },
-    // })
-    // if (board && board.count && board.poll && board.poll.count) {
-    //   return {
-    //     ..._toStringId(board),
-    //     count: _toStringId(board.count),
-    //     poll: board.poll && {
-    //       ..._toStringId(board.poll),
-    //       count: _toStringId(board.poll.count),
-    //     },
-    //   }
-    // } else if (board && board.count && board.poll === null) {
-    //   return {
-    //     ..._toStringId(board),
-    //     count: _toStringId(board.count),
-    //     poll: undefined,
-    //   }
-    // }
-    // throw new Error()
-  },
+  // async board(_parent, { id }, _context, _info) {
+  // throw 'Consider to remove'
+  // const board = await prisma.board.findUnique({
+  //   include: {
+  //     count: true,
+  //     poll: { include: { count: true } },
+  //   },
+  //   where: { id: parseInt(id) },
+  // })
+  // if (board && board.count && board.poll && board.poll.count) {
+  //   return {
+  //     ..._toStringId(board),
+  //     count: _toStringId(board.count),
+  //     poll: board.poll && {
+  //       ..._toStringId(board.poll),
+  //       count: _toStringId(board.poll.count),
+  //     },
+  //   }
+  // } else if (board && board.count && board.poll === null) {
+  //   return {
+  //     ..._toStringId(board),
+  //     count: _toStringId(board.count),
+  //     poll: undefined,
+  //   }
+  // }
+  // throw new Error()
+  // },
 
-  async comments(_parent, { boardId, afterId }, _context, _info) {
-    throw 'Consider to remove'
-    // const comments = await prisma.comment.findMany({
-    //   include: { count: true, vote: true },
-    //   where: { boardId: parseInt(boardId) },
-    //   orderBy: { createdAt: 'desc' },
-    //   cursor: afterId ? { id: parseInt(afterId) } : undefined,
-    //   take: 100,
-    // })
-    // return comments.map(e => {
-    //   if (e.count) {
-    //     return {
-    //       ..._toStringId(e),
-    //       oauthorName: e.oauthorName ?? undefined,
-    //       count: _toStringId(e.count),
-    //       vote: e.vote && _toStringId(e.vote),
-    //     }
-    //   }
-    //   throw new Error()
-    // })
-  },
+  // async comments(_parent, { boardId, afterId }, _context, _info) {
+  // throw 'Consider to remove'
+  // const comments = await prisma.comment.findMany({
+  //   include: { count: true, vote: true },
+  //   where: { boardId: parseInt(boardId) },
+  //   orderBy: { createdAt: 'desc' },
+  //   cursor: afterId ? { id: parseInt(afterId) } : undefined,
+  //   take: 100,
+  // })
+  // return comments.map(e => {
+  //   if (e.count) {
+  //     return {
+  //       ..._toStringId(e),
+  //       oauthorName: e.oauthorName ?? undefined,
+  //       count: _toStringId(e.count),
+  //       vote: e.vote && _toStringId(e.vote),
+  //     }
+  //   }
+  //   throw new Error()
+  // })
+  // },
 
   // botPolls: async (parent, { symbolName }, { prisma }) => {
   //   const maxDate = dayjs().startOf("d").subtract(7, "d")
@@ -406,20 +420,20 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const { userId } = isAuthenticated(req, res)
     const votes = await prisma.vote.findMany({
       where: {
-        AND: [{ pollId: parseInt(pollId), userId }],
+        AND: [{ pollId, userId }],
       },
     })
-    return votes.map(e => ({ ..._toStringId(e) }))
+    return votes.map(e => ({ ...toStringId(e) }))
   },
 
-  async myHashtagLike(_parent, { hashtagId }, { req, res }, _info) {
+  async myEmojiLike(_parent, { emojiId }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const like = await prisma.hashtagLike.findUnique({
+    const like = await prisma.emojiLike.findUnique({
       where: {
-        userId_hashtagId: { hashtagId: parseInt(hashtagId), userId },
+        userId_emojiId: { emojiId, userId },
       },
     })
-    return like ? _toStringId(like) : null
+    return like ? toStringId(like) : null
   },
 
   // async myVotes(_parent, { after }, { req, res }, _info) {
@@ -457,7 +471,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { userId } = isAuthenticated(req, res)
     const card = await getOrCreateCardBySymbol(data.symbol)
     return {
-      ..._toStringId(card),
+      ...card,
       body: { ..._toStringId(card.body) },
       link: card.link && _toStringId(card.link),
     }
@@ -491,7 +505,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return _toStringId(body)
   },
 
-  async createPoll(_parent, { bulletId, data }, { req, res }, _info) {
+  async createPoll(_parent, { data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
     const poll = await prisma.poll.create({
       data: {
@@ -514,66 +528,66 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { userId } = isAuthenticated(req, res)
     const vote = await createVote({
       choiceIdx: data.choiceIdx,
-      pollId: parseInt(pollId),
+      pollId,
       userId,
     })
     return _toStringId(vote)
   },
 
-  async createComment(_parent, { boardId, pollId, data }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const board = await prisma.board.findUnique({
-      include: { count: true },
-      where: { id: parseInt(boardId) },
-    })
-    if (board === null) throw new Error(`Given boardId not found`)
-    // if (post.status !== PostStatus.ACTIVE) throw new Error("post is not active")
+  // async createComment(_parent, { boardId, pollId, data }, { req, res }, _info) {
+  //   const { userId } = isAuthenticated(req, res)
+  //   const board = await prisma.board.findUnique({
+  //     include: { count: true },
+  //     where: { id: parseInt(boardId) },
+  //   })
+  //   if (board === null) throw new Error(`Given boardId not found`)
+  //   // if (post.status !== PostStatus.ACTIVE) throw new Error("post is not active")
 
-    let vote: Vote | undefined
-    if (pollId && data.vote?.choiceIdx) {
-      vote = await createVote({
-        choiceIdx: data.vote.choiceIdx,
-        pollId: parseInt(pollId),
-        userId,
-      })
-    }
-    const comment = await prisma.comment.create({
-      include: { count: true, vote: true },
-      data: {
-        content: data.content,
-        user: { connect: { id: userId } },
-        // oauthor: { connect: { name: e.oauthor } },
-        count: { create: {} },
-        board: { connect: { id: parseInt(boardId) } },
-        vote: vote && { connect: { id: vote.id } },
-      },
-    })
-    // await prisma.commentCount.update({
-    //   data: { nReplies: comment.count.nComments + 1 },
-    //   where: { commentId: comment.id }
-    // })
+  //   let vote: Vote | undefined
+  //   if (pollId && data.vote?.choiceIdx) {
+  //     vote = await createVote({
+  //       choiceIdx: data.vote.choiceIdx,
+  //       pollId: parseInt(pollId),
+  //       userId,
+  //     })
+  //   }
+  //   const comment = await prisma.comment.create({
+  //     include: { count: true, vote: true },
+  //     data: {
+  //       content: data.content,
+  //       user: { connect: { id: userId } },
+  //       // oauthor: { connect: { name: e.oauthor } },
+  //       count: { create: {} },
+  //       board: { connect: { id: parseInt(boardId) } },
+  //       vote: vote && { connect: { id: vote.id } },
+  //     },
+  //   })
+  //   // await prisma.commentCount.update({
+  //   //   data: { nReplies: comment.count.nComments + 1 },
+  //   //   where: { commentId: comment.id }
+  //   // })
 
-    if (comment.count) {
-      return {
-        ..._toStringId(comment),
-        count: _toStringId(comment.count),
-        vote: comment.vote && _toStringId(comment.vote),
-      }
-    } else {
-      throw new Error()
-    }
-  },
+  //   if (comment.count) {
+  //     return {
+  //       ..._toStringId(comment),
+  //       count: _toStringId(comment.count),
+  //       vote: comment.vote && _toStringId(comment.vote),
+  //     }
+  //   } else {
+  //     throw new Error()
+  //   }
+  // },
 
-  async createAuthorVote(_parent, { pollId, authorName, data }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const vote = await createAuthorVote({
-      choiceIdx: data.choiceIdx,
-      pollId: parseInt(pollId),
-      authorName,
-      userId,
-    })
-    return _toStringId(vote)
-  },
+  // async createAuthorVote(_parent, { pollId, authorName, data }, { req, res }, _info) {
+  //   const { userId } = isAuthenticated(req, res)
+  //   const vote = await createAuthorVote({
+  //     choiceIdx: data.choiceIdx,
+  //     pollId: parseInt(pollId),
+  //     authorName,
+  //     userId,
+  //   })
+  //   return _toStringId(vote)
+  // },
 
   // async createOauthorComment(_parent, { boardId, pollId, oauthorName, data }, { req, res }, _info) {
   //   throw 'Consider to remove'

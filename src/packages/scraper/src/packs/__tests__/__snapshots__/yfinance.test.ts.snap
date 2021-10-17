@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`yfinance https://finance.yahoo.com/news/2-musk-tesla-plant-party-112005747.html 1`] = `
+Object {
+  "keywords": Array [
+    "Elon Musk",
+    "volume production",
+    "production line",
+    "German business culture",
+  ],
+  "tickers": Array [
+    "TSLA",
+  ],
+}
+`;

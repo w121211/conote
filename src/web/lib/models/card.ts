@@ -1,23 +1,17 @@
-import { Card, CardBody, CardType, Link } from '@prisma/client'
+import { Card, CardBody, CardType, Link } from '.prisma/client'
 import { FetchClient } from '../fetcher/fetcher'
 import prisma from '../prisma'
 import { checkBulletDraft, BulletNode } from '../bullet/node'
 import { runBulletOp } from '../bullet/operation'
-import { Bullet, BulletDraft, isRootBullet, isRootBulletDraft, RootBullet, RootBulletDraft } from '../bullet/types'
+import { Bullet, isRootBulletDraft, RootBullet, RootBulletDraft } from '../bullet/types'
 import { getOrCreateLink, linkToSymbol } from './link'
-import { parse } from './symbol'
+import { parseSymbol } from './symbol'
 import { getBotId } from './user'
 import { inspect } from 'util'
-
-export type PinBoardCode = 'BUYSELL' | 'VS'
-
-export type PinBoard = {
-  pinCode: PinBoardCode
-  boardId: number
-  pollId?: number
-}
+import { writeLine } from '../bullet/sim-editor'
 
 export type CardMeta = {
+  template?: 'webpage' | 'ticker' | 'topic' | 'vs'
   redirects?: string[]
   duplicates?: string[]
   url?: string
@@ -28,15 +22,6 @@ export type CardMeta = {
   // lang?: string
   title?: string
 }
-
-// export type MirrorOperation = BulletOperation
-
-// TODO: 改成用bullet存？ 可以直接用bullet ops
-// export type MirrorEntry = {
-//   cardSymbol: string
-//   cardBodyId: number // 儲存編輯後創的body id，可能與最新body不一樣
-//   // op?: MirrorOperation
-// }
 
 export type CardBodyContent = {
   value: RootBullet
@@ -57,99 +42,90 @@ export type CardTemplateProps = {
   ticker?: string
 }
 
-export const templateTicker: CardTemplate = {
-  name: '::Ticker',
-  bodyDraft: {
+// const buysellPollAttr: { choices: string[]; meta: PollMeta } = {
+//   choices: ['#buy', '#sell', '#hold'],
+//   meta: {
+//     code: 'buysell',
+//   },
+// }
+
+export const tickerStarter = ({ symbol }: { symbol: string }): RootBulletDraft => {
+  return {
     draft: true,
     op: 'CREATE',
     root: true,
-    symbol: '%SYMBOL%',
-    head: '%SYMBOL%',
+    symbol,
+    head: symbol,
     freeze: true,
     children: [
-      {
-        draft: true,
-        op: 'CREATE',
-        head: '討論區',
-        children: [
-          {
-            draft: true,
-            op: 'CREATE',
-            head: '提問',
-            children: [
-              {
-                draft: true,
-                op: 'CREATE',
-                head: '%SYMBOL% 如何操作？ !((poll))(#buy #sell #hold)',
-                children: [],
-              },
-            ],
-          },
-        ],
-      },
-      { draft: true, op: 'CREATE', head: '[!]', children: [] },
-      { draft: true, op: 'CREATE', head: '[?]', children: [] },
-      { draft: true, op: 'CREATE', head: '[*]', children: [] },
-      { draft: true, op: 'CREATE', head: '[+]', children: [] },
-      { draft: true, op: 'CREATE', head: '[-]', children: [] },
-      { draft: true, op: 'CREATE', head: '[vs]', children: [] },
+      writeLine('_討論'),
+      writeLine('最新[!]'),
+      writeLine('簡介[*]'),
+      writeLine('優[+]'),
+      writeLine('缺[-]'),
+      writeLine('比較[vs]'),
     ],
-  },
+  }
 }
 
-export const templateWebpage: CardTemplate = {
-  name: '::Webpage',
-  bodyDraft: {
+export const topicStarter = ({ symbol }: { symbol: string }): RootBulletDraft => {
+  return {
     draft: true,
     op: 'CREATE',
-    head: '%SYMBOL%',
-    freeze: true,
     root: true,
-    symbol: '%SYMBOL%',
+    symbol,
+    head: symbol,
+    freeze: true,
     children: [
-      {
-        draft: true,
-        op: 'CREATE',
-        head: '筆記區',
-        children: [],
-      },
+      writeLine('_討論'),
+      writeLine('最新[!]'),
+      writeLine('簡介[*]'),
+      writeLine('優[+]'),
+      writeLine('缺[-]'),
+      writeLine('比較[vs]'),
     ],
-  },
+  }
 }
 
-const regexReplaceMather = /%([A-Z_]+)%/gm
+export const webpageStarter = ({ symbol }: { symbol: string }): RootBulletDraft => ({
+  draft: true,
+  op: 'CREATE',
+  head: symbol,
+  freeze: true,
+  root: true,
+  symbol,
+  children: [writeLine('_討論'), writeLine('_筆記')],
+})
+
+// const reReplacer = /%([A-Z_]+)%/gm
 
 /**
  * (Recursive) 將Bullet draft的內容依照給予的card template properties替換掉
  */
-export function replaceBulletDraft<T extends BulletDraft | RootBulletDraft>(node: T, props: CardTemplateProps): T {
-  function _keyIn(key: string, props: CardTemplateProps): key is keyof CardTemplateProps {
-    return key in props
-  }
+// export function replaceBulletDraft<T extends BulletDraft | RootBulletDraft>(node: T, props: CardTemplateProps): T {
+//   function _keyIn(key: string, props: CardTemplateProps): key is keyof CardTemplateProps {
+//     return key in props
+//   }
 
-  function _replacer(match: string, p1: string): string {
-    if (p1) {
-      const k = p1.toLowerCase()
-      if (_keyIn(k, props)) return props[k] ?? ''
-    }
-    console.error(p1)
-    throw new Error(`props未包含需要的variable: ${p1}}`)
-  }
+//   function _replacer(match: string, p1: string): string {
+//     if (p1) {
+//       const k = p1.toLowerCase()
+//       if (_keyIn(k, props)) return props[k] ?? ''
+//     }
+//     console.error(p1)
+//     throw new Error(`props未包含需要的variable: ${p1}}`)
+//   }
 
-  return {
-    ...node,
-    head: node.head.replace(regexReplaceMather, _replacer),
-    body: node.body?.replace(regexReplaceMather, _replacer),
-    symbol: 'symbol' in node ? node.symbol.replace(regexReplaceMather, _replacer) : undefined,
-    children: node.children?.map(e => replaceBulletDraft(e, props)),
-  }
-}
+//   return {
+//     ...node,
+//     head: node.head.replace(reReplacer, _replacer),
+//     body: node.body?.replace(reReplacer, _replacer),
+//     symbol: 'symbol' in node ? node.symbol.replace(reReplacer, _replacer) : undefined,
+//     children: node.children?.map(e => replaceBulletDraft(e, props)),
+//   }
+// }
 
-async function batchCreateBullet() {
-  // TODO
-}
-
-export async function getLatestCardBody(cardId: number): Promise<CardBody | null> {
+export async function getLatestCardBody(cardId: string): Promise<CardBody | null> {
   return await prisma.cardBody.findFirst({
     where: { cardId },
     orderBy: { createdAt: 'desc' },
@@ -163,19 +139,17 @@ export async function getLatestCardBody(cardId: number): Promise<CardBody | null
 //   })
 // }
 
-function serializeContent() {
-  // TODO
-}
+// function serializeContent() {
+//   // TODO
+// }
 
-function deserializeContent() {
-  // TODO
-}
+// function deserializeContent() {
+//   // TODO
+// }
 
-// type NestedRecord = Record<string, string | string[] | boolean | undefined | Record<string, string | string[] | boolean | undefined>>
-
-interface KeyValue<T> {
-  [k: string]: T | KeyValue<T>
-}
+// interface KeyValue<T> {
+//   [k: string]: T | KeyValue<T>
+// }
 
 // function bulletToKeyValue(node: Bullet): KeyValue<string | string[] | boolean | undefined> {
 //   if (node.children && node.children.length > 0) {
@@ -236,31 +210,30 @@ interface KeyValue<T> {
 /**
  * 用於資料庫的建立，不考慮輸入資料的檢查等，內部使用
  */
-async function _createCardBody(props: {
-  cardId: number
+async function _createCardBody({
+  cardId,
+  root,
+  userId,
+}: {
+  cardId: string
   root: RootBulletDraft
   userId: string
 }): Promise<[CardBody, CardBodyContent]> {
-  const { cardId, root, userId } = props
-
   const timestamp = Date.now()
   const cur = await getLatestCardBody(cardId)
-  const curContent: CardBodyContent | undefined = cur ? JSON.parse(cur.content) : undefined
-
   const nextRoot = await runBulletOp({
     cardId: cardId,
-    current: curContent && curContent.value,
+    current: cur ? (cur.content as unknown as CardBodyContent).value : undefined,
     draft: root,
     timestamp,
     userId,
   })
-
   const nextContent: CardBodyContent = { value: nextRoot }
-
   const body = await prisma.cardBody.create({
     data: {
       timestamp,
-      content: JSON.stringify(nextContent), // TODO: serializer
+      // content: JSON.stringify(nextContent), // TODO: serializer
+      content: nextContent,
       card: { connect: { id: cardId } },
       user: { connect: { id: userId } },
       prev: cur ? { connect: { id: cur.id } } : undefined,
@@ -276,7 +249,7 @@ async function _createCardBody(props: {
  */
 async function checkDraft(draft: RootBulletDraft): Promise<{
   cardSymbol: string
-  cardId?: number
+  cardId?: string
   curValue?: Bullet
   draft: RootBulletDraft
 }> {
@@ -306,7 +279,7 @@ async function checkDraft(draft: RootBulletDraft): Promise<{
   if (body === null) {
     throw new Error('找不到 body，第一次創卡無法使用 checkDraft()')
   }
-  const curContent: CardBodyContent = JSON.parse(body.content)
+  const curContent: CardBodyContent = body.content as unknown as CardBodyContent
 
   return {
     cardId: card.id,
@@ -338,13 +311,15 @@ async function checkDraft(draft: RootBulletDraft): Promise<{
  *
  * @throws 輸入資料有問題時會報錯，用try-catch方式創card body
  */
-export async function createCardBody(props: {
-  cardId: number
+export async function createCardBody({
+  cardId,
+  root,
+  userId,
+}: {
+  cardId: string
   root: RootBulletDraft
   userId: string
 }): Promise<[CardBody, CardBodyContent]> {
-  const { cardId, root, userId } = props
-
   const body = await getLatestCardBody(cardId)
   if (body === null) {
     throw new Error('Card body not found')
@@ -354,13 +329,7 @@ export async function createCardBody(props: {
     throw new Error('Card not found')
   }
 
-  // if (mirrors && card.type !== CardType.WEBPAGE) {
-  //   // 檢查此卡片是否允許mirrors
-  //   throw new Error('Card not allow to have mirrors')
-  // }
-
   const pruned = BulletNode.prune(root)
-  console.log(pruned)
   if (pruned && isRootBulletDraft(pruned)) {
     const checked = await checkDraft(pruned)
     return await _createCardBody({
@@ -376,13 +345,11 @@ export async function createCardBody(props: {
 /**
  * TODO: latest body 需要有驗證機制，才可以回朔
  */
-export async function attachLatestHeadBody(card: Card): Promise<
+export async function attachLatestBody(card: Card): Promise<
   Card & {
-    // head: CardHead
     body: CardBody
   }
 > {
-  // const head = await getCurrentCardHead(card.id)
   const body = await getLatestCardBody(card.id)
   if (body) {
     return { ...card, body }
@@ -392,57 +359,9 @@ export async function attachLatestHeadBody(card: Card): Promise<
 }
 
 /**
- * 僅供內部使用，會載入 template 並創第一個 card body
- */
-async function _createCard({
-  link,
-  symbol,
-  template,
-  templateProps,
-  type,
-  meta,
-}: {
-  link?: Link
-  symbol: string
-  template: CardTemplate
-  templateProps: CardTemplateProps
-  type: CardType
-  meta: CardMeta
-}): Promise<
-  Omit<Card, 'meta'> & {
-    link: Link | null
-    meta: CardMeta
-    body: CardBody
-  }
-> {
-  const card = await prisma.card.create({
-    data: {
-      link: link && { connect: { id: link.id } },
-      meta: JSON.stringify(meta),
-      type,
-      symbol,
-    },
-    include: { link: true },
-  })
-  // 依 template 建 card-body
-  const [body, { value: rootBullet }] = await _createCardBody({
-    cardId: card.id,
-    root: replaceBulletDraft(template.bodyDraft, templateProps),
-    userId: await getBotId(),
-  })
-  // TODO: (pending) 對 root bullet 創 default emojis
-  return { ...card, meta, body }
-}
-
-export const templateDict: { [key in CardType]: CardTemplate } = {
-  [CardType.TICKER]: templateTicker,
-  [CardType.TOPIC]: templateTicker,
-  [CardType.WEBPAGE]: templateWebpage,
-}
-
-/**
  * 搜尋、創新 symbol card
  * TODO: 當 symbol 為 url 時，應導向 webpage card
+ * @throw symbol format error
  */
 export async function getOrCreateCardBySymbol(symbol: string): Promise<
   Omit<Card, 'meta'> & {
@@ -451,71 +370,99 @@ export async function getOrCreateCardBySymbol(symbol: string): Promise<
     body: CardBody
   }
 > {
-  const { symbolName, cardType } = parse(symbol)
-  const template = templateDict[cardType]
-  const card = await prisma.card.findUnique({
+  const { symbolName, cardType } = parseSymbol(symbol)
+  const found = await prisma.card.findUnique({
     where: { symbol: symbolName },
     include: { link: true },
   })
-  if (card === null) {
-    return await _createCard({
-      symbol: symbolName,
-      template: template,
-      templateProps: {
-        symbol: symbolName,
-        template: template.name,
-        title: '',
-      },
-      type: cardType,
-      meta: {},
-    })
-  } else {
-    const meta: CardMeta = card.meta ? JSON.parse(card.meta) : {}
+  if (found) {
     return {
-      ...(await attachLatestHeadBody(card)),
-      link: card.link,
-      meta,
+      ...(await attachLatestBody(found)),
+      link: found.link,
+      meta: found.meta as unknown as CardMeta,
     }
   }
+  // Card not found, create one
+  let meta: CardMeta = {}
+  let draft: RootBulletDraft
+  switch (cardType) {
+    case 'WEBPAGE':
+      throw 'Use getOrCreateCardByUrl(...) to create a webpage card instead.'
+    case 'TICKER': {
+      meta = {
+        template: 'ticker',
+        title: '', // TODO, fill company if possible
+      }
+      draft = tickerStarter({ symbol })
+      break
+    }
+    case 'TOPIC': {
+      meta = {
+        template: 'topic',
+      }
+      draft = topicStarter({ symbol })
+      break
+    }
+  }
+  const card = await prisma.card.create({
+    data: {
+      meta,
+      symbol,
+      type: cardType,
+    },
+  })
+  const [body] = await _createCardBody({
+    cardId: card.id,
+    root: draft,
+    userId: await getBotId(),
+  })
+  return { ...card, body, meta, link: null }
 }
 
 /**
  * 搜尋、創新 webpage card
  * 若給予的 url 在資料庫中找不到對應的 link，會 fetch url 並創一個 link
  */
-export async function getOrCreateCardByUrl({ fetcher, url }: { fetcher?: FetchClient; url: string }): Promise<
+export async function getOrCreateCardByUrl({ scraper, url }: { scraper?: FetchClient; url: string }): Promise<
   Omit<Card, 'meta'> & {
     link: Link
     meta: CardMeta
     body: CardBody
   }
 > {
-  const [link, { fetchResult }] = await getOrCreateLink({ fetcher, url })
-  const template = templateDict[CardType.WEBPAGE]
+  const [link, { fetchResult }] = await getOrCreateLink({ scraper, url })
   const symbol = linkToSymbol(link)
   if (link.card) {
-    const card = await attachLatestHeadBody(link.card)
-    const meta: CardMeta = card.meta ? JSON.parse(card.meta) : {}
-    return { ...card, link, meta }
+    const card = await attachLatestBody(link.card)
+    return {
+      ...card,
+      link,
+      meta: card.meta as unknown as CardMeta,
+    }
   }
-  const card = await _createCard({
-    link,
-    symbol,
-    template: template,
-    templateProps: {
+  // Card not found, create one
+  const meta: CardMeta = {
+    template: 'webpage',
+    url: link.url,
+    author: fetchResult?.authorName,
+    date: fetchResult?.date,
+    description: fetchResult?.date,
+    keywords: fetchResult?.keywords,
+    title: fetchResult?.title,
+  }
+  const card = await prisma.card.create({
+    data: {
+      type: CardType.WEBPAGE,
+      link: { connect: { id: link.id } },
+      meta,
       symbol,
-      template: template.name,
-      title: fetchResult.title ?? '',
     },
-    type: CardType.WEBPAGE,
-    meta: {
-      url: link.url,
-      author: fetchResult?.authorName,
-      date: fetchResult?.date,
-      description: fetchResult?.date,
-      keywords: fetchResult?.keywords,
-      title: fetchResult?.title,
-    },
+    include: { link: true },
   })
-  return { ...card, link }
+  const [body] = await _createCardBody({
+    cardId: card.id,
+    root: webpageStarter({ symbol }),
+    userId: await getBotId(),
+  })
+  return { ...card, body, meta, link }
 }

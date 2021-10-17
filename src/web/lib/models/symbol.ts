@@ -22,7 +22,7 @@ const reUrl = /^@[a-zA-Z0-9:/.]+/ // eg @https://regex101.com/ 非常簡單的 u
  * 1. 無法區別[[topic]] vs [[https://...]], [[https://...]]應要parse為WEBPAGE
  * 2. 無法辨識oauthor
  */
-export function parse(symbol: string): SymbolParsed {
+export function parseSymbol(symbol: string): SymbolParsed {
   let cardType: CardType
   let authorName: string | undefined
   if (symbol.match(reTicker) !== null) {

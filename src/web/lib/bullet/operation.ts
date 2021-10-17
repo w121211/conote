@@ -1,5 +1,4 @@
 import { inspect } from 'util'
-import { Hashtag, HashtagCount } from '@prisma/client'
 import { getBotId } from '../models/user'
 import prisma from '../prisma'
 import {
@@ -17,8 +16,7 @@ import {
 } from './types'
 import { BulletNode } from './node'
 import { cloneDeep } from '@apollo/client/utilities'
-import { inlinesToString, parseBulletHead } from './text'
-import { toGQLHashtag } from '../hashtag/inject'
+import { inlinesToString, parseBulletHead } from './parse'
 
 /**
  * 使用conditional type，輸入是bullet draft時返回bullet，輸入是root bullet draft時返回root bullet
@@ -52,13 +50,17 @@ function returnOrThrow<T extends BulletDraft | RootBulletDraft>(
   throw new Error('Root bullet draft應返回root bullet，bullet draft應返回bullet')
 }
 
-async function createInlineItem(props: {
+async function createInlineItem({
+  inline,
+  // bulletId,
+  // cardId,
+  userId,
+}: {
   inline: InlineItem
-  bulletId: number
-  cardId: number
+  // bulletId: string
+  // cardId: string
   userId: string
 }): Promise<InlineItem> {
-  const { inline, bulletId, cardId, userId } = props
   switch (inline.type) {
     // case 'new-hashtag': {
     //   const hashtag = await prisma.hashtag.create({
@@ -142,7 +144,7 @@ async function createInlineItem(props: {
  * 在資料庫創一個bullet
  */
 async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
-  cardId: number
+  cardId: string
   draft: T
   timestamp: number
   userId: string
@@ -156,15 +158,12 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
   const dbBullet = await prisma.bullet.create({
     data: {
       card: { connect: { id: cardId } },
-      count: { create: {} },
     },
   })
 
   // tokenize & parse
   const { headInlines } = parseBulletHead({ str: draft.head })
-  const producedHeadInlines = await Promise.all(
-    headInlines.map(e => createInlineItem({ inline: e, userId, bulletId: dbBullet.id, cardId })),
-  )
+  const producedHeadInlines = await Promise.all(headInlines.map(e => createInlineItem({ inline: e, userId })))
 
   if (isRootBulletDraft(draft)) {
     const produced: RootBullet = {
@@ -176,6 +175,7 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
       body: draft.body,
       timestamp,
       children: [],
+      symbols: [],
     }
     return produced
   }
@@ -186,8 +186,10 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
     body: draft.body,
     timestamp,
     children: [],
-    author: draft.author,
-    sourceUrl: draft.sourceUrl,
+    authorId: draft.authorId,
+    sourceCardId: draft.sourceCardId,
+    sourceLinkId: draft.sourceLinkId,
+    symbols: [],
   }
   return returnOrThrow(node, draft)
 }
@@ -200,7 +202,7 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
  */
 export async function runBulletOp(props: {
   draft: RootBulletDraft
-  cardId: number
+  cardId: string
   userId: string
   timestamp: number
   current?: RootBullet
@@ -250,7 +252,7 @@ export async function runBulletOp(props: {
         const head = node.head
         const dbBullet = await prisma.bullet.findUnique({
           where: { id: cur.id },
-          include: { hashtags: true },
+          include: { emojis: true },
         })
         if (dbBullet) {
           // const { headInlines } = parseBulletHead({
