@@ -220,14 +220,14 @@ query LatestCardEntries($afterId: String) {
   }
 }
 
-query Link($url: String!) {
-  link(url: $url) {
+query Link($id: ID, $url: String) {
+  link(id: $id, url: $url) {
     ...link
   }
 }
 
-query Card($symbol: String!) {
-  card(symbol: $symbol) {
+query Card($id: ID, $symbol: String, $cardBodyId: ID) {
+  card(id: $id, symbol: $symbol, cardBodyId: $cardBodyId) {
     ...card
   }
 }

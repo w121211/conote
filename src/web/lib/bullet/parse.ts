@@ -1,16 +1,16 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
-// import { parseHashtags } from '../hashtag/text'
+import { parseInlineShotParams } from '../models/shot'
 import { tokenToString } from '../token'
 import { InlineItem } from './types'
 
 /**
- * Regex
- * url @see https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
- * hashtag @see https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
+ * Regex:
+ * - url @see https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
+ * - hashtag @see https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
  */
 const reTicker = /\$[A-Z-=]+/
 const reTopic = /\[\[[^\]\n]+\]\]/u
-const reUser = /\B@[\p{L}\d_]+\b/u
+export const reAuthor = /\B@[\p{L}\d_]+\b/u
 
 const decorateReMirrorTicker = /^(::\$[A-Z-=]+)\b/u
 const decorateReMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B/u
@@ -22,20 +22,27 @@ const reShot = /\B!\(\(shot:([a-z0-9]{25,30})\)\)\([^)]*\)\B/
 const reNewShot = /\B!\(\(shot\)\)\(([^)]*)\)\B/
 
 const grammar: Grammar = {
-  'mirror-ticker': { pattern: reMirrorTicker }, // 順序重要，先 mirror 後 ticker
+  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
+
+  // 順序重要，先 mirror 後 ticker
+  'mirror-ticker': { pattern: reMirrorTicker },
   'mirror-topic': { pattern: reMirrorTopic },
   ticker: { pattern: reTicker },
   topic: { pattern: reTopic },
+
+  poll: { pattern: rePoll },
+  'new-poll': { pattern: reNewPoll },
+
+  shot: { pattern: reShot },
+  'new-shot': { pattern: reNewShot },
+
   url: {
     pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
   },
-  user: { pattern: reUser },
-  poll: { pattern: rePoll },
-  'new-poll': { pattern: reNewPoll },
-  shot: { pattern: reShot },
-  'new-shot': { pattern: reNewShot },
-  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
+
+  author: { pattern: reAuthor },
 }
+
 const decorationGrammar: Grammar = {
   // 'mirror-ticker': { pattern: /^::\$[A-Z-=]+\b/ },
   // 'mirror-topic': { pattern: /^::\[\[[^\]\n]+\]\]\B/u },
@@ -65,20 +72,12 @@ export function inlinesToString(inlines: InlineItem[]): string {
 
 /**
  * Parse a bullet head/body string to slate inline elements
- * @throws Validation error
+ *
+ * @throws Parse error
  */
-export function parseBulletHead(props: {
-  str: string
-  // connected?: { hashtags?: InlineHashtag[] }
-}): {
-  headInlines: InlineItem[]
-  // connectedInlines?: (InlineText | InlineHashtag | InlineNewHashtag)[]
-} {
-  // const { str, connected } = props
-  const { str } = props
-
+export function parseBulletHead({ str }: { str: string }): { inlines: InlineItem[] } {
   // TODO: validate
-  function tokenToInline(token: string | Token): InlineItem {
+  function _tokenToInline(token: string | Token): InlineItem {
     if (typeof token === 'string') {
       return { type: 'text', str: token }
     }
@@ -106,7 +105,7 @@ export function parseBulletHead(props: {
       case 'url':
       case 'ticker':
       case 'topic':
-      case 'user': {
+      case 'author': {
         return { type: 'symbol', str, symbol: str }
       }
       case 'poll': {
@@ -136,20 +135,50 @@ export function parseBulletHead(props: {
           throw 'Parse error'
         }
       }
+      case 'shot': {
+        const match = reShot.exec(str)
+        if (match) {
+          const params = match[2].split(' ')
+          const { authorName, targetSymbol, choice } = parseInlineShotParams(params)
+          return {
+            type: 'shot',
+            id: match[1],
+            str,
+            params,
+            authorName,
+            targetSymbol,
+            choice,
+          }
+        } else {
+          console.error(str)
+          throw 'Parse error'
+        }
+      }
+      case 'new-shot': {
+        const match = reNewShot.exec(str)
+        if (match) {
+          const params = match[1].split(' ')
+          const { authorName, targetSymbol, choice } = parseInlineShotParams(params)
+          return {
+            type: 'shot',
+            str,
+            params,
+            authorName,
+            targetSymbol,
+            choice,
+          }
+        } else {
+          console.error(str)
+          throw 'Parse error'
+        }
+      }
     }
+    // 沒被處理到的 token
     console.error(token)
     throw 'Parse error'
   }
 
-  // const { beforeHashtagStr, inlines: hashtagInlines } = parseHashtags({ str, connectedHashtags: connected?.hashtags })
-  // const tokens = tokenizeBulletString(beforeHashtagStr)
-  // const beforeHashtagInlines = tokens.map(e => tokenToInline(e))
-  // return {
-  //   headInlines: beforeHashtagInlines,
-  //   connectedInlines: hashtagInlines,
-  // }
-
   const tokens = tokenizeBulletString(str)
-  const inlines = tokens.map(e => tokenToInline(e))
-  return { headInlines: inlines }
+  const inlines = tokens.map(e => _tokenToInline(e))
+  return { inlines }
 }

@@ -1,4 +1,5 @@
 # Custom scalar，需要同步修改./apollo/schema.ts @see https://www.graphql-scalars.dev/docs/quick-start
+scalar BigInt
 scalar DateTime
 scalar JSON
 
@@ -9,14 +10,14 @@ type Query {
 
   # 以 symbol 查找，若無創新 symbol card
   # @cardBodyId 若給予，返回該card及指定的body，否則返回 latest body
-  card(symbol: String!, cardBodyId: String): Card!
+  card(id: ID, symbol: String, cardBodyId: ID): Card
 
   # 若找不到 card,throws error
   cardMeta(symbol: String!): CardMeta!
 
   latestCardEntries(afterId: String): [CardEntry!]!
 
-  link(url: String!): Link
+  link(id: ID, url: String): Link
 
   # 找 bullet 所有的 emojis，沒有時為空的 array
   emojis(bulletId: ID!): [Emoji!]!
@@ -373,7 +374,7 @@ type CardBody {
   userId: String!
   content: JSON!
   # content: String! # in json
-  timestamp: Int!
+  timestamp: BigInt!
   prevId: Int
 }
 
