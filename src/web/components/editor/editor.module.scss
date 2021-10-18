@@ -70,7 +70,7 @@
   // margin-left: 2em;
   // background: $bg;
   // padding: 10px 3.5em 10px 3.5em;
-  box-shadow: 0 0px 0 1px $gray;
+  // box-shadow: 0 0px 0 1px $gray;
   border-radius: 3px;
   color: $text;
   @media screen and (max-width: 500px) {
@@ -116,4 +116,7 @@
     cursor: pointer;
     box-shadow: 0 1px 0 #6a53fe;
   }
+}
+.lcText {
+  margin: 0;
 }

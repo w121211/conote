@@ -26,6 +26,7 @@ import { useUser } from '@auth0/nextjs-auth0'
 import Popup from '../../components/popup/popup'
 import HeaderForm from '../../components/header-form/header-form'
 import Link from 'next/link'
+import LinkIcon from '../../assets/svg/link.svg'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -294,13 +295,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           >
             {'Drop'}
           </button>
-          {data.selfCard.link?.url && (
-            <button>
-              <a href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
-                來源連結
-              </a>
-            </button>
-          )}
+
           {/* {location.author && (
           <button
             onClick={() => {
@@ -389,21 +384,26 @@ const CardSymbolPage = (): JSX.Element | null => {
               />
             </Popover>
           )}
-
-          <h3 className={classes.header}>
-            {router.query.p && Node.string(data.openedLi.children[0]).replace(rePoll, '').trimEnd()}
-            {data.mirror && !router.query.p && data.mirror.symbol}
-            {!router.query.p && !data.mirror && (
-              <>
-                {data.selfCard.meta.title ?? data.selfCard.symbol}
-                {data.selfCard.meta.author && (
-                  <Link href={`/author/${encodeURIComponent('@' + data.selfCard.meta.author)}`}>
-                    <a className={classes.author}>@{data.selfCard.meta.author}</a>
-                  </Link>
-                )}
-              </>
+          <div className={classes.header}>
+            <h3>
+              {router.query.p && Node.string(data.openedLi.children[0]).replace(rePoll, '').trimEnd()}
+              {data.mirror && !router.query.p && data.mirror.symbol}
+              {!router.query.p && !data.mirror && <>{data.selfCard.meta.title ?? data.selfCard.symbol}</>}
+            </h3>
+            {data.selfCard.link?.url && (
+              // <button>
+              <a href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
+                {/* 來源連結 */}
+                <LinkIcon />
+              </a>
+              // </button>
             )}
-          </h3>
+            {data.selfCard.meta.author && (
+              <Link href={`/author/${encodeURIComponent('@' + data.selfCard.meta.author)}`}>
+                <a className={classes.author}>@{data.selfCard.meta.author}</a>
+              </Link>
+            )}
+          </div>
           {/* {hashtags && <div>{hashtags.text}</div>} */}
           {openLiHashtags.length > 0 && (
             <div>

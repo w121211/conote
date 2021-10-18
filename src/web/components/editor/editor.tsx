@@ -406,9 +406,9 @@ const InlineSymbol = ({
         {children}
       </span>
       {/* </Link> */}
-      <div contentEditable={false}>
-        {showPopover &&
-          (router.query.symbol !== element.symbol && router.query.m !== '::' + element.symbol ? (
+      {showPopover && (
+        <span contentEditable={false}>
+          {router.query.symbol !== element.symbol && router.query.m !== '::' + element.symbol ? (
             <Popup
               visible={showPopover}
               hideBoard={() => {
@@ -463,8 +463,9 @@ const InlineSymbol = ({
             >
               你就在這頁了！
             </Popup>
-          ))}
-      </div>
+          )}
+        </span>
+      )}
       {/* </span> */}
     </span>
   )
@@ -867,16 +868,23 @@ const Lc = (
   }, [selected, readonly])
 
   const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
+
   return (
     <div {...attributes}>
-      <span className={classes.lcText}>{children}</span>
-      {(!selected || readonly) && mirrors.length > 0 && sourceUrl && (
+      <p className={classes.lcText}>
+        {children}
+        {element.emojis && (
+          <span contentEditable={false}>
+            {element.emojis?.map((e, i) => (
+              <EmojiButotn key={i} emoji={e} />
+            ))}
+          </span>
+        )}
+      </p>
+      {mirrors.length > 0 && sourceUrl && (
         <span contentEditable={false}>
           {/* {author === element.author && element.author}
-          {sourceUrl === element.sourceUrl && sourceUrl}
-          {element.emojis?.map((e, i) => (
-            <EmojiButotn key={i} emoji={e} />
-          ))} */}
+          {sourceUrl === element.sourceUrl && sourceUrl} */}
           <FilterMirror mirrors={mirrors} sourceUrl={sourceUrl} />
         </span>
       )}
@@ -922,9 +930,9 @@ const Li = ({
   const href = locationToUrl(location, ReactEditor.findPath(editor, element))
 
   function onEmojiCreated(emoji: Hashtag, myEmojiLike: HashtagLike) {
-    // const curEmojis = lc.emojis ?? []
-    // const path = ReactEditor.findPath(editor, element)
-    // Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
+    const curEmojis = lc.emojis ?? []
+    const path = ReactEditor.findPath(editor, element)
+    Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
   }
   // console.log(lc.emojis)
 
@@ -1091,10 +1099,7 @@ export const BulletEditor = ({
   return (
     <div
       className={`${classes.bulletEditorContainer} `}
-      onClick={e => {
-        e.stopPropagation()
-        console.log('editor div', e.target)
-      }}
+
       // onFocus={e => {
       //   if (!e.currentTarget.classList.contains(classes.focused)) {
       //     e.currentTarget.classList.add(classes.focused)
@@ -1127,14 +1132,24 @@ export const BulletEditor = ({
         }}
       >
         <Editable
-          style={{ padding: '10px 10px 10px 3.5em' }}
-          onFocus={e => {
-            console.log('focus', e.target)
-          }}
-          // onClick={e => {
-          //   e.stopPropagation()
-          //   console.log(e.target)
+          // style={{ padding: '10px 10px 10px 3.5em' }}
+          // onSelect={e => {
+          //   if (!(window as any).chrome) return
+          //   if (editor.selection == null) return
+          //   try {
+          //     const domPoint = ReactEditor.toDOMPoint(editor, editor.selection.focus)
+          //     const node = domPoint[0]
+          //     if (node == null) return
+          //     const element = node.parentElement
+          //     if (element == null) return
+          //     element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+          //   } catch (e) {
+          //     /**
+          //      * Empty catch. Do nothing if there is an error.
+          //      */
+          //   }
           // }}
+
           autoCorrect="false"
           autoFocus={false}
           decorate={renderDecorate}

@@ -28,10 +28,25 @@
   }
 }
 .header {
+  display: flex;
+  align-items: center;
   color: $black;
   .author {
     color: $gray-text-dark;
     font-weight: 400;
     font-size: 14px;
+  }
+  a {
+    display: flex;
+  }
+  svg {
+    width: 17px;
+    height: 17px;
+    fill: $secondary;
+    margin-right: 8px;
+    margin-left: 2px;
+    &:hover {
+      fill: $secondaryHover;
+    }
   }
 }

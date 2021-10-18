@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import assert from 'assert'
+import { ReactEditor } from 'slate-react'
 import { Editor, Transforms, Range, Element, Node, Path, Text, NodeEntry } from 'slate'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 
@@ -173,7 +174,7 @@ export function unindent(editor: Editor, entry: NodeEntry<LiElement>): void {
 
 export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
   const { selection } = editor
-
+  // console.log(event.key)
   if (selection && Range.isCollapsed(selection)) {
     // 非tab、enter，略過
     if (!['Tab', 'Enter'].includes(event.key)) return
@@ -183,6 +184,18 @@ export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
     if (li) {
       const [, path] = li
       let op: 'indent' | 'unindent' | 'body' | undefined
+
+      // if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      //   // const editorNode =
+      //   // console.log(editorNode)
+      //   if (editor.selection == null) return
+      //   const domPoint = ReactEditor.toDOMPoint(editor, editor.selection?.focus)
+      //   const node = domPoint[0]
+      //   const element = node.parentElement
+
+      //   if (element === null) return
+      //   element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      // }
 
       if (event.shiftKey && event.key === 'Tab') {
         op = 'unindent'
