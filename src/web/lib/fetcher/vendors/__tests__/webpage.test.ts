@@ -1,7 +1,7 @@
-import { webpage } from '../webpage'
+import { base } from '../base'
 
 describe('fetch webpage', () => {
   it.each([['https://news.cnyes.com/news/id/4700195']])('get metadata of %s', async url => {
-    expect(await webpage(url)).toMatchSnapshot()
+    expect(await base(url)).toMatchSnapshot()
   })
 })

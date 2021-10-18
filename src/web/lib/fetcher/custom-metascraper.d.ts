@@ -13,6 +13,6 @@ declare module 'metascraper' {
   }
 }
 
-declare module '@metascraper/helpers' {
-  export function toRule(mapper, opts): ({ htmlDom, url }) => Promise<string>
-}
+// declare module '@metascraper/helpers' {
+//   export function toRule(mapper, opts): ({ htmlDom, url }) => Promise<string>
+// }

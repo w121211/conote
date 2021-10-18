@@ -1,5 +1,5 @@
 import { Editor, Transforms, Node, Path, NodeEntry, createEditor } from 'slate'
-import { parseBulletHead } from '../../lib/bullet/text'
+import { parseBulletHead } from '../../lib/bullet/parse'
 import { InlineItem } from '../../lib/bullet/types'
 import { LcElement, CustomElement, CustomInlineElement, CustomText, LiElement } from './slate-custom-types'
 import { isLc, isLiArray } from './with-list'

@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`keywords https://finance.yahoo.com/news/2-musk-tesla-plant-party-112005747.html 1`] = `
+Object {
+  "keywords": Array [
+    "Elon Musk",
+    "volume production",
+    "production line",
+    "German business culture",
+  ],
+  "tickers": undefined,
+}
+`;
+
+exports[`keywords https://news.cnyes.com/news/id/4738961 1`] = `
+Object {
+  "keywords": Array [
+    "本周大事",
+    "台積電",
+    "國安基金",
+    "宏碁",
+    "宏達電",
+  ],
+  "tickers": undefined,
+}
+`;
+
+exports[`tickers https://news.cnyes.com/news/id/4738961 1`] = `
+Object {
+  "keywords": undefined,
+  "tickers": undefined,
+}
+`;
+
+exports[`tickers https://news.cnyes.com/news/id/4741929?exp=a 1`] = `
+Object {
+  "keywords": undefined,
+  "tickers": Array [
+    "5299-TW",
+    "8261-TW",
+    "3317-TW",
+    "6435-TW",
+    "6138-TW",
+    "6217-TW",
+    "6510-TW",
+    "6223-TW",
+  ],
+}
+`;
+
+exports[`yfinance https://finance.yahoo.com/news/2-musk-tesla-plant-party-112005747.html 1`] = `
+Object {
+  "keywords": undefined,
+  "tickers": undefined,
+}
+`;

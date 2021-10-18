@@ -2,7 +2,6 @@ import React, { HtmlHTMLAttributes, useContext, useEffect, useState } from 'reac
 // import PinIcon from '../../assets/svg/like.svg'
 // import UpIcon from '../../assets/svg/arrow-up.svg'
 import classes from './upDown.module.scss'
-import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import Popover from '../popover/popover'
 import PollPage from '../board/poll-page'
 import { Poll, PollDocument, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'

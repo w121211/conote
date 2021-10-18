@@ -1,4 +1,4 @@
-import { Hashtag as GQLHashtag, Poll as GQLPoll } from '../../apollo/query.graphql'
+import { Poll as GQLPoll } from '../../apollo/query.graphql'
 
 /**
  * Bullet operation flow:
@@ -61,6 +61,15 @@ export type InlinePoll = {
   // vote?: author vote
 }
 
+export type InlineShot = {
+  type: 'shot'
+  str: string
+  id?: string
+  choice: string
+  shot?: GQLPoll
+  // vote?: author vote
+}
+
 export type InlineItem =
   | InlineText
   | InlineSymbol
@@ -70,29 +79,34 @@ export type InlineItem =
   // | InlineHashtag
   // | InlineNewHashtag
   | InlinePoll
+  | InlineShot
 
 export type BulletOperation = 'CREATE' | 'MOVE' | 'UPDATE' | 'DELETE' | 'UPDATE_MOVE'
 
 export type Bullet = {
-  id: number
+  id: string
   timestamp: number // commit 的時間點，有修改時才會更新，沒修改時會沿用之前的時間，用於判斷本次 commit 包含哪些 bullet
   userIds: string[] // 最新修改此 bullet 的 user id 放在最後
   head: string
   body?: string
   children: Bullet[] // 空 array 表示為無children
 
-  sourceUrl?: string // as URL, 等同於 card symbol 的 url
-  author?: string // 等同於 author name，沒有的話代表是 user 自己的創作
+  // author?: { id: string; name: string }
+  // source?: { id: string; url: string }
+  authorId?: string
+  sourceCardId?: string
+  sourceLinkId?: string
+
+  symbols: { cardId: string; str: string }[] // 在此 bullet 中所提到的 symbols，當 symbol 改名時，仍可以靠 id 修正成新名字
 
   placeholder?: string
-
   freeze?: true // 無法變動
   freezeChildren?: true // 無法新增child
 
   // Next
   // headValueChecker?: string
   // bodyValueChecker?: string
-  hashtagIds?: number[] // 屬 self-objects，若內文遭到刪除可透過此偵測
+  // hashtagIds?: number[] // 屬 self-objects，若內文遭到刪除可透過此偵測
 
   // Consider to remove
   op?: BulletOperation // 記錄編輯狀態，用於 revision TODO: 若沒修改時 op 會移除嗎？？？
@@ -120,7 +134,7 @@ export type BulletDraft = Omit<Partial<Bullet>, 'children'> & {
   parsed?: InlineItem[]
 
   // 用於輔助顯示，不會直接影響
-  emojis?: GQLHashtag[] // injected existing hashtags
+  // emojis?: GQLHashtag[] // injected existing hashtags
   draft?: true // 表示此 bullet 有被修改，搭配 op 做更新，用於區隔沒有修改的 bullet（因為即便是未修改的 bullet，type 仍然是 BulletDraft)
   error?: string
   createCard?: true // 為新創的card

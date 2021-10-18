@@ -1,4 +1,4 @@
-import { parseBulletHead } from '../text'
+import { parseBulletHead } from '../parse'
 
 // test('grammar', () => {
 //   // expect(clean(replaceBulletInput(templateTicker.body, params))).toMatchSnapshot()

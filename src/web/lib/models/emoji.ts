@@ -1,75 +1,76 @@
-import { Hashtag, HashtagCount, HashtagLike, LikeChoice } from '.prisma/client'
+import { Emoji, EmojiCount, EmojiLike, LikeChoice } from '.prisma/client'
 import { EmojiText } from '../../apollo/query.graphql'
-import { deltaLike } from '../helper'
+import { deltaLike } from '../helpers'
 import { getBotId } from '../models/user'
 import prisma from '../prisma'
 
-function hasCount(obj: Hashtag & { count: HashtagCount | null }): obj is Hashtag & { count: HashtagCount } {
-  return obj.count !== null
-}
-
-export async function upsertEmojiLike(props: { choice: LikeChoice; hashtagId: number; userId: string }): Promise<{
-  like: HashtagLike
-  count: HashtagCount
+export async function upsertEmojiLike({
+  choice,
+  emojiId,
+  userId,
+}: {
+  choice: LikeChoice
+  emojiId: string
+  userId: string
+}): Promise<{
+  like: EmojiLike
+  count: EmojiCount
 }> {
-  const { choice, hashtagId, userId } = props
-  const curCount = await prisma.hashtagCount.findUnique({
-    where: { hashtagId },
+  const curCount = await prisma.emojiCount.findUnique({
+    where: { emojiId },
   })
   if (curCount === null) {
     throw 'Database unexpected error'
   }
 
-  const curLike = await prisma.hashtagLike.findUnique({
+  const curLike = await prisma.emojiLike.findUnique({
     where: {
-      userId_hashtagId: {
-        userId,
-        hashtagId,
-      },
+      userId_emojiId: { userId, emojiId },
     },
   })
   const nextLike = curLike
-    ? await prisma.hashtagLike.update({
+    ? await prisma.emojiLike.update({
         data: { choice },
         where: { id: curLike.id },
       })
-    : await prisma.hashtagLike.create({
+    : await prisma.emojiLike.create({
         data: {
           choice,
+          emoji: { connect: { id: emojiId } },
           user: { connect: { id: userId } },
-          hashtag: { connect: { id: hashtagId } },
         },
       })
 
   const { dUp, dDown } = deltaLike(nextLike, curLike ?? undefined)
-  const nextCount = await prisma.hashtagCount.update({
+  const nextCount = await prisma.emojiCount.update({
     data: {
       nUps: curCount.nUps + dUp,
       nDowns: curCount.nDowns + dDown,
     },
-    where: { hashtagId },
+    where: { emojiId },
   })
   return { like: nextLike, count: nextCount }
 }
 
-export async function createEmoji(props: { bulletId: number; emojiText: EmojiText; userId: string }): Promise<{
-  emoji: Hashtag & { count: HashtagCount }
-  like: HashtagLike
+export async function createEmoji(props: { bulletId: string; text: EmojiText; userId: string }): Promise<{
+  emoji: Emoji & { count: EmojiCount }
+  like: EmojiLike
 }> {
-  const { bulletId, emojiText, userId } = props
-  const botId = await getBotId()
-  const bullet = await prisma.bullet.findUnique({
-    where: { id: bulletId },
-    include: { hashtags: { include: { count: true } } },
+  const { bulletId, text, userId } = props
+  // const botId = await getBotId()
+  // const bullet = await prisma.bullet.findUnique({
+  //   where: { id: bulletId },
+  //   include: { emojis: { include: { count: true } } },
+  // })
+  // if (bullet === null) {
+  //   throw 'bullet not found'
+  // }
+  const found = await prisma.emoji.findUnique({
+    where: { bulletId_text: { bulletId, text } },
   })
-  if (bullet === null) {
-    throw 'bullet not found'
-  }
-
-  const found = bullet?.hashtags.find(e => e.text === emojiText)
   if (found) {
-    // 該 emoji 已存在，upsert like
-    const { like, count } = await upsertEmojiLike({ choice: LikeChoice.UP, hashtagId: found.id, userId })
+    // emoji 已存在，upsert like
+    const { like, count } = await upsertEmojiLike({ choice: LikeChoice.UP, emojiId: found.id, userId })
     return {
       emoji: {
         ...found,
@@ -79,20 +80,20 @@ export async function createEmoji(props: { bulletId: number; emojiText: EmojiTex
     }
   }
 
-  // 創 emoji & like
-  const hashtag = await prisma.hashtag.create({
+  // emoji 未存在，創 emoji & like
+  const botId = await getBotId() // TODO: 目前僅限 bot 創 emoji
+  const emoji = await prisma.emoji.create({
     data: {
       userId: botId,
       bulletId,
-      cardId: bullet.cardId,
-      text: emojiText,
+      text,
       count: { create: {} },
     },
   })
-  const { like, count } = await upsertEmojiLike({ choice: LikeChoice.UP, hashtagId: hashtag.id, userId })
+  const { like, count } = await upsertEmojiLike({ choice: LikeChoice.UP, emojiId: emoji.id, userId })
   return {
     emoji: {
-      ...hashtag,
+      ...emoji,
       count,
     },
     like,

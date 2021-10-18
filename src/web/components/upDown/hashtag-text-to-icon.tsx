@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
-import { Hashtag } from '../../apollo/query.graphql'
+import { Emoji } from '../../apollo/query.graphql'
 // import classes from './upDown.module.scss'
 
-const HashtagTextToIcon = ({ hashtag }: { hashtag: Hashtag }): JSX.Element => {
-  switch (hashtag.text) {
+const HashtagTextToIcon = ({ emoji }: { emoji: Emoji }): JSX.Element => {
+  switch (emoji.text) {
     case 'PIN':
       return <PinIcon />
     case 'UP':
@@ -13,7 +13,7 @@ const HashtagTextToIcon = ({ hashtag }: { hashtag: Hashtag }): JSX.Element => {
     case 'DOWN':
       return <UpIcon style={{ transform: 'rotate(180deg)' }} />
     default:
-      return <span>{hashtag.text}</span>
+      return <span>{emoji.text}</span>
   }
 }
 

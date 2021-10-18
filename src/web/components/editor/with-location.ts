@@ -12,7 +12,10 @@ export type NavLocation = {
   selfSymbol: string
   openedLiPath: number[] // 若有 mirror 對應到的是以 mirror 為 root 的 path，若無則是 self root 的 payh
   mirrorSymbol?: string // 包括前綴符號，eg ::$XX, ::[[Hello World]]
-  author?: string // 包括前綴符號，eg @cnyes
+  // author?: string // 包括前綴符號，eg @cnyes
+  authorId?: string
+  sourceCardId?: string
+  sourceLinkId?: string
 }
 
 /** URL search params */
