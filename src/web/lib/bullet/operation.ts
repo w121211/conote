@@ -155,23 +155,25 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
     console.warn(draft)
     throw new Error('權限不足: 無法創freeze bullet')
   }
-  const dbBullet = await prisma.bullet.create({
+  const bullet = await prisma.bullet.create({
     data: {
       card: { connect: { id: cardId } },
     },
   })
 
-  // tokenize & parse
-  const { headInlines } = parseBulletHead({ str: draft.head })
-  const producedHeadInlines = await Promise.all(headInlines.map(e => createInlineItem({ inline: e, userId })))
+  // (TBC) 是否需要確認 inline-items？
+  // Tokenize & parse
+  // const { inlines } = parseBulletHead({ str: draft.head })
+  // const producedHeadInlines = await Promise.all(inlines.map(e => createInlineItem({ inline: e, userId })))
 
   if (isRootBulletDraft(draft)) {
     const produced: RootBullet = {
-      id: dbBullet.id,
+      id: bullet.id,
       userIds: [userId],
       root: true,
       symbol: draft.symbol,
-      head: inlinesToString(producedHeadInlines).trim(),
+      head: draft.head,
+      // head: inlinesToString(producedHeadInlines).trim(),
       body: draft.body,
       timestamp,
       children: [],
@@ -180,9 +182,10 @@ async function createOneBullet<T extends BulletDraft | RootBulletDraft>(props: {
     return produced
   }
   const node: Bullet = {
-    id: dbBullet.id,
+    id: bullet.id,
     userIds: [userId],
-    head: inlinesToString(producedHeadInlines).trim(),
+    // head: inlinesToString(producedHeadInlines).trim(),
+    head: draft.head.trim(),
     body: draft.body,
     timestamp,
     children: [],

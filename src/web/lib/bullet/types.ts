@@ -1,4 +1,4 @@
-import { Poll as GQLPoll } from '../../apollo/query.graphql'
+import { Poll as GQLPoll, Shot as GQLShot, ShotChoice } from '../../apollo/query.graphql'
 
 /**
  * Bullet operation flow:
@@ -12,13 +12,6 @@ type SymbolType = 'ticker' | 'title' | 'url'
 export type InlineText = {
   type: 'text'
   str: string
-}
-
-export type InlineSymbol = {
-  type: 'symbol'
-  str: string
-  // symbolType: SymbolType
-  symbol: string
 }
 
 // export type InlineAuthor = {
@@ -65,14 +58,23 @@ export type InlineShot = {
   type: 'shot'
   str: string
   id?: string
-  choice: string
-  shot?: GQLPoll
+  params: string[]
+  shot?: GQLShot
+  authorName?: string
+  targetSymbol?: string
+  choice?: ShotChoice
   // vote?: author vote
+}
+
+export type InlineSymbol = {
+  type: 'symbol'
+  str: string
+  // symbolType: SymbolType
+  symbol: string
 }
 
 export type InlineItem =
   | InlineText
-  | InlineSymbol
   // | InlineAuthor
   | InlineFiltertag
   | InlineMirror
@@ -80,6 +82,7 @@ export type InlineItem =
   // | InlineNewHashtag
   | InlinePoll
   | InlineShot
+  | InlineSymbol
 
 export type BulletOperation = 'CREATE' | 'MOVE' | 'UPDATE' | 'DELETE' | 'UPDATE_MOVE'
 
@@ -203,8 +206,7 @@ export function isBulletDraft(node: BulletDraft | RootBulletDraft): node is Bull
 //   }
 // }
 
-export function toInlinePoll(props: { id: string | number; choices: string[] }): InlinePoll {
-  const { id, choices } = props
+export function toInlinePoll({ id, choices }: { id: string | number; choices: string[] }): InlinePoll {
   const _id = typeof id === 'number' ? id.toString() : id
   return {
     type: 'poll',

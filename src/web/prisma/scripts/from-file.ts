@@ -15,7 +15,7 @@ import {
   getOrCreateCardByUrl,
 } from '../../lib/models/card'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
-import { ShotContent, toShotInlineText } from '../../lib/models/shot'
+import { ShotContent, toInlineShotString } from '../../lib/models/shot'
 // import { getBotId } from '../../lib/models/user'
 // import { injectHashtags, toGQLHashtag } from '../../lib/hashtag/inject'
 
@@ -225,7 +225,7 @@ async function main() {
         await createCardBody({ cardId: mirrorCard.id, root: mirror, userId: TESTUSERS[0].id })
         // console.log(inspect(mirror, { depth: null }))
 
-        let shotInlineText = ''
+        let inlineShotStr = ''
         const neatReplies = markerlines.filter(e => e.neatReply)
         if (neatReplies.length > 1) {
           console.log(inspect(neatReplies, { depth: null }))
@@ -239,7 +239,7 @@ async function main() {
               targetCardId: mirrorCard.id,
               userId: TESTUSERS[0].id,
             })
-            shotInlineText = toShotInlineText({
+            inlineShotStr = toInlineShotString({
               author: shot.author.name,
               choice: shot.choice,
               targetSymbol: shot.target.symbol,
@@ -253,7 +253,7 @@ async function main() {
         sourceRootDraft.children.push({
           draft: true,
           op: 'CREATE',
-          head: `::${mirrorCard.symbol} ${shotInlineText}`,
+          head: `::${mirrorCard.symbol} ${inlineShotStr}`,
           // mirror: true,
           children: [],
         })

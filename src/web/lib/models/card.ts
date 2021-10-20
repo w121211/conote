@@ -345,8 +345,10 @@ export async function createCardBody({
 /**
  * TODO: latest body 需要有驗證機制，才可以回朔
  */
-export async function attachLatestBody(card: Card): Promise<
-  Card & {
+export async function attachLatestBody<T extends Card>(
+  card: T,
+): Promise<
+  T & {
     body: CardBody
   }
 > {
@@ -465,4 +467,30 @@ export async function getOrCreateCardByUrl({ scraper, url }: { scraper?: FetchCl
     userId: await getBotId(),
   })
   return { ...card, body, meta, link }
+}
+
+export async function getCard({ id }: { id: string }): Promise<
+  | null
+  | (Omit<Card, 'meta'> & {
+      body: CardBody
+      link: Link | null
+      meta: CardMeta
+    })
+> {
+  const card = await prisma.card.findUnique({
+    where: { id },
+    include: { link: true },
+  })
+  if (card) {
+    const body = await getLatestCardBody(card.id)
+    if (body === null) {
+      throw 'Card body not found'
+    }
+    return {
+      ...card,
+      body,
+      meta: card.meta as unknown as CardMeta,
+    }
+  }
+  return null
 }

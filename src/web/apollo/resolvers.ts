@@ -7,7 +7,7 @@ import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
 import { QueryResolvers, MutationResolvers } from './type-defs.graphqls'
 import { hasCount, toStringId } from '../lib/helpers'
-import { CardMeta, createCardBody, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
+import { CardMeta, createCardBody, getCard, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
 import { getOrCreateUser } from '../lib/models/user'
 import { createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
@@ -102,32 +102,35 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return cards
   },
 
-  async link(_parent, { url }, _context, _info) {
-    const link = await prisma.link.findUnique({
-      where: { url },
-    })
-    return link
+  async link(_parent, { id, url }, _context, _info) {
+    if (id) {
+      return await prisma.link.findUnique({ where: { id } })
+    }
+    if (url) {
+      return await prisma.link.findUnique({ where: { url } })
+    }
+    throw 'Param requires either id or url'
   },
 
-  async card(_parent, { symbol }, _context, _info) {
-    const card = await getOrCreateCardBySymbol(symbol)
-    return {
-      ...card,
-      body: toStringId(card.body),
+  async card(_parent, { id, symbol }, _context, _info) {
+    if (id) {
+      const card = await getCard({ id })
+      if (card) {
+        return {
+          ...card,
+          body: toStringId(card.body),
+        }
+      }
+      return null
     }
-    // const card = await prisma.card.findUnique({
-    //   where: { symbol },
-    //   include: { link: true },
-    // })
-    // if (card !== null) {
-    //   const _card = await attachLatestHeadBody(card)
-    //   return {
-    //     ..._toStringId(_card),
-    //     body: _toStringId(_card.body),
-    //     link: card.link && _toStringId(card.link),
-    //   }
-    // }
-    // return null
+    if (symbol) {
+      const card = await getOrCreateCardBySymbol(symbol)
+      return {
+        ...card,
+        body: toStringId(card.body),
+      }
+    }
+    throw 'Param requires either id or symbol'
   },
 
   async cardMeta(_parent, { symbol }, _context, _info) {
