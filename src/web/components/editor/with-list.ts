@@ -175,6 +175,17 @@ export function unindent(editor: Editor, entry: NodeEntry<LiElement>): void {
 export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
   const { selection } = editor
   // console.log(event.key)
+  if (event.key === 'Shift') {
+    const lc = Editor.above<LcElement>(editor, { match: n => isLc(n) })
+    if (lc) {
+      Transforms.setNodes(editor, { shift: true })
+    } else {
+      const lc = Editor.above<LcElement>(editor, { match: n => isLc(n) })
+      if (lc) {
+        Transforms.setNodes(editor, { shift: false })
+      }
+    }
+  }
   if (selection && Range.isCollapsed(selection)) {
     // 非tab、enter，略過
     if (!['Tab', 'Enter'].includes(event.key)) return

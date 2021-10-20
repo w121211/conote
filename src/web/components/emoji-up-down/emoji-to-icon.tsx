@@ -1,25 +1,26 @@
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import {
-  useMyHashtagLikeQuery,
+  useMyEmojiLikeQuery,
   // useCreateHashtagLikeMutation,
   // useUpdateHashtagLikeMutation,
-  MyHashtagLikeQuery,
-  MyHashtagLikeQueryVariables,
-  MyHashtagLikeDocument,
+  MyEmojiLikeQuery,
+  MyEmojiLikeQueryVariables,
+  MyEmojiLikeDocument,
   LikeChoice,
-  HashtagsDocument,
+  EmojisDocument,
+  Emoji,
 } from '../../apollo/query.graphql'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
 import classes from './upDown.module.scss'
-import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
-import HashtagTextToIcon from './hashtag-text-to-icon'
-import MyHashtagGroup from './poll-group'
+// import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
+import EmojiTextToIcon from './emoji-text-to-icon'
+import MyEmojiGroup from './poll-group'
 
-const hashtagTextToIcon = (hashtag: Hashtag | HashtagGroup): JSX.Element | null => {
-  if (hashtag.type === 'hashtag') {
-    switch (hashtag.text) {
+const hashtagTextToIcon = (emoji: Emoji): JSX.Element | null => {
+  if (emoji) {
+    switch (emoji.text) {
       case '#pin':
         return <PinIcon width="1em" height="1em" />
       case '#up':
@@ -29,44 +30,44 @@ const hashtagTextToIcon = (hashtag: Hashtag | HashtagGroup): JSX.Element | null 
     }
   }
 
-  if (hashtag.type === 'hashtag-group') {
-    const newText = hashtag.text.substring(1, hashtag.text.length - 1)
-    const textArr = newText.split(' ')
-    return (
-      <>
-        {textArr.map((e, i) => {
-          //first child
-          if (i === 0) {
-            return (
-              <span
-                key={i}
-                onClick={ev => {
-                  ev.stopPropagation()
-                  // console.log(e)
-                }}
-              >
-                {e}
-              </span>
-            )
-          }
-          //others
-          return (
-            <span
-              className={classes.HashtagGroupChildren}
-              key={i}
-              onClick={ev => {
-                ev.stopPropagation()
-                // console.log(e)
-              }}
-            >
-              {e}
-            </span>
-          )
-        })}
-      </>
-    )
-  }
-  return <span>{hashtag.text}</span>
+  // if (emoji.type === 'emoji-group') {
+  //   const newText = emoji.text.substring(1, emoji.text.length - 1)
+  //   const textArr = newText.split(' ')
+  //   return (
+  //     <>
+  //       {textArr.map((e, i) => {
+  //         //first child
+  //         if (i === 0) {
+  //           return (
+  //             <span
+  //               key={i}
+  //               onClick={ev => {
+  //                 ev.stopPropagation()
+  //                 // console.log(e)
+  //               }}
+  //             >
+  //               {e}
+  //             </span>
+  //           )
+  //         }
+  //         //others
+  //         return (
+  //           <span
+  //             className={classes.HashtagGroupChildren}
+  //             key={i}
+  //             onClick={ev => {
+  //               ev.stopPropagation()
+  //               // console.log(e)
+  //             }}
+  //           >
+  //             {e}
+  //           </span>
+  //         )
+  //       })}
+  //     </>
+  //   )
+  // }
+  return <span>{emoji.text}</span>
 }
 
 // const HashtagUpDown = ({

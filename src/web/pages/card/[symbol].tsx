@@ -8,7 +8,7 @@ import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 import NavPath from '../../components/nav-path/nav-path'
-import { CardMeta, useMeQuery } from '../../apollo/query.graphql'
+import { CardMeta, useEmojisQuery, useMeQuery } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/symbol.module.scss'
 import Popover from '../../components/popover/popover'
@@ -116,6 +116,10 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [headerFormSubmited, setHeaderFormSubmited] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [submitFinished, setSubmitFinished] = useState(false)
+  const { data: emojiData } = useEmojisQuery({
+    fetchPolicy: 'cache-first',
+    variables: { bulletId: data?.openedLi.children[0].id ?? '' },
+  })
   // const [openLiHashtags, setOpenLiHashtags] = useState<Hashtag[]>([])
   // const [queryHashtags, { data: hashtagData }] = useHashtagsLazyQuery({
   //   fetchPolicy: 'cache-first',
@@ -358,7 +362,7 @@ const CardSymbolPage = (): JSX.Element | null => {
               <HeaderForm
                 symbol={router.query.symbol as string}
                 initialValue={{
-                  author: (data.selfCard.meta.author || data.selfCard.link?.authorName) ?? '',
+                  author: data.selfCard.meta.author ?? '',
                   title: (data.selfCard.meta.title || data.selfCard.link?.url) ?? '',
                   url: (data.selfCard.meta.url || data.selfCard.link?.url) ?? '',
                   keywords: data.selfCard.meta.keywords?.map(e => {

@@ -7,16 +7,16 @@ import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
 import {
   EmojiText,
-  Hashtag,
-  HashtagLike,
-  MyHashtagLikeDocument,
-  MyHashtagLikeQuery,
-  MyHashtagLikeQueryVariables,
+  Emoji,
+  EmojiLike,
+  MyEmojiLikeDocument,
+  MyEmojiLikeQuery,
+  MyEmojiLikeQueryVariables,
   useCreateEmojiMutation,
-  useMyHashtagLikeQuery,
+  useMyEmojiLikeQuery,
   useUpsertEmojiLikeMutation,
 } from '../../apollo/query.graphql'
-import UpDown from '../upDown/upDown'
+import EmojiUpDown from '../emoji-up-down/emoji-up-down'
 
 interface Child {
   icon?: SVGComponentTransferFunctionElement | SVGElement | Element | string | ReactElement
@@ -33,9 +33,9 @@ export interface BulletPanelType {
   className?: string
   sourceUrl?: string
   authorName?: string
-  bulletId?: number
-  onEmojiCreated: (emoji: Hashtag, myEmojiLike: HashtagLike) => void
-  emoji?: Hashtag[]
+  bulletId?: string
+  onEmojiCreated: (emoji: Emoji, myEmojiLike: EmojiLike) => void
+  emoji?: Emoji[]
 }
 
 const BulletPanel = ({
@@ -142,20 +142,20 @@ const BulletPanel = ({
               )
             if (bulletId && e.emojiText !== undefined) {
               return (
-                <UpDown
+                <EmojiUpDown
                   className={classes.panelElement}
                   key={i}
                   bulletId={bulletId}
                   foundEmoji={emoji?.find(el => el.text === e.emojiText)}
                   emojiText={e.emojiText}
-                  onEmojiCreated={onEmojiCreated}
+                  // onEmojiCreated={onEmojiCreated}
                 >
                   {/* <div className={classes.panelElement} key={i}> */}
                   <span className={classes.panelIcon}>{e.icon}</span>
 
                   {e.text}
                   {/* </div> */}
-                </UpDown>
+                </EmojiUpDown>
               )
             }
             return (

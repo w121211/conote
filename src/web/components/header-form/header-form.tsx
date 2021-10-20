@@ -4,7 +4,7 @@ import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-for
 
 import CreatableSelect from 'react-select/creatable'
 import classes from './header-form.module.scss'
-import { CardDocument, CardMeta, CardQuery, useBoardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
+import { CardDocument, CardMeta, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
 import { RadioInput } from '../board-form/board-form'
 import router from 'next/router'
 import { GroupTypeBase, Styles } from 'react-select'

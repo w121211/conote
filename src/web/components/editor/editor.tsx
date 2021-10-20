@@ -49,10 +49,11 @@ import {
   usePollLazyQuery,
   usePollQuery,
   useUpsertEmojiLikeMutation,
+  useEmojisQuery,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
-import MyHashtagGroup from '../upDown/poll-group'
+import MyHashtagGroup from '../emoji-up-down/poll-group'
 import { spawn } from 'child_process'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { NavLocation, locationToUrl } from './with-location'
@@ -60,19 +61,19 @@ import { withOperation } from './with-operation'
 import { parseLcAndReplace, withParse } from './with-parse'
 import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll } from '../../lib/bullet/types'
 import CreatePollForm from '../board-form/create-poll-form'
-import HashtagTextToIcon from '../upDown/hashtag-text-to-icon'
+import HashtagTextToIcon from '../emoji-up-down/emoji-text-to-icon'
 import PollPage from '../board/poll-page'
 // import { Context } from '../../pages/card/[symbol]'
 import AuthorPollPage from '../board/author-poll-page'
 import router, { useRouter } from 'next/router'
 import Popup from '../popup/popup'
-import PollGroup from '../upDown/poll-group'
+import PollGroup from '../emoji-up-down/poll-group'
 import { getLocalOrQueryRoot } from './use-local-value'
 import { useApolloClient } from '@apollo/client'
 import { Serializer } from './serializer'
 import { BulletNode } from '../../lib/bullet/node'
 import { Token, tokenize } from 'prismjs'
-import { tokenizeBulletString } from '../../lib/bullet/text'
+import { tokenizeBulletString } from '../../lib/bullet/parse'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
@@ -160,8 +161,11 @@ const decorate = ([node, path]: NodeEntry) => {
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, children, leaf } = props
+  // const [isPressShift, setIsPressShift] = useState(false)
+  // console.log(isPressShift)
   let style: React.CSSProperties = {}
   let className = ''
+
   // if (leaf.placeholder) {
   //   return (
   //     <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
@@ -242,7 +246,15 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
           leaf.type === 'mirror-topic' ||
           leaf.type === 'filtertag'
         ) {
-          e && (e.onselectstart = ev => false)
+          if (e) {
+            // let isPressShift = false
+            // document.addEventListener('keydown', ev => {
+            //   console.log(ev.shiftKey)
+            //   isPressShift = ev.shiftKey
+            // })
+
+            e.onselectstart = ev => leaf.shift
+          }
         }
       }}
     >
@@ -252,7 +264,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   )
 }
 
-const EmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
+const UpdateEmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
   const { data, loading, error } = useMyEmojiLikeQuery({
     variables: { emojiId: emoji.id },
   })
@@ -330,7 +342,7 @@ export const EmojiButotn = ({ emoji }: { emoji: Emoji }): JSX.Element | null => 
 
   return (
     // <span>
-    <EmojiLike emoji={emoji} />
+    <UpdateEmojiLike emoji={emoji} />
     // {/* </span> */}
   )
 }
@@ -481,7 +493,7 @@ const InlineMirror = ({
     ...location,
     mirrorSymbol: element.mirrorSymbol,
     openedLiPath: [],
-    author: element.author,
+    // author: element.author,
   })
   // const authorName = selfCard.link?.authorName
   // useEffect(() => {
@@ -836,25 +848,26 @@ const Lc = ({
   const readonly = useReadOnly()
   const focused = useFocused() // 整個editor是否focus
   const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
+  const { data: emojiData } = useEmojisQuery({ fetchPolicy: 'cache-first', variables: { bulletId: element.id ?? '' } })
   // const [author, authorSwitcher] = useAuthorSwitcher({ authorName })
   // const [placeholder, setPlaceholder] = useState<string | undefined>()
   // useEffect(() => {
   //   setPlaceholder(element.placeholder)
   // }, [element])
-  const author = location.author
+  // const author = location.author
 
-  useEffect(() => {
-    if (element.op === 'CREATE') {
-      let lcPath: number[] | undefined
-      if (author && element.author === undefined) {
-        lcPath = ReactEditor.findPath(editor, element)
-        Transforms.setNodes<LcElement>(editor, { author }, { at: lcPath })
-      }
-      if (sourceUrl && element.sourceUrl === undefined) {
-        Transforms.setNodes<LcElement>(editor, { sourceUrl }, { at: lcPath ?? ReactEditor.findPath(editor, element) })
-      }
-    }
-  }, [author, element, sourceUrl])
+  // useEffect(() => {
+  //   if (element.op === 'CREATE') {
+  //     let lcPath: number[] | undefined
+  //     if (author && element.author === undefined) {
+  //       lcPath = ReactEditor.findPath(editor, element)
+  //       Transforms.setNodes<LcElement>(editor, { author }, { at: lcPath })
+  //     }
+  //     if (sourceUrl && element.sourceUrl === undefined) {
+  //       Transforms.setNodes<LcElement>(editor, { sourceUrl }, { at: lcPath ?? ReactEditor.findPath(editor, element) })
+  //     }
+  //   }
+  // }, [author, element, sourceUrl])
 
   useEffect(() => {
     if ((focused && !selected) || readonly) {
@@ -874,26 +887,31 @@ const Lc = ({
       // console.log('unwrapNodes', path)
     }
   }, [selected, readonly])
+  // useEffect(()=>{
+  //   if(focused){
+
+  //   }
+  // },[focused])
 
   const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
 
   return (
     <div {...attributes}>
-      <p className={classes.lcText}>
+      <div className={classes.lcText}>
         {children}
-        {element.emojis && (
+        {emojiData && (
           <span contentEditable={false}>
-            {element.emojis?.map((e, i) => (
+            {emojiData.emojis?.map((e, i) => (
               <EmojiButotn key={i} emoji={e} />
             ))}
           </span>
         )}
-      </p>
-      {mirrors.length > 0 && sourceUrl && (
+      </div>
+      {mirrors.length > 0 && sourceCardId && (
         <span contentEditable={false}>
           {/* {author === element.author && element.author}
           {sourceUrl === element.sourceUrl && sourceUrl} */}
-          <FilterMirror mirrors={mirrors} sourceUrl={sourceUrl} />
+          <FilterMirror mirrors={mirrors} sourceCardId={sourceCardId} />
         </span>
       )}
     </div>
@@ -937,10 +955,10 @@ const Li = ({
   const hasUl = ul !== undefined
   const href = locationToUrl(location, ReactEditor.findPath(editor, element))
 
-  function onEmojiCreated(emoji: Hashtag, myEmojiLike: HashtagLike) {
-    const curEmojis = lc.emojis ?? []
-    const path = ReactEditor.findPath(editor, element)
-    Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
+  function onEmojiCreated(emoji: Emoji, myEmojiLike: EmojiLike) {
+    // const curEmojis = lc.emojis ?? []
+    // const path = ReactEditor.findPath(editor, element)
+    // Transforms.setNodes<LcElement>(editor,  { at: lcPath(path) })
   }
   // console.log(lc.emojis)
 
@@ -963,10 +981,10 @@ const Li = ({
       <div className={classes.arrowBulletWrapper} contentEditable={false}>
         <BulletPanel
           bulletId={lc.id}
-          emoji={lc.emojis}
+          // emoji={lc.emojis}
           visible={showPanelIcon}
-          sourceUrl={element.children[0].sourceUrl}
-          authorName={element.children[0].author}
+          // sourceUrl={element.children[0].sourceUrl}
+          // authorName={element.children[0].author}
           onEmojiCreated={onEmojiCreated}
         >
           {/* <span className={classes.oauthorName}> @{authorName}</span> */}
@@ -1072,6 +1090,7 @@ export const BulletEditor = ({
   onValueChange?: (value: LiElement[]) => void
 }): JSX.Element => {
   // const context = useContext(Context)
+  const [isPressShift, setIsPressShift] = useState(false)
   const editor = useMemo(() => withParse(withOperation(withList(withHistory(withReact(createEditor()))))), [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
@@ -1166,6 +1185,7 @@ export const BulletEditor = ({
           renderLeaf={renderLeaf}
           onKeyDown={event => {
             withListOnKeyDown(event, editor)
+            setIsPressShift(event.key === 'Shift')
             // if (search) {
             //   onKeyDownForSuggest(event)
             // } else {

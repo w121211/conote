@@ -4,7 +4,7 @@ import UpIcon from '../../assets/svg/arrow-up.svg'
 import { Emoji } from '../../apollo/query.graphql'
 // import classes from './upDown.module.scss'
 
-const HashtagTextToIcon = ({ emoji }: { emoji: Emoji }): JSX.Element => {
+const EmojiTextToIcon = ({ emoji }: { emoji: Emoji }): JSX.Element => {
   switch (emoji.text) {
     case 'PIN':
       return <PinIcon />
@@ -17,4 +17,4 @@ const HashtagTextToIcon = ({ emoji }: { emoji: Emoji }): JSX.Element => {
   }
 }
 
-export default HashtagTextToIcon
+export default EmojiTextToIcon

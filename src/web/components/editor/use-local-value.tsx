@@ -8,10 +8,10 @@ import {
   CardDocument,
   CardQueryVariables,
   Card,
-  HashtagsQuery,
-  HashtagsQueryVariables,
-  HashtagsDocument,
-  Hashtag as GQLHashtag,
+  EmojisQuery,
+  EmojisQueryVariables,
+  EmojisDocument,
+  Emoji as GQLHashtag,
   CreateCardBodyMutation,
   CreateCardBodyMutationVariables,
   CreateCardBodyDocument,
@@ -20,7 +20,7 @@ import {
   WebpageCardDocument,
 } from '../../apollo/query.graphql'
 import { BulletNode } from '../../lib/bullet/node'
-import { injectHashtags } from '../../lib/hashtag/inject'
+// import { injectHashtags } from '../../lib/hashtag/inject'
 import { CardBodyContent } from '../../lib/models/card'
 import { Serializer } from './serializer'
 import { LiElement } from './slate-custom-types'
@@ -167,16 +167,16 @@ export async function getLocalOrQueryRoot(props: {
 
   // local 沒有，query card & hashtags
   let card: Card | undefined
-  let gqlHashtags: GQLHashtag[] = []
+  // let gqlHashtags: GQLHashtag[] = []
 
   const queryCard = await client.query<CardQuery, CardQueryVariables>({
     query: CardDocument,
     variables: { symbol },
   })
-  const queryHashtags = await client.query<HashtagsQuery, HashtagsQueryVariables>({
-    query: HashtagsDocument,
-    variables: { symbol },
-  })
+  // const queryHashtags = await client.query<EmojisQuery, EmojisQueryVariables>({
+  //   query: EmojisDocument,
+  //   variables: { bulletId },
+  // })
 
   if (queryCard.data && queryCard.data.card) {
     if (queryCard.data.card) {
@@ -194,12 +194,12 @@ export async function getLocalOrQueryRoot(props: {
       throw queryWebCard.error
     }
   }
-  if (queryHashtags.data && queryHashtags.data.hashtags) {
-    gqlHashtags = queryHashtags.data.hashtags
-  }
-  if (queryHashtags.error) {
-    throw queryHashtags.error
-  }
+  // if (queryHashtags.data && queryHashtags.data.hashtags) {
+  //   gqlHashtags = queryHashtags.data.hashtags
+  // }
+  // if (queryHashtags.error) {
+  //   throw queryHashtags.error
+  // }
 
   // if (url) {
   //   const { data, error } = await client.query<WebpageCardQuery, WebpageCardQueryVariables>({
@@ -217,14 +217,15 @@ export async function getLocalOrQueryRoot(props: {
   // }
 
   if (card) {
-    const parsed: CardBodyContent = JSON.parse(card.body.content)
+    const parsed: CardBodyContent = card.body.content
+
     const rootBullet = parsed.value
     const rootBulletDraft = BulletNode.toDraft(rootBullet)
-    const rootBulletWithHashtags = injectHashtags({
-      root: rootBulletDraft,
-      hashtags: gqlHashtags,
-    }) // 合併 hashtags 與 bullet
-    const rootLi = Serializer.toRootLi(rootBulletWithHashtags)
+    // const rootBulletWithHashtags = injectHashtags({
+    //   root: rootBulletDraft,
+    //   hashtags: gqlHashtags,
+    // }) // 合併 hashtags 與 bullet
+    const rootLi = Serializer.toRootLi(rootBulletDraft)
 
     store.setCard(symbol, card) // 存入 local storage
     store.setRootLi(symbol, rootLi)
@@ -390,9 +391,9 @@ export const useLocalValue = ({
         })
       }
     }
-    asyncRun().catch(err => {
-      console.error(err)
-    })
+    // asyncRun().catch(err => {
+    //   console.error(err)
+    asyncRun()
   }, [location])
 
   return {

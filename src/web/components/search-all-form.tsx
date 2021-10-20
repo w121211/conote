@@ -87,8 +87,10 @@ export function SearchAllForm(): JSX.Element {
 
       // borderColor: isFocused ? '#5c6cda' : 'hsl(0, 0%, 80%)',
       ':hover': {
+        // ':hover': { cursor: 'text' },
         borderColor: '#fff',
         boxShadow: '0 1px 6px 0 #17171730',
+        cursor: 'text',
       },
       borderColor: isFocused ? '#fff' : 'hsl(0, 0%, 80%)',
       boxShadow: isFocused ? '0 1px 6px 0 #17171730' : 'none',
