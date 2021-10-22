@@ -522,8 +522,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const card = await prisma.card.update({
       where: { symbol },
       data: {
-        // TODO 需要檢查 input
-        meta: JSON.stringify(data),
+        meta: data, // TODO 需要檢查 input
       },
     })
     const meta = card.meta as unknown as CardMeta
