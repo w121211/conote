@@ -10,6 +10,10 @@
   list-style: none;
   align-items: flex-start;
   margin-left: -3em;
+  word-break: break-all;
+  @media screen and(max-width:500px) {
+    margin-left: 0;
+  }
 }
 .bulletWrapper {
   position: relative;

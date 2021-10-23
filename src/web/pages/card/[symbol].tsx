@@ -8,7 +8,7 @@ import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 import NavPath from '../../components/nav-path/nav-path'
-import { CardMeta, useEmojisQuery, useMeQuery } from '../../apollo/query.graphql'
+import { CardMeta, useCardMetaQuery, useEmojisQuery, useMeQuery } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/symbol.module.scss'
 import Popover from '../../components/popover/popover'
@@ -17,6 +17,11 @@ import Popup from '../../components/popup/popup'
 import HeaderForm from '../../components/header-form/header-form'
 import Link from 'next/link'
 import LinkIcon from '../../assets/svg/link.svg'
+
+import CardMetaForm from '../../components/card-meta-form/card-meta-form'
+import MyTooltip from '../../components/my-tooltip/my-tooltip'
+import EmojiHeaderBtn from '../../components/emoji-up-down/emoji-header-btn'
+import CreateEmojiBtn from '../../components/emoji-up-down/emoji-header-create-btn'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -112,10 +117,12 @@ const CardSymbolPage = (): JSX.Element | null => {
   const { data: meData, loading: meLoading } = useMeQuery({ fetchPolicy: 'cache-first' })
   const { user, error, isLoading } = useUser()
   const [showLoginPopup, setShowLoginPopup] = useState(false)
-  const [showHeaderForm, setShowHeaderForm] = useState(false)
-  const [headerFormSubmited, setHeaderFormSubmited] = useState(false)
+  const [showKwTooltip, setShowKwTooltip] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [submitFinished, setSubmitFinished] = useState(false)
+  const { data: cardMetaData } = useCardMetaQuery({
+    variables: { symbol: data?.selfCard.symbol ?? '' },
+  })
   const { data: emojiData } = useEmojisQuery({
     fetchPolicy: 'cache-first',
     variables: { bulletId: data?.openedLi.children[0].id ?? '' },
@@ -144,13 +151,17 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
   }, [meData, user, meLoading])
 
-  useEffect(() => {
-    if (!showHeaderForm && headerFormSubmited) {
+  // useEffect(() => {
+  //   if ( headerFormSubmited) {
+  //   }
+  // }, [headerFormSubmited])
+  const handleCardMetaSubmitted = (isSubmitted: boolean) => {
+    // setHeaderFormSubmited(isSubmitted)
+    if (isSubmitted) {
       dropValue()
       router.reload()
     }
-  }, [headerFormSubmited, showHeaderForm])
-
+  }
   // useEffect(() => {
   //   queryHashtags()
   //   if (hashtagData?.hashtags && data) {
@@ -257,7 +268,7 @@ const CardSymbolPage = (): JSX.Element | null => {
                   setDisableSubmit(true)
                   dropValue()
 
-                  router.reload()
+                  // router.reload()
                 },
               })
             }}
@@ -289,39 +300,6 @@ const CardSymbolPage = (): JSX.Element | null => {
             {'Drop'}
           </button>
 
-          {/* {location.author && (
-          <button
-            onClick={() => {
-              setAuthorName(prev => {
-                if (prev) {
-                  return undefined
-                } else {
-                  return location.author
-                }
-              })
-            }}
-          >
-            {location.author}
-          </button>
-        )} */}
-
-          {/* {mirror && (
-          <span>
-            <Link href={locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>
-              <a>Home</a>
-            </Link>
-            ...
-          </span>
-        )} */}
-
-          {/* {/* {navs &&
-          navs.map((e, i) => (
-            <Link href={locationToUrl({ ...location, openedLiPath: e.path })} key={i}>
-              <a>{e.text}</a>
-            </Link>
-          ))} */}
-          {/* {data.selfCard.link?.authorName && <span>@{data.selfCard.link?.authorName}</span>} */}
-
           {router.query.a && (
             <button
               className="transparent"
@@ -341,47 +319,68 @@ const CardSymbolPage = (): JSX.Element | null => {
             </button>
           )}
 
-          {data.openedLi.children[0].rootBulletDraft && (
-            <button
-              className="secondary"
-              onClick={() => {
-                setShowHeaderForm(true)
-              }}
-            >
-              編輯卡片資訊
-            </button>
+          {data.openedLi.children[0].rootBulletDraft && data?.selfCard.symbol && (
+            <CardMetaForm
+              symbol={data.selfCard.symbol}
+              selfCard={data.selfCard}
+              handleCardMetaSubmitted={handleCardMetaSubmitted}
+            />
           )}
           {/* // )} */}
-          {showHeaderForm && (
-            <Popover
-              visible={showHeaderForm}
-              hideBoard={() => {
-                setShowHeaderForm(false)
-              }}
-            >
-              <HeaderForm
-                symbol={router.query.symbol as string}
-                initialValue={{
-                  author: data.selfCard.meta.author ?? '',
-                  title: (data.selfCard.meta.title || data.selfCard.link?.url) ?? '',
-                  url: (data.selfCard.meta.url || data.selfCard.link?.url) ?? '',
-                  keywords: data.selfCard.meta.keywords?.map(e => {
-                    return { label: e, value: e }
-                  }) ?? [{ label: '', value: '' }],
-                  redirects: data.selfCard.meta.redirects?.join(' ') ?? '',
-                  duplicates: data.selfCard.meta.duplicates?.join(' ') ?? '',
-                }}
-                handleSubmitted={isSubmitted => {
-                  setHeaderFormSubmited(isSubmitted)
-                }}
-              />
-            </Popover>
+
+          {cardMetaData?.cardMeta.keywords && (
+            <div className={classes.headerKw}>
+              {cardMetaData?.cardMeta.keywords.map((e, i) => {
+                if (i < 5) {
+                  return (
+                    <span className={classes.headerKwEl} key={i}>
+                      {e}
+                    </span>
+                  )
+                }
+                return null
+              })}
+              {cardMetaData.cardMeta.keywords.length > 5 && (
+                <span
+                  className={classes.headerKwElHidden}
+                  onClick={e => {
+                    e.stopPropagation()
+                    setShowKwTooltip(true)
+                  }}
+                >
+                  ...+{cardMetaData.cardMeta.keywords.length - 5}項
+                  <MyTooltip
+                    className={classes.headerKwElTooltip}
+                    visible={showKwTooltip}
+                    handleVisibleState={() => {
+                      setShowKwTooltip(false)
+                    }}
+                  >
+                    {cardMetaData?.cardMeta.keywords.map((e, i) => {
+                      if (i >= 5) {
+                        return (
+                          <span className={classes.headerKwEl} key={i}>
+                            {e}
+                          </span>
+                        )
+                      }
+                      return null
+                    })}
+                  </MyTooltip>
+                </span>
+              )}
+            </div>
           )}
           <div className={classes.header}>
+            {cardMetaData?.cardMeta.author && (
+              <Link href={`/author/${encodeURIComponent('@' + cardMetaData?.cardMeta.author)}`}>
+                <a className={classes.author}>@{cardMetaData?.cardMeta.author}</a>
+              </Link>
+            )}
             <h3>
               {router.query.p && Node.string(data.openedLi.children[0]).replace(rePoll, '').trimEnd()}
               {data.mirror && !router.query.p && data.mirror.symbol}
-              {!router.query.p && !data.mirror && <>{data.selfCard.meta.title ?? data.selfCard.symbol}</>}
+              {!router.query.p && !data.mirror && <>{cardMetaData?.cardMeta.title ?? data.selfCard.symbol}</>}
             </h3>
             {data.selfCard.link?.url && (
               // <button>
@@ -391,13 +390,24 @@ const CardSymbolPage = (): JSX.Element | null => {
               </a>
               // </button>
             )}
-            {data.selfCard.meta.author && (
-              <Link href={`/author/${encodeURIComponent('@' + data.selfCard.meta.author)}`}>
-                <a className={classes.author}>@{data.selfCard.meta.author}</a>
-              </Link>
-            )}
           </div>
-          {/* {hashtags && <div>{hashtags.text}</div>} */}
+          {emojiData?.emojis && data?.openedLi.children[0].id && (
+            <span>
+              {emojiData.emojis.findIndex(e => e.text === 'PIN') < 0 && (
+                <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="PIN" />
+              )}
+              {emojiData.emojis.findIndex(e => e.text === 'UP') < 0 && (
+                <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="UP" />
+              )}
+              {emojiData.emojis.findIndex(e => e.text === 'DOWN') < 0 && (
+                <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="DOWN" />
+              )}
+              {console.log(emojiData.emojis)}
+              {emojiData.emojis.map((e, i) => (
+                <EmojiHeaderBtn key={i} emoji={e} bulletId={data.openedLi.children[0].id ?? ''} />
+              ))}
+            </span>
+          )}
           {/* {openLiHashtags.length > 0 && (
             <div>
               {openLiHashtags.map((e, i) => {

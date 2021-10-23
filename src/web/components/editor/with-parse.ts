@@ -4,14 +4,14 @@ import { InlineItem } from '../../lib/bullet/types'
 import { LcElement, CustomElement, CustomInlineElement, CustomText, LiElement } from './slate-custom-types'
 import { isLc, isLiArray } from './with-list'
 
-function isInlineElement(element: CustomElement): element is CustomInlineElement {
-  const inlineTypes = ['mirror', 'poll', 'filtertag']
+export function isInlineElement(element: CustomElement): element is CustomInlineElement {
+  const inlineTypes = ['mirror', 'poll', 'filtertag', 'symbol']
   return inlineTypes.includes(element.type)
 }
 
 function toSlateInline(item: InlineItem): CustomInlineElement | CustomText {
   if (item.type === 'text') {
-    return { text: item.str }
+    return { text: item.str, shift: false }
   }
   return {
     ...item,
@@ -34,8 +34,8 @@ export function parseLcAndReplace(props: { editor: Editor; lcEntry: NodeEntry<Lc
     editor,
     lcEntry: [lcNode, lcPath],
   } = props
-  const { headInlines } = parseBulletHead({ str: Node.string(lcNode) })
-  const inlines = headInlines.map(e => toSlateInline(e))
+  const { inlines } = parseBulletHead({ str: Node.string(lcNode) })
+  const headInlines = inlines.map(e => toSlateInline(e))
 
   // 移除 lc 原本的 children 並插入新的 inlines
   Transforms.removeNodes(editor, {
@@ -43,7 +43,7 @@ export function parseLcAndReplace(props: { editor: Editor; lcEntry: NodeEntry<Lc
     match: (n, p) => Path.isChild(p, lcPath),
   })
   // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
-  Transforms.insertNodes(editor, inlines, { at: [...lcPath, 0] })
+  Transforms.insertNodes(editor, headInlines, { at: [...lcPath, 0] })
 }
 
 export function parseChildren(lis: LiElement[]): LiElement[] {

@@ -13,6 +13,7 @@ interface SerializerInterface {
 export const Serializer: SerializerInterface = {
   _toBulletDraft: (li: LiElement): BulletDraft => {
     const [lc, ul] = li.children
+
     return {
       ...lc,
       head: Node.string(lc),

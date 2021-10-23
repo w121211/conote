@@ -218,7 +218,6 @@ export async function getLocalOrQueryRoot(props: {
 
   if (card) {
     const parsed: CardBodyContent = card.body.content
-
     const rootBullet = parsed.value
     const rootBulletDraft = BulletNode.toDraft(rootBullet)
     // const rootBulletWithHashtags = injectHashtags({

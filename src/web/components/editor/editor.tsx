@@ -100,6 +100,7 @@ const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element
 const decorate = ([node, path]: NodeEntry) => {
   // const focused = useFocused() // 整個editor是否focus
   // const selected = useSelected()
+
   const ranges: CustomRange[] = []
   //   if (editor.selection != null) {
   //     if (
@@ -196,13 +197,6 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   // console.log(leaf)
 
   switch (leaf.type) {
-    case 'ticker':
-    case 'topic': {
-      className = classes.topicLeaf
-
-      // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
-      break
-    }
     case 'mirror-ticker':
     case 'mirror-topic': {
       className = classes.mirrorLeaf
@@ -216,6 +210,18 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
     case 'poll':
     case 'new-poll': {
       style = { color: '#329ead' }
+      break
+    }
+    case 'shot':
+    case 'new-shot': {
+      style = { color: '#329ead' }
+      break
+    }
+    case 'ticker':
+    case 'topic': {
+      className = classes.topicLeaf
+
+      // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
       break
     }
     case 'filtertag': {
@@ -247,13 +253,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
           leaf.type === 'filtertag'
         ) {
           if (e) {
-            // let isPressShift = false
-            // document.addEventListener('keydown', ev => {
-            //   console.log(ev.shiftKey)
-            //   isPressShift = ev.shiftKey
-            // })
-
-            e.onselectstart = ev => leaf.shift
+            e.onselectstart = ev => false
           }
         }
       }}
@@ -389,6 +389,8 @@ const InlineSymbol = ({
 }): JSX.Element => {
   const [showPopover, setShowPopover] = useState(false)
   const router = useRouter()
+  const selected = useSelected()
+  // console.log(element)
   return (
     <span {...attributes}>
       {/* <span contentEditable={false}> */}
@@ -633,7 +635,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   return (
     <span {...attributes}>
       <span style={selected ? undefined : { display: 'none' }}>{children}</span>
-      {selected || (
+      {!selected && (
         <span contentEditable={false}>
           <PollGroup
             // bulletId={parent.id}
@@ -869,24 +871,24 @@ const Lc = ({
   //   }
   // }, [author, element, sourceUrl])
 
-  useEffect(() => {
-    if ((focused && !selected) || readonly) {
-      // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
-      const path = ReactEditor.findPath(editor, element)
+  // useEffect(() => {
+  //   if ((focused && !selected) || readonly) {
+  //     // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
+  //     const path = ReactEditor.findPath(editor, element)
 
-      // parseLcAndReplace({ editor, lcEntry: [element, path] })
-      // return
-    }
-    if (selected) {
-      // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
-      const path = ReactEditor.findPath(editor, element)
-      // Transforms.unwrapNodes(editor, {
-      //   at: path,
-      //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
-      // })
-      // console.log('unwrapNodes', path)
-    }
-  }, [selected, readonly])
+  //     // parseLcAndReplace({ editor, lcEntry: [element, path] })
+  //     // return
+  //   }
+  //   if (selected) {
+  //     // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
+  //     const path = ReactEditor.findPath(editor, element)
+  //     // Transforms.unwrapNodes(editor, {
+  //     //   at: path,
+  //     //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+  //     // })
+  //     // console.log('unwrapNodes', path)
+  //   }
+  // }, [selected, readonly])
   // useEffect(()=>{
   //   if(focused){
 
@@ -894,16 +896,19 @@ const Lc = ({
   // },[focused])
 
   const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
-
+  // console.log(element, children)
   return (
     <div {...attributes}>
       <div className={classes.lcText}>
         {children}
         {emojiData && (
           <span contentEditable={false}>
-            {emojiData.emojis?.map((e, i) => (
-              <EmojiButotn key={i} emoji={e} />
-            ))}
+            {emojiData.emojis?.map((e, i) => {
+              if (e.count.nUps === 0) {
+                return null
+              }
+              return <EmojiButotn key={i} emoji={e} />
+            })}
           </span>
         )}
       </div>

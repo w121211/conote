@@ -24,17 +24,15 @@ const MyTooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
   const customStyle = () => {
     const newStyle: React.CSSProperties = {}
 
-    if (visible !== undefined) {
-      // newStyle.visibility = `${visible === true ? 'visible' : 'hidden'}`
-      newStyle.opacity = `${visible === true ? 1 : 0}`
-      // newStyle.transform = `${ visible === true ? 'visible' : 'hidden'}`
-    }
+    newStyle.opacity = `${visible === true ? 1 : 0}`
     if (myRef.current) {
       if (myRef.current.getBoundingClientRect().top > window.innerHeight / 2) {
         newStyle.bottom = '120%'
         newStyle.transform = 'translateY(8px)'
+        // newStyle.maxHeight = window.innerHeight - myRef.current.getBoundingClientRect().top + 'px'
       } else {
-        newStyle.top = '120%'
+        // newStyle.maxHeight = window.innerHeight - myRef.current.getBoundingClientRect().top + 'px'
+        newStyle.top = 'max(120%,30px)'
 
         newStyle.transform = 'translateY(-8px)'
       }
@@ -71,13 +69,17 @@ const MyTooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
   useEffect(() => {
     // handleCustomStyle()
     if (window) {
-      window.addEventListener('scroll', handleCustomStyle, true)
+      window.addEventListener('scroll', handleCustomStyle)
     }
-    return () => window.removeEventListener('scroll', handleCustomStyle, true)
+    return () => {
+      window.removeEventListener('scroll', handleCustomStyle)
+    }
   }, [])
   useEffect(() => {
     handleCustomStyle()
   }, [visible])
+
+  if (!visible) return null
 
   return (
     <div className={`${classes.containerOuter} ${className ? className : ''}`} style={styleState} ref={myRef}>

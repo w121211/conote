@@ -22,19 +22,18 @@ const reShot = /\B!\(\(shot:([a-z0-9]{25,30})\)\)\([^)]*\)\B/
 const reNewShot = /\B!\(\(shot\)\)\(([^)]*)\)\B/
 
 const grammar: Grammar = {
-  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
-
   // 順序重要，先 mirror 後 ticker
   'mirror-ticker': { pattern: reMirrorTicker },
   'mirror-topic': { pattern: reMirrorTopic },
-  ticker: { pattern: reTicker },
-  topic: { pattern: reTopic },
 
   poll: { pattern: rePoll },
   'new-poll': { pattern: reNewPoll },
-
+  ticker: { pattern: reTicker },
+  topic: { pattern: reTopic },
   shot: { pattern: reShot },
   'new-shot': { pattern: reNewShot },
+
+  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
 
   url: {
     pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,

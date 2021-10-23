@@ -27,18 +27,18 @@ export type CustomText = {
   text: string
   type?: string // stream type
   placeholder?: boolean
-  shift: boolean
+  shift?: boolean
 }
 
 export type InlineSymbolElement = InlineSymbol & {
   children: CustomText[]
-  shift: boolean
+  shift?: boolean
 }
 
 export type InlineMirrorElement = InlineMirror & {
   children: CustomText[]
   root?: RootBulletDraft
-  shift: boolean
+  shift?: boolean
 }
 
 // export type InlineHashtagElement = InlineHashtag & {
@@ -46,12 +46,12 @@ export type InlineMirrorElement = InlineMirror & {
 // }
 export type InlineFiltertagElement = InlineFiltertag & {
   children: CustomText[]
-  shift: boolean
+  shift?: boolean
 }
 
 export type InlinePollElement = InlinePoll & {
   children: CustomText[]
-  shift: boolean
+  shift?: boolean
 }
 
 /**

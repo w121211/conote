@@ -20,15 +20,20 @@ const Popover = ({
   buttons?: React.ReactNode
   center?: boolean
   // width?: number
-}): JSX.Element => {
+}): JSX.Element | null => {
   // console.log(mask)
+  if (!visible) {
+    return null
+  }
   return (
     <div
       className={classes.containerOuter}
-      style={{
-        visibility: `${visible ? 'visible' : 'hidden'}`,
-        // width: `${typeof width === 'number' ? width + 'px' : 'initial'}`,
-      }}
+      style={
+        {
+          // visibility: `${visible ? 'visible' : 'hidden'}`,
+          // width: `${typeof width === 'number' ? width + 'px' : 'initial'}`,
+        }
+      }
     >
       <div
         className={classes.mask}

@@ -29,9 +29,16 @@
 }
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  margin: 0 0 1em;
   color: $black;
   .author {
+    width: 100%;
+    min-width: 60px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     color: $gray-text-dark;
     font-weight: 400;
     font-size: 14px;
@@ -49,4 +56,41 @@
       fill: $secondaryHover;
     }
   }
+  h3 {
+    margin: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+.headerKw {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.headerKwEl {
+  margin: 0 4px;
+  padding: 0 10px;
+  border-radius: 3px;
+  background: $secondaryHover-light;
+}
+.headerKwElHidden {
+  position: relative;
+  color: $secondary;
+  &:hover {
+    box-shadow: 0 1px 0 $secondary;
+    cursor: pointer;
+  }
+}
+.headerKwElTooltip {
+  flex-direction: row;
+  flex-wrap: wrap;
+  left: 0;
+  top: 30px;
+  width: 300px;
+  padding: 10px;
+  row-gap: 10px;
+  // transition: all 0.1s;
 }

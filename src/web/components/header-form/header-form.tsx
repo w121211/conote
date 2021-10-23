@@ -4,7 +4,14 @@ import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-for
 
 import CreatableSelect from 'react-select/creatable'
 import classes from './header-form.module.scss'
-import { CardDocument, CardMeta, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
+import {
+  CardDocument,
+  CardMeta,
+  CardMetaDocument,
+  CardMetaQuery,
+  CardQuery,
+  useUpdateCardMetaMutation,
+} from '../../apollo/query.graphql'
 import { RadioInput } from '../board-form/board-form'
 import router from 'next/router'
 import { GroupTypeBase, Styles } from 'react-select'
@@ -15,6 +22,8 @@ type FormInputs = {
   keywords: { label: string; value: string }[]
   redirects: string
   duplicates: string
+  date: string
+  description: string
 }
 const components = {
   DropdownIndicator: null,
@@ -61,17 +70,24 @@ const HeaderForm = ({
 
   const [updateCardMeta] = useUpdateCardMetaMutation({
     update(cache, { data }) {
-      const res = cache.readQuery<CardQuery>({ query: CardDocument })
-      if (data?.updateCardMeta && res?.card) {
+      const res = cache.readQuery<CardMetaQuery>({ query: CardMetaDocument })
+      if (data?.updateCardMeta && res?.cardMeta) {
         cache.writeQuery({
-          query: CardDocument,
+          query: CardMetaDocument,
           data: {
-            card: data.updateCardMeta,
+            ...res.cardMeta,
+            title: data.updateCardMeta.title,
+            author: data.updateCardMeta.author,
+            keywords: data.updateCardMeta.keywords,
+            duplicates: data.updateCardMeta.duplicates,
+            redirects: data.updateCardMeta.redirects,
+            url: data.updateCardMeta.url,
           },
         })
       }
     },
     onCompleted(data) {
+      console.log(data.updateCardMeta)
       if (data.updateCardMeta) {
         const newData = data.updateCardMeta
         // setValue('title', newData.title ?? '', { shouldDirty: false })
@@ -86,9 +102,10 @@ const HeaderForm = ({
             author: newData.author ?? '',
             url: newData.url ?? '',
             redirects: newData.redirects?.join(' ') ?? '',
-            keywords: newData.keywords?.map(e => {
-              return { label: e, value: e }
-            }) ?? [{ label: '', value: '' }],
+            keywords:
+              newData.keywords?.map(e => {
+                return { label: e, value: e }
+              }) ?? [],
             duplicates: newData.duplicates?.join(' ') ?? '',
           },
           { keepIsSubmitted: true },
@@ -107,6 +124,7 @@ const HeaderForm = ({
           keywordArr.push(e.value)
         })
       }
+
       updateCardMeta({
         variables: {
           symbol,
@@ -233,7 +251,7 @@ const HeaderForm = ({
                   isMulti
                   onChange={e => {
                     onChange(e)
-                    console.log(e)
+                    // console.log(e)
                   }}
                   value={value}
                   components={components}

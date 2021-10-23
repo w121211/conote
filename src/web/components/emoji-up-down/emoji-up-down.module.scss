@@ -63,3 +63,16 @@
 .hasDividerDiv {
   display: flex;
 }
+.hashtag {
+  svg {
+    fill: $gray-text;
+  }
+  color: $gray-text;
+}
+
+.clicked {
+  svg {
+    fill: $text;
+  }
+  color: $text;
+}
