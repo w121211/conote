@@ -20,33 +20,32 @@ import // useCreateReplyMutation,
 // RepliesDocument,
 '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
-import PollForm, { FormInputs } from '../board-form/poll-form'
+import PollForm, { FormInputs } from '../poll-form/poll-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import BarChart from '../bar/bar'
 import classes from './board-page.module.scss'
-import AuthorPollForm from '../board-form/author-poll-form'
+import AuthorPollForm from '../poll-form/author-poll-form'
 
-const PollPage = ({
+const AuthorPollPage = ({
   pollId,
   // description,
   clickedChoiceIdx,
-
-  title,
   author,
+  title,
 }: {
   // boardId: string
+  author: string
   pollId: string
   clickedChoiceIdx?: number
-  author?: string
   //  description?:string
 
   title?: string
 }): JSX.Element => {
-  // const [measureRef, bounds] = useMeasure()
-  // const [boardValue, setBoardValue] = useState<Board>()
-  // const [pollValue, setPollValue] = useState([''])
-  // const [commentsList, setCommentsList] = useState<Comment[]>()
-  // const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
+  const [measureRef, bounds] = useMeasure()
+  const [boardValue, setBoardValue] = useState<Board>()
+  const [pollValue, setPollValue] = useState([''])
+  const [commentsList, setCommentsList] = useState<Comment[]>()
+  const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
   // const [form] = Form.useForm()
 
   const { data, loading, error } = usePollQuery({
@@ -129,22 +128,14 @@ const PollPage = ({
           {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
           {/* </div> */}
           {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}
-          {author ? (
-            <AuthorPollForm
-              pollId={pollId}
-              author={author}
-              clickedChoiceIdx={clickedChoiceIdx}
-              initialValue={{ title: '', choice: undefined, lines: '' }}
-            />
-          ) : (
-            <PollForm
-              // boardId={boardId}
-              pollId={pollId}
-              initialValue={{ title: '', choice: undefined, lines: '' }}
-              // filterComments={filterComments}
-              clickedChoiceIdx={clickedChoiceIdx}
-            />
-          )}
+          <AuthorPollForm
+            // boardId={boardId}
+            author={author}
+            pollId={pollId}
+            initialValue={{ title: '', choice: undefined, lines: '' }}
+            // filterComments={filterComments}
+            clickedChoiceIdx={clickedChoiceIdx}
+          />
           {/* <CommentForm
         boardId={boardId}
         pollId={pollId}
@@ -178,4 +169,4 @@ const PollPage = ({
 }
 
 // Discuss.displayName = 'Discuss'
-export default PollPage
+export default AuthorPollPage

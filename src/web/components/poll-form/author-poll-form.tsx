@@ -16,9 +16,10 @@ import {
   Poll,
   PollDocument,
   usePollQuery,
+  useCreateAuthorVoteMutation,
 } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
-import classes from './board-form.module.scss'
+import classes from './poll-form.module.scss'
 
 export type RadioInputs = {
   choice?: string
@@ -54,7 +55,7 @@ export const RadioInput = ({
   const methods = useFormContext()
 
   // const [checkedTarget, setCheckedTarget] = useState<any>(null)
-  // console.log(myVote)
+  console.log(myVote)
   return (
     <label className={classes.radioLabel}>
       <input
@@ -105,13 +106,15 @@ export const RadioInput = ({
   )
 }
 
-const PollForm = ({
+const AuthorPollForm = ({
   pollId,
 
   initialValue,
   clickedChoiceIdx,
+  author,
 }: {
   pollId: string
+  author: string
   // boardId: string
   initialValue: FormInputs
   clickedChoiceIdx?: number
@@ -135,7 +138,7 @@ const PollForm = ({
   const [check, setChecked] = useState<boolean[]>(Array(3).fill(false))
   const [myVote, setMyVote] = useState<Vote>()
   const [pollCount, setPollCount] = useState<number[] | undefined>(pollData?.poll.count.nVotes)
-
+  console.log('authorPoll')
   useEffect(() => {
     if (myVotesData) {
       setMyVote(myVotesData?.myVotes.find(e => e.pollId.toString() === pollId))
@@ -158,32 +161,32 @@ const PollForm = ({
     initialValue.title && setValue('lines', initialValue.lines)
   }
 
-  const [createComment] = useCreateCommentMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<CommentsQuery>({
-        query: CommentsDocument,
-      })
-      if (data?.createComment && res?.comments) {
-        cache.writeQuery({
-          query: CommentsDocument,
-          data: { comments: res.comments.concat([data.createComment]) },
-        })
-      }
-      // refetch()
-    },
+  // const [createComment] = useCreateCommentMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<CommentsQuery>({
+  //       query: CommentsDocument,
+  //     })
+  //     if (data?.createComment && res?.comments) {
+  //       cache.writeQuery({
+  //         query: CommentsDocument,
+  //         data: { comments: res.comments.concat([data.createComment]) },
+  //       })
+  //     }
+  //     // refetch()
+  //   },
 
-    // refetchQueries: [{ query: CommentsDocument, variables: { boardId: boardId } }],
-  })
+  //   // refetchQueries: [{ query: CommentsDocument, variables: { boardId: boardId } }],
+  // })
 
-  const [createVote] = useCreateVoteMutation({
+  const [createAuthorVote] = useCreateAuthorVoteMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyVotesQuery>({
         query: MyVotesDocument,
       })
-      if (data?.createVote && res?.myVotes) {
+      if (data?.createAuthorVote && res?.myVotes) {
         cache.writeQuery({
           query: MyVotesDocument,
-          data: { myVotes: res.myVotes.concat([data.createVote]) },
+          data: { myVotes: res.myVotes.concat([data.createAuthorVote]) },
         })
       }
       // refetch()
@@ -224,9 +227,10 @@ const PollForm = ({
         }
         return prev
       })
-      createVote({
+      createAuthorVote({
         variables: {
           pollId: pollId,
+          authorName: author,
           data: { choiceIdx: parseInt(d.choice) },
         },
       })
@@ -309,12 +313,10 @@ const PollForm = ({
 
             {/* <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." /> */}
           </div>
-          <button className="primary" disabled={myVote !== undefined}>
-            {myVote ? '已投票' : '送出'}
-          </button>
+          <button>送出</button>
         </form>
       </div>
     </FormProvider>
   )
 }
-export default PollForm
+export default AuthorPollForm

@@ -2,24 +2,17 @@ import { title } from 'process'
 import React, { useEffect, useState } from 'react'
 import { useForm, useController, useFormContext, FormProvider, useWatch, Control } from 'react-hook-form'
 import {
-  useCreateCommentMutation,
-  CommentsDocument,
-  CommentsQuery,
-  useBoardQuery,
-  Board,
   useCreateVoteMutation,
   MyVotesDocument,
   MyVotesQuery,
-  BoardDocument,
   useMyVotesQuery,
   Vote,
   Poll,
   PollDocument,
   usePollQuery,
-  useCreateAuthorVoteMutation,
 } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
-import classes from './board-form.module.scss'
+import classes from './poll-form.module.scss'
 
 export type RadioInputs = {
   choice?: string
@@ -55,7 +48,7 @@ export const RadioInput = ({
   const methods = useFormContext()
 
   // const [checkedTarget, setCheckedTarget] = useState<any>(null)
-  console.log(myVote)
+  // console.log(myVote)
   return (
     <label className={classes.radioLabel}>
       <input
@@ -106,15 +99,13 @@ export const RadioInput = ({
   )
 }
 
-const AuthorPollForm = ({
+const PollForm = ({
   pollId,
 
   initialValue,
   clickedChoiceIdx,
-  author,
 }: {
   pollId: string
-  author: string
   // boardId: string
   initialValue: FormInputs
   clickedChoiceIdx?: number
@@ -138,7 +129,7 @@ const AuthorPollForm = ({
   const [check, setChecked] = useState<boolean[]>(Array(3).fill(false))
   const [myVote, setMyVote] = useState<Vote>()
   const [pollCount, setPollCount] = useState<number[] | undefined>(pollData?.poll.count.nVotes)
-  console.log('authorPoll')
+
   useEffect(() => {
     if (myVotesData) {
       setMyVote(myVotesData?.myVotes.find(e => e.pollId.toString() === pollId))
@@ -178,15 +169,15 @@ const AuthorPollForm = ({
   //   // refetchQueries: [{ query: CommentsDocument, variables: { boardId: boardId } }],
   // })
 
-  const [createAuthorVote] = useCreateAuthorVoteMutation({
+  const [createVote] = useCreateVoteMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyVotesQuery>({
         query: MyVotesDocument,
       })
-      if (data?.createAuthorVote && res?.myVotes) {
+      if (data?.createVote && res?.myVotes) {
         cache.writeQuery({
           query: MyVotesDocument,
-          data: { myVotes: res.myVotes.concat([data.createAuthorVote]) },
+          data: { myVotes: res.myVotes.concat([data.createVote]) },
         })
       }
       // refetch()
@@ -227,10 +218,9 @@ const AuthorPollForm = ({
         }
         return prev
       })
-      createAuthorVote({
+      createVote({
         variables: {
           pollId: pollId,
-          authorName: author,
           data: { choiceIdx: parseInt(d.choice) },
         },
       })
@@ -313,10 +303,12 @@ const AuthorPollForm = ({
 
             {/* <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." /> */}
           </div>
-          <button>送出</button>
+          <button className="primary" disabled={myVote !== undefined}>
+            {myVote ? '已投票' : '送出'}
+          </button>
         </form>
       </div>
     </FormProvider>
   )
 }
-export default AuthorPollForm
+export default PollForm

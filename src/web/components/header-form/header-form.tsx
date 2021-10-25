@@ -12,7 +12,7 @@ import {
   CardQuery,
   useUpdateCardMetaMutation,
 } from '../../apollo/query.graphql'
-import { RadioInput } from '../board-form/board-form'
+import { RadioInput } from '../poll-form/board-form'
 import router from 'next/router'
 import { GroupTypeBase, Styles } from 'react-select'
 type FormInputs = {

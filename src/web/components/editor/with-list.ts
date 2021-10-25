@@ -399,6 +399,7 @@ export function withList(editor: Editor): Editor {
 
         // cursor 在行尾
         if (Editor.isEnd(editor, point, lcPath(path))) {
+          console.log(point, path)
           if (node.children[1]) {
             // 後行是indent，插入indent後行
             insertNextIndentLi(editor, li)
@@ -510,6 +511,7 @@ export function withList(editor: Editor): Editor {
       // 檢查li只能有lc, ul?
       assert(node.children.length <= 2)
       const [lc, ul] = node.children
+
       assert(isLc(lc))
       if (ul) assert(isUl(ul))
 

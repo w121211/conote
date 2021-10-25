@@ -8,6 +8,7 @@ import {
   InlineSymbol,
   RootBulletDraft,
   InlineFiltertag,
+  InlineShot,
 } from '../../lib/bullet/types'
 
 export type CommentInput = {
@@ -52,6 +53,11 @@ export type InlineFiltertagElement = InlineFiltertag & {
 export type InlinePollElement = InlinePoll & {
   children: CustomText[]
   shift?: boolean
+  selected?: boolean
+}
+export type InlineShotElement = InlineShot & {
+  children: CustomText[]
+  shift?: boolean
 }
 
 /**
@@ -63,7 +69,7 @@ export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
 
   body?: string
   editingBody?: true
-
+  // selected?: boolean
   // asAuthor?: true // 若沒有的話視為self author
   // banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
   // banDeleteBackward?: true
@@ -102,7 +108,12 @@ export type UlElement = {
   folded?: true
 }
 
-export type CustomInlineElement = InlineSymbolElement | InlineMirrorElement | InlinePollElement | InlineFiltertagElement
+export type CustomInlineElement =
+  | InlineSymbolElement
+  | InlineMirrorElement
+  | InlinePollElement
+  | InlineFiltertagElement
+  | InlineShotElement
 
 type CustomElement = CustomInlineElement | LcElement | LiElement | UlElement
 

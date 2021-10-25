@@ -5,7 +5,7 @@ import { LcElement, CustomElement, CustomInlineElement, CustomText, LiElement } 
 import { isLc, isLiArray } from './with-list'
 
 export function isInlineElement(element: CustomElement): element is CustomInlineElement {
-  const inlineTypes = ['mirror', 'poll', 'filtertag', 'symbol']
+  const inlineTypes = ['mirror', 'poll', 'filtertag', 'symbol', 'shot']
   return inlineTypes.includes(element.type)
 }
 
@@ -13,10 +13,11 @@ function toSlateInline(item: InlineItem): CustomInlineElement | CustomText {
   if (item.type === 'text') {
     return { text: item.str, shift: false }
   }
-  return {
+  const inline: CustomInlineElement = {
     ...item,
     children: [{ text: item.str }],
   }
+  return inline
 }
 
 export function withParse(editor: Editor): Editor {

@@ -18,7 +18,7 @@ import // useCreateReplyMutation,
 // RepliesDocument,
 '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
-import CreateBoardFrom, { BoardFormInputs } from '../board-form/create-board-form'
+import CreateBoardFrom, { BoardFormInputs } from '../poll-form/_create-board-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import classes from './board-page.module.scss'
 import Popover from '../popover/popover'
