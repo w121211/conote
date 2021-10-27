@@ -72,10 +72,18 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   //   return null
   // },
 
-  async author(_parent, { id }, _context, _info) {
-    return await prisma.author.findUnique({
-      where: { id },
-    })
+  async author(_parent, { id, name }, _context, _info) {
+    if (id) {
+      return await prisma.author.findUnique({
+        where: { id },
+      })
+    }
+    if (name) {
+      return await prisma.author.findUnique({
+        where: { name },
+      })
+    }
+    throw 'Parameter input error'
   },
 
   searchAll(_parent, { term }, _context, _info) {
