@@ -4,7 +4,8 @@ scalar DateTime
 scalar JSON
 
 type Query {
-  author(id: ID!): Author
+  # 以 ID 或 name 查找 (若兩者皆給以 ID 查找)，若無返回 null
+  author(id: ID, name: String): Author
 
   bullet(id: ID!): Bullet
 

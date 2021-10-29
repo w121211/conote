@@ -204,8 +204,8 @@ fragment cardEntry on CardEntry {
   updatedAt
 }
 
-query Author($id: ID!) {
-  author(id: $id) {
+query Author($id: ID, $name: String) {
+  author(id: $id, name: $name) {
     ...author
   }
 }
