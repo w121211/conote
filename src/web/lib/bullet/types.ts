@@ -215,3 +215,20 @@ export function toInlinePoll({ id, choices }: { id: string | number; choices: st
     choices: choices,
   }
 }
+export function toInlineShotString({
+  author,
+  choice,
+  targetSymbol,
+  id,
+}: {
+  author: string
+  choice: ShotChoice
+  targetSymbol: string
+  id?: string
+}): string {
+  // const { symbolName, cardType } = parseSymbol(targetSymbol)
+  if (id) {
+    return `!((shot:${id}))(@${author} ${targetSymbol} #${choice})`
+  }
+  return `!((shot))(@${author} ${targetSymbol} #${choice})`
+}

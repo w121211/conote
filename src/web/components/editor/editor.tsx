@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties, useContext } from 'react'
 import Link from 'next/link'
 import Modal from 'react-modal'
-import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element } from 'slate'
+import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element, Point } from 'slate'
 import {
   Editable,
   ReactEditor,
@@ -20,6 +20,7 @@ import {
   InlineFiltertagElement,
   InlineMirrorElement,
   InlinePollElement,
+  InlineShotElement,
   InlineSymbolElement,
   LcElement,
   LiElement,
@@ -50,6 +51,9 @@ import {
   usePollQuery,
   useUpsertEmojiLikeMutation,
   useEmojisQuery,
+  useShotLazyQuery,
+  Shot,
+  useCardQuery,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
@@ -59,12 +63,12 @@ import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withLi
 import { NavLocation, locationToUrl } from './with-location'
 import { withOperation } from './with-operation'
 import { parseLcAndReplace, withParse } from './with-parse'
-import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll } from '../../lib/bullet/types'
-import CreatePollForm from '../board-form/create-poll-form'
+import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../../lib/bullet/types'
+import CreatePollForm from '../poll-form/create-poll-form'
 import HashtagTextToIcon from '../emoji-up-down/emoji-text-to-icon'
-import PollPage from '../board/poll-page'
+import PollPage from '../poll/poll-page'
 // import { Context } from '../../pages/card/[symbol]'
-import AuthorPollPage from '../board/author-poll-page'
+import AuthorPollPage from '../poll/author-poll-page'
 import router, { useRouter } from 'next/router'
 import Popup from '../popup/popup'
 import PollGroup from '../emoji-up-down/poll-group'
@@ -74,6 +78,7 @@ import { Serializer } from './serializer'
 import { BulletNode } from '../../lib/bullet/node'
 import { Token, tokenize } from 'prismjs'
 import { tokenizeBulletString } from '../../lib/bullet/parse'
+import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
@@ -203,7 +208,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       // style = { color: '#5395f0' }
       break
     }
-    case 'user': {
+    case 'author': {
       style = { color: '#0cb26e' }
       break
     }
@@ -214,7 +219,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
     }
     case 'shot':
     case 'new-shot': {
-      style = { color: '#329ead' }
+      style = { color: 'rgb(215 159 29)' }
       break
     }
     case 'ticker':
@@ -227,6 +232,10 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
     case 'filtertag': {
       className = classes.filtertagLeaf
       style = { color: '#6a53fe' }
+      break
+    }
+    case 'url': {
+      style = { color: '#ff619b' }
       break
     }
     default: {
@@ -570,6 +579,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   const selected = useSelected()
   // const context = useContext(Context)
   const editor = useSlateStatic()
+  const { selection } = editor
   const path = ReactEditor.findPath(editor, element)
   const readonly = useReadOnly()
   const [showPopover, setShowPopover] = useState(false)
@@ -611,6 +621,19 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
     }
   }, [showPopover, pollData, pollId])
 
+  // useEffect(() => {
+  //   // console.log(path, selection)
+  //   if (selected && selection) {
+  //     const isEnd = Point.equals(selection.focus, { path: [...path, 0], offset: element.str.length })
+  //     if (isEnd) {
+  //       Transforms.setSelection(editor, {
+  //         anchor: { path: Path.next(path), offset: 0 },
+  //         focus: { path: Path.next(path), offset: 0 },
+  //       })
+  //     }
+  //   }
+  // }, [selection, selected])
+
   const handleHideBoard = () => {
     setClickedIdx(undefined)
     setShowPopover(false)
@@ -634,7 +657,8 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   // if (element.type === 'poll') {
   return (
     <span {...attributes}>
-      <span style={selected ? undefined : { display: 'none' }}>{children}</span>
+      {/* <span style={selected ? undefined : { display: 'none' }}>{children}</span> */}
+
       {!selected && (
         <span contentEditable={false}>
           <PollGroup
@@ -659,113 +683,113 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
           {/* parent.id = bullet id */}
           {showPopover && parent.id && (
             <Popover visible={showPopover} hideBoard={handleHideBoard}>
-              {pollId ? <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} /> : <span>loading</span>}
+              {pollId ? (
+                <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />
+              ) : (
+                <CreatePollForm
+                  choices={element.choices}
+                  handlePollId={(pollId: string) => {
+                    setPollId(pollId)
+                  }}
+                />
+              )}
             </Popover>
           )}
-
-          {/* {showPopover && authorContext.author && (
-          <Popover visible={showPopover} hideBoard={handleHideBoard}>
-            
-            {pollId ? (
-              <AuthorPollPage author={authorContext.author} pollId={pollId} clickedChoiceIdx={clickedIdx} />
-            ) : (
-              <span>loading</span>
-            )}
-          </Popover>
-        )} */}
-          {/* {element.id ? (
-          <MyHashtagGroup choices={element.choices} pollId={element.id.toString()} inline />
-        ) : (
-          <>
-            <button
-              className="inline mR"
-              onClick={() => {
-                handleCreatePoll()
-                setShowPopover(true)
-              }}
-            >
-              創建{element.choices}
-            </button>
-
-            <Popover
-              visible={showPopover}
-              hideBoard={() => {
-                setShowPopover(false)
-              }}
-            >
-              <CreatePollForm bulletId={element.id ?? ''} choices={element.choices}></CreatePollForm>
-            </Popover>
-          </>
-        )} */}
         </span>
       )}
+      <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
     </span>
   )
-  // }
-  // return (
-  //   <button {...attributes} className="inline">
-  //     {children}
-  //   </button>
-  // )
-  // return <span {...attributes}>{children}</span>
+}
 
-  // const [isOpen, setIsOpen] = useState(false)
-  // const [queryMyVotes, { data, loading, error }] = useMyVotesLazyQuery() // 若已投票可展現投票結果
+const InlineShot = (props: RenderElementProps & { element: InlineShotElement; location: NavLocation }): JSX.Element => {
+  const editor = useSlateStatic()
+  const selected = useSelected()
 
-  // useEffect(() => {
-  //   // console.log('inline poll')
-  //   if (element.id) {
-  //     queryMyVotes({ variables: { pollId: element.id } })
-  //   }
-  // }, [element])
+  const { children, attributes, element } = props
+  const [showPopover, setShowPopover] = useState(false)
+  const [shotId, setShotId] = useState(element.id)
+  const [shotData, setShotData] = useState<Shot | undefined>()
+  const { data: targetData } = useCardQuery({ variables: { id: shotId } })
 
-  // useEffect(() => {
-  //   console.log(element)
-  //   if (isOpen) {
-  //     const path = ReactEditor.findPath(editor, element)
-  //     Transforms.setNodes<PopupInlineElement>(
-  //       editor,
-  //       { id: 'test', str: 'hello-world' },
-  //       { at: path }
-  //     )
-  //     Transforms.insertText(editor, 'hello-world', { at: [...path, 0] })
-  //     console.log('setNodes', element)
-  //     setIsOpen(false)
-  //   }
-  // }, [isOpen])
+  function onCreated(shot: Shot) {
+    // const editor = useSlateStatic()
+    if (shotId) {
+      const path = ReactEditor.findPath(editor, element)
+      const inlineShot = toInlineShotString({
+        id: shotId,
+        choice: shot.choice,
+        targetSymbol: targetData?.card?.symbol ?? '',
+        author: element.authorName ?? '',
+      })
+      Transforms.setNodes<InlineShotElement>(
+        editor,
+        {
+          id: shotId,
+        },
+        { at: path },
+      )
+      Transforms.insertText(editor, inlineShot, { at: path })
+    }
+  }
 
-  // function closeModal() {
-  //   setIsOpen(false)
-  // }
+  console.log(element)
+  useEffect(() => {
+    // if (showPopover && !pollId) {
+    //   handleCreatePoll()
+    // }
+    console.log(shotData, shotId)
 
-  // return (
-  //   <span {...attributes}>
-  //     <span style={{ display: 'none' }}>{children}</span>
-
-  //     <span contentEditable={false}>
-  //       <button
-  //         onClick={event => {
-  //           event.preventDefault()
-  //           setIsOpen(true)
-  //         }}
-  //       >
-  //         {element.choices.join(' ')}
-  //         {data?.myVotes && data.myVotes.length > 0 && `[${data.myVotes[data.myVotes.length - 1].choiceIdx}]`}
-  //       </button>
-
-  //       <Modal
-  //         ariaHideApp={false}
-  //         isOpen={isOpen}
-  //         // onAfterOpen={afterOpenModal}
-  //         onRequestClose={closeModal}
-  //         contentLabel="Example Modal"
-  //       >
-  //         <button onClick={closeModal}>close</button>
-  //         {element.id ? <PollForm id={element.id} /> : <NewPollForm choices={element.choices} onCreated={onCreated} />}
-  //       </Modal>
-  //     </span>
-  //   </span>
-  // )
+    if (!showPopover && !element.id && shotId && shotData) {
+      // const queryPollData = async () => {
+      //   queryPoll({ variables: { id: pollId } })
+      // }
+      // queryPollData()
+      // queryShot({ variables: { id:shotId } })
+      if (shotData) {
+        onCreated(shotData)
+      }
+    }
+  }, [showPopover, shotData, shotId])
+  return (
+    <span {...attributes}>
+      {!selected && (
+        <button
+          className="inline"
+          contentEditable={false}
+          onClick={e => {
+            e.stopPropagation()
+            setShowPopover(true)
+          }}
+        >
+          {element.params}
+        </button>
+      )}
+      {showPopover && (
+        <span contentEditable={false}>
+          <Popover visible={showPopover} hideBoard={() => setShowPopover(false)}>
+            {shotId ? (
+              <div>{element.str}</div>
+            ) : (
+              <CreateShotForm
+                initialInput={{
+                  author: element.authorName ?? '',
+                  target: element.targetSymbol ?? '',
+                  choice: element.choice ?? '',
+                  link: '',
+                }}
+                handleShotData={(shot: Shot) => {
+                  setShotId(shot.id)
+                  setShotData(shot)
+                }}
+              />
+            )}
+          </Popover>
+        </span>
+      )}
+      <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
+    </span>
+  )
 }
 
 const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
@@ -871,24 +895,24 @@ const Lc = ({
   //   }
   // }, [author, element, sourceUrl])
 
-  // useEffect(() => {
-  //   if ((focused && !selected) || readonly) {
-  //     // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
-  //     const path = ReactEditor.findPath(editor, element)
+  useEffect(() => {
+    if ((focused && !selected) || readonly) {
+      // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
+      const path = ReactEditor.findPath(editor, element)
 
-  //     // parseLcAndReplace({ editor, lcEntry: [element, path] })
-  //     // return
-  //   }
-  //   if (selected) {
-  //     // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
-  //     const path = ReactEditor.findPath(editor, element)
-  //     // Transforms.unwrapNodes(editor, {
-  //     //   at: path,
-  //     //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
-  //     // })
-  //     // console.log('unwrapNodes', path)
-  //   }
-  // }, [selected, readonly])
+      parseLcAndReplace({ editor, lcEntry: [element, path] })
+      return
+    }
+    if (selected) {
+      // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
+      const path = ReactEditor.findPath(editor, element)
+      // Transforms.unwrapNodes(editor, {
+      //   at: path,
+      //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+      // })
+      // console.log('unwrapNodes', path)
+    }
+  }, [selected, readonly])
   // useEffect(()=>{
   //   if(focused){
 
@@ -902,14 +926,18 @@ const Lc = ({
       <div className={classes.lcText}>
         {children}
         {emojiData && (
-          <span contentEditable={false}>
+          <>
             {emojiData.emojis?.map((e, i) => {
               if (e.count.nUps === 0) {
                 return null
               }
-              return <EmojiButotn key={i} emoji={e} />
+              return (
+                <span contentEditable={false} key={i}>
+                  <EmojiButotn emoji={e} />
+                </span>
+              )
             })}
-          </span>
+          </>
         )}
       </div>
       {mirrors.length > 0 && sourceCardId && (
@@ -1064,12 +1092,13 @@ const CustomElement = ({
       return <InlineSymbol {...{ attributes, children, element }} />
     case 'mirror':
       return <InlineMirror {...{ attributes, children, element, location, selfCard }} />
-    // case 'hashtag':
-    //   return <InlineHashtag {...{ attributes, children, element, location }} />
+
     case 'filtertag':
       return <InlineFiltertag {...{ attributes, children, element, location }} />
     case 'poll':
       return <InlinePoll {...{ attributes, children, element, location }} />
+    case 'shot':
+      return <InlineShot {...{ attributes, children, element, location }} />
     case 'lc':
       return <Lc {...{ attributes, children, element, location, sourceUrl }} />
     case 'li':

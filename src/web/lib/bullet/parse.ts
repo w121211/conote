@@ -18,9 +18,9 @@ const decorateReMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B/u
 const reMirrorTicker = /^(::\$[A-Z-=]+)\b(?:\s@([\p{Letter}\d_]+))?/u
 const reMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B(?:\s@([\p{Letter}\d_]+))?/u
 // const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
-const rePoll = /\B!\(\(poll:(c[a-zA-Z0-9]{24})\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
+const rePoll = /\B!\(\(poll:(c[a-z0-9]{24,29})\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const reNewPoll = /\B!\(\(poll\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
-const reShot = /\B!\(\(shot:([a-z0-9]{25,30})\)\)\(([^)]*)\)\B/
+const reShot = /\B!\(\(shot:(c[a-z0-9]{24,29})\)\)\(([^)]*)\)\B/
 const reNewShot = /\B!\(\(shot\)\)\(([^)]*)\)\B/
 
 const grammar: Grammar = {
@@ -74,7 +74,7 @@ export function inlinesToString(inlines: InlineItem[]): string {
 }
 
 function isShotChoice(s: string): s is ShotChoice {
-  return ['LONG', 'SHORT', 'HOLD'].includes(s)
+  return ['#LONG', '#SHORT', '#HOLD'].includes(s)
 }
 
 function parseInlineShotParams(params: string[]): {

@@ -402,7 +402,7 @@ const CardSymbolPage = (): JSX.Element | null => {
               {emojiData.emojis.findIndex(e => e.text === 'DOWN') < 0 && (
                 <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="DOWN" />
               )}
-              {console.log(emojiData.emojis)}
+              {/* {console.log(emojiData.emojis)} */}
               {emojiData.emojis.map((e, i) => (
                 <EmojiHeaderBtn key={i} emoji={e} bulletId={data.openedLi.children[0].id ?? ''} />
               ))}
