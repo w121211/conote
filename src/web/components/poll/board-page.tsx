@@ -1,13 +1,4 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import {
-  useCreateCommentMutation,
-  CommentsDocument,
-  CommentsQuery,
-  useBoardQuery,
-  Board,
-  useCommentsQuery,
-  Comment,
-} from '../../apollo/query.graphql'
 
 import useMeasure from 'react-use-measure'
 import // useCreateReplyMutation,
@@ -38,7 +29,7 @@ const BoardPage = ({
   title?: string
 }): JSX.Element => {
   const [measureRef, bounds] = useMeasure()
-  const [boardValue, setBoardValue] = useState<Board>()
+  // const [boardValue, setBoardValue] = useState<Board>()
   const [pollValue, setPollValue] = useState([''])
   const [commentsList, setCommentsList] = useState<Comment[]>()
   const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
@@ -63,49 +54,49 @@ const BoardPage = ({
   //   return ()=>{if(!hideBoard)}
   // })
   // console.log(boardId)
-  const { data: boardData, loading, error } = useBoardQuery({ variables: { id: boardId } })
+  // const { data: boardData, loading, error } = useBoardQuery({ variables: { id: boardId } })
   // console.log(boardData?.board?.bulletId)
-  const {
-    data: commentsData,
-    loading: commentsLoading,
-    error: commentsError,
-    refetch: commentsRetch,
-  } = useCommentsQuery({
-    // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
-    variables: { boardId: boardId },
-    fetchPolicy: 'cache-first',
-  })
+  // const {
+  //   data: commentsData,
+  //   loading: commentsLoading,
+  //   error: commentsError,
+  //   refetch: commentsRetch,
+  // } = useCommentsQuery({
+  //   // variables: { commentId: `${pollCommentId ? pollCommentId : commentId}` },
+  //   variables: { boardId: boardId },
+  //   fetchPolicy: 'cache-first',
+  // })
 
-  useEffect(() => {
-    if (boardData?.board) {
-      setBoardValue(boardData.board)
-    }
-    if (boardData?.board?.poll) {
-      setPollValue(boardData.board.poll.choices)
-    }
-  }, [boardData])
+  // useEffect(() => {
+  //   if (boardData?.board) {
+  //     setBoardValue(boardData.board)
+  //   }
+  //   if (boardData?.board?.poll) {
+  //     setPollValue(boardData.board.poll.choices)
+  //   }
+  // }, [boardData])
 
-  useEffect(() => {
-    if (commentsData?.comments) {
-      setCommentsList(commentsData.comments)
-    }
-  }, [commentsData])
+  // useEffect(() => {
+  //   if (commentsData?.comments) {
+  //     setCommentsList(commentsData.comments)
+  //   }
+  // }, [commentsData])
 
-  const filterComments = (i: number) => {
-    // const newCommentList=
-    // const regex = new RegExp(`^<${pollValue[i]}> .+`, 'gm')
+  // const filterComments = (i: number) => {
+  //   // const newCommentList=
+  //   // const regex = new RegExp(`^<${pollValue[i]}> .+`, 'gm')
 
-    i !== -1
-      ? setCommentsList(
-          commentsData?.comments &&
-            commentsData.comments.filter((e, ind) => e.content.startsWith(`<${pollValue[i]}> `)),
-        )
-      : setCommentsList(commentsData?.comments)
+  //   i !== -1
+  //     ? setCommentsList(
+  //         commentsData?.comments &&
+  //           commentsData.comments.filter((e, ind) => e.content.startsWith(`<${pollValue[i]}> `)),
+  //       )
+  //     : setCommentsList(commentsData?.comments)
 
-    // console.log(commentsList && commentsList[i] && commentsList[i].content)
-    // setFilterCommentsList(newCommentList)
-    // console.log(commentsList, newCommentList)
-  }
+  //   // console.log(commentsList && commentsList[i] && commentsList[i].content)
+  //   // setFilterCommentsList(newCommentList)
+  //   // console.log(commentsList, newCommentList)
+  // }
 
   return (
     <>
@@ -116,23 +107,23 @@ const BoardPage = ({
             <span onClick={discussClickRHandler}>Q&A</span> */}
         {/* </div> */}
         <div className={classes.title}>{title}</div>
-        {boardData?.board?.content && <div>{boardData.board.content}</div>}
+        {/* {boardData?.board?.content && <div>{boardData.board.content}</div>} */}
         {/* tabs底線 */}
         {/* <div className={classes.underLine}> */}
         {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
         {/* </div> */}
         {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}
-        <BoardFrom
+        {/* <BoardFrom
           boardId={boardId}
           pollId={pollId}
           initialValue={{ title: '', choice: undefined, lines: '' }}
           // pollChoices={pollValue}
           refetch={() => {
-            commentsRetch()
+            // commentsRetch()
           }}
           filterComments={filterComments}
           clickedChoiceIdx={clickedChoiceIdx}
-        />
+        /> */}
         {/* <CommentForm
         boardId={boardId}
         pollId={pollId}

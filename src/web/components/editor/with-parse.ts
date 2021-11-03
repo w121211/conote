@@ -1,22 +1,45 @@
 import { Editor, Transforms, Node, Path, NodeEntry, createEditor } from 'slate'
 import { parseBulletHead } from '../../lib/bullet/parse'
-import { InlineItem } from '../../lib/bullet/types'
-import { LcElement, CustomElement, CustomInlineElement, CustomText, LiElement } from './slate-custom-types'
+import { InlineItem, InlinePoll, InlineShot } from '../../lib/bullet/types'
+import {
+  LcElement,
+  CustomElement,
+  CustomInlineElement,
+  CustomText,
+  LiElement,
+  InlinePollElement,
+  InlineShotElement,
+} from './slate-custom-types'
 import { isLc, isLiArray } from './with-list'
 
 export function isInlineElement(element: CustomElement): element is CustomInlineElement {
   const inlineTypes = ['mirror', 'poll', 'filtertag', 'symbol', 'shot']
   return inlineTypes.includes(element.type)
 }
+function isPoll(item: InlineItem): item is InlinePoll {
+  return item.type === 'poll'
+}
+function isShot(item: InlineItem): item is InlineShot {
+  return item.type === 'shot'
+}
 
 function toSlateInline(item: InlineItem): CustomInlineElement | CustomText {
   if (item.type === 'text') {
     return { text: item.str, shift: false }
   }
-  const inline: CustomInlineElement = {
-    ...item,
-    children: [{ text: item.str }],
-  }
+  const inline: CustomInlineElement =
+    // isPoll(item) || isShot(item)
+    //   ? { ...item, children: [{ text: '' }] }
+    //   : {
+    //       ...item,
+    //       // children: [{ text: '' }],
+    //       children: [{ text: item.str }],
+    //     }
+    {
+      ...item,
+      // children: [{ text: '' }],
+      children: [{ text: item.str }],
+    }
   return inline
 }
 
@@ -43,6 +66,7 @@ export function parseLcAndReplace(props: { editor: Editor; lcEntry: NodeEntry<Lc
     at: lcPath,
     match: (n, p) => Path.isChild(p, lcPath),
   })
+
   // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
   Transforms.insertNodes(editor, headInlines, { at: [...lcPath, 0] })
 }

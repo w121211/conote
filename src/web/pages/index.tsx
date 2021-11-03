@@ -106,6 +106,7 @@ function HomePage(): JSX.Element {
                 <div className={classes.newHotList}>
                   <h3
                     className={`${switchList === 'new' && classes.clickedTab}`}
+                    style={{ cursor: 'pointer' }}
                     onClick={() => {
                       setSwitchList('new')
                     }}
@@ -114,6 +115,7 @@ function HomePage(): JSX.Element {
                   </h3>
                   <h3
                     className={`${switchList === 'hot' && classes.clickedTab}`}
+                    style={{ cursor: 'pointer' }}
                     onClick={() => {
                       setSwitchList('hot')
                     }}
@@ -121,12 +123,32 @@ function HomePage(): JSX.Element {
                     熱門
                   </h3>
                 </div>
+                {switchList === 'hot' && <h4 className={classes.hotSubtitle}>#討論 #機會 #Battle #事件</h4>}
                 <div className={classes.latestCards}>
                   {switchList === 'new' && <LatestCards />}
-                  {switchList === 'hot' && <LatestCards />}
+                  {switchList === 'hot' && (
+                    <div>
+                      <div className={classes.hotElement}>
+                        <h5 className={`${classes.hashtag} ${classes.blue}`}>#討論</h5>
+                        <h4 className={classes.lcElementSymbol}>原油 vs 天然氣，哪個比較適合投資？</h4>
+                        <span className={classes.hashtagSymbol}>[[原油]]</span>
+                      </div>
+                      <div className={classes.divider}></div>
+                      <div className={classes.hotElement}>
+                        <div className={classes.hashtagContainer}>
+                          <h5 className={`${classes.hashtag} ${classes.blue}`}>#討論</h5>
+                          <h5 className={`${classes.hashtag} ${classes.orange}`}>#機會</h5>
+                        </div>
+                        <h4 className={classes.lcElementSymbol}>
+                          全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI #多
+                          @匿名)
+                        </h4>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className={classes.hot}>
+              {/* <div className={classes.hot}>
                 <h3>Battle</h3>
                 <div className={classes.latestCards}>
                   <div className={classes.latestCardsListText}>
@@ -178,9 +200,9 @@ function HomePage(): JSX.Element {
                     </div>
                   </div>
 
-                  {/* <LatestCards /> */}
+                
                 </div>
-              </div>
+              </div> */}
               <div className={classes.tickerList}>
                 <h3>自選股</h3>
                 <div className={classes.latestCards}>

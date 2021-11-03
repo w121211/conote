@@ -1,19 +1,7 @@
 import { title } from 'process'
 import React, { useEffect, useState } from 'react'
 import { useForm, useController, useFormContext, FormProvider, useWatch, Control } from 'react-hook-form'
-import {
-  useCreateCommentMutation,
-  CommentsDocument,
-  CommentsQuery,
-  useBoardQuery,
-  Board,
-  useCreateVoteMutation,
-  MyVotesDocument,
-  MyVotesQuery,
-  BoardDocument,
-  useMyVotesQuery,
-  Vote,
-} from '../../apollo/query.graphql'
+import { useCreateVoteMutation, MyVotesDocument, MyVotesQuery, useMyVotesQuery, Vote } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
 import classes from './board-form.module.scss'
 
@@ -119,12 +107,12 @@ const BoardForm = ({
   filterComments: (i: number) => void
 }): JSX.Element => {
   // const { field, fieldState } = useController({ name: 'choice' })
-  const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
+  // const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
   const { data: myVotesData } = useMyVotesQuery({ variables: { pollId: pollId } })
   const methods = useForm<FormInputs>()
   const { register, handleSubmit, setValue, reset, getValues } = methods
   const [choiceValue, setChoiceValue] = useState<number | null | undefined>()
-  const [check, setChecked] = useState<boolean[]>(Array(boardData?.board.poll?.choices.length).fill(false))
+  // const [check, setChecked] = useState<boolean[]>(Array(boardData?.board.poll?.choices.length).fill(false))
   const [myVote, setMyVote] = useState<Vote>()
 
   useEffect(() => {
@@ -133,11 +121,11 @@ const BoardForm = ({
     }
   }, [myVotesData])
   useEffect(() => {
-    setChecked(prev => {
-      const newCheck = [...prev]
-      if (clickedChoiceIdx !== undefined) newCheck[clickedChoiceIdx] = true
-      return newCheck
-    })
+    // setChecked(prev => {
+    //   const newCheck = [...prev]
+    //   if (clickedChoiceIdx !== undefined) newCheck[clickedChoiceIdx] = true
+    //   return newCheck
+    // })
   }, [clickedChoiceIdx])
 
   if (initialValue) {
@@ -146,21 +134,21 @@ const BoardForm = ({
     initialValue.title && setValue('lines', initialValue.lines)
   }
 
-  const [createComment] = useCreateCommentMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<CommentsQuery>({
-        query: CommentsDocument,
-      })
-      if (data?.createComment && res?.comments) {
-        cache.writeQuery({
-          query: CommentsDocument,
-          data: { comments: res.comments.concat([data.createComment]) },
-        })
-      }
-      // refetch()
-    },
-    // refetchQueries: [{ query: CommentsDocument, variables: { boardId: boardId } }],
-  })
+  // const [createComment] = useCreateCommentMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<CommentsQuery>({
+  //       query: CommentsDocument,
+  //     })
+  //     if (data?.createComment && res?.comments) {
+  //       cache.writeQuery({
+  //         query: CommentsDocument,
+  //         data: { comments: res.comments.concat([data.createComment]) },
+  //       })
+  //     }
+  //     // refetch()
+  //   },
+  //   // refetchQueries: [{ query: CommentsDocument, variables: { boardId: boardId } }],
+  // })
 
   const [createVote] = useCreateVoteMutation({
     update(cache, { data }) {
@@ -179,21 +167,21 @@ const BoardForm = ({
   })
 
   const myHandleSubmit = (d: FormInputs) => {
-    if (d.lines) {
-      createComment({
-        variables: {
-          boardId,
-          pollId,
-          data: {
-            content: `${
-              boardData?.board.poll?.choices && d.choice
-                ? '<' + boardData?.board.poll?.choices[parseInt(d.choice)] + '>'
-                : ''
-            } ${d.lines}`,
-          },
-        },
-      })
-    }
+    // if (d.lines) {
+    //   createComment({
+    //     variables: {
+    //       boardId,
+    //       pollId,
+    //       data: {
+    //         content: `${
+    //           boardData?.board.poll?.choices && d.choice
+    //             ? '<' + boardData?.board.poll?.choices[parseInt(d.choice)] + '>'
+    //             : ''
+    //         } ${d.lines}`,
+    //       },
+    //     },
+    //   })
+    // }
     if (d.choice && pollId) {
       createVote({
         variables: {
@@ -203,7 +191,7 @@ const BoardForm = ({
       })
       // console.log(typeof d.choice, pollId)
     }
-    setChecked(Array(boardData?.board.poll?.choices?.length).fill(false))
+    // setChecked(Array(boardData?.board.poll?.choices?.length).fill(false))
     setChoiceValue(null)
     reset({ title: '', lines: '' })
   }
@@ -211,18 +199,18 @@ const BoardForm = ({
   const handleChoiceValue = (i: string) => {
     // console.log()
     const iToNum = parseInt(i)
-    setChecked(prevArr => {
-      const newArr = [...prevArr]
-      const oldIndex = newArr.findIndex(e => e === true)
-      if (oldIndex === iToNum) {
-        newArr[iToNum] = false
-      } else {
-        newArr[iToNum] = !newArr[iToNum]
-        newArr[oldIndex] = !newArr[oldIndex]
-      }
+    // setChecked(prevArr => {
+    //   const newArr = [...prevArr]
+    //   const oldIndex = newArr.findIndex(e => e === true)
+    //   if (oldIndex === iToNum) {
+    //     newArr[iToNum] = false
+    //   } else {
+    //     newArr[iToNum] = !newArr[iToNum]
+    //     newArr[oldIndex] = !newArr[oldIndex]
+    //   }
 
-      return newArr
-    })
+    //   return newArr
+    // })
     setChoiceValue(prev => {
       // console.log(prev, i, prev === i)
 
@@ -234,10 +222,10 @@ const BoardForm = ({
   // },[choiceValue])
 
   useEffect(() => {
-    filterComments(
-      check.findIndex((e, i) => e),
-      // check,
-    )
+    // filterComments(
+    //   check.findIndex((e, i) => e),
+    //   // check,
+    // )
   }, [choiceValue])
   // console.log(pollChoices)
 
@@ -250,9 +238,9 @@ const BoardForm = ({
           {/* <input type="text" {...register('title')} placeholder="Symbol 或 Topic" /> */}
           {/* </div> */}
           <div className={classes.section}>
-            {boardData?.board.poll?.choices && pollId && (
+            {/* {boardData?.board.poll?.choices && pollId && (
               <div className={classes.choiceWrapper}>
-                {/* <label>@作者</label> */}
+                <label>@作者</label>
                 <div className={classes.radioWrapper}>
                   {boardData?.board.poll?.choices.map((e, i) => (
                     <RadioInput
@@ -272,7 +260,7 @@ const BoardForm = ({
                   共 {boardData.board.poll?.count.nVotes.reduce((a, b) => a + b)} 人參與投票
                 </span>
               </div>
-            )}
+            )} */}
             <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." />
           </div>
           <button>送出</button>

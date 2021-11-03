@@ -1,8 +1,10 @@
 import { useApolloClient } from '@apollo/client'
+import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { Controller, set, useForm } from 'react-hook-form'
 import AsyncSelect from 'react-select/async'
 import {
+  AuthorDocument,
   AuthorQuery,
   AuthorQueryVariables,
   Shot,
@@ -17,6 +19,7 @@ import {
   useLinkLazyQuery,
   useLinkQuery,
 } from '../../apollo/query.graphql'
+import Popup from '../popup/popup'
 import classes from './shot-form.module.scss'
 
 export interface FormInput {
@@ -33,6 +36,8 @@ const CreateShotForm = ({
   initialInput: FormInput
   handleShotData: (shot: Shot) => void
 }): JSX.Element => {
+  const router = useRouter()
+  const [showPopup, setShowPopup] = useState(false)
   const [skipCardQuery, setSkipCardQuery] = useState(true)
   const { author, choice, target, link } = initialInput
   const [targetId, setTargetId] = useState<string | undefined>()
@@ -92,14 +97,17 @@ const CreateShotForm = ({
       }
     },
   })
-
-  const promiseOptions = (inputValue: string) => {
-    const { data: authorData } = useAuthorQuery({ fetchPolicy: 'cache-first', variables: {} })
-    // new Promise(client.query<AuthorQuery, AuthorQueryVariables>({
-
-    //     variables: { id: mirrorSymbol },
-    //   }),)
+  const filterAuthor = (inputValue: string) => {
+    return [inputValue]
   }
+  const promiseOptions = (inputValue: string, callback: (authors: string[]) => void) =>
+    new Promise(resolve => {
+      client.query<AuthorQuery, AuthorQueryVariables>({
+        query: AuthorDocument,
+        variables: { name: inputValue },
+      })
+      resolve(filterAuthor)
+    })
 
   const myHandleSubmit = (d: FormInput) => {
     if (d.target && d.choice !== '') {
@@ -124,41 +132,73 @@ const CreateShotForm = ({
     }
   }
   return (
-    <form className={classes.form} onSubmit={handleSubmit(myHandleSubmit)}>
-      <label>
-        <h5> 作者</h5>
-        <Controller
-          control={control}
-          name="author"
-          render={({ field: { value } }) => <AsyncSelect cacheOptions loadOptions={promiseOptions} />}
-        />
-        {/* <input {...register('author')} type="text" /> */}
-      </label>
-      <label>
-        <input {...register('choice')} type="radio" value="LONG" />
-        <h5> 看多</h5>
-      </label>
-      <label>
-        <input {...register('choice')} type="radio" value="SHORT" />
-        <h5> 看空</h5>
-      </label>
-      <label>
-        <input {...register('choice')} type="radio" value="HOLD" />
-        <h5> 觀望</h5>
-      </label>
-      <label>
-        <h5>Ticker</h5>
-        <input {...register('target')} type="text" />
-      </label>
-      <label>
-        <h5> 來源網址</h5>
-        <input {...register('link')} type="text" />
-      </label>
+    <>
+      <form className={classes.form} onSubmit={handleSubmit(myHandleSubmit)}>
+        <label>
+          <h5> 作者</h5>
+          {
+            initialInput.author ? (
+              <button type="button" onClick={() => setShowPopup(true)}>
+                {initialInput.author}
+              </button>
+            ) : null
+            // <Controller
+            //   control={control}
+            //   name="author"
+            //   render={({ field: { value } }) => <AsyncSelect cacheOptions loadOptions={promiseOptions} />}
+            // />
+            // <input {...register('author')} type="text" />
+          }
+        </label>
+        <div className={classes.radioWrapper}>
+          <label>
+            <input {...register('choice')} type="radio" value="LONG" />
+            <h5> 看多</h5>
+          </label>
+          <label>
+            <input {...register('choice')} type="radio" value="SHORT" />
+            <h5> 看空</h5>
+          </label>
+          <label>
+            <input {...register('choice')} type="radio" value="HOLD" />
+            <h5> 觀望</h5>
+          </label>
+        </div>
+        <label>
+          <h5>Ticker</h5>
+          <input {...register('target')} type="text" />
+        </label>
+        <label>
+          <h5> 來源網址</h5>
+          <input {...register('link')} type="text" />
+        </label>
 
-      <button className="primary" type="submit">
-        <h5> 送出</h5>
-      </button>
-    </form>
+        <button className="primary" type="submit">
+          <h5> 送出</h5>
+        </button>
+      </form>
+      <Popup
+        visible={showPopup}
+        hideBoard={() => setShowPopup(false)}
+        buttons={
+          <>
+            <button
+              className="secondary"
+              onClick={() => {
+                router.push(`/author/${initialInput.author}`)
+              }}
+            >
+              確定
+            </button>
+            <button className="primary" onClick={() => setShowPopup(false)}>
+              取消
+            </button>
+          </>
+        }
+      >
+        尚未儲存的內容將丟失，確立離開本頁嗎？
+      </Popup>
+    </>
   )
 }
 export default CreateShotForm

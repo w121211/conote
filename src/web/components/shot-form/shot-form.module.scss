@@ -16,7 +16,8 @@
     }
   }
   label {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     margin-right: 0;
     font-weight: 700;
   }
@@ -82,7 +83,7 @@
 }
 .radioWrapper {
   display: flex;
-  flex-direction: column;
+  // flex-direction: column;
 }
 .section:not(:last-child) {
   margin-bottom: 1em;

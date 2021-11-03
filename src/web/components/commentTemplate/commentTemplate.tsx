@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { CommentCount } from '../../apollo/query.graphql'
+// import { CommentCount } from '../../apollo/query.graphql'
 import UpDown from '../emoji-up-down/emoji-up-down'
 import classes from './commentTemplate.module.scss'
 

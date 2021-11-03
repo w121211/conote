@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, EventHandler } from 'react'
 import { SubmitErrorHandler, SubmitHandler, useForm, useFieldArray } from 'react-hook-form'
-import { useCommentsQuery, CommentsDocument, Comment } from '../../apollo/query.graphql'
+// import { useCommentsQuery, CommentsDocument, Comment } from '../../apollo/query.graphql'
 // import { List } from 'antd'
 // import { RouteComponentProps, Redirect, Link, navigate, useLocation } from '@reach/router'
 // import * as QT from '../../graphql/query-types'
@@ -158,7 +158,7 @@ const CommentList = ({
             // ref={myRef}
             // onClick={e => onClickHandler(e, item.text.matchAll(/(^\d+ )(.+$)/g))}
           >
-            {commentsList ? (
+            {/* {commentsList ? (
               <CommentTemplate
                 commentId={e.id}
                 content={e.content.replace(/(^\d+ )(.+$)/g, '$2')}
@@ -167,7 +167,7 @@ const CommentList = ({
                 floor={`#${commentsLength && commentsLength - i}`}
                 key={i}
               />
-            ) : null}
+            ) : null} */}
           </ul>
         ))}
     </div>

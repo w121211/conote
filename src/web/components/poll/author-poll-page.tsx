@@ -1,18 +1,8 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import {
-  useCreateCommentMutation,
-  CommentsDocument,
-  CommentsQuery,
-  useBoardQuery,
-  Board,
-  useCommentsQuery,
-  Comment,
-  Poll,
-  usePollQuery,
-} from '../../apollo/query.graphql'
+import { Poll, usePollQuery } from '../../apollo/query.graphql'
 
 import useMeasure from 'react-use-measure'
-import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
+// import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import // useCreateReplyMutation,
 // useCommentQuery,
 // useRepliesQuery,
@@ -42,7 +32,7 @@ const AuthorPollPage = ({
   title?: string
 }): JSX.Element => {
   const [measureRef, bounds] = useMeasure()
-  const [boardValue, setBoardValue] = useState<Board>()
+  // const [boardValue, setBoardValue] = useState<Board>()
   const [pollValue, setPollValue] = useState([''])
   const [commentsList, setCommentsList] = useState<Comment[]>()
   const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
@@ -110,7 +100,7 @@ const AuthorPollPage = ({
   //   // setFilterCommentsList(newCommentList)
   //   // console.log(commentsList, newCommentList)
   // }
-  if (data) {
+  if (data && data?.poll !== null && data?.poll !== undefined) {
     return (
       <>
         <div className={classes.containerinner}>

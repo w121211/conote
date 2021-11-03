@@ -57,9 +57,9 @@ const CreatePollForm = ({
         query: PollDocument,
       })
       if (data?.createPoll && res?.poll) {
-        cache.writeQuery<PollQuery>({
+        cache.writeQuery({
           query: PollDocument,
-          data: { choices: data.createPoll },
+          data: { choices: data.createPoll.choices },
         })
       }
     },

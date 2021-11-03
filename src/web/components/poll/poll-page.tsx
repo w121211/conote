@@ -1,18 +1,8 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import {
-  useCreateCommentMutation,
-  CommentsDocument,
-  CommentsQuery,
-  useBoardQuery,
-  Board,
-  useCommentsQuery,
-  Comment,
-  Poll,
-  usePollQuery,
-} from '../../apollo/query.graphql'
+import { Poll, usePollQuery } from '../../apollo/query.graphql'
 
 import useMeasure from 'react-use-measure'
-import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
+// import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import // useCreateReplyMutation,
 // useCommentQuery,
 // useRepliesQuery,
@@ -111,7 +101,7 @@ const PollPage = ({
   //   // setFilterCommentsList(newCommentList)
   //   // console.log(commentsList, newCommentList)
   // }
-  if (data) {
+  if (data && data.poll) {
     return (
       <>
         <div className={classes.containerinner}>

@@ -54,6 +54,7 @@ import {
   useShotLazyQuery,
   Shot,
   useCardQuery,
+  useShotQuery,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
@@ -62,7 +63,7 @@ import { spawn } from 'child_process'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { NavLocation, locationToUrl } from './with-location'
 import { withOperation } from './with-operation'
-import { parseLcAndReplace, withParse } from './with-parse'
+import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
 import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../../lib/bullet/types'
 import CreatePollForm from '../poll-form/create-poll-form'
 import HashtagTextToIcon from '../emoji-up-down/emoji-text-to-icon'
@@ -79,6 +80,7 @@ import { BulletNode } from '../../lib/bullet/node'
 import { Token, tokenize } from 'prismjs'
 import { tokenizeBulletString } from '../../lib/bullet/parse'
 import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
+// import UpdateShotForm from '../shot-form/update-shot-form'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
@@ -424,6 +426,7 @@ const InlineSymbol = ({
         }}
       >
         {children}
+        {element.str}
       </span>
       {/* </Link> */}
       {showPopover && (
@@ -526,53 +529,10 @@ const InlineMirror = ({
         <a className="ui">{children}</a>
       </Link>
       {/* </span> */}
+      {/* <a className="ui">{element.str}</a> */}
     </span>
   )
 }
-
-// const PollForm = ({ id }: { id: string }): JSX.Element => {
-//   const { data, loading, error } = usePollQuery({ variables: { id } })
-//   const [createVote, createVoteResult] = useCreateVoteMutation()
-//   if (loading || createVoteResult.loading) {
-//     return <div>loading...</div>
-//   }
-//   if (error || data === undefined || createVoteResult.error) {
-//     return <div>error</div>
-//   }
-//   if (createVoteResult.data) {
-//     const vote = createVoteResult.data.createVote
-//     const voted = data.poll.choices[vote.choiceIdx]
-//     return (
-//       <div>
-//         {data.poll.choices.join(' ')}[{voted}]
-//       </div>
-//     )
-//   }
-//   return (
-//     <div>
-//       {data.poll.choices.map((e, i) => (
-//         <button
-//           key={i}
-//           onClick={() => {
-//             createVote({
-//               variables: {
-//                 pollId: id,
-//                 data: { choiceIdx: i },
-//               },
-//             })
-//           }}
-//         >
-//           {e}
-//         </button>
-//       ))}
-//     </div>
-//   )
-// }
-
-// const NewPollForm = ({ choices }: { choices?: string[]; onCreated: (poll: Poll) => void }): JSX.Element => {
-//   // const queryPoll = usePollQuery({ variables: { id } })
-//   return <div></div>
-// }
 
 const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; location: NavLocation }): JSX.Element => {
   const { attributes, children, element, location } = props
@@ -697,6 +657,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
           )}
         </span>
       )}
+      {/* <span>{children}</span> */}
       <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
     </span>
   )
@@ -733,12 +694,12 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement; lo
     }
   }
 
-  console.log(element)
+  // console.log(element)
   useEffect(() => {
     // if (showPopover && !pollId) {
     //   handleCreatePoll()
     // }
-    console.log(shotData, shotId)
+    // console.log(shotData, shotId)
 
     if (!showPopover && !element.id && shotId && shotData) {
       // const queryPollData = async () => {
@@ -768,26 +729,23 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement; lo
       {showPopover && (
         <span contentEditable={false}>
           <Popover visible={showPopover} hideBoard={() => setShowPopover(false)}>
-            {shotId ? (
-              <div>{element.str}</div>
-            ) : (
-              <CreateShotForm
-                initialInput={{
-                  author: element.authorName ?? '',
-                  target: element.targetSymbol ?? '',
-                  choice: element.choice ?? '',
-                  link: '',
-                }}
-                handleShotData={(shot: Shot) => {
-                  setShotId(shot.id)
-                  setShotData(shot)
-                }}
-              />
-            )}
+            <CreateShotForm
+              initialInput={{
+                author: element.authorName ?? '',
+                target: element.targetSymbol ?? '',
+                choice: element.choice ?? '',
+                link: '',
+              }}
+              handleShotData={(shot: Shot) => {
+                setShotId(shot.id)
+                setShotData(shot)
+              }}
+            />
           </Popover>
         </span>
       )}
       <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
+      {/* <span>{children}</span> */}
     </span>
   )
 }
@@ -894,7 +852,7 @@ const Lc = ({
   //     }
   //   }
   // }, [author, element, sourceUrl])
-
+  // console.log(element)
   useEffect(() => {
     if ((focused && !selected) || readonly) {
       // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
@@ -903,15 +861,26 @@ const Lc = ({
       parseLcAndReplace({ editor, lcEntry: [element, path] })
       return
     }
-    if (selected) {
-      // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
-      const path = ReactEditor.findPath(editor, element)
-      // Transforms.unwrapNodes(editor, {
-      //   at: path,
-      //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
-      // })
-      // console.log('unwrapNodes', path)
-    }
+    // if (selected && focused) {
+    //   // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
+    //   const path = ReactEditor.findPath(editor, element)
+    //   const lcChildren = Node.children(editor, path)
+
+    //   for (const lcChild of lcChildren) {
+    //     if (!Text.isText(lcChild[0]) && (lcChild[0].type === 'poll' || lcChild[0].type === 'shot')) {
+    //       console.log(lcChild)
+    //       Transforms.insertText(editor, lcChild[0].str, { at: lcChild[1] })
+    //       // Transforms.setNodes(editor, { children: [{ text: `${lcChild[0].str}` }] }, { at: lcChild[1] })
+    //       // match:(n,p)=>!Text.isText(n)&&Element.isElement(n)&&isInlineElement(n)
+    //     }
+    //   }
+
+    //   // Transforms.unwrapNodes(editor, {
+    //   //   at: path,
+    //   //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+    //   // })
+    //   // console.log('unwrapNodes', path)
+    // }
   }, [selected, readonly])
   // useEffect(()=>{
   //   if(focused){
@@ -925,6 +894,7 @@ const Lc = ({
     <div {...attributes}>
       <div className={classes.lcText}>
         {children}
+
         {emojiData && (
           <>
             {emojiData.emojis?.map((e, i) => {

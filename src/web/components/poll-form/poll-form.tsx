@@ -112,7 +112,7 @@ const PollForm = ({
   // pollChoices?: string[]
   // refetch: () => void
   // filterComments: (i: number) => void
-}): JSX.Element => {
+}): JSX.Element | null => {
   // const { field, fieldState } = useController({ name: 'choice' })
   // const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
   const { data: myVotesData } = useMyVotesQuery({ variables: { pollId } })
@@ -128,7 +128,7 @@ const PollForm = ({
   const [choiceValue, setChoiceValue] = useState<number | null | undefined>()
   const [check, setChecked] = useState<boolean[]>(Array(3).fill(false))
   const [myVote, setMyVote] = useState<Vote>()
-  const [pollCount, setPollCount] = useState<number[] | undefined>(pollData?.poll.count.nVotes)
+  // const [pollCount, setPollCount] = useState<number[] | undefined>(pollData?.poll.count.nVotes)
 
   useEffect(() => {
     if (myVotesData) {
@@ -210,14 +210,14 @@ const PollForm = ({
     // }
 
     if (d.choice && pollId) {
-      setPollCount(prev => {
-        if (prev) {
-          const newArr = [...prev]
-          d.choice && (newArr[parseInt(d.choice)] += 1)
-          return newArr
-        }
-        return prev
-      })
+      // setPollCount(prev => {
+      //   if (prev) {
+      //     const newArr = [...prev]
+      //     d.choice && (newArr[parseInt(d.choice)] += 1)
+      //     return newArr
+      //   }
+      //   return prev
+      // })
       createVote({
         variables: {
           pollId: pollId,
@@ -264,51 +264,56 @@ const PollForm = ({
   }, [choiceValue])
   // console.log(pollChoices)
 
-  return (
-    <FormProvider {...methods}>
-      <div className={classes.formContainer}>
-        <form className={classes.form} onSubmit={handleSubmit(myHandleSubmit)}>
-          {/* <div className={classes.section}> */}
-          {/* <label>Symbol/Topic</label> */}
-          {/* <input type="text" {...register('title')} placeholder="Symbol 或 Topic" /> */}
-          {/* </div> */}
-          <div className={classes.section}>
-            <div className={classes.choiceWrapper}>
-              {/* <label>@作者</label> */}
-              <div className={classes.radioWrapper}>
-                {pollData?.poll.choices.map((e, i) => (
-                  <RadioInput
-                    value={`${i}`}
-                    content={e}
-                    total={
-                      pollData.poll.count.nVotes.length > 0 ? pollData.poll.count.nVotes.reduce((a, b) => a + b) : 0
-                    }
-                    count={pollData.poll.count.nVotes[i]}
-                    // filterComments={filterComments}
-                    key={i}
-                    choiceValue={handleChoiceValue}
-                    checked={check[i]}
-                    myVote={myVote}
-                  />
-                ))}
+  if (pollData && pollData.poll) {
+    return (
+      <FormProvider {...methods}>
+        <div className={classes.formContainer}>
+          <form className={classes.form} onSubmit={handleSubmit(myHandleSubmit)}>
+            {/* <div className={classes.section}> */}
+            {/* <label>Symbol/Topic</label> */}
+            {/* <input type="text" {...register('title')} placeholder="Symbol 或 Topic" /> */}
+            {/* </div> */}
+            <div className={classes.section}>
+              <div className={classes.choiceWrapper}>
+                {/* <label>@作者</label> */}
+                <div className={classes.radioWrapper}>
+                  {pollData.poll.choices.map((e, i) => (
+                    <RadioInput
+                      value={`${i}`}
+                      content={e}
+                      total={
+                        pollData.poll && pollData.poll.count.nVotes.length > 0
+                          ? pollData.poll.count.nVotes.reduce((a, b) => a + b)
+                          : 0
+                      }
+                      count={pollData.poll ? pollData.poll.count.nVotes[i] : 0}
+                      // filterComments={filterComments}
+                      key={i}
+                      choiceValue={handleChoiceValue}
+                      checked={check[i]}
+                      myVote={myVote}
+                    />
+                  ))}
+                </div>
+                <span className={classes.votedCount}>
+                  共
+                  {pollData.poll.count.nVotes && pollData.poll.count.nVotes.length > 0
+                    ? pollData?.poll.count.nVotes.reduce((a, b) => a + b)
+                    : 0}
+                  人參與投票
+                </span>
               </div>
-              <span className={classes.votedCount}>
-                共{' '}
-                {pollData?.poll.count.nVotes && pollData.poll.count.nVotes.length > 0
-                  ? pollData?.poll.count.nVotes.reduce((a, b) => a + b)
-                  : 0}{' '}
-                人參與投票
-              </span>
-            </div>
 
-            {/* <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." /> */}
-          </div>
-          <button className="primary" disabled={myVote !== undefined}>
-            {myVote ? '已投票' : '送出'}
-          </button>
-        </form>
-      </div>
-    </FormProvider>
-  )
+              {/* <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." /> */}
+            </div>
+            <button className="primary" disabled={myVote !== undefined}>
+              {myVote ? '已投票' : '送出'}
+            </button>
+          </form>
+        </div>
+      </FormProvider>
+    )
+  }
+  return null
 }
 export default PollForm

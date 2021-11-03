@@ -49,6 +49,8 @@
   @media screen and (max-width: 500px) {
     flex-direction: column;
   }
+  h4 {
+  }
   .new {
     margin: 0 20px;
     // max-width: 36vw;
@@ -283,6 +285,7 @@
 }
 .clickedTab {
   color: $black;
+  cursor: pointer;
 }
 .tickerElement {
   width: 100%;
@@ -293,4 +296,49 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  // h5,
+}
+.hotElement {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  h4 {
+    margin: 0;
+  }
+}
+.hotSubtitle {
+  color: $gray-text-dark;
+  font-weight: normal;
+  margin-top: 0;
+}
+.hashtag {
+  width: fit-content;
+  font-weight: normal;
+  padding: 0 6px;
+  border-radius: 3px;
+
+  margin-right: 6px;
+  margin-top: 0;
+  margin-bottom: 0;
+  &.blue {
+    background-color: #2562ef;
+    color: white;
+  }
+  &.orange {
+    background-color: #eba70a;
+    color: white;
+  }
+}
+.hashtagSymbol {
+  color: $gray-text-dark;
+}
+.hashtagContainer {
+  display: flex;
+  flex-direction: row;
+}
+.divider {
+  background-color: $gray;
+  height: 1px;
+  margin: 10px 0 20px;
 }
