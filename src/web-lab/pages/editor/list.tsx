@@ -45,6 +45,7 @@ import {
   onKeyDown as withListOnKeyDown,
   withList,
 } from './with-list'
+import { withObserve } from './with-observe'
 // import { useSearch } from './search'
 
 const initialValueDemo: LiElement[] = [
@@ -233,7 +234,7 @@ export const BulletEditor = (props: {
 
   const [value, setValue] = useState<LiElement[]>(initialValue)
   const editor = useMemo(
-    () => withList(withHistory(withReact(createEditor()))),
+    () => withObserve(withList(withHistory(withReact(createEditor())))),
     []
   )
   const renderElement = useCallback(

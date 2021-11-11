@@ -1,4 +1,4 @@
-import { Emoji, EmojiCount, EmojiLike, LikeChoice } from '.prisma/client'
+import { BulletEmoji, BulletEmojiCount, BulletEmojiLike, LikeChoice } from '.prisma/client'
 import { EmojiText } from '../../apollo/query.graphql'
 import { deltaLike } from '../helpers'
 import { getBotId } from '../models/user'
@@ -13,8 +13,8 @@ export async function upsertEmojiLike({
   emojiId: string
   userId: string
 }): Promise<{
-  like: EmojiLike
-  count: EmojiCount
+  like: BulletEmojiLike
+  count: BulletEmojiCount
 }> {
   const curCount = await prisma.emojiCount.findUnique({
     where: { emojiId },

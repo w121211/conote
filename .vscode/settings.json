@@ -53,6 +53,10 @@
     {
       "directory": "./src/packages/scraper",
       "changeProcessCWD": true
+    },
+    {
+      "directory": "./src/packages/docdiff",
+      "changeProcessCWD": true
     }
   ],
   "typescript.enablePromptUseWorkspaceTsdk": true

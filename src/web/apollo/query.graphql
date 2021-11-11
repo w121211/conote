@@ -4,21 +4,129 @@ fragment author on Author {
   name
 }
 
-fragment shot on Shot {
+fragment bullet on Bullet {
+  id
+  cardId
+  # createdAt
+  # updatedAt
+}
+
+fragment bulletEmoji on BulletEmoji {
+  __typename
+  id
+  code
+  count {
+    ...bulletEmojiCount
+  }
+}
+
+fragment bulletEmojiCount on BulletEmojiCount {
+  __typename
+  id
+  nUps
+  nDowns
+}
+
+fragment bulletEmojiLike on BulletEmojiLike {
+  __typename
+  id
+  bulletEmojiId
+  choice
+  updatedAt
+}
+
+# fragment bulletNodeChange on BulletNodeChange {
+#   __typename
+#   type
+#   cid
+#   toParentCid
+#   toIndex
+#   data {
+#     ...bullet
+#   }
+# }
+
+fragment card on Card {
+  __typename
+  id
+  symbol {
+    ...symbol
+  }
+  link {
+    ...link
+  }
+  meta {
+    ...cardMeta
+  }
+  updatedAt
+}
+
+fragment cardEmoji on CardEmoji {
+  __typename
+  id
+  code
+  count {
+    ...cardEmojiCount
+  }
+}
+
+fragment cardEmojiCount on CardEmojiCount {
+  __typename
+  id
+  nUps
+  nDowns
+}
+
+fragment cardEmojiLike on CardEmojiLike {
+  __typename
+  id
+  cardEmojiId
+  choice
+  updatedAt
+}
+
+fragment cardMeta on CardMeta {
+  __typename
+  redirects
+  duplicates
+  url
+  author
+  date
+  description
+  keywords
+  title
+}
+
+fragment cardState on CardState {
   __typename
   id
   userId
-  authorId
-  linkId
-  targetId
-  choice
+  commitId
+  prevId
+  body {
+    prevStateId
+    subStateIds
+    changes
+    value
+  }
+  updatedAt
 }
 
-fragment vote on Vote {
+# fragment commit on Commit {
+#   __typename
+#   id
+#   userId
+#   updatedAt
+#   changes {
+#     ...change
+#   }
+# }
+
+fragment link on Link {
   __typename
   id
-  pollId
-  choiceIdx
+  url
+  authorId
 }
 
 fragment poll on Poll {
@@ -32,6 +140,30 @@ fragment poll on Poll {
   }
   createdAt
   updatedAt
+}
+
+fragment shot on Shot {
+  __typename
+  id
+  userId
+  authorId
+  linkId
+  targetId
+  choice
+}
+
+fragment symbol on Symbol {
+  __typename
+  id
+  type
+  name
+}
+
+fragment vote on Vote {
+  __typename
+  id
+  pollId
+  choiceIdx
 }
 
 # fragment commentCount on CommentCount {
@@ -103,51 +235,6 @@ fragment poll on Poll {
 #   updatedAt
 # }
 
-fragment link on Link {
-  __typename
-  id
-  url
-  authorId
-}
-
-fragment emojiLike on EmojiLike {
-  __typename
-  id
-  emojiId
-  choice
-  createdAt
-  updatedAt
-}
-
-fragment emojiCount on EmojiCount {
-  __typename
-  id
-  nUps
-  nDowns
-}
-
-fragment emoji on Emoji {
-  __typename
-  id
-  userId
-  # authorName
-  # bulletId
-  # cardId
-  text
-  count {
-    ...emojiCount
-  }
-  createdAt
-  updatedAt
-}
-
-fragment bullet on Bullet {
-  id
-  cardId
-  # createdAt
-  # updatedAt
-}
-
 # fragment cardHead on CardHead {
 #   __typename
 #   id
@@ -157,96 +244,18 @@ fragment bullet on Bullet {
 #   prevId
 # }
 
-fragment cardBody on CardBody {
-  __typename
-  id
-  userId
-  content
-  timestamp
-  prevId
-}
-
-fragment cardMeta on CardMeta {
-  redirects
-  duplicates
-  url
-  author
-  date
-  description
-  keywords
-  title
-}
-
-fragment card on Card {
-  __typename
-  id
-  type
-  symbol
-  link {
-    ...link
-  }
-  meta {
-    ...cardMeta
-  }
-  body {
-    ...cardBody
-  }
-  createdAt
-  updatedAt
-}
-
-fragment cardEntry on CardEntry {
-  __typename
-  id
-  type
-  symbol
-  createdAt
-  updatedAt
-}
+# fragment cardBody on CardBody {
+#   __typename
+#   id
+#   userId
+#   content
+#   timestamp
+#   prevId
+# }
 
 query Author($id: ID, $name: String) {
   author(id: $id, name: $name) {
     ...author
-  }
-}
-
-query SearchAll($term: String!) {
-  searchAll(term: $term)
-}
-
-query LatestCardEntries($afterId: String) {
-  latestCardEntries(afterId: $afterId) {
-    ...cardEntry
-  }
-}
-
-query Link($id: ID, $url: String) {
-  link(id: $id, url: $url) {
-    ...link
-  }
-}
-
-query Card($id: ID, $symbol: String, $cardBodyId: ID) {
-  card(id: $id, symbol: $symbol, cardBodyId: $cardBodyId) {
-    ...card
-  }
-}
-
-query CardMeta($symbol: String!) {
-  cardMeta(symbol: $symbol) {
-    ...cardMeta
-  }
-}
-
-query WebpageCard($url: String!) {
-  webpageCard(url: $url) {
-    ...card
-  }
-}
-
-query Emojis($bulletId: ID!) {
-  emojis(bulletId: $bulletId) {
-    ...emoji
   }
 }
 
@@ -256,10 +265,80 @@ query Bullet($id: ID!) {
   }
 }
 
+query BulletEmojis($bulletId: ID!) {
+  bulletEmojis(bulletId: $bulletId) {
+    ...bulletEmoji
+  }
+}
+
+query Card($id: ID, $symbol: String, $url: String) {
+  card(id: $id, symbol: $symbol, url: $url) {
+    ...card
+  }
+}
+
+query CardEmojis($cardId: ID!) {
+  cardEmojis(cardId: $cardId) {
+    ...cardEmoji
+  }
+}
+
+# query CardMeta($symbol: String!) {
+#   cardMeta(symbol: $symbol) {
+#     ...cardMeta
+#   }
+# }
+
+# query LatestCommits($afterId: String) {
+#   latestCommits(afterId: $afterId) {
+#     ...commit
+#   }
+# }
+
+query Link($id: ID, $url: String) {
+  link(id: $id, url: $url) {
+    ...link
+  }
+}
+
+query Me {
+  me {
+    id
+  }
+}
+
+query MyShots($targetId: ID!) {
+  myShots(targetId: $targetId) {
+    ...shot
+  }
+}
+
+query MyVotes($pollId: ID!) {
+  myVotes(pollId: $pollId) {
+    ...vote
+  }
+}
+
+query MyBulletEmojiLike($bulletEmojiId: ID!) {
+  myBulletEmojiLike(bulletEmojiId: $bulletEmojiId) {
+    ...bulletEmojiLike
+  }
+}
+
+query MyCardEmojiLike($cardEmojiId: ID!) {
+  myCardEmojiLike(cardEmojiId: $cardEmojiId) {
+    ...cardEmojiLike
+  }
+}
+
 query Poll($id: ID!) {
   poll(id: $id) {
     ...poll
   }
+}
+
+query SearchAll($term: String!) {
+  searchAll(term: $term)
 }
 
 query Shot($id: ID!) {
@@ -292,12 +371,6 @@ query ShotsByAuthor($authorId: ID!, $targetId: ID!) {
 #   }
 # }
 
-query Me {
-  me {
-    id
-  }
-}
-
 # query MyVotes {
 #   myVotes {
 #     ...vote
@@ -316,27 +389,47 @@ query Me {
 #   }
 # }
 
-query MyShots($targetId: ID!) {
-  myShots(targetId: $targetId) {
-    ...shot
+mutation CreateBulletEmoji($bulletId: ID!, $code: EmojiCode!) {
+  createBulletEmoji(bulletId: $bulletId, code: $code) {
+    emoji {
+      ...bulletEmoji
+    }
+    like {
+      ...bulletEmojiLike
+    }
   }
 }
 
-query MyVotes($pollId: ID!) {
-  myVotes(pollId: $pollId) {
-    ...vote
+mutation UpsertBulletEmojiLike($bulletEmojiId: ID!, $data: LikeInput!) {
+  upsertBulletEmojiLike(bulletEmojiId: $bulletEmojiId, data: $data) {
+    like {
+      ...bulletEmojiLike
+    }
+    count {
+      ...bulletEmojiCount
+    }
   }
 }
 
-query MyEmojiLike($emojiId: ID!) {
-  myEmojiLike(emojiId: $emojiId) {
-    ...emojiLike
+mutation CreateCardEmoji($cardId: ID!, $code: EmojiCode!) {
+  createCardEmoji(cardId: $cardId, code: $code) {
+    emoji {
+      ...cardEmoji
+    }
+    like {
+      ...cardEmojiLike
+    }
   }
 }
 
-mutation CreateSymbolCard($data: CardInput!) {
-  createSymbolCard(data: $data) {
-    ...card
+mutation UpsertCardEmojiLike($cardEmojiId: ID!, $data: LikeInput!) {
+  upsertCardEmojiLike(cardEmojiId: $cardEmojiId, data: $data) {
+    like {
+      ...cardEmojiLike
+    }
+    count {
+      ...cardEmojiCount
+    }
   }
 }
 
@@ -346,9 +439,11 @@ mutation UpdateCardMeta($symbol: String!, $data: CardMetaInput!) {
   }
 }
 
-mutation CreateCardBody($cardSymbol: String!, $data: CardBodyInput!) {
-  createCardBody(cardSymbol: $cardSymbol, data: $data) {
-    ...cardBody
+mutation CreateCommit($data: CommitInput!) {
+  createCommit(data: $data) {
+    cardStates {
+      ...cardState
+    }
   }
 }
 
@@ -358,15 +453,21 @@ mutation CreatePoll($data: PollInput!) {
   }
 }
 
-mutation CreateVote($pollId: ID!, $data: VoteInput!) {
-  createVote(pollId: $pollId, data: $data) {
-    ...vote
-  }
-}
-
 mutation CreateShot($data: ShotInput!) {
   createShot(data: $data) {
     ...shot
+  }
+}
+
+mutation UpdateShot($id: ID!, $data: ShotInput!) {
+  updateShot(id: $id, data: $data) {
+    ...shot
+  }
+}
+
+mutation CreateVote($pollId: ID!, $data: VoteInput!) {
+  createVote(pollId: $pollId, data: $data) {
+    ...vote
   }
 }
 
@@ -387,28 +488,6 @@ mutation CreateShot($data: ShotInput!) {
 #     ...comment
 #   }
 # }
-
-mutation CreateEmoji($bulletId: ID!, $text: EmojiText!) {
-  createEmoji(bulletId: $bulletId, text: $text) {
-    emoji {
-      ...emoji
-    }
-    like {
-      ...emojiLike
-    }
-  }
-}
-
-mutation UpsertEmojiLike($emojiId: ID!, $data: LikeInput!) {
-  upsertEmojiLike(emojiId: $emojiId, data: $data) {
-    like {
-      ...emojiLike
-    }
-    count {
-      ...emojiCount
-    }
-  }
-}
 
 # mutation CreateCommentLike($commentId: ID!, $data: LikeInput!) {
 #   createCommentLike(commentId: $commentId, data: $data) {
@@ -472,4 +551,10 @@ mutation UpsertEmojiLike($emojiId: ID!, $data: LikeInput!) {
 
 # mutation SignOut {
 #   signOut
+# }
+
+# mutation CreateCardBody($cardSymbol: String!, $data: CardBodyInput!) {
+#   createCardBody(cardSymbol: $cardSymbol, data: $data) {
+#     ...cardBody
+#   }
 # }

@@ -1,4 +1,6 @@
-// Ref: https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
+/**
+ * @see https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
+ */
 import { useState } from 'react'
 import Link from 'next/link'
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'

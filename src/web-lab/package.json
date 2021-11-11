@@ -26,14 +26,20 @@
     ]
   },
   "dependencies": {
+    "immer": "^9.0.6",
+    "localforage": "^1.10.0",
+    "nanoid": "^3.1.30",
     "next": "latest",
     "prismjs": "^1.24.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-modal": "^3.14.3",
+    "rxjs": "^7.4.0",
+    "rxjs-hooks": "^0.7.0",
     "slate": "^0.63.0",
     "slate-history": "^0.62.0",
-    "slate-react": "^0.65.2"
+    "slate-react": "^0.65.2",
+    "yjs": "^13.5.16"
   },
   "devDependencies": {
     "@babel/plugin-transform-unicode-regex": "^7.12.13",

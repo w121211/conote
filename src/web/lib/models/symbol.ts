@@ -1,44 +1,61 @@
-import { CardType } from '@prisma/client'
+import { Symbol as PrismaSymbol, SymbolType } from '.prisma/client'
+import prisma from '../prisma'
 
-export type SymbolParsed = {
-  symbolName: string
-  cardType: CardType
-  authorName?: string // not implemented
+/**
+ * Symbol category:
+ *
+ * - Ticker: $AB, $A01
+ * - Topic: [[what ever]], [[包括unicode]]
+ * - URL: @https://github.com/typescript-eslint
+ */
+
+export type ParsedSymbol = {
+  name: string
+  type: SymbolType
 }
 
 const reTicker = /^\$[A-Z0-9]+$/
-const reTopic = /^\[\[[^\]]+\]\]$/
-const reUrl = /^@[a-zA-Z0-9:/.]+/ // eg @https://regex101.com/ 非常簡單的 url regex，會捕捉到很多非 url 的 string
 
-/**
- * Parse symbol, symbol分為：
- * 1. ticker: $AB, $A01
- * 2. topic: [[what ever]], [[包括unicode]]
- * 3. 包含oauthor: `$AB@someone` `[[Ha ha]]@作者`
- *
- * @throws Symbol格式無法辨識
- *
- * TODO:
- * 1. 無法區別[[topic]] vs [[https://...]], [[https://...]]應要parse為WEBPAGE
- * 2. 無法辨識oauthor
- */
-export function parseSymbol(symbol: string): SymbolParsed {
-  let cardType: CardType
-  let authorName: string | undefined
-  if (symbol.match(reTicker) !== null) {
-    cardType = CardType.TICKER
-  } else if (symbol.match(reTopic) !== null) {
-    cardType = CardType.TOPIC
-  } else if (symbol.match(reUrl) !== null) {
-    cardType = CardType.WEBPAGE
-  } else {
-    throw new Error(`symbol格式無法辨識: ${symbol}`)
-  }
-  return {
-    symbolName: symbol,
-    cardType,
-    authorName,
-  }
+const reTopic = /^\[\[[^\]]+\]\]$/
+
+// eg @https://regex101.com/ 非常簡單的 url regex，會捕捉到很多非 url 的 string
+const reUrl = /^@[a-zA-Z0-9:/.]+/
+
+export const SymbolModel = {
+  async getOrCreate(symbol: string): Promise<PrismaSymbol> {
+    const { name, type } = this.parse(symbol)
+    return prisma.symbol.upsert({
+      create: { name, type },
+      where: { name },
+      update: {},
+    })
+  },
+
+  /**
+   * Parse symbol
+   *
+   * @throws Symbol格式無法辨識
+   *
+   * TODO:
+   * 1. 無法區別[[topic]] vs [[https://...]], [[https://...]]應要parse為WEBPAGE
+   * 2. 無法辨識oauthor
+   */
+  parse(symbol: string): ParsedSymbol {
+    let type: SymbolType
+    if (symbol.match(reTicker) !== null) {
+      type = SymbolType.TICKER
+    } else if (symbol.match(reTopic) !== null) {
+      type = SymbolType.TOPIC
+    } else if (symbol.match(reUrl) !== null) {
+      type = SymbolType.URL
+    } else {
+      throw new Error(`symbol parse error: ${symbol}`)
+    }
+    return {
+      name: symbol,
+      type,
+    }
+  },
 }
 
 // export function urlToSymbol(url: string): string | null {

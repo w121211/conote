@@ -54,7 +54,7 @@ export function toStringId<T extends { id: number }>(obj: T): T & { id: string }
 //   return params
 // }
 
-export function deltaLike<T extends BulletLike | EmojiLike>(like: T, prevLike?: T): { dDown: number; dUp: number } {
+export function deltaLike<T extends EmojiLike>(like: T, prevLike?: T): { dDown: number; dUp: number } {
   // 計算up-down的變化值
   let dUp = 0
   let dDown = 0

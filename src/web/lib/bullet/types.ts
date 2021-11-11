@@ -88,11 +88,15 @@ export type BulletOperation = 'CREATE' | 'MOVE' | 'UPDATE' | 'DELETE' | 'UPDATE_
 
 export type Bullet = {
   id: string
-  timestamp: number // commit 的時間點，有修改時才會更新，沒修改時會沿用之前的時間，用於判斷本次 commit 包含哪些 bullet
-  userIds: string[] // 最新修改此 bullet 的 user id 放在最後
+  cid?: string // 若沒有 id 時會生成一個 id
+
+  // timestamp: number // commit 的時間點，有修改時才會更新，沒修改時會沿用之前的時間，用於判斷本次 commit 包含哪些 bullet
+  // commitId: string
+  // userIds: string[] // 最新修改此 bullet 的 user id 放在最後
+
   head: string
   body?: string
-  children: Bullet[] // 空 array 表示為無children
+  // children: Bullet[] // 空 array 表示為無children
 
   // author?: { id: string; name: string }
   // source?: { id: string; url: string }
@@ -100,7 +104,7 @@ export type Bullet = {
   sourceCardId?: string
   sourceLinkId?: string
 
-  symbols: { cardId: string; str: string }[] // 在此 bullet 中所提到的 symbols，當 symbol 改名時，仍可以靠 id 修正成新名字
+  symbols?: { cardId: string; str: string }[] // 在此 bullet 中所提到的 symbols，當 symbol 改名時，仍可以靠 id 修正成新名字
 
   placeholder?: string
   freeze?: true // 無法變動
@@ -112,9 +116,9 @@ export type Bullet = {
   // hashtagIds?: number[] // 屬 self-objects，若內文遭到刪除可透過此偵測
 
   // Consider to remove
-  op?: BulletOperation // 記錄編輯狀態，用於 revision TODO: 若沒修改時 op 會移除嗎？？？
-  prevHead?: string
-  prevBody?: string
+  // op?: BulletOperation // 記錄編輯狀態，用於 revision TODO: 若沒修改時 op 會移除嗎？？？
+  // prevHead?: string
+  // prevBody?: string
   // keyvalue?: true // 用key-value的方式呈現
   // valueBoolean?: true // body必須是boolean
   // valueArray?: true // body必須是string array
