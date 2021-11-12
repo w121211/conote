@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { dropDatabase, tableOne } from './localforage-db'
+import { hello, LocalDBService } from '../../lib/localforage'
 
 const Page = (): JSX.Element => {
   useEffect(() => {
@@ -8,16 +8,19 @@ const Page = (): JSX.Element => {
         const a = {
           hello: 'world',
         }
-        dropDatabase()
-        const value = await tableOne.getItem('a')
+        // const value = await .getItem('a')
+        // await LocalDBService.tableOne.setItem('a', a)
+
+        const value = await LocalDBService.tableOne.getItem('a')
         console.log(value)
       } catch (err) {
         console.log(err)
       }
     }
-
     runner()
   }, [])
+
+  console.log(hello)
 
   return (
     <div className="container">

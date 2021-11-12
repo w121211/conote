@@ -270,7 +270,7 @@ type Card {
   link: Link
   # headDoc: CardDoc # 可能為 null
   updatedAt: DateTime!
-  state: CardState!
+  state: CardState # 可能為 null
 }
 
 type CardEmoji {
