@@ -53,49 +53,6 @@ function getNavs(root: LiElement, destPath: number[], meta: CardMeta): Nav[] {
  * @param poll
  * @param author 若給予視為代表 author 投票
  */
-// const PollComponent = (props: { poll: Poll; author?: string }): JSX.Element => {
-//   const { poll, author } = props
-//   const [createVote] = useCreateVoteMutation({
-//     update(cache, { data }) {
-//       // const res = cache.readQuery<MyVotesQuery>({
-//       //   query: MyVotesDocument,
-//       // })
-//       // if (data?.createVote && res?.myVotes) {
-//       //   cache.writeQuery({
-//       //     query: MyVotesDocument,
-//       //     data: { myVotes: res.myVotes.concat([data.createVote]) },
-//       //   })
-//       // }
-//       // refetch()
-//     },
-//     // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
-//   })
-//   const onVote = () => {
-//     // 已經投票且生效，不能再投
-//     // 尚未投票，可以投
-//     // 送出按鈕
-//   }
-
-//   return (
-//     <>
-//       {poll.choices.map((e, i) => (
-//         <button
-//           key={i}
-//           onClick={event => {
-//             createVote({
-//               variables: {
-//                 pollId: poll.id,
-//                 data: { choiceIdx: i },
-//               },
-//             })
-//           }}
-//         >
-//           {e}
-//         </button>
-//       ))}
-//     </>
-//   )
-// }
 
 // export const Context = createContext({
 //   author: '' as string | undefined,
@@ -120,6 +77,7 @@ const CardSymbolPage = (): JSX.Element | null => {
   const [showKwTooltip, setShowKwTooltip] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [submitFinished, setSubmitFinished] = useState(false)
+  const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
   const { data: cardMetaData } = useCardMetaQuery({
     variables: { symbol: data?.selfCard.symbol ?? '' },
   })
@@ -127,11 +85,6 @@ const CardSymbolPage = (): JSX.Element | null => {
     fetchPolicy: 'cache-first',
     variables: { bulletId: data?.openedLi.children[0].id ?? '' },
   })
-  // const [openLiHashtags, setOpenLiHashtags] = useState<Hashtag[]>([])
-  // const [queryHashtags, { data: hashtagData }] = useHashtagsLazyQuery({
-  //   fetchPolicy: 'cache-first',
-  //   variables: { symbol: data?.self.symbol ?? '' },
-  // })
 
   useEffect(() => {
     if (router.isReady) {
@@ -221,44 +174,17 @@ const CardSymbolPage = (): JSX.Element | null => {
   }
 
   return (
-    <Layout>
-      <div style={{ marginBottom: '3em' }}>
-        <div>
-          <NavPath
-            path={navs}
-            location={{ ...location }}
-            mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
-          />
+    <Layout
+      buttonLeft={
+        <>
           <button
-            // className="noBg"
             onClick={() => {
-              if (meData || user) {
-                setReadonly(!readonly)
-              }
-              if (!meData && !user) {
-                setReadonly(true)
-                setShowLoginPopup(true)
-              }
+              dropValue()
+              router.reload()
             }}
           >
-            {readonly || !meData || !user ? '編輯' : '鎖定'}
+            Drop
           </button>
-          {showLoginPopup && (
-            <Popup
-              visible={showLoginPopup}
-              hideBoard={() => {
-                setShowLoginPopup(false)
-              }}
-              buttons={
-                <button className="primary" onClick={() => setShowLoginPopup(false)}>
-                  確定
-                </button>
-              }
-            >
-              請先登入！
-            </Popup>
-          )}
-
           <button
             className="primary"
             onClick={() => {
@@ -277,28 +203,45 @@ const CardSymbolPage = (): JSX.Element | null => {
             {submitFinished ? '已儲存' : '儲存'}
             {/* {console.log(isValueModified)} */}
           </button>
+        </>
+      }
+    >
+      <div style={{ marginBottom: '3em' }}>
+        <div>
+          <NavPath
+            path={navs}
+            location={{ ...location }}
+            mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
+          />
           {/* <button
-          className="primary"
-          onClick={() => {
-            submitValue({
-              onFinish: () => {
-                // dropValue()
-                router.reload()
-              },
-            })
-          }}
-        >
-          Submit {isValueModified ? '*' : ''}
-        </button> */}
-
-          <button
+            // className="noBg"
             onClick={() => {
-              dropValue()
-              router.reload()
+              if (meData || user) {
+                setReadonly(!readonly)
+              }
+              if (!meData && !user) {
+                setReadonly(true)
+                setShowLoginPopup(true)
+              }
             }}
           >
-            {'Drop'}
-          </button>
+            {readonly || !meData || !user ? '編輯' : '鎖定'}
+          </button> */}
+          {showLoginPopup && (
+            <Popup
+              visible={showLoginPopup}
+              hideBoard={() => {
+                setShowLoginPopup(false)
+              }}
+              buttons={
+                <button className="primary" onClick={() => setShowLoginPopup(false)}>
+                  確定
+                </button>
+              }
+            >
+              請先登入！
+            </Popup>
+          )}
 
           {router.query.a && (
             <button
@@ -319,95 +262,113 @@ const CardSymbolPage = (): JSX.Element | null => {
             </button>
           )}
 
-          {data.openedLi.children[0].rootBulletDraft && data?.selfCard.symbol && (
-            <CardMetaForm
-              symbol={data.selfCard.symbol}
-              selfCard={data.selfCard}
-              handleCardMetaSubmitted={handleCardMetaSubmitted}
-            />
-          )}
           {/* // )} */}
 
-          {cardMetaData?.cardMeta.keywords && (
-            <div className={classes.headerKw}>
-              {cardMetaData?.cardMeta.keywords.map((e, i) => {
-                if (i < 5) {
-                  return (
-                    <span className={classes.headerKwEl} key={i}>
-                      {e}
-                    </span>
-                  )
-                }
-                return null
-              })}
-              {cardMetaData.cardMeta.keywords.length > 5 && (
-                <span
-                  className={classes.headerKwElHidden}
-                  onClick={e => {
-                    e.stopPropagation()
-                    setShowKwTooltip(true)
-                  }}
-                >
-                  ...+{cardMetaData.cardMeta.keywords.length - 5}項
-                  <MyTooltip
-                    className={classes.headerKwElTooltip}
-                    visible={showKwTooltip}
-                    handleVisibleState={() => {
-                      setShowKwTooltip(false)
-                    }}
-                  >
-                    {cardMetaData?.cardMeta.keywords.map((e, i) => {
-                      if (i >= 5) {
-                        return (
-                          <span className={classes.headerKwEl} key={i}>
-                            {e}
-                          </span>
-                        )
-                      }
-                      return null
-                    })}
-                  </MyTooltip>
-                </span>
-              )}
-            </div>
-          )}
           <div className={classes.header}>
-            {cardMetaData?.cardMeta.author && (
-              <Link href={`/author/${encodeURIComponent('@' + cardMetaData?.cardMeta.author)}`}>
-                <a className={classes.author}>@{cardMetaData?.cardMeta.author}</a>
-              </Link>
-            )}
-            <h3>
+            <h3
+              onMouseEnter={e => {
+                setShowHeaderHiddenBtns(true)
+              }}
+              onMouseLeave={e => {
+                setShowHeaderHiddenBtns(false)
+              }}
+            >
+              <div
+                className={classes.headerHiddenBtns}
+                style={showHeaderHiddenBtns ? { visibility: 'visible' } : { visibility: 'hidden' }}
+              >
+                {data.openedLi.children[0].rootBulletDraft && data?.selfCard.symbol && (
+                  <CardMetaForm
+                    symbol={data.selfCard.symbol}
+                    selfCard={data.selfCard}
+                    handleCardMetaSubmitted={handleCardMetaSubmitted}
+                    btnClassName={classes.cardMetaBtn}
+                  />
+                )}
+                {data.selfCard.link?.url && (
+                  // <button>
+                  <a className={classes.cardSource} href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
+                    <LinkIcon />
+                    開啟來源
+                  </a>
+                  // </button>
+                )}
+              </div>
               {router.query.p && Node.string(data.openedLi.children[0]).replace(rePoll, '').trimEnd()}
               {data.mirror && !router.query.p && data.mirror.symbol}
               {!router.query.p && !data.mirror && <>{cardMetaData?.cardMeta.title ?? data.selfCard.symbol}</>}
             </h3>
-            {data.selfCard.link?.url && (
-              // <button>
-              <a href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
-                {/* 來源連結 */}
-                <LinkIcon />
-              </a>
-              // </button>
+            {cardMetaData?.cardMeta.keywords && (
+              <div className={classes.headerKw}>
+                {cardMetaData?.cardMeta.keywords.map((e, i) => {
+                  if (i < 5) {
+                    return (
+                      <span className={classes.headerKwEl} key={i}>
+                        {e}
+                      </span>
+                    )
+                  }
+                  return null
+                })}
+                {cardMetaData.cardMeta.keywords.length > 5 && (
+                  <span
+                    className={classes.headerKwElHidden}
+                    onClick={e => {
+                      e.stopPropagation()
+                      setShowKwTooltip(true)
+                    }}
+                  >
+                    ...+{cardMetaData.cardMeta.keywords.length - 5}項
+                    <MyTooltip
+                      className={classes.headerKwElTooltip}
+                      visible={showKwTooltip}
+                      handleVisibleState={() => {
+                        setShowKwTooltip(false)
+                      }}
+                    >
+                      {cardMetaData?.cardMeta.keywords.map((e, i) => {
+                        if (i >= 5) {
+                          return (
+                            <span className={classes.headerKwEl} key={i}>
+                              {e}
+                            </span>
+                          )
+                        }
+                        return null
+                      })}
+                    </MyTooltip>
+                  </span>
+                )}
+              </div>
             )}
+            <div className={classes.headerBottom}>
+              {emojiData?.emojis && data?.openedLi.children[0].id && (
+                <div>
+                  {emojiData.emojis.findIndex(e => e.text === 'PIN') < 0 && (
+                    <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="PIN" />
+                  )}
+                  {emojiData.emojis.findIndex(e => e.text === 'UP') < 0 && (
+                    <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="UP" />
+                  )}
+                  {emojiData.emojis.findIndex(e => e.text === 'DOWN') < 0 && (
+                    <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="DOWN" />
+                  )}
+                  {/* {console.log(emojiData.emojis)} */}
+                  {emojiData.emojis.map((e, i) => (
+                    <EmojiHeaderBtn key={i} emoji={e} bulletId={data.openedLi.children[0].id ?? ''} />
+                  ))}
+                </div>
+              )}
+              {cardMetaData?.cardMeta.author && (
+                <>
+                  <div className={classes.divider}></div>
+                  <Link href={`/author/${encodeURIComponent('@' + cardMetaData?.cardMeta.author)}`}>
+                    <a className={classes.author}>@{cardMetaData?.cardMeta.author}</a>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
-          {emojiData?.emojis && data?.openedLi.children[0].id && (
-            <span>
-              {emojiData.emojis.findIndex(e => e.text === 'PIN') < 0 && (
-                <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="PIN" />
-              )}
-              {emojiData.emojis.findIndex(e => e.text === 'UP') < 0 && (
-                <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="UP" />
-              )}
-              {emojiData.emojis.findIndex(e => e.text === 'DOWN') < 0 && (
-                <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="DOWN" />
-              )}
-              {/* {console.log(emojiData.emojis)} */}
-              {emojiData.emojis.map((e, i) => (
-                <EmojiHeaderBtn key={i} emoji={e} bulletId={data.openedLi.children[0].id ?? ''} />
-              ))}
-            </span>
-          )}
           {/* {openLiHashtags.length > 0 && (
             <div>
               {openLiHashtags.map((e, i) => {

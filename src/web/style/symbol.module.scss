@@ -21,7 +21,7 @@
     transform: translateX(0);
   }
   &.toggleClicked {
-    background-image: linear-gradient($secondary, $secondary), url('../assets/png/toggle/toggle-bar.png');
+    background-image: linear-gradient($primary, $primary), url('../assets/png/toggle/toggle-bar.png');
     &:after {
       transform: translateX(100%);
     }
@@ -34,7 +34,7 @@
   margin: 0 0 1em;
   color: $black;
   .author {
-    width: 100%;
+    // width: 100%;
     min-width: 60px;
     overflow: hidden;
     white-space: nowrap;
@@ -46,22 +46,14 @@
   a {
     display: flex;
   }
-  svg {
-    width: 17px;
-    height: 17px;
-    fill: $secondary;
-    margin-right: 8px;
-    margin-left: 2px;
-    &:hover {
-      fill: $secondaryHover;
-    }
-  }
+
   h3 {
     margin: 0;
-    max-width: 100%;
+    width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: pointer;
   }
 }
 .headerKw {
@@ -74,13 +66,13 @@
   margin: 0 4px;
   padding: 0 10px;
   border-radius: 3px;
-  background: $secondaryHover-light;
+  background: $primaryHover-light;
 }
 .headerKwElHidden {
   position: relative;
-  color: $secondary;
+  color: $primary;
   &:hover {
-    box-shadow: 0 1px 0 $secondary;
+    box-shadow: 0 1px 0 $primary;
     cursor: pointer;
   }
 }
@@ -93,4 +85,55 @@
   padding: 10px;
   row-gap: 10px;
   // transition: all 0.1s;
+}
+.cardSource {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+  color: $gray-text-dark;
+  &:hover {
+    color: $black;
+    svg {
+      fill: $primary;
+    }
+  }
+  svg {
+    width: 15px;
+    height: 15px;
+    fill: $primaryHover;
+    margin-right: 2px;
+    // margin-left: 2px;
+  }
+}
+.headerHiddenBtns {
+  display: flex;
+  // position: absolute;
+  align-items: center;
+  // color: $gray-text;
+  line-height: 1;
+  font-size: 14px;
+  font-weight: normal;
+  visibility: hidden;
+}
+.cardMetaBtn {
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  color: $gray-text-dark;
+  &:hover {
+    background: none;
+    color: $black;
+  }
+}
+.headerBottom {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  .divider {
+    height: 18px;
+    width: 1px;
+    margin: 0 6px;
+    background: $gray;
+  }
 }

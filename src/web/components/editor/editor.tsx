@@ -169,6 +169,8 @@ const decorate = ([node, path]: NodeEntry) => {
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, children, leaf } = props
+  const readonly = useReadOnly()
+  const selected = useSelected()
   // const [isPressShift, setIsPressShift] = useState(false)
   // console.log(isPressShift)
   let style: React.CSSProperties = {}
@@ -202,46 +204,86 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   // filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
   // console.log(leaf.type, children)
   // console.log(leaf)
+  if (readonly || !selected) {
+    switch (leaf.type) {
+      case 'mirror-ticker':
+      case 'mirror-topic':
+      case 'ticker':
+      case 'topic': {
+        className = classes.mirrorLeaf
+        // style = { color: '#5395f0' }
+        break
+      }
+      case 'author':
+      case 'url':
+      case 'filtertag': {
+        style = { color: '#0cb26e' }
+        break
+      }
+      // case 'poll':
+      // case 'new-poll': {
+      //   style = { color: '#329ead' }
+      //   break
+      // }
+      // case 'shot':
+      // case 'new-shot': {
+      //   style = { color: 'rgb(215 159 29)' }
+      //   break
+      // }
+      // case 'filtertag': {
+      //   className = classes.filtertagLeaf
+      //   style = { color: '#6a53fe' }
+      //   break
+      // }
+      // case 'url': {
+      //   style = { color: '#ff619b' }
+      //   break
+      // }
+      // default: {
+      //   style = { color: '#3d434a' }
+      // }
+    }
+  } else {
+    switch (leaf.type) {
+      case 'mirror-ticker':
+      case 'mirror-topic': {
+        className = classes.mirrorLeaf
+        // style = { color: '#5395f0' }
+        break
+      }
+      case 'author': {
+        style = { color: '#0cb26e' }
+        break
+      }
+      case 'poll':
+      case 'new-poll': {
+        style = { color: '#329ead' }
+        break
+      }
+      case 'shot':
+      case 'new-shot': {
+        style = { color: 'rgb(215 159 29)' }
+        break
+      }
+      case 'ticker':
+      case 'topic': {
+        className = classes.topicLeaf
 
-  switch (leaf.type) {
-    case 'mirror-ticker':
-    case 'mirror-topic': {
-      className = classes.mirrorLeaf
-      // style = { color: '#5395f0' }
-      break
-    }
-    case 'author': {
-      style = { color: '#0cb26e' }
-      break
-    }
-    case 'poll':
-    case 'new-poll': {
-      style = { color: '#329ead' }
-      break
-    }
-    case 'shot':
-    case 'new-shot': {
-      style = { color: 'rgb(215 159 29)' }
-      break
-    }
-    case 'ticker':
-    case 'topic': {
-      className = classes.topicLeaf
-
-      // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
-      break
-    }
-    case 'filtertag': {
-      className = classes.filtertagLeaf
-      style = { color: '#6a53fe' }
-      break
-    }
-    case 'url': {
-      style = { color: '#ff619b' }
-      break
-    }
-    default: {
-      style = { color: '#3d434a' }
+        // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
+        break
+      }
+      case 'filtertag': {
+        className = classes.filtertagLeaf
+        style = { color: '#6a53fe' }
+        break
+      }
+      case 'url': {
+        style = { color: '#ff619b' }
+        break
+      }
+      default: {
+        style = { color: '#3d434a' }
+      }
     }
   }
 
@@ -426,7 +468,6 @@ const InlineSymbol = ({
         }}
       >
         {children}
-        {element.str}
       </span>
       {/* </Link> */}
       {showPopover && (
@@ -716,14 +757,32 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement; lo
     <span {...attributes}>
       {!selected && (
         <button
-          className="inline"
+          className={classes.shotBtn}
           contentEditable={false}
           onClick={e => {
             e.stopPropagation()
             setShowPopover(true)
           }}
         >
-          {element.params}
+          {element.params.map((e, i) => {
+            return (
+              <span
+                className={
+                  e.startsWith('@')
+                    ? classes.shotAuthor
+                    : e.startsWith('$') || e.startsWith('[[')
+                    ? classes.shotTarget
+                    : e.startsWith('#')
+                    ? classes.shotChoice
+                    : ''
+                }
+                data-choice={e.startsWith('#') ? e : ''}
+                key={i}
+              >
+                {e}
+              </span>
+            )
+          })}
         </button>
       )}
       {showPopover && (
@@ -861,26 +920,26 @@ const Lc = ({
       parseLcAndReplace({ editor, lcEntry: [element, path] })
       return
     }
-    // if (selected && focused) {
-    //   // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
-    //   const path = ReactEditor.findPath(editor, element)
-    //   const lcChildren = Node.children(editor, path)
+    if (selected) {
+      // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
+      const path = ReactEditor.findPath(editor, element)
+      //   const lcChildren = Node.children(editor, path)
 
-    //   for (const lcChild of lcChildren) {
-    //     if (!Text.isText(lcChild[0]) && (lcChild[0].type === 'poll' || lcChild[0].type === 'shot')) {
-    //       console.log(lcChild)
-    //       Transforms.insertText(editor, lcChild[0].str, { at: lcChild[1] })
-    //       // Transforms.setNodes(editor, { children: [{ text: `${lcChild[0].str}` }] }, { at: lcChild[1] })
-    //       // match:(n,p)=>!Text.isText(n)&&Element.isElement(n)&&isInlineElement(n)
-    //     }
-    //   }
+      //   for (const lcChild of lcChildren) {
+      //     if (!Text.isText(lcChild[0]) && (lcChild[0].type === 'poll' || lcChild[0].type === 'shot')) {
+      //       console.log(lcChild)
+      //       Transforms.insertText(editor, lcChild[0].str, { at: lcChild[1] })
+      //       // Transforms.setNodes(editor, { children: [{ text: `${lcChild[0].str}` }] }, { at: lcChild[1] })
+      //       // match:(n,p)=>!Text.isText(n)&&Element.isElement(n)&&isInlineElement(n)
+      //     }
+      //   }
 
-    //   // Transforms.unwrapNodes(editor, {
-    //   //   at: path,
-    //   //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
-    //   // })
-    //   // console.log('unwrapNodes', path)
-    // }
+      Transforms.unwrapNodes(editor, {
+        at: path,
+        match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+      })
+      //   // console.log('unwrapNodes', path)
+    }
   }, [selected, readonly])
   // useEffect(()=>{
   //   if(focused){

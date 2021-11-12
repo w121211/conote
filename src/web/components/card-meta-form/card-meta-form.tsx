@@ -7,11 +7,13 @@ const CardMetaForm = ({
   symbol,
   selfCard,
   handleCardMetaSubmitted,
+  btnClassName,
 }: {
   symbol: string
   selfCard: Card
   handleCardMetaSubmitted: (isSubmitted: boolean) => void
-}) => {
+  btnClassName?: string
+}): JSX.Element => {
   const [showHeaderForm, setShowHeaderForm] = useState(false)
 
   const { data: cardMetaData } = useCardMetaQuery({
@@ -20,7 +22,7 @@ const CardMetaForm = ({
   return (
     <>
       <button
-        className="secondary"
+        className={btnClassName ? btnClassName : ''}
         onClick={() => {
           setShowHeaderForm(true)
         }}

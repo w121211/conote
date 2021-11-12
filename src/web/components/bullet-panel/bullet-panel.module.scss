@@ -39,7 +39,7 @@
   }
   // &:hover {
   //   cursor: pointer;
-  //   // background-color: $secondaryHover;
+  //   // background-color: $primaryHover;
   //   // color: white;
   // }
 }
@@ -52,7 +52,7 @@
 
   &:hover {
     &:not(.title) {
-      background-color: $secondaryHover-light;
+      background-color: $primaryHover-light;
     }
     cursor: pointer;
     a {

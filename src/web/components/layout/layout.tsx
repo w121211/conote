@@ -8,11 +8,13 @@ import { useMeQuery } from '../../apollo/query.graphql'
 export default function Layout({
   children,
   navPath,
+  buttonLeft,
 }: // handlePath,
 // handleSymbol,
 {
   children: React.ReactNode
   navPath?: React.ReactNode
+  buttonLeft?: React.ReactNode
   // handlePath?: (i: number) => void
   // handleSymbol?: (e: string) => void
 }): JSX.Element {
@@ -74,15 +76,18 @@ export default function Layout({
             <a>Conote</a>
           </Link>
           {/* {navPath} */}
-          {meData ? (
-            <button className="secondary">
-              <a href="/api/auth/logout">Logout</a>{' '}
-            </button>
-          ) : (
-            <button className="primary">
-              <a href="/api/auth/login">Login</a>
-            </button>
-          )}
+          <div className={classes.left}>
+            {buttonLeft}
+            {meData ? (
+              <button className="secondary">
+                <a href="/api/auth/logout">Logout</a>{' '}
+              </button>
+            ) : (
+              <button className="primary">
+                <a href="/api/auth/login">Login</a>
+              </button>
+            )}
+          </div>
         </div>
       </nav>
 

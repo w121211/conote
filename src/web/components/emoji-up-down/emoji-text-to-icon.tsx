@@ -9,11 +9,11 @@ const EmojiTextToIcon = ({ emoji, emojiText }: { emoji?: Emoji; emojiText?: Emoj
   if (emoji) {
     switch (emoji.text) {
       case 'PIN':
-        return <PinIcon />
+        return <span>❤️</span>
       case 'UP':
-        return <UpIcon />
+        return <span>👍</span>
       case 'DOWN':
-        return <UpIcon style={{ transform: 'rotate(180deg)' }} />
+        return <span>👎</span>
       default:
         return <span>{emoji.text}</span>
     }
@@ -21,11 +21,11 @@ const EmojiTextToIcon = ({ emoji, emojiText }: { emoji?: Emoji; emojiText?: Emoj
   if (emojiText) {
     switch (emojiText) {
       case 'PIN':
-        return <PinIcon />
+        return <span>❤️</span>
       case 'UP':
-        return <UpIcon />
+        return <span>👍</span>
       case 'DOWN':
-        return <UpIcon style={{ transform: 'rotate(180deg)' }} />
+        return <span>👎</span>
       default:
         return <span>{emojiText}</span>
     }

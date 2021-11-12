@@ -17,7 +17,7 @@ const CreateEmojiBtn = ({ bulletId, emojiText }: { bulletId: string; emojiText: 
   }
   return (
     <button
-      className={`inline mR ${classes.hashtag}`}
+      className={`inline ${classes.hashtag}`}
       onClick={() => {
         handleLike('UP')
       }}

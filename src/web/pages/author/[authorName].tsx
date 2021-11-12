@@ -14,6 +14,8 @@ import classes from '../../style/authorPage.module.scss'
 import Popover from '../../components/popover/popover'
 import { useUser } from '@auth0/nextjs-auth0'
 import Popup from '../../components/popup/popup'
+import ListLarge from '../../components/list-large/list-large'
+import ListRow from '../../components/list-row/list-row'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -36,13 +38,13 @@ function getNavs(root: LiElement, destPath: number[]): Nav[] {
   return navs
 }
 
-export const Context = createContext({
-  author: '' as string | undefined,
-  login: true,
-  showLoginPopup: (b: boolean) => {
-    '_'
-  },
-})
+// export const Context = createContext({
+//   author: '' as string | undefined,
+//   login: true,
+//   showLoginPopup: (b: boolean) => {
+//     '_'
+//   },
+// })
 
 const AuthorPage = (): JSX.Element | null => {
   const router = useRouter()
@@ -53,20 +55,20 @@ const AuthorPage = (): JSX.Element | null => {
   const [mentionedPopupContents, setMentionedPopupContents] = useState<undefined | JSX.Element>()
   // const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
   const [disableSubmit, setDisableSubmit] = useState(true)
-  const { data: meData, loading: meLoading } = useMeQuery({ fetchPolicy: 'cache-first' })
-  const { user, error, isLoading } = useUser()
+  // const { data: meData, loading: meLoading } = useMeQuery({ fetchPolicy: 'cache-first' })
+  // const { user, error, isLoading } = useUser()
   const [showLoginPopup, setShowLoginPopup] = useState(false)
   const [showHeaderForm, setShowHeaderForm] = useState(false)
   const [headerFormSubmited, setHeaderFormSubmited] = useState(false)
-  const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
+  // const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [submitFinished, setSubmitFinished] = useState(false)
 
-  useEffect(() => {
-    if (!meLoading && (meData || user)) {
-      // console.log(meData, user)
-      setReadonly(false)
-    }
-  }, [meData, user, meLoading])
+  // useEffect(() => {
+  //   if (!meLoading && (meData || user)) {
+  //     // console.log(meData, user)
+  //     setReadonly(false)
+  //   }
+  // }, [meData, user, meLoading])
 
   //   useEffect(() => {
   //     if (!showHeaderForm && headerFormSubmited) {
@@ -85,33 +87,33 @@ const AuthorPage = (): JSX.Element | null => {
   //   }
   // }, [data])
 
-  const navs = useMemo(() => {
-    if (data && location) {
-      const { self, mirror } = data
-      return mirror ? getNavs(mirror.rootLi, location.openedLiPath) : getNavs(self.rootLi, location.openedLiPath)
-    }
-  }, [data])
+  // const navs = useMemo(() => {
+  //   if (data && location) {
+  //     const { self, mirror } = data
+  //     return mirror ? getNavs(mirror.rootLi, location.openedLiPath) : getNavs(self.rootLi, location.openedLiPath)
+  //   }
+  // }, [data])
 
-  const editor = useMemo(() => {
-    if (data && location) {
-      const { selfCard, mirror, openedLi, value } = data
-      const parsedValue = parseChildren(value)
-      return (
-        <BulletEditor
-          initialValue={parsedValue}
-          location={location}
-          onValueChange={value => {
-            // setDisableSubmit(false)
-            setSubmitFinished(false)
-            setValue(value)
-          }}
-          readOnly={readonly}
-          selfCard={selfCard}
-        />
-      )
-    }
-    return null
-  }, [data, readonly])
+  // const editor = useMemo(() => {
+  //   if (data && location) {
+  //     const { selfCard, mirror, openedLi, value } = data
+  //     const parsedValue = parseChildren(value)
+  //     return (
+  //       <BulletEditor
+  //         initialValue={parsedValue}
+  //         location={location}
+  //         onValueChange={value => {
+  //           // setDisableSubmit(false)
+  //           setSubmitFinished(false)
+  //           setValue(value)
+  //         }}
+  //         readOnly={readonly}
+  //         selfCard={selfCard}
+  //       />
+  //     )
+  //   }
+  //   return null
+  // }, [data, readonly])
 
   //   if (data === undefined || location === undefined) {
   //     return null
@@ -119,78 +121,21 @@ const AuthorPage = (): JSX.Element | null => {
   return (
     <Layout>
       <div className={classes.authorContainer} style={{ marginBottom: '3em' }}>
-        {/* <button
-          // className="noBg"
-          onClick={() => {
-            if (meData || user) {
-              setReadonly(!readonly)
-            }
-            if (!meData && !user) {
-              setReadonly(true)
-              setShowLoginPopup(true)
-            }
-          }}
-        >
-          {readonly || !meData || !user ? '編輯' : '鎖定'}
-        </button>
-        {showLoginPopup && (
-          <Popup
-            visible={showLoginPopup}
-            hideBoard={() => {
-              setShowLoginPopup(false)
-            }}
-            buttons={
-              <button className="primary" onClick={() => setShowLoginPopup(false)}>
-                確定
-              </button>
-            }
-          >
-            請先登入！
-          </Popup>
-        )}
-
-        <button
-          className="primary"
-          onClick={() => {
-            submitValue({
-              onFinish: () => {
-                setSubmitFinished(true)
-                setDisableSubmit(true)
-                dropValue()
-
-                router.reload()
-              },
-            })
-          }}
-          disabled={!isValueModified}
-        >
-          {submitFinished ? '已儲存' : '儲存'}
-          
-        </button>
-
-        <button
-          onClick={() => {
-            dropValue()
-            router.reload()
-          }}
-        >
-          {'Drop'}
-        </button> */}
-
-        <h2 className={classes.header}>
+        <h1 className={classes.header}>
           {router.query.authorName}
           {/* <span className={classes.author}>@{data.selfCard.meta.author}</span> */}
-        </h2>
-        {/* <table>
+        </h1>
+        <div style={{ width: '50%', border: '1px solid #cccccc', padding: '0 20px' }}>
+          {/* <table>
             <th>網址</th>
             <td>www.xxx.yyy.com</td>
           </table> */}
-        <h3>最新</h3>
-        <ul>
-          <li>$AA #buy</li>
-          <li>$BB #sell</li>
-        </ul>
-        <h3>文章</h3>
+          <h2>Shot(預測)</h2>
+          <ListRow href="#" title="$AA" shot="#buy" summary="AAA Company" />
+          <ListRow href="#" title="$BB" shot="#sell" />
+          <ListLarge href="#" title="$BB" hashtags="#watch" />
+        </div>
+        <h2>文章</h2>
         <ul>
           <li>
             晶片荒惡化費半大跌 交期拉長至逾20周
@@ -200,7 +145,7 @@ const AuthorPage = (): JSX.Element | null => {
           </li>
           <li>哈哈晶片荒惡化費</li>
         </ul>
-        <h3>Mention in</h3>
+        <h2>Mention in</h2>
         <ul>
           <li
             onMouseOver={e => {

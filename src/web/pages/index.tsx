@@ -12,8 +12,10 @@ import Layout from '../components/layout/layout'
 import classes from './index.module.scss'
 import { useRouter } from 'next/router'
 import BulletSvg from '../components/bullet-svg/bullet-svg'
+import ListLarge from '../components/list-large/list-large'
 
 function LatestCards(): JSX.Element | null {
+  const router = useRouter()
   const { data, loading, error, fetchMore } = useLatestCardEntriesQuery({ fetchPolicy: 'cache-and-network' })
   const [hasMore, setHasMore] = useState<boolean>(true)
 
@@ -33,24 +35,13 @@ function LatestCards(): JSX.Element | null {
     <>
       {data.latestCardEntries &&
         data.latestCardEntries.map((e, i) => (
-          <div key={i} className={classes.latestCardsListText}>
-            <span className={classes.latestCardsListIndex}>{i + 1} </span>
-            {/* <BulletSvg className={classes.bulletSvg} /> */}
-            {/* {console.log(e)} */}
-            <Link href={`/card/${encodeURIComponent(e.symbol)}`}>
-              {/* <a>{e.link.url.substring(0, 50).replace('//', '').replace('[[', '').replace(']]', '')}</a> */}
-              <a className={classes.latestCardsLink}>
-                <div>
-                  <div className={classes.lcElementSymbol}>{e.symbol}</div>
-                  <div className={classes.lcElementInfo}>
-                    {e.type === 'WEBPAGE' && <div className={classes.lcElementUrl}> {e.symbol.substr(1)}</div>}
-                    <div className={classes.lcElementAuthor}>@cnyes</div>
-                  </div>
-                </div>
-                <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div>
-              </a>
-            </Link>
-          </div>
+          <ListLarge
+            key={i}
+            title={e.symbol}
+            href={`/card/${encodeURIComponent(e.symbol)}`}
+            sourceUrl={e.symbol.startsWith('@') ? e.symbol.substr(1) : `${router.asPath}card/${e.symbol.substr(1)}`}
+            summary="原油 vs 天然氣，哪個比較適合投資？ · 2021Q4油價是否還會持續上漲？ · #討論 #機會 哈哈哈哈啊fj;ejfoi喔喔喔喔喔j sdlkfj;aj · 哈哈哈哈再來"
+          />
         ))}
       {hasMore ? (
         <div>
@@ -101,54 +92,53 @@ function HomePage(): JSX.Element {
         </div>
         {user && data ? (
           <>
+            <div className={classes.innerTop}>
+              <h4
+                className={`${switchList === 'new' && classes.clickedTab}`}
+                onClick={() => {
+                  setSwitchList('new')
+                }}
+              >
+                最新
+              </h4>
+              <h4
+                className={`${switchList === 'hot' && classes.clickedTab}`}
+                onClick={() => {
+                  setSwitchList('hot')
+                }}
+              >
+                熱門
+              </h4>
+            </div>
             <div className={classes.inner}>
-              <div className={classes.new}>
-                <div className={classes.newHotList}>
-                  <h3
-                    className={`${switchList === 'new' && classes.clickedTab}`}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => {
-                      setSwitchList('new')
-                    }}
-                  >
-                    最新
-                  </h3>
-                  <h3
-                    className={`${switchList === 'hot' && classes.clickedTab}`}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => {
-                      setSwitchList('hot')
-                    }}
-                  >
-                    熱門
-                  </h3>
-                </div>
-                {switchList === 'hot' && <h4 className={classes.hotSubtitle}>#討論 #機會 #Battle #事件</h4>}
-                <div className={classes.latestCards}>
-                  {switchList === 'new' && <LatestCards />}
-                  {switchList === 'hot' && (
-                    <div>
-                      <div className={classes.hotElement}>
-                        <h5 className={`${classes.hashtag} ${classes.blue}`}>#討論</h5>
-                        <h4 className={classes.lcElementSymbol}>原油 vs 天然氣，哪個比較適合投資？</h4>
-                        <span className={classes.hashtagSymbol}>[[原油]]</span>
-                      </div>
-                      <div className={classes.divider}></div>
-                      <div className={classes.hotElement}>
-                        <div className={classes.hashtagContainer}>
+              <div className={classes.innerContent}>
+                <div className={classes.new}>
+                  {switchList === 'hot' && <h4 className={classes.hotSubtitle}>#討論 #機會 #Battle #事件</h4>}
+                  <div className={classes.latestCards}>
+                    {switchList === 'new' && <LatestCards />}
+                    {switchList === 'hot' && (
+                      <div>
+                        <div className={classes.hotElement}>
                           <h5 className={`${classes.hashtag} ${classes.blue}`}>#討論</h5>
-                          <h5 className={`${classes.hashtag} ${classes.orange}`}>#機會</h5>
+                          <h4 className={classes.lcElementSymbol}>原油 vs 天然氣，哪個比較適合投資？</h4>
+                          <span className={classes.hashtagSymbol}>[[原油]]</span>
                         </div>
-                        <h4 className={classes.lcElementSymbol}>
-                          全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI #多
-                          @匿名)
-                        </h4>
+                        <div className={classes.divider}></div>
+                        <div className={classes.hotElement}>
+                          <div className={classes.hashtagContainer}>
+                            <h5 className={`${classes.hashtag} ${classes.blue}`}>#討論</h5>
+                            <h5 className={`${classes.hashtag} ${classes.orange}`}>#機會</h5>
+                          </div>
+                          <h4 className={classes.lcElementSymbol}>
+                            全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI
+                            #多 @匿名)
+                          </h4>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-              {/* <div className={classes.hot}>
+                {/* <div className={classes.hot}>
                 <h3>Battle</h3>
                 <div className={classes.latestCards}>
                   <div className={classes.latestCardsListText}>
@@ -203,14 +193,15 @@ function HomePage(): JSX.Element {
                 
                 </div>
               </div> */}
-              <div className={classes.tickerList}>
-                <h3>自選股</h3>
-                <div className={classes.latestCards}>
-                  <div className={classes.latestCardsListText}>
-                    <div className={classes.tickerElement}>
-                      <div className={classes.lcElementSymbol}>$BA</div>
+                <div className={classes.tickerList}>
+                  <h3>自選股</h3>
+                  <div className={classes.latestCards}>
+                    <div className={classes.latestCardsListText}>
+                      <div className={classes.tickerElement}>
+                        <div className={classes.lcElementSymbol}>$BA</div>
 
-                      <span>221.39 +0.29 (+0.13%)</span>
+                        <span>221.39 +0.29 (+0.13%)</span>
+                      </div>
                     </div>
                   </div>
                 </div>

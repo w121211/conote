@@ -39,7 +39,7 @@
 //   color: #262626;
 //   /* height: 100%; */
 //   // background: #f7c44a;
-//   // background: $secondary;
+//   // background: $primary;
 //   border-radius: 15px;
 //   // font-family: 'jf-openhuninn-1';
 //   margin: 0 6px 0 0;
@@ -63,7 +63,7 @@
   // mix-blend-mode: multiply;
   // border-bottom: 0;
   &:hover {
-    // border: 2px solid $secondaryHover;
+    // border: 2px solid $primaryHover;
     color: $text;
     background: $gray;
     // border-bottom: 0;
@@ -87,7 +87,7 @@
   display: flex;
   // background-color: #313d9214;
   // background-color: #4d4e5414;
-  background-color: $secondaryHover;
+  background-color: $primaryHover;
   // height: 32px;
   // display: flex;
   position: absolute;
@@ -99,7 +99,7 @@
   // border-radius: 20px;
   // mix-blend-mode: multiply;
   &.voted {
-    background-color: $secondary;
+    background-color: $primary;
   }
 }
 .voteColorBlockText {
@@ -115,7 +115,7 @@
   }
 }
 .clicked {
-  box-shadow: 0 0 0 2px $secondary;
-  // border: 2px solid $secondary;
+  box-shadow: 0 0 0 2px $primary;
+  // border: 2px solid $primary;
   color: $text;
 }
