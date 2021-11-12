@@ -1,18 +1,6 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import {
-  useCreateCommentMutation,
-  CommentsDocument,
-  CommentsQuery,
-  useBoardQuery,
-  Board,
-  useCommentsQuery,
-  Comment,
-  Poll,
-  usePollQuery,
-} from '../../apollo/query.graphql'
 
 import useMeasure from 'react-use-measure'
-import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import // useCreateReplyMutation,
 // useCommentQuery,
 // useRepliesQuery,
@@ -20,21 +8,20 @@ import // useCreateReplyMutation,
 // RepliesDocument,
 '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
-import PollForm, { FormInputs } from '../board-form/poll-form'
+import BoardFrom, { FormInputs } from '../poll-form/board-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import BarChart from '../bar/bar'
 import classes from './board-page.module.scss'
-import AuthorPollForm from '../board-form/author-poll-form'
 
-const AuthorPollPage = ({
+const BoardPage = ({
+  boardId,
   pollId,
   // description,
   clickedChoiceIdx,
-  author,
+
   title,
 }: {
-  // boardId: string
-  author: string
+  boardId: string
   pollId: string
   clickedChoiceIdx?: number
   //  description?:string
@@ -42,23 +29,23 @@ const AuthorPollPage = ({
   title?: string
 }): JSX.Element => {
   const [measureRef, bounds] = useMeasure()
-  const [boardValue, setBoardValue] = useState<Board>()
+  // const [boardValue, setBoardValue] = useState<Board>()
   const [pollValue, setPollValue] = useState([''])
   const [commentsList, setCommentsList] = useState<Comment[]>()
   const [filterCommentsList, setFilterCommentsList] = useState<number[]>()
   // const [form] = Form.useForm()
 
-  const { data, loading, error } = usePollQuery({
-    variables: { id: pollId },
-  })
+  // const { data, loading, error } = useCommentQuery({
+  //   variables: { id: commentId },
+  // })
 
-  if (loading) {
-    return <p>loading...</p>
-  }
-  if (error) {
-    console.error(error)
-    return <p>API error</p>
-  }
+  // if (loading) {
+  //   return <p>loading...</p>
+  // }
+  // if (error) {
+  //   console.error(error)
+  //   return <p>API error</p>
+  // }
   // if (!data || !data.comment) {
   //   return <p>Comment not found</p>
   // }
@@ -110,46 +97,47 @@ const AuthorPollPage = ({
   //   // setFilterCommentsList(newCommentList)
   //   // console.log(commentsList, newCommentList)
   // }
-  if (data) {
-    return (
-      <>
-        <div className={classes.containerinner}>
-          {/* <div ref={measureRef}> */}
-          {/* <div className={classes.tabs}> */}
-          {/* <span onClick={discussClickLHandler}>討論</span>
-            <span onClick={discussClickRHandler}>Q&A</span> */}
-          {/* </div> */}
-          <div className={classes.title}>{data.poll.choices}</div>
 
-          {/* tabs底線 */}
-          <div className={classes.underLine} />
-          <h5>投票身份</h5>
-          <span>{author ? author : '我'}</span>
-          {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
-          {/* </div> */}
-          {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}
-          <AuthorPollForm
-            // boardId={boardId}
-            author={author}
-            pollId={pollId}
-            initialValue={{ title: '', choice: undefined, lines: '' }}
-            // filterComments={filterComments}
-            clickedChoiceIdx={clickedChoiceIdx}
-          />
-          {/* <CommentForm
+  return (
+    <>
+      <div className={classes.containerinner}>
+        {/* <div ref={measureRef}> */}
+        {/* <div className={classes.tabs}> */}
+        {/* <span onClick={discussClickLHandler}>討論</span>
+            <span onClick={discussClickRHandler}>Q&A</span> */}
+        {/* </div> */}
+        <div className={classes.title}>{title}</div>
+        {/* {boardData?.board?.content && <div>{boardData.board.content}</div>} */}
+        {/* tabs底線 */}
+        {/* <div className={classes.underLine}> */}
+        {/* <div className={`${classes.underLineBar} ${switchTab ? classes.left : classes.right}`}></div> */}
+        {/* </div> */}
+        {/* {pollId && boardValue?.poll && <BarChart pollData={boardValue.poll} />} */}
+        {/* <BoardFrom
+          boardId={boardId}
+          pollId={pollId}
+          initialValue={{ title: '', choice: undefined, lines: '' }}
+          // pollChoices={pollValue}
+          refetch={() => {
+            // commentsRetch()
+          }}
+          filterComments={filterComments}
+          clickedChoiceIdx={clickedChoiceIdx}
+        /> */}
+        {/* <CommentForm
         boardId={boardId}
         pollId={pollId}
         // anchorId={anchorId}
         // ref={ref}
         // switchTab={switchTab}
       /> */}
-          {/* {switchTab || <PollForm commentId={pollClick} />} */}
-          {/* </div> */}
-          {/* content */}
-          {/* <div className={classes.outer} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
-          {/* <div className={classes.inner}> */}
-          {/* <div className={classes.element} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
-          {/* <CommentList
+        {/* {switchTab || <PollForm commentId={pollClick} />} */}
+        {/* </div> */}
+        {/* content */}
+        {/* <div className={classes.outer} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
+        {/* <div className={classes.inner}> */}
+        {/* <div className={classes.element} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
+        <CommentList
           commentsList={commentsList}
           // filterCommentsList={filterCommentsList}
           // pollId={pollId}
@@ -157,16 +145,14 @@ const AuthorPollPage = ({
           // anchorHLHandler={anchorHLHandler}
           // myScrollIntoView={myScrollIntoView}
           // resetHighLight={resetHighLight}
-        /> */}
-          {/* </div>
+        />
+        {/* </div>
           </div>
         </div> */}
-        </div>
-      </>
-    )
-  }
-  return <h4>好像出錯了...</h4>
+      </div>
+    </>
+  )
 }
 
 // Discuss.displayName = 'Discuss'
-export default AuthorPollPage
+export default BoardPage

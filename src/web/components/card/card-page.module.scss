@@ -9,7 +9,7 @@
   justify-content: center;
   width: 100%;
   height: 100vh;
-  background-color: $bg;
+  background-color: $natual;
   /* flex-direction: column; */
   // align-items: center;
   position: relative;
@@ -22,7 +22,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: $bg;
+  background: $natual;
   // padding: 0 24px;
 }
 .header {
@@ -54,7 +54,7 @@
   .author {
     @extend %Round_sm_gray_en;
     @extend %Round_sm_ch;
-    color: $secondary;
+    color: $primary;
   }
 }
 .flexContainer {
@@ -79,11 +79,11 @@ a {
     position: relative;
     top: 3px;
     margin-right: 3px;
-    fill: $secondary;
+    fill: $primary;
   }
   &:hover {
     .linkIcon {
-      fill: $secondaryHover;
+      fill: $primaryHover;
     }
   }
 }
@@ -145,8 +145,8 @@ a {
   &:hover {
     background: $natual;
     .editIcon {
-      fill: $secondary;
-      stroke: $secondary;
+      fill: $primary;
+      stroke: $primary;
     }
   }
 }
@@ -155,7 +155,7 @@ a {
   box-shadow: 0 0 10px #ddd;
   margin: 0 0 40px;
   padding: 6px 16px;
-  border-left: 6px solid $secondary;
+  border-left: 6px solid $primary;
 
   border-radius: 5px;
 }

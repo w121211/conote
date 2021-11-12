@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties, useContext } from 'react'
 import Link from 'next/link'
 import Modal from 'react-modal'
-import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element } from 'slate'
+import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element, Point } from 'slate'
 import {
   Editable,
   ReactEditor,
@@ -20,6 +20,7 @@ import {
   InlineFiltertagElement,
   InlineMirrorElement,
   InlinePollElement,
+  InlineShotElement,
   InlineSymbolElement,
   LcElement,
   LiElement,
@@ -49,30 +50,37 @@ import {
   usePollLazyQuery,
   usePollQuery,
   useUpsertEmojiLikeMutation,
+  useEmojisQuery,
+  useShotLazyQuery,
+  Shot,
+  useCardQuery,
+  useShotQuery,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
-import MyHashtagGroup from '../upDown/poll-group'
+import MyHashtagGroup from '../emoji-up-down/poll-group'
 import { spawn } from 'child_process'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { NavLocation, locationToUrl } from './with-location'
 import { withOperation } from './with-operation'
-import { parseLcAndReplace, withParse } from './with-parse'
-import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll } from '../../lib/bullet/types'
-import CreatePollForm from '../board-form/create-poll-form'
-import HashtagTextToIcon from '../upDown/hashtag-text-to-icon'
-import PollPage from '../board/poll-page'
+import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
+import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../../lib/bullet/types'
+import CreatePollForm from '../poll-form/create-poll-form'
+import HashtagTextToIcon from '../emoji-up-down/emoji-text-to-icon'
+import PollPage from '../poll/poll-page'
 // import { Context } from '../../pages/card/[symbol]'
-import AuthorPollPage from '../board/author-poll-page'
+import AuthorPollPage from '../poll/author-poll-page'
 import router, { useRouter } from 'next/router'
 import Popup from '../popup/popup'
-import PollGroup from '../upDown/poll-group'
+import PollGroup from '../emoji-up-down/poll-group'
 import { getLocalOrQueryRoot } from './use-local-value'
 import { useApolloClient } from '@apollo/client'
 import { Serializer } from './serializer'
 import { BulletNode } from '../../lib/bullet/node'
 import { Token, tokenize } from 'prismjs'
-import { tokenizeBulletString } from '../../lib/bullet/text'
+import { tokenizeBulletString } from '../../lib/bullet/parse'
+import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
+// import UpdateShotForm from '../shot-form/update-shot-form'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
@@ -99,6 +107,7 @@ const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element
 const decorate = ([node, path]: NodeEntry) => {
   // const focused = useFocused() // 整個editor是否focus
   // const selected = useSelected()
+
   const ranges: CustomRange[] = []
   //   if (editor.selection != null) {
   //     if (
@@ -160,8 +169,13 @@ const decorate = ([node, path]: NodeEntry) => {
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, children, leaf } = props
+  const readonly = useReadOnly()
+  const selected = useSelected()
+  // const [isPressShift, setIsPressShift] = useState(false)
+  // console.log(isPressShift)
   let style: React.CSSProperties = {}
   let className = ''
+
   // if (leaf.placeholder) {
   //   return (
   //     <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
@@ -190,37 +204,86 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   // filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
   // console.log(leaf.type, children)
   // console.log(leaf)
+  if (readonly || !selected) {
+    switch (leaf.type) {
+      case 'mirror-ticker':
+      case 'mirror-topic':
+      case 'ticker':
+      case 'topic': {
+        className = classes.mirrorLeaf
+        // style = { color: '#5395f0' }
+        break
+      }
+      case 'author':
+      case 'url':
+      case 'filtertag': {
+        style = { color: '#0cb26e' }
+        break
+      }
+      // case 'poll':
+      // case 'new-poll': {
+      //   style = { color: '#329ead' }
+      //   break
+      // }
+      // case 'shot':
+      // case 'new-shot': {
+      //   style = { color: 'rgb(215 159 29)' }
+      //   break
+      // }
+      // case 'filtertag': {
+      //   className = classes.filtertagLeaf
+      //   style = { color: '#6a53fe' }
+      //   break
+      // }
+      // case 'url': {
+      //   style = { color: '#ff619b' }
+      //   break
+      // }
+      // default: {
+      //   style = { color: '#3d434a' }
+      // }
+    }
+  } else {
+    switch (leaf.type) {
+      case 'mirror-ticker':
+      case 'mirror-topic': {
+        className = classes.mirrorLeaf
+        // style = { color: '#5395f0' }
+        break
+      }
+      case 'author': {
+        style = { color: '#0cb26e' }
+        break
+      }
+      case 'poll':
+      case 'new-poll': {
+        style = { color: '#329ead' }
+        break
+      }
+      case 'shot':
+      case 'new-shot': {
+        style = { color: 'rgb(215 159 29)' }
+        break
+      }
+      case 'ticker':
+      case 'topic': {
+        className = classes.topicLeaf
 
-  switch (leaf.type) {
-    case 'ticker':
-    case 'topic': {
-      className = classes.topicLeaf
-
-      // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
-      break
-    }
-    case 'mirror-ticker':
-    case 'mirror-topic': {
-      className = classes.mirrorLeaf
-      // style = { color: '#5395f0' }
-      break
-    }
-    case 'user': {
-      style = { color: '#0cb26e' }
-      break
-    }
-    case 'poll':
-    case 'new-poll': {
-      style = { color: '#329ead' }
-      break
-    }
-    case 'filtertag': {
-      className = classes.filtertagLeaf
-      style = { color: '#6a53fe' }
-      break
-    }
-    default: {
-      style = { color: '#3d434a' }
+        // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
+        break
+      }
+      case 'filtertag': {
+        className = classes.filtertagLeaf
+        style = { color: '#6a53fe' }
+        break
+      }
+      case 'url': {
+        style = { color: '#ff619b' }
+        break
+      }
+      default: {
+        style = { color: '#3d434a' }
+      }
     }
   }
 
@@ -242,7 +305,9 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
           leaf.type === 'mirror-topic' ||
           leaf.type === 'filtertag'
         ) {
-          e && (e.onselectstart = ev => false)
+          if (e) {
+            e.onselectstart = ev => false
+          }
         }
       }}
     >
@@ -252,7 +317,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   )
 }
 
-const EmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
+const UpdateEmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
   const { data, loading, error } = useMyEmojiLikeQuery({
     variables: { emojiId: emoji.id },
   })
@@ -330,7 +395,7 @@ export const EmojiButotn = ({ emoji }: { emoji: Emoji }): JSX.Element | null => 
 
   return (
     // <span>
-    <EmojiLike emoji={emoji} />
+    <UpdateEmojiLike emoji={emoji} />
     // {/* </span> */}
   )
 }
@@ -377,6 +442,8 @@ const InlineSymbol = ({
 }): JSX.Element => {
   const [showPopover, setShowPopover] = useState(false)
   const router = useRouter()
+  const selected = useSelected()
+  // console.log(element)
   return (
     <span {...attributes}>
       {/* <span contentEditable={false}> */}
@@ -403,9 +470,9 @@ const InlineSymbol = ({
         {children}
       </span>
       {/* </Link> */}
-      <div contentEditable={false}>
-        {showPopover &&
-          (router.query.symbol !== element.symbol && router.query.m !== '::' + element.symbol ? (
+      {showPopover && (
+        <span contentEditable={false}>
+          {router.query.symbol !== element.symbol && router.query.m !== '::' + element.symbol ? (
             <Popup
               visible={showPopover}
               hideBoard={() => {
@@ -460,8 +527,9 @@ const InlineSymbol = ({
             >
               你就在這頁了！
             </Popup>
-          ))}
-      </div>
+          )}
+        </span>
+      )}
       {/* </span> */}
     </span>
   )
@@ -480,7 +548,7 @@ const InlineMirror = ({
     ...location,
     mirrorSymbol: element.mirrorSymbol,
     openedLiPath: [],
-    author: element.author,
+    // author: element.author,
   })
   // const authorName = selfCard.link?.authorName
   // useEffect(() => {
@@ -502,59 +570,17 @@ const InlineMirror = ({
         <a className="ui">{children}</a>
       </Link>
       {/* </span> */}
+      {/* <a className="ui">{element.str}</a> */}
     </span>
   )
 }
-
-// const PollForm = ({ id }: { id: string }): JSX.Element => {
-//   const { data, loading, error } = usePollQuery({ variables: { id } })
-//   const [createVote, createVoteResult] = useCreateVoteMutation()
-//   if (loading || createVoteResult.loading) {
-//     return <div>loading...</div>
-//   }
-//   if (error || data === undefined || createVoteResult.error) {
-//     return <div>error</div>
-//   }
-//   if (createVoteResult.data) {
-//     const vote = createVoteResult.data.createVote
-//     const voted = data.poll.choices[vote.choiceIdx]
-//     return (
-//       <div>
-//         {data.poll.choices.join(' ')}[{voted}]
-//       </div>
-//     )
-//   }
-//   return (
-//     <div>
-//       {data.poll.choices.map((e, i) => (
-//         <button
-//           key={i}
-//           onClick={() => {
-//             createVote({
-//               variables: {
-//                 pollId: id,
-//                 data: { choiceIdx: i },
-//               },
-//             })
-//           }}
-//         >
-//           {e}
-//         </button>
-//       ))}
-//     </div>
-//   )
-// }
-
-// const NewPollForm = ({ choices }: { choices?: string[]; onCreated: (poll: Poll) => void }): JSX.Element => {
-//   // const queryPoll = usePollQuery({ variables: { id } })
-//   return <div></div>
-// }
 
 const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; location: NavLocation }): JSX.Element => {
   const { attributes, children, element, location } = props
   const selected = useSelected()
   // const context = useContext(Context)
   const editor = useSlateStatic()
+  const { selection } = editor
   const path = ReactEditor.findPath(editor, element)
   const readonly = useReadOnly()
   const [showPopover, setShowPopover] = useState(false)
@@ -596,6 +622,19 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
     }
   }, [showPopover, pollData, pollId])
 
+  // useEffect(() => {
+  //   // console.log(path, selection)
+  //   if (selected && selection) {
+  //     const isEnd = Point.equals(selection.focus, { path: [...path, 0], offset: element.str.length })
+  //     if (isEnd) {
+  //       Transforms.setSelection(editor, {
+  //         anchor: { path: Path.next(path), offset: 0 },
+  //         focus: { path: Path.next(path), offset: 0 },
+  //       })
+  //     }
+  //   }
+  // }, [selection, selected])
+
   const handleHideBoard = () => {
     setClickedIdx(undefined)
     setShowPopover(false)
@@ -619,8 +658,9 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   // if (element.type === 'poll') {
   return (
     <span {...attributes}>
-      <span style={selected ? undefined : { display: 'none' }}>{children}</span>
-      {selected || (
+      {/* <span style={selected ? undefined : { display: 'none' }}>{children}</span> */}
+
+      {!selected && (
         <span contentEditable={false}>
           <PollGroup
             // bulletId={parent.id}
@@ -644,113 +684,129 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
           {/* parent.id = bullet id */}
           {showPopover && parent.id && (
             <Popover visible={showPopover} hideBoard={handleHideBoard}>
-              {pollId ? <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} /> : <span>loading</span>}
+              {pollId ? (
+                <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />
+              ) : (
+                <CreatePollForm
+                  choices={element.choices}
+                  handlePollId={(pollId: string) => {
+                    setPollId(pollId)
+                  }}
+                />
+              )}
             </Popover>
           )}
-
-          {/* {showPopover && authorContext.author && (
-          <Popover visible={showPopover} hideBoard={handleHideBoard}>
-            
-            {pollId ? (
-              <AuthorPollPage author={authorContext.author} pollId={pollId} clickedChoiceIdx={clickedIdx} />
-            ) : (
-              <span>loading</span>
-            )}
-          </Popover>
-        )} */}
-          {/* {element.id ? (
-          <MyHashtagGroup choices={element.choices} pollId={element.id.toString()} inline />
-        ) : (
-          <>
-            <button
-              className="inline mR"
-              onClick={() => {
-                handleCreatePoll()
-                setShowPopover(true)
-              }}
-            >
-              創建{element.choices}
-            </button>
-
-            <Popover
-              visible={showPopover}
-              hideBoard={() => {
-                setShowPopover(false)
-              }}
-            >
-              <CreatePollForm bulletId={element.id ?? ''} choices={element.choices}></CreatePollForm>
-            </Popover>
-          </>
-        )} */}
         </span>
       )}
+      {/* <span>{children}</span> */}
+      <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
     </span>
   )
-  // }
-  // return (
-  //   <button {...attributes} className="inline">
-  //     {children}
-  //   </button>
-  // )
-  // return <span {...attributes}>{children}</span>
+}
 
-  // const [isOpen, setIsOpen] = useState(false)
-  // const [queryMyVotes, { data, loading, error }] = useMyVotesLazyQuery() // 若已投票可展現投票結果
+const InlineShot = (props: RenderElementProps & { element: InlineShotElement; location: NavLocation }): JSX.Element => {
+  const editor = useSlateStatic()
+  const selected = useSelected()
 
-  // useEffect(() => {
-  //   // console.log('inline poll')
-  //   if (element.id) {
-  //     queryMyVotes({ variables: { pollId: element.id } })
-  //   }
-  // }, [element])
+  const { children, attributes, element } = props
+  const [showPopover, setShowPopover] = useState(false)
+  const [shotId, setShotId] = useState(element.id)
+  const [shotData, setShotData] = useState<Shot | undefined>()
+  const { data: targetData } = useCardQuery({ variables: { id: shotId } })
 
-  // useEffect(() => {
-  //   console.log(element)
-  //   if (isOpen) {
-  //     const path = ReactEditor.findPath(editor, element)
-  //     Transforms.setNodes<PopupInlineElement>(
-  //       editor,
-  //       { id: 'test', str: 'hello-world' },
-  //       { at: path }
-  //     )
-  //     Transforms.insertText(editor, 'hello-world', { at: [...path, 0] })
-  //     console.log('setNodes', element)
-  //     setIsOpen(false)
-  //   }
-  // }, [isOpen])
+  function onCreated(shot: Shot) {
+    // const editor = useSlateStatic()
+    if (shotId) {
+      const path = ReactEditor.findPath(editor, element)
+      const inlineShot = toInlineShotString({
+        id: shotId,
+        choice: shot.choice,
+        targetSymbol: targetData?.card?.symbol ?? '',
+        author: element.authorName ?? '',
+      })
+      Transforms.setNodes<InlineShotElement>(
+        editor,
+        {
+          id: shotId,
+        },
+        { at: path },
+      )
+      Transforms.insertText(editor, inlineShot, { at: path })
+    }
+  }
 
-  // function closeModal() {
-  //   setIsOpen(false)
-  // }
+  // console.log(element)
+  useEffect(() => {
+    // if (showPopover && !pollId) {
+    //   handleCreatePoll()
+    // }
+    // console.log(shotData, shotId)
 
-  // return (
-  //   <span {...attributes}>
-  //     <span style={{ display: 'none' }}>{children}</span>
-
-  //     <span contentEditable={false}>
-  //       <button
-  //         onClick={event => {
-  //           event.preventDefault()
-  //           setIsOpen(true)
-  //         }}
-  //       >
-  //         {element.choices.join(' ')}
-  //         {data?.myVotes && data.myVotes.length > 0 && `[${data.myVotes[data.myVotes.length - 1].choiceIdx}]`}
-  //       </button>
-
-  //       <Modal
-  //         ariaHideApp={false}
-  //         isOpen={isOpen}
-  //         // onAfterOpen={afterOpenModal}
-  //         onRequestClose={closeModal}
-  //         contentLabel="Example Modal"
-  //       >
-  //         <button onClick={closeModal}>close</button>
-  //         {element.id ? <PollForm id={element.id} /> : <NewPollForm choices={element.choices} onCreated={onCreated} />}
-  //       </Modal>
-  //     </span>
-  //   </span>
-  // )
+    if (!showPopover && !element.id && shotId && shotData) {
+      // const queryPollData = async () => {
+      //   queryPoll({ variables: { id: pollId } })
+      // }
+      // queryPollData()
+      // queryShot({ variables: { id:shotId } })
+      if (shotData) {
+        onCreated(shotData)
+      }
+    }
+  }, [showPopover, shotData, shotId])
+  return (
+    <span {...attributes}>
+      {!selected && (
+        <button
+          className={classes.shotBtn}
+          contentEditable={false}
+          onClick={e => {
+            e.stopPropagation()
+            setShowPopover(true)
+          }}
+        >
+          {element.params.map((e, i) => {
+            return (
+              <span
+                className={
+                  e.startsWith('@')
+                    ? classes.shotAuthor
+                    : e.startsWith('$') || e.startsWith('[[')
+                    ? classes.shotTarget
+                    : e.startsWith('#')
+                    ? classes.shotChoice
+                    : ''
+                }
+                data-choice={e.startsWith('#') ? e : ''}
+                key={i}
+              >
+                {e}
+              </span>
+            )
+          })}
+        </button>
+      )}
+      {showPopover && (
+        <span contentEditable={false}>
+          <Popover visible={showPopover} hideBoard={() => setShowPopover(false)}>
+            <CreateShotForm
+              initialInput={{
+                author: element.authorName ?? '',
+                target: element.targetSymbol ?? '',
+                choice: element.choice ?? '',
+                link: '',
+              }}
+              handleShotData={(shot: Shot) => {
+                setShotId(shot.id)
+                setShotData(shot)
+              }}
+            />
+          </Popover>
+        </span>
+      )}
+      <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
+      {/* <span>{children}</span> */}
+    </span>
+  )
 }
 
 const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
@@ -835,57 +891,89 @@ const Lc = ({
   const readonly = useReadOnly()
   const focused = useFocused() // 整個editor是否focus
   const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
+  const { data: emojiData } = useEmojisQuery({ fetchPolicy: 'cache-first', variables: { bulletId: element.id ?? '' } })
   // const [author, authorSwitcher] = useAuthorSwitcher({ authorName })
   // const [placeholder, setPlaceholder] = useState<string | undefined>()
   // useEffect(() => {
   //   setPlaceholder(element.placeholder)
   // }, [element])
-  const author = location.author
+  // const author = location.author
 
-  useEffect(() => {
-    if (element.op === 'CREATE') {
-      let lcPath: number[] | undefined
-      if (author && element.author === undefined) {
-        lcPath = ReactEditor.findPath(editor, element)
-        Transforms.setNodes<LcElement>(editor, { author }, { at: lcPath })
-      }
-      if (sourceUrl && element.sourceUrl === undefined) {
-        Transforms.setNodes<LcElement>(editor, { sourceUrl }, { at: lcPath ?? ReactEditor.findPath(editor, element) })
-      }
-    }
-  }, [author, element, sourceUrl])
-
+  // useEffect(() => {
+  //   if (element.op === 'CREATE') {
+  //     let lcPath: number[] | undefined
+  //     if (author && element.author === undefined) {
+  //       lcPath = ReactEditor.findPath(editor, element)
+  //       Transforms.setNodes<LcElement>(editor, { author }, { at: lcPath })
+  //     }
+  //     if (sourceUrl && element.sourceUrl === undefined) {
+  //       Transforms.setNodes<LcElement>(editor, { sourceUrl }, { at: lcPath ?? ReactEditor.findPath(editor, element) })
+  //     }
+  //   }
+  // }, [author, element, sourceUrl])
+  // console.log(element)
   useEffect(() => {
     if ((focused && !selected) || readonly) {
       // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
       const path = ReactEditor.findPath(editor, element)
 
-      // parseLcAndReplace({ editor, lcEntry: [element, path] })
-      // return
+      parseLcAndReplace({ editor, lcEntry: [element, path] })
+      return
     }
     if (selected) {
       // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
       const path = ReactEditor.findPath(editor, element)
-      // Transforms.unwrapNodes(editor, {
-      //   at: path,
-      //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
-      // })
-      // console.log('unwrapNodes', path)
+      //   const lcChildren = Node.children(editor, path)
+
+      //   for (const lcChild of lcChildren) {
+      //     if (!Text.isText(lcChild[0]) && (lcChild[0].type === 'poll' || lcChild[0].type === 'shot')) {
+      //       console.log(lcChild)
+      //       Transforms.insertText(editor, lcChild[0].str, { at: lcChild[1] })
+      //       // Transforms.setNodes(editor, { children: [{ text: `${lcChild[0].str}` }] }, { at: lcChild[1] })
+      //       // match:(n,p)=>!Text.isText(n)&&Element.isElement(n)&&isInlineElement(n)
+      //     }
+      //   }
+
+      Transforms.unwrapNodes(editor, {
+        at: path,
+        match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+      })
+      //   // console.log('unwrapNodes', path)
     }
   }, [selected, readonly])
+  // useEffect(()=>{
+  //   if(focused){
+
+  //   }
+  // },[focused])
 
   const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
+  // console.log(element, children)
   return (
     <div {...attributes}>
-      <span className={classes.lcText}>{children}</span>
-      {(!selected || readonly) && mirrors.length > 0 && sourceUrl && (
+      <div className={classes.lcText}>
+        {children}
+
+        {emojiData && (
+          <>
+            {emojiData.emojis?.map((e, i) => {
+              if (e.count.nUps === 0) {
+                return null
+              }
+              return (
+                <span contentEditable={false} key={i}>
+                  <EmojiButotn emoji={e} />
+                </span>
+              )
+            })}
+          </>
+        )}
+      </div>
+      {mirrors.length > 0 && sourceCardId && (
         <span contentEditable={false}>
           {/* {author === element.author && element.author}
-          {sourceUrl === element.sourceUrl && sourceUrl}
-          {element.emojis?.map((e, i) => (
-            <EmojiButotn key={i} emoji={e} />
-          ))} */}
-          <FilterMirror mirrors={mirrors} sourceUrl={sourceUrl} />
+          {sourceUrl === element.sourceUrl && sourceUrl} */}
+          <FilterMirror mirrors={mirrors} sourceCardId={sourceCardId} />
         </span>
       )}
     </div>
@@ -929,10 +1017,10 @@ const Li = ({
   const hasUl = ul !== undefined
   const href = locationToUrl(location, ReactEditor.findPath(editor, element))
 
-  function onEmojiCreated(emoji: Hashtag, myEmojiLike: HashtagLike) {
+  function onEmojiCreated(emoji: Emoji, myEmojiLike: EmojiLike) {
     // const curEmojis = lc.emojis ?? []
     // const path = ReactEditor.findPath(editor, element)
-    // Transforms.setNodes<LcElement>(editor, { emojis: [...curEmojis, emoji] }, { at: lcPath(path) })
+    // Transforms.setNodes<LcElement>(editor,  { at: lcPath(path) })
   }
   // console.log(lc.emojis)
 
@@ -955,10 +1043,10 @@ const Li = ({
       <div className={classes.arrowBulletWrapper} contentEditable={false}>
         <BulletPanel
           bulletId={lc.id}
-          emoji={lc.emojis}
+          // emoji={lc.emojis}
           visible={showPanelIcon}
-          sourceUrl={element.children[0].sourceUrl}
-          authorName={element.children[0].author}
+          // sourceUrl={element.children[0].sourceUrl}
+          // authorName={element.children[0].author}
           onEmojiCreated={onEmojiCreated}
         >
           {/* <span className={classes.oauthorName}> @{authorName}</span> */}
@@ -1033,12 +1121,13 @@ const CustomElement = ({
       return <InlineSymbol {...{ attributes, children, element }} />
     case 'mirror':
       return <InlineMirror {...{ attributes, children, element, location, selfCard }} />
-    // case 'hashtag':
-    //   return <InlineHashtag {...{ attributes, children, element, location }} />
+
     case 'filtertag':
       return <InlineFiltertag {...{ attributes, children, element, location }} />
     case 'poll':
       return <InlinePoll {...{ attributes, children, element, location }} />
+    case 'shot':
+      return <InlineShot {...{ attributes, children, element, location }} />
     case 'lc':
       return <Lc {...{ attributes, children, element, location, sourceUrl }} />
     case 'li':
@@ -1064,6 +1153,7 @@ export const BulletEditor = ({
   onValueChange?: (value: LiElement[]) => void
 }): JSX.Element => {
   // const context = useContext(Context)
+  const [isPressShift, setIsPressShift] = useState(false)
   const editor = useMemo(() => withParse(withOperation(withList(withHistory(withReact(createEditor()))))), [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
@@ -1099,10 +1189,7 @@ export const BulletEditor = ({
   return (
     <div
       className={`${classes.bulletEditorContainer} `}
-      onClick={e => {
-        e.stopPropagation()
-        console.log('editor div', e.target)
-      }}
+
       // onFocus={e => {
       //   if (!e.currentTarget.classList.contains(classes.focused)) {
       //     e.currentTarget.classList.add(classes.focused)
@@ -1135,14 +1222,24 @@ export const BulletEditor = ({
         }}
       >
         <Editable
-          style={{ padding: '10px 10px 10px 3.5em' }}
-          onFocus={e => {
-            console.log('focus', e.target)
-          }}
-          // onClick={e => {
-          //   e.stopPropagation()
-          //   console.log(e.target)
+          // style={{ padding: '10px 10px 10px 3.5em' }}
+          // onSelect={e => {
+          //   if (!(window as any).chrome) return
+          //   if (editor.selection == null) return
+          //   try {
+          //     const domPoint = ReactEditor.toDOMPoint(editor, editor.selection.focus)
+          //     const node = domPoint[0]
+          //     if (node == null) return
+          //     const element = node.parentElement
+          //     if (element == null) return
+          //     element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+          //   } catch (e) {
+          //     /**
+          //      * Empty catch. Do nothing if there is an error.
+          //      */
+          //   }
           // }}
+
           autoCorrect="false"
           autoFocus={false}
           decorate={renderDecorate}
@@ -1151,6 +1248,7 @@ export const BulletEditor = ({
           renderLeaf={renderLeaf}
           onKeyDown={event => {
             withListOnKeyDown(event, editor)
+            setIsPressShift(event.key === 'Shift')
             // if (search) {
             //   onKeyDownForSuggest(event)
             // } else {

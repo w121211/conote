@@ -1,14 +1,4 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import {
-  useCreateCommentMutation,
-  CommentsDocument,
-  CommentsQuery,
-  useBoardQuery,
-  Board,
-  useCommentsQuery,
-  Comment,
-  // CreateHashtagMutation,
-} from '../../apollo/query.graphql'
 
 import useMeasure from 'react-use-measure'
 import // useCreateReplyMutation,
@@ -18,7 +8,7 @@ import // useCreateReplyMutation,
 // RepliesDocument,
 '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
-import CreateBoardFrom, { BoardFormInputs } from '../board-form/create-board-form'
+import CreateBoardFrom, { BoardFormInputs } from '../poll-form/_create-board-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import classes from './board-page.module.scss'
 import Popover from '../popover/popover'
@@ -40,7 +30,7 @@ const CreateBoardPage = ({
   const [measureRef, bounds] = useMeasure()
   const [boardId, setBoardId] = useState<string | undefined>()
   const [title, setTitle] = useState('')
-  const [boardValue, setBoardValue] = useState<Board>()
+  // const [boardValue, setBoardValue] = useState<Board>()
   const [pollValue, setPollValue] = useState([''])
   const [commentsList, setCommentsList] = useState<Comment[]>()
   const [filterCommentsList, setFilterCommentsList] = useState<number[]>()

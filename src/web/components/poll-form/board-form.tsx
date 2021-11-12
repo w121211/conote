@@ -1,23 +1,7 @@
 import { title } from 'process'
 import React, { useEffect, useState } from 'react'
 import { useForm, useController, useFormContext, FormProvider, useWatch, Control } from 'react-hook-form'
-import {
-  useCreateCommentMutation,
-  CommentsDocument,
-  CommentsQuery,
-  useBoardQuery,
-  Board,
-  useCreateVoteMutation,
-  MyVotesDocument,
-  MyVotesQuery,
-  BoardDocument,
-  useMyVotesQuery,
-  Vote,
-  Poll,
-  PollDocument,
-  usePollQuery,
-  useCreateAuthorVoteMutation,
-} from '../../apollo/query.graphql'
+import { useCreateVoteMutation, MyVotesDocument, MyVotesQuery, useMyVotesQuery, Vote } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
 import classes from './board-form.module.scss'
 
@@ -55,7 +39,7 @@ export const RadioInput = ({
   const methods = useFormContext()
 
   // const [checkedTarget, setCheckedTarget] = useState<any>(null)
-  console.log(myVote)
+
   return (
     <label className={classes.radioLabel}>
       <input
@@ -64,7 +48,6 @@ export const RadioInput = ({
         value={value}
         checked={checked}
         onClick={e => {
-          e.stopPropagation()
           // handleChange(e.target)
           // setChecked(prev => !prev)
           choiceValue && choiceValue(value)
@@ -106,53 +89,43 @@ export const RadioInput = ({
   )
 }
 
-const AuthorPollForm = ({
+const BoardForm = ({
   pollId,
-
+  boardId,
   initialValue,
   clickedChoiceIdx,
-  author,
+  // pollChoices,
+  refetch,
+  filterComments,
 }: {
   pollId: string
-  author: string
-  // boardId: string
+  boardId: string
   initialValue: FormInputs
   clickedChoiceIdx?: number
   // pollChoices?: string[]
-  // refetch: () => void
-  // filterComments: (i: number) => void
+  refetch: () => void
+  filterComments: (i: number) => void
 }): JSX.Element => {
   // const { field, fieldState } = useController({ name: 'choice' })
   // const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
-  const { data: myVotesData } = useMyVotesQuery({ variables: { pollId } })
-  const {
-    data: pollData,
-    loading,
-    error,
-  } = usePollQuery({
-    variables: { id: pollId },
-  })
+  const { data: myVotesData } = useMyVotesQuery({ variables: { pollId: pollId } })
   const methods = useForm<FormInputs>()
   const { register, handleSubmit, setValue, reset, getValues } = methods
   const [choiceValue, setChoiceValue] = useState<number | null | undefined>()
-  const [check, setChecked] = useState<boolean[]>(Array(3).fill(false))
+  // const [check, setChecked] = useState<boolean[]>(Array(boardData?.board.poll?.choices.length).fill(false))
   const [myVote, setMyVote] = useState<Vote>()
-  const [pollCount, setPollCount] = useState<number[] | undefined>(pollData?.poll.count.nVotes)
-  console.log('authorPoll')
+
   useEffect(() => {
     if (myVotesData) {
       setMyVote(myVotesData?.myVotes.find(e => e.pollId.toString() === pollId))
     }
-  }, [myVotesData, pollId, pollData])
+  }, [myVotesData])
   useEffect(() => {
-    setChecked(prev => {
-      const newCheck = [...prev]
-      if (clickedChoiceIdx !== undefined) {
-        newCheck[clickedChoiceIdx] = true
-      }
-      return newCheck
-    })
-    setValue('choice', clickedChoiceIdx?.toString())
+    // setChecked(prev => {
+    //   const newCheck = [...prev]
+    //   if (clickedChoiceIdx !== undefined) newCheck[clickedChoiceIdx] = true
+    //   return newCheck
+    // })
   }, [clickedChoiceIdx])
 
   if (initialValue) {
@@ -174,30 +147,22 @@ const AuthorPollForm = ({
   //     }
   //     // refetch()
   //   },
-
   //   // refetchQueries: [{ query: CommentsDocument, variables: { boardId: boardId } }],
   // })
 
-  const [createAuthorVote] = useCreateAuthorVoteMutation({
+  const [createVote] = useCreateVoteMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyVotesQuery>({
         query: MyVotesDocument,
       })
-      if (data?.createAuthorVote && res?.myVotes) {
+      if (data?.createVote && res?.myVotes) {
         cache.writeQuery({
           query: MyVotesDocument,
-          data: { myVotes: res.myVotes.concat([data.createAuthorVote]) },
+          data: { myVotes: res.myVotes.concat([data.createVote]) },
         })
       }
       // refetch()
     },
-    refetchQueries: [
-      { query: PollDocument, variables: { id: pollId } },
-      { query: MyVotesDocument, variables: { pollId } },
-    ],
-    // onCompleted(data) {
-    //   setMyVote(data.createVote)
-    // },
     // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
   })
 
@@ -217,45 +182,35 @@ const AuthorPollForm = ({
     //     },
     //   })
     // }
-
     if (d.choice && pollId) {
-      setPollCount(prev => {
-        if (prev) {
-          const newArr = [...prev]
-          d.choice && (newArr[parseInt(d.choice)] += 1)
-          return newArr
-        }
-        return prev
-      })
-      createAuthorVote({
+      createVote({
         variables: {
-          pollId: pollId,
-          authorName: author,
+          pollId,
           data: { choiceIdx: parseInt(d.choice) },
         },
       })
       // console.log(typeof d.choice, pollId)
-      setChecked(Array(3).fill(false))
-      setChoiceValue(null)
-      reset({ title: '', lines: '' })
     }
+    // setChecked(Array(boardData?.board.poll?.choices?.length).fill(false))
+    setChoiceValue(null)
+    reset({ title: '', lines: '' })
   }
 
   const handleChoiceValue = (i: string) => {
     // console.log()
     const iToNum = parseInt(i)
-    setChecked(prevArr => {
-      const newArr = [...prevArr]
-      const oldIndex = newArr.findIndex(e => e === true)
-      if (oldIndex === iToNum) {
-        newArr[iToNum] = false
-      } else {
-        newArr[iToNum] = !newArr[iToNum]
-        newArr[oldIndex] = !newArr[oldIndex]
-      }
+    // setChecked(prevArr => {
+    //   const newArr = [...prevArr]
+    //   const oldIndex = newArr.findIndex(e => e === true)
+    //   if (oldIndex === iToNum) {
+    //     newArr[iToNum] = false
+    //   } else {
+    //     newArr[iToNum] = !newArr[iToNum]
+    //     newArr[oldIndex] = !newArr[oldIndex]
+    //   }
 
-      return newArr
-    })
+    //   return newArr
+    // })
     setChoiceValue(prev => {
       // console.log(prev, i, prev === i)
 
@@ -283,35 +238,30 @@ const AuthorPollForm = ({
           {/* <input type="text" {...register('title')} placeholder="Symbol 或 Topic" /> */}
           {/* </div> */}
           <div className={classes.section}>
-            <div className={classes.choiceWrapper}>
-              {/* <label>@作者</label> */}
-              <div className={classes.radioWrapper}>
-                {pollData?.poll.choices.map((e, i) => (
-                  <RadioInput
-                    value={`${i}`}
-                    content={e}
-                    total={
-                      pollData.poll.count.nVotes.length > 0 ? pollData.poll.count.nVotes.reduce((a, b) => a + b) : 0
-                    }
-                    count={pollData.poll.count.nVotes[i]}
-                    // filterComments={filterComments}
-                    key={i}
-                    choiceValue={handleChoiceValue}
-                    checked={check[i]}
-                    myVote={myVote}
-                  />
-                ))}
+            {/* {boardData?.board.poll?.choices && pollId && (
+              <div className={classes.choiceWrapper}>
+                <label>@作者</label>
+                <div className={classes.radioWrapper}>
+                  {boardData?.board.poll?.choices.map((e, i) => (
+                    <RadioInput
+                      value={`${i}`}
+                      content={e}
+                      total={boardData.board.poll ? boardData.board.poll.count.nVotes.reduce((a, b) => a + b) : 0}
+                      count={boardData?.board.poll?.count.nVotes[i]}
+                      // filterComments={filterComments}
+                      key={i}
+                      choiceValue={handleChoiceValue}
+                      checked={check[i]}
+                      myVote={myVote}
+                    />
+                  ))}
+                </div>
+                <span className={classes.votedCount}>
+                  共 {boardData.board.poll?.count.nVotes.reduce((a, b) => a + b)} 人參與投票
+                </span>
               </div>
-              <span className={classes.votedCount}>
-                共{' '}
-                {pollData?.poll.count.nVotes && pollData.poll.count.nVotes.length > 0
-                  ? pollData?.poll.count.nVotes.reduce((a, b) => a + b)
-                  : 0}{' '}
-                人參與投票
-              </span>
-            </div>
-
-            {/* <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." /> */}
+            )} */}
+            <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." />
           </div>
           <button>送出</button>
         </form>
@@ -319,4 +269,4 @@ const AuthorPollForm = ({
     </FormProvider>
   )
 }
-export default AuthorPollForm
+export default BoardForm

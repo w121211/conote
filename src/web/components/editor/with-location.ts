@@ -40,12 +40,12 @@ export function getNavLocation(query: ParsedUrlQuery): NavLocation {
     openedLiPath: typeof path === 'string' ? path.split(PATH_SPLITTER).map(e => parseInt(e)) : [],
     mirrorSymbol: typeof mirror === 'string' ? mirror : undefined,
     // mirrorSymbol: typeof mirror === 'string' ? mirror : undefined,
-    author: typeof author === 'string' ? author : undefined,
+    // author: typeof author === 'string' ? author : undefined,
   }
 }
 
 export function locationToUrl(lcation: NavLocation, joinLiPath?: number[]): UrlObject {
-  const { selfSymbol, mirrorSymbol, openedLiPath, author } = lcation
+  const { selfSymbol, mirrorSymbol, openedLiPath } = lcation
 
   // const params = new URLSearchParams()
   const query: Record<string, string> = {}
@@ -53,10 +53,10 @@ export function locationToUrl(lcation: NavLocation, joinLiPath?: number[]): UrlO
     // params.set(MIRROR_KEY, mirrorSymbol)
     query[MIRROR_KEY] = mirrorSymbol
   }
-  if (author && mirrorSymbol) {
-    // params.set(AUTHOR_KEY, author)
-    query[AUTHOR_KEY] = author
-  }
+  // if (author && mirrorSymbol) {
+  //   // params.set(AUTHOR_KEY, author)
+  //   query[AUTHOR_KEY] = author
+  // }
   if (joinLiPath) {
     // const merged = [...openedLiPath, 1, ...joinLiPath]
     // params.set(PATH_KEY, merged.join(PATH_SPLITTER))

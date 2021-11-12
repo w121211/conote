@@ -1,9 +1,9 @@
 import React, { HtmlHTMLAttributes, useContext, useEffect, useState } from 'react'
 // import PinIcon from '../../assets/svg/like.svg'
 // import UpIcon from '../../assets/svg/arrow-up.svg'
-import classes from './upDown.module.scss'
+import classes from './emoji-up-down.module.scss'
 import Popover from '../popover/popover'
-import PollPage from '../board/poll-page'
+import PollPage from '../poll/poll-page'
 import { Poll, PollDocument, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'
 // import { Context } from '../../pages/card/[symbol]'
 
@@ -60,9 +60,9 @@ const PollGroup = ({
   const handleClick = (ev: React.MouseEvent, i: number) => {
     ev.stopPropagation()
     handleClickedIdx && handleClickedIdx(i)
-    if (!pollId && bulletId) {
-      createPoll({ variables: { bulletId, data: { choices } } })
-    }
+    // if (!pollId && bulletId) {
+    //   createPoll({ variables: { bulletId, data: { choices } } })
+    // }
     handleShowPopover && handleShowPopover(true)
     setClickedIdx(i)
     // if (context.login) {

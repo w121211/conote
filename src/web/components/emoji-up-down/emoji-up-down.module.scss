@@ -16,9 +16,9 @@
   }
 }
 .liked {
-  color: $secondary;
+  color: $primary;
   svg {
-    fill: $secondary;
+    fill: $primary;
   }
 }
 .button {
@@ -34,9 +34,9 @@
 }
 .clicked {
   svg {
-    fill: $secondary;
+    fill: $primary;
   }
-  // color: $secondary;
+  // color: $primary;
 }
 .divider {
   display: inline-block;
@@ -62,4 +62,23 @@
 }
 .hasDividerDiv {
   display: flex;
+}
+button.hashtag {
+  background: none;
+  padding: 0;
+  margin: 0;
+  &:not(:first-child) {
+    margin-left: 10px;
+  }
+  svg {
+    fill: $gray-text;
+  }
+  color: $gray-text;
+}
+
+.clicked {
+  svg {
+    fill: $text;
+  }
+  color: $text;
 }

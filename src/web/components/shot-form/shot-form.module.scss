@@ -1,5 +1,4 @@
 .formContainer {
-  // border-bottom: 1px solid $gray-text;
 }
 .form {
   display: flex;
@@ -7,18 +6,32 @@
   flex-direction: column;
   // width: 70%;
   //   font-size: 14px;
+  ul {
+    list-style: none;
+  }
+  li {
+    margin-bottom: 10px;
+    button {
+      margin-left: 10px;
+    }
+  }
   label {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     margin-right: 0;
     font-weight: 700;
   }
   input {
-    background: $white;
+    // background: $white;
     &[type='text'] {
       border: 0;
-      border-bottom: 1px solid $primary;
-      display: block;
-      width: 100%;
+      background: $natual;
+      padding: 8px;
+      border-radius: 3px;
+      font-size: 14px;
+      // border-bottom: 1px solid $primary;
+      // display: block;
+      // width: 100%;
       color: $text;
       &:focus-visible {
         outline: 0;
@@ -27,9 +40,10 @@
     }
   }
   button {
-    margin-top: 0;
+    margin: 0;
+
     width: fit-content;
-    align-self: flex-end;
+    align-self: center;
   }
   .radioLabel {
     position: relative;
@@ -69,7 +83,7 @@
 }
 .radioWrapper {
   display: flex;
-  flex-direction: column;
+  // flex-direction: column;
 }
 .section:not(:last-child) {
   margin-bottom: 1em;
@@ -86,3 +100,15 @@
   text-align: end;
   color: $gray-text;
 }
+.errorMsg {
+  color: red;
+  &::before {
+    display: inline;
+    content: '⚠ ';
+  }
+}
+// .fieldsInput {
+//   &:invalid {
+//     outline: red;
+//   }
+// }

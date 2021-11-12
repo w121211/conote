@@ -1,66 +1,69 @@
-import { BulletLike } from '@prisma/client'
+// import { BulletLike } from '@prisma/client'
 import React, { useEffect, useState } from 'react'
 import {
   LikeChoice,
   useCreateEmojiMutation,
   useUpsertEmojiLikeMutation,
-  MyHashtagLikeQuery,
-  MyHashtagLikeQueryVariables,
-  MyHashtagLikeDocument,
-  useMyHashtagLikeQuery,
-  Hashtag,
+  MyEmojiLikeQuery,
+  MyEmojiLikeQueryVariables,
+  MyEmojiLikeDocument,
+  useMyEmojiLikeQuery,
+  Emoji,
   EmojiText,
-  HashtagLike,
-  useMyHashtagLikeLazyQuery,
+  EmojiLike,
+  useMyEmojiLikeLazyQuery,
+  useEmojisQuery,
+  EmojisDocument,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
-import classes from './upDown.module.scss'
+import classes from './emoji-up-down.module.scss'
 
-const UpDown = ({
+const EmojiUpDown = ({
   // choice,
 
   bulletId,
   children,
   foundEmoji,
   emojiText,
-  onEmojiCreated,
+  // onEmojiCreated,
   className,
 }: {
   // choice: CommentCount | BulletCount
   // commentId?: string
   className?: string
-  bulletId?: number
+  bulletId?: string
   children?: React.ReactNode
-  foundEmoji?: Hashtag
+  foundEmoji?: Emoji
   emojiText?: EmojiText
-  onEmojiCreated: (emoji: Hashtag, myEmojiLike: HashtagLike) => void
+  // onEmojiCreated: (emoji: Emoji, myEmojiLike: EmojiLike) => void
 } & React.HTMLAttributes<HTMLElement>): JSX.Element => {
   const [myChoice, setMyChoice] = useState<any>()
   const [createEmoji] = useCreateEmojiMutation({
     // variables: { bulletId, emojiText },
     onCompleted(data) {
-      const { emoji, like } = data.createEmoji
-      onEmojiCreated(emoji, like)
+      // const { emoji, like } = data.createEmoji
+      // // onEmojiCreated(emoji, like)
     },
+    refetchQueries: [{ query: EmojisDocument, variables: { bulletId: bulletId } }],
   })
 
   const [upsertEmojiLike] = useUpsertEmojiLikeMutation({
     update(cache, { data }) {
       // TODO: 這裡忽略了更新 count
       if (data?.upsertEmojiLike) {
-        cache.writeQuery<MyHashtagLikeQuery, MyHashtagLikeQueryVariables>({
-          query: MyHashtagLikeDocument,
-          variables: { hashtagId: data.upsertEmojiLike.like.hashtagId.toString() },
-          data: { myHashtagLike: data.upsertEmojiLike.like },
+        cache.writeQuery<MyEmojiLikeQuery, MyEmojiLikeQueryVariables>({
+          query: MyEmojiLikeDocument,
+          variables: { emojiId: data.upsertEmojiLike.like.emojiId.toString() },
+          data: { myEmojiLike: data.upsertEmojiLike.like },
         })
       }
     },
   })
 
-  const [queryMyHashtag, { data, loading, error }] = useMyHashtagLikeLazyQuery()
+  const [queryMyEmoji, { data, loading, error }] = useMyEmojiLikeLazyQuery()
   if (foundEmoji) {
-    queryMyHashtag({
-      variables: { hashtagId: foundEmoji.id.toString() },
+    queryMyEmoji({
+      variables: { emojiId: foundEmoji.id.toString() },
     })
   }
   // const handleMyChoice = () => {
@@ -82,11 +85,11 @@ const UpDown = ({
       // const findEmoji = emoji?.find(el => el.text === e.emojiText)
       //   console.log(findEmoji?.id)
       if (foundEmoji) {
-        const myLike = data?.myHashtagLike
+        const myLike = data?.myEmojiLike
         if (myLike && myLike.choice === choice) {
           upsertEmojiLike({
             variables: {
-              hashtagId: foundEmoji.id.toString(),
+              emojiId: foundEmoji.id.toString(),
               data: { choice: 'NEUTRAL' },
             },
           })
@@ -94,7 +97,7 @@ const UpDown = ({
         if (myLike && myLike.choice !== choice) {
           upsertEmojiLike({
             variables: {
-              hashtagId: foundEmoji.id.toString(),
+              emojiId: foundEmoji.id.toString(),
               data: { choice },
             },
           })
@@ -102,21 +105,21 @@ const UpDown = ({
         if (myLike === null) {
           upsertEmojiLike({
             variables: {
-              hashtagId: foundEmoji.id.toString(),
+              emojiId: foundEmoji.id.toString(),
               data: { choice },
             },
           })
         }
         // upsertEmojiLike({variables:{hashtagId:foundEmoji.id,data:{choice:}}})
       } else {
-        createEmoji({ variables: { bulletId, emojiText } })
+        createEmoji({ variables: { bulletId, text: emojiText } })
       }
     }
   }
 
   return (
     <div
-      className={`${className} ${classes.default} ${data?.myHashtagLike?.choice === 'UP' && classes.clicked}`}
+      className={`${className} ${classes.default} ${data?.myEmojiLike?.choice === 'UP' && classes.clicked}`}
       onClick={e => {
         e.stopPropagation()
         handleLike()
@@ -148,4 +151,4 @@ const UpDown = ({
   )
 }
 
-export default UpDown
+export default EmojiUpDown

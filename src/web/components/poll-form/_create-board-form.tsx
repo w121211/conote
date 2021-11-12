@@ -2,8 +2,6 @@ import { title } from 'process'
 import React, { useEffect, useState, useContext } from 'react'
 import { useForm, useController, useFormContext, FormProvider, useWatch, Control } from 'react-hook-form'
 import {
-  BoardDocument,
-  BoardQuery,
   CardDocument,
   // CreateHashtagMutation,
   // useCreateHashtagMutation,

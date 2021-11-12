@@ -1,18 +1,8 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import {
-  useCreateCommentMutation,
-  CommentsDocument,
-  CommentsQuery,
-  useBoardQuery,
-  Board,
-  useCommentsQuery,
-  Comment,
-  Poll,
-  usePollQuery,
-} from '../../apollo/query.graphql'
+import { Poll, usePollQuery } from '../../apollo/query.graphql'
 
 import useMeasure from 'react-use-measure'
-import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
+// import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
 import // useCreateReplyMutation,
 // useCommentQuery,
 // useRepliesQuery,
@@ -20,11 +10,11 @@ import // useCreateReplyMutation,
 // RepliesDocument,
 '../../apollo/query.graphql'
 import CommentList from '../commentList/commentList'
-import PollForm, { FormInputs } from '../board-form/poll-form'
+import PollForm, { FormInputs } from '../poll-form/poll-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import BarChart from '../bar/bar'
 import classes from './board-page.module.scss'
-import AuthorPollForm from '../board-form/author-poll-form'
+import AuthorPollForm from '../poll-form/author-poll-form'
 
 const PollPage = ({
   pollId,
@@ -111,7 +101,7 @@ const PollPage = ({
   //   // setFilterCommentsList(newCommentList)
   //   // console.log(commentsList, newCommentList)
   // }
-  if (data) {
+  if (data && data.poll) {
     return (
       <>
         <div className={classes.containerinner}>

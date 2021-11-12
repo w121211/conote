@@ -1,5 +1,6 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
-import { parseInlineShotParams } from '../models/shot'
+import { ShotChoice } from '../../apollo/query.graphql'
+// import { parseInlineShotParams } from '../models/shot'
 import { tokenToString } from '../token'
 import { InlineItem } from './types'
 
@@ -16,25 +17,27 @@ const decorateReMirrorTicker = /^(::\$[A-Z-=]+)\b/u
 const decorateReMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B/u
 const reMirrorTicker = /^(::\$[A-Z-=]+)\b(?:\s@([\p{Letter}\d_]+))?/u
 const reMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B(?:\s@([\p{Letter}\d_]+))?/u
-const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
+// const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
+const rePoll = /\B!\(\(poll:(c[a-z0-9]{24,29})\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const reNewPoll = /\B!\(\(poll\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
-const reShot = /\B!\(\(shot:([a-z0-9]{25,30})\)\)\([^)]*\)\B/
+const reShot = /\B!\(\(shot:(c[a-z0-9]{24,29})\)\)\(([^)]*)\)\B/
 const reNewShot = /\B!\(\(shot\)\)\(([^)]*)\)\B/
 
 const grammar: Grammar = {
-  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
-
   // 順序重要，先 mirror 後 ticker
   'mirror-ticker': { pattern: reMirrorTicker },
   'mirror-topic': { pattern: reMirrorTopic },
-  ticker: { pattern: reTicker },
-  topic: { pattern: reTopic },
 
   poll: { pattern: rePoll },
   'new-poll': { pattern: reNewPoll },
 
   shot: { pattern: reShot },
   'new-shot': { pattern: reNewShot },
+
+  ticker: { pattern: reTicker },
+  topic: { pattern: reTopic },
+
+  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
 
   url: {
     pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
@@ -68,6 +71,25 @@ export function tokenizeBulletString(text: string): (string | Token)[] {
 
 export function inlinesToString(inlines: InlineItem[]): string {
   return inlines.reduce((acc, cur) => `${acc}${cur.str}`, '')
+}
+
+function isShotChoice(s: string): s is ShotChoice {
+  return ['#LONG', '#SHORT', '#HOLD'].includes(s)
+}
+
+function parseInlineShotParams(params: string[]): {
+  authorName?: string
+  targetSymbol?: string
+  choice?: ShotChoice
+} {
+  const [_authorName, _targetSymbol, _choice] = params
+  // const matchAuthor = reAuthor.exec(_authorName)
+  // const matchSymbol = parseSymbol(_targetSymbol)
+  return {
+    authorName: _authorName,
+    targetSymbol: _targetSymbol,
+    choice: isShotChoice(_choice) ? _choice : undefined,
+  }
 }
 
 /**
@@ -138,6 +160,7 @@ export function parseBulletHead({ str }: { str: string }): { inlines: InlineItem
       case 'shot': {
         const match = reShot.exec(str)
         if (match) {
+          console.log(match[2])
           const params = match[2].split(' ')
           const { authorName, targetSymbol, choice } = parseInlineShotParams(params)
           return {

@@ -1,0 +1,15 @@
+.authorContainer {
+  & > ul {
+    margin-top: 0;
+    border: 1px solid $gray;
+    border-radius: 3px;
+  }
+  h3 {
+    // margin-top: 30px;
+    // margin-bottom: 0;
+    // color: $black;
+  }
+  h2 {
+    color: $black;
+  }
+}

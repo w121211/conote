@@ -21,17 +21,119 @@
     transform: translateX(0);
   }
   &.toggleClicked {
-    background-image: linear-gradient($secondary, $secondary), url('../assets/png/toggle/toggle-bar.png');
+    background-image: linear-gradient($primary, $primary), url('../assets/png/toggle/toggle-bar.png');
     &:after {
       transform: translateX(100%);
     }
   }
 }
 .header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 1em;
   color: $black;
   .author {
+    // width: 100%;
+    min-width: 60px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     color: $gray-text-dark;
     font-weight: 400;
     font-size: 14px;
+  }
+  a {
+    display: flex;
+  }
+
+  h3 {
+    margin: 0;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+}
+.headerKw {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.headerKwEl {
+  margin: 0 4px;
+  padding: 0 10px;
+  border-radius: 3px;
+  background: $primaryHover-light;
+}
+.headerKwElHidden {
+  position: relative;
+  color: $primary;
+  &:hover {
+    box-shadow: 0 1px 0 $primary;
+    cursor: pointer;
+  }
+}
+.headerKwElTooltip {
+  flex-direction: row;
+  flex-wrap: wrap;
+  left: 0;
+  top: 30px;
+  width: 300px;
+  padding: 10px;
+  row-gap: 10px;
+  // transition: all 0.1s;
+}
+.cardSource {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+  color: $gray-text-dark;
+  &:hover {
+    color: $black;
+    svg {
+      fill: $primary;
+    }
+  }
+  svg {
+    width: 15px;
+    height: 15px;
+    fill: $primaryHover;
+    margin-right: 2px;
+    // margin-left: 2px;
+  }
+}
+.headerHiddenBtns {
+  display: flex;
+  // position: absolute;
+  align-items: center;
+  // color: $gray-text;
+  line-height: 1;
+  font-size: 14px;
+  font-weight: normal;
+  visibility: hidden;
+}
+.cardMetaBtn {
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  color: $gray-text-dark;
+  &:hover {
+    background: none;
+    color: $black;
+  }
+}
+.headerBottom {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  .divider {
+    height: 18px;
+    width: 1px;
+    margin: 0 6px;
+    background: $gray;
   }
 }

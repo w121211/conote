@@ -163,7 +163,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
                   <Link href={locationToUrl({ ...location, openedLiPath: e.path })}>
                     <a>
                       {mirrorHomeUrl && e.path.length === 0 && '::'}
-                      {!mirrorHomeUrl && i === 0 ? data?.cardMeta.title : e.text}
+                      {!mirrorHomeUrl && i === 0 ? data?.cardMeta.title || e.text : e.text}
                     </a>
                   </Link>
                 )}

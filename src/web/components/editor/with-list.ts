@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import assert from 'assert'
+import { ReactEditor } from 'slate-react'
 import { Editor, Transforms, Range, Element, Node, Path, Text, NodeEntry } from 'slate'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 
@@ -174,6 +175,28 @@ export function unindent(editor: Editor, entry: NodeEntry<LiElement>): void {
 export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
   const { selection } = editor
 
+  // if (event.key === 'Shift') {
+  //   const lc = Editor.above<LcElement>(editor, { match: n => isLc(n) })
+  //   console.log(lc)
+  //   if (lc) {
+  //     Transforms.setNodes(
+  //       editor,
+  //       { shift: true },
+  //       {
+  //         // at:selection,
+  //         match: n => {
+  //           // console.log(n)
+  //           return isLc(n)
+  //         },
+  //       },
+  //     )
+  //   } else {
+  //     // const lc = Editor.above<LcElement>(editor, { match: n => isLc(n) })
+  //     // if (lc) {
+  //     Transforms.setNodes(editor, { shift: false })
+  //     // }
+  //   }
+  // }
   if (selection && Range.isCollapsed(selection)) {
     // 非tab、enter，略過
     if (!['Tab', 'Enter'].includes(event.key)) return
@@ -183,6 +206,18 @@ export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
     if (li) {
       const [, path] = li
       let op: 'indent' | 'unindent' | 'body' | undefined
+
+      // if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      //   // const editorNode =
+      //   // console.log(editorNode)
+      //   if (editor.selection == null) return
+      //   const domPoint = ReactEditor.toDOMPoint(editor, editor.selection?.focus)
+      //   const node = domPoint[0]
+      //   const element = node.parentElement
+
+      //   if (element === null) return
+      //   element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      // }
 
       if (event.shiftKey && event.key === 'Tab') {
         op = 'unindent'
@@ -364,6 +399,7 @@ export function withList(editor: Editor): Editor {
 
         // cursor 在行尾
         if (Editor.isEnd(editor, point, lcPath(path))) {
+          console.log(point, path)
           if (node.children[1]) {
             // 後行是indent，插入indent後行
             insertNextIndentLi(editor, li)
@@ -475,6 +511,7 @@ export function withList(editor: Editor): Editor {
       // 檢查li只能有lc, ul?
       assert(node.children.length <= 2)
       const [lc, ul] = node.children
+
       assert(isLc(lc))
       if (ul) assert(isUl(ul))
 

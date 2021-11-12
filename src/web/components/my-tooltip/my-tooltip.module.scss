@@ -11,6 +11,7 @@
   z-index: 100;
 
   height: fit-content;
+  max-height: 42vh;
   display: -moz-box;
   display: flex;
   align-items: flex-start;
@@ -20,6 +21,8 @@
 
   flex-wrap: nowrap;
   white-space: nowrap;
+
+  overflow: auto;
 
   color: $text;
 

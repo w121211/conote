@@ -1,7 +1,7 @@
 import React, { useState, useEffect, CSSProperties } from 'react'
 import router, { useRouter } from 'next/router'
 import Creatable from 'react-select/creatable'
-import { toUrlParams } from '../lib/helper'
+// import { toUrlParams } from '../lib/helper'
 import { useSearchAllLazyQuery } from '../apollo/query.graphql'
 import { ActionMeta, GroupTypeBase, Styles } from 'react-select'
 
@@ -46,9 +46,18 @@ export function SearchAllForm(): JSX.Element {
     const newOption = createOption(inputValue)
     if (inputValue.startsWith('http')) {
       router.push(`/card?url=${encodeURIComponent(inputValue)}`)
+    } else if (
+      !inputValue.startsWith('$') &&
+      !inputValue.startsWith('@') &&
+      !inputValue.startsWith('[[') &&
+      !inputValue.startsWith('http')
+    ) {
+      //未打任何記號且非 http
+      router.push(`/card/${encodeURIComponent('[[' + inputValue + ']]')}`)
     } else {
       router.push(`/card/${encodeURIComponent(inputValue)}`)
     }
+
     // setOptions([...options, newOption])
     // setValue(newOption)
   }
@@ -87,8 +96,10 @@ export function SearchAllForm(): JSX.Element {
 
       // borderColor: isFocused ? '#5c6cda' : 'hsl(0, 0%, 80%)',
       ':hover': {
+        // ':hover': { cursor: 'text' },
         borderColor: '#fff',
         boxShadow: '0 1px 6px 0 #17171730',
+        cursor: 'text',
       },
       borderColor: isFocused ? '#fff' : 'hsl(0, 0%, 80%)',
       boxShadow: isFocused ? '0 1px 6px 0 #17171730' : 'none',
@@ -112,7 +123,7 @@ export function SearchAllForm(): JSX.Element {
       onCreateOption={handleCreate}
       menuIsOpen={openMenu}
       placeholder="搜尋全站"
-
+      formatCreateLabel={inputValue => <>創建:{inputValue}</>}
       // onClick={() => {
       //   setOpenMenu(prev => !prev)
       // }}

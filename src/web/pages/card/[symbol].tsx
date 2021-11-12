@@ -8,7 +8,7 @@ import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 import NavPath from '../../components/nav-path/nav-path'
-import { CardMeta, useMeQuery } from '../../apollo/query.graphql'
+import { CardMeta, useCardMetaQuery, useEmojisQuery, useMeQuery } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/symbol.module.scss'
 import Popover from '../../components/popover/popover'
@@ -16,6 +16,12 @@ import { useUser } from '@auth0/nextjs-auth0'
 import Popup from '../../components/popup/popup'
 import HeaderForm from '../../components/header-form/header-form'
 import Link from 'next/link'
+import LinkIcon from '../../assets/svg/link.svg'
+
+import CardMetaForm from '../../components/card-meta-form/card-meta-form'
+import MyTooltip from '../../components/my-tooltip/my-tooltip'
+import EmojiHeaderBtn from '../../components/emoji-up-down/emoji-header-btn'
+import CreateEmojiBtn from '../../components/emoji-up-down/emoji-header-create-btn'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -47,49 +53,6 @@ function getNavs(root: LiElement, destPath: number[], meta: CardMeta): Nav[] {
  * @param poll
  * @param author 若給予視為代表 author 投票
  */
-// const PollComponent = (props: { poll: Poll; author?: string }): JSX.Element => {
-//   const { poll, author } = props
-//   const [createVote] = useCreateVoteMutation({
-//     update(cache, { data }) {
-//       // const res = cache.readQuery<MyVotesQuery>({
-//       //   query: MyVotesDocument,
-//       // })
-//       // if (data?.createVote && res?.myVotes) {
-//       //   cache.writeQuery({
-//       //     query: MyVotesDocument,
-//       //     data: { myVotes: res.myVotes.concat([data.createVote]) },
-//       //   })
-//       // }
-//       // refetch()
-//     },
-//     // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
-//   })
-//   const onVote = () => {
-//     // 已經投票且生效，不能再投
-//     // 尚未投票，可以投
-//     // 送出按鈕
-//   }
-
-//   return (
-//     <>
-//       {poll.choices.map((e, i) => (
-//         <button
-//           key={i}
-//           onClick={event => {
-//             createVote({
-//               variables: {
-//                 pollId: poll.id,
-//                 data: { choiceIdx: i },
-//               },
-//             })
-//           }}
-//         >
-//           {e}
-//         </button>
-//       ))}
-//     </>
-//   )
-// }
 
 // export const Context = createContext({
 //   author: '' as string | undefined,
@@ -111,15 +74,17 @@ const CardSymbolPage = (): JSX.Element | null => {
   const { data: meData, loading: meLoading } = useMeQuery({ fetchPolicy: 'cache-first' })
   const { user, error, isLoading } = useUser()
   const [showLoginPopup, setShowLoginPopup] = useState(false)
-  const [showHeaderForm, setShowHeaderForm] = useState(false)
-  const [headerFormSubmited, setHeaderFormSubmited] = useState(false)
+  const [showKwTooltip, setShowKwTooltip] = useState(false)
   const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
   const [submitFinished, setSubmitFinished] = useState(false)
-  // const [openLiHashtags, setOpenLiHashtags] = useState<Hashtag[]>([])
-  // const [queryHashtags, { data: hashtagData }] = useHashtagsLazyQuery({
-  //   fetchPolicy: 'cache-first',
-  //   variables: { symbol: data?.self.symbol ?? '' },
-  // })
+  const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
+  const { data: cardMetaData } = useCardMetaQuery({
+    variables: { symbol: data?.selfCard.symbol ?? '' },
+  })
+  const { data: emojiData } = useEmojisQuery({
+    fetchPolicy: 'cache-first',
+    variables: { bulletId: data?.openedLi.children[0].id ?? '' },
+  })
 
   useEffect(() => {
     if (router.isReady) {
@@ -139,13 +104,17 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
   }, [meData, user, meLoading])
 
-  useEffect(() => {
-    if (!showHeaderForm && headerFormSubmited) {
+  // useEffect(() => {
+  //   if ( headerFormSubmited) {
+  //   }
+  // }, [headerFormSubmited])
+  const handleCardMetaSubmitted = (isSubmitted: boolean) => {
+    // setHeaderFormSubmited(isSubmitted)
+    if (isSubmitted) {
       dropValue()
       router.reload()
     }
-  }, [headerFormSubmited, showHeaderForm])
-
+  }
   // useEffect(() => {
   //   queryHashtags()
   //   if (hashtagData?.hashtags && data) {
@@ -205,7 +174,38 @@ const CardSymbolPage = (): JSX.Element | null => {
   }
 
   return (
-    <Layout>
+    <Layout
+      buttonLeft={
+        <>
+          <button
+            onClick={() => {
+              dropValue()
+              router.reload()
+            }}
+          >
+            Drop
+          </button>
+          <button
+            className="primary"
+            onClick={() => {
+              submitValue({
+                onFinish: () => {
+                  setSubmitFinished(true)
+                  setDisableSubmit(true)
+                  dropValue()
+
+                  // router.reload()
+                },
+              })
+            }}
+            disabled={!isValueModified}
+          >
+            {submitFinished ? '已儲存' : '儲存'}
+            {/* {console.log(isValueModified)} */}
+          </button>
+        </>
+      }
+    >
       <div style={{ marginBottom: '3em' }}>
         <div>
           <NavPath
@@ -213,7 +213,7 @@ const CardSymbolPage = (): JSX.Element | null => {
             location={{ ...location }}
             mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
           />
-          <button
+          {/* <button
             // className="noBg"
             onClick={() => {
               if (meData || user) {
@@ -226,7 +226,7 @@ const CardSymbolPage = (): JSX.Element | null => {
             }}
           >
             {readonly || !meData || !user ? '編輯' : '鎖定'}
-          </button>
+          </button> */}
           {showLoginPopup && (
             <Popup
               visible={showLoginPopup}
@@ -242,86 +242,6 @@ const CardSymbolPage = (): JSX.Element | null => {
               請先登入！
             </Popup>
           )}
-
-          <button
-            className="primary"
-            onClick={() => {
-              submitValue({
-                onFinish: () => {
-                  setSubmitFinished(true)
-                  setDisableSubmit(true)
-                  dropValue()
-
-                  router.reload()
-                },
-              })
-            }}
-            disabled={!isValueModified}
-          >
-            {submitFinished ? '已儲存' : '儲存'}
-            {/* {console.log(isValueModified)} */}
-          </button>
-          {/* <button
-          className="primary"
-          onClick={() => {
-            submitValue({
-              onFinish: () => {
-                // dropValue()
-                router.reload()
-              },
-            })
-          }}
-        >
-          Submit {isValueModified ? '*' : ''}
-        </button> */}
-
-          <button
-            onClick={() => {
-              dropValue()
-              router.reload()
-            }}
-          >
-            {'Drop'}
-          </button>
-          {data.selfCard.link?.url && (
-            <button>
-              <a href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
-                來源連結
-              </a>
-            </button>
-          )}
-          {/* {location.author && (
-          <button
-            onClick={() => {
-              setAuthorName(prev => {
-                if (prev) {
-                  return undefined
-                } else {
-                  return location.author
-                }
-              })
-            }}
-          >
-            {location.author}
-          </button>
-        )} */}
-
-          {/* {mirror && (
-          <span>
-            <Link href={locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}>
-              <a>Home</a>
-            </Link>
-            ...
-          </span>
-        )} */}
-
-          {/* {/* {navs &&
-          navs.map((e, i) => (
-            <Link href={locationToUrl({ ...location, openedLiPath: e.path })} key={i}>
-              <a>{e.text}</a>
-            </Link>
-          ))} */}
-          {/* {data.selfCard.link?.authorName && <span>@{data.selfCard.link?.authorName}</span>} */}
 
           {router.query.a && (
             <button
@@ -342,58 +262,113 @@ const CardSymbolPage = (): JSX.Element | null => {
             </button>
           )}
 
-          {data.openedLi.children[0].rootBulletDraft && (
-            <button
-              className="secondary"
-              onClick={() => {
-                setShowHeaderForm(true)
-              }}
-            >
-              編輯卡片資訊
-            </button>
-          )}
           {/* // )} */}
-          {showHeaderForm && (
-            <Popover
-              visible={showHeaderForm}
-              hideBoard={() => {
-                setShowHeaderForm(false)
+
+          <div className={classes.header}>
+            <h3
+              onMouseEnter={e => {
+                setShowHeaderHiddenBtns(true)
+              }}
+              onMouseLeave={e => {
+                setShowHeaderHiddenBtns(false)
               }}
             >
-              <HeaderForm
-                symbol={router.query.symbol as string}
-                initialValue={{
-                  author: (data.selfCard.meta.author || data.selfCard.link?.authorName) ?? '',
-                  title: (data.selfCard.meta.title || data.selfCard.link?.url) ?? '',
-                  url: (data.selfCard.meta.url || data.selfCard.link?.url) ?? '',
-                  keywords: data.selfCard.meta.keywords?.map(e => {
-                    return { label: e, value: e }
-                  }) ?? [{ label: '', value: '' }],
-                  redirects: data.selfCard.meta.redirects?.join(' ') ?? '',
-                  duplicates: data.selfCard.meta.duplicates?.join(' ') ?? '',
-                }}
-                handleSubmitted={isSubmitted => {
-                  setHeaderFormSubmited(isSubmitted)
-                }}
-              />
-            </Popover>
-          )}
-
-          <h3 className={classes.header}>
-            {router.query.p && Node.string(data.openedLi.children[0]).replace(rePoll, '').trimEnd()}
-            {data.mirror && !router.query.p && data.mirror.symbol}
-            {!router.query.p && !data.mirror && (
-              <>
-                {data.selfCard.meta.title ?? data.selfCard.symbol}
-                {data.selfCard.meta.author && (
-                  <Link href={`/author/${encodeURIComponent('@' + data.selfCard.meta.author)}`}>
-                    <a className={classes.author}>@{data.selfCard.meta.author}</a>
-                  </Link>
+              <div
+                className={classes.headerHiddenBtns}
+                style={showHeaderHiddenBtns ? { visibility: 'visible' } : { visibility: 'hidden' }}
+              >
+                {data.openedLi.children[0].rootBulletDraft && data?.selfCard.symbol && (
+                  <CardMetaForm
+                    symbol={data.selfCard.symbol}
+                    selfCard={data.selfCard}
+                    handleCardMetaSubmitted={handleCardMetaSubmitted}
+                    btnClassName={classes.cardMetaBtn}
+                  />
                 )}
-              </>
+                {data.selfCard.link?.url && (
+                  // <button>
+                  <a className={classes.cardSource} href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
+                    <LinkIcon />
+                    開啟來源
+                  </a>
+                  // </button>
+                )}
+              </div>
+              {router.query.p && Node.string(data.openedLi.children[0]).replace(rePoll, '').trimEnd()}
+              {data.mirror && !router.query.p && data.mirror.symbol}
+              {!router.query.p && !data.mirror && <>{cardMetaData?.cardMeta.title ?? data.selfCard.symbol}</>}
+            </h3>
+            {cardMetaData?.cardMeta.keywords && (
+              <div className={classes.headerKw}>
+                {cardMetaData?.cardMeta.keywords.map((e, i) => {
+                  if (i < 5) {
+                    return (
+                      <span className={classes.headerKwEl} key={i}>
+                        {e}
+                      </span>
+                    )
+                  }
+                  return null
+                })}
+                {cardMetaData.cardMeta.keywords.length > 5 && (
+                  <span
+                    className={classes.headerKwElHidden}
+                    onClick={e => {
+                      e.stopPropagation()
+                      setShowKwTooltip(true)
+                    }}
+                  >
+                    ...+{cardMetaData.cardMeta.keywords.length - 5}項
+                    <MyTooltip
+                      className={classes.headerKwElTooltip}
+                      visible={showKwTooltip}
+                      handleVisibleState={() => {
+                        setShowKwTooltip(false)
+                      }}
+                    >
+                      {cardMetaData?.cardMeta.keywords.map((e, i) => {
+                        if (i >= 5) {
+                          return (
+                            <span className={classes.headerKwEl} key={i}>
+                              {e}
+                            </span>
+                          )
+                        }
+                        return null
+                      })}
+                    </MyTooltip>
+                  </span>
+                )}
+              </div>
             )}
-          </h3>
-          {/* {hashtags && <div>{hashtags.text}</div>} */}
+            <div className={classes.headerBottom}>
+              {emojiData?.emojis && data?.openedLi.children[0].id && (
+                <div>
+                  {emojiData.emojis.findIndex(e => e.text === 'PIN') < 0 && (
+                    <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="PIN" />
+                  )}
+                  {emojiData.emojis.findIndex(e => e.text === 'UP') < 0 && (
+                    <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="UP" />
+                  )}
+                  {emojiData.emojis.findIndex(e => e.text === 'DOWN') < 0 && (
+                    <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="DOWN" />
+                  )}
+                  {/* {console.log(emojiData.emojis)} */}
+                  {emojiData.emojis.map((e, i) => (
+                    <EmojiHeaderBtn key={i} emoji={e} bulletId={data.openedLi.children[0].id ?? ''} />
+                  ))}
+                </div>
+              )}
+              {cardMetaData?.cardMeta.author && (
+                <>
+                  <div className={classes.divider}></div>
+                  <Link href={`/author/${encodeURIComponent('@' + cardMetaData?.cardMeta.author)}`}>
+                    <a className={classes.author}>@{cardMetaData?.cardMeta.author}</a>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
           {/* {openLiHashtags.length > 0 && (
             <div>
               {openLiHashtags.map((e, i) => {
