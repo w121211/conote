@@ -331,6 +331,7 @@ type CardStateBody {
   # value: [BulletTreeNode!]!
   changes: JSON!
   value: JSON!
+  # symbolToCardId: JSON!  # a symbol-cardId map, so later the cahnge of symbol name won't affect
 }
 
 type Commit {
@@ -552,13 +553,13 @@ input CardInput {
 }
 
 input CardStateInput {
-  symbol: String!
+  cid: String!
   cardId: String
-  prevStateId: String
   sourceCardId: String # 用此來分辨 sub-docs
-  changes: JSON!
-  finalValue: JSON! # 用於比較 applyChanges() 是否相同，不存入
+  prevStateId: String
   cardInput: CardInput # 當需要同時創新 card 時 (目前只適用於創 symbol-card 的情況)
+  changes: JSON!
+  value: JSON! # 用於比較 applyChanges() 是否相同，不存入
 }
 
 input CommitInput {

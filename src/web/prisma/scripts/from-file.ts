@@ -1,17 +1,17 @@
 import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
-import { nanoid } from 'nanoid'
-import { Author, Card, CardState, Link, PrismaClient, Shot, ShotChoice, Symbol as PrismaSymbol } from '.prisma/client'
-import { DataNode, NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
-import { Editor as OldEditor, Markerline, splitByUrl } from '../../../packages/editor/src'
+import { Author, Card, CardState, Link, PrismaClient, Shot, ShotChoice, Sym } from '.prisma/client'
+import { TreeService } from '../../../packages/docdiff/src'
+import { Editor as MKEditor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../lib/fetcher/fetcher'
-import { Bullet } from '../../components/bullet/types'
 import { CardMeta, CardModel } from '../../lib/models/card'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
 import { ShotBody, ShotModel } from '../../lib/models/shot'
-import { CardStateBody, CommitModel } from '../../lib/models/commit'
-import { CardInput } from '../../apollo/type-defs.graphqls'
+import { CommitModel } from '../../lib/models/commit'
+import { CardStateBody, CardStateParsed } from '../../lib/models/card-state'
+import { MKDoc } from './mk-doc'
+// import { Doc, DocProps } from '../../components/workspace/workspace'
 // import { getBotId } from '../../lib/models/user'
 // import { injectHashtags, toGQLHashtag } from '../../lib/hashtag/inject'
 
@@ -33,7 +33,7 @@ const NEAT_REPLY_CHOICE = [
   { options: ['<觀望>'], choiceIdx: 2, shotChoice: ShotChoice.HOLD },
 ]
 
-async function createNeatReply({
+async function getNeatReply({
   authorId,
   neatReply,
   linkId,
@@ -48,7 +48,7 @@ async function createNeatReply({
 }): Promise<
   Shot & {
     author: Author
-    symbol: PrismaSymbol
+    sym: Sym
   }
 > {
   if (!neatReply.neatReply) throw new Error('非neatReply')
@@ -107,98 +107,9 @@ async function createNeatReply({
   // node.children.push(child)
 }
 
-type DocProps = {
-  symbol: string // use as cid
-  card: Card | null
-  prevState: CardState | null
-  subSymbols?: string[]
-  value: TreeNode<Bullet>[]
-  cardInput?: CardInput // only needs if card does not exist, which creating card and doc in the same time
-}
-
-class Doc {
-  readonly symbol: string // as CID
-  readonly card: Card | null
-  readonly prevState: CardState | null
-
-  subSymbols: string[]
-  value: TreeNode<Bullet>[]
-  cardInput?: CardInput
-
-  constructor({ card, prevState, symbol, subSymbols, value, cardInput }: DocProps) {
-    // this.cid = cid
-    this.symbol = symbol
-    this.card = card
-    this.prevState = prevState
-    this.subSymbols = subSymbols ?? []
-    this.cardInput = cardInput
-    // this.store = new NestedNodeValueStore(value)
-    this.value = value
-  }
-
-  createBullet({
-    head,
-    authorId,
-    sourceCardId,
-  }: {
-    head: string
-    authorId?: string
-    sourceCardId?: string
-  }): DataNode<Bullet> {
-    const cid = nanoid()
-    const node: DataNode<Bullet> = {
-      cid,
-      data: {
-        id: cid,
-        cid,
-        head,
-        sourceCardId,
-        authorId,
-      },
-    }
-    return node
-  }
-
-  insertMarkerLines({
-    markerlines,
-    authorId,
-    sourceCardId,
-  }: {
-    markerlines: Markerline[]
-    authorId?: string
-    sourceCardId?: string
-  }): void {
-    // const root = cloneDeep(rootBullet)
-    for (const e of markerlines) {
-      if (e.new && e.marker?.key && e.marker.value) {
-        const { key, value } = e.marker
-        const valueNode = this.createBullet({
-          head: value,
-          sourceCardId,
-          authorId,
-        })
-
-        const found = TreeService.find(this.value, node => node.data?.head.includes(key) ?? false)
-        if (found.length > 0) {
-          this.value = TreeService.insert(this.value, valueNode, found[0].cid, -1)
-        } else {
-          // key node not found, create one
-          const keyNode = this.createBullet({ head: key })
-          this.value = TreeService.insert(this.value, keyNode, TreeService.tempRootCid, -1) // insert key
-          this.value = TreeService.insert(this.value, valueNode, keyNode.cid, -1) // insert value
-        }
-      }
-    }
-  }
-
-  insertBullet(bullet: DataNode<Bullet>, toParentCid: string, toIndex = -1): void {
-    this.value = TreeService.insert(this.value, bullet, toParentCid, toIndex)
-  }
-}
-
 const main = async () => {
   console.log('Truncating databse...')
-  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Link", "Poll", "Shot", "Symbol", "User" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Link", "Poll", "Shot", "Sym", "User" CASCADE;`
 
   console.log('Creating test users...')
   await createTestUsers(prisma)
@@ -221,9 +132,9 @@ const main = async () => {
 
       let webpageCard: Omit<Card, 'meta'> & {
         link: Link
-        symbol: PrismaSymbol
+        sym: Sym
         meta: CardMeta
-        state: CardState | null
+        state: CardStateParsed | null
       }
       try {
         webpageCard = await CardModel.getOrCreateByUrl({ scraper, url })
@@ -232,15 +143,28 @@ const main = async () => {
         continue
       }
 
-      const doc = new Doc({
-        symbol: webpageCard.symbol.name,
-        card: webpageCard,
-        prevState: webpageCard.state,
+      // {
+      //   symbol: string
+      //   cardInput: CardInput | null
+      //   cardCopy: Card | null
+      //   sourceCardCopy: Card | null
+      //   // subSymbols?: string[]
+      //   updatedAt?: number
+      //   // value: TreeNode<Bullet>[]
+      //   // syncValue: LiElement[]
+      //   editorValue: LiElement[]
+      // }
+
+      const doc = new MKDoc({
+        symbol: webpageCard.sym.symbol,
+        cardInput: null,
+        cardCopy: webpageCard,
+        sourceCardCopy: null,
         value: webpageCard.state ? (webpageCard.state.body as unknown as CardStateBody).value : [],
       })
-      const subDocs: Doc[] = []
+      const subDocs: MKDoc[] = []
 
-      const mkEditor = new OldEditor('', [], webpageCard.link.url, webpageCard.link.authorId ?? undefined)
+      const mkEditor = new MKEditor('', [], webpageCard.link.url, webpageCard.link.authorId ?? undefined)
       mkEditor.setText(text)
       mkEditor.flush()
 
@@ -248,24 +172,21 @@ const main = async () => {
         const mirrorSymbol = cardlabel.symbol
         const mirrorCard = await CardModel.getBySymbol(mirrorSymbol)
         const mirrorDoc = mirrorCard
-          ? new Doc({
+          ? new MKDoc({
               symbol: mirrorSymbol,
-              card: mirrorCard,
-              prevState: mirrorCard.state,
+              cardInput: null,
+              cardCopy: mirrorCard,
+              sourceCardCopy: webpageCard,
               value: (mirrorCard.state.body as unknown as CardStateBody).value,
             })
-          : new Doc({
+          : new MKDoc({
               symbol: mirrorSymbol,
-              card: null,
-              prevState: null,
-              value: [],
               cardInput: { symbol: mirrorSymbol, meta: {} },
+              cardCopy: null,
+              sourceCardCopy: webpageCard,
+              value: [],
             })
-        mirrorDoc.insertMarkerLines({
-          markerlines,
-          authorId: webpageCard.link.authorId ?? undefined,
-          sourceCardId: webpageCard.id,
-        })
+        mirrorDoc.insertMarkerLines({ markerlines })
         subDocs.push(mirrorDoc)
 
         // if (mirrorCard) {
@@ -281,7 +202,7 @@ const main = async () => {
           throw '[conote-seed] neatReplies.length > 1'
         } else if (neatReplies.length === 1) {
           if (webpageCard.link.authorId && webpageCard.linkId) {
-            const shot = await createNeatReply({
+            const shot = await getNeatReply({
               authorId: webpageCard.link.authorId,
               neatReply: neatReplies[0],
               linkId: webpageCard.linkId,
@@ -291,7 +212,7 @@ const main = async () => {
             inlineShotStr = ShotModel.toInlineShotString({
               author: shot.author.name,
               choice: shot.choice,
-              symbol: shot.symbol.name,
+              symbol: shot.sym.symbol,
               id: shot.id,
             })
           }
@@ -303,19 +224,17 @@ const main = async () => {
         doc.insertBullet(bt, TreeService.tempRootCid)
       }
 
-      doc.subSymbols = subDocs.map(e => e.symbol)
-
       const commit = await CommitModel.create(
         {
           cardStateInputs: [doc, ...subDocs].map(e => {
-            const { prevState, card, symbol, subSymbols, value, cardInput } = e
+            const { cid, cardCopy, sourceCardCopy, cardInput, value } = e
             return {
-              prevStateId: prevState?.id,
-              cardId: card ? card.id : undefined,
-              symbol,
-              subSymbols,
+              cid,
+              prevStateId: cardCopy?.state?.id,
+              cardId: cardCopy?.id,
+              sourceCardId: sourceCardCopy?.id,
               changes: [],
-              finalValue: value,
+              value,
               cardInput,
             }
           }),
@@ -330,13 +249,13 @@ const main = async () => {
 }
 
 main()
-// .catch(err => {
-//   console.error(err)
-//   throw new Error()
-// })
-// .finally(async () => {
-//   console.log('Done, closing primsa')
-//   scraper.dump()
-//   prisma.$disconnect()
-//   process.exit()
-// })
+  .catch(err => {
+    console.error(err)
+    throw new Error()
+  })
+  .finally(async () => {
+    console.log('Done, closing primsa')
+    scraper.dump()
+    prisma.$disconnect()
+    process.exit()
+  })

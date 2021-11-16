@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { Token } from 'prismjs'
 import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element, Point } from 'slate'
 import {
   Editable,
@@ -14,20 +16,6 @@ import {
   withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
-import {
-  CustomRange,
-  InlineFiltertagElement,
-  InlineMirrorElement,
-  InlinePollElement,
-  InlineShotElement,
-  InlineSymbolElement,
-  LcElement,
-  LiElement,
-  UlElement,
-} from './slate-custom-types'
-import BulletSvg from '../bullet-svg/bullet-svg'
-import classes from './editor.module.scss'
-import Popover from '../popover/popover'
 import {
   BulletEmoji,
   BulletEmojiLike,
@@ -54,28 +42,36 @@ import {
   useShotQuery,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
+import { tokenizeBulletString } from '../bullet/parser'
+import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../bullet/types'
 import BulletPanel from '../bullet-panel/bullet-panel'
-import MyHashtagGroup from '../emoji-up-down/poll-group'
-import { spawn } from 'child_process'
+import BulletSvg from '../bullet-svg/bullet-svg'
+import HashtagTextToIcon from '../emoji-up-down/emoji-text-to-icon'
+import PollGroup from '../emoji-up-down/poll-group'
+import PollPage from '../poll/poll-page'
+import AuthorPollPage from '../poll/author-poll-page'
+import CreatePollForm from '../poll-form/create-poll-form'
+import Popover from '../popover/popover'
+import Popup from '../popup/popup'
+import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
+import { DocPathService } from '../workspace/doc-path'
+import { Doc } from '../workspace/workspace'
+import classes from './editor.module.scss'
+import {
+  CustomRange,
+  InlineFiltertagElement,
+  InlineMirrorElement,
+  InlinePollElement,
+  InlineShotElement,
+  InlineSymbolElement,
+  LcElement,
+  LiElement,
+  UlElement,
+} from './slate-custom-types'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
-import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../bullet/types'
-import CreatePollForm from '../poll-form/create-poll-form'
-import HashtagTextToIcon from '../emoji-up-down/emoji-text-to-icon'
-import PollPage from '../poll/poll-page'
 // import { Context } from '../../pages/card/[symbol]'
-import AuthorPollPage from '../poll/author-poll-page'
-import router, { useRouter } from 'next/router'
-import Popup from '../popup/popup'
-import PollGroup from '../emoji-up-down/poll-group'
-import { getLocalOrQueryRoot } from './use-local-value'
-import { useApolloClient } from '@apollo/client'
 // import { BulletNode } from '../bullet/node'
-import { Token, tokenize } from 'prismjs'
-import { tokenizeBulletString } from '../bullet/parser'
-import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
-import { Doc } from '../workspace/workspace'
-import { DocPathService } from '../workspace/doc-path'
 // import UpdateShotForm from '../shot-form/update-shot-form'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 

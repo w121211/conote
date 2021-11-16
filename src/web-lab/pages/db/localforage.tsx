@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { hello, LocalDBService } from '../../lib/localforage'
+import { LocalDBService } from '../../lib/localforage'
 
 const Page = (): JSX.Element => {
   useEffect(() => {
@@ -11,7 +11,7 @@ const Page = (): JSX.Element => {
         // const value = await .getItem('a')
         // await LocalDBService.tableOne.setItem('a', a)
 
-        const value = await LocalDBService.tableOne.getItem('a')
+        const value = await LocalDBService.docTable.getItem('a')
         console.log(value)
       } catch (err) {
         console.log(err)
@@ -19,8 +19,6 @@ const Page = (): JSX.Element => {
     }
     runner()
   }, [])
-
-  console.log(hello)
 
   return (
     <div className="container">

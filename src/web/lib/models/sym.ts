@@ -2,8 +2,7 @@ import { Sym, SymType } from '.prisma/client'
 import prisma from '../prisma'
 
 /**
- * Symbol category:
- *
+ * Symbol types:
  * - Ticker: $AB, $A01
  * - Topic: [[what ever]], [[包括unicode]]
  * - URL: @https://github.com/typescript-eslint
@@ -40,7 +39,7 @@ export const SymModel = {
    * 1. 無法區別[[topic]] vs [[https://...]], [[https://...]]應要parse為WEBPAGE
    * 2. 無法辨識oauthor
    */
-  parse(symbol: string): ParsedSymbol {
+  parse(symbol: string): SymbolParsed {
     let type: SymType
     if (symbol.match(reTicker) !== null) {
       type = SymType.TICKER

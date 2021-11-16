@@ -1,34 +1,34 @@
 import { assert } from 'console'
 import cuid from 'cuid'
+import { NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import {
   CardInput as GQLCardInput,
   CommitInput as GQLCommitInput,
   CardStateInput as GQLCardStateInput,
   Commit as GQLCommit,
 } from '../../apollo/type-defs.graphqls'
-import prisma from '../prisma'
-import { NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { Bullet } from '../../components/bullet/types'
-import { SymbolParsed, SymModel } from './sym'
+import prisma from '../prisma'
 import { CardStateBody, CardStateModel } from './card-state'
+import { SymbolParsed, SymModel } from './sym'
 
-type InsertBullet = {
+type BulletInsert = {
   id: string
 }
 
-type InsertCard = {
+type CardInsert = {
   id: string
-  symbol: string
+  // symbol: string
   // meta?: Record<string, string>
+  symbolParsed: SymbolParsed
 }
 
-type InsertCardState = {
+type CardStateInsert = {
   id: string
-  symbolParsed: SymbolParsed
   cardId?: string // 用此替代 symbol
   body: CardStateBody
-  insertCard?: InsertCard
-  insertBullets: InsertBullet[]
+  cardInsert?: CardInsert
+  bulletInserts: BulletInsert[]
 }
 
 export const CommitModel = {
@@ -61,12 +61,12 @@ export const CommitModel = {
   // toDBChangeInputs(inputs: GQLChangeInput[]): ChangeInput[] {
   // }
 
-  _toInserts(inputs: GQLCardStateInput[]): InsertCardState[] {
+  _toInserts(inputs: GQLCardStateInput[]): CardStateInsert[] {
     // Initialize symbol-cuid dicts
-    const stateSymbols = [...new Set(inputs.map(e => e.symbol))]
-    const stateIdDict: Record<string, string> = Object.fromEntries(stateSymbols.map(e => [e, cuid()]))
-    const cardSymbols = [...new Set(inputs.map(e => e.cardInput?.symbol))]
-    const cardIdDict: Record<string, string> = Object.fromEntries(cardSymbols.map(e => [e, cuid()]))
+    const cardInputSymbols = [...new Set(inputs.map(e => e.cardInput?.symbol))]
+    const stateCids = [...new Set(inputs.map(e => e.cid))]
+    const genCardId: Record<string, string> = Object.fromEntries(cardInputSymbols.map(e => [e, cuid()]))
+    const genStateId: Record<string, string> = Object.fromEntries(stateCids.map(e => [e, cuid()]))
 
     // const queriedCards = await prisma.$transaction(
     //   stateSymbols.map(e => {
@@ -79,41 +79,38 @@ export const CommitModel = {
     //   }),
     // )
 
-    const inserts = inputs.map<InsertCardState>(state => {
-      const { prevStateId, cardId, sourceCardId, symbol, changes, finalValue, cardInput } = state
+    const inserts = inputs.map<CardStateInsert>(input => {
+      const { cid, prevStateId, cardId, sourceCardId, cardInput, changes, value } = input
 
       // 直接置換 value 中每個 bullet 的 id (硬幹) -> 正常應該是要從 updates 著手
-      const value: TreeNode<Bullet>[] = finalValue
-      const insertBullets: InsertBullet[] = []
-      const nodes = TreeService.toList(value).map(e => {
-        if (e.data) {
-          if (e.data.cid) {
-            e.data.id = cuid() // in-place
-            delete e.data.cid
-            insertBullets.push({ id: e.data.id })
-          }
+      const bulletInserts: BulletInsert[] = []
+      const nodes = TreeService.toList(value as unknown as TreeNode<Bullet>[]).map(e => {
+        if (e.data && e.data.cid) {
+          e.data.id = cuid() // in-place
+          delete e.data.cid // cid should not store in backend
+          bulletInserts.push({ id: e.data.id })
         }
         return e
       })
-      const bulletModifiedValue = TreeService.fromList(nodes)
+      const finalValue = TreeService.fromList(nodes)
 
-      const insert: InsertCardState = {
-        id: stateIdDict[symbol],
-        symbolParsed: SymModel.parse(symbol),
+      const insert: CardStateInsert = {
+        id: genStateId[cid],
         cardId: cardId ?? undefined,
         body: {
           prevStateId: prevStateId ?? null,
           sourceCardId: sourceCardId ?? null,
           changes,
-          value: bulletModifiedValue,
+          value: finalValue,
         },
-        insertCard: cardInput
+        cardInsert: cardInput
           ? {
-              ...cardInput,
-              id: cardIdDict[cardInput.symbol],
+              // ...cardInput,
+              id: genCardId[cardInput.symbol],
+              symbolParsed: SymModel.parse(cardInput.symbol),
             }
           : undefined,
-        insertBullets,
+        bulletInserts,
       }
       return insert
     })
@@ -163,20 +160,21 @@ export const CommitModel = {
       }),
 
       ...inserts.map(e => {
-        const { id, symbolParsed, cardId, body, insertCard, insertBullets } = e
-        if (insertCard) {
+        const { id, cardId, body, cardInsert, bulletInserts } = e
+        if (cardInsert) {
+          const { symbolParsed } = cardInsert
           return prisma.cardState.create({
             data: {
               id,
               bullets: {
                 createMany: {
-                  data: insertBullets.map(e => ({ id: e.id })),
+                  data: bulletInserts.map(e => ({ id: e.id })),
                 },
               },
               body,
               card: {
                 create: {
-                  id: insertCard.id,
+                  id: cardInsert.id,
                   sym: {
                     connectOrCreate: {
                       create: { symbol: symbolParsed.symbol, type: symbolParsed.type },
@@ -196,7 +194,7 @@ export const CommitModel = {
               id,
               bullets: {
                 createMany: {
-                  data: insertBullets.map(e => ({ id: e.id })),
+                  data: bulletInserts.map(e => ({ id: e.id })),
                 },
               },
               body,

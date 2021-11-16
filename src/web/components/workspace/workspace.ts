@@ -26,7 +26,7 @@ export type DocEntry = {
   updatedAt: number
 }
 
-type DocProps = {
+export type DocProps = {
   symbol: string
   cardInput: CardInput | null
   cardCopy: Card | null
@@ -43,13 +43,11 @@ export class Doc {
   readonly symbol: string // as CID
   readonly cardCopy: Card | null // to keep the prev-state,
   readonly sourceCardCopy: Card | null // indicate current doc is a mirror
-
   cardInput: CardInput | null // required if card is null
-  // subSymbols: string[] // 動態儲存還是只有在 submit 的時候直接輸出？
+  editorValue: LiElement[]
   updatedAt: number = Date.now() // timestamp
   // value: TreeNode<Bullet>[]
   // editorValue: LiElement[] | null // local store
-  editorValue: LiElement[]
 
   constructor({ cardInput, cardCopy, sourceCardCopy, symbol, editorValue }: DocProps) {
     if (cardCopy && cardCopy.sym.symbol !== symbol) {
@@ -80,22 +78,6 @@ export class Doc {
     //   curDoc = { doc, warn: 'prev_doc_behind' }
     // }
   }
-
-  /**
-   * Time-consuming, iterate all docs in local-db to match its source card
-   */
-  // async getSubDocs(): Promise<Doc[]> {
-  //   const subDocs: Doc[] = []
-  //   if (this.cardCopy?.id) {
-  //     for (const e of await LocalDBService.docTable.keys()) {
-  //       const loaded = await Doc.loads(e)
-  //       if (loaded?.sourceCardCopy?.id === this.cardCopy.id) {
-  //         subDocs.push(loaded)
-  //       }
-  //     }
-  //   }
-  //   return subDocs
-  // }
 
   async remove(): Promise<void> {
     try {
@@ -133,15 +115,15 @@ export class Doc {
   }
 
   toCardStateInput(): CardStateInput {
+    const { cid, cardInput, cardCopy, sourceCardCopy, editorValue } = this
     return {
-      cardId: this.cardCopy?.id,
-      cardInput: this.cardInput,
-      prevStateId: this.cardCopy?.state?.id,
-      symbol: this.symbol,
-      // subSymbols: this.subSymbols,
-      // subSymbols: [],
+      cid,
+      prevStateId: cardCopy?.state?.id,
+      cardInput,
+      cardId: cardCopy?.id,
+      sourceCardId: sourceCardCopy?.id,
       changes: [], // TODO
-      finalValue: EditorSerializer.toTreeNodes(this.editorValue),
+      value: EditorSerializer.toTreeNodes(editorValue),
     }
   }
 

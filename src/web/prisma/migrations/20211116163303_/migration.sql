@@ -1,85 +1,44 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `cardId` on the `Bullet` table. All the data in the column will be lost.
-  - You are about to drop the column `scrapeData` on the `Link` table. All the data in the column will be lost.
-  - You are about to drop the `CardBody` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Emoji` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `EmojiCount` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `EmojiLike` table. If the table is not empty, all the data it contains will be lost.
-  - Added the required column `cardStateId` to the `Bullet` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- CreateEnum
 CREATE TYPE "EmojiCode" AS ENUM ('UP', 'DOWN', 'PIN', 'REPORT');
 
--- DropForeignKey
-ALTER TABLE "Bullet" DROP CONSTRAINT "Bullet_cardId_fkey";
+-- CreateEnum
+CREATE TYPE "LikeChoice" AS ENUM ('UP', 'DOWN', 'NEUTRAL');
 
--- DropForeignKey
-ALTER TABLE "CardBody" DROP CONSTRAINT "CardBody_cardId_fkey";
+-- CreateEnum
+CREATE TYPE "PollFailReason" AS ENUM ('MIN_VOTES', 'MIN_JUDGMENTS', 'MAJOR_VERDICT', 'VERDICT_AS_FAIL', 'OTHER');
 
--- DropForeignKey
-ALTER TABLE "CardBody" DROP CONSTRAINT "CardBody_prevId_fkey";
+-- CreateEnum
+CREATE TYPE "PollStatus" AS ENUM ('OPEN', 'JUDGE', 'CLOSE_SUCCESS', 'CLOSE_FAIL');
 
--- DropForeignKey
-ALTER TABLE "CardBody" DROP CONSTRAINT "CardBody_userId_fkey";
+-- CreateEnum
+CREATE TYPE "PollType" AS ENUM ('FIXED', 'ADD', 'ADD_BY_POST');
 
--- DropForeignKey
-ALTER TABLE "Emoji" DROP CONSTRAINT "Emoji_bulletId_fkey";
+-- CreateEnum
+CREATE TYPE "ShotChoice" AS ENUM ('LONG', 'SHORT', 'HOLD');
 
--- DropForeignKey
-ALTER TABLE "Emoji" DROP CONSTRAINT "Emoji_userId_fkey";
+-- CreateEnum
+CREATE TYPE "SymType" AS ENUM ('TICKER', 'TOPIC', 'URL');
 
--- DropForeignKey
-ALTER TABLE "EmojiCount" DROP CONSTRAINT "EmojiCount_emojiId_fkey";
+-- CreateTable
+CREATE TABLE "Author" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "meta" JSONB NOT NULL DEFAULT E'{}',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "EmojiLike" DROP CONSTRAINT "EmojiLike_emojiId_fkey";
+    CONSTRAINT "Author_pkey" PRIMARY KEY ("id")
+);
 
--- DropForeignKey
-ALTER TABLE "EmojiLike" DROP CONSTRAINT "EmojiLike_userId_fkey";
+-- CreateTable
+CREATE TABLE "Bullet" (
+    "id" TEXT NOT NULL,
+    "cardStateId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "Poll" DROP CONSTRAINT "Poll_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "PollCount" DROP CONSTRAINT "PollCount_pollId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Shot" DROP CONSTRAINT "Shot_targetId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Shot" DROP CONSTRAINT "Shot_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Vote" DROP CONSTRAINT "Vote_pollId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Vote" DROP CONSTRAINT "Vote_userId_fkey";
-
--- AlterTable
-ALTER TABLE "Author" ADD COLUMN     "meta" JSONB NOT NULL DEFAULT E'{}';
-
--- AlterTable
-ALTER TABLE "Bullet" DROP COLUMN "cardId",
-ADD COLUMN     "cardStateId" TEXT NOT NULL;
-
--- AlterTable
-ALTER TABLE "Link" DROP COLUMN "scrapeData",
-ADD COLUMN     "scraped" JSONB NOT NULL DEFAULT E'{}';
-
--- DropTable
-DROP TABLE "CardBody";
-
--- DropTable
-DROP TABLE "Emoji";
-
--- DropTable
-DROP TABLE "EmojiCount";
-
--- DropTable
-DROP TABLE "EmojiLike";
+    CONSTRAINT "Bullet_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "BulletEmoji" (
@@ -118,10 +77,22 @@ CREATE TABLE "BulletEmojiLike" (
 );
 
 -- CreateTable
+CREATE TABLE "Card" (
+    "id" TEXT NOT NULL,
+    "symId" TEXT NOT NULL,
+    "linkId" TEXT,
+    "meta" JSONB NOT NULL DEFAULT E'{}',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Card_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "CardEmoji" (
     "id" TEXT NOT NULL,
     "cardId" TEXT NOT NULL,
-    "value" "EmojiCode" NOT NULL,
+    "code" "EmojiCode" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -159,7 +130,7 @@ CREATE TABLE "CardState" (
     "cardId" TEXT NOT NULL,
     "commitId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "content" JSONB NOT NULL,
+    "body" JSONB NOT NULL,
     "prevId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -177,6 +148,92 @@ CREATE TABLE "Commit" (
     CONSTRAINT "Commit_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Link" (
+    "id" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "domain" TEXT NOT NULL,
+    "scraped" JSONB NOT NULL DEFAULT E'{}',
+    "authorId" TEXT,
+
+    CONSTRAINT "Link_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Poll" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "type" "PollType" NOT NULL DEFAULT E'FIXED',
+    "status" "PollStatus" NOT NULL DEFAULT E'OPEN',
+    "meta" JSONB NOT NULL DEFAULT E'{}',
+    "choices" TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Poll_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PollCount" (
+    "id" SERIAL NOT NULL,
+    "pollId" TEXT NOT NULL,
+    "nVotes" INTEGER[],
+    "nJudgments" INTEGER[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PollCount_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Shot" (
+    "id" TEXT NOT NULL,
+    "linkId" TEXT,
+    "userId" TEXT NOT NULL,
+    "authorId" TEXT,
+    "symId" TEXT NOT NULL,
+    "choice" "ShotChoice" NOT NULL,
+    "body" JSONB NOT NULL DEFAULT E'{}',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Shot_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Sym" (
+    "id" TEXT NOT NULL,
+    "type" "SymType" NOT NULL,
+    "symbol" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Sym_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Vote" (
+    "id" SERIAL NOT NULL,
+    "userId" TEXT NOT NULL,
+    "pollId" TEXT NOT NULL,
+    "choiceIdx" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Vote_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Author_name_key" ON "Author"("name");
+
 -- CreateIndex
 CREATE UNIQUE INDEX "BulletEmoji_bulletId_code_key" ON "BulletEmoji"("bulletId", "code");
 
@@ -187,7 +244,13 @@ CREATE UNIQUE INDEX "BulletEmojiCount_bulletEmojiId_key" ON "BulletEmojiCount"("
 CREATE UNIQUE INDEX "BulletEmojiLike_userId_bulletEmojiId_key" ON "BulletEmojiLike"("userId", "bulletEmojiId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "CardEmoji_cardId_value_key" ON "CardEmoji"("cardId", "value");
+CREATE UNIQUE INDEX "Card_symId_key" ON "Card"("symId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Card_linkId_key" ON "Card"("linkId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CardEmoji_cardId_code_key" ON "CardEmoji"("cardId", "code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CardEmojiCount_cardEmojiId_key" ON "CardEmojiCount"("cardEmojiId");
@@ -197,6 +260,18 @@ CREATE UNIQUE INDEX "CardEmojiLike_userId_cardEmojiId_key" ON "CardEmojiLike"("u
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CardState_prevId_key" ON "CardState"("prevId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Link_url_key" ON "Link"("url");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PollCount_pollId_key" ON "PollCount"("pollId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Sym_symbol_key" ON "Sym"("symbol");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
 ALTER TABLE "Bullet" ADD CONSTRAINT "Bullet_cardStateId_fkey" FOREIGN KEY ("cardStateId") REFERENCES "CardState"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -212,6 +287,12 @@ ALTER TABLE "BulletEmojiLike" ADD CONSTRAINT "BulletEmojiLike_userId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "BulletEmojiLike" ADD CONSTRAINT "BulletEmojiLike_bulletEmojiId_fkey" FOREIGN KEY ("bulletEmojiId") REFERENCES "BulletEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Card" ADD CONSTRAINT "Card_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Card" ADD CONSTRAINT "Card_linkId_fkey" FOREIGN KEY ("linkId") REFERENCES "Link"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CardEmoji" ADD CONSTRAINT "CardEmoji_cardId_fkey" FOREIGN KEY ("cardId") REFERENCES "Card"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -241,37 +322,28 @@ ALTER TABLE "CardState" ADD CONSTRAINT "CardState_prevId_fkey" FOREIGN KEY ("pre
 ALTER TABLE "Commit" ADD CONSTRAINT "Commit_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Link" ADD CONSTRAINT "Link_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Author"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Poll" ADD CONSTRAINT "Poll_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PollCount" ADD CONSTRAINT "PollCount_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Shot" ADD CONSTRAINT "Shot_linkId_fkey" FOREIGN KEY ("linkId") REFERENCES "Link"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Shot" ADD CONSTRAINT "Shot_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Shot" ADD CONSTRAINT "Shot_targetId_fkey" FOREIGN KEY ("targetId") REFERENCES "Card"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Shot" ADD CONSTRAINT "Shot_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Author"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Shot" ADD CONSTRAINT "Shot_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Vote" ADD CONSTRAINT "Vote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Vote" ADD CONSTRAINT "Vote_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- RenameIndex
-ALTER INDEX "Author.name_unique" RENAME TO "Author_name_key";
-
--- RenameIndex
-ALTER INDEX "Card.linkId_unique" RENAME TO "Card_linkId_key";
-
--- RenameIndex
-ALTER INDEX "Card.symbol_unique" RENAME TO "Card_symbol_key";
-
--- RenameIndex
-ALTER INDEX "Link.url_unique" RENAME TO "Link_url_key";
-
--- RenameIndex
-ALTER INDEX "PollCount.pollId_unique" RENAME TO "PollCount_pollId_key";
-
--- RenameIndex
-ALTER INDEX "User.email_unique" RENAME TO "User_email_key";

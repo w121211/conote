@@ -66,7 +66,7 @@ export const CardModel = {
     })
     if (sym?.card) {
       const { card, ...restSym } = sym
-      const state = await CardStateModel.getLatestCardState(card.id)
+      const state = await CardStateModel.getLastCardState(card.id)
       if (state === null) {
         throw '[conote-web] symbol-card state cannot be null'
       }
@@ -99,7 +99,7 @@ export const CardModel = {
         ...card,
         link: linkRest,
         meta: card.meta as unknown as CardMeta,
-        state: await CardStateModel.getLatestCardState(card.id),
+        state: await CardStateModel.getLastCardState(card.id),
       }
     }
 
