@@ -1,22 +1,16 @@
 import { assert } from 'console'
 import cuid from 'cuid'
-import { Commit } from '.prisma/client'
 import {
   CardInput as GQLCardInput,
   CommitInput as GQLCommitInput,
   CardStateInput as GQLCardStateInput,
+  Commit as GQLCommit,
 } from '../../apollo/type-defs.graphqls'
 import prisma from '../prisma'
 import { NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
-import { Bullet } from '../bullet/types'
-import { ParsedSymbol, SymbolModel } from './symbol'
-
-export type CardStateBody = {
-  prevStateId: string | null
-  subStateIds: string[]
-  changes: NodeChange<Bullet>[]
-  value: TreeNode<Bullet>[]
-}
+import { Bullet } from '../../components/bullet/types'
+import { SymbolParsed, SymModel } from './sym'
+import { CardStateBody, CardStateModel } from './card-state'
 
 type InsertBullet = {
   id: string
@@ -30,7 +24,7 @@ type InsertCard = {
 
 type InsertCardState = {
   id: string
-  symbol: ParsedSymbol
+  symbolParsed: SymbolParsed
   cardId?: string // 用此替代 symbol
   body: CardStateBody
   insertCard?: InsertCard
@@ -86,14 +80,7 @@ export const CommitModel = {
     // )
 
     const inserts = inputs.map<InsertCardState>(state => {
-      const { prevStateId, cardId, symbol, subSymbols, changes, finalValue, cardInput } = state
-
-      for (const e of subSymbols) {
-        if (!stateSymbols.includes(e)) {
-          console.error(stateSymbols, inputs)
-          throw '[conote-web] each subsymbol should have a corresponding card-state-input'
-        }
-      }
+      const { prevStateId, cardId, sourceCardId, symbol, changes, finalValue, cardInput } = state
 
       // 直接置換 value 中每個 bullet 的 id (硬幹) -> 正常應該是要從 updates 著手
       const value: TreeNode<Bullet>[] = finalValue
@@ -110,13 +97,13 @@ export const CommitModel = {
       })
       const bulletModifiedValue = TreeService.fromList(nodes)
 
-      const insertCardState: InsertCardState = {
+      const insert: InsertCardState = {
         id: stateIdDict[symbol],
-        symbol: SymbolModel.parse(symbol),
+        symbolParsed: SymModel.parse(symbol),
         cardId: cardId ?? undefined,
         body: {
           prevStateId: prevStateId ?? null,
-          subStateIds: subSymbols.map(e => stateIdDict[e]),
+          sourceCardId: sourceCardId ?? null,
           changes,
           value: bulletModifiedValue,
         },
@@ -128,9 +115,8 @@ export const CommitModel = {
           : undefined,
         insertBullets,
       }
-      return insertCardState
+      return insert
     })
-
     return inserts
   },
 
@@ -159,7 +145,7 @@ export const CommitModel = {
   //   }
   // },
 
-  async create({ cardStateInputs }: GQLCommitInput, userId: string): Promise<Commit> {
+  async create({ cardStateInputs }: GQLCommitInput, userId: string): Promise<GQLCommit> {
     // const checked = this.check(this._generateIds(input))
     const inserts = this._toInserts(cardStateInputs)
     const commitId = cuid()
@@ -177,7 +163,7 @@ export const CommitModel = {
       }),
 
       ...inserts.map(e => {
-        const { id, symbol, cardId, body, insertCard, insertBullets } = e
+        const { id, symbolParsed, cardId, body, insertCard, insertBullets } = e
         if (insertCard) {
           return prisma.cardState.create({
             data: {
@@ -191,10 +177,10 @@ export const CommitModel = {
               card: {
                 create: {
                   id: insertCard.id,
-                  symbol: {
+                  sym: {
                     connectOrCreate: {
-                      create: { name: symbol.name, type: symbol.type },
-                      where: { name: symbol.name },
+                      create: { symbol: symbolParsed.symbol, type: symbolParsed.type },
+                      where: { symbol: symbolParsed.symbol },
                     },
                   },
                 },
@@ -224,6 +210,11 @@ export const CommitModel = {
         throw 'Require either insertCard or cardId'
       }),
     ])
-    return commit
+
+    const { cardStates, ...restCommit } = commit
+    return {
+      cardStates: cardStates.map(e => CardStateModel.toParsed(e)),
+      ...restCommit,
+    }
   },
 }

@@ -1,11 +1,11 @@
 import { Editor, Transforms, Node, Path, NodeEntry, createEditor } from 'slate'
-import { parseBulletHead } from '../../lib/bullet/parse'
-import { InlineItem, InlinePoll, InlineShot } from '../../lib/bullet/types'
+import { BulletParser } from '../bullet/parser'
+import { InlineItem, InlinePoll, InlineShot } from '../bullet/types'
 import {
-  LcElement,
   CustomElement,
   CustomInlineElement,
   CustomText,
+  LcElement,
   LiElement,
   InlinePollElement,
   InlineShotElement,
@@ -58,8 +58,9 @@ export function parseLcAndReplace(props: { editor: Editor; lcEntry: NodeEntry<Lc
     editor,
     lcEntry: [lcNode, lcPath],
   } = props
-  const { inlines } = parseBulletHead({ str: Node.string(lcNode) })
+  const { inlines } = BulletParser.parseBulletHead({ str: Node.string(lcNode) })
   const headInlines = inlines.map(e => toSlateInline(e))
+  // console.log(headInlines)
 
   // 移除 lc 原本的 children 並插入新的 inlines
   Transforms.removeNodes(editor, {

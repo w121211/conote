@@ -6,7 +6,7 @@ import { Author, Card, CardState, Link, PrismaClient, Shot, ShotChoice, Symbol a
 import { DataNode, NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { Editor as OldEditor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../lib/fetcher/fetcher'
-import { Bullet } from '../../lib/bullet/types'
+import { Bullet } from '../../components/bullet/types'
 import { CardMeta, CardModel } from '../../lib/models/card'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
 import { ShotBody, ShotModel } from '../../lib/models/shot'

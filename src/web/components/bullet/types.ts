@@ -100,15 +100,15 @@ export type Bullet = {
 
   // author?: { id: string; name: string }
   // source?: { id: string; url: string }
-  authorId?: string
-  sourceCardId?: string
-  sourceLinkId?: string
+  // authorId?: string
+  // sourceCardId?: string
+  // sourceLinkId?: string
 
   symbols?: { cardId: string; str: string }[] // 在此 bullet 中所提到的 symbols，當 symbol 改名時，仍可以靠 id 修正成新名字
 
-  placeholder?: string
-  freeze?: true // 無法變動
-  freezeChildren?: true // 無法新增child
+  // placeholder?: string
+  // freeze?: true // 無法變動
+  // freezeChildren?: true // 無法新增child
 
   // Next
   // headValueChecker?: string

@@ -2,19 +2,23 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { AuthenticationError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
 import { getSession } from '@auth0/nextjs-auth0'
-import { Emoji, EmojiCount } from '.prisma/client'
+import { BulletEmoji, BulletEmojiCount, CardEmoji, CardEmojiCount } from '.prisma/client'
 import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
 import { QueryResolvers, MutationResolvers } from './type-defs.graphqls'
 import { hasCount, toStringId } from '../lib/helpers'
-import { CardMeta, createCardBody, getCard, getOrCreateCardBySymbol, getOrCreateCardByUrl } from '../lib/models/card'
+import { CardMeta, CardModel } from '../lib/models/card'
 import { getOrCreateUser } from '../lib/models/user'
 import { createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
-import { createEmoji, upsertEmojiLike } from '../lib/models/emoji'
 import { PollMeta } from '../lib/models/poll'
-import { createShot } from '../lib/models/shot'
+import { ShotModel } from '../lib/models/shot'
 import { ResolverContext } from './apollo-client'
+import { CardStateModel } from '../lib/models/card-state'
+import { BulletEmojiModel } from '../lib/models/bullet-emoji'
+import { CardEmojiModel } from '../lib/models/card-emoji'
+import { CommitModel } from '../lib/models/commit'
+import { CardDigestModel } from '../lib/models/card-digest'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -60,6 +64,19 @@ function isAuthenticated(req: NextApiRequest, res: NextApiResponse): { userId: s
 }
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
+  // me?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  // myBulletEmojiLike?: Resolver<Maybe<ResolversTypes['BulletEmojiLike']>, ParentType, ContextType, RequireFields<QueryMyBulletEmojiLikeArgs, 'bulletEmojiId'>>;
+  // myCardEmojiLike?: Resolver<Maybe<ResolversTypes['CardEmojiLike']>, ParentType, ContextType, RequireFields<QueryMyCardEmojiLikeArgs, 'cardEmojiId'>>;
+  // myShots?: Resolver<Array<ResolversTypes['Shot']>, ParentType, ContextType, RequireFields<QueryMyShotsArgs, 'targetId'>>;
+  // myVotes?: Resolver<Array<ResolversTypes['Vote']>, ParentType, ContextType, RequireFields<QueryMyVotesArgs, 'pollId'>>;
+  // poll?: Resolver<Maybe<ResolversTypes['Poll']>, ParentType, ContextType, RequireFields<QueryPollArgs, 'id'>>;
+  // searchAll?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QuerySearchAllArgs, 'term'>>;
+  // searchTicker?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QuerySearchTickerArgs, 'term'>>;
+  // searchTopic?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QuerySearchTopicArgs, 'term'>>;
+  // shot?: Resolver<Maybe<ResolversTypes['Shot']>, ParentType, ContextType, RequireFields<QueryShotArgs, 'id'>>;
+  // shotsByAuthor?: Resolver<Array<ResolversTypes['Shot']>, ParentType, ContextType, RequireFields<QueryShotsByAuthorArgs, 'authorId' | 'targetId'>>;
+  // shotsBySource?: Resolver<Array<ResolversTypes['Shot']>, ParentType, ContextType, RequireFields<QueryShotsBySourceArgs, 'linkId'>>;
+
   // tagHints: (parent, { term }, { prisma }) => {
   //   return null
   // },
@@ -86,28 +103,90 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     throw 'Parameter input error'
   },
 
-  searchAll(_parent, { term }, _context, _info) {
-    return searchAllSymbols(term)
-  },
-
-  searchTicker(_parent, { term }, _context, _info) {
-    throw 'Not implemented yet.'
-  },
-
-  searchTopic(_parent, { term }, _context, _info) {
-    throw 'Not implemented yet.'
-  },
-
-  async latestCardEntries(_parent, { afterId }, _context, _info) {
-    // const maxDate = dayjs().startOf('d').subtract(7, 'd')
-    const cards = await prisma.card.findMany({
-      // where: { createdAt: { gte: maxDate.toDate() } },
-      orderBy: { updatedAt: 'desc' },
-      cursor: afterId ? { id: afterId } : undefined,
-      take: 10,
-      skip: afterId ? 1 : 0,
+  async bullet(_parent, { id }, _context, _info) {
+    return await prisma.bullet.findUnique({
+      where: { id },
     })
-    return cards
+  },
+
+  async bulletEmojis(_parent, { bulletId }, _context, _info) {
+    const emojis = (
+      await prisma.bulletEmoji.findMany({
+        // where: { AND: [{ card: { symbol } }, { status: HashtagStatus.ACTIVE }] },
+        where: { bulletId },
+        include: { count: true },
+      })
+    ).filter(
+      (
+        e,
+      ): e is BulletEmoji & {
+        count: BulletEmojiCount
+      } => e.count !== null,
+    )
+    return emojis.map(e => {
+      return {
+        ...e,
+        count: { ...toStringId(e.count) },
+      }
+    })
+  },
+
+  async card(_parent, { id, symbol, url }, _context, _info) {
+    if (id) {
+      return await CardModel.get(id)
+    }
+    if (symbol) {
+      // return await CardModel.getBySymbol(symbol)
+      const card = await CardModel.getBySymbol(symbol)
+      console.log(card)
+      return card
+    }
+    if (url) {
+      return await CardModel.getOrCreateByUrl({ scraper: fetcher, url })
+    }
+    throw 'Param requires to be either id, symbol or url'
+  },
+
+  async cardState(_parent, { id }, _context, _info) {
+    return await CardStateModel.get(id)
+  },
+
+  async cardEmojis(_parent, { cardId }, _context, _info) {
+    const emojis = (
+      await prisma.cardEmoji.findMany({
+        where: { cardId },
+        include: { count: true },
+      })
+    ).filter(
+      (
+        e,
+      ): e is CardEmoji & {
+        count: CardEmojiCount
+      } => e.count !== null,
+    )
+    return emojis.map(e => {
+      return {
+        ...e,
+        count: { ...toStringId(e.count) },
+      }
+    })
+  },
+
+  // async cardMeta(_parent, { symbol }, _context, _info) {
+  //   const card = await prisma.card.findUnique({
+  //     where: { symbol },
+  //     include: { link: true },
+  //   })
+  //   if (card === null) {
+  //     throw `Card ${symbol} not found`
+  //   }
+  //   return card.meta as unknown as CardMeta
+  //   // const meta: CardMeta = card.meta ? card.meta : {}
+  //   // return meta
+  // },
+
+  async latestCardDigests(_parent, { afterId }, _context, _info) {
+    return await CardDigestModel.getLatest(afterId ?? undefined)
   },
 
   async link(_parent, { id, url }, _context, _info) {
@@ -120,104 +199,52 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     throw 'Param requires either id or url'
   },
 
-  async card(_parent, { id, symbol }, _context, _info) {
-    if (id) {
-      const card = await getCard({ id })
-      if (card) {
-        return {
-          ...card,
-          body: toStringId(card.body),
-        }
-      }
-      return null
-    }
-    if (symbol) {
-      const card = await getOrCreateCardBySymbol(symbol)
-      return {
-        ...card,
-        body: toStringId(card.body),
-      }
-    }
-    throw 'Param requires either id or symbol'
+  async me(_parent, _args, { req, res }, _info) {
+    const { email } = isAuthenticated(req, res)
+    const user = await getOrCreateUser(email)
+    // await prisma.user.findUnique({ where: { id: userId } })
+    return user
   },
 
-  async cardMeta(_parent, { symbol }, _context, _info) {
-    const card = await prisma.card.findUnique({
-      where: { symbol },
-      include: { link: true },
+  async myBulletEmojiLike(_parent, { bulletEmojiId }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const like = await prisma.bulletEmojiLike.findUnique({
+      where: {
+        userId_bulletEmojiId: { bulletEmojiId, userId },
+      },
     })
-    if (card === null) {
-      throw `Card ${symbol} not found`
-    }
-    return card.meta as unknown as CardMeta
-    // const meta: CardMeta = card.meta ? card.meta : {}
-    // return meta
+    return like ? toStringId(like) : null
   },
 
-  async webpageCard(_parent, { url }, _context, _info) {
-    const card = await getOrCreateCardByUrl({ scraper: fetcher, url })
-    return {
-      ...card,
-      body: toStringId(card.body),
-    }
-  },
-
-  async emojis(_parent, { bulletId }, _context, _info) {
-    const emojis = (
-      await prisma.emoji.findMany({
-        // where: { AND: [{ card: { symbol } }, { status: HashtagStatus.ACTIVE }] },
-        where: { bulletId },
-        include: { count: true },
-      })
-    ).filter(
-      (
-        e,
-      ): e is Emoji & {
-        count: EmojiCount
-      } => e.count !== null,
-    )
-    return emojis.map(e => {
-      return {
-        ...e,
-        count: { ...toStringId(e.count) },
-      }
+  async myCardEmojiLike(_parent, { cardEmojiId }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const like = await prisma.cardEmojiLike.findUnique({
+      where: {
+        userId_cardEmojiId: { cardEmojiId, userId },
+      },
     })
-    // const emojis = (
-    //   await prisma.emoji.findMany({
-    //     // where: { AND: [{ card: { symbol } }, { status: HashtagStatus.ACTIVE }] },
-    //     where: { bulletId },
-    //     include: { count: true },
-    //   })
-    // ).filter(
-    //   (
-    //     e,
-    //   ): e is Hashtag & {
-    //     count: HashtagCount
-    //     poll: (Poll & { count: PollCount }) | null
-    //   } => {
-    //     if (e.count === null || (e.poll && e.poll.count === null)) {
-    //       throw 'count 不應為 null, database error'
-    //     }
-    //     return true
+    return like ? toStringId(like) : null
+  },
+
+  async myShots(_parent, { symId }, { req, res }, _info) {
+    throw 'Not implemented'
+    // const { userId } = isAuthenticated(req, res)
+    // const shots = await prisma.shot.findMany({
+    //   where: {
+    //     AND: { targetId, userId },
     //   },
-    // )
-    // return hashtags.map(e => {
-    //   return {
-    //     ..._toStringId(e),
-    //     count: { ..._toStringId(e.count) },
-    //     poll: e.poll && {
-    //       ..._toStringId(e.poll),
-    //       count: _toStringId(e.poll.count),
-    //     },
-    //   }
     // })
+    // return shots
   },
 
-  async bullet(_parent, { id }, _context, _info) {
-    const bullet = await prisma.bullet.findUnique({
-      where: { id },
+  async myVotes(_parent, { pollId }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const votes = await prisma.vote.findMany({
+      where: {
+        AND: { pollId, userId },
+      },
     })
-    return bullet
+    return votes.map(e => ({ ...toStringId(e) }))
   },
 
   async poll(_parent, { id }, _context, _info) {
@@ -235,11 +262,22 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return null
   },
 
+  searchAll(_parent, { term }, _context, _info) {
+    return searchAllSymbols(term)
+  },
+
+  searchTicker(_parent, { term }, _context, _info) {
+    throw 'Not implemented yet.'
+  },
+
+  searchTopic(_parent, { term }, _context, _info) {
+    throw 'Not implemented yet.'
+  },
+
   async shot(_parent, { id }, _context, _info) {
-    const shot = await prisma.shot.findUnique({
+    return await prisma.shot.findUnique({
       where: { id },
     })
-    return shot
   },
 
   async shotsBySource(_parent, { linkId }, _context, _info) {
@@ -253,9 +291,9 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return shot
   },
 
-  async shotsByAuthor(_parent, { authorId, targetId }, _context, _info) {
+  async shotsByAuthor(_parent, { authorId, symId }, _context, _info) {
     const shot = await prisma.shot.findMany({
-      where: { AND: { authorId, targetId } },
+      where: { AND: { authorId, symId } },
       orderBy: { updatedAt: 'desc' },
     })
     return shot
@@ -448,43 +486,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   //   })
   // },
 
-  async me(_parent, _args, { req, res }, _info) {
-    const { email } = isAuthenticated(req, res)
-    const user = await getOrCreateUser(email)
-    // await prisma.user.findUnique({ where: { id: userId } })
-    return user
-  },
-
-  async myShots(_parent, { targetId }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const shots = await prisma.shot.findMany({
-      where: {
-        AND: { targetId, userId },
-      },
-    })
-    return shots
-  },
-
-  async myVotes(_parent, { pollId }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const votes = await prisma.vote.findMany({
-      where: {
-        AND: { pollId, userId },
-      },
-    })
-    return votes.map(e => ({ ...toStringId(e) }))
-  },
-
-  async myEmojiLike(_parent, { emojiId }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const like = await prisma.emojiLike.findUnique({
-      where: {
-        userId_emojiId: { emojiId, userId },
-      },
-    })
-    return like ? toStringId(like) : null
-  },
-
   // async myVotes(_parent, { after }, { req, res }, _info) {
   //   const { userId } = isAuthenticated(req, res)
   //   const votes = await prisma.vote.findMany({ where: { userId }, take: 50 })
@@ -516,19 +517,60 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 }
 
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
-  async createSymbolCard(_parent, { data }, { req, res }, _info) {
+  async createBulletEmoji(_parent, { bulletId, code }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const card = await getOrCreateCardBySymbol(data.symbol)
+    const { emoji, like } = await BulletEmojiModel.create({ bulletId, code, userId })
     return {
-      ...card,
-      body: { ...toStringId(card.body) },
+      emoji: {
+        ...emoji,
+        count: toStringId(emoji.count),
+      },
+      like: toStringId(like),
     }
   },
 
-  async updateCardMeta(_parent, { symbol, data }, { req, res }, _info) {
+  async upsertBulletEmojiLike(_parent, { bulletEmojiId, data }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const { like, count } = await BulletEmojiModel.upsertLike({
+      choice: data.choice,
+      bulletEmojiId,
+      userId,
+    })
+    return {
+      like: toStringId(like),
+      count: toStringId(count),
+    }
+  },
+
+  async createCardEmoji(_parent, { cardId, code }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const { emoji, like } = await CardEmojiModel.create({ cardId, code, userId })
+    return {
+      emoji: {
+        ...emoji,
+        count: toStringId(emoji.count),
+      },
+      like: toStringId(like),
+    }
+  },
+
+  async upsertCardEmojiLike(_parent, { cardEmojiId, data }, { req, res }, _info) {
+    const { userId } = isAuthenticated(req, res)
+    const { like, count } = await CardEmojiModel.upsertLike({
+      choice: data.choice,
+      cardEmojiId,
+      userId,
+    })
+    return {
+      like: toStringId(like),
+      count: toStringId(count),
+    }
+  },
+
+  async updateCardMeta(_parent, { cardId, data }, { req, res }, _info) {
     isAuthenticated(req, res)
     const card = await prisma.card.update({
-      where: { symbol },
+      where: { id: cardId },
       data: {
         meta: data, // TODO 需要檢查 input
       },
@@ -537,19 +579,9 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return meta
   },
 
-  async createCardBody(_parent, { cardSymbol, data }, { req, res }, _info) {
+  async createCommit(_parent, { data }, { req, res }, _info) {
     const { userId } = isAuthenticated(req, res)
-    const card = await prisma.card.findUnique({ where: { symbol: cardSymbol } })
-    if (card === null) {
-      throw 'Card not found'
-    }
-    const [body] = await createCardBody({
-      cardId: card.id,
-      root: data.root,
-      userId,
-    })
-    // console.log(body)
-    return toStringId(body)
+    return await CommitModel.create(data, userId)
   },
 
   async createPoll(_parent, { data }, { req, res }, _info) {
@@ -569,6 +601,18 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       }
     }
     throw 'Database internal error'
+  },
+
+  async createShot(_parent, { data }, { req, res }, _info) {
+    throw 'Not implemented yet.'
+    // const { userId } = isAuthenticated(req, res)
+    // const { choice, targetId, authorId, linkId } = data
+    // const shot = await ShotModel.create({ choice, targetCardId: targetId, userId, authorId, linkId })
+    // return shot
+  },
+
+  async updateShot(_parent, { id, data }, { req, res }, _info) {
+    throw 'Not implemented yet.'
   },
 
   async createVote(_parent, { pollId, data }, { req, res }, _info) {
@@ -678,42 +722,6 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   //     throw new Error()
   //   }
   // },
-
-  async createEmoji(_parent, { bulletId, text }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const { emoji, like } = await createEmoji({ bulletId, text, userId })
-    return {
-      emoji: {
-        ...emoji,
-        count: toStringId(emoji.count),
-      },
-      like: toStringId(like),
-    }
-  },
-
-  async upsertEmojiLike(_parent, { emojiId, data }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const { like, count } = await upsertEmojiLike({
-      choice: data.choice,
-      emojiId,
-      userId,
-    })
-    return {
-      like: toStringId(like),
-      count: toStringId(count),
-    }
-  },
-
-  async createShot(_parent, { data }, { req, res }, _info) {
-    const { userId } = isAuthenticated(req, res)
-    const { choice, targetId, authorId, linkId } = data
-    const shot = await createShot({ choice, targetCardId: targetId, userId, authorId, linkId })
-    return shot
-  },
-
-  async updateShot(_parent, { id, data }, { req, res }, _info) {
-    throw 'Not implemented yet.'
-  },
 
   // async createCommentLike(_parent, { commentId, data }, { req, res }, _info) {
   //   const { userId } = isAuthenticated(req, res)

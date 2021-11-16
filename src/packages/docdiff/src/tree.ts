@@ -1,10 +1,12 @@
+import { ChangeType } from '.'
+
 export type DataNode<T> = {
   cid: string
-  parentCid?: string
-  index?: number
-  // prevId: string | null
+  change?: ChangeType // record change-event lively
   data?: T
-  change?: 'move' // record change-event lively
+  index?: number // index of children array
+  parentCid?: string
+  // prevId: string | null
 }
 
 export type TreeNode<T> = DataNode<T> & {
@@ -60,12 +62,12 @@ export const TreeService = {
    * P.S. Node's index is followed by the given array, not by the node's index
    */
   fromParentChildrenDict<T>(dict: Record<string, DataNode<T>[]>): TreeNode<T>[] {
-    const root: TreeNode<T> = {
+    const tempRoot: TreeNode<T> = {
       cid: this.tempRootCid,
       children: [],
     }
-    const addedIds: string[] = [root.cid]
-    const parents: TreeNode<T>[] = [root]
+    const addedIds: string[] = [tempRoot.cid]
+    const parents: TreeNode<T>[] = [tempRoot]
     while (parents.length > 0) {
       const p = parents.shift()
       if (p === undefined || !(p.cid in dict)) {
@@ -84,7 +86,7 @@ export const TreeService = {
         parents.push(e)
       })
     }
-    return root.children
+    return tempRoot.children
   },
 
   insert<T>(value: TreeNode<T>[], item: DataNode<T>, toParentCid: string, toIndex: number): TreeNode<T>[] {

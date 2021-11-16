@@ -1,7 +1,7 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
 import { ShotChoice } from '../../apollo/query.graphql'
 // import { parseInlineShotParams } from '../models/shot'
-import { tokenToString } from '../token'
+import { tokenToString } from '../../lib/token'
 import { InlineItem } from './types'
 
 /**
@@ -73,15 +73,17 @@ export function inlinesToString(inlines: InlineItem[]): string {
   return inlines.reduce((acc, cur) => `${acc}${cur.str}`, '')
 }
 
-function isShotChoice(s: string): s is ShotChoice {
+const isShotChoice = (s: string): s is ShotChoice => {
   return ['#LONG', '#SHORT', '#HOLD'].includes(s)
 }
 
-function parseInlineShotParams(params: string[]): {
+const parseInlineShotParams = (
+  params: string[],
+): {
   authorName?: string
   targetSymbol?: string
   choice?: ShotChoice
-} {
+} => {
   const [_authorName, _targetSymbol, _choice] = params
   // const matchAuthor = reAuthor.exec(_authorName)
   // const matchSymbol = parseSymbol(_targetSymbol)
@@ -92,116 +94,118 @@ function parseInlineShotParams(params: string[]): {
   }
 }
 
-/**
- * Parse a bullet head/body string to slate inline elements
- *
- * @throws Parse error
- */
-export function parseBulletHead({ str }: { str: string }): { inlines: InlineItem[] } {
-  // TODO: validate
-  function _tokenToInline(token: string | Token): InlineItem {
-    if (typeof token === 'string') {
-      return { type: 'text', str: token }
+export const BulletParser = {
+  /**
+   * Parse a bullet head/body string to slate inline elements
+   *
+   * @throws Parse error
+   */
+  parseBulletHead({ str }: { str: string }): { inlines: InlineItem[] } {
+    // TODO: validate
+    function _tokenToInline(token: string | Token): InlineItem {
+      if (typeof token === 'string') {
+        return { type: 'text', str: token }
+      }
+
+      const str = tokenToString(token.content)
+      switch (token.type) {
+        case 'mirror-ticker':
+        case 'mirror-topic': {
+          const match = token.type === 'mirror-ticker' ? reMirrorTicker.exec(str) : reMirrorTopic.exec(str)
+          if (match) {
+            return {
+              type: 'mirror',
+              str,
+              mirrorSymbol: match[1],
+              author: match[2], // 沒有 match 到時會返回 undefined
+            }
+          } else {
+            console.error(str)
+            throw 'Parse error'
+          }
+        }
+        case 'filtertag': {
+          return { type: 'filtertag', str }
+        }
+        case 'url':
+        case 'ticker':
+        case 'topic':
+        case 'author': {
+          return { type: 'symbol', str, symbol: str }
+        }
+        case 'poll': {
+          const match = rePoll.exec(str)
+          if (match) {
+            return {
+              type: 'poll',
+              str,
+              id: match[1],
+              choices: match[2].split(' '),
+            }
+          } else {
+            console.error(str)
+            throw 'Parse error'
+          }
+        }
+        case 'new-poll': {
+          const match = reNewPoll.exec(str)
+          if (match) {
+            return {
+              type: 'poll',
+              str,
+              choices: match[1].split(' '),
+            }
+          } else {
+            console.error(str)
+            throw 'Parse error'
+          }
+        }
+        case 'shot': {
+          const match = reShot.exec(str)
+          if (match) {
+            console.log(match[2])
+            const params = match[2].split(' ')
+            const { authorName, targetSymbol, choice } = parseInlineShotParams(params)
+            return {
+              type: 'shot',
+              id: match[1],
+              str,
+              params,
+              authorName,
+              targetSymbol,
+              choice,
+            }
+          } else {
+            console.error(str)
+            throw 'Parse error'
+          }
+        }
+        case 'new-shot': {
+          const match = reNewShot.exec(str)
+          if (match) {
+            const params = match[1].split(' ')
+            const { authorName, targetSymbol, choice } = parseInlineShotParams(params)
+            return {
+              type: 'shot',
+              str,
+              params,
+              authorName,
+              targetSymbol,
+              choice,
+            }
+          } else {
+            console.error(str)
+            throw 'Parse error'
+          }
+        }
+      }
+      // 沒被處理到的 token
+      console.error(token)
+      throw 'Parse error'
     }
 
-    const str = tokenToString(token.content)
-    switch (token.type) {
-      case 'mirror-ticker':
-      case 'mirror-topic': {
-        const match = token.type === 'mirror-ticker' ? reMirrorTicker.exec(str) : reMirrorTopic.exec(str)
-        if (match) {
-          return {
-            type: 'mirror',
-            str,
-            mirrorSymbol: match[1],
-            author: match[2], // 沒有 match 到時會返回 undefined
-          }
-        } else {
-          console.error(str)
-          throw 'Parse error'
-        }
-      }
-      case 'filtertag': {
-        return { type: 'filtertag', str }
-      }
-      case 'url':
-      case 'ticker':
-      case 'topic':
-      case 'author': {
-        return { type: 'symbol', str, symbol: str }
-      }
-      case 'poll': {
-        const match = rePoll.exec(str)
-        if (match) {
-          return {
-            type: 'poll',
-            str,
-            id: match[1],
-            choices: match[2].split(' '),
-          }
-        } else {
-          console.error(str)
-          throw 'Parse error'
-        }
-      }
-      case 'new-poll': {
-        const match = reNewPoll.exec(str)
-        if (match) {
-          return {
-            type: 'poll',
-            str,
-            choices: match[1].split(' '),
-          }
-        } else {
-          console.error(str)
-          throw 'Parse error'
-        }
-      }
-      case 'shot': {
-        const match = reShot.exec(str)
-        if (match) {
-          console.log(match[2])
-          const params = match[2].split(' ')
-          const { authorName, targetSymbol, choice } = parseInlineShotParams(params)
-          return {
-            type: 'shot',
-            id: match[1],
-            str,
-            params,
-            authorName,
-            targetSymbol,
-            choice,
-          }
-        } else {
-          console.error(str)
-          throw 'Parse error'
-        }
-      }
-      case 'new-shot': {
-        const match = reNewShot.exec(str)
-        if (match) {
-          const params = match[1].split(' ')
-          const { authorName, targetSymbol, choice } = parseInlineShotParams(params)
-          return {
-            type: 'shot',
-            str,
-            params,
-            authorName,
-            targetSymbol,
-            choice,
-          }
-        } else {
-          console.error(str)
-          throw 'Parse error'
-        }
-      }
-    }
-    // 沒被處理到的 token
-    console.error(token)
-    throw 'Parse error'
-  }
-
-  const tokens = tokenizeBulletString(str)
-  const inlines = tokens.map(e => _tokenToInline(e))
-  return { inlines }
+    const tokens = tokenizeBulletString(str)
+    const inlines = tokens.map(e => _tokenToInline(e))
+    return { inlines }
+  },
 }

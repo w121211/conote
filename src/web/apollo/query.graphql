@@ -6,7 +6,7 @@ fragment author on Author {
 
 fragment bullet on Bullet {
   id
-  cardId
+  # cardStateId
   # createdAt
   # updatedAt
 }
@@ -49,14 +49,17 @@ fragment bulletEmojiLike on BulletEmojiLike {
 fragment card on Card {
   __typename
   id
-  symbol {
-    ...symbol
-  }
   link {
     ...link
   }
   meta {
     ...cardMeta
+  }
+  state {
+    ...cardState
+  }
+  sym {
+    ...sym
   }
   updatedAt
 }
@@ -87,11 +90,12 @@ fragment cardEmojiLike on CardEmojiLike {
 
 fragment cardMeta on CardMeta {
   __typename
+  template
   redirects
   duplicates
   url
   author
-  date
+  publishedAt
   description
   keywords
   title
@@ -100,12 +104,13 @@ fragment cardMeta on CardMeta {
 fragment cardState on CardState {
   __typename
   id
+  cardId
   userId
   commitId
   prevId
   body {
     prevStateId
-    subStateIds
+    sourceCardId
     changes
     value
   }
@@ -148,15 +153,25 @@ fragment shot on Shot {
   userId
   authorId
   linkId
-  targetId
+  symId
   choice
+  # body {
+  #   ...shotBody
+  # }
+  createdAt
+  updatedAt
 }
 
-fragment symbol on Symbol {
+fragment shotBody on ShotBody {
+  comment
+  quote
+}
+
+fragment sym on Sym {
   __typename
   id
   type
-  name
+  symbol
 }
 
 fragment vote on Vote {
@@ -307,8 +322,8 @@ query Me {
   }
 }
 
-query MyShots($targetId: ID!) {
-  myShots(targetId: $targetId) {
+query MyShots($symId: ID!) {
+  myShots(symId: $symId) {
     ...shot
   }
 }
@@ -353,8 +368,8 @@ query ShotsBySource($linkId: ID!) {
   }
 }
 
-query ShotsByAuthor($authorId: ID!, $targetId: ID!) {
-  shotsByAuthor(authorId: $authorId, targetId: $targetId) {
+query ShotsByAuthor($authorId: ID!, $symId: ID!) {
+  shotsByAuthor(authorId: $authorId, symId: $symId) {
     ...shot
   }
 }
@@ -433,8 +448,8 @@ mutation UpsertCardEmojiLike($cardEmojiId: ID!, $data: LikeInput!) {
   }
 }
 
-mutation UpdateCardMeta($symbol: String!, $data: CardMetaInput!) {
-  updateCardMeta(symbol: $symbol, data: $data) {
+mutation UpdateCardMeta($cardId: ID!, $data: CardMetaInput!) {
+  updateCardMeta(cardId: $cardId, data: $data) {
     ...cardMeta
   }
 }

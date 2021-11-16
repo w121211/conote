@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
-import { Bullet, RootBullet } from '../../lib/bullet/types'
+import { Bullet, RootBullet } from '../../components/bullet/types'
 
 const root: RootBullet = {
   id: 1,

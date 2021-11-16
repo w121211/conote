@@ -1,8 +1,9 @@
-import { Card, CardState, Link, Symbol as PrismaSymbol, SymbolType } from '.prisma/client'
+import { Card, Link, Sym, SymType } from '.prisma/client'
 import { FetchClient } from '../fetcher/fetcher'
 import prisma from '../prisma'
+import { CardStateModel, CardStateParsed } from './card-state'
 import { LinkService } from './link'
-import { SymbolModel } from './symbol'
+import { SymModel } from './sym'
 
 export type CardMeta = {
   template?: 'webpage' | 'ticker' | 'topic' | 'vs'
@@ -10,46 +11,35 @@ export type CardMeta = {
   duplicates?: string[]
   url?: string
   author?: string
-  date?: string
+  publishedAt?: string
   description?: string
   keywords?: string[]
   // lang?: string
   title?: string
 }
 
-export async function getLatestCardState(cardId: string): Promise<CardState | null> {
-  return await prisma.cardState.findFirst({
-    where: { cardId },
-    orderBy: { createdAt: 'desc' },
-  })
-}
-
-// function serializeContent() {
-//   // TODO
-// }
-
-// function deserializeContent() {
-//   // TODO
-// }
-
 export const CardModel = {
-  async get({ id }: { id: string }): Promise<
+  async get(id: string): Promise<
     | null
     | (Omit<Card, 'meta'> & {
         link: Link | null
         meta: CardMeta
-        state: CardState | null
+        state: CardStateParsed | null
+        sym: Sym
       })
   > {
     const card = await prisma.card.findUnique({
       where: { id },
-      include: { link: true },
+      include: {
+        link: true,
+        sym: true,
+      },
     })
     if (card) {
       return {
         ...card,
         meta: card.meta as unknown as CardMeta,
-        state: await getLatestCardState(card.id),
+        state: await CardStateModel.getLastCardState(card.id),
       }
     }
     return null
@@ -64,26 +54,27 @@ export const CardModel = {
     | (Omit<Card, 'meta'> & {
         link: Link | null
         meta: CardMeta
-        state: CardState
+        state: CardStateParsed
+        sym: Sym
       })
     | null
   > {
-    const { name } = SymbolModel.parse(symbol)
-    const result = await prisma.symbol.findUnique({
-      where: { name },
+    const parsed = SymModel.parse(symbol)
+    const sym = await prisma.sym.findUnique({
+      where: { symbol: parsed.symbol },
       include: { card: { include: { link: true } } },
     })
-    if (result?.card) {
-      const card = result.card
-      const state = await getLatestCardState(card.id)
+    if (sym?.card) {
+      const { card, ...restSym } = sym
+      const state = await CardStateModel.getLatestCardState(card.id)
       if (state === null) {
         throw '[conote-web] symbol-card state cannot be null'
       }
       return {
         ...card,
-        link: card.link,
         meta: card.meta as unknown as CardMeta,
         state,
+        sym: restSym,
       }
     }
     return null
@@ -96,18 +87,19 @@ export const CardModel = {
   async getOrCreateByUrl({ scraper, url }: { scraper?: FetchClient; url: string }): Promise<
     Omit<Card, 'meta'> & {
       link: Link
-      symbol: PrismaSymbol
       meta: CardMeta
-      state: CardState | null
+      state: CardStateParsed | null
+      sym: Sym
     }
   > {
     const [link, { fetchResult }] = await LinkService.getOrCreateLink({ scraper, url })
     if (link.card) {
+      const { card, ...linkRest } = link
       return {
-        ...link.card,
-        link,
-        meta: link.card.meta as unknown as CardMeta,
-        state: await getLatestCardState(link.card.id),
+        ...card,
+        link: linkRest,
+        meta: card.meta as unknown as CardMeta,
+        state: await CardStateModel.getLatestCardState(card.id),
       }
     }
 
@@ -116,7 +108,7 @@ export const CardModel = {
       template: 'webpage',
       url: link.url,
       author: fetchResult?.authorName,
-      date: fetchResult?.date,
+      publishedAt: fetchResult?.date,
       description: fetchResult?.date,
       keywords: fetchResult?.keywords,
       title: fetchResult?.title,
@@ -125,14 +117,14 @@ export const CardModel = {
       data: {
         link: { connect: { id: link.id } },
         meta,
-        symbol: {
+        sym: {
           create: {
-            type: SymbolType.URL,
-            name: LinkService.toSymbol(link),
+            type: SymType.URL,
+            symbol: LinkService.toSymbol(link),
           },
         },
       },
-      include: { link: true, symbol: true },
+      include: { sym: true },
     })
     return {
       ...card,

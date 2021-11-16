@@ -1,6 +1,6 @@
 import { inspect } from 'util'
-import { getBotId } from '../models/user'
-import prisma from '../prisma'
+import { getBotId } from '../../lib/models/user'
+import prisma from '../../lib/prisma'
 import {
   Bullet,
   BulletDraft,
@@ -16,7 +16,7 @@ import {
 } from './types'
 import { BulletNode } from './node'
 import { cloneDeep } from '@apollo/client/utilities'
-import { inlinesToString, parseBulletHead } from './parse'
+import { inlinesToString } from './parser'
 
 /**
  * 使用conditional type，輸入是bullet draft時返回bullet，輸入是root bullet draft時返回root bullet

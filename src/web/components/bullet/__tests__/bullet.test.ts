@@ -1,4 +1,4 @@
-import { parseBulletHead } from '../parse'
+import { BulletParser } from '../parser'
 
 // test('grammar', () => {
 //   // expect(clean(replaceBulletInput(templateTicker.body, params))).toMatchSnapshot()
@@ -11,5 +11,5 @@ test.each([
   '// #Cc3 #Dd4',
   'Hello #world !!! !((poll))(#A1 #A2 #A3) some text ... !((poll:123))(#Bb1 #Bb2)',
 ])('parseBulletHead', str => {
-  expect(parseBulletHead({ str })).toMatchSnapshot()
+  expect(BulletParser.parseBulletHead({ str })).toMatchSnapshot()
 })

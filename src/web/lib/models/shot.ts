@@ -1,6 +1,6 @@
-import { Author, Shot, ShotChoice, Symbol as PrismaSymbol } from '.prisma/client'
+import { Author, Shot, ShotChoice, Sym } from '.prisma/client'
 import prisma from '../prisma'
-import { SymbolModel } from './symbol'
+import { SymModel } from './sym'
 
 /**
  * Inline shot: !((shot:id))(@author $TARGET|[[Target]] #CHOICE)
@@ -59,7 +59,7 @@ export const ShotModel = {
    */
   async create({
     choice,
-    symbol: symbolName,
+    symbol,
     userId,
     authorId,
     body = {},
@@ -74,7 +74,7 @@ export const ShotModel = {
   }): Promise<
     Shot & {
       author: Author | null
-      symbol: PrismaSymbol
+      sym: Sym
     }
   > {
     if (authorId) {
@@ -87,7 +87,7 @@ export const ShotModel = {
         throw 'Create author shot require both authorId & linkId'
       }
     }
-    const symbol = await SymbolModel.getOrCreate(symbolName)
+    const sym = await SymModel.getOrCreate(symbol)
     return await prisma.shot.create({
       data: {
         choice,
@@ -95,11 +95,11 @@ export const ShotModel = {
         user: { connect: { id: userId } },
         author: authorId ? { connect: { id: authorId } } : undefined,
         link: linkId ? { connect: { id: linkId } } : undefined,
-        symbol: { connect: { id: symbol.id } },
+        sym: { connect: { id: sym.id } },
       },
       include: {
         author: true,
-        symbol: true,
+        sym: true,
       },
     })
   },

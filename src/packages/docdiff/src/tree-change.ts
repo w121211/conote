@@ -1,8 +1,17 @@
 import { cloneDeep } from 'lodash'
 import { DataNode, TreeService, TreeNode } from './tree'
 
+export type ChangeType =
+  | 'insert'
+  | 'update'
+  | 'move' // TODO: 若又改回來了的情況？
+  | 'move-update'
+  | 'delete'
+  | 'change-parent' // TODO: 若又改回來了的情況？
+  | 'change-parent-update'
+
 export type NodeChange<T> = {
-  type: 'insert' | 'update' | 'move' | 'move-update' | 'delete' | 'change-parent' | 'change-parent-update'
+  type: ChangeType
   cid: string
   toParentCid: string // refers to final state id
   toIndex: number | null // for insert only, others set to null

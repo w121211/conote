@@ -29,7 +29,6 @@ export function getNavLocation(query: ParsedUrlQuery): NavLocation {
   const symbol = query['symbol']
   const path = query[PATH_KEY]
   const mirror = query[MIRROR_KEY]
-
   const author = query[AUTHOR_KEY]
 
   if (typeof symbol !== 'string') {
@@ -47,7 +46,6 @@ export function getNavLocation(query: ParsedUrlQuery): NavLocation {
 export function locationToUrl(lcation: NavLocation, joinLiPath?: number[]): UrlObject {
   const { selfSymbol, mirrorSymbol, openedLiPath } = lcation
 
-  // const params = new URLSearchParams()
   const query: Record<string, string> = {}
   if (mirrorSymbol) {
     // params.set(MIRROR_KEY, mirrorSymbol)

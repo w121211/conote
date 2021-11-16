@@ -67,9 +67,8 @@ model BulletEmojiLike {
 
 model Card {
   id        String      @id @default(cuid())
-  // symbol    String      @unique
-  symbol    Symbol      @relation(fields: [symbolId], references: [id])
-  symbolId  String      @unique
+  sym       Sym         @relation(fields: [symId], references: [id])
+  symId     String      @unique
   link      Link?       @relation(fields: [linkId], references: [id])
   linkId    String?     @unique
   meta      Json        @default("{}")
@@ -85,13 +84,13 @@ model CardEmoji {
   id        String          @id @default(cuid())
   card      Card            @relation(fields: [cardId], references: [id])
   cardId    String
-  value     EmojiCode
+  code      EmojiCode
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   count     CardEmojiCount?
   likes     CardEmojiLike[]
 
-  @@unique([cardId, value])
+  @@unique([cardId, code])
 }
 
 model CardEmojiCount {
@@ -193,20 +192,20 @@ model Shot {
   userId    String
   author    Author?    @relation(fields: [authorId], references: [id])
   authorId  String?
-  symbol    Symbol     @relation(fields: [symbolId], references: [id]) // as target
-  symbolId  String
+  sym       Sym        @relation(fields: [symId], references: [id]) // as target
+  symId     String
   choice    ShotChoice
   body      Json       @default("{}")
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
 
-model Symbol {
-  id        String     @id @default(cuid())
-  type      SymbolType
-  name      String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+model Sym {
+  id        String   @id @default(cuid())
+  type      SymType
+  symbol    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   card      Card? // 1-to-1
   shots     Shot[]
 }
@@ -290,7 +289,7 @@ enum ShotChoice {
   HOLD
 }
 
-enum SymbolType {
+enum SymType {
   TICKER
   TOPIC
   URL

@@ -10,10 +10,11 @@ export function CardIndexPage(): JSX.Element | null {
   useEffect(() => {
     const { query, isReady } = router
     if (isReady) {
-      if (query.url && typeof query.url === 'string') {
-        setUrl(query.url)
+      const { u: url } = query
+      if (url && typeof url === 'string') {
+        setUrl(url)
         queryCard({
-          variables: { url: query.url },
+          variables: { url },
         })
       } else {
         setUrl(null)
@@ -28,7 +29,11 @@ export function CardIndexPage(): JSX.Element | null {
     return null
   }
   if (data && data.card) {
-    router.push(`/card/${encodeURIComponent(data.card.symbol.name)}`)
+    // router.push(`/card/${encodeURIComponent(data.card.sym.symbol)}`)
+    router.push({
+      pathname: '/cardx/[symbol]',
+      query: { symbol: data.card.sym.symbol },
+    })
     return null
   }
   if (error) {

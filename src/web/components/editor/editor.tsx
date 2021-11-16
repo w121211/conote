@@ -1,6 +1,5 @@
-import React, { useState, useMemo, useCallback, useEffect, CSSProperties, useContext } from 'react'
+import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
 import Link from 'next/link'
-import Modal from 'react-modal'
 import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element, Point } from 'slate'
 import {
   Editable,
@@ -29,28 +28,26 @@ import {
 import BulletSvg from '../bullet-svg/bullet-svg'
 import classes from './editor.module.scss'
 import Popover from '../popover/popover'
-import MyTooltip from '../my-tooltip/my-tooltip'
 import {
+  BulletEmoji,
+  BulletEmojiLike,
   Card,
-  EmojiText,
-  Emoji,
-  EmojiLike,
   LikeChoice,
-  MyEmojiLikeDocument,
-  MyEmojiLikeQuery,
-  MyEmojiLikeQueryVariables,
+  MyBulletEmojiLikeDocument,
+  MyBulletEmojiLikeQuery,
+  MyBulletEmojiLikeQueryVariables,
   Poll,
   PollDocument,
   PollQuery,
-  useCreateEmojiMutation,
+  useCreateBulletEmojiMutation,
   useCreatePollMutation,
   useCreateVoteMutation,
-  useMyEmojiLikeQuery,
+  useMyBulletEmojiLikeQuery,
   useMyVotesLazyQuery,
   usePollLazyQuery,
   usePollQuery,
-  useUpsertEmojiLikeMutation,
-  useEmojisQuery,
+  useUpsertBulletEmojiLikeMutation,
+  useBulletEmojisQuery,
   useShotLazyQuery,
   Shot,
   useCardQuery,
@@ -61,10 +58,8 @@ import BulletPanel from '../bullet-panel/bullet-panel'
 import MyHashtagGroup from '../emoji-up-down/poll-group'
 import { spawn } from 'child_process'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
-import { NavLocation, locationToUrl } from './with-location'
-import { withOperation } from './with-operation'
 import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
-import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../../lib/bullet/types'
+import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../bullet/types'
 import CreatePollForm from '../poll-form/create-poll-form'
 import HashtagTextToIcon from '../emoji-up-down/emoji-text-to-icon'
 import PollPage from '../poll/poll-page'
@@ -75,11 +70,12 @@ import Popup from '../popup/popup'
 import PollGroup from '../emoji-up-down/poll-group'
 import { getLocalOrQueryRoot } from './use-local-value'
 import { useApolloClient } from '@apollo/client'
-import { Serializer } from './serializer'
-import { BulletNode } from '../../lib/bullet/node'
+// import { BulletNode } from '../bullet/node'
 import { Token, tokenize } from 'prismjs'
-import { tokenizeBulletString } from '../../lib/bullet/parse'
+import { tokenizeBulletString } from '../bullet/parser'
 import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
+import { Doc } from '../workspace/workspace'
+import { DocPathService } from '../workspace/doc-path'
 // import UpdateShotForm from '../shot-form/update-shot-form'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
@@ -306,7 +302,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
           leaf.type === 'filtertag'
         ) {
           if (e) {
-            e.onselectstart = ev => false
+            e.onselectstart = () => false
           }
         }
       }}
@@ -317,29 +313,28 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   )
 }
 
-const UpdateEmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
-  const { data, loading, error } = useMyEmojiLikeQuery({
-    variables: { emojiId: emoji.id },
+const UpdateEmojiLike = ({ emoji }: { emoji: BulletEmoji }): JSX.Element | null => {
+  const { data, loading, error } = useMyBulletEmojiLikeQuery({
+    variables: { bulletEmojiId: emoji.id },
   })
-
-  const [upsertEmojiLike] = useUpsertEmojiLikeMutation({
+  const [upsertEmojiLike] = useUpsertBulletEmojiLikeMutation({
     update(cache, { data }) {
       // TODO: 這裡忽略了更新 count
-      if (data?.upsertEmojiLike) {
-        cache.writeQuery<MyEmojiLikeQuery, MyEmojiLikeQueryVariables>({
-          query: MyEmojiLikeDocument,
-          variables: { emojiId: data.upsertEmojiLike.like.emojiId },
-          data: { myEmojiLike: data.upsertEmojiLike.like },
+      if (data?.upsertBulletEmojiLike) {
+        cache.writeQuery<MyBulletEmojiLikeQuery, MyBulletEmojiLikeQueryVariables>({
+          query: MyBulletEmojiLikeDocument,
+          variables: { bulletEmojiId: data.upsertBulletEmojiLike.like.bulletEmojiId },
+          data: { myBulletEmojiLike: data.upsertBulletEmojiLike.like },
         })
       }
     },
   })
   function handleClickLike(choice: LikeChoice) {
-    const myLike = data?.myEmojiLike
+    const myLike = data?.myBulletEmojiLike
     if (myLike && myLike.choice === choice) {
       upsertEmojiLike({
         variables: {
-          emojiId: emoji.id,
+          bulletEmojiId: emoji.id,
           data: { choice: 'NEUTRAL' },
         },
       })
@@ -347,7 +342,7 @@ const UpdateEmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
     if (myLike && myLike.choice !== choice) {
       upsertEmojiLike({
         variables: {
-          emojiId: emoji.id,
+          bulletEmojiId: emoji.id,
           data: { choice },
         },
       })
@@ -355,7 +350,7 @@ const UpdateEmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
     if (myLike === null) {
       upsertEmojiLike({
         variables: {
-          emojiId: emoji.id,
+          bulletEmojiId: emoji.id,
           data: { choice },
         },
       })
@@ -370,7 +365,7 @@ const UpdateEmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
 
   return (
     <button
-      className={`inline mR ${data.myEmojiLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
+      className={`inline mR ${data.myBulletEmojiLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
       onClick={() => {
         handleClickLike('UP')
       }}
@@ -387,7 +382,7 @@ const UpdateEmojiLike = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
 /**
  * @returns 若 emoji 目前沒有人點贊，返回 null
  */
-export const EmojiButotn = ({ emoji }: { emoji: Emoji }): JSX.Element | null => {
+export const EmojiButotn = ({ emoji }: { emoji: BulletEmoji }): JSX.Element | null => {
   // console.log(emoji)
   // if (emoji.count.nUps === 0) {
   //   return null
@@ -463,7 +458,6 @@ const InlineSymbol = ({
           // e.preventDefault()
           // e.stopPropagation()
           // router.push(`/card/${encodeURIComponent(element.symbol)}`)
-
           setShowPopover(true)
         }}
       >
@@ -486,7 +480,7 @@ const InlineSymbol = ({
                       // e.preventDefault()
                       // e.stopPropagation()
                       setShowPopover(false)
-                      router.push(`/card/${encodeURI(element.symbol)}`)
+                      router.push(`/cardx/${encodeURI(element.symbol)}`)
                     }}
                   >
                     確定
@@ -539,17 +533,17 @@ const InlineMirror = ({
   attributes,
   children,
   element,
-  location,
-  selfCard,
-}: RenderElementProps & { element: InlineMirrorElement; location: NavLocation; selfCard: Card }): JSX.Element => {
-  const [showPopover, setShowPopover] = useState(false)
+  sourceCardId,
+}: RenderElementProps & { element: InlineMirrorElement; sourceCardId?: string }): JSX.Element => {
+  // const [showPopover, setShowPopover] = useState(false)
   // const editor = useSlateStatic()
-  const href = locationToUrl({
-    ...location,
-    mirrorSymbol: element.mirrorSymbol,
-    openedLiPath: [],
-    // author: element.author,
-  })
+  // const href = locationToUrl({
+  //   ...location,
+  //   mirrorSymbol: element.mirrorSymbol,
+  //   openedLiPath: [],
+  //   // author: element.author,
+  // })
+
   // const authorName = selfCard.link?.authorName
   // useEffect(() => {
   //   // 若有 sourceUrl 且未設有 author 的情況，設一個預設 author
@@ -563,10 +557,7 @@ const InlineMirror = ({
   return (
     <span {...attributes}>
       {/* <span contentEditable={false}> */}
-      <Link
-        href={href}
-        // as={`/card/${encodeURIComponent(location.selfSymbol)}/${encodeURIComponent(element.mirrorSymbol)}`}
-      >
+      <Link href={DocPathService.toURL(element.mirrorSymbol.substr(2), sourceCardId)}>
         <a className="ui">{children}</a>
       </Link>
       {/* </span> */}
@@ -575,8 +566,8 @@ const InlineMirror = ({
   )
 }
 
-const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; location: NavLocation }): JSX.Element => {
-  const { attributes, children, element, location } = props
+const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }): JSX.Element => {
+  const { attributes, children, element } = props
   const selected = useSelected()
   // const context = useContext(Context)
   const editor = useSlateStatic()
@@ -682,7 +673,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
             inline
           />
           {/* parent.id = bullet id */}
-          {showPopover && parent.id && (
+          {/* {showPopover && parent.id && (
             <Popover visible={showPopover} hideBoard={handleHideBoard}>
               {pollId ? (
                 <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />
@@ -695,7 +686,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
                 />
               )}
             </Popover>
-          )}
+          )} */}
         </span>
       )}
       {/* <span>{children}</span> */}
@@ -704,7 +695,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement; lo
   )
 }
 
-const InlineShot = (props: RenderElementProps & { element: InlineShotElement; location: NavLocation }): JSX.Element => {
+const InlineShot = (props: RenderElementProps & { element: InlineShotElement }): JSX.Element => {
   const editor = useSlateStatic()
   const selected = useSelected()
 
@@ -721,7 +712,7 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement; lo
       const inlineShot = toInlineShotString({
         id: shotId,
         choice: shot.choice,
-        targetSymbol: targetData?.card?.symbol ?? '',
+        targetSymbol: targetData?.card?.sym.symbol ?? '',
         author: element.authorName ?? '',
       })
       Transforms.setNodes<InlineShotElement>(
@@ -824,74 +815,77 @@ const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
   )
 }
 
-const FilterMirror = ({
-  mirrors,
-  sourceCardId,
-}: {
-  mirrors: InlineMirrorElement[]
-  sourceCardId: string
-}): JSX.Element | null => {
-  const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
-  const client = useApolloClient()
+// const FilterMirror = ({
+//   mirrors,
+//   sourceCardId,
+// }: {
+//   mirrors: InlineMirrorElement[]
+//   sourceCardId: string
+// }): JSX.Element | null => {
+//   const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
+//   const client = useApolloClient()
 
-  useEffect(() => {
-    const asyncRun = async () => {
-      if (mirrors.length === 1) {
-        const mirror = mirrors[0]
-        const { rootLi } = await getLocalOrQueryRoot({ client, mirrorSymbol: mirror.mirrorSymbol })
-        const rootBulletDraft = Serializer.toRootBulletDraft(rootLi)
-        const filtered = BulletNode.filter({
-          node: rootBulletDraft,
-          match: ({ node }) => node.sourceCardId === sourceCardId,
-        })
-        setFilteredBullet(filtered)
-      }
-    }
-    asyncRun().catch(err => {
-      console.error(err)
-    })
-  }, [])
+//   useEffect(() => {
+//     const asyncRun = async () => {
+//       if (mirrors.length === 1) {
+//         const mirror = mirrors[0]
+//         const { rootLi } = await getLocalOrQueryRoot({ client, mirrorSymbol: mirror.mirrorSymbol })
+//         const rootBulletDraft = Serializer.toRootBulletDraft(rootLi)
+//         const filtered = BulletNode.filter({
+//           node: rootBulletDraft,
+//           match: ({ node }) => node.sourceCardId === sourceCardId,
+//         })
+//         setFilteredBullet(filtered)
+//       }
+//     }
+//     asyncRun().catch(err => {
+//       console.error(err)
+//     })
+//   }, [])
 
-  if (mirrors.length === 0) {
-    return null
-  }
-  if (mirrors.length > 1) {
-    return <div>一行只允許一個 mirror</div>
-  }
-  if (filteredBullet === undefined) {
-    return null
-  }
-  if (filteredBullet === null) {
-    return <div>Click to edit</div>
-  }
-  return (
-    <ul style={{ background: '#f3f4f9', borderRadius: '6px' }}>
-      {/* 忽略 root，從 root children 開始 render */}
-      {filteredBullet.children.map((e, i) => (
-        <BulletComponent key={i} bullet={e} />
-      ))}
-    </ul>
-  )
-}
+//   if (mirrors.length === 0) {
+//     return null
+//   }
+//   if (mirrors.length > 1) {
+//     return <div>一行只允許一個 mirror</div>
+//   }
+//   if (filteredBullet === undefined) {
+//     return null
+//   }
+//   if (filteredBullet === null) {
+//     return <div>Click to edit</div>
+//   }
+//   return (
+//     <ul style={{ background: '#f3f4f9', borderRadius: '6px' }}>
+//       {/* 忽略 root，從 root children 開始 render */}
+//       {filteredBullet.children.map((e, i) => (
+//         <BulletComponent key={i} bullet={e} />
+//       ))}
+//     </ul>
+//   )
+// }
 
 const Lc = ({
   attributes,
   children,
   element,
-  location,
-  sourceCardId,
-  sourceLinkId,
-}: RenderElementProps & {
+  curCardId,
+}: // sourceLinkId,
+RenderElementProps & {
   element: LcElement
-  location: NavLocation
-  sourceCardId?: string
-  sourceLinkId?: string
+  curCardId?: string
+  // sourceLinkId?: string
 }): JSX.Element => {
   const editor = useSlateStatic()
   const readonly = useReadOnly()
   const focused = useFocused() // 整個editor是否focus
   const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
-  const { data: emojiData } = useEmojisQuery({ fetchPolicy: 'cache-first', variables: { bulletId: element.id ?? '' } })
+
+  // TODO: 改成 lazyQuery + useEffect
+  const { data: emojiData } = useBulletEmojisQuery({
+    fetchPolicy: 'cache-first',
+    variables: { bulletId: element.bulletSnapshot?.id ?? '' },
+  })
   // const [author, authorSwitcher] = useAuthorSwitcher({ authorName })
   // const [placeholder, setPlaceholder] = useState<string | undefined>()
   // useEffect(() => {
@@ -916,7 +910,6 @@ const Lc = ({
     if ((focused && !selected) || readonly) {
       // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
       const path = ReactEditor.findPath(editor, element)
-
       parseLcAndReplace({ editor, lcEntry: [element, path] })
       return
     }
@@ -941,11 +934,6 @@ const Lc = ({
       //   // console.log('unwrapNodes', path)
     }
   }, [selected, readonly])
-  // useEffect(()=>{
-  //   if(focused){
-
-  //   }
-  // },[focused])
 
   const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
   // console.log(element, children)
@@ -956,7 +944,7 @@ const Lc = ({
 
         {emojiData && (
           <>
-            {emojiData.emojis?.map((e, i) => {
+            {emojiData.bulletEmojis?.map((e, i) => {
               if (e.count.nUps === 0) {
                 return null
               }
@@ -969,23 +957,18 @@ const Lc = ({
           </>
         )}
       </div>
-      {mirrors.length > 0 && sourceCardId && (
+      {mirrors.length > 0 && curCardId && (
         <span contentEditable={false}>
           {/* {author === element.author && element.author}
           {sourceUrl === element.sourceUrl && sourceUrl} */}
-          <FilterMirror mirrors={mirrors} sourceCardId={sourceCardId} />
+          {/* <FilterMirror mirrors={mirrors} sourceCardId={sourceCardId} /> */}
         </span>
       )}
     </div>
   )
 }
 
-const Li = ({
-  attributes,
-  children,
-  element,
-  location,
-}: RenderElementProps & { element: LiElement; location: NavLocation }): JSX.Element => {
+const Li = ({ attributes, children, element }: RenderElementProps & { element: LiElement }): JSX.Element => {
   const editor = useSlateStatic()
   // const [hasUl, setHasUl] = useState(false)
   const [ulFolded, setUlFolded] = useState<true | undefined>()
@@ -1015,9 +998,9 @@ const Li = ({
 
   const [lc, ul] = element.children
   const hasUl = ul !== undefined
-  const href = locationToUrl(location, ReactEditor.findPath(editor, element))
+  // const href = locationToUrl(location, ReactEditor.findPath(editor, element))
 
-  function onEmojiCreated(emoji: Emoji, myEmojiLike: EmojiLike) {
+  function onEmojiCreated(emoji: BulletEmoji, myEmojiLike: BulletEmojiLike) {
     // const curEmojis = lc.emojis ?? []
     // const path = ReactEditor.findPath(editor, element)
     // Transforms.setNodes<LcElement>(editor,  { at: lcPath(path) })
@@ -1042,7 +1025,7 @@ const Li = ({
       {/* <div contentEditable={false}></div> */}
       <div className={classes.arrowBulletWrapper} contentEditable={false}>
         <BulletPanel
-          bulletId={lc.id}
+          bulletId={lc.bulletSnapshot?.id}
           // emoji={lc.emojis}
           visible={showPanelIcon}
           // sourceUrl={element.children[0].sourceUrl}
@@ -1084,7 +1067,7 @@ const Li = ({
           </span>
         )}
 
-        <Link href={href}>
+        <Link href={'/href'}>
           <a>
             <BulletSvg />
           </a>
@@ -1111,27 +1094,23 @@ const CustomElement = ({
   attributes,
   children,
   element,
-  location,
-  selfCard,
-}: RenderElementProps & { location: NavLocation; selfCard: Card }): JSX.Element => {
-  const sourceUrl = selfCard.link?.url
-
+  card,
+}: RenderElementProps & { card: Card | null }): JSX.Element => {
   switch (element.type) {
     case 'symbol':
       return <InlineSymbol {...{ attributes, children, element }} />
     case 'mirror':
-      return <InlineMirror {...{ attributes, children, element, location, selfCard }} />
-
+      return <InlineMirror {...{ attributes, children, element, sourceCardId: card?.id }} />
     case 'filtertag':
-      return <InlineFiltertag {...{ attributes, children, element, location }} />
+      return <InlineFiltertag {...{ attributes, children, element }} />
     case 'poll':
-      return <InlinePoll {...{ attributes, children, element, location }} />
+      return <InlinePoll {...{ attributes, children, element }} />
     case 'shot':
-      return <InlineShot {...{ attributes, children, element, location }} />
+      return <InlineShot {...{ attributes, children, element }} />
     case 'lc':
-      return <Lc {...{ attributes, children, element, location, sourceUrl }} />
+      return <Lc {...{ attributes, children, element, curCardId: card?.id }} />
     case 'li':
-      return <Li {...{ attributes, children, element, location }} />
+      return <Li {...{ attributes, children, element }} />
     case 'ul':
       return <Ul {...{ attributes, children, element }} />
     default:
@@ -1139,44 +1118,35 @@ const CustomElement = ({
   }
 }
 
-export const BulletEditor = ({
-  initialValue,
-  location,
-  selfCard,
-  readOnly,
-  onValueChange,
-}: {
-  initialValue: LiElement[]
-  location: NavLocation
-  selfCard: Card
-  readOnly?: boolean
-  onValueChange?: (value: LiElement[]) => void
-}): JSX.Element => {
-  // const context = useContext(Context)
-  const [isPressShift, setIsPressShift] = useState(false)
-  const editor = useMemo(() => withParse(withOperation(withList(withHistory(withReact(createEditor()))))), [])
+export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
+  const editor = useMemo(() => withParse(withList(withHistory(withReact(createEditor())))), [])
   const renderElement = useCallback(
-    (props: RenderElementProps) => <CustomElement {...{ ...props, location, selfCard }} />,
-    [location, selfCard],
+    (props: RenderElementProps) => <CustomElement {...{ ...props, card: doc.cardCopy }} />,
+    [doc],
   )
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
   const renderDecorate = useCallback(([node, path]) => decorate([node, path]), [])
 
-  const withListOnKeyDownMemo = useCallback((event: React.KeyboardEvent) => {
-    withListOnKeyDown(event, editor)
-    // console.log(editor.children)
-  }, [])
+  // const [isPressShift, setIsPressShift] = useState(false)
+  // const withListOnKeyDownMemo = useCallback((event: React.KeyboardEvent) => {
+  //   withListOnKeyDown(event, editor)
+  //   // console.log(editor.children)
+  // }, [])
 
   // const [searchPanel, onValueChange] = useSearch(editor)
-  const [value, setValue] = useState<LiElement[]>(initialValue)
+  const [value, setValue] = useState<LiElement[]>(doc.editorValue ?? [])
+
+  // useEffect(() => {
+  //   // 當 initialValue 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
+  //   Transforms.deselect(editor)
+  //   setValue(initialValue)
+  // }, [initialValue])
 
   useEffect(() => {
-    // console.log('use effect deps initialValue')
-    // 當 initialValue 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
+    // 當 doc 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
     Transforms.deselect(editor)
-    setValue(initialValue)
-    // console.log('initial value setted')
-  }, [initialValue])
+    setValue(doc.editorValue ?? [])
+  }, [doc])
 
   // useEffect(() => {
   //   if (searchAllResult.data) {
@@ -1189,7 +1159,6 @@ export const BulletEditor = ({
   return (
     <div
       className={`${classes.bulletEditorContainer} `}
-
       // onFocus={e => {
       //   if (!e.currentTarget.classList.contains(classes.focused)) {
       //     e.currentTarget.classList.add(classes.focused)
@@ -1205,19 +1174,21 @@ export const BulletEditor = ({
       {/* <div>
         @{selfCard.link?.url ?? 'undefined'}; @{location.author ?? 'undefined'}
       </div> */}
+
       <Slate
         editor={editor}
         value={value}
         onChange={value => {
           if (isLiArray(value)) {
             setValue(value)
+            doc.editorValue = value // point to the new value
 
-            // TODO: 每字都儲存會有效能問題
-            if (onValueChange) {
-              onValueChange(value)
-            }
+            // TODO: 每字都執行一遍儲存會有效能問題
+            // if (onValueChange) {
+            //   onValueChange(value)
+            // }
           } else {
-            throw new Error('value需為ul array')
+            throw 'value needs to be li array'
           }
         }}
       >
@@ -1243,12 +1214,12 @@ export const BulletEditor = ({
           autoCorrect="false"
           autoFocus={false}
           decorate={renderDecorate}
-          readOnly={readOnly}
+          // readOnly={readOnly}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           onKeyDown={event => {
             withListOnKeyDown(event, editor)
-            setIsPressShift(event.key === 'Shift')
+            // setIsPressShift(event.key === 'Shift')
             // if (search) {
             //   onKeyDownForSuggest(event)
             // } else {

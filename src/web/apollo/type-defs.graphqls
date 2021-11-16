@@ -12,8 +12,10 @@ type Query {
   # all emojis of a bullet
   bulletEmojis(bulletId: ID!): [BulletEmoji!]!
 
-  # 以 id, symbol, or url 查找，若無返回 null，以 url 查找時，若無會自動創一個 card
+  # 以 id, sym, or url 查找，若無返回 null，以 url 查找時，若無會自動創一個 card
   card(id: ID, symbol: String, url: String): Card
+
+  cardState(id: ID!): CardState
 
   # 若查無返回 null
   # change(id: ID): Change
@@ -39,7 +41,7 @@ type Query {
   myCardEmojiLike(cardEmojiId: ID!): CardEmojiLike
 
   # 可重複 shot
-  myShots(targetId: ID!): [Shot!]!
+  myShots(symId: ID!): [Shot!]!
 
   # 因為目前可重複投票，所以同一個 poll 可能會有多個 votes
   myVotes(pollId: ID!): [Vote!]!
@@ -55,7 +57,7 @@ type Query {
 
   shot(id: ID!): Shot
 
-  shotsByAuthor(authorId: ID!, targetId: ID!): [Shot!]!
+  shotsByAuthor(authorId: ID!, symId: ID!): [Shot!]!
 
   shotsBySource(linkId: ID!): [Shot!]!
 
@@ -143,7 +145,7 @@ type Mutation {
   createCardEmoji(cardId: ID!, code: EmojiCode!): CreateCardEmojiResponse!
   upsertCardEmojiLike(cardEmojiId: ID!, data: LikeInput!): UpsertCardEmojiLikeResponse!
 
-  updateCardMeta(symbol: String!, data: CardMetaInput!): CardMeta!
+  updateCardMeta(cardId: ID!, data: CardMetaInput!): CardMeta!
 
   createCommit(data: CommitInput!): Commit!
 
@@ -221,7 +223,7 @@ type Author {
 
 type Bullet {
   id: ID!
-  cardId: String!
+  # cardId: String!
   # createdAt: DateTime!
   # updatedAt: DateTime!
 }
@@ -266,11 +268,10 @@ type BulletEmojiLike {
 type Card {
   id: ID!
   meta: CardMeta!
-  symbol: Symbol!
+  sym: Sym!
   link: Link
-  # headDoc: CardDoc # 可能為 null
-  updatedAt: DateTime!
   state: CardState # 可能為 null
+  updatedAt: DateTime!
 }
 
 type CardEmoji {
@@ -295,19 +296,19 @@ type CardEmojiLike {
 type CardDigest {
   id: ID!
   meta: CardMeta!
-  symbol: Symbol!
+  sym: Sym!
   link: Link
-  # headDoc: CardDoc # 可能為 null
   updatedAt: DateTime!
-  digest: JSON!
+  body: JSON!
 }
 
 type CardMeta {
+  template: String
   redirects: [String!]
   duplicates: [String!]
   url: String
   author: String
-  date: String
+  publishedAt: String
   description: String
   keywords: [String!]
   title: String
@@ -318,17 +319,14 @@ type CardState {
   cardId: String!
   userId: String!
   commitId: String!
-  prevId: String!
+  prevId: String
   body: CardStateBody!
   updatedAt: DateTime!
 }
 
 type CardStateBody {
-  # id: String! # 和 change id 相同
-  # symbol: String!
-  prevStateId: String! # prev-card-change
-  subStateIds: [String!]!
-  # subSymbols: [String!]! # sub-docs
+  prevStateId: String
+  sourceCardId: String
   # changes: [BulletNodeChange!]!
   # value: [BulletTreeNode!]!
   changes: JSON!
@@ -373,9 +371,11 @@ type Shot {
   userId: String!
   authorId: String
   linkId: String
-  targetId: String!
+  symId: String!
   choice: ShotChoice!
-  body: ShotBody
+  # body: ShotBody
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type ShotBody {
@@ -383,10 +383,10 @@ type ShotBody {
   quote: String
 }
 
-type Symbol {
+type Sym {
   id: ID!
-  type: SymbolType!
-  name: String!
+  type: SymType!
+  symbol: String!
 }
 
 type Poll {
@@ -552,10 +552,10 @@ input CardInput {
 }
 
 input CardStateInput {
-  prevStateId: String
-  cardId: String
   symbol: String!
-  subSymbols: [String!]!
+  cardId: String
+  prevStateId: String
+  sourceCardId: String # 用此來分辨 sub-docs
   changes: JSON!
   finalValue: JSON! # 用於比較 applyChanges() 是否相同，不存入
   cardInput: CardInput # 當需要同時創新 card 時 (目前只適用於創 symbol-card 的情況)
@@ -711,7 +711,7 @@ enum ShotChoice {
   HOLD
 }
 
-enum SymbolType {
+enum SymType {
   TICKER
   TOPIC
   URL

@@ -1,4 +1,4 @@
-import { Symbol as PrismaSymbol, SymbolType } from '.prisma/client'
+import { Sym, SymType } from '.prisma/client'
 import prisma from '../prisma'
 
 /**
@@ -9,9 +9,9 @@ import prisma from '../prisma'
  * - URL: @https://github.com/typescript-eslint
  */
 
-export type ParsedSymbol = {
-  name: string
-  type: SymbolType
+export type SymbolParsed = {
+  symbol: string
+  type: SymType
 }
 
 const reTicker = /^\$[A-Z0-9]+$/
@@ -21,12 +21,12 @@ const reTopic = /^\[\[[^\]]+\]\]$/
 // eg @https://regex101.com/ 非常簡單的 url regex，會捕捉到很多非 url 的 string
 const reUrl = /^@[a-zA-Z0-9:/.]+/
 
-export const SymbolModel = {
-  async getOrCreate(symbol: string): Promise<PrismaSymbol> {
-    const { name, type } = this.parse(symbol)
-    return prisma.symbol.upsert({
-      create: { name, type },
-      where: { name },
+export const SymModel = {
+  async getOrCreate(symbol: string): Promise<Sym> {
+    const parsed = this.parse(symbol)
+    return prisma.sym.upsert({
+      create: { symbol: parsed.symbol, type: parsed.type },
+      where: { symbol: parsed.symbol },
       update: {},
     })
   },
@@ -41,18 +41,18 @@ export const SymbolModel = {
    * 2. 無法辨識oauthor
    */
   parse(symbol: string): ParsedSymbol {
-    let type: SymbolType
+    let type: SymType
     if (symbol.match(reTicker) !== null) {
-      type = SymbolType.TICKER
+      type = SymType.TICKER
     } else if (symbol.match(reTopic) !== null) {
-      type = SymbolType.TOPIC
+      type = SymType.TOPIC
     } else if (symbol.match(reUrl) !== null) {
-      type = SymbolType.URL
+      type = SymType.URL
     } else {
       throw new Error(`symbol parse error: ${symbol}`)
     }
     return {
-      name: symbol,
+      symbol,
       type,
     }
   },

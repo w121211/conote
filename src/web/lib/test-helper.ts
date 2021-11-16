@@ -1,6 +1,6 @@
 // import { hash, hashSync } from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
-import { BulletDraft } from './bullet/types'
+import { BulletDraft } from '../components/bullet/types'
 import { getBotEmail } from './models/user'
 
 export const BOT = { id: 'bot', email: getBotEmail() }

@@ -1,105 +1,78 @@
+import { nanoid } from 'nanoid'
 import { Node } from 'slate'
-import { BulletNode } from '../../lib/bullet/node'
-import { BulletDraft, isRootBulletDraft, RootBullet, RootBulletDraft } from '../../lib/bullet/types'
+import { TreeNode } from '../../../packages/docdiff/src'
+import { Bullet } from '../bullet/types'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 
-interface SerializerInterface {
-  _toBulletDraft: (li: LiElement) => BulletDraft
-  _toLi: (draft: BulletDraft | RootBulletDraft) => LiElement
-  toRootBulletDraft: (li: LiElement) => RootBulletDraft
-  toRootLi: (root: RootBulletDraft, options?: { newSymbol?: true }) => LiElement
-}
-
-export const Serializer: SerializerInterface = {
-  _toBulletDraft: (li: LiElement): BulletDraft => {
-    const [lc, ul] = li.children
-
-    return {
-      ...lc,
-      head: Node.string(lc),
-      children: ul?.children.map(e => Serializer._toBulletDraft(e)) ?? [],
+export const EditorSerializer = {
+  /**
+   * Recursively iterate and transform all nodes
+   *
+   * TODO: avoid using recusive method!
+   */
+  _toLi(node: TreeNode<Bullet>): LiElement {
+    const { data } = node
+    if (data === undefined) {
+      throw 'Require data'
     }
-  },
-
-  _toLi(draft: BulletDraft | RootBulletDraft): LiElement {
     const lc: LcElement = {
-      ...draft,
       type: 'lc',
-      children: [{ text: draft.head }],
-      // rootBullet: isRootBulletDraft(draft) ? draft : undefined,
+      children: [{ text: data.head }],
+      bulletSnapshot: data,
     }
     const ul: UlElement | undefined =
-      draft.children.length > 0
+      node.children.length > 0
         ? {
             type: 'ul',
-            children: draft.children.map(e => Serializer._toLi(e)),
+            children: node.children.map(e => this._toLi(e)),
           }
         : undefined
     return { type: 'li', children: ul ? [lc, ul] : [lc] }
   },
 
   /**
-   * @throws 輸入資料格式錯誤
+   * Recursively iterate and transform all nodes
+   *
+   * TODO: avoid using recusive method!
    */
-  toRootBulletDraft(li: LiElement): RootBulletDraft {
+  _toTreeNode(li: LiElement): TreeNode<Bullet> {
     const [lc, ul] = li.children
-    if (lc.rootBulletDraft === undefined) {
-      throw 'lc 沒有 rootBulletDraft'
+    if (lc.bulletSnapshot) {
+      const { id, cid } = lc.bulletSnapshot // TODO: bullet should have more info?
+      if (cid) {
+        throw 'bullet-snapshot should not have cid'
+      }
+      const node: TreeNode<Bullet> = {
+        cid: lc.bulletSnapshot.id,
+        data: {
+          id,
+          head: Node.string(lc),
+        },
+        change: lc.change,
+        children: ul?.children.map(e => this._toTreeNode(e)) ?? [], // recursive
+      }
+      return node
     }
-    if (ul?.children === undefined) {
-      throw 'ul 沒有 children'
+    const cid = nanoid()
+    const bullet: Bullet = {
+      id: cid, // bullet require an id, use cid for temporary fill
+      cid,
+      head: Node.string(lc),
     }
-    // console.log(lc.rootBulletDraft)
-    return {
-      ...lc.rootBulletDraft,
-      children: ul.children.map(e => Serializer._toBulletDraft(e)),
+    const node: TreeNode<Bullet> = {
+      cid,
+      data: bullet,
+      change: lc.change,
+      children: ul?.children.map(e => this._toTreeNode(e)) ?? [], // recursive
     }
+    return node
   },
 
-  toRootLi(root: RootBulletDraft, options?: { newSymbol?: true }): LiElement {
-    const li = Serializer._toLi(root)
-    const [lc, ...rest] = li.children
-    return {
-      ...li,
-      children: [
-        {
-          ...lc,
-          // root: true,
-          // symbol: root.symbol,
-          rootBulletDraft: root,
-          // mirror: root.mirror,
-          // newSymbol: options?.newSymbol,
-          // boardId: root.boardId,
-          // pollId: root.pollId,
-        },
-        ...rest,
-      ],
-    }
+  toLis(children: TreeNode<Bullet>[]): LiElement[] {
+    return children.map(e => this._toLi(e))
+  },
+
+  toTreeNodes(lis: LiElement[]): TreeNode<Bullet>[] {
+    return lis.map(e => this._toTreeNode(e))
   },
 }
-
-// /**
-//  * @deprecated
-//  *
-//  * Traver a slate element node and convert to bullet input nodes and return
-//  * Bullet input與li是1對1的關係，bullet tree與ul是1對1的關係，1個card body對應至1個ul，self及nested cards表示多個ul
-//  * 因為輸入是ul，會返回ul裡的children
-//  */
-// function serialize(node: UlElement): BulletDraft[] {
-//   return node.children.map(e => Serializer.toBulletDraft(e))
-// }
-
-// /**
-//  * @deprecated
-//  *
-//  * Traver a bullet node and convert to slate element node and return
-//  *
-//  * @param options.includeRoot - 若`true`返回ul包著root，若`false`返回ul包著root children
-//  */
-// function deserialize(root: BulletDraft, options?: { includeRoot?: true }): UlElement {
-//   const li = Serializer.toLi(root)
-//   return {
-//     type: 'ul',
-//     children: options?.includeRoot ? [li] : li.children[1]?.children ?? [],
-//   }
-// }

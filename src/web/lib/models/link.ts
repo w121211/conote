@@ -1,4 +1,4 @@
-import { Author, Card, Link, Symbol as PrismaSymbol } from '.prisma/client'
+import { Author, Card, Link, Sym } from '.prisma/client'
 import { FetchClient, FetchResult } from '../fetcher/fetcher'
 import { tryFetch } from '../fetcher/vendors'
 import { parseUrl } from '../fetcher/vendors/base'
@@ -27,7 +27,7 @@ export const LinkService = {
         author: Author | null
         card:
           | (Card & {
-              symbol: PrismaSymbol
+              sym: Sym
             })
           | null
       },
@@ -37,7 +37,7 @@ export const LinkService = {
     // TODO: 這個 url 尚未 resolved, 需要考慮 redirect、不同 url 指向同一個頁面的情況
     const parsed = parseUrl(url)
     const found = await prisma.link.findUnique({
-      include: { author: true, card: { include: { symbol: true } } },
+      include: { author: true, card: { include: { sym: true } } },
       where: { url: parsed.resolvedUrl },
     })
 
@@ -70,7 +70,7 @@ export const LinkService = {
         scraped: res as any,
         author: author ? { connect: { id: author.id } } : undefined,
       },
-      include: { card: { include: { symbol: true } }, author: true },
+      include: { card: { include: { sym: true } }, author: true },
     })
     return [link, { fetchResult: res }]
   },

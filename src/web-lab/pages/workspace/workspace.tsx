@@ -3,58 +3,10 @@ import { ParsedUrlQuery } from 'querystring'
 import { nanoid } from 'nanoid'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useObservable } from 'rxjs-hooks'
 import { TreeNode } from '../../../packages/docdiff/src'
 import { Bullet, Card, Doc, DocLocation, workspace } from '../../lib/workspace'
-
-// class NestedNodeValueStore<T> {
-//   readonly TEMP_ROOT_ID = 'TEMP_ROOT_ID'
-//   readonly root: NestedNode<T>
-
-//   constructor(children: NestedNode<T>[]) {
-//     this.root = {
-//       id: this.TEMP_ROOT_ID,
-//       children,
-//     }
-//   }
-
-//   get(): NestedNode<T>[] {
-//     return this.root.children
-//   }
-
-//   set(children: NestedNode<T>[]): void {
-//     this.root.children = children
-//   }
-
-//   getPartial(path: NodePath): NestedNode<T>[] {
-//     return NodeHelper.getPartial(this.root, path).children
-//   }
-
-//   setPartial(path: NodePath, children: NestedNode<T>[]): void {
-//     // NodeHelper.setPartial(this.root, path, children)
-//     this.root.children = children
-//   }
-
-//   static fromJSON<T>(json: NestedNodeValueParams<T>): NestedNodeValueStore<T> {
-//     const { children } = json
-//     return new NestedNodeValueStore(children)
-//   }
-
-//   toJSON(): NestedNodeValueParams<T> {
-//     return { children: this.root.children }
-//   }
-// }
-
-// class CardService {
-//   readonly card$ = new BehaviorSubject<string | null>(null)
-//   set(card: string) {
-//     //
-//   }
-//   create(symbol: string) {
-//     //
-//   }
-// }
 
 const Editor = ({ doc }: { doc: Doc }): JSX.Element => {
   const [value, setValue] = useState<TreeNode<Bullet>[]>(doc.value)
@@ -88,27 +40,6 @@ const Editor = ({ doc }: { doc: Doc }): JSX.Element => {
     </div>
   )
 }
-
-// const CreateDoc = ({ symbol }: { symbol: string }): JSX.Element => {
-//   return (
-//     <div>
-//       <button
-//         onClick={() => {
-//           docService.create(symbol, 'Ticker template')
-//         }}
-//       >
-//         Ticker template
-//       </button>
-//       <button
-//         onClick={() => {
-//           docService.create(symbol, 'Event template')
-//         }}
-//       >
-//         Event template
-//       </button>
-//     </div>
-//   )
-// }
 
 const CardHead = ({
   card,

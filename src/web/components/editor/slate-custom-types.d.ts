@@ -2,14 +2,15 @@ import { BaseEditor, BaseRange } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
 import {
-  BulletDraft,
   InlineMirror,
   InlinePoll,
   InlineSymbol,
   RootBulletDraft,
   InlineFiltertag,
   InlineShot,
-} from '../../lib/bullet/types'
+  Bullet,
+} from '../bullet/types'
+import { ChangeType } from '../../../packages/docdiff/src'
 
 export type CommentInput = {
   boardCode: !PinBoardCode
@@ -63,12 +64,14 @@ export type InlineShotElement = InlineShot & {
 /**
  * li的content，實際文字輸入、操作的element，所以將bullet properties集中在此
  */
-export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
+export type LcElement = {
   type: 'lc'
   children: (CustomText | LabelInlineElement)[]
 
-  body?: string
-  editingBody?: true
+  bulletSnapshot?: Bullet // keeps original copy
+  change?: ChangeType // record change-event lively
+
+  // editingBody?: true
   // selected?: boolean
   // asAuthor?: true // 若沒有的話視為self author
   // banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
@@ -76,19 +79,6 @@ export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
   // banDeleteForward?: true
   // banInsertBreak?: true
   // insertBreakAsIndent?: true
-
-  // rootBullet?: Bullet // query card 取得的 body bullet root，保持靜態不修改
-
-  // comments?: CommentInput[]
-  // comment?: CommentInput
-
-  // 新增mirror時需要先暫時存放
-  // root?: true
-  // mirror?: true
-  // symbol?: string
-  // newSymbol?: true // 找不到symbol，視為創新card
-
-  rootBulletDraft?: RootBulletDraft // 只有 root 會存 root bullet，用此幫助 serialize
 }
 
 /**
