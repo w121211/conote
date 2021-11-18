@@ -1,8 +1,11 @@
 {
   "references": [
-    { "path": "../packages/editor" },
-    { "path": "../packages/fetcher" }
-    // { "path": "../web" }
+    {
+      "path": "../packages/editor"
+    },
+    {
+      "path": "../packages/docdiff"
+    }
   ],
   "compilerOptions": {
     "target": "es5",
@@ -18,7 +21,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "incremental": true
   },
   "exclude": ["node_modules", ".next", "out", "test"],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"]

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useWebpageCardLazyQuery } from '../../apollo/query.graphql'
+import { useCardLazyQuery } from '../../apollo/query.graphql'
 
 export function CardIndexPage(): JSX.Element | null {
   const router = useRouter()
   const [url, setUrl] = useState<string | null>()
-  const [queryCard, { data, loading, error }] = useWebpageCardLazyQuery()
+  const [queryCard, { data, loading, error }] = useCardLazyQuery()
 
   useEffect(() => {
     const { query, isReady } = router
@@ -27,8 +27,8 @@ export function CardIndexPage(): JSX.Element | null {
   if (loading) {
     return null
   }
-  if (data && data.webpageCard) {
-    router.push(`/card/${encodeURIComponent(data.webpageCard.symbol)}`)
+  if (data && data.card) {
+    router.push(`/card/${encodeURIComponent(data.card.symbol.name)}`)
     return null
   }
   if (error) {

@@ -5,37 +5,27 @@ import SrcIcon from '../../assets/svg/foreign.svg'
 import classes from './bullet-panel.module.scss'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
-import {
-  EmojiText,
-  Emoji,
-  EmojiLike,
-  MyEmojiLikeDocument,
-  MyEmojiLikeQuery,
-  MyEmojiLikeQueryVariables,
-  useCreateEmojiMutation,
-  useMyEmojiLikeQuery,
-  useUpsertEmojiLikeMutation,
-} from '../../apollo/query.graphql'
+import { BulletEmoji, BulletEmojiLike, EmojiCode } from '../../apollo/query.graphql'
 import EmojiUpDown from '../emoji-up-down/emoji-up-down'
 
 interface Child {
   icon?: SVGComponentTransferFunctionElement | SVGElement | Element | string | ReactElement
   text?: string | React.ReactNode
-  emojiText?: EmojiText
+  emojiCode?: EmojiCode
   sourceUrl?: string
   authorName?: string
 }
 
 export interface BulletPanelType {
+  bulletId?: string
   children?: Child[]
   visible?: boolean
   handleVisibleState?: (state: boolean) => void
   className?: string
   sourceUrl?: string
   authorName?: string
-  bulletId?: string
-  onEmojiCreated: (emoji: Emoji, myEmojiLike: EmojiLike) => void
-  emoji?: Emoji[]
+  onEmojiCreated: (emoji: BulletEmoji, myEmojiLike: BulletEmojiLike) => void
+  emoji?: BulletEmoji[]
 }
 
 const BulletPanel = ({
@@ -60,17 +50,17 @@ const BulletPanel = ({
     myChildren.push(
       {
         icon: <PinIcon />,
-        emojiText: 'PIN',
+        emojiCode: 'PIN',
         text: 'Pin',
       },
       {
         icon: <UpIcon />,
-        emojiText: 'UP',
+        emojiCode: 'UP',
         text: 'Up',
       },
       {
         icon: <UpIcon style={{ transform: 'rotate(180deg)' }} />,
-        emojiText: 'DOWN',
+        emojiCode: 'DOWN',
         text: 'Down',
       },
     )
@@ -140,14 +130,14 @@ const BulletPanel = ({
                   </a>
                 </div>
               )
-            if (bulletId && e.emojiText !== undefined) {
+            if (bulletId && e.emojiCode !== undefined) {
               return (
                 <EmojiUpDown
                   className={classes.panelElement}
                   key={i}
                   bulletId={bulletId}
-                  foundEmoji={emoji?.find(el => el.text === e.emojiText)}
-                  emojiText={e.emojiText}
+                  foundEmoji={emoji?.find(el => el.code === e.emojiCode)}
+                  emojiText={e.emojiCode}
                   // onEmojiCreated={onEmojiCreated}
                 >
                   {/* <div className={classes.panelElement} key={i}> */}

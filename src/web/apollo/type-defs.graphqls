@@ -9,34 +9,46 @@ type Query {
 
   bullet(id: ID!): Bullet
 
-  # 以 symbol 查找，若無創新 symbol card
-  # @cardBodyId 若給予，返回該card及指定的body，否則返回 latest body
-  card(id: ID, symbol: String, cardBodyId: ID): Card
+  # all emojis of a bullet
+  bulletEmojis(bulletId: ID!): [BulletEmoji!]!
 
-  # 若找不到 card,throws error
-  cardMeta(symbol: String!): CardMeta!
+  # 以 id, sym, or url 查找，若無返回 null，以 url 查找時，若無會自動創一個 card
+  card(id: ID, symbol: String, url: String): Card
 
-  latestCardEntries(afterId: String): [CardEntry!]!
+  cardState(id: ID!): CardState
+
+  # 若查無返回 null
+  # change(id: ID): Change
+
+  # all emojis of a card
+  cardEmojis(cardId: ID!): [CardEmoji!]!
+
+  # 若查無返回 null
+  # cardMeta(symbol: String!): CardMeta
+
+  # latestCommits(afterId: String): [Commit!]!
+  latestCardDigests(afterId: String): [CardDigest!]!
+
+  # latestBullets(afterId: String): [Commit!]!
 
   link(id: ID, url: String): Link
 
-  # 找 bullet 所有的 emojis，沒有時為空的 array
-  emojis(bulletId: ID!): [Emoji!]!
-
   me: User!
 
+  # 若沒有 like 過會返回 null
+  myBulletEmojiLike(bulletEmojiId: ID!): BulletEmojiLike
+
+  myCardEmojiLike(cardEmojiId: ID!): CardEmojiLike
+
   # 可重複 shot
-  myShots(targetId: ID!): [Shot!]!
+  myShots(symId: ID!): [Shot!]!
 
   # 因為目前可重複投票，所以同一個 poll 可能會有多個 votes
   myVotes(pollId: ID!): [Vote!]!
 
-  # 若沒有 like 過會返回 null TODO: 整合成對單張卡片搜尋？
-  myEmojiLike(emojiId: ID!): EmojiLike
-
   poll(id: ID!): Poll
 
-  # 搜尋ticker, topics，近似字搜尋（ElasticSearch？）
+  # 搜尋 ticker, topics，近似搜尋 TODO:ElasticSearch？
   searchAll(term: String!): [String!]!
 
   searchTicker(term: String!): [String!]!
@@ -45,12 +57,9 @@ type Query {
 
   shot(id: ID!): Shot
 
+  shotsByAuthor(authorId: ID!, symId: ID!): [Shot!]!
+
   shotsBySource(linkId: ID!): [Shot!]!
-
-  shotsByAuthor(authorId: ID!, targetId: ID!): [Shot!]!
-
-  # 以 url 查找，若無會 fetch, resolve url 並創新 card
-  webpageCard(url: String!): Card!
 
   # 以 card symbol 找該 card 所有的 active hashtags
   # hashtags(symbol: String!): [Hashtag!]
@@ -101,8 +110,6 @@ type Query {
   # post(id: ID!): Post!
   # event(id: ID!): Event!
   # ticker(id: ID, name: String): Ticker!
-  # commit(id: ID!): Commit!
-  # commits(symbolId: ID!, after: String): [Commit!]!
 
   # myPostLikes(after: String): [PostLike!]!
   # myCommentLikes(after: String): [CommentLike!]!
@@ -129,28 +136,25 @@ type Query {
 }
 
 type Mutation {
-  # 若 symbol 已存在會直接返回現有的 card，不另外創新
-  createSymbolCard(data: CardInput!): Card!
-
-  updateCardMeta(symbol: String!, data: CardMetaInput!): CardMeta!
-
-  # 若該 symbol 尚未有 card 時，需要給 template，會同步創 card, body
-  createCardBody(cardSymbol: String!, data: CardBodyInput!): CardBody!
-
   # 若 emoji 已經創，返回該 emoji 並 like
-  createEmoji(bulletId: ID!, text: EmojiText!): CreateEmojiResponse!
-
-  upsertEmojiLike(emojiId: ID!, data: LikeInput!): UpsertEmojiLikeResponse!
+  createBulletEmoji(bulletId: ID!, code: EmojiCode!): CreateBulletEmojiResponse!
+  upsertBulletEmojiLike(bulletEmojiId: ID!, data: LikeInput!): UpsertBulletEmojiLikeResponse!
 
   # createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): CreateBoardResponse!
+
+  createCardEmoji(cardId: ID!, code: EmojiCode!): CreateCardEmojiResponse!
+  upsertCardEmojiLike(cardEmojiId: ID!, data: LikeInput!): UpsertCardEmojiLikeResponse!
+
+  updateCardMeta(cardId: ID!, data: CardMetaInput!): CardMeta!
+
+  createCommit(data: CommitInput!): Commit!
+
   createPoll(data: PollInput!): Poll!
 
-  createVote(pollId: ID!, data: VoteInput!): Vote!
-  # createAuthorVote(pollId: ID!, authorName: String!, data: VoteInput!): Vote!
-
   createShot(data: ShotInput!): Shot!
-
   updateShot(id: ID!, data: ShotInput!): Shot!
+
+  createVote(pollId: ID!, data: VoteInput!): Vote!
 
   # createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
   # createAuthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
@@ -217,14 +221,144 @@ type Author {
   name: String!
 }
 
-type User {
+type Bullet {
   id: ID!
-  email: String!
-  # profileImage: String
-  # trips: [Launch]!
+  # cardId: String!
+  # createdAt: DateTime!
+  # updatedAt: DateTime!
 }
 
-type ScrapeData {
+type BulletEmoji {
+  id: ID!
+  code: EmojiCode!
+  count: BulletEmojiCount!
+}
+
+type BulletEmojiCount {
+  id: ID!
+  nUps: Int!
+  nDowns: Int!
+}
+
+type BulletEmojiLike {
+  id: ID!
+  bulletEmojiId: String!
+  choice: LikeChoice!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# type BulletNodeChange {
+#   type: String!
+#   cid: String!
+#   toParentCid: String!
+#   toIndex: Int
+#   data: Bullet
+# }
+
+# type BulletTreeNode {
+#   cid: String!
+#   parentCid: String
+#   index: Int
+#   data: Bullet
+#   # change?: 'move' // record change-event lively
+#   children: BulletTreeNode
+# }
+
+type Card {
+  id: ID!
+  meta: CardMeta!
+  sym: Sym!
+  link: Link
+  state: CardState # 可能為 null
+  updatedAt: DateTime!
+}
+
+type CardEmoji {
+  id: ID!
+  code: EmojiCode!
+  count: CardEmojiCount!
+}
+
+type CardEmojiCount {
+  id: ID!
+  nUps: Int!
+  nDowns: Int!
+}
+
+type CardEmojiLike {
+  id: ID!
+  cardEmojiId: String!
+  choice: LikeChoice!
+  updatedAt: DateTime!
+}
+
+type CardDigest {
+  id: ID!
+  meta: CardMeta!
+  sym: Sym!
+  link: Link
+  updatedAt: DateTime!
+  body: JSON!
+}
+
+type CardMeta {
+  template: String
+  redirects: [String!]
+  duplicates: [String!]
+  url: String
+  author: String
+  publishedAt: String
+  description: String
+  keywords: [String!]
+  title: String
+}
+
+type CardState {
+  id: ID!
+  cardId: String!
+  userId: String!
+  commitId: String!
+  prevId: String
+  body: CardStateBody!
+  updatedAt: DateTime!
+}
+
+type CardStateBody {
+  prevStateId: String
+  sourceCardId: String
+  # changes: [BulletNodeChange!]!
+  # value: [BulletTreeNode!]!
+  changes: JSON!
+  value: JSON!
+  # symbolToCardId: JSON!  # a symbol-cardId map, so later the cahnge of symbol name won't affect
+}
+
+type Commit {
+  id: String!
+  userId: String!
+  updatedAt: DateTime!
+  cardStates: [CardState!]!
+}
+
+type CreateBulletEmojiResponse {
+  emoji: BulletEmoji!
+  like: BulletEmojiLike! # 創 emoji 會同時創 emoji-like，表示 user 點讚此 emoji
+}
+
+type CreateCardEmojiResponse {
+  emoji: CardEmoji!
+  like: CardEmojiLike! # 創 emoji 會同時創 emoji-like，表示 user 點讚此 emoji
+}
+
+type Link {
+  id: ID!
+  url: String!
+  authorId: String
+  # scraped: Scraped!
+}
+
+type Scraped {
   authorName: String
   date: String
   description: String
@@ -233,53 +367,28 @@ type ScrapeData {
   tickers: [String!]
 }
 
-type Link {
-  id: ID!
-  url: String!
-  authorId: String
-  # scrapeData: ScrapeData!
-}
-
-type ShotContent {
-  comment: String
-  quote: String
-}
-
 type Shot {
   id: ID!
   userId: String!
   authorId: String
   linkId: String
-  targetId: String!
+  symId: String!
   choice: ShotChoice!
-  # content   Json
+  # body: ShotBody
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
-type Vote {
+type ShotBody {
+  comment: String
+  quote: String
+}
+
+type Sym {
   id: ID!
-  pollId: String!
-  choiceIdx: Int!
-  # reward: Float
-  # createdAt: DateTime!
-  # updatedAt: DateTime!
+  type: SymType!
+  symbol: String!
 }
-
-type PollCount {
-  id: ID!
-  nVotes: [Int!]!
-  # nJudgements: [Int]
-  # judgeStartedAt: DateTime
-  # judgeEndedAt: DateTime
-  # verdictValid: Boolean
-  # verdictChoice: Int
-  # updatedAt: DateTime!
-  # failedMsg: String
-}
-
-# type PollMeta {
-#   code: String
-#   text: String
-# }
 
 type Poll {
   id: ID!
@@ -304,110 +413,48 @@ type Poll {
   updatedAt: DateTime!
 }
 
-type EmojiCount {
+type PollCount {
   id: ID!
-  nUps: Int!
-  nDowns: Int!
+  nVotes: [Int!]!
+  # nJudgements: [Int]
+  # judgeStartedAt: DateTime
+  # judgeEndedAt: DateTime
+  # verdictValid: Boolean
+  # verdictChoice: Int
+  # updatedAt: DateTime!
+  # failedMsg: String
 }
 
-type Emoji {
+type UpsertBulletEmojiLikeResponse {
+  like: BulletEmojiLike!
+  count: BulletEmojiCount!
+}
+
+type UpsertCardEmojiLikeResponse {
+  like: CardEmojiLike!
+  count: CardEmojiCount!
+}
+
+type User {
   id: ID!
-  userId: String!
-  # authorName: String
-  # bulletId: String!
-  # cardId: Int!
-  # pollId: Int
-  # status: HashtagStatus
-  # poll: Poll
-  text: String!
-  count: EmojiCount!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  email: String!
+  # profileImage: String
+  # trips: [Launch]!
 }
 
-type EmojiLike {
+type Vote {
   id: ID!
-  emojiId: String!
-  choice: LikeChoice!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type CreateEmojiResponse {
-  emoji: Emoji!
-  like: EmojiLike! # 創 emoji 會同時創 emoji-like，表示 user 點讚此 emoji
-}
-
-type UpsertEmojiLikeResponse {
-  like: EmojiLike!
-  count: EmojiCount!
-}
-
-# type BulletCount {
-#   id: ID!
-#   nUps: Int!
-#   nDowns: Int!
-# }
-
-# type BulletLikeResponse {
-#   like: BulletLike!
-#   count: BulletCount!
-# }
-
-# type BulletLike {
-#   id: ID!
-#   bulletId: String!
-#   choice: LikeChoice!
-#   createdAt: DateTime!
-#   updatedAt: DateTime!
-# }
-
-type Bullet {
-  id: ID!
-  cardId: String!
-  # count: BulletCount!
+  pollId: String!
+  choiceIdx: Int!
+  # reward: Float
   # createdAt: DateTime!
   # updatedAt: DateTime!
 }
 
-type CardBody {
-  id: ID!
-  userId: String!
-  content: JSON!
-  # content: String! # in json
-  timestamp: BigInt!
-  prevId: Int
-}
-
-type CardMeta {
-  redirects: [String!]
-  duplicates: [String!]
-  url: String
-  author: String
-  date: String
-  description: String
-  keywords: [String!]
-  title: String
-}
-
-type Card {
-  id: ID!
-  meta: CardMeta!
-  type: CardType!
-  symbol: String!
-  link: Link
-  body: CardBody!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type CardEntry {
-  id: ID!
-  type: CardType!
-  symbol: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
+# type PollMeta {
+#   code: String
+#   text: String
+# }
 
 # type CommentLike {
 #   id: ID!
@@ -482,12 +529,45 @@ type CardEntry {
 
 # ------ Inputs ------
 
-input LikeInput {
-  choice: LikeChoice!
+input CardMetaInput {
+  redirects: [String!]
+  duplicates: [String!]
+  url: String
+  author: String
+  date: String
+  description: String
+  keywords: [String!]
+  title: String
 }
 
-input VoteInput {
-  choiceIdx: Int!
+# input CardTemplatePropsInput {
+#   template: String!
+#   title: String!
+#   ticker: String
+# }
+
+input CardInput {
+  symbol: String!
+  # templateProps: CardTemplatePropsInput
+  meta: CardMetaInput
+}
+
+input CardStateInput {
+  cid: String!
+  cardId: String
+  sourceCardId: String # 用此來分辨 sub-docs
+  prevStateId: String
+  cardInput: CardInput # 當需要同時創新 card 時 (目前只適用於創 symbol-card 的情況)
+  changes: JSON!
+  value: JSON! # 用於比較 applyChanges() 是否相同，不存入
+}
+
+input CommitInput {
+  cardStateInputs: [CardStateInput!]!
+}
+
+input LikeInput {
+  choice: LikeChoice!
 }
 
 input PollInput {
@@ -502,6 +582,10 @@ input ShotInput {
   linkId: ID # Create author shot required
 }
 
+input VoteInput {
+  choiceIdx: Int!
+}
+
 # input CommentInput {
 #   content: String!
 #   vote: VoteInput
@@ -512,70 +596,6 @@ input ShotInput {
 #   meta: String!
 #   content: String!
 # }
-
-# input BulletInput {
-#   id: Int
-#   timestamp: Int
-#   userIds: [String!]
-#   head: String!
-#   body: String
-#   # hashtags: Hashtag[]
-#   placeholder: String
-#   children: [BulletInput!]
-#   prevHead: String
-#   prevBody: String
-#   op: BulletOperation
-
-#   sourceUrl: String
-#   oauthorName: String
-#   boardId: Int
-#   pollId: Int
-
-#   # 這些需要bot權限，一般user無法操作
-#   # freeze: Boolean
-#   # freezeChildren: Boolean
-#   # keyvalue: Boolean
-#   # valueBoolean: Boolean
-#   # valueArray: Boolean
-#   # pin: Boolean
-#   # pinCode: PinCode
-#   # childTemplate: BulletInput
-
-#   headValidator: String
-#   bodyValidator: String
-# }
-
-# input CardBulletRootInput {
-#   symbol: String!
-#   root: BulletInput!
-# }
-
-input CardMetaInput {
-  redirects: [String!]
-  duplicates: [String!]
-  url: String
-  author: String
-  date: String
-  description: String
-  keywords: [String!]
-  title: String
-}
-
-input CardBodyInput {
-  root: JSON!
-  # mirrors: [JSON!]
-}
-
-input CardTemplatePropsInput {
-  template: String!
-  title: String!
-  ticker: String
-}
-
-input CardInput {
-  symbol: String!
-  templateProps: CardTemplatePropsInput
-}
 
 # ------ NEXT ------
 
@@ -637,51 +657,11 @@ input CardInput {
 #   followed: Boolean!
 # }
 
-# type Commit {
-#   id: ID!
-#   symbolId: ID!
-#   status: CommitStatus!
-#   action: CommitAction!
-#   content: String!
-#   # post: Post!
-#   # TODO:洩漏問題？
-#   reviews: [CommitReview!]!
-#   createdAt: DateTime
-#   updatedAt: DateTime
-# }
-
-# input CommitInput {
-#   symbolId: ID
-#   action: CommitAction!
-#   content: String!
-#   # postContent: String!
-#   # post: String!
-# }
-
-# type CommitReview {
-#   id: ID!
-#   userId: ID!
-#   choice: Int!
-#   createdAt: DateTime
-#   updatedAt: DateTime
-# }
-
-# input CommitReviewInput {
-#   # commitId: ID!
-#   choice: Int!
-# }
-
 enum SourceType {
   VIDEO
   POST
   AUTHOR
   OTHER
-}
-
-enum CardType {
-  TICKER
-  TOPIC
-  WEBPAGE
 }
 
 enum CardStatus {
@@ -692,23 +672,7 @@ enum CardStatus {
   DUPLICATED
 }
 
-# enum BoardStatus {
-#   ACTIVE
-#   LOCK
-#   DELETE
-#   ARCHIVE
-#   REPORTED
-# }
-
-# enum CommentStatus {
-#   ACTIVE
-#   LOCK
-#   DELETE
-#   ARCHIVE
-#   REPORTED
-# }
-
-enum EmojiText {
+enum EmojiCode {
   UP
   DOWN
   PIN
@@ -747,3 +711,25 @@ enum ShotChoice {
   SHORT
   HOLD
 }
+
+enum SymType {
+  TICKER
+  TOPIC
+  URL
+}
+
+# enum BoardStatus {
+#   ACTIVE
+#   LOCK
+#   DELETE
+#   ARCHIVE
+#   REPORTED
+# }
+
+# enum CommentStatus {
+#   ACTIVE
+#   LOCK
+#   DELETE
+#   ARCHIVE
+#   REPORTED
+# }

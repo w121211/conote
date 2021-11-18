@@ -1,6 +1,5 @@
 // import * as QT from './graphql/query-types'
 // import { SymbolCat, CardTemplate, CocardFragment } from '../apollo/query.graphql'
-import { EmojiLike, LikeChoice } from '.prisma/client'
 
 export function hasCount<T, U>(v: T & { count: U | null }): v is T & { count: U } {
   return v.count !== null
@@ -53,28 +52,3 @@ export function toStringId<T extends { id: number }>(obj: T): T & { id: string }
 //   }
 //   return params
 // }
-
-export function deltaLike<T extends BulletLike | EmojiLike>(like: T, prevLike?: T): { dDown: number; dUp: number } {
-  // 計算up-down的變化值
-  let dUp = 0
-  let dDown = 0
-  if (prevLike) {
-    switch (prevLike.choice) {
-      case LikeChoice.UP:
-        dUp -= 1
-        break
-      case LikeChoice.DOWN:
-        dDown -= 1
-        break
-    }
-  }
-  switch (like.choice) {
-    case LikeChoice.UP:
-      dUp += 1
-      break
-    case LikeChoice.DOWN:
-      dDown += 1
-      break
-  }
-  return { dDown, dUp }
-}

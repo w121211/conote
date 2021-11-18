@@ -1,4 +1,5 @@
 import assert from 'assert'
+import { nanoid } from 'nanoid'
 import {
   Editor,
   Transforms,
@@ -11,262 +12,351 @@ import {
 } from 'slate'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 
-export function isUl(node: Node): node is UlElement {
-  return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'ul'
-}
+export const ListHelper = {
+  isUl(node: Node): node is UlElement {
+    return (
+      !Editor.isEditor(node) && Element.isElement(node) && node.type === 'ul'
+    )
+  },
 
-export function isLi(node: Node): node is LiElement {
-  return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'li'
-}
+  isLi(node: Node): node is LiElement {
+    return (
+      !Editor.isEditor(node) && Element.isElement(node) && node.type === 'li'
+    )
+  },
 
-export function isLiArray(nodes: Node[]): nodes is LiElement[] {
-  for (const e of nodes) {
-    if (!isLi(e)) {
-      return false
+  isLiArray(nodes: Node[]): nodes is LiElement[] {
+    for (const e of nodes) {
+      if (!ListHelper.isLi(e)) {
+        return false
+      }
     }
-  }
-  return true
+    return true
+  },
+
+  isLc(node: Node): node is LcElement {
+    return (
+      !Editor.isEditor(node) && Element.isElement(node) && node.type === 'lc'
+    )
+  },
+
+  lcPath(liPath: Path): Path {
+    return [...liPath, 0]
+  },
+
+  ulPath(liPath: Path): Path {
+    return [...liPath, 1]
+  },
 }
 
-export function isLc(node: Node): node is LcElement {
-  return !Editor.isEditor(node) && Element.isElement(node) && node.type === 'lc'
+interface ListOperator {
+  _newLc: () => LcElement
+
+  onInsertLc: (lc: LcElement) => void
+  onMoveLc: (lc: LcElement) => void
+
+  insertNextUl: (
+    editor: Editor,
+    entry: NodeEntry<LiElement>,
+    root?: true
+  ) => void
+  removePrevUl: (editor: Editor, path: Path) => void
+
+  insertNextLi: (editor: Editor, entry: NodeEntry<LiElement>) => void
+  insertPrevLi: (editor: Editor, entry: NodeEntry<LiElement>) => void
+  insertNextIndentLi: (editor: Editor, entry: NodeEntry<LiElement>) => void
+  splitLi: (editor: Editor, entry: NodeEntry<LiElement>) => void
+
+  indent: (editor: Editor, entry: NodeEntry<LiElement>) => void
+  unindent: (editor: Editor, entry: NodeEntry<LiElement>) => void
+
+  deleteLiAndMergePrevChildren: (
+    editor: Editor,
+    unit: 'character' | 'word' | 'line' | 'block',
+    liPath: number[],
+    prevLiPath: number[]
+  ) => void
 }
 
-export function lcPath(liPath: Path): Path {
-  return [...liPath, 0]
-}
+export const createListOperator = ({
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onInsertLc = () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onMoveLc = () => {},
+}: {
+  onInsertLc?: (lc: LcElement) => void
+  onMoveLc?: (lc: LcElement) => void
+}): ListOperator => {
+  return {
+    onInsertLc,
+    onMoveLc,
 
-export function ulPath(liPath: Path): Path {
-  return [...liPath, 1]
-}
-
-export function insertNextUl(
-  editor: Editor,
-  entry: NodeEntry<LiElement>,
-  root?: true
-): void {
-  const insertPath = Path.next(Path.parent(entry[1]))
-  Transforms.insertNodes<UlElement>(
-    editor,
-    {
-      type: 'ul',
-      children: [
-        { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
-      ],
+    _newLc() {
+      const lc: LcElement = {
+        type: 'lc',
+        id: nanoid(),
+        children: [{ text: '' }],
+      }
+      this.onInsertLc(lc)
+      return lc
     },
-    { at: insertPath }
-  )
-  Transforms.select(editor, [...insertPath, 0, 0]) // 移動cursor至新的位置
-}
 
-function removePrevUl(editor: Editor, path: Path) {
-  if (!Path.hasPrevious(Path.parent(path))) {
-    console.warn('第一個<li root>無法刪除')
-    return
-  }
-  const next = Editor.next(editor, { at: Path.parent(path) })
-  if (next === undefined) {
-    console.warn('最後一個<li root>無法刪除')
-    return
-  }
-  Transforms.removeNodes(editor, { at: Path.parent(path) })
-
-  // 將cursor移至前一個ul-li的尾端
-  Transforms.select(editor, [...Path.previous(Path.parent(path)), 0])
-  Transforms.collapse(editor, { edge: 'end' })
-}
-
-export function insertNextLi(
-  editor: Editor,
-  entry: NodeEntry<LiElement>
-): void {
-  console.log('insertNextLi')
-  const [, path] = entry
-  Transforms.insertNodes<LiElement>(
-    editor,
-    { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
-    { at: Path.next(path) }
-  )
-  Transforms.move(editor)
-}
-
-function insertPrevLi(editor: Editor, entry: NodeEntry<LiElement>) {
-  const [, path] = entry
-  Transforms.insertNodes<LiElement>(
-    editor,
-    { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
-    { at: path }
-  )
-  // Transforms.move(editor)
-}
-
-function insertNextIndentLi(editor: Editor, entry: NodeEntry<LiElement>) {
-  const [node, path] = entry
-  if (node.children[1] === undefined) {
-    // 沒有子ul，創一個
-    Transforms.insertNodes<UlElement>(
-      editor,
-      {
-        type: 'ul',
-        children: [
-          { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
-        ],
-      },
-      { at: [...ulPath(path)] }
-    )
-  } else {
-    // 有子ul，插入至第1個
-    Transforms.insertNodes<LiElement>(
-      editor,
-      { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
-      { at: [...ulPath(path), 0] }
-    )
-  }
-  Transforms.move(editor)
-}
-
-/**
- * Indent li node
- *
- * TODO:
- * - indent是位置移動，需要設定op='MOVE'
- */
-export function indent(editor: Editor, entry: NodeEntry<LiElement>): void {
-  const [, path] = entry
-  const prev = Editor.previous<LiElement>(editor, { at: path })
-  if (prev === undefined) {
-    console.warn('第一個<li>無法indent')
-    return
-  }
-
-  const [prevNode, prevPath] = prev
-  const prevUl = prevNode.children[1]
-
-  if (prevUl) {
-    // prev有ul，將li移至prev-ul中的最後一個
-    Transforms.moveNodes(editor, {
-      at: path,
-      to: [...ulPath(prevPath), prevUl.children.length],
-    })
-  } else {
-    // prev沒有ul，創一個，然後搬運
-    Editor.withoutNormalizing(editor, () => {
+    insertNextUl(editor: Editor, entry: NodeEntry<LiElement>, root?: true) {
+      const insertPath = Path.next(Path.parent(entry[1]))
       Transforms.insertNodes<UlElement>(
         editor,
-        { type: 'ul', children: [] },
-        { at: ulPath(prevPath) }
+        {
+          type: 'ul',
+          children: [{ type: 'li', children: [this._newLc()] }],
+        },
+        { at: insertPath }
       )
-      Transforms.moveNodes(editor, {
-        at: path,
-        to: [...ulPath(prevPath), 0],
+      Transforms.select(editor, [...insertPath, 0, 0]) // 移動cursor至新的位置
+    },
+
+    removePrevUl(editor: Editor, path: Path) {
+      if (!Path.hasPrevious(Path.parent(path))) {
+        console.warn('第一個<li root>無法刪除')
+        return
+      }
+      const next = Editor.next(editor, { at: Path.parent(path) })
+      if (next === undefined) {
+        console.warn('最後一個<li root>無法刪除')
+        return
+      }
+      Transforms.removeNodes(editor, { at: Path.parent(path) })
+
+      // 將cursor移至前一個ul-li的尾端
+      Transforms.select(editor, [...Path.previous(Path.parent(path)), 0])
+      Transforms.collapse(editor, { edge: 'end' })
+    },
+
+    insertNextLi(editor: Editor, entry: NodeEntry<LiElement>): void {
+      // console.log('insertNextLi')
+      const [, path] = entry
+      Transforms.insertNodes<LiElement>(
+        editor,
+        { type: 'li', children: [this._newLc()] },
+        { at: Path.next(path) }
+      )
+      Transforms.move(editor)
+    },
+
+    insertPrevLi(editor: Editor, entry: NodeEntry<LiElement>) {
+      const [, path] = entry
+      Transforms.insertNodes<LiElement>(
+        editor,
+        { type: 'li', children: [this._newLc()] },
+        { at: path }
+      )
+      // Transforms.move(editor)
+    },
+
+    insertNextIndentLi(editor: Editor, entry: NodeEntry<LiElement>) {
+      const [node, path] = entry
+      if (node.children[1] === undefined) {
+        // 沒有子ul，創一個
+        Transforms.insertNodes<UlElement>(
+          editor,
+          {
+            type: 'ul',
+            children: [
+              {
+                type: 'li',
+                children: [this._newLc()],
+              },
+            ],
+          },
+          { at: [...ListHelper.ulPath(path)] }
+        )
+      } else {
+        // 有子ul，插入至第1個
+        Transforms.insertNodes<LiElement>(
+          editor,
+          { type: 'li', children: [this._newLc()] },
+          { at: [...ListHelper.ulPath(path), 0] }
+        )
+      }
+      Transforms.move(editor)
+    },
+
+    splitLi(editor: Editor, entry: NodeEntry<LiElement>) {
+      const [, liPath] = entry
+      Transforms.splitNodes(editor, {
+        always: true,
+        match: (n) => ListHelper.isLi(n),
+        // at: Path.parent(li[1]),  // at 會用 editor.selection
       })
-    })
-  }
-}
 
-/**
- * Unindent li node
- */
-export function unindent(editor: Editor, entry: NodeEntry<LiElement>): void {
-  const [, path] = entry
-  // const [, parentPath] = Editor.parent(editor, path)
-  // const [, parentLiPath] = Editor.parent(editor, parentPath)
-  let grandparentPath: Path
-  try {
-    grandparentPath = Path.parent(Path.parent(path))
-  } catch (err) {
-    console.error(err)
-    console.warn('grandparent不存在，無法unindent')
-    return
-  }
+      // 原生 split 會複製原本的 lc value，需重新設定
+      const lc = this._newLc()
+      Transforms.setNodes<LcElement>(
+        editor,
+        {
+          id: lc.id,
+          data: undefined,
+        },
+        { at: ListHelper.lcPath(Path.next(liPath)) }
+      )
+      this.onInsertLc(lc)
+    },
 
-  Editor.withoutNormalizing(editor, () => {
-    Transforms.moveNodes(editor, {
-      at: path,
-      to: Path.next(grandparentPath),
-    })
+    indent(editor: Editor, liEntry: NodeEntry<LiElement>): void {
+      const [li, path] = liEntry
 
-    // 若原ul已沒有children，刪除該parent
-    const [parentNode, parentPath] = Editor.parent(editor, path)
-    if (isUl(parentNode) && Editor.isEmpty(editor, parentNode)) {
-      Transforms.removeNodes(editor, { at: parentPath })
-    }
-  })
-}
-
-export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
-  const { selection } = editor
-
-  if (selection && Range.isCollapsed(selection)) {
-    // 非tab、enter，略過
-    if (!['Tab', 'Enter'].includes(event.key)) return
-
-    const li = Editor.above<LiElement>(editor, { match: (n) => isLi(n) })
-
-    if (li) {
-      const [, path] = li
-      let op: 'indent' | 'unindent' | 'body' | undefined
-
-      if (event.shiftKey && event.key === 'Tab') {
-        op = 'unindent'
-      } else if (event.key === 'Tab') {
-        op = 'indent'
-      }
-      // else if (event.key === 'Enter' && Node.string(node).length === 0) {
-      //   op = 'unindent'
-      // }
-
-      switch (op) {
-        case 'unindent':
-          event.preventDefault()
-          // if (path.length === 3) {
-          //   console.warn('因為上層是root，無法unindent')
-          //   return
-          // }
-          unindent(editor, li)
-          return
-        case 'indent':
-          event.preventDefault()
-          indent(editor, li)
-          return
+      const prev = Editor.previous<LiElement>(editor, { at: path })
+      if (prev === undefined) {
+        return // 第一個 li 無法 indent
       }
 
-      // if (event.shiftKey && event.key === 'Enter') {
-      //   event.preventDefault()
-      //   editBody(editor, [bullet, bulletPath])
-      //   return
-      // }
-    }
+      const [prevNode, prevPath] = prev
+      const prevUl = prevNode.children[1]
+      if (prevUl) {
+        // prev 有 ul，將li移至prev-ul中的最後一個
+        Transforms.moveNodes(editor, {
+          at: path,
+          to: [...ListHelper.ulPath(prevPath), prevUl.children.length],
+        })
+      } else {
+        // prev 沒有 ul，創一個，然後搬運
+        Editor.withoutNormalizing(editor, () => {
+          Transforms.insertNodes<UlElement>(
+            editor,
+            { type: 'ul', children: [] },
+            { at: ListHelper.ulPath(prevPath) }
+          )
+          Transforms.moveNodes(editor, {
+            at: path,
+            to: [...ListHelper.ulPath(prevPath), 0],
+          })
+        })
+      }
+      this.onMoveLc(li.children[0])
+    },
 
-    // 目前在bulletBody裡
-    // const [bulletBody] = Editor.nodes(editor, {
-    //   match: (n) =>
-    //     !Editor.isEditor(n) &&
-    //     Element.isElement(n) &&
-    //     n.type === 'bullet-body',
-    // })
-    // if (bulletBody) {
-    //   const [, bodyPath] = bulletBody
-    //   const [bullet, bulletPath] = Editor.parent(editor, bodyPath)
+    unindent(editor: Editor, liEntry: NodeEntry<LiElement>): void {
+      const [li, liPath] = liEntry
+      let grandLiPath: Path
+      try {
+        grandLiPath = Path.parent(Path.parent(liPath))
+      } catch (err) {
+        return // grand-li 不存在，無法 unindent
+      }
 
-    //   if (!Element.isElement(bullet) || bullet.type !== 'bullet') return
+      Editor.withoutNormalizing(editor, () => {
+        Transforms.moveNodes(editor, {
+          at: liPath,
+          to: Path.next(grandLiPath),
+        })
+        // 若原 ul 已經沒有 children，刪除該 parent
+        const [ul, ulPath] = Editor.parent(editor, liPath)
+        if (ListHelper.isUl(ul) && Editor.isEmpty(editor, ul)) {
+          Transforms.removeNodes(editor, { at: ulPath })
+        }
+      })
+      this.onMoveLc(li.children[0])
+    },
 
-    //   if (event.shiftKey && event.key === 'Enter') {
-    //     event.preventDefault()
-    //     finishEditBody(editor, [bullet, bulletPath])
-    //     return
-    //   }
-    // }
+    deleteLiAndMergePrevChildren(
+      editor: Editor,
+      unit: 'character' | 'word' | 'line' | 'block',
+      liPath: number[],
+      prevLiPath: number[]
+    ): void {
+      // 此行有子層: 與前行合併，並將此行子層移至前行子層
+      // TODO: 子層算是 move
+      Editor.withoutNormalizing(editor, () => {
+        // 先用原生 delete，但原生 delete 會造成錯誤結構，所以 move nodes 看起來會和原本結構不同 （這是魔法）
+        Transforms.delete(editor, { unit, reverse: true })
+        Transforms.moveNodes(editor, {
+          at: ListHelper.lcPath(liPath),
+          to: ListHelper.ulPath(prevLiPath),
+        })
+        Transforms.removeNodes(editor, { at: liPath })
+      })
+    },
   }
 }
 
-export function withList(editor: Editor): Editor {
-  const { deleteBackward, insertBreak, insertData, insertText, normalizeNode } =
-    editor
+export const createOnKeyDown =
+  () =>
+  (
+    event: React.KeyboardEvent,
+    editor: Editor,
+    listOperator: ListOperator
+  ): void => {
+    const { selection } = editor
+
+    if (selection && Range.isCollapsed(selection)) {
+      if (!['Tab', 'Enter'].includes(event.key)) {
+        // 只考慮 tab, enter key
+        return
+      }
+
+      const li = Editor.above<LiElement>(editor, {
+        match: (n) => ListHelper.isLi(n),
+      })
+      if (li) {
+        // const [, path] = li
+        let action: 'indent' | 'unindent' | 'edit-body' | undefined
+
+        if (event.shiftKey && event.key === 'Tab') {
+          action = 'unindent'
+        } else if (event.key === 'Tab') {
+          action = 'indent'
+        }
+        // else if (event.key === 'Enter' && Node.string(node).length === 0) {
+        //   op = 'unindent'
+        // }
+
+        switch (action) {
+          case 'unindent':
+            event.preventDefault()
+            listOperator.unindent(editor, li)
+            return
+          case 'indent':
+            event.preventDefault()
+            listOperator.indent(editor, li)
+            return
+        }
+
+        // if (event.shiftKey && event.key === 'Enter') {
+        //   event.preventDefault()
+        //   editBody(editor, [bullet, bulletPath])
+        //   return
+        // }
+      }
+
+      // 目前在bulletBody裡
+      // const [bulletBody] = Editor.nodes(editor, {
+      //   match: (n) =>
+      //     !Editor.isEditor(n) &&
+      //     Element.isElement(n) &&
+      //     n.type === 'bullet-body',
+      // })
+      // if (bulletBody) {
+      //   const [, bodyPath] = bulletBody
+      //   const [bullet, bulletPath] = Editor.parent(editor, bodyPath)
+      //   if (!Element.isElement(bullet) || bullet.type !== 'bullet') return
+      //   if (event.shiftKey && event.key === 'Enter') {
+      //     event.preventDefault()
+      //     finishEditBody(editor, [bullet, bulletPath])
+      //     return
+      //   }
+      // }
+    }
+  }
+
+export const withList = (
+  editor: Editor,
+  listOperator: ListOperator
+): Editor => {
+  const { deleteBackward, insertBreak, insertData, normalizeNode } = editor
 
   /**
-   * - 此行freeze，不動作
-   * - cursor在行首
+   * - (freeze，不動作)
+   * - OOOOOO
+   * - IXXXXXX cursor在行首
    *   - 有同階層前行
    *     - 前行有子層，不動作
    *     - 前行沒子層
@@ -278,13 +368,15 @@ export function withList(editor: Editor): Editor {
    * - 此行為空，同cursor在行首
    * - cursor在行中、行尾，delete backward
    */
+
   editor.deleteBackward = (...args) => {
     const [unit] = args
     const { selection } = editor
 
-    // TODO: 還未考慮一次刪除整段的情況
     if (selection && Range.isCollapsed(selection)) {
-      const liEntry = Editor.above<LiElement>(editor, { match: (n) => isLi(n) })
+      const liEntry = Editor.above<LiElement>(editor, {
+        match: (n) => ListHelper.isLi(n),
+      })
 
       if (liEntry) {
         const [li, liPath] = liEntry
@@ -292,51 +384,104 @@ export function withList(editor: Editor): Editor {
         // const input = Editor.string(editor, path)
         const point = Editor.point(editor, selection)
 
-        // 此行 freeze，不動作
-        if (lc.freeze) return
+        // 此行 freeze -> 不允許 deleteBackward
+        // if (lc.freeze) { return }
 
-        // TODO: 需要考慮op
-
-        if (Editor.isStart(editor, point, lcPath(liPath))) {
-          // cursor 在 lc 行首
+        if (Editor.isStart(editor, point, ListHelper.lcPath(liPath))) {
+          // 只考慮 cursor 在 lc 句首的情況
 
           // if (lc.root) {
           //   // li root，刪除ul & li
           //   removePrevRootLi(editor, path)
           //   return
           // }
-          const prevLiEntry = Editor.previous<LiElement>(editor, { at: liPath })
 
+          const prevLiEntry = Editor.previous<LiElement>(editor, { at: liPath })
           if (prevLiEntry) {
-            // 有同階層的前行
+            // 有 prev-li
+            // -----------
+            // - OOOOOO PREV LI
+            //   - ???
+            // - IXXXXXX THIS LI
+            //   - ???
+            // -----------
+
             const [prevLi, prevLiPath] = prevLiEntry
 
             if (prevLi.children[1]) {
-              // 前行有 indent-list
+              // prev li 有子層
               if (Node.string(lc).length === 0 && ul === undefined) {
-                // 此行沒有子層、沒有內文，刪除此行，cursor 移至前行
+                // li 沒有子層、沒有內文: 刪除此行，cursor 移至前行 => 原生 deleteBackward
+                // ------------------------
+                // - OOOOOO PREV LI
+                //   - OOOOOO
+                // - I (THIS LI)
+                // - OOOOOO
+                deleteBackward(...args)
+                return
               } else {
-                return // 此行有子層、或有內文，不動作
+                // 此行有子層、或有內文: 不允許 deleteBackward
+                // ------------------------
+                // - OOOOOO PREV LI
+                //   - OOOOOO
+                // - IXXXXXX THIS LI
+                //   - OOOOOO
+                return
               }
             }
+
             if (ul) {
-              // 此行有子層，與前行合併，並將此行子層移至前行子層
-              Editor.withoutNormalizing(editor, () => {
-                Transforms.delete(editor, { unit, reverse: true })
-                Transforms.moveNodes(editor, {
-                  at: lcPath(liPath),
-                  to: ulPath(prevLiPath),
-                })
-                Transforms.removeNodes(editor, { at: liPath })
-              })
+              // prev-li 沒有子層，li 有子層: 與 prev-li 合併，並將此行子層移至前行子層
+              // 注意：這會造成 li 的子層移動至 prev-li (move-change)
+              //
+              // ------------------------
+              // - OOOOOO PREV LI
+              // - IXXXXXX THIS LI
+              //   - OOOOOO THIS LI UL
+              //
+              // ------ becomes ------
+              // - OOOOOO PREV LI IXXXXXX THIS LI
+              //   - OOOOOO THIS LI UL
+              //
+              // ------------------------
+              listOperator.deleteLiAndMergePrevChildren(
+                editor,
+                unit,
+                liPath,
+                prevLiPath
+              )
+              return
+            } else {
+              // 此行沒子層: 與前行合併 => 原生 deleteBackward
+              // -----------
+              // - OOOOOO
+              // - IXXXXXX THIS LI
+              //   - OOOOOO
+              // -----------
+              deleteBackward(...args)
               return
             }
-            // else: 此行沒子層，與前行合併 => 原生 delete backward
           } else {
-            // 沒有同階層的前行
+            // li 沒有 prev-li，ie 此行是該階層的首個
 
-            if (ul) return // 此行有子層，不動作
-            // else: 此行沒有子層，與前行合併 => 原生 delete backward
+            if (ul) {
+              // 此行有子層 -> 不允許 deleteBackward
+              // -----------
+              // - OOOOOO
+              //   - IXXXXXX THIS LI
+              //     - OOOOOO
+              // -----------
+              return
+            } else {
+              // 此行沒有子層 -> 原生 deleteBackward
+              // -----------
+              // - OOOOOO
+              //   - IXXXXXX THIS LI
+              //   - OOOOOO
+              // -----------
+              deleteBackward(...args)
+              return
+            }
           }
         }
       }
@@ -357,89 +502,73 @@ export function withList(editor: Editor): Editor {
    * - cursor在行首，插入前行
    * - cursor在行中，拆分本行並插入後行
    */
+
   editor.insertBreak = () => {
     const { selection } = editor
 
     if (selection) {
-      const li = Editor.above<LiElement>(editor, { match: (n) => isLi(n) })
-
-      if (li) {
-        const [node, path] = li
-        const lc = node.children[0]
+      const liEntry = Editor.above<LiElement>(editor, {
+        match: (n) => ListHelper.isLi(n),
+      })
+      if (liEntry) {
+        const [node, path] = liEntry
+        // const lc = node.children[0]
         const point = Editor.point(editor, selection)
 
         // li freeze
-        if (lc.freeze) {
-          if (Editor.isEnd(editor, point, lcPath(path))) {
-            // cursor在行尾，插入indent後行
-            insertNextIndentLi(editor, li) // 後行是indent，插入indent後行
-          }
-          // 指標在句首、句中，不動作
-          return
-        }
+        // if (lc.freeze) {
+        //   if (Editor.isEnd(editor, point, lcPath(path))) {
+        //     // cursor在行尾，插入indent後行
+        //     insertNextIndentLi(editor, li) // 後行是indent，插入indent後行
+        //   }
+        //   // 指標在句首、句中，不動作
+        //   return
+        // }
 
-        // 此行為空 & 此行是最後一行 & 此行不是第一層，unindent
         if (
           Node.string(node).length === 0 &&
           Editor.next(editor, { at: path }) === undefined &&
-          // !Path.equals(path, [0])
           path.length > 1
         ) {
-          unindent(editor, li)
+          // 此行為空 & 此行是最後一行 & 此行不是第一階層 -> unindent
+          listOperator.unindent(editor, liEntry)
           return
         }
 
-        // cursor 在行尾
-        if (Editor.isEnd(editor, point, lcPath(path))) {
+        if (Editor.isEnd(editor, point, ListHelper.lcPath(path))) {
+          // cursor 在行尾
           if (node.children[1]) {
-            // 後行是indent，插入indent後行
-            insertNextIndentLi(editor, li)
-            return
+            // 後行是 indent -> 插入 indent 後行
+            listOperator.insertNextIndentLi(editor, liEntry)
+          } else {
+            // 後行不是 indent -> 插入同階層後行
+            listOperator.insertNextLi(editor, liEntry)
           }
-
-          // 後行不是 indent，插入後行
-          insertNextLi(editor, li)
           return
         }
 
-        // cursor 在行首，插入前行
-        if (Editor.isStart(editor, point, lcPath(path))) {
-          insertPrevLi(editor, li)
+        if (Editor.isStart(editor, point, ListHelper.lcPath(path))) {
+          // cursor 在行首，插入前行
+          listOperator.insertPrevLi(editor, liEntry)
           return
         }
 
-        // cursor 在行中，拆分本行並插入後行，若此行有 indent，會併入後行
-        const insertAt = Path.next(path)
-        Transforms.splitNodes(editor, {
-          always: true,
-          match: (n) => isLi(n),
-          // at: Path.parent(li[1]),
-          // match: (n, p) => {
-          //   console.log(n, p)
-          //   return isLi(n)
-          // },
-        })
-        Transforms.setNodes<LcElement>(
-          editor,
-          {
-            id: undefined,
-            body: undefined,
-            error: undefined,
-            // op: 'CREATE',
-          },
-          { at: lcPath(insertAt) }
-        )
+        // cursor 在行中 -> 拆分本行並插入後行，若此行有 indent，會併入後行
+        listOperator.splitLi(editor, liEntry)
         return
       }
     }
-    // console.log('original insertBreak')
     insertBreak()
   }
 
+  /**
+   * @see https://github.com/ianstormtaylor/slate/blob/c1433f56cfe13feb826264989bb4f68a0eefab62/packages/slate-react/src/plugin/with-react.ts
+   */
+
   editor.insertData = (data) => {
-    // @see https://github.com/ianstormtaylor/slate/blob/c1433f56cfe13feb826264989bb4f68a0eefab62/packages/slate-react/src/plugin/with-react.ts
     const text = data.getData('text/plain')
     if (text) {
+      // 貼上外部文字時需要先斷行
       const lines = text.trim().split(/\r\n|\r|\n/)
       for (let i = 0; i < lines.length; i++) {
         editor.insertText(lines[i])
@@ -449,25 +578,22 @@ export function withList(editor: Editor): Editor {
       }
       return
     }
-
     insertData(data)
   }
 
-  editor.insertText = (...args) => {
-    console.log(...args)
-
-    const { selection } = editor
-    if (selection) {
-      const lc = Editor.above<LcElement>(editor, {
-        match: (n) => isLc(n),
-      })
-      // lc freeze，不動作
-      if (lc && lc[0].freeze) {
-        return
-      }
-    }
-    insertText(...args)
-  }
+  // editor.insertText = (...args) => {
+  //   const { selection } = editor
+  //   if (selection) {
+  //     const lc = Editor.above<LcElement>(editor, {
+  //       match: (n) => isLc(n),
+  //     })
+  //     if (lc && lc[0].freeze) {
+  //       // lc freeze，不動作
+  //       return
+  //     }
+  //   }
+  //   insertText(...args)
+  // }
 
   /**
    * Hint:
@@ -475,11 +601,12 @@ export function withList(editor: Editor): Editor {
    * - 只有操作的node及他的parent會進來，其他node並不會被送進來
    * - 盡量不要在這裡修改node，只作為檢查用，因為直接修改容易造成不可遇見的問題
    */
+
   editor.normalizeNode = ([node, path]) => {
-    if (isUl(node)) {
+    if (ListHelper.isUl(node)) {
       // 檢查 ul children 只能是 li, trick: 在沒有children的情況下，slate會自動增加一個text node
       for (const e of node.children) {
-        assert(isLi(e))
+        assert(ListHelper.isLi(e))
       }
 
       // 檢查除了root ul以外，ul的前後均只能為li
@@ -497,16 +624,16 @@ export function withList(editor: Editor): Editor {
       // }
     }
 
-    if (isLi(node)) {
+    if (ListHelper.isLi(node)) {
       // console.log(editor.children)
-      console.log(node)
+      // console.log(node)
 
       // 檢查li只能有lc, ul?
       assert(node.children.length <= 2)
       const [lc, ul] = node.children
-      assert(isLc(lc))
+      assert(ListHelper.isLc(lc))
       if (ul) {
-        assert(isUl(ul))
+        assert(ListHelper.isUl(ul))
       }
       // 只有第0層的li是root（lv0=ul, lv1=li）
       // if (path.length === 1 && node.children[0].root === undefined) {
@@ -521,3 +648,17 @@ export function withList(editor: Editor): Editor {
 
   return editor
 }
+
+// class BaseListHelper {}
+
+// interface Constructor<T> extends Function {
+//   new (...args: any[]): T
+// }
+
+// const createWithList = <T extends BaseListHelper>(ctor?: Constructor<T>) => {
+//   return () => {
+//     const a = ctor ? new ctor() : new BaseListHelper()
+//   }
+// }
+
+// const withList = createWithList(BaseList)

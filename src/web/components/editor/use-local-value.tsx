@@ -3,25 +3,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { set } from 'react-hook-form'
 import { Node } from 'slate'
 // import { editorCurrentSymbol, editorRootDict } from '../../apollo/cache'
-import {
-  CardQuery,
-  CardDocument,
-  CardQueryVariables,
-  Card,
-  EmojisQuery,
-  EmojisQueryVariables,
-  EmojisDocument,
-  Emoji as GQLHashtag,
-  CreateCardBodyMutation,
-  CreateCardBodyMutationVariables,
-  CreateCardBodyDocument,
-  WebpageCardQuery,
-  WebpageCardQueryVariables,
-  WebpageCardDocument,
-} from '../../apollo/query.graphql'
-import { BulletNode } from '../../lib/bullet/node'
+import { CardQuery, CardDocument, CardQueryVariables, Card } from '../../apollo/query.graphql'
+import { BulletNode } from '../bullet/node'
 // import { injectHashtags } from '../../lib/hashtag/inject'
-import { CardBodyContent } from '../../lib/models/card'
 import { Serializer } from './serializer'
 import { LiElement } from './slate-custom-types'
 import { isLi } from './with-list'

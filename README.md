@@ -103,17 +103,22 @@ kubectl run temp-pg-client --rm --tty -i --restart='Never' --namespace default -
 \dt # list tables
 SELECT * FROM "User"
 
-# dump (from docker)
+# Dump from local docker
 #docker exec -i 8ac632cf6317 sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > prisma_dump.tar
 
-# dump (from k8s)
-kubectl exec -i temp-pg-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > prisma_dump.tar
+# Dump from k8s
+kubectl exec -i temp-pg-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > gke_conote_prisma_dump-$(date +%Y%m%d).tar
 
-# psql (若沒有 database 需要先建立)
-CREATE DATABASE prisma;
+# Restore to k8s
+
+# 若沒有 database 需要先建立 (psql)
+$(psql) CREATE DATABASE prisma;
 
 # restore
-kubectl exec -i temp-pg-client -- pg_restore --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft --clean --if-exists < prisma_dump.tar
+kubectl exec -i temp-pg-client -- pg_restore --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft --clean --if-exists < gke_conote_prisma_dump-$(date +%Y%m%d).tar
+
+# Restore to local docker
+docker exec -i ${container_id} sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > gke_conote_prisma_dump-${date}.tar
 ```
 
 Troubleshoots:

@@ -19,7 +19,7 @@ import prisma from '../../prisma'
 import { clean, createTestUsers, TESTUSERS, TESTOAUTHORS, omitDeep } from '../../test-helper'
 import { FetchClient } from '../../fetcher/fetcher'
 import { getBotId } from '../user'
-import { symbolToUrl, SYMBOL_DOMAIN } from '../symbol'
+import { symbolToUrl, SYMBOL_DOMAIN } from '../sym'
 
 const sampleFilepath = resolve(__dirname, '__samples__', 'common.txt')
 

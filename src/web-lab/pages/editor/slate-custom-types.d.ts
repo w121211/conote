@@ -101,36 +101,42 @@ export type LcHeadBodyElement = {
   children: [LcHeadElement, LcBodyElement?]
 }
 
-export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
-  type: 'lc'
-  children: (CustomText | LabelInlineElement | MirrorInlineElement)[]
-
-  body?: string
-  editingBody?: true
-
-  // asAuthor?: true // 若沒有的話視為self author
-  // banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
-  // banDeleteBackward?: true
-  // banDeleteForward?: true
-  // banInsertBreak?: true
-  // insertBreakAsIndent?: true
-
-  // rootBullet?: Bullet // query card 取得的 body bullet root，保持靜態不修改
-
-  // comments?: CommentInput[]
-  // comment?: CommentInput
-
-  // 新增mirror時需要先暫時存放
-  // root?: true
-  // mirror?: true
-  // symbol?: string
-  // newSymbol?: true // 找不到symbol，視為創新card
-
-  rootBulletDraft?: RootBulletDraft // 只有 root 會存 root bullet，用此幫助 serialize
+export type BulletData = {
+  id: string
+  head: string
 }
 
+export type LcElement = {
+  type: 'lc'
+  children: (CustomText | LabelInlineElement | MirrorInlineElement)[]
+  id: string
+  data?: BulletData
+}
+
+// export type LcElement = Omit<BulletDraft, 'head' | 'children'> & {
+//   type: 'lc'
+//   children: (CustomText | LabelInlineElement | MirrorInlineElement)[]
+//   body?: string
+//   editingBody?: true
+//   // asAuthor?: true // 若沒有的話視為self author
+//   // banAsOauthor?: true // 此欄位無法以 @oauthor 記錄，例如self card
+//   // banDeleteBackward?: true
+//   // banDeleteForward?: true
+//   // banInsertBreak?: true
+//   // insertBreakAsIndent?: true
+//   // rootBullet?: Bullet // query card 取得的 body bullet root，保持靜態不修改
+//   // comments?: CommentInput[]
+//   // comment?: CommentInput
+//   // 新增mirror時需要先暫時存放
+//   // root?: true
+//   // mirror?: true
+//   // symbol?: string
+//   // newSymbol?: true // 找不到symbol，視為創新card
+//   rootBulletDraft?: RootBulletDraft // 只有 root 會存 root bullet，用此幫助 serialize
+// }
+
 /**
- * li只允許包2個child：[lc, ul?]
+ * li 只允許包2個child：[lc, ul?]
  */
 export type LiElement = {
   type: 'li'
@@ -138,7 +144,7 @@ export type LiElement = {
 }
 
 /**
- * ul只允許包li child
+ * ul 只允許包li child
  */
 export type UlElement = {
   type: 'ul'

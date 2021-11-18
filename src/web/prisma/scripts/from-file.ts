@@ -1,21 +1,17 @@
 import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
-import { cloneDeep } from '@apollo/client/utilities'
-import { Author, Card, CardBody, Link, PrismaClient, Shot, ShotChoice } from '.prisma/client'
-import { Editor, Markerline, splitByUrl } from '../../../packages/editor/src'
+import { Author, Card, CardState, Link, PrismaClient, Shot, ShotChoice, Sym } from '.prisma/client'
+import { TreeService } from '../../../packages/docdiff/src'
+import { Editor as MKEditor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../lib/fetcher/fetcher'
-import { BulletNode } from '../../lib/bullet/node'
-import { BulletDraft, RootBulletDraft } from '../../lib/bullet/types'
-import {
-  CardBodyContent,
-  CardMeta,
-  createCardBody,
-  getOrCreateCardBySymbol,
-  getOrCreateCardByUrl,
-} from '../../lib/models/card'
+import { CardMeta, CardModel } from '../../lib/models/card'
 import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
-import { ShotContent, toInlineShotString } from '../../lib/models/shot'
+import { ShotBody, ShotModel } from '../../lib/models/shot'
+import { CommitModel } from '../../lib/models/commit'
+import { CardStateBody, CardStateParsed } from '../../lib/models/card-state'
+import { MKDoc } from './mk-doc'
+// import { Doc, DocProps } from '../../components/workspace/workspace'
 // import { getBotId } from '../../lib/models/user'
 // import { injectHashtags, toGQLHashtag } from '../../lib/hashtag/inject'
 
@@ -37,22 +33,22 @@ const NEAT_REPLY_CHOICE = [
   { options: ['<觀望>'], choiceIdx: 2, shotChoice: ShotChoice.HOLD },
 ]
 
-async function createNeatReply({
+async function getNeatReply({
   authorId,
   neatReply,
   linkId,
-  targetCardId,
+  symbol,
   userId,
 }: {
   authorId: string
   neatReply: Markerline
   linkId: string
-  targetCardId: string
+  symbol: string
   userId: string
 }): Promise<
   Shot & {
     author: Author
-    target: Card
+    sym: Sym
   }
 > {
   if (!neatReply.neatReply) throw new Error('非neatReply')
@@ -80,23 +76,18 @@ async function createNeatReply({
   }
 
   // 創 shot
-  const shotContent: ShotContent = {
+  const shotBody: ShotBody = {
     comment: neatReply.str,
   }
-  const shot = await prisma.shot.create({
-    data: {
-      choice: shotChoice,
-      content: shotContent,
-      user: { connect: { id: userId } },
-      author: { connect: { id: authorId } },
-      link: { connect: { id: linkId } },
-      target: { connect: { id: targetCardId } },
-    },
-    include: {
-      author: true,
-      target: true,
-    },
+  const shot = await ShotModel.create({
+    choice: shotChoice,
+    symbol,
+    userId,
+    authorId,
+    body: shotBody,
+    linkId,
   })
+
   if (shot.author) {
     return {
       ...shot,
@@ -116,68 +107,9 @@ async function createNeatReply({
   // node.children.push(child)
 }
 
-/**
- * 將markerlines插入(in-place)至對應的children裡，並對neat-reply創新comment/vote
- */
-async function insertMarkerlines({
-  rootBullet,
-  markerlines,
-  authorId,
-  sourceCardId,
-}: {
-  authorId?: string
-  markerlines: Markerline[]
-  rootBullet: RootBulletDraft
-  sourceCardId: string
-  // userId: string
-}): Promise<RootBulletDraft> {
-  const root = cloneDeep(rootBullet)
-  for (const e of markerlines) {
-    if (e.new && e.marker?.key && e.marker.value) {
-      // if (e.neatReply) {
-      //   _insertNeatReply(e)
-      // }
-
-      // 依照 markerline key 找對應的 subtitle node（PS. 僅找第一層）
-      // const [node] = searchTree({
-      //   node: root,
-      //   depth: 0,
-      //   inDepth: 1,
-      //   where: { head: e.marker.key },
-      // })
-
-      const { key, value } = e.marker
-      const found = BulletNode.find({
-        node: root,
-        match: ({ node }) => node.head.includes(key),
-      }) as BulletDraft[]
-      const child: BulletDraft = {
-        head: e.marker.value,
-        sourceCardId,
-        authorId,
-        op: 'CREATE',
-        children: [],
-      }
-      if (found.length > 0) {
-        found[0].children.push(child)
-      } else {
-        // 創一個subtitle bullet
-        root.children.push({
-          head: e.marker.key,
-          op: 'CREATE',
-          children: [child],
-        })
-      }
-    }
-  }
-  return root
-}
-
-async function main() {
+const main = async () => {
   console.log('Truncating databse...')
-  await prisma.$executeRaw(
-    'TRUNCATE "User", "Author", "Link", "Card", "CardBody", "Bullet", "Emoji", "Poll", "Shot" CASCADE;',
-  )
+  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Link", "Poll", "Shot", "Sym", "User" CASCADE;`
 
   console.log('Creating test users...')
   await createTestUsers(prisma)
@@ -196,77 +128,122 @@ async function main() {
     console.log(`*\n*\n* Seed file: ${filepath}`)
 
     for (const [url, text] of splitByUrl(readFileSync(filepath, { encoding: 'utf8' }))) {
-      let sourceCard: Omit<Card, 'meta'> & { link: Link; meta: CardMeta; body: CardBody }
+      console.log(`Working on: ${url}`)
 
+      let webpageCard: Omit<Card, 'meta'> & {
+        link: Link
+        sym: Sym
+        meta: CardMeta
+        state: CardStateParsed | null
+      }
       try {
-        sourceCard = await getOrCreateCardByUrl({ scraper, url })
+        webpageCard = await CardModel.getOrCreateByUrl({ scraper, url })
       } catch (err) {
         console.warn(err)
         continue
       }
 
-      const { value: sourceRoot } = sourceCard.body.content as unknown as CardBodyContent
-      const sourceRootDraft = BulletNode.toDraft(sourceRoot)
+      // {
+      //   symbol: string
+      //   cardInput: CardInput | null
+      //   cardCopy: Card | null
+      //   sourceCardCopy: Card | null
+      //   // subSymbols?: string[]
+      //   updatedAt?: number
+      //   // value: TreeNode<Bullet>[]
+      //   // syncValue: LiElement[]
+      //   editorValue: LiElement[]
+      // }
 
-      const editor = new Editor('', [], sourceCard.link.url, sourceCard.link.authorId ?? undefined)
-      editor.setText(text)
-      editor.flush()
+      const doc = new MKDoc({
+        symbol: webpageCard.sym.symbol,
+        cardInput: null,
+        cardCopy: webpageCard,
+        sourceCardCopy: null,
+        value: webpageCard.state ? (webpageCard.state.body as unknown as CardStateBody).value : [],
+      })
+      const subDocs: MKDoc[] = []
 
-      for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
-        const mirrorCard = await getOrCreateCardBySymbol(cardlabel.symbol)
-        const { value: mirrorRoot } = mirrorCard.body.content as unknown as CardBodyContent
+      const mkEditor = new MKEditor('', [], webpageCard.link.url, webpageCard.link.authorId ?? undefined)
+      mkEditor.setText(text)
+      mkEditor.flush()
 
-        const mirror = await insertMarkerlines({
-          authorId: sourceCard.link.authorId ?? undefined,
-          rootBullet: BulletNode.toDraft(mirrorRoot),
-          markerlines,
-          sourceCardId: sourceCard.id,
-        })
-        await createCardBody({ cardId: mirrorCard.id, root: mirror, userId: TESTUSERS[0].id })
-        // console.log(inspect(mirror, { depth: null }))
+      for (const [cardlabel, markerlines] of mkEditor.getNestedMarkerlines()) {
+        const mirrorSymbol = cardlabel.symbol
+        const mirrorCard = await CardModel.getBySymbol(mirrorSymbol)
+        const mirrorDoc = mirrorCard
+          ? new MKDoc({
+              symbol: mirrorSymbol,
+              cardInput: null,
+              cardCopy: mirrorCard,
+              sourceCardCopy: webpageCard,
+              value: (mirrorCard.state.body as unknown as CardStateBody).value,
+            })
+          : new MKDoc({
+              symbol: mirrorSymbol,
+              cardInput: { symbol: mirrorSymbol, meta: {} },
+              cardCopy: null,
+              sourceCardCopy: webpageCard,
+              value: [],
+            })
+        mirrorDoc.insertMarkerLines({ markerlines })
+        subDocs.push(mirrorDoc)
+
+        // if (mirrorCard) {
+        //   console.log(inspect((mirrorCard.state.body as unknown as CardStateBody).value, { depth: null }))
+        //   console.log(inspect(mirrorDoc.value, { depth: null }))
+        // }
+        // console.log(mirrorDoc)
 
         let inlineShotStr = ''
         const neatReplies = markerlines.filter(e => e.neatReply)
         if (neatReplies.length > 1) {
-          console.log(inspect(neatReplies, { depth: null }))
-          throw ''
+          console.warn(inspect(neatReplies, { depth: null }))
+          throw '[conote-seed] neatReplies.length > 1'
         } else if (neatReplies.length === 1) {
-          if (sourceCard.link.authorId && sourceCard.linkId) {
-            const shot = await createNeatReply({
-              authorId: sourceCard.link.authorId,
+          if (webpageCard.link.authorId && webpageCard.linkId) {
+            const shot = await getNeatReply({
+              authorId: webpageCard.link.authorId,
               neatReply: neatReplies[0],
-              linkId: sourceCard.linkId,
-              targetCardId: mirrorCard.id,
+              linkId: webpageCard.linkId,
+              symbol: mirrorSymbol,
               userId: TESTUSERS[0].id,
             })
-            inlineShotStr = toInlineShotString({
+            inlineShotStr = ShotModel.toInlineShotString({
               author: shot.author.name,
               choice: shot.choice,
-              targetSymbol: shot.target.symbol,
+              symbol: shot.sym.symbol,
               id: shot.id,
             })
           }
         }
-        // console.log(inspect(body[1], { depth: null }))
 
         // 在 root 上新增 mirror & shot (if any)
-        sourceRootDraft.children.push({
-          draft: true,
-          op: 'CREATE',
-          head: `::${mirrorCard.symbol} ${inlineShotStr}`,
-          // mirror: true,
-          children: [],
-        })
+        const bt = doc.createBullet({ head: `::${mirrorSymbol} ${inlineShotStr}` })
+        // const bt = doc.createBullet({ head: `::${mirrorSymbol} {{inlineShotStr}}` })
+        doc.insertBullet(bt, TreeService.tempRootCid)
       }
 
+      const commit = await CommitModel.create(
+        {
+          cardStateInputs: [doc, ...subDocs].map(e => {
+            const { cid, cardCopy, sourceCardCopy, cardInput, value } = e
+            return {
+              cid,
+              prevStateId: cardCopy?.state?.id,
+              cardId: cardCopy?.id,
+              sourceCardId: sourceCardCopy?.id,
+              changes: [],
+              value,
+              cardInput,
+            }
+          }),
+        },
+        TESTUSERS[0].id,
+      )
       // console.log(inspect(selfRootDraft, { depth: null }))
-      await createCardBody({
-        cardId: sourceCard.id,
-        root: sourceRootDraft,
-        userId: TESTUSERS[0].id,
-      })
-      // console.log(inspect(body[1], { depth: null }))
-      console.log(`Card and card-body created`)
+
+      console.log(`Create a commit`)
     }
   }
 }
