@@ -1,0 +1,37 @@
+.container {
+  //   padding-bottom: 16px;
+  font-size: 14px;
+}
+.listContent {
+  margin-left: 1em;
+  color: $text;
+  ul {
+    padding-inline-start: 1.5em;
+    border-left: 1px solid #ecedf2;
+    list-style: none;
+  }
+  li {
+    // width: 100%;
+    padding-inline-start: 0;
+  }
+}
+.title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.titleText {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.articleIcon {
+  font-size: 18px;
+  color: $gray-text;
+}
+.children {
+  margin-left: 9px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}

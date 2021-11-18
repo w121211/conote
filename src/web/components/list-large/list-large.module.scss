@@ -93,6 +93,7 @@
 
 .topDivider {
   // display: inline-block;
+
   width: 1px;
   height: 1em;
   background: $gray;
@@ -108,12 +109,16 @@
 .hashtag {
   width: fit-content;
   font-weight: normal;
-  padding: 0 6px;
+  font-size: 14px;
+  // padding: 0 6px;
   border-radius: 3px;
 
-  margin-right: 6px;
-  margin-top: 0;
   margin-bottom: 0;
+  margin-top: 0;
+  color: $link;
+  &:not(:last-child) {
+    margin-right: 6px;
+  }
   &.blue {
     background-color: #2562ef;
     color: white;
@@ -141,4 +146,7 @@
   margin-left: 3px;
   padding: 0px 6px;
   border-radius: 3px;
+}
+.source {
+  color: $gray-text-dark;
 }

@@ -118,13 +118,21 @@ function HomePage(): JSX.Element {
                     {switchList === 'new' && <LatestCards />}
                     {switchList === 'hot' && (
                       <div>
-                        <div className={classes.hotElement}>
-                          <h5 className={`${classes.hashtag} ${classes.blue}`}>#討論</h5>
-                          <h4 className={classes.lcElementSymbol}>原油 vs 天然氣，哪個比較適合投資？</h4>
-                          <span className={classes.hashtagSymbol}>[[原油]]</span>
-                        </div>
-                        <div className={classes.divider}></div>
-                        <div className={classes.hotElement}>
+                        <ListLarge
+                          title="原油 vs 天然氣，哪個比較適合投資？"
+                          href="#"
+                          source="[[原油]]"
+                          hashtags={['#討論']}
+                        />
+                        <ListLarge
+                          title="全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI
+                            #多 @匿名)"
+                          href="#"
+                          source="[[原油]]"
+                          hashtags={['#討論', '#機會']}
+                        />
+
+                        {/* <div className={classes.hotElement}>
                           <div className={classes.hashtagContainer}>
                             <h5 className={`${classes.hashtag} ${classes.blue}`}>#討論</h5>
                             <h5 className={`${classes.hashtag} ${classes.orange}`}>#機會</h5>
@@ -133,7 +141,7 @@ function HomePage(): JSX.Element {
                             全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI
                             #多 @匿名)
                           </h4>
-                        </div>
+                        </div> */}
                       </div>
                     )}
                   </div>

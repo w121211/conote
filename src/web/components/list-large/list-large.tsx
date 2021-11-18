@@ -6,6 +6,7 @@ const ListLarge = ({
   href,
   title,
   sourceUrl,
+  source,
   summary,
   hashtags,
   author,
@@ -14,9 +15,10 @@ const ListLarge = ({
   href: string
   title: string
   sourceUrl?: string
+  source?: string
   author?: string
   summary?: string
-  hashtags?: string
+  hashtags?: string[]
   shot?: string
 }): JSX.Element => {
   return (
@@ -27,14 +29,25 @@ const ListLarge = ({
           <div>
             <div className={classes.top}>
               {hashtags && (
-                <div className={`${classes.hashtag} ${hashtags == '#watch' ? classes.watch : ''}`}>{hashtags}</div>
+                <div className={classes.hashtagContainer}>
+                  {hashtags.map((e, i) => {
+                    return (
+                      <div className={`${classes.hashtag} ${e === '#watch' ? classes.watch : ''}`} key={i}>
+                        {e}
+                      </div>
+                    )
+                  })}
+                </div>
               )}
-              {author ? <div className={classes.author}>{author}</div> : <div className={classes.author}>@cnyes</div>}
-              {shot && <span className={classes.shot}>{shot}</span>}
+              {hashtags && source && <span className={classes.topDivider}></span>}
+              {author ? <div className={classes.author}>{author}</div> : <div className={classes.author}></div>}
+              {/* {shot && <span className={classes.shot}>{shot}</span>} */}
+              {source && <div className={classes.source}>{source}</div>}
 
               {sourceUrl && (
                 <div className={classes.url}>
-                  <span className={classes.topDivider}></span> {sourceUrl}
+                  {author || hashtags || (source && <span className={classes.topDivider}></span>)}
+                  {sourceUrl}
                 </div>
               )}
               {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}

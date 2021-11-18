@@ -80,6 +80,7 @@ import { BulletNode } from '../../lib/bullet/node'
 import { Token, tokenize } from 'prismjs'
 import { tokenizeBulletString } from '../../lib/bullet/parse'
 import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
+import ShotBtn from '../shot-button/shotBtn'
 // import UpdateShotForm from '../shot-form/update-shot-form'
 // import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
 
@@ -153,12 +154,47 @@ const decorate = ([node, path]: NodeEntry) => {
     const end = start + length
 
     if (typeof token !== 'string') {
-      ranges.push({
-        // [token.type]: true,
-        type: token.type,
-        anchor: { path, offset: start },
-        focus: { path, offset: end },
-      })
+      if (token.type === 'topic') {
+        ranges.push({
+          type: token.type,
+          anchor: { path, offset: start },
+          focus: { path, offset: end },
+        })
+        ranges.push({
+          type: 'topic-bracket',
+          anchor: { path, offset: start },
+          focus: { path, offset: start + 2 },
+        })
+        ranges.push({
+          type: 'topic-bracket',
+          anchor: { path, offset: end - 2 },
+          focus: { path, offset: end },
+        })
+      } else if (token.type === 'mirror-topic') {
+        const bracketMatches = Node.string(node).matchAll(/\[\[|\]\]/g)
+
+        ranges.push({
+          type: token.type,
+          anchor: { path, offset: start },
+          focus: { path, offset: end },
+        })
+        for (const match of bracketMatches) {
+          if (match.index) {
+            ranges.push({
+              type: 'mTopic-bracket',
+              anchor: { path, offset: match.index },
+              focus: { path, offset: match.index + 2 },
+            })
+          }
+        }
+      } else {
+        ranges.push({
+          // [token.type]: true,
+          type: token.type,
+          anchor: { path, offset: start },
+          focus: { path, offset: end },
+        })
+      }
     }
     start = end
   }
@@ -168,7 +204,8 @@ const decorate = ([node, path]: NodeEntry) => {
 }
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
-  const { attributes, children, leaf } = props
+  const { attributes, leaf, children } = props
+
   const readonly = useReadOnly()
   const selected = useSelected()
   // const [isPressShift, setIsPressShift] = useState(false)
@@ -204,49 +241,56 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   // filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
   // console.log(leaf.type, children)
   // console.log(leaf)
-  if (readonly || !selected) {
+  // if (readonly || !selected) {
+  //   switch (leaf.type) {
+  //     case 'mirror-ticker':
+  //     case 'mirror-topic':
+  //     case 'topic':
+  //     case 'ticker': {
+  //       className = classes.mirrorLeaf
+  //       // style = { color: '#5395f0' }
+  //       break
+  //     }
+  //     case 'mTopic-bracket':
+  //     case 'topic-bracket': {
+  //       style = { color: '#b5b5b3' }
+  //       break
+  //     }
+  //     case 'author':
+  //     case 'url':
+  //     case 'filtertag': {
+  //       style = { color: '#0cb26e' }
+  //       break
+  //     }
+  //     // case 'poll':
+  //     // case 'new-poll': {
+  //     //   style = { color: '#329ead' }
+  //     //   break
+  //     // }
+  //     // case 'shot':
+  //     // case 'new-shot': {
+  //     //   style = { color: 'rgb(215 159 29)' }
+  //     //   break
+  //     // }
+  //     // case 'filtertag': {
+  //     //   className = classes.filtertagLeaf
+  //     //   style = { color: '#6a53fe' }
+  //     //   break
+  //     // }
+  //     // case 'url': {
+  //     //   style = { color: '#ff619b' }
+  //     //   break
+  //     // }
+  //     // default: {
+  //     //   style = { color: '#3d434a' }
+  //     // }
+  //   }
+  // } else {
+  if (selected) {
     switch (leaf.type) {
       case 'mirror-ticker':
       case 'mirror-topic':
-      case 'ticker':
-      case 'topic': {
-        className = classes.mirrorLeaf
-        // style = { color: '#5395f0' }
-        break
-      }
-      case 'author':
-      case 'url':
-      case 'filtertag': {
-        style = { color: '#0cb26e' }
-        break
-      }
-      // case 'poll':
-      // case 'new-poll': {
-      //   style = { color: '#329ead' }
-      //   break
-      // }
-      // case 'shot':
-      // case 'new-shot': {
-      //   style = { color: 'rgb(215 159 29)' }
-      //   break
-      // }
-      // case 'filtertag': {
-      //   className = classes.filtertagLeaf
-      //   style = { color: '#6a53fe' }
-      //   break
-      // }
-      // case 'url': {
-      //   style = { color: '#ff619b' }
-      //   break
-      // }
-      // default: {
-      //   style = { color: '#3d434a' }
-      // }
-    }
-  } else {
-    switch (leaf.type) {
-      case 'mirror-ticker':
-      case 'mirror-topic': {
+      case 'mTopic-bracket': {
         className = classes.mirrorLeaf
         // style = { color: '#5395f0' }
         break
@@ -266,6 +310,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
         break
       }
       case 'ticker':
+      case 'topic-bracket':
       case 'topic': {
         className = classes.topicLeaf
 
@@ -285,7 +330,34 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
         style = { color: '#3d434a' }
       }
     }
+  } else {
+    switch (leaf.type) {
+      case 'mirror-ticker':
+      case 'mirror-topic':
+      case 'topic':
+      case 'ticker': {
+        className = classes.mirrorLeaf
+        // style = { color: '#5395f0' }
+        break
+      }
+      case 'mTopic-bracket':
+      case 'topic-bracket': {
+        style = { color: '#b5b5b3' }
+        break
+      }
+
+      case 'author':
+      case 'url': {
+        style = { color: '#0cb26e' }
+        break
+      }
+      case 'filtertag': {
+        style = { color: '#3f70de' }
+      }
+    }
   }
+
+  // }
 
   return (
     // {/* <span {...attributes}>{children}</span> */}
@@ -303,7 +375,9 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
           leaf.type === 'topic' ||
           leaf.type === 'mirror-ticker' ||
           leaf.type === 'mirror-topic' ||
-          leaf.type === 'filtertag'
+          leaf.type === 'filtertag' ||
+          leaf.type === 'topic-bracket' ||
+          leaf.type === 'mTopic-bracket'
         ) {
           if (e) {
             e.onselectstart = ev => false
@@ -445,7 +519,7 @@ const InlineSymbol = ({
   const selected = useSelected()
   // console.log(element)
   return (
-    <span {...attributes}>
+    <span {...attributes} className={classes.symbolContainer}>
       {/* <span contentEditable={false}> */}
       {/* <Link href={`/card/${encodeURI(element.symbol)}`}> */}
       {/* <a
@@ -561,13 +635,13 @@ const InlineMirror = ({
   // }, [authorName, element])
 
   return (
-    <span {...attributes}>
+    <span {...attributes} className={classes.mirrorContainer}>
       {/* <span contentEditable={false}> */}
       <Link
         href={href}
         // as={`/card/${encodeURIComponent(location.selfSymbol)}/${encodeURIComponent(element.mirrorSymbol)}`}
       >
-        <a className="ui">{children}</a>
+        <a className={`ui `}>{children}</a>
       </Link>
       {/* </span> */}
       {/* <a className="ui">{element.str}</a> */}
@@ -756,34 +830,42 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement; lo
   return (
     <span {...attributes}>
       {!selected && (
-        <button
-          className={classes.shotBtn}
-          contentEditable={false}
-          onClick={e => {
-            e.stopPropagation()
-            setShowPopover(true)
-          }}
-        >
-          {element.params.map((e, i) => {
-            return (
-              <span
-                className={
-                  e.startsWith('@')
-                    ? classes.shotAuthor
-                    : e.startsWith('$') || e.startsWith('[[')
-                    ? classes.shotTarget
-                    : e.startsWith('#')
-                    ? classes.shotChoice
-                    : ''
-                }
-                data-choice={e.startsWith('#') ? e : ''}
-                key={i}
-              >
-                {e}
-              </span>
-            )
-          })}
-        </button>
+        <>
+          {/* <button
+            className={classes.shotBtn}
+            contentEditable={false}
+            onClick={e => {
+              e.stopPropagation()
+              setShowPopover(true)
+            }}
+          >
+            {element.params.map((e, i) => {
+              return (
+                <span
+                  className={
+                    e.startsWith('@')
+                      ? classes.shotAuthor
+                      : e.startsWith('$') || e.startsWith('[[')
+                      ? classes.shotTarget
+                      : e.startsWith('#')
+                      ? classes.shotChoice
+                      : ''
+                  }
+                  data-choice={e.startsWith('#') ? e : ''}
+                  key={i}
+                >
+                  {e.startsWith('$') ? '  ' + e + '  ' : e.startsWith('#') ? e.substr(1) : e}
+                </span>
+              )
+            })}
+          </button> */}
+
+          <ShotBtn
+            author={element.params.find(e => e.startsWith('@'))}
+            target={element.params.find(e => e.startsWith('$'))}
+            choice={element.params.find(e => e.startsWith('#'))}
+          />
+        </>
       )}
       {showPopover && (
         <span contentEditable={false}>
@@ -829,7 +911,7 @@ const FilterMirror = ({
   sourceCardId,
 }: {
   mirrors: InlineMirrorElement[]
-  sourceCardId: string
+  sourceCardId?: string
 }): JSX.Element | null => {
   const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
   const client = useApolloClient()
@@ -865,7 +947,7 @@ const FilterMirror = ({
     return <div>Click to edit</div>
   }
   return (
-    <ul style={{ background: '#f3f4f9', borderRadius: '6px' }}>
+    <ul className={classes.filterMirrorContainer}>
       {/* 忽略 root，從 root children 開始 render */}
       {filteredBullet.children.map((e, i) => (
         <BulletComponent key={i} bullet={e} />
@@ -969,13 +1051,13 @@ const Lc = ({
           </>
         )}
       </div>
-      {mirrors.length > 0 && sourceCardId && (
-        <span contentEditable={false}>
-          {/* {author === element.author && element.author}
+      {/* {sourceCardId && ( */}
+      <span contentEditable={false}>
+        {/* {author === element.author && element.author}
           {sourceUrl === element.sourceUrl && sourceUrl} */}
-          <FilterMirror mirrors={mirrors} sourceCardId={sourceCardId} />
-        </span>
-      )}
+        <FilterMirror mirrors={mirrors} sourceCardId={sourceCardId} />
+      </span>
+      {/* )} */}
     </div>
   )
 }

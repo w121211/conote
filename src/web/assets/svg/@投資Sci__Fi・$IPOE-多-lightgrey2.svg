@@ -1,0 +1,56 @@
+<svg id="_投資Sci__Fi_IPOE-多-lightgrey" data-name="@投資Sci__Fi・$IPOE-多-lightgrey" xmlns="http://www.w3.org/2000/svg" width="140.5" height="20" viewBox="0 0 140.5 20">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fcfcfc;
+      }
+
+      .cls-2 {
+        fill: #4d8b17;
+      }
+
+      .cls-3 {
+        fill: none;
+      }
+
+      .cls-4 {
+        fill: #f2f2f2;
+        stroke: #d5d5d5;
+      }
+
+      .cls-5, .cls-8 {
+        fill: #fff;
+      }
+
+      .cls-5, .cls-7, .cls-8 {
+        font-size: 11px;
+      }
+
+      .cls-5, .cls-7 {
+        font-family: HelveticaNeue-Bold, Helvetica Neue;
+        font-weight: 700;
+      }
+
+      .cls-6, .cls-8 {
+        font-family: PingFangSC-Semibold, PingFang SC;
+        font-weight: 600;
+      }
+
+      .cls-7 {
+        fill: #333;
+      }
+    </style>
+  </defs>
+  <g id="组_1" data-name="组 1">
+    <rect id="矩形_3" data-name="矩形 3" class="cls-1" width="115" height="19" rx="2" transform="translate(0.5 0.5)"/>
+    <rect id="矩形_4" data-name="矩形 4" class="cls-2" width="19" height="19" rx="2" transform="translate(121.5 0.5)"/>
+    <path id="路径_2" data-name="路径 2" class="cls-3" d="M0,0H.5V5H0Z" transform="translate(121 7.5)"/>
+    <path id="路径_1" data-name="路径 1" class="cls-2" d="M121.5,6.5l-3,3v1l3,3"/>
+  </g>
+  <g id="组_2" data-name="组 2">
+    <path id="llink" class="cls-4" d="M2,0H113a2,2,0,0,1,2,2V17a2,2,0,0,1-2,2H2a2,2,0,0,1-2-2V2A2,2,0,0,1,2,0Z" transform="translate(0.5 0.5)"/>
+    <text id="_投資Sci_Fi_IPOE" data-name="@投資Sci_Fi・$IPOE" class="cls-5" transform="translate(57.5 15)"><tspan x="-52.668" y="0">@</tspan><tspan class="cls-6" y="0">投資</tspan><tspan y="0">Sci_Fi</tspan><tspan class="cls-6" y="0">・</tspan><tspan y="0">$IPOE</tspan></text>
+    <text id="_投資Sci_Fi_IPOE-2" data-name="@投資Sci_Fi・$IPOE" class="cls-7" transform="translate(57.5 14)"><tspan x="-52.668" y="0">@</tspan><tspan class="cls-6" y="0">投資</tspan><tspan y="0">Sci_Fi</tspan><tspan class="cls-6" y="0">・</tspan><tspan y="0">$IPOE</tspan></text>
+    <text id="rlink" class="cls-8" transform="translate(130.5 14)"><tspan x="-5.5" y="0">多</tspan></text>
+  </g>
+</svg>

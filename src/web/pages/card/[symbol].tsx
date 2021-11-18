@@ -178,6 +178,7 @@ const CardSymbolPage = (): JSX.Element | null => {
       buttonLeft={
         <>
           <button
+            className="secondary"
             onClick={() => {
               dropValue()
               router.reload()
@@ -265,7 +266,7 @@ const CardSymbolPage = (): JSX.Element | null => {
           {/* // )} */}
 
           <div className={classes.header}>
-            <h3
+            <h1
               onMouseEnter={e => {
                 setShowHeaderHiddenBtns(true)
               }}
@@ -297,7 +298,7 @@ const CardSymbolPage = (): JSX.Element | null => {
               {router.query.p && Node.string(data.openedLi.children[0]).replace(rePoll, '').trimEnd()}
               {data.mirror && !router.query.p && data.mirror.symbol}
               {!router.query.p && !data.mirror && <>{cardMetaData?.cardMeta.title ?? data.selfCard.symbol}</>}
-            </h3>
+            </h1>
             {cardMetaData?.cardMeta.keywords && (
               <div className={classes.headerKw}>
                 {cardMetaData?.cardMeta.keywords.map((e, i) => {

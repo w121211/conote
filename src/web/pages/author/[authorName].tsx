@@ -125,26 +125,24 @@ const AuthorPage = (): JSX.Element | null => {
           {router.query.authorName}
           {/* <span className={classes.author}>@{data.selfCard.meta.author}</span> */}
         </h1>
-        <div style={{ width: '50%', border: '1px solid #cccccc', padding: '0 20px' }}>
-          {/* <table>
+        <div className={classes.col2}>
+          <div className={classes.authorMetaContainer}>test</div>
+          <div className={classes.shotContainer}>
+            {/* <table>
             <th>網址</th>
             <td>www.xxx.yyy.com</td>
           </table> */}
-          <h2>Shot(預測)</h2>
-          <ListRow href="#" title="$AA" shot="#buy" summary="AAA Company" />
-          <ListRow href="#" title="$BB" shot="#sell" />
-          <ListLarge href="#" title="$BB" hashtags="#watch" />
+            <h2>Shot(預測)</h2>
+            <ListRow href="#" title="$AA" shot="#buy" summary="AAA Company" />
+            <ListRow href="#" title="$BB" shot="#sell" />
+            {/* <ListLarge href="#" title="$BB" hashtags="#watch" /> */}
+          </div>
         </div>
-        <h2>文章</h2>
-        <ul>
-          <li>
-            晶片荒惡化費半大跌 交期拉長至逾20周
-            <ul>
-              <li>.............. (author: @cnyes)</li>
-            </ul>
-          </li>
-          <li>哈哈晶片荒惡化費</li>
-        </ul>
+        <div className={classes.articleContainer}>
+          <h2>文章</h2>
+          <ListRow href="#" title="晶片荒惡化費半大跌 交期拉長至逾20周" summary=".............. (author: @cnyes)" />
+          <ListRow href="#" title="哈哈晶片荒惡化費" summary=".............. (author: @cnyes)" />
+        </div>
         <h2>Mention in</h2>
         <ul>
           <li
