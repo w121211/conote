@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import { DataNode, NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
+import { MonoNode, NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { Markerline } from '../../../packages/editor/src'
 import { Card, CardInput } from '../../apollo/type-defs.graphqls'
 import { Bullet } from '../../components/bullet/types'
@@ -54,9 +54,9 @@ export class MKDoc {
     head: string
     // authorId?: string
     // sourceCardId?: string
-  }): DataNode<Bullet> {
+  }): MonoNode<Bullet> {
     const cid = nanoid()
-    const node: DataNode<Bullet> = {
+    const node: MonoNode<Bullet> = {
       cid,
       data: {
         id: cid,
@@ -89,7 +89,7 @@ export class MKDoc {
     }
   }
 
-  insertBullet(bullet: DataNode<Bullet>, toParentCid: string, toIndex = -1): void {
+  insertBullet(bullet: MonoNode<Bullet>, toParentCid: string, toIndex = -1): void {
     this.value = TreeService.insert(this.value, bullet, toParentCid, toIndex)
   }
 }

@@ -29,11 +29,6 @@ import { CardDigestModel } from '../lib/models/card-digest'
 //   }
 // }
 
-// function isBulletInput(obj: GqlBulletInput): obj is BulletInput {
-//   _deleteNull(obj)
-//   return true
-// }
-
 // function _nullToUndefined<T>(obj: T): { [P in keyof T]: Exclude<T[P], null> } {
 //   for (const k in obj) {
 //     if (obj[k] === null) {
@@ -55,7 +50,7 @@ import { CardDigestModel } from '../lib/models/card-digest'
 //   }
 // }
 
-function isAuthenticated(req: NextApiRequest, res: NextApiResponse): { userId: string; email: string } {
+const isAuthenticated = (req: NextApiRequest, res: NextApiResponse): { userId: string; email: string } => {
   const session = getSession(req, res)
   if (session?.user && session.user.appUserId) {
     return { userId: session.user.appUserId, email: session.user.email }
@@ -64,31 +59,6 @@ function isAuthenticated(req: NextApiRequest, res: NextApiResponse): { userId: s
 }
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
-  // me?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  // myBulletEmojiLike?: Resolver<Maybe<ResolversTypes['BulletEmojiLike']>, ParentType, ContextType, RequireFields<QueryMyBulletEmojiLikeArgs, 'bulletEmojiId'>>;
-  // myCardEmojiLike?: Resolver<Maybe<ResolversTypes['CardEmojiLike']>, ParentType, ContextType, RequireFields<QueryMyCardEmojiLikeArgs, 'cardEmojiId'>>;
-  // myShots?: Resolver<Array<ResolversTypes['Shot']>, ParentType, ContextType, RequireFields<QueryMyShotsArgs, 'targetId'>>;
-  // myVotes?: Resolver<Array<ResolversTypes['Vote']>, ParentType, ContextType, RequireFields<QueryMyVotesArgs, 'pollId'>>;
-  // poll?: Resolver<Maybe<ResolversTypes['Poll']>, ParentType, ContextType, RequireFields<QueryPollArgs, 'id'>>;
-  // searchAll?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QuerySearchAllArgs, 'term'>>;
-  // searchTicker?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QuerySearchTickerArgs, 'term'>>;
-  // searchTopic?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QuerySearchTopicArgs, 'term'>>;
-  // shot?: Resolver<Maybe<ResolversTypes['Shot']>, ParentType, ContextType, RequireFields<QueryShotArgs, 'id'>>;
-  // shotsByAuthor?: Resolver<Array<ResolversTypes['Shot']>, ParentType, ContextType, RequireFields<QueryShotsByAuthorArgs, 'authorId' | 'targetId'>>;
-  // shotsBySource?: Resolver<Array<ResolversTypes['Shot']>, ParentType, ContextType, RequireFields<QueryShotsBySourceArgs, 'linkId'>>;
-
-  // tagHints: (parent, { term }, { prisma }) => {
-  //   return null
-  // },
-
-  // tickerHints: (parent, { term }, { prisma }) => {
-  //   return null
-  // },
-
-  // eventHints: (parent, { term }, { prisma }) => {
-  //   return null
-  // },
-
   async author(_parent, { id, name }, _context, _info) {
     if (id) {
       return await prisma.author.findUnique({
@@ -185,8 +155,8 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   //   // return meta
   // },
 
-  async latestCardDigests(_parent, { afterId }, _context, _info) {
-    return await CardDigestModel.getLatest(afterId ?? undefined)
+  async latestCardDigests(_parent, { afterCommitId }, _context, _info) {
+    return await CardDigestModel.getLatest(afterCommitId ?? undefined)
   },
 
   async link(_parent, { id, url }, _context, _info) {
@@ -298,6 +268,18 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     })
     return shot
   },
+
+  // tagHints: (parent, { term }, { prisma }) => {
+  //   return null
+  // },
+
+  // tickerHints: (parent, { term }, { prisma }) => {
+  //   return null
+  // },
+
+  // eventHints: (parent, { term }, { prisma }) => {
+  //   return null
+  // },
 
   // async board(_parent, { id }, _context, _info) {
   // throw 'Consider to remove'

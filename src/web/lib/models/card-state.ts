@@ -27,7 +27,7 @@ export const CardStateModel = {
     const state = await prisma.cardState.findFirst({
       where: { id },
     })
-    return state ? this.toParsed(state) : null
+    return state ? this.parse(state) : null
   },
 
   async getLastCardState(cardId: string): Promise<CardStateParsed | null> {
@@ -35,10 +35,10 @@ export const CardStateModel = {
       where: { cardId },
       orderBy: { createdAt: 'desc' },
     })
-    return state ? this.toParsed(state) : null
+    return state ? this.parse(state) : null
   },
 
-  toParsed(state: CardState): CardStateParsed {
+  parse(state: CardState): CardStateParsed {
     return {
       ...state,
       body: state.body as unknown as CardStateBody,

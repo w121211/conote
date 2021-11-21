@@ -13,12 +13,13 @@ export const EditorSerializer = {
   _toLi(node: TreeNode<Bullet>): LiElement {
     const { data } = node
     if (data === undefined) {
-      throw 'Require data'
+      throw 'Every tree-node needs to contain data'
     }
     const lc: LcElement = {
       type: 'lc',
       children: [{ text: data.head }],
-      bulletSnapshot: data,
+      cid: node.cid,
+      bulletCopy: data,
     }
     const ul: UlElement | undefined =
       node.children.length > 0
@@ -33,19 +34,18 @@ export const EditorSerializer = {
   /**
    * Recursively iterate and transform all nodes
    *
-   * TODO: avoid using recusive method!
+   * TODO: avoid recusive!
    */
   _toTreeNode(li: LiElement): TreeNode<Bullet> {
     const [lc, ul] = li.children
-    if (lc.bulletSnapshot) {
-      const { id, cid } = lc.bulletSnapshot // TODO: bullet should have more info?
-      if (cid) {
-        throw 'bullet-snapshot should not have cid'
+    if (lc.bulletCopy) {
+      if (lc.bulletCopy.cid) {
+        throw 'bullet-copy should not have cid'
       }
       const node: TreeNode<Bullet> = {
-        cid: lc.bulletSnapshot.id,
+        cid: lc.cid,
         data: {
-          id,
+          id: lc.bulletCopy.id,
           head: Node.string(lc),
         },
         change: lc.change,
@@ -68,7 +68,7 @@ export const EditorSerializer = {
     return node
   },
 
-  toLis(children: TreeNode<Bullet>[]): LiElement[] {
+  toLiArray(children: TreeNode<Bullet>[]): LiElement[] {
     return children.map(e => this._toLi(e))
   },
 

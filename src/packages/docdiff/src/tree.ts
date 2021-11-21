@@ -1,6 +1,6 @@
 import { ChangeType } from '.'
 
-export type DataNode<T> = {
+export type NodeBody<T> = {
   cid: string
   change?: ChangeType // record change-event lively
   data?: T
@@ -9,11 +9,11 @@ export type DataNode<T> = {
   // prevId: string | null
 }
 
-export type TreeNode<T> = DataNode<T> & {
+export type TreeNode<T> = NodeBody<T> & {
   children: TreeNode<T>[]
 }
 
-export type Match<T> = (node: DataNode<T>) => boolean
+export type Match<T> = (node: NodeBody<T>) => boolean
 
 export const TreeService = {
   tempRootCid: 'TEMP_ROOT_CID',
@@ -25,8 +25,8 @@ export const TreeService = {
   // }
   // },
 
-  find<T>(children: TreeNode<T>[], match: Match<T>): DataNode<T>[] {
-    const found: DataNode<T>[] = []
+  find<T>(children: TreeNode<T>[], match: Match<T>): NodeBody<T>[] {
+    const found: NodeBody<T>[] = []
     for (const e of this.toList(children)) {
       if (match(e)) {
         found.push(e)
@@ -35,9 +35,9 @@ export const TreeService = {
     return found
   },
 
-  fromList<T>(nodes: DataNode<T>[]): TreeNode<T>[] {
-    const pcDict: Record<string, DataNode<T>[]> = Object.fromEntries(
-      nodes.map((e): [string, DataNode<T>[]] => [e.cid, []]),
+  fromList<T>(nodes: NodeBody<T>[]): TreeNode<T>[] {
+    const pcDict: Record<string, NodeBody<T>[]> = Object.fromEntries(
+      nodes.map((e): [string, NodeBody<T>[]] => [e.cid, []]),
     )
 
     for (const e of nodes) {
@@ -61,7 +61,7 @@ export const TreeService = {
    * Use given parent-children dict to construct a tree.
    * P.S. Node's index is followed by the given array, not by the node's index
    */
-  fromParentChildrenDict<T>(dict: Record<string, DataNode<T>[]>): TreeNode<T>[] {
+  fromParentChildrenDict<T>(dict: Record<string, NodeBody<T>[]>): TreeNode<T>[] {
     const tempRoot: TreeNode<T> = {
       cid: this.tempRootCid,
       children: [],
@@ -89,7 +89,7 @@ export const TreeService = {
     return tempRoot.children
   },
 
-  insert<T>(value: TreeNode<T>[], item: DataNode<T>, toParentCid: string, toIndex: number): TreeNode<T>[] {
+  insert<T>(value: TreeNode<T>[], item: NodeBody<T>, toParentCid: string, toIndex: number): TreeNode<T>[] {
     const dict = this.toParentChildrenDict(value)
     const arr = dict[toParentCid]
     item.parentCid = toParentCid
@@ -128,7 +128,7 @@ export const TreeService = {
     return tempRoot.children
   },
 
-  sortParentChildrenDict_<T>(dict: Record<string, DataNode<T>[]>): void {
+  sortParentChildrenDict_<T>(dict: Record<string, NodeBody<T>[]>): void {
     Object.entries(dict).forEach(([k, v]) => {
       // sort children by its index
       dict[k] = v.sort((a, b) => {
@@ -140,8 +140,8 @@ export const TreeService = {
     })
   },
 
-  toPreOrderList<T>(children: TreeNode<T>[]): DataNode<T>[] {
-    const traversed: DataNode<T>[] = []
+  toPreOrderList<T>(children: TreeNode<T>[]): NodeBody<T>[] {
+    const traversed: NodeBody<T>[] = []
     const parents: TreeNode<T>[] = children.map((e, i) => ({
       ...e,
       parentCid: this.tempRootCid,
@@ -162,23 +162,23 @@ export const TreeService = {
   },
 
   // alias
-  toList<T>(children: TreeNode<T>[]): DataNode<T>[] {
+  toList<T>(children: TreeNode<T>[]): NodeBody<T>[] {
     return this.toPreOrderList(children)
   },
 
-  toDict<T>(children: TreeNode<T>[]): Record<string, DataNode<T>> {
+  toDict<T>(children: TreeNode<T>[]): Record<string, NodeBody<T>> {
     // const nd = cloneDeep(node)
-    const dict: Record<string, DataNode<T>> = {}
+    const dict: Record<string, NodeBody<T>> = {}
     for (const e of this.toList(children)) {
       dict[e.cid] = e
     }
     return dict
   },
 
-  toParentChildrenDict<T>(children: TreeNode<T>[]): Record<string, DataNode<T>[]> {
+  toParentChildrenDict<T>(children: TreeNode<T>[]): Record<string, NodeBody<T>[]> {
     const nodeDict = this.toDict(children)
-    const dict: Record<string, DataNode<T>[]> = Object.fromEntries(
-      Object.entries(nodeDict).map(([k]): [string, DataNode<T>[]] => [k, []]),
+    const dict: Record<string, NodeBody<T>[]> = Object.fromEntries(
+      Object.entries(nodeDict).map(([k]): [string, NodeBody<T>[]] => [k, []]),
     )
     dict[this.tempRootCid] = []
 

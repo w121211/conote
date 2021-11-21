@@ -68,7 +68,8 @@ export type LcElement = {
   type: 'lc'
   children: (CustomText | LabelInlineElement)[]
 
-  bulletSnapshot?: Bullet // keeps original copy
+  cid: string
+  bulletCopy?: Bullet // keeps original copy
   change?: ChangeType // record change-event lively
 
   // editingBody?: true

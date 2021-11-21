@@ -1,120 +1,78 @@
-import dayjs from 'dayjs'
-import { Card, CardState, Commit, Link, Sym } from '.prisma/client'
-import { CardDigest as GQLCardDigest, CardMeta } from '../../apollo/type-defs.graphqls'
+import { NodeChange } from '../../../packages/docdiff/src'
+import { CardDigest as GQLCardDigest } from '../../apollo/type-defs.graphqls'
+import { Bullet } from '../../components/bullet/types'
 import prisma from '../prisma'
+import { CardModel, CardPrarsed } from './card'
 import { CardStateBody } from './card-state'
-
-type CardDigest = Omit<GQLCardDigest, 'body'> & {
-  body: CardDigestBody
-  subDigests: CardDigest[]
-}
-
-export type CardDigestBody = {
-  inserts: string[]
-  mirrors: string[]
-  shots: string[]
-}
+import { CardStatePack, CommitModel, RowCardState, RowCommit } from './commit'
 
 export const CardDigestModel = {
-  stateToDigest(state: CardState & { card: Card & { sym: Sym; link: Link | null } }): CardDigest {
-    const { updatedAt } = state
-    const { id, meta, sym, link } = state.card
+  fromCard(card: CardPrarsed, subs: GQLCardDigest[]): GQLCardDigest {
+    if (subs.length === 0) {
+      throw 'Require 1 or more sub-digests to create a null-state-card digest'
+    }
+    const { id: cardId, sym } = card
     return {
-      id,
-      meta: meta as unknown as CardMeta,
+      cardId,
+      commitId: subs[0].commitId, // TODO: temp fill
       sym,
-      link,
+      title: sym.symbol,
+      picks: [],
+      subs,
+      updatedAt: subs[0].updatedAt, // TODO:  temp fill
+    }
+  },
+
+  fromCardState(state: RowCardState, subs: GQLCardDigest[] = []): GQLCardDigest {
+    const { cardId, updatedAt } = state
+    const { sym } = state.card
+    const body = state.body as unknown as CardStateBody
+    return {
+      cardId,
+      commitId: state.commitId,
+      sym,
+      title: sym.symbol,
+      picks: body.changes
+        .filter((e): e is NodeChange<Bullet> & { data: Bullet } => e.data !== undefined && e.type === 'insert')
+        .map(e => e.data.head),
+      subs,
       updatedAt,
-      body: {
-        inserts: [],
-        mirrors: [],
-        shots: [],
-      },
-      subDigests: [],
     }
   },
 
-  commitToDigests(
-    commit: Commit & { cardStates: (CardState & { card: Card & { sym: Sym; link: Link | null } })[] },
-  ): CardDigest[] {
-    throw 'Not implemented'
-    const { cardStates } = commit
+  async commitToDigests(commit: RowCommit): Promise<GQLCardDigest[]> {
+    const packs = CommitModel.toCardPacks(commit)
+    console.log(packs)
 
-    const dict: Record<string, CardDigest> = Object.fromEntries(cardStates.map(e => [e.id, this.stateToDigest(e)]))
-    const subs: CardDigest[] = []
-
-    for (const state of cardStates) {
-      if (state.body) {
-        const { sourceCardId } = state.body as unknown as CardStateBody
-        if (sourceCardId) {
-          const sub = dict[state.id]
-          if (sub === undefined) {
-            throw 'getDocEntries() unexpected error'
-          }
-
-          subs.push(sub)
-          // const { symbol: parentSymbol } = sourceCardCopy.sym
-          // if (parentSymbol in dict) {
-          //   dict[parentSymbol].subDigests.push(sub)
-          // } else {
-          //   dict[parentSymbol] = {
-          //     symbol: parentSymbol,
-          //     title: sourceCardCopy.meta.title ?? parentSymbol,
-          //     cardId: sourceCardCopy.id,
-          //     subEntries: [subEntry],
-          //     updatedAt: subEntry.updatedAt,
-          //   }
-          // }
+    const promises = packs.map(async e => {
+      const subs = e.subs.map(e => this.fromCardState(e))
+      if (e.main.state === undefined) {
+        const card = await CardModel.get(e.main.cardId)
+        if (card === null) {
+          throw 'commitToDigests() error'
         }
+        return this.fromCard(card, subs)
       }
-    }
-
-    // for (const e of subs) {
-    //   delete dict[e] // remove entry from dict
-    // }
-
-    // const entries: DocEntry[] = Object.values(dict)
-
-    // sort entries
-    // for (const entry of entries) {
-    //   entry.subEntries.sort(e => -e.updatedAt)
-    //   if (entry.subEntries.length > 0 && entry.updatedAt < entry.subEntries[0].updatedAt) {
-    //     entry.updatedAt = entry.subEntries[0].updatedAt // align entry's updated with subEntries latest update
-    //   }
-    // }
-    // entries.sort(e => -e.updatedAt)
+      return this.fromCardState(e.main.state, subs)
+    })
+    return await Promise.all(promises)
   },
 
-  async getLatest(afterId?: string): Promise<CardDigest[]> {
-    const maxDate = dayjs().startOf('d').subtract(7, 'd')
+  async getLatest(afterCommitId?: string): Promise<GQLCardDigest[]> {
+    // const maxDate = dayjs().startOf('d').subtract(7, 'd')
     const commits = await prisma.commit.findMany({
       // where: { createdAt: { gte: maxDate.toDate() } },
       orderBy: { updatedAt: 'desc' },
-      cursor: afterId ? { id: afterId } : undefined,
+      cursor: afterId ? { id: afterCommitId } : undefined,
       take: 20,
-      skip: afterId ? 1 : 0,
+      skip: afterCommitId ? 1 : 0,
       include: { cardStates: { include: { card: { include: { sym: true, link: true } } } } },
     })
-
-    // const digest: CardDigest = {
-    //   id: ID!
-    //   meta: CardMeta!
-    //   sym: Sym!
-    //   link: Link
-    //   # headDoc: CardDoc # 可能為 null
-    //   updatedAt: DateTime!
-    //   digest: JSON!
-    // }
-
-    throw 'Not implemented'
-    // const maxDate = dayjs().startOf('d').subtract(7, 'd')
-    // const cards = await prisma.card.findMany({
-    //   // where: { createdAt: { gte: maxDate.toDate() } },
-    //   orderBy: { updatedAt: 'desc' },
-    //   cursor: afterId ? { id: afterId } : undefined,
-    //   take: 10,
-    //   skip: afterId ? 1 : 0,
-    // })
-    // return cards
+    const commitDigests = await Promise.all(commits.map(async e => this.commitToDigests(e)))
+    return commitDigests.reduce((acc, cur) => {
+      // only keep the latest digest for the same symbol
+      const digests = cur.filter(d => acc.find(e => e.sym.id === d.sym.id) === undefined)
+      return [...acc, ...digests]
+    }, [])
   },
 }
