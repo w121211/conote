@@ -4,162 +4,15 @@ import { TreeNode } from '../../../packages/docdiff/src'
 import { LocalDBService } from './local-db'
 import {
   Card,
-  CardInput,
-  CardStateInput,
   CreateCommitDocument,
   CreateCommitMutation,
   CreateCommitMutationVariables,
 } from '../../apollo/query.graphql'
 import { Bullet } from '../bullet/types'
-import { LiElement } from '../editor/slate-custom-types'
 import { EditorSerializer } from '../editor/serializer'
 import { ApolloClient } from '@apollo/client'
 import { DocPath } from './doc-path'
-
-export type DocEntry = {
-  symbol: string
-  title: string // webpage-card use title instead of symbol
-  cardId?: string
-  sourceCardId?: string
-  commitId?: string
-  subEntries: DocEntry[]
-  updatedAt: number
-}
-
-export type DocProps = {
-  symbol: string
-  cardInput: CardInput | null
-  cardCopy: Card | null
-  sourceCardCopy: Card | null
-  // subSymbols?: string[]
-  updatedAt?: number
-  // value: TreeNode<Bullet>[]
-  // syncValue: LiElement[]
-  editorValue: LiElement[]
-}
-
-export class Doc {
-  readonly cid: string
-  readonly symbol: string // as CID
-  readonly cardCopy: Card | null // to keep the prev-state,
-  readonly sourceCardCopy: Card | null // indicate current doc is a mirror
-  cardInput: CardInput | null // required if card is null
-  editorValue: LiElement[]
-  updatedAt: number = Date.now() // timestamp
-  // value: TreeNode<Bullet>[]
-  // editorValue: LiElement[] | null // local store
-
-  constructor({ cardInput, cardCopy, sourceCardCopy, symbol, editorValue }: DocProps) {
-    if (cardCopy && cardCopy.sym.symbol !== symbol) {
-      throw 'cardSnapshot.symbol !== symbol'
-    }
-    if (cardCopy && cardInput) {
-      throw 'Card-snapshot & card-input cannot co-exist'
-    }
-    if (cardCopy === null && cardInput === null) {
-      throw 'Need card-input if no card-snapshot'
-    }
-    this.cid = symbol
-    // this.editorValue = editorValue
-    this.symbol = symbol
-    this.cardCopy = cardCopy
-    this.sourceCardCopy = sourceCardCopy
-    // this.subSymbols = subSymbols ?? []
-    this.cardInput = cardInput
-    // this.store = new NestedNodeValueStore(value)
-    this.editorValue = editorValue
-  }
-
-  check(): void {
-    throw 'Not implemented'
-    // check subdocs
-    // check prev-doc is current head
-    // if (cardDoc?.id && cardDoc.id !== doc.prevDocId) {
-    //   curDoc = { doc, warn: 'prev_doc_behind' }
-    // }
-  }
-
-  async remove(): Promise<void> {
-    try {
-      await LocalDBService.docTable.removeItem(this.cid)
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  async save(): Promise<void> {
-    this.updatedAt = Date.now()
-    try {
-      await LocalDBService.docTable.setItem(this.cid, this.toJSON())
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  toDocEntry(): DocEntry {
-    const { symbol, cardInput, cardCopy, sourceCardCopy, editorValue, updatedAt } = this
-    const title = cardCopy?.meta.title ? cardCopy?.meta.title : symbol
-    return {
-      symbol,
-      title,
-      cardId: cardCopy?.id,
-      sourceCardId: sourceCardCopy?.id,
-      subEntries: [],
-      updatedAt,
-    }
-  }
-
-  toJSON(): Required<DocProps> {
-    const { symbol, cardInput, cardCopy, sourceCardCopy, editorValue, updatedAt } = this
-    return { symbol, cardInput, cardCopy, sourceCardCopy, editorValue, updatedAt }
-  }
-
-  toCardStateInput(): CardStateInput {
-    const { cid, cardInput, cardCopy, sourceCardCopy, editorValue } = this
-    return {
-      cid,
-      prevStateId: cardCopy?.state?.id,
-      cardInput,
-      cardId: cardCopy?.id,
-      sourceCardId: sourceCardCopy?.id,
-      changes: [], // TODO
-      value: EditorSerializer.toTreeNodes(editorValue),
-    }
-  }
-
-  async getSubDocs(): Promise<Doc[]> {
-    return (await Doc.getAllDocs()).filter(e => e.sourceCardCopy?.sym.symbol === this.symbol)
-  }
-
-  static async getAllDocs(): Promise<Doc[]> {
-    const keys = await LocalDBService.docTable.keys()
-    console.log('Get all keys:', keys)
-    const docs: Doc[] = []
-    for (const e of keys) {
-      const loaded = await Doc.loads(e)
-      if (loaded === null) {
-        throw 'getAllDocs() unexpected error'
-      }
-      docs.push(loaded)
-    }
-    return docs
-  }
-
-  static fromJSON(props: Required<DocProps>): Doc {
-    return new Doc(props)
-  }
-
-  static async loads(symbol: string): Promise<Doc | null> {
-    const saved: Required<DocProps> | null = await LocalDBService.docTable.getItem(symbol) // symbol as cid
-
-    if (saved) {
-      // console.log('Doc loaded', saved)
-      return Doc.fromJSON(saved)
-      // this.check(doc)
-    }
-    return null
-  }
-}
+import { Doc, DocEntry, DocEntryPack } from './doc'
 
 class Workspace {
   readonly mainDoc$ = new BehaviorSubject<{
@@ -170,31 +23,26 @@ class Workspace {
 
   readonly status$ = new BehaviorSubject<'starting' | 'loading' | 'saving' | 'pushing' | 'droped' | null>('starting')
 
-  readonly committedEntries$ = new BehaviorSubject<DocEntry[] | null>(null)
+  readonly committedDocs$ = new BehaviorSubject<DocEntryPack[] | null>(null)
 
-  readonly workingEntries$ = new BehaviorSubject<DocEntry[] | null>(null)
-
-  // public readonly savedDocs$: string[] = [] // docs not pushed yet
+  readonly savedDocs$ = new BehaviorSubject<DocEntryPack[] | null>(null) // docs not pushed yet
 
   constructor() {
-    // LocalDBService.docTable.keys().then(keys => {
-    //   this.latestDocCids$.next(keys)
-    // })
-    this._getDocEntries().then(entries => {
-      this.workingEntries$.next(entries)
-    })
+    this.updateEditingDocEntries()
+    this.updateCommittedDocEntries()
   }
 
   _create({ card, sourceCard, symbol }: { card: Card | null; sourceCard: Card | null; symbol: string }): Doc {
     if (card?.state) {
-      const value: TreeNode<Bullet>[] = card.state.body.value
+      const value = card.state.body.value as unknown as TreeNode<Bullet>[]
+
       return new Doc({
         cardCopy: card,
         sourceCardCopy: sourceCard,
         cardInput: null,
         // editorValue: null,
         symbol,
-        editorValue: EditorSerializer.toLis(value),
+        editorValue: EditorSerializer.toLiArray(value),
       })
     }
     if (card) {
@@ -214,7 +62,7 @@ class Workspace {
         cardInput: null,
         cardCopy: card,
         sourceCardCopy: null, // force set to null
-        editorValue: EditorSerializer.toLis(value),
+        editorValue: EditorSerializer.toLiArray(value),
       })
     }
     // No card nor card-doc -> a new symbol-card
@@ -230,64 +78,12 @@ class Workspace {
       cardInput: { symbol, meta: {} },
       cardCopy: null,
       sourceCardCopy: sourceCard,
-      editorValue: EditorSerializer.toLis(value),
+      editorValue: EditorSerializer.toLiArray(value),
     })
   }
 
-  async _getDocEntries(): Promise<DocEntry[]> {
-    console.log('get doc entries...')
-    const docs = await Doc.getAllDocs()
-    const dict: Record<string, DocEntry> = Object.fromEntries(docs.map(e => [e.symbol, e.toDocEntry()]))
-    const subSymbols: string[] = []
-
-    for (const doc of docs) {
-      const { sourceCardCopy } = doc
-      if (sourceCardCopy) {
-        const subEntry = dict[doc.symbol]
-        if (subEntry === undefined) {
-          throw 'getDocEntries() unexpected error'
-        }
-
-        // push to parent's sub-entries
-        subSymbols.push(subEntry.symbol)
-        const { symbol: parentSymbol } = sourceCardCopy.sym
-        console.log(dict, subEntry, parentSymbol)
-        if (parentSymbol in dict) {
-          dict[parentSymbol].subEntries.push(subEntry)
-        } else {
-          dict[parentSymbol] = {
-            symbol: parentSymbol,
-            title: sourceCardCopy.meta.title ?? parentSymbol,
-            cardId: sourceCardCopy.id,
-            subEntries: [subEntry],
-            updatedAt: subEntry.updatedAt,
-          }
-        }
-      }
-    }
-
-    for (const e of subSymbols) {
-      delete dict[e] // remove entry from dict
-    }
-
-    const entries: DocEntry[] = Object.values(dict)
-
-    // sort entries
-    // for (const entry of entries) {
-    //   entry.subEntries.sort(e => -e.updatedAt)
-    //   if (entry.subEntries.length > 0 && entry.updatedAt < entry.subEntries[0].updatedAt) {
-    //     entry.updatedAt = entry.subEntries[0].updatedAt // align entry's updated with subEntries latest update
-    //   }
-    // }
-    // entries.sort(e => -e.updatedAt)
-
-    console.log(entries)
-
-    return entries
-  }
-
   /**
-   * Commit a doc to remote (and drop local?)
+   * Commit a doc and its sub-docs to remote, once completed mvoe to commited-doc of local-db
    */
   // eslint-disable-next-line @typescript-eslint/ban-types
   async commit(doc: Doc, client: ApolloClient<object>): Promise<void> {
@@ -297,21 +93,46 @@ class Workspace {
     }
     const subDocs = await doc.getSubDocs()
     const allDocs = [doc, ...subDocs]
+    const cardStateInputs = allDocs.map(e => e.toCardStateInput()).filter(e => e.changes.length > 0)
+
+    if (cardStateInputs.length === 0) {
+      console.warn(`Doc(s) not changed, return`)
+      return
+    }
+
     const { data, errors } = await client.mutate<CreateCommitMutation, CreateCommitMutationVariables>({
       mutation: CreateCommitDocument,
       variables: {
-        data: {
-          cardStateInputs: allDocs.map(e => e.toCardStateInput()),
-        },
+        data: { cardStateInputs },
       },
     })
     if (errors) {
       console.error('Commit error', errors)
-    } else {
-      console.log(data)
-      // Remove committed docs
-      for (const e of allDocs) {
-        await e.remove()
+      return
+    }
+    if (data === undefined || data === null) {
+      console.error('Commit error: return empty data')
+      return
+    }
+    if (data) {
+      console.log('CreateCommitMutation', data)
+
+      for (const state of data.createCommit.cardStates) {
+        if (state.cid === undefined || state.cid === null) {
+          throw 'Commit return state error: should have cid'
+        }
+        const found = allDocs.find(e => e.cid === state.cid)
+        if (found === undefined) {
+          throw 'Commit return state error: cannot find corresponding doc'
+        }
+        found.committedAt = new Date(data.createCommit.updatedAt).getTime()
+        found.committedState = state
+
+        console.log(found)
+
+        await found.saveToCommittedTable()
+        await found.remove() // remove from doc-table
+        // await Doc.removeDoc(e.cid)
       }
     }
   }
@@ -331,7 +152,7 @@ class Workspace {
     await LocalDBService.drop()
     this.mainDoc$.next({ doc: null })
     this.status$.next('droped')
-    await this.updateDocEntries()
+    await this.updateEditingDocEntries()
   }
 
   async open({
@@ -356,7 +177,7 @@ class Workspace {
     this.status$.next('loading')
 
     // TODO: check with remote has card-state updated?
-    const loaded = await Doc.loads(symbol)
+    const loaded = await Doc.load(symbol)
     if (loaded) {
       this.mainDoc$.next({ doc: loaded })
       this.status$.next(null)
@@ -377,7 +198,9 @@ class Workspace {
     this.status$.next('saving')
     try {
       await doc.save()
-      await this.updateDocEntries()
+      await this.updateEditingDocEntries()
+
+      doc.getChanges()
     } catch (err) {
       console.error(err)
     }
@@ -388,8 +211,57 @@ class Workspace {
     throw 'Not implemented'
   }
 
-  async updateDocEntries(docSaved?: Doc): Promise<void> {
-    this.workingEntries$.next(await this._getDocEntries())
+  toDocEntries(docs: Doc[]): DocEntryPack[] {
+    console.log('Get doc entries...')
+    const dict: Record<string, { main: { symbol: string; entry?: DocEntry }; subs: DocEntry[] }> = {}
+    // const docs = await Doc.getAllDocs()
+    for (const e of docs) {
+      const { sourceCardCopy } = e
+      const entry = e.toDocEntry()
+      if (sourceCardCopy) {
+        const { symbol } = sourceCardCopy.sym
+        if (symbol in dict) {
+          dict[symbol].subs.push(entry)
+        } else {
+          dict[symbol] = {
+            main: { symbol },
+            subs: [entry],
+          }
+        }
+      } else {
+        const { symbol } = e
+        dict[symbol] =
+          symbol in dict
+            ? {
+                ...dict[symbol],
+                main: { symbol, entry },
+              }
+            : {
+                main: { symbol, entry },
+                subs: [],
+              }
+      }
+    }
+    const entries = Object.values(dict)
+
+    // sort entries
+    // for (const entry of entries) {
+    //   entry.subEntries.sort(e => -e.updatedAt)
+    //   if (entry.subEntries.length > 0 && entry.updatedAt < entry.subEntries[0].updatedAt) {
+    //     entry.updatedAt = entry.subEntries[0].updatedAt // align entry's updated with subEntries latest update
+    //   }
+    // }
+    // entries.sort(e => -e.updatedAt)
+
+    return entries
+  }
+
+  async updateEditingDocEntries(docSaved?: Doc): Promise<void> {
+    this.savedDocs$.next(this.toDocEntries(await Doc.getAllDocs()))
+  }
+
+  async updateCommittedDocEntries(): Promise<void> {
+    this.committedDocs$.next(this.toDocEntries(await Doc.getAllCommittedDocs()))
   }
 }
 

@@ -6,14 +6,16 @@ import resolvers from './resolvers'
 
 const typeDefs = readFileSync(join(process.cwd(), 'apollo/type-defs.graphqls'), 'utf8')
 
-// Use custom scalars
-// See: https://www.apollographql.com/docs/apollo-server/schema/custom-scalars/
+/**
+ * Use custom scalars @see https://www.apollographql.com/docs/apollo-server/schema/custom-scalars/
+ * Need also add custom-scalar type at '.../.graphql-let.yml'
+ */
 export const schema = makeExecutableSchema({
   typeDefs,
   resolvers: {
     BigInt: BigIntResolver,
-    DateTime: DateTimeResolver,
     JSON: JSONResolver,
+    DateTime: DateTimeResolver,
     // JSONObject: JSONObjectResolver,
     ...resolvers,
   },

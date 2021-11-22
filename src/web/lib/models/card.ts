@@ -5,6 +5,13 @@ import { CardStateModel, CardStateParsed } from './card-state'
 import { LinkService } from './link'
 import { SymModel } from './sym'
 
+export type CardPrarsed = Omit<Card, 'meta'> & {
+  link: Link | null
+  meta: CardMeta
+  state: CardStateParsed | null
+  sym: Sym
+}
+
 export type CardMeta = {
   template?: 'webpage' | 'ticker' | 'topic' | 'vs'
   redirects?: string[]
@@ -18,16 +25,10 @@ export type CardMeta = {
   title?: string
 }
 
+export type RowCard = Card & { sym: Sym; link: Link | null }
+
 export const CardModel = {
-  async get(id: string): Promise<
-    | null
-    | (Omit<Card, 'meta'> & {
-        link: Link | null
-        meta: CardMeta
-        state: CardStateParsed | null
-        sym: Sym
-      })
-  > {
+  async get(id: string): Promise<null | CardPrarsed> {
     const card = await prisma.card.findUnique({
       where: { id },
       include: {
@@ -50,15 +51,7 @@ export const CardModel = {
    *
    * @throw symbol parse error
    */
-  async getBySymbol(symbol: string): Promise<
-    | (Omit<Card, 'meta'> & {
-        link: Link | null
-        meta: CardMeta
-        state: CardStateParsed
-        sym: Sym
-      })
-    | null
-  > {
+  async getBySymbol(symbol: string): Promise<(Omit<CardPrarsed, 'state'> & { state: CardStateParsed }) | null> {
     const parsed = SymModel.parse(symbol)
     const sym = await prisma.sym.findUnique({
       where: { symbol: parsed.symbol },
@@ -84,14 +77,13 @@ export const CardModel = {
    * Get or create a webpage-card by URL, if the URL not found in database, will try to scrape and then store
    * Newly created webpage-card will not have card-state and remains null.
    */
-  async getOrCreateByUrl({ scraper, url }: { scraper?: FetchClient; url: string }): Promise<
-    Omit<Card, 'meta'> & {
-      link: Link
-      meta: CardMeta
-      state: CardStateParsed | null
-      sym: Sym
-    }
-  > {
+  async getOrCreateByUrl({
+    scraper,
+    url,
+  }: {
+    scraper?: FetchClient
+    url: string
+  }): Promise<CardPrarsed & { link: Link }> {
     const [link, { fetchResult }] = await LinkService.getOrCreateLink({ scraper, url })
     if (link.card) {
       const { card, ...linkRest } = link

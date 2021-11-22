@@ -1,6 +1,6 @@
 import { inspect } from 'util'
 import { cloneDeep, isEqual } from 'lodash'
-import { TreeService, TreeChangeService, TreeNode, DataNode } from '..'
+import { TreeService, TreeChangeService, TreeNode, MonoNode } from '..'
 
 type Bullet = {
   id?: string
@@ -120,7 +120,7 @@ describe('TreeService', () => {
 
   it('insert()', () => {
     const v = cloneDeep(startValue)
-    const item: DataNode<Bullet> = { cid: 'x' }
+    const item: MonoNode<Bullet> = { cid: 'x' }
     expect(TreeService.insert(v, item, '1', -1)).toMatchInlineSnapshot(`
       Array [
         Object {

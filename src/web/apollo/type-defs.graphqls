@@ -15,10 +15,8 @@ type Query {
   # 以 id, sym, or url 查找，若無返回 null，以 url 查找時，若無會自動創一個 card
   card(id: ID, symbol: String, url: String): Card
 
+  # 查無返回 null
   cardState(id: ID!): CardState
-
-  # 若查無返回 null
-  # change(id: ID): Change
 
   # all emojis of a card
   cardEmojis(cardId: ID!): [CardEmoji!]!
@@ -27,7 +25,7 @@ type Query {
   # cardMeta(symbol: String!): CardMeta
 
   # latestCommits(afterId: String): [Commit!]!
-  latestCardDigests(afterId: String): [CardDigest!]!
+  latestCardDigests(afterCommitId: String): [CardDigest!]!
 
   # latestBullets(afterId: String): [Commit!]!
 
@@ -147,6 +145,7 @@ type Mutation {
 
   updateCardMeta(cardId: ID!, data: CardMetaInput!): CardMeta!
 
+  # @throw validation error
   createCommit(data: CommitInput!): Commit!
 
   createPoll(data: PollInput!): Poll!
@@ -294,12 +293,14 @@ type CardEmojiLike {
 }
 
 type CardDigest {
-  id: ID!
-  meta: CardMeta!
+  cardId: String!
+  commitId: String!
   sym: Sym!
-  link: Link
+  title: String!
+  picks: [String!]!
+  # shots: [String!]!
   updatedAt: DateTime!
-  body: JSON!
+  subs: [CardDigest!]!
 }
 
 type CardMeta {
@@ -316,6 +317,7 @@ type CardMeta {
 
 type CardState {
   id: ID!
+  cid: String # for client to match committed docs
   cardId: String!
   userId: String!
   commitId: String!

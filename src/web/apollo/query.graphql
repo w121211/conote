@@ -64,6 +64,25 @@ fragment card on Card {
   updatedAt
 }
 
+fragment cardDigestMono on CardDigest {
+  __typename
+  cardId
+  commitId
+  sym {
+    ...sym
+  }
+  title
+  picks
+  updatedAt
+}
+
+fragment cardDigest on CardDigest {
+  ...cardDigestMono
+  subs {
+    ...cardDigestMono
+  }
+}
+
 fragment cardEmoji on CardEmoji {
   __typename
   id
@@ -104,6 +123,7 @@ fragment cardMeta on CardMeta {
 fragment cardState on CardState {
   __typename
   id
+  cid
   cardId
   userId
   commitId
@@ -117,15 +137,15 @@ fragment cardState on CardState {
   updatedAt
 }
 
-# fragment commit on Commit {
-#   __typename
-#   id
-#   userId
-#   updatedAt
-#   changes {
-#     ...change
-#   }
-# }
+fragment commit on Commit {
+  __typename
+  id
+  userId
+  updatedAt
+  cardStates {
+    ...cardState
+  }
+}
 
 fragment link on Link {
   __typename
@@ -304,11 +324,11 @@ query CardEmojis($cardId: ID!) {
 #   }
 # }
 
-# query LatestCommits($afterId: String) {
-#   latestCommits(afterId: $afterId) {
-#     ...commit
-#   }
-# }
+query LatestCardDigests($afterCommitId: String) {
+  latestCardDigests(afterCommitId: $afterCommitId) {
+    ...cardDigest
+  }
+}
 
 query Link($id: ID, $url: String) {
   link(id: $id, url: $url) {
@@ -456,9 +476,7 @@ mutation UpdateCardMeta($cardId: ID!, $data: CardMetaInput!) {
 
 mutation CreateCommit($data: CommitInput!) {
   createCommit(data: $data) {
-    cardStates {
-      ...cardState
-    }
+    ...commit
   }
 }
 

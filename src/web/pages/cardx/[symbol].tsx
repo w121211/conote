@@ -2,16 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useApolloClient, useQuery } from '@apollo/client'
-import { catchError, combineLatest, interval, of, switchMap } from 'rxjs'
 import { useUser } from '@auth0/nextjs-auth0'
 import { useObservable } from 'rxjs-hooks'
 import { Card, CardMeta, CardMetaInput, useCardLazyQuery, useMeQuery } from '../../apollo/query.graphql'
 import Layout from '../../components/layout/layout'
-import { Doc, DocEntry, workspace } from '../../components/workspace/workspace'
-import { TreeNode } from '../../../packages/docdiff/src'
-import { Bullet } from '../../components/bullet/types'
+import { workspace } from '../../components/workspace/workspace'
 import { BulletEditor } from '../../components/editor/editor'
-import { EditorSerializer } from '../../components/editor/serializer'
+import { DocEntry, DocEntryPack } from '../../components/workspace/doc'
 import { DocPath, DocPathService } from '../../components/workspace/doc-path'
 import classes from '../../style/symbol.module.scss'
 import CardMetaForm from '../../components/card-meta-form/card-meta-form'
@@ -120,21 +117,30 @@ const CardHead = ({ card, symbol }: { card: Card | null; symbol: string }): JSX.
   )
 }
 
-const MonoDocEntryLink = ({ entry }: { entry: DocEntry }): JSX.Element => (
-  <Link href={DocPathService.toURL(entry.symbol, entry.sourceCardId)}>
-    <a>{entry.title}</a>
-  </Link>
-)
+const DocEntryLink = ({ entry, symbol }: { entry?: DocEntry; symbol: string }): JSX.Element => {
+  if (entry) {
+    return (
+      <Link href={DocPathService.toURL(entry.symbol, entry.sourceCardId)}>
+        <a>{entry.title}</a>
+      </Link>
+    )
+  }
+  return (
+    <Link href={DocPathService.toURL(symbol)}>
+      <a>{symbol} (null doc)</a>
+    </Link>
+  )
+}
 
-const DocEntryLink = ({ entry }: { entry: DocEntry }): JSX.Element => {
-  if (entry.subEntries.length === 0) {
-    return <MonoDocEntryLink entry={entry} />
+const DocEntryPackLink = ({ pack }: { pack: DocEntryPack }): JSX.Element => {
+  if (pack.subs.length === 0) {
+    return <DocEntryLink {...pack.main} />
   }
   return (
     <>
-      <MonoDocEntryLink entry={entry} />(
-      {entry.subEntries.map((e, i) => (
-        <MonoDocEntryLink key={i} entry={e} />
+      <DocEntryLink {...pack.main} />(
+      {pack.subs.map((e, i) => (
+        <DocEntryLink key={i} entry={e} symbol={e.symbol} />
       ))}
       )
     </>
@@ -155,7 +161,14 @@ const WorkspaceComponent = ({
   const router = useRouter()
   const mainDoc = useObservable(() => workspace.mainDoc$)
   const status = useObservable(() => workspace.status$)
-  const workingEntries = useObservable(() => workspace.workingEntries$)
+  const savedDocs = useObservable(() => workspace.savedDocs$)
+  const committedDocs = useObservable(() => workspace.committedDocs$)
+
+  // if (card) {
+  //   const a = new Date(card.updatedAt as unknown as string)
+  //   console.log(card.updatedAt)
+  //   console.log(a)
+  // }
 
   // const saveEvery = useObservable(() =>
   //   combineLatest([interval(60000), workspace.mainDoc$]).pipe(
@@ -190,16 +203,39 @@ const WorkspaceComponent = ({
   }
   return (
     <div>
-      <div>{workingEntries && workingEntries.map((e, i) => <DocEntryLink key={i} entry={e} />)}</div>
-      {console.log(workingEntries)}
-      {/* <NavPath
-            path={workingEntries}
-            location={{ ...location }}
-            mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
-          /> */}
+      <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
+      <div>Committed:{committedDocs && committedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
+
       <div>{status}</div>
 
-      {/* <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div> */}
+      <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div>
+
+      <button
+        onClick={() => {
+          workspace.drop()
+        }}
+      >
+        Drop
+      </button>
+      <button
+        onClick={async () => {
+          if (mainDoc.doc) {
+            await workspace.commit(mainDoc.doc, client)
+            // router.reload()
+          }
+        }}
+      >
+        Commit
+      </button>
+      <button
+        onClick={() => {
+          if (mainDoc.doc) {
+            workspace.save(mainDoc.doc)
+          }
+        }}
+      >
+        Save
+      </button>
 
       <CardHead card={card} symbol={mainDoc.doc.symbol} />
 

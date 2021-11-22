@@ -19,8 +19,6 @@ model Author {
 
 model Bullet {
   id          String        @id @default(cuid())
-  // card      Card     @relation(fields: [cardId], references: [id])
-  // cardId    String
   cardState   CardState     @relation(fields: [cardStateId], references: [id])
   cardStateId String
   createdAt   DateTime      @default(now())

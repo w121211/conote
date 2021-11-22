@@ -88,7 +88,7 @@ export type BulletOperation = 'CREATE' | 'MOVE' | 'UPDATE' | 'DELETE' | 'UPDATE_
 
 export type Bullet = {
   id: string
-  cid?: string // 若沒有 id 時會生成一個 id
+  cid?: string // 尚未創立時暫時生成一個 client-id，並設定 id 與 cid 相等
 
   // timestamp: number // commit 的時間點，有修改時才會更新，沒修改時會沿用之前的時間，用於判斷本次 commit 包含哪些 bullet
   // commitId: string

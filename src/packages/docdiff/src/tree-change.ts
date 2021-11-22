@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash'
-import { DataNode, TreeService, TreeNode } from './tree'
+import { NodeBody, TreeService, TreeNode } from './tree'
 
 export type ChangeType =
   | 'insert'
@@ -19,7 +19,7 @@ export type NodeChange<T> = {
 }
 
 interface ITreeChangeService {
-  _applyArrayChanges: <T>(arr: DataNode<T>[], changes: NodeChange<T>[]) => DataNode<T>[]
+  _applyArrayChanges: <T>(arr: NodeBody<T>[], changes: NodeChange<T>[]) => NodeBody<T>[]
 
   applyChanges: <T>(value: TreeNode<T>[] | null, changes: NodeChange<T>[]) => TreeNode<T>[]
 
@@ -31,8 +31,8 @@ interface ITreeChangeService {
 }
 
 export const TreeChangeService: ITreeChangeService = {
-  _applyArrayChanges<T>(arr: DataNode<T>[], changes: NodeChange<T>[]): DataNode<T>[] {
-    const _apply = (arr: DataNode<T>[], change: NodeChange<T>): DataNode<T>[] => {
+  _applyArrayChanges<T>(arr: NodeBody<T>[], changes: NodeChange<T>[]): NodeBody<T>[] {
+    const _apply = (arr: NodeBody<T>[], change: NodeChange<T>): NodeBody<T>[] => {
       switch (change.type) {
         case 'delete': {
           const keeps = arr.filter(e => e.cid !== change.cid)
@@ -85,7 +85,7 @@ export const TreeChangeService: ITreeChangeService = {
     //   children: [],
     // }
     const startPC = TreeService.toParentChildrenDict(value ?? [])
-    const finalPC: Record<string, DataNode<T>[]> = {}
+    const finalPC: Record<string, NodeBody<T>[]> = {}
 
     let parentCids: string[] = [TreeService.tempRootCid]
     const doneCids: string[] = []
@@ -94,7 +94,7 @@ export const TreeChangeService: ITreeChangeService = {
       if (cid === undefined || doneCids.includes(cid)) {
         throw '[bullet-doc] node data error'
       }
-      const children: DataNode<T>[] = startPC[cid] ?? []
+      const children: NodeBody<T>[] = startPC[cid] ?? []
       const appliedChildren = this._applyArrayChanges(
         children,
         changes.filter(e => e.toParentCid === cid),

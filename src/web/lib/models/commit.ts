@@ -1,4 +1,4 @@
-import { assert } from 'console'
+import { Card, CardState, Commit, Link, Sym } from '.prisma/client'
 import cuid from 'cuid'
 import { NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import {
@@ -9,7 +9,8 @@ import {
 } from '../../apollo/type-defs.graphqls'
 import { Bullet } from '../../components/bullet/types'
 import prisma from '../prisma'
-import { CardStateBody, CardStateModel } from './card-state'
+import { RowCard } from './card'
+import { CardStateBody, CardStateModel, CardStateParsed } from './card-state'
 import { SymbolParsed, SymModel } from './sym'
 
 type BulletInsert = {
@@ -30,6 +31,20 @@ type CardStateInsert = {
   cardInsert?: CardInsert
   bulletInserts: BulletInsert[]
 }
+
+export type CardStatePack = {
+  main: {
+    cardId: string
+    state?: RowCardState
+  }
+  subs: RowCardState[]
+}
+
+export type CommitParsed = Commit & { cardStates: CardStateParsed[] }
+
+export type RowCardState = CardState & { card: RowCard }
+
+export type RowCommit = Commit & { cardStates: RowCardState[] }
 
 export const CommitModel = {
   _checkCardInput(cardInput: GQLCardInput): void {
@@ -61,8 +76,10 @@ export const CommitModel = {
   // toDBChangeInputs(inputs: GQLChangeInput[]): ChangeInput[] {
   // }
 
-  _toInserts(inputs: GQLCardStateInput[]): CardStateInsert[] {
-    // Initialize symbol-cuid dicts
+  _toInserts(
+    inputs: GQLCardStateInput[],
+  ): [CardStateInsert[], { genCardId: Record<string, string>; genStateId: Record<string, string> }] {
+    // initialize symbol-cuid dicts
     const cardInputSymbols = [...new Set(inputs.map(e => e.cardInput?.symbol))]
     const stateCids = [...new Set(inputs.map(e => e.cid))]
     const genCardId: Record<string, string> = Object.fromEntries(cardInputSymbols.map(e => [e, cuid()]))
@@ -85,14 +102,17 @@ export const CommitModel = {
       // 直接置換 value 中每個 bullet 的 id (硬幹) -> 正常應該是要從 updates 著手
       const bulletInserts: BulletInsert[] = []
       const nodes = TreeService.toList(value as unknown as TreeNode<Bullet>[]).map(e => {
-        if (e.data && e.data.cid) {
-          e.data.id = cuid() // in-place
+        if (e.data && e.data.id === e.data.cid) {
+          // a new bullet
+          const gid = cuid()
+          e.data.id = gid // in-place
           delete e.data.cid // cid should not store in backend
-          bulletInserts.push({ id: e.data.id })
+          bulletInserts.push({ id: gid })
         }
         return e
       })
       const finalValue = TreeService.fromList(nodes)
+      // e.cid = gid // node cid aligns with bullet id for later retreival
 
       const insert: CardStateInsert = {
         id: genStateId[cid],
@@ -100,7 +120,7 @@ export const CommitModel = {
         body: {
           prevStateId: prevStateId ?? null,
           sourceCardId: sourceCardId ?? null,
-          changes,
+          changes: changes as unknown as NodeChange<Bullet>[],
           value: finalValue,
         },
         cardInsert: cardInput
@@ -114,22 +134,19 @@ export const CommitModel = {
       }
       return insert
     })
-    return inserts
+    return [inserts, { genCardId, genStateId }]
   },
 
   // check(changeInputs: ChangeInsert[]): ChangeInsert[] {
   //   const docDict: Record<string, GQLDocInput> = Object.fromEntries(docs.map(e => [e.symbol, e]))
-
   //   for (const e of docs) {
   //     // checkSymbol(e.symbol)
   //     this._checkDocInput(e)
-
   //     if (e.cardInput) {
   //       assert(e.cardInput.symbol === e.symbol, 'Symbol should equal')
   //       this._checkCardInput(e.cardInput)
   //     }
   //   }
-
   //   for (const [symbol, cardInput, doc] of zip(cardInputs, docs)) {
   //     if (doc === undefined) {
   //       throw '創卡需要搭配 doc'
@@ -142,23 +159,22 @@ export const CommitModel = {
   //   }
   // },
 
-  async create({ cardStateInputs }: GQLCommitInput, userId: string): Promise<GQLCommit> {
+  async create({ cardStateInputs }: GQLCommitInput, userId: string): Promise<CommitParsed> {
+    if (cardStateInputs.length === 0) {
+      throw 'Commit requires at least 1 card-state'
+    }
     // const checked = this.check(this._generateIds(input))
-    const inserts = this._toInserts(cardStateInputs)
+    const [inserts, { genCardId, genStateId }] = this._toInserts(cardStateInputs)
     const commitId = cuid()
 
     // Create
-    const [commit] = await prisma.$transaction([
+    const [commitInserted] = await prisma.$transaction([
       prisma.commit.create({
         data: {
           id: commitId,
           userId,
         },
-        include: {
-          cardStates: true,
-        },
       }),
-
       ...inserts.map(e => {
         const { id, cardId, body, cardInsert, bulletInserts } = e
         if (cardInsert) {
@@ -209,10 +225,62 @@ export const CommitModel = {
       }),
     ])
 
-    const { cardStates, ...restCommit } = commit
-    return {
-      cardStates: cardStates.map(e => CardStateModel.toParsed(e)),
-      ...restCommit,
+    const commit = await prisma.commit.findUnique({
+      where: { id: commitInserted.id },
+      include: { cardStates: { include: { card: { include: { sym: true } } } } },
+    })
+    if (commit === null) {
+      throw 'Unexpected database error'
     }
+
+    const { cardStates, ...rest } = commit
+    const genStateCid = Object.fromEntries(Object.entries(genStateId).map(([k, v]) => [v, k]))
+    return {
+      ...rest,
+      cardStates: cardStates.map(e => {
+        const cid = genStateCid[e.id]
+        if (cid === undefined) {
+          throw 'state-id key not in genStateCid , unexpected error'
+        }
+        return {
+          ...CardStateModel.parse(e),
+          cid,
+        }
+      }),
+    }
+  },
+
+  toCardPacks(commit: RowCommit): CardStatePack[] {
+    const dict: Record<string, CardStatePack> = {}
+
+    const { cardStates } = commit
+    for (const e of cardStates) {
+      const body = e.body as unknown as CardStateBody
+      const { sourceCardId } = body
+      if (sourceCardId) {
+        if (sourceCardId in dict) {
+          dict[sourceCardId].subs.push(e)
+        } else {
+          dict[sourceCardId] = {
+            main: { cardId: sourceCardId },
+            subs: [e],
+          }
+        }
+      } else {
+        const { cardId } = e
+        dict[cardId] =
+          cardId in dict
+            ? {
+                ...dict[cardId],
+                main: { cardId, state: e },
+              }
+            : {
+                main: { cardId, state: e },
+                subs: [],
+              }
+      }
+    }
+
+    return Object.entries(dict).map(([, v]) => v)
   },
 }

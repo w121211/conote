@@ -49,7 +49,6 @@ export type LabelInlineElement = {
 export type MirrorInlineElement = {
   type: 'mirror'
   children: CustomText[]
-  root?: RootBulletDraft
 }
 
 export type PopupInlineElement = {

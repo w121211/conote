@@ -5,8 +5,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
 // import { getCardUrlParam } from '../lib/helper'
+<<<<<<< HEAD
 // import { useLatestCardsQuery, useMeQuery } from '../apollo/query.graphql'
 import { useMeQuery } from '../apollo/query.graphql'
+=======
+import { useLatestCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
+>>>>>>> a2fdf7d847eb7ec60060eb7d918a95a7b8346c62
 import { SearchAllForm } from '../components/search-all-form'
 // import { SearchAllForm } from '../components/search-all-form'
 import SideBar from '../components/sidebar/sidebar'
@@ -23,9 +27,9 @@ function LatestCards(): JSX.Element | null {
   const [hasMore, setHasMore] = useState<boolean>(true)
 
   if (error || !data) return <p>Something goes wrong...</p>
-  if (data.latestCardEntries.length === 0) return <p>No cards</p>
+  if (data.latestCardDigests.length === 0) return <p>No cards</p>
 
-  const afterId = data.latestCardEntries[data.latestCardEntries.length - 1].id
+  const afterId = data.latestCardDigests[data.latestCardDigests.length - 1].commitId
 
   // async function onClickMore() {
   //   const result = await fetchMore({ variables: { afterId } })
@@ -36,8 +40,8 @@ function LatestCards(): JSX.Element | null {
 
   return (
     <>
-      {data.latestCardEntries &&
-        data.latestCardEntries.map((e, i) => (
+      {data.latestCardDigests &&
+        data.latestCardDigests.map((e, i) => (
           <ListLarge
             key={i}
             title={e.symbol}
