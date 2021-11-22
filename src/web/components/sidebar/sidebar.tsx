@@ -56,16 +56,13 @@ const SideBar = ({
       <div className={classes.searchBar}>
         <SearchAllForm small />
       </div>
-
-      <SidebarList title="暫存區" />
-      <SidebarList title="最近編輯的文章" />
       <ul className={classes.sideList}>
-        {/* <li>
-            <Link to="/">
-              <HomeIcon />
-              首頁
-            </Link>
-          </li> */}
+        <li>
+          {/* <HomeIcon /> */}
+          <a href="/">
+            <span>首頁</span>
+          </a>
+        </li>
         <li>
           <a href="#">
             {/* <CocardIcon /> */}
@@ -79,6 +76,9 @@ const SideBar = ({
           </a>
         </li>
       </ul>
+      <SidebarList title="暫存區" />
+      <SidebarList title="最近編輯的文章" />
+
       {/* <span className="logo">
         <Link href="/">COCARD</Link>
       </span> */}

@@ -9,7 +9,7 @@
   display: flex;
   list-style: none;
   align-items: flex-start;
-  margin-left: -3em;
+  // margin-left: -28px;
   word-break: break-all;
   @media screen and(max-width:500px) {
     margin-left: 0;
@@ -33,15 +33,9 @@
     // display: none;
     visibility: hidden;
   }
-  &:hover {
-    .bulletTooltip {
-      // display: flex;
-      visibility: visible;
-    }
-    & ~ .bulletPanel {
-      visibility: visible;
-    }
-  }
+}
+.bulletPanelTooltip {
+  margin-left: calc(-50% - 30px);
 }
 .arrowWrapper {
   // position: absolute;
@@ -71,7 +65,7 @@
   }
 }
 .bulletEditorContainer {
-  margin-left: -28px;
+  margin-left: -48px;
 
   color: $text;
   @media screen and (max-width: 500px) {

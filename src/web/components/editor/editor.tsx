@@ -71,6 +71,8 @@ import {
 } from './slate-custom-types'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
+import { useApolloClient } from '@apollo/client'
+import { getLocalOrQueryRoot } from './use-local-value'
 // import { Context } from '../../pages/card/[symbol]'
 // import { BulletNode } from '../bullet/node'
 // import UpdateShotForm from '../shot-form/update-shot-form'
@@ -893,55 +895,55 @@ const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
   )
 }
 
-const FilterMirror = ({
-  mirrors,
-  sourceCardId,
-}: {
-  mirrors: InlineMirrorElement[]
-  sourceCardId?: string
-}): JSX.Element | null => {
-  const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
-  const client = useApolloClient()
+// const FilterMirror = ({
+//   mirrors,
+//   sourceCardId,
+// }: {
+//   mirrors: InlineMirrorElement[]
+//   sourceCardId?: string
+// }): JSX.Element | null => {
+//   const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
+//   const client = useApolloClient()
 
-  useEffect(() => {
-    const asyncRun = async () => {
-      if (mirrors.length === 1) {
-        const mirror = mirrors[0]
-        const { rootLi } = await getLocalOrQueryRoot({ client, mirrorSymbol: mirror.mirrorSymbol })
-        const rootBulletDraft = Serializer.toRootBulletDraft(rootLi)
-        const filtered = BulletNode.filter({
-          node: rootBulletDraft,
-          match: ({ node }) => node.sourceCardId === sourceCardId,
-        })
-        setFilteredBullet(filtered)
-      }
-    }
-    asyncRun().catch(err => {
-      console.error(err)
-    })
-  }, [])
+//   useEffect(() => {
+//     const asyncRun = async () => {
+//       if (mirrors.length === 1) {
+//         const mirror = mirrors[0]
+//         const { rootLi } = await getLocalOrQueryRoot({ client, mirrorSymbol: mirror.mirrorSymbol })
+//         const rootBulletDraft = Serializer.toRootBulletDraft(rootLi)
+//         const filtered = BulletNode.filter({
+//           node: rootBulletDraft,
+//           match: ({ node }) => node.sourceCardId === sourceCardId,
+//         })
+//         setFilteredBullet(filtered)
+//       }
+//     }
+//     asyncRun().catch(err => {
+//       console.error(err)
+//     })
+//   }, [])
 
-  if (mirrors.length === 0) {
-    return null
-  }
-  if (mirrors.length > 1) {
-    return <div>一行只允許一個 mirror</div>
-  }
-  if (filteredBullet === undefined) {
-    return null
-  }
-  if (filteredBullet === null) {
-    return <div>Click to edit</div>
-  }
-  return (
-    <ul className={classes.filterMirrorContainer}>
-      {/* 忽略 root，從 root children 開始 render */}
-      {filteredBullet.children.map((e, i) => (
-        <BulletComponent key={i} bullet={e} />
-      ))}
-    </ul>
-  )
-}
+//   if (mirrors.length === 0) {
+//     return null
+//   }
+//   if (mirrors.length > 1) {
+//     return <div>一行只允許一個 mirror</div>
+//   }
+//   if (filteredBullet === undefined) {
+//     return null
+//   }
+//   if (filteredBullet === null) {
+//     return <div>Click to edit</div>
+//   }
+//   return (
+//     <ul className={classes.filterMirrorContainer}>
+//       {/* 忽略 root，從 root children 開始 render */}
+//       {filteredBullet.children.map((e, i) => (
+//         <BulletComponent key={i} bullet={e} />
+//       ))}
+//     </ul>
+//   )
+// }
 
 const Lc = ({
   attributes,
@@ -1039,7 +1041,7 @@ RenderElementProps & {
       <span contentEditable={false}>
         {/* {author === element.author && element.author}
           {sourceUrl === element.sourceUrl && sourceUrl} */}
-        <FilterMirror mirrors={mirrors} sourceCardId={sourceCardId} />
+        {/* <FilterMirror mirrors={mirrors} /> */}
       </span>
       {/* )} */}
     </div>
@@ -1050,7 +1052,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   const editor = useSlateStatic()
   // const [hasUl, setHasUl] = useState(false)
   const [ulFolded, setUlFolded] = useState<true | undefined>()
-  const [showPanelIcon, setShowPanelIcon] = useState(false)
+  const [showPanel, setShowPanel] = useState(false)
   // console.log(element)
 
   // useEffect(() => {
@@ -1092,27 +1094,16 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
       onMouseOver={event => {
         event.stopPropagation()
         event.preventDefault()
-        setShowPanelIcon(true)
+        // setShowPanelIcon(true)
       }}
       onMouseOut={event => {
         event.stopPropagation()
         event.preventDefault()
-        setShowPanelIcon(false)
+        // setShowPanelIcon(false)
       }}
     >
       {/* <div contentEditable={false}></div> */}
       <div className={classes.arrowBulletWrapper} contentEditable={false}>
-        <BulletPanel
-          bulletId={lc.bulletSnapshot?.id}
-          // emoji={lc.emojis}
-          visible={showPanelIcon}
-          // sourceUrl={element.children[0].sourceUrl}
-          // authorName={element.children[0].author}
-          onEmojiCreated={onEmojiCreated}
-        >
-          {/* <span className={classes.oauthorName}> @{authorName}</span> */}
-        </BulletPanel>
-
         {hasUl ? (
           <>
             <span
@@ -1146,10 +1137,43 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
         )}
 
         <Link href={'/href'}>
-          <a>
+          <a
+            onMouseOver={e => {
+              e.stopPropagation()
+              // e.preventDefault()
+              // if (e.currentTarget.contains(containerRef.current)) {
+              setShowPanel(true)
+              // }
+              // console.log('hover')
+            }}
+            onMouseLeave={e => {
+              e.stopPropagation()
+              // e.preventDefault()
+
+              setShowPanel(false)
+              // if (!e.currentTarget.contains(containerRef.current)) {
+              //  setTimeout(
+              //   () => {
+              //   },
+              //   100,
+              //   false,
+              // )
+              // }
+              // console.log('mouseout')
+            }}
+          >
             <BulletSvg />
           </a>
         </Link>
+        {showPanel && (
+          <BulletPanel
+            className={classes.bulletPanel}
+            tooltipClassName={classes.bulletPanelTooltip}
+            bulletId={lc.bulletSnapshot?.id}
+            visible={showPanel}
+            onEmojiCreated={onEmojiCreated}
+          />
+        )}
 
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>

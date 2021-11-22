@@ -11,6 +11,7 @@ const ListLarge = ({
   hashtags,
   author,
   shot,
+  currentHashtag,
 }: {
   href: string
   title: string
@@ -20,6 +21,7 @@ const ListLarge = ({
   summary?: string
   hashtags?: string[]
   shot?: string
+  currentHashtag?: string
 }): JSX.Element => {
   return (
     <div className={classes.container}>
@@ -32,7 +34,12 @@ const ListLarge = ({
                 <div className={classes.hashtagContainer}>
                   {hashtags.map((e, i) => {
                     return (
-                      <div className={`${classes.hashtag} ${e === '#watch' ? classes.watch : ''}`} key={i}>
+                      <div
+                        className={`${classes.hashtag} ${e === '#watch' ? classes.watch : ''} ${
+                          currentHashtag === e ? classes.selectedHashtag : ''
+                        }`}
+                        key={i}
+                      >
                         {e}
                       </div>
                     )

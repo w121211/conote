@@ -7,7 +7,8 @@ import { getNavLocation, locationToUrl, NavLocation } from '../../components/edi
 import classes from './nav-path.module.scss'
 import { UrlObject } from 'url'
 import Link from 'next/link'
-import { useCardMetaQuery } from '../../apollo/query.graphql'
+import { useCardQuery } from '../../apollo/query.graphql'
+import { DocEntry } from '../workspace/workspace'
 
 function getTextWidth(text: string, font?: any) {
   const canvas = document.createElement('canvas')
@@ -20,7 +21,7 @@ function getTextWidth(text: string, font?: any) {
 }
 
 export interface NavPathProps {
-  path?: Nav[]
+  path?: DocEntry[]
   mirrorHomeUrl?: UrlObject
   location: NavLocation
 }
@@ -28,17 +29,17 @@ export interface NavPathProps {
 const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/g
 
 const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX.Element => {
-  const [myPath, setMyPath] = useState<(Nav | string)[] | undefined>(path)
-  const [hiddenPath, setHiddenPath] = useState<(Nav | string)[]>([])
+  const [myPath, setMyPath] = useState<(DocEntry | string)[] | undefined>(path)
+  const [hiddenPath, setHiddenPath] = useState<(DocEntry | string)[]>([])
 
-  const [prevPath, setPrevPath] = useState<Nav[] | undefined>([])
+  const [prevPath, setPrevPath] = useState<DocEntry[] | undefined>([])
   const [viewPortWidth, setViewPortWidth] = useState(0)
   const [showTooltip, setShowTooltip] = useState(false)
 
   const router = useRouter()
 
   const pathRef = useRef<HTMLUListElement>(null)
-  const { data } = useCardMetaQuery({
+  const { data } = useCardQuery({
     fetchPolicy: 'cache-first',
     variables: { symbol: router.query.symbol as string },
   })
@@ -71,7 +72,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
       if (path.length > 2 && viewPortWidth > 0 && 501 > viewPortWidth) {
         const pathElementWidth: number[] = []
         path.forEach((e, i) => {
-          const textWidth = getTextWidth(e.text)
+          const textWidth = getTextWidth(e.title)
           if (textWidth) {
             const newWidth = textWidth > 80 ? 80 : textWidth
             pathElementWidth.push(newWidth)
@@ -89,19 +90,19 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
           const copyArr = [...path]
           const filterCopyArr = copyArr.slice(1, indx)
 
-          const newCopyArr: (Nav | string)[] = [...path]
+          const newCopyArr: (DocEntry | string)[] = [...path]
           newCopyArr.splice(1, indx - 1, '...')
 
           newCopyArr.forEach(e => {
             if (typeof e !== 'string') {
-              e.text.replace(rePoll, '')
+              e.title.replace(rePoll, '')
             }
           })
 
           setHiddenPath(filterCopyArr)
           setMyPath(newCopyArr)
         } else {
-          const newPath = JSON.parse(JSON.stringify(path)) as Nav[]
+          const newPath = JSON.parse(JSON.stringify(path)) as DocEntry[]
           newPath.forEach(e => {
             if (typeof e !== 'string') {
               e.text = e.text.replace(rePoll, '').trimEnd()
@@ -129,7 +130,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
         <li>
           <span>
             <Link href={mirrorHomeUrl}>
-              <a>{data?.cardMeta.title}</a>
+              <a>{data?.card.meta.title}</a>
             </Link>
             {/* {console.log(path, location)} */}
           </span>
@@ -162,8 +163,8 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
                 {typeof e !== 'string' && (
                   <Link href={locationToUrl({ ...location, openedLiPath: e.path })}>
                     <a>
-                      {mirrorHomeUrl && e.path.length === 0 && '::'}
-                      {!mirrorHomeUrl && i === 0 ? data?.cardMeta.title || e.text : e.text}
+                      {mirrorHomeUrl && e.subEntries.length === 0 && '::'}
+                      {!mirrorHomeUrl && i === 0 ? data?.card.meta.title || e.title : e.text}
                     </a>
                   </Link>
                 )}

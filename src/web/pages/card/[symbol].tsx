@@ -20,8 +20,8 @@ import LinkIcon from '../../assets/svg/link.svg'
 
 import CardMetaForm from '../../components/card-meta-form/card-meta-form'
 import MyTooltip from '../../components/my-tooltip/my-tooltip'
-import EmojiHeaderBtn from '../../components/emoji-up-down/emoji-header-btn'
-import CreateEmojiBtn from '../../components/emoji-up-down/emoji-header-create-btn'
+import EmojiHeaderBtn from '../../components/emoji-up-down/card-emoji-btn'
+import CreateEmojiBtn from '../../components/emoji-up-down/create-card-emoji-btn'
 
 // TODO: 與 li-location 合併
 export type Nav = {
@@ -175,7 +175,7 @@ const CardSymbolPage = (): JSX.Element | null => {
 
   return (
     <Layout
-      buttonLeft={
+      buttonRight={
         <>
           <button
             className="secondary"
@@ -244,7 +244,7 @@ const CardSymbolPage = (): JSX.Element | null => {
             </Popup>
           )}
 
-          {router.query.a && (
+          {/* {router.query.a && (
             <button
               className="transparent"
               onClick={() => {
@@ -261,7 +261,7 @@ const CardSymbolPage = (): JSX.Element | null => {
 
               <div className={`${classes.toggle} ${authorName && classes.toggleClicked}`}></div>
             </button>
-          )}
+          )} */}
 
           {/* // )} */}
 

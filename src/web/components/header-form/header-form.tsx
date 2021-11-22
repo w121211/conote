@@ -4,14 +4,7 @@ import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-for
 
 import CreatableSelect from 'react-select/creatable'
 import classes from './header-form.module.scss'
-import {
-  CardDocument,
-  CardMeta,
-  CardMetaDocument,
-  CardMetaQuery,
-  CardQuery,
-  useUpdateCardMetaMutation,
-} from '../../apollo/query.graphql'
+import { CardDocument, CardMeta, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
 import { RadioInput } from '../poll-form/board-form'
 import router from 'next/router'
 import { GroupTypeBase, Styles } from 'react-select'
@@ -39,11 +32,11 @@ const components = {
 
 const HeaderForm = ({
   initialValue,
-  symbol,
+  cardId,
   handleSubmitted,
 }: {
   initialValue: FormInputs
-  symbol: string
+  cardId: string
   handleSubmitted: (isSubmitted: boolean) => void
 }): JSX.Element => {
   const methods = useForm<FormInputs>({
@@ -70,12 +63,12 @@ const HeaderForm = ({
 
   const [updateCardMeta] = useUpdateCardMetaMutation({
     update(cache, { data }) {
-      const res = cache.readQuery<CardMetaQuery>({ query: CardMetaDocument })
-      if (data?.updateCardMeta && res?.cardMeta) {
+      const res = cache.readQuery<CardQuery>({ query: CardDocument })
+      if (data?.updateCardMeta && res?.card?.meta) {
         cache.writeQuery({
-          query: CardMetaDocument,
+          query: CardDocument,
           data: {
-            ...res.cardMeta,
+            ...res.card.meta,
             title: data.updateCardMeta.title,
             author: data.updateCardMeta.author,
             keywords: data.updateCardMeta.keywords,
@@ -87,7 +80,7 @@ const HeaderForm = ({
       }
     },
     onCompleted(data) {
-      console.log(data.updateCardMeta)
+      // console.log(data.updateCardMeta)
       if (data.updateCardMeta) {
         const newData = data.updateCardMeta
         // setValue('title', newData.title ?? '', { shouldDirty: false })
@@ -127,7 +120,7 @@ const HeaderForm = ({
 
       updateCardMeta({
         variables: {
-          symbol,
+          cardId,
           data: {
             author: d.author,
             title: d.title,

@@ -1,13 +1,18 @@
 import { useState } from 'react'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
-import { Emoji } from '../../apollo/query.graphql'
-import { EmojiText } from '../../apollo/type-defs.graphqls'
+import { CardEmoji, BulletEmoji, EmojiCode } from '../../apollo/query.graphql'
 // import classes from './upDown.module.scss'
 
-const EmojiTextToIcon = ({ emoji, emojiText }: { emoji?: Emoji; emojiText?: EmojiText }): JSX.Element | null => {
+const EmojiCodeToIcon = ({
+  emoji,
+  emojiCode,
+}: {
+  emoji?: CardEmoji | BulletEmoji
+  emojiCode?: EmojiCode
+}): JSX.Element | null => {
   if (emoji) {
-    switch (emoji.text) {
+    switch (emoji.code) {
       case 'PIN':
         return <span>❤️</span>
       case 'UP':
@@ -15,11 +20,11 @@ const EmojiTextToIcon = ({ emoji, emojiText }: { emoji?: Emoji; emojiText?: Emoj
       case 'DOWN':
         return <span>👎</span>
       default:
-        return <span>{emoji.text}</span>
+        return <span>{emoji.code}</span>
     }
   }
-  if (emojiText) {
-    switch (emojiText) {
+  if (emojiCode) {
+    switch (emojiCode) {
       case 'PIN':
         return <span>❤️</span>
       case 'UP':
@@ -27,10 +32,10 @@ const EmojiTextToIcon = ({ emoji, emojiText }: { emoji?: Emoji; emojiText?: Emoj
       case 'DOWN':
         return <span>👎</span>
       default:
-        return <span>{emojiText}</span>
+        return <span>{emojiCode}</span>
     }
   }
   return null
 }
 
-export default EmojiTextToIcon
+export default EmojiCodeToIcon

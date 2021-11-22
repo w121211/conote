@@ -22,6 +22,7 @@ export interface BulletPanelType {
   visible?: boolean
   handleVisibleState?: (state: boolean) => void
   className?: string
+  tooltipClassName?: string
   sourceUrl?: string
   authorName?: string
   onEmojiCreated: (emoji: BulletEmoji, myEmojiLike: BulletEmojiLike) => void
@@ -38,8 +39,9 @@ const BulletPanel = ({
   bulletId,
   onEmojiCreated,
   emoji,
+  tooltipClassName,
 }: BulletPanelType): JSX.Element => {
-  const [showPanel, setShowPanel] = useState<boolean>(false)
+  // const [showPanel, setShowPanel] = useState<boolean>(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const myChildren: Child[] = []
@@ -70,94 +72,59 @@ const BulletPanel = ({
   }
 
   const handleShowPanel = (state: boolean) => {
-    setShowPanel(state)
+    // setShowPanel(state)
   }
   return (
-    <div
-      className={`${classes.container} ${className ? className : ''}`}
-      onMouseOver={e => {
-        e.stopPropagation()
-        // e.preventDefault()
-        if (e.currentTarget.contains(containerRef.current)) {
-          setShowPanel(true)
-        }
-        // console.log('hover')
-      }}
-      onMouseLeave={e => {
-        e.stopPropagation()
-        // e.preventDefault()
-
-        setShowPanel(false)
-        // if (!e.currentTarget.contains(containerRef.current)) {
-        //  setTimeout(
-        //   () => {
-        //   },
-        //   100,
-        //   false,
-        // )
-        // }
-        // console.log('mouseout')
-      }}
-      ref={containerRef}
-    >
-      {/* <div className={classes.bulletPanelSibling}></div> */}
-      <BulletPanelSvg
-        className={classes.bulletPanel}
-        // clicked={() => {
-        //   setShowPanel(prev => !prev)
-        //   // console.log('panel clicked')
-        // }}
-
-        style={showPanel || visible ? { visibility: 'visible' } : undefined}
-      />
-
-      {showPanel && (
-        <MyTooltip className={classes.panelTooltip} visible={showPanel} handleVisibleState={handleShowPanel}>
-          {myChildren.map((e, i) => {
-            if (e.authorName)
-              return (
-                <div key={i} className={classes.titleContainer}>
-                  <div className={` ${classes.title}`}>{e.authorName}</div>
-                  <div role="none" className={classes.divider}></div>
-                </div>
-              )
-            if (e.sourceUrl)
-              return (
-                <div className={classes.panelElement} key={i}>
-                  <a className="ui" href={e.sourceUrl} target="_blank" rel="noreferrer">
-                    <span className={classes.panelIcon}>{e.icon}</span>
-                    {e.text}
-                  </a>
-                </div>
-              )
-            if (bulletId && e.emojiCode !== undefined) {
-              return (
-                <EmojiUpDown
-                  className={classes.panelElement}
-                  key={i}
-                  bulletId={bulletId}
-                  foundEmoji={emoji?.find(el => el.code === e.emojiCode)}
-                  emojiText={e.emojiCode}
-                  // onEmojiCreated={onEmojiCreated}
-                >
-                  {/* <div className={classes.panelElement} key={i}> */}
-                  <span className={classes.panelIcon}>{e.icon}</span>
-
-                  {e.text}
-                  {/* </div> */}
-                </EmojiUpDown>
-              )
-            }
+    <div className={`${classes.container} ${className ? className : ''}`} ref={containerRef}>
+      <MyTooltip
+        className={`${classes.panelTooltip} ${tooltipClassName ? tooltipClassName : ''}`}
+        visible={visible}
+        handleVisibleState={handleShowPanel}
+      >
+        {myChildren.map((e, i) => {
+          if (e.authorName)
+            return (
+              <div key={i} className={classes.titleContainer}>
+                <div className={` ${classes.title}`}>{e.authorName}</div>
+                <div role="none" className={classes.divider}></div>
+              </div>
+            )
+          if (e.sourceUrl)
             return (
               <div className={classes.panelElement} key={i}>
+                <a className="ui" href={e.sourceUrl} target="_blank" rel="noreferrer">
+                  <span className={classes.panelIcon}>{e.icon}</span>
+                  {e.text}
+                </a>
+              </div>
+            )
+          if (bulletId && e.emojiCode !== undefined) {
+            return (
+              <EmojiUpDown
+                className={classes.panelElement}
+                key={i}
+                bulletId={bulletId}
+                foundEmoji={emoji?.find(el => el.code === e.emojiCode)}
+                emojiCode={e.emojiCode}
+                // onEmojiCreated={onEmojiCreated}
+              >
+                {/* <div className={classes.panelElement} key={i}> */}
                 <span className={classes.panelIcon}>{e.icon}</span>
 
                 {e.text}
-              </div>
+                {/* </div> */}
+              </EmojiUpDown>
             )
-          })}
-        </MyTooltip>
-      )}
+          }
+          return (
+            <div className={classes.panelElement} key={i}>
+              <span className={classes.panelIcon}>{e.icon}</span>
+
+              {e.text}
+            </div>
+          )
+        })}
+      </MyTooltip>
     </div>
   )
 }

@@ -8,13 +8,13 @@ import { useMeQuery } from '../../apollo/query.graphql'
 export default function Layout({
   children,
   navPath,
-  buttonLeft,
+  buttonRight,
 }: // handlePath,
 // handleSymbol,
 {
   children: React.ReactNode
   navPath?: React.ReactNode
-  buttonLeft?: React.ReactNode
+  buttonRight?: React.ReactNode
   // handlePath?: (i: number) => void
   // handleSymbol?: (e: string) => void
 }): JSX.Element {
@@ -68,6 +68,8 @@ export default function Layout({
         style={{
           transform: showMenu ? 'translate3d(0,0,0)' : 'translate3d(-100%,0,0)',
           position: pinSideBar ? 'relative' : 'absolute',
+          background: pinSideBar ? 'rgb(247 246 246)' : 'white',
+          boxShadow: pinSideBar || !showMenu ? '0 0 50px transparent' : '0 0 50px #322f2f36',
         }}
         isPined={pinSideBar}
       />
@@ -94,7 +96,7 @@ export default function Layout({
           </Link>
           {/* {navPath} */}
           <div className={classes.left}>
-            {buttonLeft}
+            {buttonRight}
             {meData ? (
               <button className="secondary">
                 <a href="/api/auth/logout">Logout</a>{' '}
