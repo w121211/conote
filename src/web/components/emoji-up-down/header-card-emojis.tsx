@@ -6,7 +6,7 @@ import CardEmojiBtn from './card-emoji-btn'
 const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null => {
   const { data: emojiData } = useCardEmojisQuery({ variables: { cardId } })
   const pinEmoji = emojiData?.cardEmojis.find(e => e.code === 'PIN')
-  console.log(pinEmoji)
+  console.log(emojiData?.cardEmojis)
   const upEmoji = emojiData?.cardEmojis.find(e => e.code === 'UP')
   const downEmoji = emojiData?.cardEmojis.find(e => e.code === 'DOWN')
   if (emojiData === null || !emojiData?.cardEmojis) return null

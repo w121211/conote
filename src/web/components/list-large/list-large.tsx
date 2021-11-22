@@ -1,6 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
 import classes from './list-large.module.scss'
+import { useCardEmojisQuery } from '../../apollo/query.graphql'
+import CardEmojis from '../emoji-up-down/card-emojis-display'
 
 const ListLarge = ({
   href,
@@ -12,13 +14,15 @@ const ListLarge = ({
   author,
   shot,
   currentHashtag,
+  cardId,
 }: {
+  cardId: string
   href: string
   title: string
   sourceUrl?: string
   source?: string
   author?: string
-  summary?: string
+  summary?: string[]
   hashtags?: string[]
   shot?: string
   currentHashtag?: string
@@ -60,11 +64,21 @@ const ListLarge = ({
               {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
             </div>
             <h3 className={classes.title}>{title}</h3>
-            {summary && <div className={classes.summary}>{summary}</div>}
+            {summary && (
+              <div className={classes.summary}>
+                {summary.map((e, i) => {
+                  return (
+                    <span key={i}>
+                      {i > 0 && '·'}
+                      {e}
+                    </span>
+                  )
+                })}
+              </div>
+            )}
 
             <div className={classes.emojisContainer}>
-              <span>👍22</span>
-              <span>👎10</span>
+              <CardEmojis cardId={cardId} />
             </div>
           </div>
         </a>

@@ -1,10 +1,12 @@
 import React from 'react'
-import { EmojiCode, LikeChoice, useCreateCardEmojiMutation } from '../../apollo/query.graphql'
+import { CardEmojisDocument, EmojiCode, LikeChoice, useCreateCardEmojiMutation } from '../../apollo/query.graphql'
 import EmojiTextToIcon from './emoji-text-to-icon'
 import classes from './emoji-up-down.module.scss'
 
 const CreateCardEmojiBtn = ({ cardId, emojiCode }: { cardId: string; emojiCode: EmojiCode }) => {
-  const [createCardEmoji] = useCreateCardEmojiMutation()
+  const [createCardEmoji] = useCreateCardEmojiMutation({
+    refetchQueries: [{ query: CardEmojisDocument, variables: { cardId } }],
+  })
 
   const handleLike = () => {
     createCardEmoji({ variables: { cardId, code: emojiCode } })

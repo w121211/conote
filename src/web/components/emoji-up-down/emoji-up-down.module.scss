@@ -64,9 +64,9 @@
   display: flex;
 }
 button.hashtag {
-  background: none;
-  padding: 0;
-  margin: 0;
+  // background: none;
+  // padding: 0 6px;
+  // margin: 0;
   &:not(:first-child) {
     margin-left: 10px;
   }
@@ -76,9 +76,13 @@ button.hashtag {
   color: $gray-text;
 }
 
-.clicked {
+button.clicked {
+  padding: 0 6px;
   svg {
     fill: $text;
   }
   color: $text;
+  background: $natual;
+  border: 1px solid $gray;
+  border-radius: 15px;
 }

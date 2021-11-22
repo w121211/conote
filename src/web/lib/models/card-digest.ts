@@ -63,7 +63,7 @@ export const CardDigestModel = {
     const commits = await prisma.commit.findMany({
       // where: { createdAt: { gte: maxDate.toDate() } },
       orderBy: { updatedAt: 'desc' },
-      cursor: afterId ? { id: afterCommitId } : undefined,
+      cursor: afterCommitId ? { id: afterCommitId } : undefined,
       take: 20,
       skip: afterCommitId ? 1 : 0,
       include: { cardStates: { include: { card: { include: { sym: true, link: true } } } } },

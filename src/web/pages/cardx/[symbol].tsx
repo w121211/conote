@@ -8,7 +8,7 @@ import { Card, CardMeta, CardMetaInput, useCardLazyQuery, useMeQuery } from '../
 import Layout from '../../components/layout/layout'
 import { workspace } from '../../components/workspace/workspace'
 import { BulletEditor } from '../../components/editor/editor'
-import { DocEntry, DocEntryPack } from '../../components/workspace/doc'
+import { Doc, DocEntry, DocEntryPack } from '../../components/workspace/doc'
 import { DocPath, DocPathService } from '../../components/workspace/doc-path'
 import classes from '../../style/symbol.module.scss'
 import CardMetaForm from '../../components/card-meta-form/card-meta-form'
@@ -16,8 +16,8 @@ import LinkIcon from '../../assets/svg/link.svg'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 import NavPath from '../../components/nav-path/nav-path'
 
-const CardHead = ({ card, symbol }: { card: Card | null; symbol: string }): JSX.Element => {
-  const mainDoc = useObservable(() => workspace.mainDoc$)
+const CardHead = ({ doc, card, symbol }: { doc: Doc; card: Card | null; symbol: string }): JSX.Element => {
+  // const mainDoc = useObservable(() => workspace.mainDoc$)
   const status = useObservable(() => workspace.status$)
   const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
   const [cardMetaSubmitted, setCardMetaSubmitted] = useState(false)
@@ -40,17 +40,17 @@ const CardHead = ({ card, symbol }: { card: Card | null; symbol: string }): JSX.
           className={classes.headerHiddenBtns}
           style={showHeaderHiddenBtns ? { visibility: 'visible' } : { visibility: 'hidden' }}
         >
-          {mainDoc && mainDoc.doc?.cardInput?.meta && (
+          {doc.cardInput?.meta && (
             <CardMetaForm
-              cardId={mainDoc.doc.cid}
+              cardId={doc.cid}
               // selfCard={data.selfCard}
               handleCardMetaSubmitted={handleCardMetaSubmitted}
               btnClassName={classes.cardMetaBtn}
             />
           )}
-          {mainDoc && mainDoc.doc?.symbol.startsWith('@http') && (
+          {doc?.symbol.startsWith('@http') && (
             // <button>
-            <a className={classes.cardSource} href={mainDoc.doc?.symbol.substr(1)} target="_blank" rel="noreferrer">
+            <a className={classes.cardSource} href={doc?.symbol.substr(1)} target="_blank" rel="noreferrer">
               <LinkIcon />
               開啟來源
             </a>
@@ -103,12 +103,12 @@ const CardHead = ({ card, symbol }: { card: Card | null; symbol: string }): JSX.
         </div>
       )} */}
       <div className={classes.headerBottom}>
-        {mainDoc?.doc?.cid && <HeaderCardEmojis cardId={mainDoc?.doc?.cid} />}
-        {mainDoc && mainDoc?.doc?.cardInput?.meta?.author && (
+        {doc.cardCopy?.id && <HeaderCardEmojis cardId={doc.cardCopy?.id} />}
+        {doc?.cardInput?.meta?.author && (
           <>
             <div className={classes.divider}></div>
-            <Link href={`/author/${encodeURIComponent('@' + mainDoc?.doc?.cardInput?.meta?.author)}`}>
-              <a className={classes.author}>@{mainDoc?.doc?.cardInput?.meta?.author}</a>
+            <Link href={`/author/${encodeURIComponent('@' + doc?.cardInput?.meta?.author)}`}>
+              <a className={classes.author}>@{doc?.cardInput?.meta?.author}</a>
             </Link>
           </>
         )}
@@ -210,34 +210,7 @@ const WorkspaceComponent = ({
 
       <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div>
 
-      <button
-        onClick={() => {
-          workspace.drop()
-        }}
-      >
-        Drop
-      </button>
-      <button
-        onClick={async () => {
-          if (mainDoc.doc) {
-            await workspace.commit(mainDoc.doc, client)
-            // router.reload()
-          }
-        }}
-      >
-        Commit
-      </button>
-      <button
-        onClick={() => {
-          if (mainDoc.doc) {
-            workspace.save(mainDoc.doc)
-          }
-        }}
-      >
-        Save
-      </button>
-
-      <CardHead card={card} symbol={mainDoc.doc.symbol} />
+      <CardHead doc={mainDoc.doc} card={card} symbol={mainDoc.doc.symbol} />
 
       <BulletEditor doc={mainDoc.doc} />
     </div>
@@ -313,7 +286,7 @@ const CardSymbolPage = (): JSX.Element | null => {
               }
               if (mainDoc.doc) {
                 await workspace.commit(mainDoc.doc, client)
-                router.reload()
+                // router.reload()
               }
             }}
           >

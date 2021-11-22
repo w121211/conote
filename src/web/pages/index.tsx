@@ -5,12 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
 // import { getCardUrlParam } from '../lib/helper'
-<<<<<<< HEAD
-// import { useLatestCardsQuery, useMeQuery } from '../apollo/query.graphql'
-import { useMeQuery } from '../apollo/query.graphql'
-=======
 import { useLatestCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
->>>>>>> a2fdf7d847eb7ec60060eb7d918a95a7b8346c62
 import { SearchAllForm } from '../components/search-all-form'
 // import { SearchAllForm } from '../components/search-all-form'
 import SideBar from '../components/sidebar/sidebar'
@@ -29,7 +24,7 @@ function LatestCards(): JSX.Element | null {
   if (error || !data) return <p>Something goes wrong...</p>
   if (data.latestCardDigests.length === 0) return <p>No cards</p>
 
-  const afterId = data.latestCardDigests[data.latestCardDigests.length - 1].commitId
+  const afterCommitId = data.latestCardDigests[data.latestCardDigests.length - 1].commitId
 
   // async function onClickMore() {
   //   const result = await fetchMore({ variables: { afterId } })
@@ -37,17 +32,18 @@ function LatestCards(): JSX.Element | null {
   //     setHasMore(false)
   //   }
   // }
-
+  console.log(data.latestCardDigests)
   return (
     <>
       {data.latestCardDigests &&
         data.latestCardDigests.map((e, i) => (
           <ListLarge
             key={i}
-            title={e.symbol}
-            href={`/card/${encodeURIComponent(e.symbol)}`}
-            sourceUrl={e.symbol.startsWith('@') ? e.symbol.substr(1) : `${router.asPath}card/${e.symbol.substr(1)}`}
-            summary="原油 vs 天然氣，哪個比較適合投資？ · 2021Q4油價是否還會持續上漲？ · #討論 #機會 哈哈哈哈啊fj;ejfoi喔喔喔喔喔j sdlkfj;aj · 哈哈哈哈再來"
+            cardId={e.cardId}
+            title={e.title}
+            href={`/cardx/${encodeURIComponent(e.sym.symbol)}`}
+            sourceUrl={e.sym.type === 'URL' ? e.sym.symbol.substr(1) : `${router.asPath}cardx/${e.sym.symbol}`}
+            summary={e.picks}
           />
         ))}
       {hasMore ? (
@@ -58,8 +54,8 @@ function LatestCards(): JSX.Element | null {
             <button
               className={`primary ${classes.moreBtn}`}
               onClick={async () => {
-                const result = await fetchMore({ variables: { afterId } })
-                if (result.data.latestCardEntries.length === 0) {
+                const result = await fetchMore({ variables: { afterCommitId } })
+                if (result.data.latestCardDigests.length === 0) {
                   setHasMore(false)
                 }
               }}
@@ -122,7 +118,7 @@ function HomePage(): JSX.Element {
               <div className={classes.new}>
                 {/* {switchList === 'hot' && } */}
                 <div className={classes.latestCards}>
-                  {/* {switchList === 'new' && <LatestCards />} */}
+                  {switchList === 'new' && <LatestCards />}
                   {switchList === 'hot' && <IndexHotList />}
                 </div>
               </div>
