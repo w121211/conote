@@ -6,7 +6,7 @@ import { TreeService } from '../../../packages/docdiff/src'
 import { Editor as MKEditor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../lib/fetcher/fetcher'
 import { CardMeta, CardModel } from '../../lib/models/card'
-import { createTestUsers, TESTUSERS } from '../../lib/test-helper'
+import { TestDataHelper, TESTUSERS } from '../../test/test-helpers'
 import { ShotBody, ShotModel } from '../../lib/models/shot'
 import { CommitModel } from '../../lib/models/commit'
 import { CardStateBody, CardStateParsed } from '../../lib/models/card-state'
@@ -112,7 +112,7 @@ const main = async () => {
   await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Link", "Poll", "Shot", "Sym", "User" CASCADE;`
 
   console.log('Creating test users...')
-  await createTestUsers(prisma)
+  await TestDataHelper.createUsers(prisma)
 
   for (const filename of readdirSync(seedDirPath).sort()) {
     if (filename.startsWith(IGNORE_FILE_STARTS_WITH)) {
