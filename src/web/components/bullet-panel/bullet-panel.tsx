@@ -51,7 +51,7 @@ const BulletPanel = ({
   if (bulletId) {
     myChildren.push(
       {
-        icon: <PinIcon />,
+        icon: <span>❤️</span>,
         emojiCode: 'PIN',
         text: 'Pin',
       },

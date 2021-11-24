@@ -1169,7 +1169,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           <BulletPanel
             className={classes.bulletPanel}
             tooltipClassName={classes.bulletPanelTooltip}
-            bulletId={lc.bulletSnapshot?.id}
+            bulletId={lc.bulletCopy?.id}
             visible={showPanel}
             onEmojiCreated={onEmojiCreated}
           />
