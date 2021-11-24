@@ -4,7 +4,7 @@
  * https://www.apollographql.com/blog/building-a-next-js-app-with-apollo-client-slash-graphql/
  * https://github.com/apollographql/apollo-cache-persist/blob/master/examples/web/src/index.tsx
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 import { createCache } from './cache'
