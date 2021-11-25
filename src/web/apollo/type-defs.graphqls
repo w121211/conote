@@ -293,8 +293,9 @@ type CardEmojiLike {
 }
 
 type CardDigest {
-  cardId: String!
   commitId: String!
+  cardId: String!
+  cardMeta: CardMeta!
   sym: Sym!
   title: String!
   picks: [String!]!

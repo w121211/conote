@@ -3,18 +3,19 @@ import { CardDigest as GQLCardDigest } from '../../apollo/type-defs.graphqls'
 import { Bullet } from '../../components/bullet/types'
 import prisma from '../prisma'
 import { CardModel, CardPrarsed } from './card'
-import { CardStateBody } from './card-state'
-import { CardStatePack, CommitModel, RowCardState, RowCommit } from './commit'
+import { CardStateModel } from './card-state'
+import { CommitModel, RowCardState, RowCommit } from './commit'
 
 export const CardDigestModel = {
   fromCard(card: CardPrarsed, subs: GQLCardDigest[]): GQLCardDigest {
     if (subs.length === 0) {
       throw 'Require 1 or more sub-digests to create a null-state-card digest'
     }
-    const { id: cardId, sym } = card
+    const { id: cardId, sym, meta: cardMeta } = card
     return {
-      cardId,
       commitId: subs[0].commitId, // TODO: temp fill
+      cardId,
+      cardMeta,
       sym,
       title: sym.symbol,
       picks: [],
@@ -24,12 +25,12 @@ export const CardDigestModel = {
   },
 
   fromCardState(state: RowCardState, subs: GQLCardDigest[] = []): GQLCardDigest {
-    const { cardId, updatedAt } = state
-    const { sym } = state.card
-    const body = state.body as unknown as CardStateBody
+    const { body, updatedAt } = CardStateModel.parse(state)
+    const { id: cardId, meta: cardMeta, sym } = CardModel.parse(state.card)
     return {
-      cardId,
       commitId: state.commitId,
+      cardId,
+      cardMeta,
       sym,
       title: sym.symbol,
       picks: body.changes
@@ -63,7 +64,7 @@ export const CardDigestModel = {
     const commits = await prisma.commit.findMany({
       // where: { createdAt: { gte: maxDate.toDate() } },
       orderBy: { updatedAt: 'desc' },
-      cursor: afterId ? { id: afterCommitId } : undefined,
+      cursor: afterCommitId ? { id: afterCommitId } : undefined,
       take: 20,
       skip: afterCommitId ? 1 : 0,
       include: { cardStates: { include: { card: { include: { sym: true, link: true } } } } },

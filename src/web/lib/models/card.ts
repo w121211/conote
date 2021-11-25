@@ -6,10 +6,10 @@ import { LinkService } from './link'
 import { SymModel } from './sym'
 
 export type CardPrarsed = Omit<Card, 'meta'> & {
-  link: Link | null
   meta: CardMeta
-  state: CardStateParsed | null
   sym: Sym
+  state: CardStateParsed | null
+  link: Link | null
 }
 
 export type CardMeta = {
@@ -123,6 +123,17 @@ export const CardModel = {
       link,
       meta,
       state: null,
+    }
+  },
+
+  parse(card: RowCard, cardState: CardStateParsed | null = null): CardPrarsed {
+    const { link, sym } = card
+    return {
+      ...card,
+      meta: card.meta as unknown as CardMeta,
+      state: cardState,
+      sym,
+      link,
     }
   },
 }
