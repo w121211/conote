@@ -54,25 +54,7 @@
 .author {
   color: $link;
 }
-.emojisContainer {
-  display: flex;
-  width: fit-content;
 
-  margin-top: 4px;
-  // padding: 0 8px;
-  // border: 1px solid $gray;
-  // border-radius: 1em;
-  // background: #f9f9fb;
-  font-size: 14px;
-
-  color: $gray-text-dark;
-  white-space: nowrap;
-  line-height: 1.5;
-
-  .upIcon {
-    color: #ee9700;
-  }
-}
 .title {
   // max-width: min(400px, 50vw, 100%);
   overflow: hidden;

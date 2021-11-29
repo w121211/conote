@@ -6,7 +6,8 @@ import classes from './bullet-panel.module.scss'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
 import { BulletEmoji, BulletEmojiLike, EmojiCode } from '../../apollo/query.graphql'
-import EmojiUpDown from '../emoji-up-down/emoji-up-down'
+
+import BulletPanelEmojis from '../emoji-up-down/bullet-panel-emojis'
 
 interface Child {
   icon?: SVGComponentTransferFunctionElement | SVGElement | Element | string | ReactElement
@@ -49,23 +50,23 @@ const BulletPanel = ({
     myChildren.unshift({ authorName: '@' + authorName.split(':')[0] })
   }
   if (bulletId) {
-    myChildren.push(
-      {
-        icon: <span>❤️</span>,
-        emojiCode: 'PIN',
-        text: 'Pin',
-      },
-      {
-        icon: <UpIcon />,
-        emojiCode: 'UP',
-        text: 'Up',
-      },
-      {
-        icon: <UpIcon style={{ transform: 'rotate(180deg)' }} />,
-        emojiCode: 'DOWN',
-        text: 'Down',
-      },
-    )
+    // myChildren.push(
+    //   {
+    //     // icon: <span className="material-icons-outlined">favorite_border</span>,
+    //     emojiCode: 'PIN',
+    //     text: 'Pin',
+    //   },
+    //   {
+    //     // icon: <UpIcon />,
+    //     emojiCode: 'UP',
+    //     text: 'Up',
+    //   },
+    //   {
+    //     // icon: <UpIcon style={{ transform: 'rotate(180deg)' }} />,
+    //     emojiCode: 'DOWN',
+    //     text: 'Down',
+    //   },
+    // )
   }
   if (sourceUrl) {
     myChildren.push({ icon: <SrcIcon />, text: '來源連結', sourceUrl })
@@ -98,32 +99,16 @@ const BulletPanel = ({
                 </a>
               </div>
             )
-          if (bulletId && e.emojiCode !== undefined) {
-            return (
-              <EmojiUpDown
-                className={classes.panelElement}
-                key={i}
-                bulletId={bulletId}
-                foundEmoji={emoji?.find(el => el.code === e.emojiCode)}
-                emojiCode={e.emojiCode}
-                // onEmojiCreated={onEmojiCreated}
-              >
-                {/* <div className={classes.panelElement} key={i}> */}
-                <span className={classes.panelIcon}>{e.icon}</span>
 
-                {e.text}
-                {/* </div> */}
-              </EmojiUpDown>
-            )
-          }
-          return (
-            <div className={classes.panelElement} key={i}>
-              <span className={classes.panelIcon}>{e.icon}</span>
+          // return (
+          //   <div className={classes.panelElement} key={i}>
+          //     <span className={classes.panelIcon}>{e.icon}</span>
 
-              {e.text}
-            </div>
-          )
+          //     {e.text}
+          //   </div>
+          // )
         })}
+        {bulletId && <BulletPanelEmojis bulletId={bulletId} />}
       </MyTooltip>
     </div>
   )

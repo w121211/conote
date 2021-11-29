@@ -1,24 +1,42 @@
 .container {
+  margin-top: 4px;
+  overflow: hidden;
+  &:hover {
+    overflow-y: auto;
+  }
+}
+.listContainer {
   //   padding-bottom: 16px;
+
   font-size: 14px;
+  ul {
+    // padding-inline-start: 1.5em;
+    list-style-type: none;
+    // list-style-position: inside;
+    // color: $text;
+  }
 }
 .listContent {
-  margin-left: 1em;
   color: $text;
-  ul {
-    padding-inline-start: 1.5em;
-    border-left: 1px solid #ecedf2;
-    list-style: none;
-  }
-  li {
-    // width: 100%;
-    padding-inline-start: 0;
+  // ul {
+  //   // padding-inline-start: 1.5em;
+  //   // border-left: 1px solid #ecedf2;
+  //   list-style: none;
+  // }
+  // li {
+  //   // width: 100%;
+  //   padding-inline-start: 0;
+  // }
+  &:hover {
+    background-color: $gray;
+    cursor: pointer;
   }
 }
 .title {
   display: flex;
   align-items: center;
   gap: 5px;
+  line-height: 1.8;
 }
 .titleText {
   min-width: 0;
@@ -29,9 +47,30 @@
 .articleIcon {
   font-size: 18px;
   color: $gray-text;
+  mix-blend-mode: multiply;
 }
 .children {
-  margin-left: 9px;
   margin-top: 5px;
   margin-bottom: 10px;
+  padding: 0;
+}
+.listChildWrapper {
+  padding-left: 8px;
+
+  &:hover {
+    background-color: $gray;
+    cursor: pointer;
+  }
+}
+.listChild {
+  display: flex;
+  align-items: center;
+  border-left: 1px solid #e7e7e3;
+  mix-blend-mode: multiply;
+  padding-left: 8px;
+}
+.notesIcon {
+  font-size: 18px;
+  color: $gray-text;
+  mix-blend-mode: multiply;
 }

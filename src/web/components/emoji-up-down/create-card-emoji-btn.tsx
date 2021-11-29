@@ -3,7 +3,7 @@ import { CardEmojisDocument, EmojiCode, LikeChoice, useCreateCardEmojiMutation }
 import EmojiTextToIcon from './emoji-text-to-icon'
 import classes from './emoji-up-down.module.scss'
 
-const CreateCardEmojiBtn = ({ cardId, emojiCode }: { cardId: string; emojiCode: EmojiCode }) => {
+const CreateCardEmojiBtn = ({ cardId, emojiCode }: { cardId: string; emojiCode: EmojiCode }): JSX.Element => {
   const [createCardEmoji] = useCreateCardEmojiMutation({
     refetchQueries: [{ query: CardEmojisDocument, variables: { cardId } }],
   })
@@ -13,14 +13,12 @@ const CreateCardEmojiBtn = ({ cardId, emojiCode }: { cardId: string; emojiCode: 
   }
   return (
     <button
-      className={`inline ${classes.hashtag}`}
+      className={`noStyle ${classes.hashtag}`}
       onClick={() => {
         handleLike()
       }}
     >
-      <EmojiTextToIcon emojiCode={emojiCode} />
-
-      <span style={{ marginLeft: '3px' }}>0</span>
+      <EmojiTextToIcon emojiCode={emojiCode} count={0} />
     </button>
   )
 }

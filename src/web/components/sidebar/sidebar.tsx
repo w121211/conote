@@ -10,6 +10,8 @@ import { useMeQuery } from '../../apollo/query.graphql'
 import MenuIcon from '../../assets/svg/menu.svg'
 import layoutClasses from '../layout/layout.module.scss'
 import SidebarList from './sidebar-list'
+import { workspace } from '../workspace/workspace'
+import { useObservable } from 'rxjs-hooks'
 
 const SideBar = ({
   style,
@@ -24,6 +26,8 @@ const SideBar = ({
 }): JSX.Element => {
   // const { user, error, isLoading } = useUser()
   // const { data, loading } = useMeQuery()
+  const savedDocs = useObservable(() => workspace.savedDocs$)
+  const committedDocs = useObservable(() => workspace.committedDocs$)
 
   return (
     <div
@@ -35,53 +39,52 @@ const SideBar = ({
         pinMenuHandler(false)
       }}
     >
-      <div className={`${classes.menuIconWrapper}`}>
-        <MenuIcon
-          className={classes.menuIcon}
-          onClick={() => {
-            showMenuHandler(false)
-            pinMenuHandler(false)
-          }}
-        />
-        <span
-          className={`${isPined ? 'material-icons' : 'material-icons-outlined'} ${classes.pushPin}`}
-          onClick={() => {
-            pinMenuHandler()
-          }}
-        >
-          push_pin
-        </span>
-      </div>
+      <div className={classes.sidebarTop}>
+        <div className={`${classes.menuIconWrapper}`}>
+          <MenuIcon
+            className={classes.menuIcon}
+            onClick={() => {
+              showMenuHandler(false)
+              pinMenuHandler(false)
+            }}
+          />
+          <span
+            className={`${isPined ? 'material-icons' : 'material-icons-outlined'} ${classes.pushPin}`}
+            onClick={() => {
+              pinMenuHandler()
+            }}
+          >
+            push_pin
+          </span>
+        </div>
 
-      <div className={classes.searchBar}>
-        <SearchAllForm small />
+        <div className={classes.searchBar}>
+          <SearchAllForm small />
+        </div>
+        <ul className={classes.sideList}>
+          <li>
+            {/* <HomeIcon /> */}
+            <a href="/">
+              <span>首頁</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              {/* <CocardIcon /> */}
+              <span>社群卡</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              {/* <HeartIcon /> */}
+              <span>收藏</span>
+            </a>
+          </li>
+        </ul>
       </div>
-      <ul className={classes.sideList}>
-        <li>
-          {/* <HomeIcon /> */}
-          <a href="/">
-            <span>首頁</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            {/* <CocardIcon /> */}
-            <span>社群卡</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            {/* <HeartIcon /> */}
-            <span>收藏</span>
-          </a>
-        </li>
-      </ul>
-      <SidebarList title="暫存區" />
-      <SidebarList title="最近編輯的文章" />
+      <SidebarList title="最近編輯的文章" entries={committedDocs} />
+      <SidebarList title="暫存區" entries={savedDocs} />
 
-      {/* <span className="logo">
-        <Link href="/">COCARD</Link>
-      </span> */}
       {/* {data ? (
         <>
           {window.location.protocol.includes('extension') ? (
@@ -97,14 +100,6 @@ const SideBar = ({
       ) : (
         <a href="/api/auth/login">Login</a>
       )} */}
-      {/* <Search
-          className="search"
-          placeholder="Search..."
-          enterButton
-          size="middle"
-          // suffix={suffix}
-          // onSearch={onSearch}
-        /> */}
     </div>
   )
 }

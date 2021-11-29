@@ -26,7 +26,15 @@
     fill: $gray-text;
   }
 }
-.default {
+.bulletEmojiDefaultBtn {
+  display: flex;
+
+  width: 100%;
+  // padding: 2px 14px;
+  text-align: start;
+  // &:hover {
+  //   color: #787572;
+  // }
   svg {
     fill: $gray-text;
   }
@@ -63,10 +71,9 @@
 .hasDividerDiv {
   display: flex;
 }
-button.hashtag {
-  // background: none;
-  // padding: 0 6px;
-  // margin: 0;
+button.hashtag,
+.hashtag {
+  // display: block;
   &:not(:first-child) {
     margin-left: 10px;
   }
@@ -76,13 +83,69 @@ button.hashtag {
   color: $gray-text;
 }
 
-button.clicked {
-  padding: 0 6px;
-  svg {
-    fill: $text;
+// button.clicked {
+//   padding: 0 6px;
+//   svg {
+//     fill: $text;
+//   }
+//   color: $text;
+//   background: $natual;
+//   border: 1px solid $gray;
+//   border-radius: 15px;
+// }
+.emojisContainer {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+
+  // margin-top: 4px;
+  // padding: 0 8px;
+  // border: 1px solid $gray;
+  // border-radius: 1em;
+  // background: #f9f9fb;
+  font-size: 14px;
+
+  color: $gray-text-dark;
+  white-space: nowrap;
+  line-height: 1.5;
+
+  // .upIcon {
+  //   color: #ee9700;
+  // }
+}
+.bulletPointEmojisContainer {
+  @extend .emojisContainer;
+  flex-direction: row;
+  vertical-align: middle;
+  gap: 10px;
+  margin-left: 6px;
+}
+
+.cardEmojiContainer {
+  @extend .emojisContainer;
+  flex-direction: row;
+}
+
+.headerCardEmojiContainer {
+  display: flex;
+}
+.bulletPanelBtn {
+  // gap: 3px;
+  // vertical-align: middle;
+  padding: 3px 14px;
+  &:hover {
+    background: #eee;
   }
-  color: $text;
-  background: $natual;
-  border: 1px solid $gray;
-  border-radius: 15px;
+}
+.bulletPanelBtnIcon {
+  gap: 3px;
+  &:hover {
+    color: $text;
+  }
+}
+.cardDisplayIcon {
+  &:hover {
+    color: $text;
+  }
 }

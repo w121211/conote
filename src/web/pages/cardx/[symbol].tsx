@@ -40,14 +40,14 @@ const CardHead = ({ doc, card, symbol }: { doc: Doc; card: Card | null; symbol: 
           className={classes.headerHiddenBtns}
           style={showHeaderHiddenBtns ? { visibility: 'visible' } : { visibility: 'hidden' }}
         >
-          {doc.cardInput?.meta && (
-            <CardMetaForm
-              cardId={doc.cid}
-              // selfCard={data.selfCard}
-              handleCardMetaSubmitted={handleCardMetaSubmitted}
-              btnClassName={classes.cardMetaBtn}
-            />
-          )}
+          {/* {doc.cardInput?.meta && ( */}
+          <CardMetaForm
+            cardId={doc.cid}
+            // selfCard={data.selfCard}
+            handleCardMetaSubmitted={handleCardMetaSubmitted}
+            btnClassName={classes.cardMetaBtn}
+          />
+          {/* )} */}
           {doc?.symbol.startsWith('@http') && (
             // <button>
             <a className={classes.cardSource} href={doc?.symbol.substr(1)} target="_blank" rel="noreferrer">
@@ -183,7 +183,7 @@ const WorkspaceComponent = ({
   //   ),
   // )
 
-  // console.log(card, sourceCard)
+  // console.log(savedDocs, committedDocs)
 
   useEffect(() => {
     workspace.open({ docPath, card, sourceCard })
@@ -203,12 +203,12 @@ const WorkspaceComponent = ({
   }
   return (
     <div>
-      <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
+      {/* <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
       <div>Committed:{committedDocs && committedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
 
       <div>{status}</div>
 
-      <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div>
+      <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div> */}
 
       <CardHead doc={mainDoc.doc} card={card} symbol={mainDoc.doc.symbol} />
 

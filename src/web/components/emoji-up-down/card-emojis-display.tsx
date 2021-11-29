@@ -29,9 +29,7 @@ const CardEmojiDisplay = ({ cardEmoji }: { cardEmoji: CardEmoji }): JSX.Element 
     >
       {/* {data.myHashtagLike?.choice && hashtag.text} */}
       {/* {hashtag.text} */}
-      <EmojiTextToIcon emoji={cardEmoji} />
-
-      <span style={{ marginLeft: '3px' }}>{cardEmoji.count.nUps}</span>
+      <EmojiTextToIcon emoji={cardEmoji} customClass={classes.cardDisplayIcon} />
     </button>
   )
 }
@@ -40,11 +38,11 @@ const CardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null => {
   const { data: cardEmojisData } = useCardEmojisQuery({ fetchPolicy: 'cache-first', variables: { cardId } })
   if (!cardEmojisData || cardEmojisData?.cardEmojis.length <= 0) return null
   return (
-    <>
+    <div className={classes.cardEmojisContainer}>
       {cardEmojisData.cardEmojis.map((e, i) => {
         return <CardEmojiDisplay key={i} cardEmoji={e} />
       })}
-    </>
+    </div>
   )
 }
 export default CardEmojis

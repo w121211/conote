@@ -73,6 +73,8 @@ import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withLi
 import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
 import { useApolloClient } from '@apollo/client'
 import { getLocalOrQueryRoot } from './use-local-value'
+import BulletPointEmojis from '../emoji-up-down/bullet-point-emojis'
+
 // import { Context } from '../../pages/card/[symbol]'
 // import { BulletNode } from '../bullet/node'
 // import UpdateShotForm from '../shot-form/update-shot-form'
@@ -962,10 +964,10 @@ RenderElementProps & {
   const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
 
   // TODO: 改成 lazyQuery + useEffect
-  const { data: emojiData } = useBulletEmojisQuery({
-    fetchPolicy: 'cache-first',
-    variables: { bulletId: element.bulletSnapshot?.id ?? '' },
-  })
+  // const { data: emojiData } = useBulletEmojisQuery({
+  //   fetchPolicy: 'cache-first',
+  //   variables: { bulletId: element.bulletCopy?.id ?? '' },
+  // })
   // const [author, authorSwitcher] = useAuthorSwitcher({ authorName })
   // const [placeholder, setPlaceholder] = useState<string | undefined>()
   // useEffect(() => {
@@ -987,7 +989,7 @@ RenderElementProps & {
   // }, [author, element, sourceUrl])
   // console.log(element)
   useEffect(() => {
-    if ((focused && !selected) || readonly) {
+    if (!focused || !selected || readonly) {
       // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
       const path = ReactEditor.findPath(editor, element)
       parseLcAndReplace({ editor, lcEntry: [element, path] })
@@ -1022,28 +1024,20 @@ RenderElementProps & {
       <div className={classes.lcText}>
         {children}
 
-        {emojiData && (
-          <>
-            {emojiData.bulletEmojis?.map((e, i) => {
-              if (e.count.nUps === 0) {
-                return null
-              }
-              return (
-                <span contentEditable={false} key={i}>
-                  <EmojiButotn emoji={e} />
-                </span>
-              )
-            })}
-          </>
-        )}
+        {element.bulletCopy?.id && <BulletPointEmojis bulletId={element.bulletCopy.id} />}
+        {/* // <span contentEditable={false}>
+          //   {emojiData.bulletEmojis?.map((e, i) => {
+          //     return <BulletPointEmojis key={i} bulletId={e.id} bulletEmojis={e} />
+          //   })}
+          // </span> */}
       </div>
-      {/* {sourceCardId && ( */}
-      <span contentEditable={false}>
-        {/* {author === element.author && element.author}
-          {sourceUrl === element.sourceUrl && sourceUrl} */}
-        {/* <FilterMirror mirrors={mirrors} /> */}
-      </span>
-      {/* )} */}
+      {/* {sourceCardId && ( 
+       <span contentEditable={false}>
+        {author === element.author && element.author}
+          {sourceUrl === element.sourceUrl && sourceUrl} 
+        <FilterMirror mirrors={mirrors} />
+      </span> 
+       )} */}
     </div>
   )
 }
@@ -1136,7 +1130,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           </span>
         )}
 
-        <Link href={'/href'}>
+        {/* <Link href={'/href'}>
           <a
             onMouseOver={e => {
               e.stopPropagation()
@@ -1150,7 +1144,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
               e.stopPropagation()
               // e.preventDefault()
 
-              setShowPanel(false)
+              setShowPanel(true)
               // if (!e.currentTarget.contains(containerRef.current)) {
               //  setTimeout(
               //   () => {
@@ -1163,17 +1157,21 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
             }}
           >
             <BulletSvg />
+            
           </a>
-        </Link>
-        {showPanel && (
-          <BulletPanel
-            className={classes.bulletPanel}
-            tooltipClassName={classes.bulletPanelTooltip}
-            bulletId={lc.bulletCopy?.id}
-            visible={showPanel}
-            onEmojiCreated={onEmojiCreated}
-          />
-        )}
+        </Link> */}
+        <span onMouseEnter={() => setShowPanel(true)} onMouseLeave={() => setShowPanel(false)}>
+          <BulletSvg />
+          {showPanel && (
+            <BulletPanel
+              className={classes.bulletPanel}
+              tooltipClassName={classes.bulletPanelTooltip}
+              bulletId={lc.bulletCopy?.id}
+              visible={showPanel}
+              onEmojiCreated={onEmojiCreated}
+            />
+          )}
+        </span>
 
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>

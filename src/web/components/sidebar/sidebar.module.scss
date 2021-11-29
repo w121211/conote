@@ -1,6 +1,8 @@
 // @import '../../style/global.scss';
 
 .sidebar {
+  display: flex;
+  flex-direction: column;
   position: absolute;
   z-index: 100;
   flex-shrink: 0;
@@ -38,9 +40,11 @@
       transform: rotate(45deg);
     }
   }
-
+  .sidebarTop {
+    flex-shrink: 0;
+  }
   .sideList {
-    margin: 0 0 20px;
+    margin: 0;
     list-style: none;
     padding-inline-start: 0;
     line-height: 1.5;

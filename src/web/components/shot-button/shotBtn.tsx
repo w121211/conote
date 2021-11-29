@@ -30,10 +30,15 @@ const ShotBtn = ({ author, target, choice }: { author?: string; target?: string;
             height="19"
             rx="2"
             transform="translate(121.5 0.5)"
-            fill="#4d8b17"
+            fill={choice === '#LONG' ? '#4d8b17' : choice === '#SHORT' ? '#eb0f29' : '#0f69ff'}
           />
           <path id="路径_2" data-name="路径 2" d="M0,0H.5V5H0Z" transform="translate(121 7.5)" fill="none" />
-          <path id="路径_1" data-name="路径 1" d="M121.5,6.5l-3,3v1l3,3" fill="#4d8b17" />
+          <path
+            id="路径_1"
+            data-name="路径 1"
+            d="M122,6.5l-3,3v1l3,3"
+            fill={choice === '#LONG' ? '#4d8b17' : choice === '#SHORT' ? '#eb0f29' : '#0f69ff'}
+          />
         </g>
         <g id="组_2" data-name="组 2">
           <path

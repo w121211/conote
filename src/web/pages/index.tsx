@@ -32,7 +32,7 @@ function LatestCards(): JSX.Element | null {
   //     setHasMore(false)
   //   }
   // }
-  console.log(data.latestCardDigests)
+  // console.log(data.latestCardDigests)
   return (
     <>
       {data.latestCardDigests &&

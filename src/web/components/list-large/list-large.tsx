@@ -69,7 +69,7 @@ const ListLarge = ({
                 {summary.map((e, i) => {
                   return (
                     <span key={i}>
-                      {i > 0 && '·'}
+                      {i > 0 && ' · '}
                       {e}
                     </span>
                   )
@@ -77,9 +77,7 @@ const ListLarge = ({
               </div>
             )}
 
-            <div className={classes.emojisContainer}>
-              <CardEmojis cardId={cardId} />
-            </div>
+            <CardEmojis cardId={cardId} />
           </div>
         </a>
       </Link>

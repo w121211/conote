@@ -85,16 +85,16 @@ const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmoji }): JSX.Element => {
   }
   return (
     <button
-      className={`inline mR ${myEmojiLikeData?.myCardEmojiLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
+      className={`noStyle ${myEmojiLikeData?.myCardEmojiLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
       onClick={() => {
         handleLike('UP')
       }}
     >
       {/* {data.myHashtagLike?.choice && hashtag.text} */}
       {/* {hashtag.text} */}
-      <EmojiTextToIcon emoji={cardEmoji} />
+      <EmojiTextToIcon emoji={cardEmoji} liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'} />
 
-      <span style={{ marginLeft: '3px' }}>{cardEmoji.count.nUps}</span>
+      {/* <span style={{ marginLeft: '3px' }}>{cardEmoji.count.nUps}</span> */}
     </button>
   )
 }
