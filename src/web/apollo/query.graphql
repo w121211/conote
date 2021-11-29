@@ -66,8 +66,11 @@ fragment card on Card {
 
 fragment cardDigestMono on CardDigest {
   __typename
-  cardId
   commitId
+  cardId
+  cardMeta {
+    ...cardMeta
+  }
   sym {
     ...sym
   }
