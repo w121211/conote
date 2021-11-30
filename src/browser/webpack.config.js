@@ -14,6 +14,8 @@ const Dotenv = require('dotenv-webpack')
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+const outDist = isDevelopment ? 'distdev' : 'dist'
+
 module.exports = {
   mode: isDevelopment ? 'development' : 'production',
   // devtool: 'cheap-module-source-map',
@@ -29,7 +31,7 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js'],
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, outDist),
     filename: '[name].js',
   },
   module: {
@@ -128,15 +130,15 @@ module.exports = {
       patterns: [
         {
           from: path.resolve(__dirname, 'public', '*.json'),
-          to: path.resolve(__dirname, 'dist', '[name].json'),
+          to: path.resolve(__dirname, outDist, '[name].json'),
         },
         {
           from: path.resolve(__dirname, 'public', '*.png'),
-          to: path.resolve(__dirname, 'dist', '[name].png'),
+          to: path.resolve(__dirname, outDist, '[name].png'),
         },
         {
           from: path.resolve(__dirname, 'public', '*.html'),
-          to: path.resolve(__dirname, 'dist', '[name].html'),
+          to: path.resolve(__dirname, outDist, '[name].html'),
         },
       ],
     }),

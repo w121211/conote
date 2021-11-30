@@ -32,5 +32,10 @@
     // "browser_style": true
   },
   // 加入api網址為了CORS @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/permissions#host_permissions
-  "permissions": ["storage", "tabs", "http://localhost:3000/*"]  
+  "permissions": [
+    "menus",
+    "storage", 
+    "tabs", 
+    "http://localhost:3000/*"
+  ]  
 }
