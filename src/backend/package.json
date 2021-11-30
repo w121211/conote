@@ -50,7 +50,7 @@
     "@elastic/elasticsearch": "^7.10.0",
     "@keyv/redis": "^2.1.2",
     "@prisma/client": "^2.18.0",
-    "apollo-server": "^2.18.1",
+    "apollo-server": "^2.25.3",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.4",
     "cron": "^1.8.2",
