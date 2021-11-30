@@ -82,7 +82,7 @@ const SideBar = ({
           </li>
         </ul>
       </div>
-      <SidebarList title="最近編輯的文章" entries={committedDocs} />
+      <SidebarList title="最近同步的筆記" entries={committedDocs} />
       <SidebarList title="暫存區" entries={savedDocs} />
 
       {/* {data ? (

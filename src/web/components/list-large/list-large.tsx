@@ -51,16 +51,12 @@ const ListLarge = ({
                 </div>
               )}
               {hashtags && source && <span className={classes.topDivider}></span>}
-              {author ? <div className={classes.author}>{author}</div> : <div className={classes.author}></div>}
+              {author && <div className={classes.author}>{author}</div>}
               {/* {shot && <span className={classes.shot}>{shot}</span>} */}
-              {source && <div className={classes.source}>{source}</div>}
+              {/* {source && <div className={classes.source}>{source}</div>} */}
 
-              {sourceUrl && (
-                <div className={classes.url}>
-                  {author || hashtags || (source && <span className={classes.topDivider}></span>)}
-                  {sourceUrl}
-                </div>
-              )}
+              {(author || hashtags || source) && <span className={classes.topDivider}></span>}
+              {sourceUrl && <div className={classes.url}>{sourceUrl}</div>}
               {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
             </div>
             <h3 className={classes.title}>{title}</h3>

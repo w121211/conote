@@ -40,10 +40,11 @@ function LatestCards(): JSX.Element | null {
           <ListLarge
             key={i}
             cardId={e.cardId}
-            title={e.title}
-            href={`/cardx/${encodeURIComponent(e.sym.symbol)}`}
-            sourceUrl={e.sym.type === 'URL' ? e.sym.symbol.substr(1) : `${router.asPath}cardx/${e.sym.symbol}`}
+            title={e.cardMeta.title ?? e.title}
+            href={`/card/${encodeURIComponent(e.sym.symbol)}`}
+            sourceUrl={e.sym.type === 'URL' && e.cardMeta.url ? e.cardMeta.url : `${router.asPath}card/${e.sym.symbol}`}
             summary={e.picks}
+            author={e.cardMeta.author ?? undefined}
           />
         ))}
       {hasMore ? (

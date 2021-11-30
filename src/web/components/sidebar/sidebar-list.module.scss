@@ -41,3 +41,17 @@
   cursor: pointer;
   user-select: none;
 }
+.noNoteSpan {
+  font-size: 14px;
+  color: $gray-text;
+  text-shadow: 1px 1px 0 white;
+  font-style: italic;
+  text-align: center;
+}
+.title {
+  display: flex;
+  align-items: center;
+  :global(.material-icons) {
+    font-size: 20px;
+  }
+}

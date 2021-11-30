@@ -46,13 +46,19 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: flex;
+  // display: flex;
   align-items: center;
+  min-width: 0;
+  flex-shrink: 1;
   // font-size: 13px;
   // color: $gray-text;
 }
 .author {
   color: $link;
+  white-space: nowrap;
+  // max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .title {

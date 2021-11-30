@@ -88,6 +88,7 @@ const IndexHotList = () => {
         return (
           <ListLarge
             key={i}
+            cardId={''}
             title={e.title}
             href={e.href}
             source={e.source}

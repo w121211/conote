@@ -56,7 +56,7 @@ import Popup from '../popup/popup'
 import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
 import ShotBtn from '../shot-button/shotBtn'
 import { DocPathService } from '../workspace/doc-path'
-import { Doc } from '../workspace/workspace'
+// import { Doc } from '../workspace/workspace'
 import classes from './editor.module.scss'
 import {
   CustomRange,
@@ -74,6 +74,7 @@ import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
 import { useApolloClient } from '@apollo/client'
 import { getLocalOrQueryRoot } from './use-local-value'
 import BulletPointEmojis from '../emoji-up-down/bullet-point-emojis'
+import { Doc } from '../workspace/doc'
 
 // import { Context } from '../../pages/card/[symbol]'
 // import { BulletNode } from '../bullet/node'
@@ -855,6 +856,7 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
             author={element.params.find(e => e.startsWith('@'))}
             target={element.params.find(e => e.startsWith('$'))}
             choice={element.params.find(e => e.startsWith('#'))}
+            handleClick={() => setShowPopover(true)}
           />
         </>
       )}

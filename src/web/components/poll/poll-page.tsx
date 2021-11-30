@@ -14,7 +14,7 @@ import PollForm, { FormInputs } from '../poll-form/poll-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import BarChart from '../bar/bar'
 import classes from './board-page.module.scss'
-import AuthorPollForm from '../poll-form/author-poll-form'
+import AuthorPollForm from '../poll-form/_author-poll-form'
 
 const PollPage = ({
   pollId,
