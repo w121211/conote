@@ -46,33 +46,21 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: flex;
+  // display: flex;
   align-items: center;
+  min-width: 0;
+  flex-shrink: 1;
   // font-size: 13px;
   // color: $gray-text;
 }
 .author {
   color: $link;
-}
-.emojisContainer {
-  display: flex;
-  width: fit-content;
-
-  margin-top: 4px;
-  // padding: 0 8px;
-  // border: 1px solid $gray;
-  // border-radius: 1em;
-  // background: #f9f9fb;
-  font-size: 14px;
-
-  color: $gray-text-dark;
   white-space: nowrap;
-  line-height: 1.5;
-  gap: 8px;
-  .upIcon {
-    color: #ee9700;
-  }
+  // max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .title {
   // max-width: min(400px, 50vw, 100%);
   overflow: hidden;
@@ -93,6 +81,7 @@
 
 .topDivider {
   // display: inline-block;
+
   width: 1px;
   height: 1em;
   background: $gray;
@@ -108,12 +97,16 @@
 .hashtag {
   width: fit-content;
   font-weight: normal;
-  padding: 0 6px;
+  font-size: 14px;
+  // padding: 0 6px;
   border-radius: 3px;
 
-  margin-right: 6px;
-  margin-top: 0;
   margin-bottom: 0;
+  margin-top: 0;
+  color: $gray-text-dark;
+  &:not(:last-child) {
+    margin-right: 6px;
+  }
   &.blue {
     background-color: #2562ef;
     color: white;
@@ -126,6 +119,9 @@
     background: #3d3d3d;
     color: white;
   }
+}
+.selectedHashtag {
+  color: $link;
 }
 .hashtagSymbol {
   color: $gray-text-dark;
@@ -141,4 +137,7 @@
   margin-left: 3px;
   padding: 0px 6px;
   border-radius: 3px;
+}
+.source {
+  color: $gray-text-dark;
 }

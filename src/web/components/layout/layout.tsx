@@ -8,27 +8,35 @@ import { useMeQuery } from '../../apollo/query.graphql'
 export default function Layout({
   children,
   navPath,
-  buttonLeft,
+  buttonRight,
 }: // handlePath,
 // handleSymbol,
 {
   children: React.ReactNode
   navPath?: React.ReactNode
-  buttonLeft?: React.ReactNode
+  buttonRight?: React.ReactNode
   // handlePath?: (i: number) => void
   // handleSymbol?: (e: string) => void
 }): JSX.Element {
   const { data: meData, error, loading } = useMeQuery()
   const [showNav, setShowNav] = useState(true)
-  const [showMenu, setShowMenu] = useState(false)
+  const [showMenu, setShowMenu] = useState(true)
+  const [pinSideBar, setPinSideBar] = useState(true)
   const [scroll, setScroll] = useState(0)
 
   const layoutRef = useRef<HTMLDivElement>(null)
 
   const childrenWithCallback = useCallback(() => children, [children])
 
-  const showMenuHandler = () => {
-    setShowMenu(false)
+  const showMenuHandler = (boo?: boolean) => {
+    if (boo === undefined) {
+      setShowMenu(!showMenu)
+    } else setShowMenu(boo)
+  }
+  const pinMenuHandler = (boo?: boolean) => {
+    if (boo === undefined) {
+      setPinSideBar(!pinSideBar)
+    } else setPinSideBar(boo)
   }
 
   const handleScroll = (e: any) => {
@@ -54,7 +62,18 @@ export default function Layout({
 
   return (
     <div className={classes.layout} onScroll={handleScroll}>
-      <div className={classes.children} ref={layoutRef}>
+      <SideBar
+        showMenuHandler={showMenuHandler}
+        pinMenuHandler={pinMenuHandler}
+        style={{
+          transform: showMenu ? 'translate3d(0,0,0)' : 'translate3d(-100%,0,0)',
+          position: pinSideBar ? 'relative' : 'absolute',
+          background: pinSideBar ? 'rgb(247 246 246)' : 'white',
+          boxShadow: pinSideBar || !showMenu ? '0 0 50px transparent' : '0 0 50px #322f2f36',
+        }}
+        isPined={pinSideBar}
+      />
+      <div className={classes.children} ref={layoutRef} style={{ padding: pinSideBar ? '0 15% 0' : '0 20vw 0' }}>
         {children}
         {/* {childrenWithCallback()} */}
         {/* <footer>footer</footer> */}
@@ -77,7 +96,7 @@ export default function Layout({
           </Link>
           {/* {navPath} */}
           <div className={classes.left}>
-            {buttonLeft}
+            {buttonRight}
             {meData ? (
               <button className="secondary">
                 <a href="/api/auth/logout">Logout</a>{' '}
@@ -92,17 +111,14 @@ export default function Layout({
       </nav>
 
       {/* <div className={classes.sideBarContainer} style={showMenu ? { visibility: 'visible' } : { visibility: 'hidden' }}> */}
-      <div
+      {/* <div
         className={classes.mask}
         style={showMenu ? { opacity: 1, visibility: 'visible' } : { opacity: 0, visibility: 'hidden' }}
         onClick={() => {
           setShowMenu(false)
         }}
-      ></div>
-      <SideBar
-        showMenuHandler={showMenuHandler}
-        style={showMenu ? { transform: 'translate3d(0,0,0)' } : { transform: 'translate3d(-100%,0,0)' }}
-      />
+      ></div> */}
+
       {/* </div> */}
     </div>
   )

@@ -54,8 +54,9 @@ import CreatePollForm from '../poll-form/create-poll-form'
 import Popover from '../popover/popover'
 import Popup from '../popup/popup'
 import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
+import ShotBtn from '../shot-button/shotBtn'
 import { DocPathService } from '../workspace/doc-path'
-import { Doc } from '../workspace/workspace'
+// import { Doc } from '../workspace/workspace'
 import classes from './editor.module.scss'
 import {
   CustomRange,
@@ -70,6 +71,11 @@ import {
 } from './slate-custom-types'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
+import { useApolloClient } from '@apollo/client'
+import { getLocalOrQueryRoot } from './use-local-value'
+import BulletPointEmojis from '../emoji-up-down/bullet-point-emojis'
+import { Doc } from '../workspace/doc'
+
 // import { Context } from '../../pages/card/[symbol]'
 // import { BulletNode } from '../bullet/node'
 // import UpdateShotForm from '../shot-form/update-shot-form'
@@ -145,12 +151,47 @@ const decorate = ([node, path]: NodeEntry) => {
     const end = start + length
 
     if (typeof token !== 'string') {
-      ranges.push({
-        // [token.type]: true,
-        type: token.type,
-        anchor: { path, offset: start },
-        focus: { path, offset: end },
-      })
+      if (token.type === 'topic') {
+        ranges.push({
+          type: token.type,
+          anchor: { path, offset: start },
+          focus: { path, offset: end },
+        })
+        ranges.push({
+          type: 'topic-bracket',
+          anchor: { path, offset: start },
+          focus: { path, offset: start + 2 },
+        })
+        ranges.push({
+          type: 'topic-bracket',
+          anchor: { path, offset: end - 2 },
+          focus: { path, offset: end },
+        })
+      } else if (token.type === 'mirror-topic') {
+        const bracketMatches = Node.string(node).matchAll(/\[\[|\]\]/g)
+
+        ranges.push({
+          type: token.type,
+          anchor: { path, offset: start },
+          focus: { path, offset: end },
+        })
+        for (const match of bracketMatches) {
+          if (match.index) {
+            ranges.push({
+              type: 'mTopic-bracket',
+              anchor: { path, offset: match.index },
+              focus: { path, offset: match.index + 2 },
+            })
+          }
+        }
+      } else {
+        ranges.push({
+          // [token.type]: true,
+          type: token.type,
+          anchor: { path, offset: start },
+          focus: { path, offset: end },
+        })
+      }
     }
     start = end
   }
@@ -160,7 +201,8 @@ const decorate = ([node, path]: NodeEntry) => {
 }
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
-  const { attributes, children, leaf } = props
+  const { attributes, leaf, children } = props
+
   const readonly = useReadOnly()
   const selected = useSelected()
   // const [isPressShift, setIsPressShift] = useState(false)
@@ -196,49 +238,56 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   // filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
   // console.log(leaf.type, children)
   // console.log(leaf)
-  if (readonly || !selected) {
+  // if (readonly || !selected) {
+  //   switch (leaf.type) {
+  //     case 'mirror-ticker':
+  //     case 'mirror-topic':
+  //     case 'topic':
+  //     case 'ticker': {
+  //       className = classes.mirrorLeaf
+  //       // style = { color: '#5395f0' }
+  //       break
+  //     }
+  //     case 'mTopic-bracket':
+  //     case 'topic-bracket': {
+  //       style = { color: '#b5b5b3' }
+  //       break
+  //     }
+  //     case 'author':
+  //     case 'url':
+  //     case 'filtertag': {
+  //       style = { color: '#0cb26e' }
+  //       break
+  //     }
+  //     // case 'poll':
+  //     // case 'new-poll': {
+  //     //   style = { color: '#329ead' }
+  //     //   break
+  //     // }
+  //     // case 'shot':
+  //     // case 'new-shot': {
+  //     //   style = { color: 'rgb(215 159 29)' }
+  //     //   break
+  //     // }
+  //     // case 'filtertag': {
+  //     //   className = classes.filtertagLeaf
+  //     //   style = { color: '#6a53fe' }
+  //     //   break
+  //     // }
+  //     // case 'url': {
+  //     //   style = { color: '#ff619b' }
+  //     //   break
+  //     // }
+  //     // default: {
+  //     //   style = { color: '#3d434a' }
+  //     // }
+  //   }
+  // } else {
+  if (selected) {
     switch (leaf.type) {
       case 'mirror-ticker':
       case 'mirror-topic':
-      case 'ticker':
-      case 'topic': {
-        className = classes.mirrorLeaf
-        // style = { color: '#5395f0' }
-        break
-      }
-      case 'author':
-      case 'url':
-      case 'filtertag': {
-        style = { color: '#0cb26e' }
-        break
-      }
-      // case 'poll':
-      // case 'new-poll': {
-      //   style = { color: '#329ead' }
-      //   break
-      // }
-      // case 'shot':
-      // case 'new-shot': {
-      //   style = { color: 'rgb(215 159 29)' }
-      //   break
-      // }
-      // case 'filtertag': {
-      //   className = classes.filtertagLeaf
-      //   style = { color: '#6a53fe' }
-      //   break
-      // }
-      // case 'url': {
-      //   style = { color: '#ff619b' }
-      //   break
-      // }
-      // default: {
-      //   style = { color: '#3d434a' }
-      // }
-    }
-  } else {
-    switch (leaf.type) {
-      case 'mirror-ticker':
-      case 'mirror-topic': {
+      case 'mTopic-bracket': {
         className = classes.mirrorLeaf
         // style = { color: '#5395f0' }
         break
@@ -258,6 +307,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
         break
       }
       case 'ticker':
+      case 'topic-bracket':
       case 'topic': {
         className = classes.topicLeaf
 
@@ -277,7 +327,34 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
         style = { color: '#3d434a' }
       }
     }
+  } else {
+    switch (leaf.type) {
+      case 'mirror-ticker':
+      case 'mirror-topic':
+      case 'topic':
+      case 'ticker': {
+        className = classes.mirrorLeaf
+        // style = { color: '#5395f0' }
+        break
+      }
+      case 'mTopic-bracket':
+      case 'topic-bracket': {
+        style = { color: '#b5b5b3' }
+        break
+      }
+
+      case 'author':
+      case 'url': {
+        style = { color: '#0cb26e' }
+        break
+      }
+      case 'filtertag': {
+        style = { color: '#3f70de' }
+      }
+    }
   }
+
+  // }
 
   return (
     // {/* <span {...attributes}>{children}</span> */}
@@ -295,7 +372,9 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
           leaf.type === 'topic' ||
           leaf.type === 'mirror-ticker' ||
           leaf.type === 'mirror-topic' ||
-          leaf.type === 'filtertag'
+          leaf.type === 'filtertag' ||
+          leaf.type === 'topic-bracket' ||
+          leaf.type === 'mTopic-bracket'
         ) {
           if (e) {
             e.onselectstart = () => false
@@ -436,7 +515,7 @@ const InlineSymbol = ({
   const selected = useSelected()
   // console.log(element)
   return (
-    <span {...attributes}>
+    <span {...attributes} className={classes.symbolContainer}>
       {/* <span contentEditable={false}> */}
       {/* <Link href={`/card/${encodeURI(element.symbol)}`}> */}
       {/* <a
@@ -551,7 +630,7 @@ const InlineMirror = ({
   // }, [authorName, element])
 
   return (
-    <span {...attributes}>
+    <span {...attributes} className={classes.mirrorContainer}>
       {/* <span contentEditable={false}> */}
       <Link href={DocPathService.toURL(element.mirrorSymbol.substr(2), sourceCardId)}>
         <a className="ui">{children}</a>
@@ -743,34 +822,43 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
   return (
     <span {...attributes}>
       {!selected && (
-        <button
-          className={classes.shotBtn}
-          contentEditable={false}
-          onClick={e => {
-            e.stopPropagation()
-            setShowPopover(true)
-          }}
-        >
-          {element.params.map((e, i) => {
-            return (
-              <span
-                className={
-                  e.startsWith('@')
-                    ? classes.shotAuthor
-                    : e.startsWith('$') || e.startsWith('[[')
-                    ? classes.shotTarget
-                    : e.startsWith('#')
-                    ? classes.shotChoice
-                    : ''
-                }
-                data-choice={e.startsWith('#') ? e : ''}
-                key={i}
-              >
-                {e}
-              </span>
-            )
-          })}
-        </button>
+        <>
+          {/* <button
+            className={classes.shotBtn}
+            contentEditable={false}
+            onClick={e => {
+              e.stopPropagation()
+              setShowPopover(true)
+            }}
+          >
+            {element.params.map((e, i) => {
+              return (
+                <span
+                  className={
+                    e.startsWith('@')
+                      ? classes.shotAuthor
+                      : e.startsWith('$') || e.startsWith('[[')
+                      ? classes.shotTarget
+                      : e.startsWith('#')
+                      ? classes.shotChoice
+                      : ''
+                  }
+                  data-choice={e.startsWith('#') ? e : ''}
+                  key={i}
+                >
+                  {e.startsWith('$') ? '  ' + e + '  ' : e.startsWith('#') ? e.substr(1) : e}
+                </span>
+              )
+            })}
+          </button> */}
+
+          <ShotBtn
+            author={element.params.find(e => e.startsWith('@'))}
+            target={element.params.find(e => e.startsWith('$'))}
+            choice={element.params.find(e => e.startsWith('#'))}
+            handleClick={() => setShowPopover(true)}
+          />
+        </>
       )}
       {showPopover && (
         <span contentEditable={false}>
@@ -816,7 +904,7 @@ const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
 //   sourceCardId,
 // }: {
 //   mirrors: InlineMirrorElement[]
-//   sourceCardId: string
+//   sourceCardId?: string
 // }): JSX.Element | null => {
 //   const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
 //   const client = useApolloClient()
@@ -852,7 +940,7 @@ const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
 //     return <div>Click to edit</div>
 //   }
 //   return (
-//     <ul style={{ background: '#f3f4f9', borderRadius: '6px' }}>
+//     <ul className={classes.filterMirrorContainer}>
 //       {/* 忽略 root，從 root children 開始 render */}
 //       {filteredBullet.children.map((e, i) => (
 //         <BulletComponent key={i} bullet={e} />
@@ -878,10 +966,10 @@ RenderElementProps & {
   const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
 
   // TODO: 改成 lazyQuery + useEffect
-  const { data: emojiData } = useBulletEmojisQuery({
-    fetchPolicy: 'cache-first',
-    variables: { bulletId: element.bulletSnapshot?.id ?? '' },
-  })
+  // const { data: emojiData } = useBulletEmojisQuery({
+  //   fetchPolicy: 'cache-first',
+  //   variables: { bulletId: element.bulletCopy?.id ?? '' },
+  // })
   // const [author, authorSwitcher] = useAuthorSwitcher({ authorName })
   // const [placeholder, setPlaceholder] = useState<string | undefined>()
   // useEffect(() => {
@@ -903,7 +991,7 @@ RenderElementProps & {
   // }, [author, element, sourceUrl])
   // console.log(element)
   useEffect(() => {
-    if ((focused && !selected) || readonly) {
+    if (!focused || !selected || readonly) {
       // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
       const path = ReactEditor.findPath(editor, element)
       parseLcAndReplace({ editor, lcEntry: [element, path] })
@@ -938,28 +1026,20 @@ RenderElementProps & {
       <div className={classes.lcText}>
         {children}
 
-        {emojiData && (
-          <>
-            {emojiData.bulletEmojis?.map((e, i) => {
-              if (e.count.nUps === 0) {
-                return null
-              }
-              return (
-                <span contentEditable={false} key={i}>
-                  <EmojiButotn emoji={e} />
-                </span>
-              )
-            })}
-          </>
-        )}
+        {element.bulletCopy?.id && <BulletPointEmojis bulletId={element.bulletCopy.id} />}
+        {/* // <span contentEditable={false}>
+          //   {emojiData.bulletEmojis?.map((e, i) => {
+          //     return <BulletPointEmojis key={i} bulletId={e.id} bulletEmojis={e} />
+          //   })}
+          // </span> */}
       </div>
-      {mirrors.length > 0 && curCardId && (
-        <span contentEditable={false}>
-          {/* {author === element.author && element.author}
-          {sourceUrl === element.sourceUrl && sourceUrl} */}
-          {/* <FilterMirror mirrors={mirrors} sourceCardId={sourceCardId} /> */}
-        </span>
-      )}
+      {/* {sourceCardId && ( 
+       <span contentEditable={false}>
+        {author === element.author && element.author}
+          {sourceUrl === element.sourceUrl && sourceUrl} 
+        <FilterMirror mirrors={mirrors} />
+      </span> 
+       )} */}
     </div>
   )
 }
@@ -968,7 +1048,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   const editor = useSlateStatic()
   // const [hasUl, setHasUl] = useState(false)
   const [ulFolded, setUlFolded] = useState<true | undefined>()
-  const [showPanelIcon, setShowPanelIcon] = useState(false)
+  const [showPanel, setShowPanel] = useState(false)
   // console.log(element)
 
   // useEffect(() => {
@@ -1010,27 +1090,16 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
       onMouseOver={event => {
         event.stopPropagation()
         event.preventDefault()
-        setShowPanelIcon(true)
+        // setShowPanelIcon(true)
       }}
       onMouseOut={event => {
         event.stopPropagation()
         event.preventDefault()
-        setShowPanelIcon(false)
+        // setShowPanelIcon(false)
       }}
     >
       {/* <div contentEditable={false}></div> */}
       <div className={classes.arrowBulletWrapper} contentEditable={false}>
-        <BulletPanel
-          bulletId={lc.bulletSnapshot?.id}
-          // emoji={lc.emojis}
-          visible={showPanelIcon}
-          // sourceUrl={element.children[0].sourceUrl}
-          // authorName={element.children[0].author}
-          onEmojiCreated={onEmojiCreated}
-        >
-          {/* <span className={classes.oauthorName}> @{authorName}</span> */}
-        </BulletPanel>
-
         {hasUl ? (
           <>
             <span
@@ -1063,11 +1132,48 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           </span>
         )}
 
-        <Link href={'/href'}>
-          <a>
+        {/* <Link href={'/href'}>
+          <a
+            onMouseOver={e => {
+              e.stopPropagation()
+              // e.preventDefault()
+              // if (e.currentTarget.contains(containerRef.current)) {
+              setShowPanel(true)
+              // }
+              // console.log('hover')
+            }}
+            onMouseLeave={e => {
+              e.stopPropagation()
+              // e.preventDefault()
+
+              setShowPanel(true)
+              // if (!e.currentTarget.contains(containerRef.current)) {
+              //  setTimeout(
+              //   () => {
+              //   },
+              //   100,
+              //   false,
+              // )
+              // }
+              // console.log('mouseout')
+            }}
+          >
             <BulletSvg />
+            
           </a>
-        </Link>
+        </Link> */}
+        <span onMouseEnter={() => setShowPanel(true)} onMouseLeave={() => setShowPanel(false)}>
+          <BulletSvg />
+          {showPanel && (
+            <BulletPanel
+              className={classes.bulletPanel}
+              tooltipClassName={classes.bulletPanelTooltip}
+              bulletId={lc.bulletCopy?.id}
+              visible={showPanel}
+              onEmojiCreated={onEmojiCreated}
+            />
+          )}
+        </span>
 
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>

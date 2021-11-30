@@ -1,307 +1,94 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/router'
-import { Node } from 'slate'
-import { BulletEditor, EmojiButotn } from '../../components/editor/editor'
-import { LiElement } from '../../components/editor/slate-custom-types'
-import { useLocalValue } from '../../components/editor/use-local-value'
-import { isLi } from '../../components/editor/with-list'
-import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
-import Layout from '../../components/layout/layout'
-import NavPath from '../../components/nav-path/nav-path'
-import { CardMeta, useCardMetaQuery, useEmojisQuery, useMeQuery } from '../../apollo/query.graphql'
-import { parseChildren } from '../../components/editor/with-parse'
-import classes from '../../style/symbol.module.scss'
-import Popover from '../../components/popover/popover'
-import { useUser } from '@auth0/nextjs-auth0'
-import Popup from '../../components/popup/popup'
-import HeaderForm from '../../components/header-form/header-form'
 import Link from 'next/link'
-import LinkIcon from '../../assets/svg/link.svg'
-
+import { useRouter } from 'next/router'
+import { useApolloClient, useQuery } from '@apollo/client'
+import { useUser } from '@auth0/nextjs-auth0'
+import { useObservable } from 'rxjs-hooks'
+import { Card, CardMeta, CardMetaInput, useCardLazyQuery, useMeQuery } from '../../apollo/query.graphql'
+import Layout from '../../components/layout/layout'
+import { workspace } from '../../components/workspace/workspace'
+import { BulletEditor } from '../../components/editor/editor'
+import { Doc, DocEntry, DocEntryPack } from '../../components/workspace/doc'
+import { DocPath, DocPathService } from '../../components/workspace/doc-path'
+import classes from '../../style/symbol.module.scss'
 import CardMetaForm from '../../components/card-meta-form/card-meta-form'
-import MyTooltip from '../../components/my-tooltip/my-tooltip'
-import EmojiHeaderBtn from '../../components/emoji-up-down/emoji-header-btn'
-import CreateEmojiBtn from '../../components/emoji-up-down/emoji-header-create-btn'
+import LinkIcon from '../../assets/svg/link.svg'
+import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
+import NavPath from '../../components/nav-path/nav-path'
 
-// TODO: 與 li-location 合併
-export type Nav = {
-  text: string
-  path: number[]
-}
-
-function getNavs(root: LiElement, destPath: number[], meta: CardMeta): Nav[] {
-  const navs: Nav[] = []
-  for (const [n, p] of Node.levels(root, destPath)) {
-    if (isLi(n)) {
-      const [lc] = n.children
-      // console.log(s)
-      // if (lc.rootBulletDraft?.root) {
-      //   navs.push({ text: meta.title || Node.string(lc), path: p })
-      // } else {
-      navs.push({
-        text: Node.string(lc),
-        path: p,
-      })
-      // }
-    }
-  }
-
-  return navs
-}
-
-/**
- * @param poll
- * @param author 若給予視為代表 author 投票
- */
-
-// export const Context = createContext({
-//   author: '' as string | undefined,
-//   login: true,
-//   showLoginPopup: (b: boolean) => {
-//     '_'
-//   },
-// })
-const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/g
-
-const CardSymbolPage = (): JSX.Element | null => {
-  const router = useRouter()
-  // const [navs, setNavs] = useState<Nav[]>() // editor route
-  const [readonly, setReadonly] = useState(true)
-  const [location, setLocation] = useState<NavLocation>()
-  const [authorName, setAuthorName] = useState<string | undefined>((router.query.a as string) ?? undefined)
-  // const [prevAuthor, setPrevAuthor] = useState<string | undefined>()
-  const [disableSubmit, setDisableSubmit] = useState(true)
-  const { data: meData, loading: meLoading } = useMeQuery({ fetchPolicy: 'cache-first' })
-  const { user, error, isLoading } = useUser()
-  const [showLoginPopup, setShowLoginPopup] = useState(false)
-  const [showKwTooltip, setShowKwTooltip] = useState(false)
-  const { data, isValueModified, setValue, submitValue, dropValue } = useLocalValue({ location })
-  const [submitFinished, setSubmitFinished] = useState(false)
+const CardHead = ({ doc, card, symbol }: { doc: Doc; card: Card | null; symbol: string }): JSX.Element => {
+  // const mainDoc = useObservable(() => workspace.mainDoc$)
+  const status = useObservable(() => workspace.status$)
   const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
-  const { data: cardMetaData } = useCardMetaQuery({
-    variables: { symbol: data?.selfCard.symbol ?? '' },
-  })
-  const { data: emojiData } = useEmojisQuery({
-    fetchPolicy: 'cache-first',
-    variables: { bulletId: data?.openedLi.children[0].id ?? '' },
-  })
+  const [cardMetaSubmitted, setCardMetaSubmitted] = useState(false)
 
-  useEffect(() => {
-    if (router.isReady) {
-      const location = getNavLocation(router.query)
-      setLocation(location)
-      // console.log(location)
-      if (router.query.a) {
-        setAuthorName(router.query.a as string)
-      }
-    }
-  }, [router])
-
-  useEffect(() => {
-    if (!meLoading && (meData || user)) {
-      // console.log(meData, user)
-      setReadonly(false)
-    }
-  }, [meData, user, meLoading])
-
-  // useEffect(() => {
-  //   if ( headerFormSubmited) {
-  //   }
-  // }, [headerFormSubmited])
-  const handleCardMetaSubmitted = (isSubmitted: boolean) => {
-    // setHeaderFormSubmited(isSubmitted)
-    if (isSubmitted) {
-      dropValue()
-      router.reload()
-    }
-  }
-  // useEffect(() => {
-  //   queryHashtags()
-  //   if (hashtagData?.hashtags && data) {
-  //     const newHashtagsArr: Hashtag[] = []
-  //     hashtagData?.hashtags?.forEach(e => {
-  //       if (e.bulletId === data.openedLi.children[0].id) {
-  //         newHashtagsArr.push(e)
-  //       }
-  //     })
-  //     setOpenLiHashtags(newHashtagsArr)
-  //   }
-  // }, [data?.openedLi])
-
-  // useEffect(() => {
-  //   if (data && location) {
-  //     const { self, mirror } = data
-  //     // const navs = mirror ? getNavs(mirror.rootLi, location.openedLiPath) : getNavs(self.rootLi, location.openedLiPath)
-  //     // navs.pop() // 最後一個是當前的 li ，不需要
-  //     // setNavs(navs)
-  //     // console.log('navs effect')
-  //   }
-  // }, [data])
-
-  const navs = useMemo(() => {
-    if (data && location) {
-      const { self, mirror } = data
-
-      return mirror
-        ? getNavs(mirror.rootLi, location.openedLiPath, data.selfCard.meta)
-        : getNavs(self.rootLi, location.openedLiPath, data.selfCard.meta)
-    }
-  }, [data])
-
-  const editor = useMemo(() => {
-    if (data && location) {
-      const { selfCard, mirror, openedLi, value } = data
-      const parsedValue = parseChildren(value)
-      return (
-        <BulletEditor
-          initialValue={parsedValue}
-          location={location}
-          onValueChange={value => {
-            // setDisableSubmit(false)
-            setSubmitFinished(false)
-            setValue(value)
-          }}
-          readOnly={readonly}
-          selfCard={selfCard}
-        />
-      )
-    }
-    return null
-  }, [data, readonly])
-
-  if (data === undefined || location === undefined) {
-    return null
+  const handleCardMetaSubmitted = () => {
+    setCardMetaSubmitted(true)
   }
 
   return (
-    <Layout
-      buttonLeft={
-        <>
-          <button
-            onClick={() => {
-              dropValue()
-              router.reload()
-            }}
-          >
-            Drop
-          </button>
-          <button
-            className="primary"
-            onClick={() => {
-              submitValue({
-                onFinish: () => {
-                  setSubmitFinished(true)
-                  setDisableSubmit(true)
-                  dropValue()
-
-                  // router.reload()
-                },
-              })
-            }}
-            disabled={!isValueModified}
-          >
-            {submitFinished ? '已儲存' : '儲存'}
-            {/* {console.log(isValueModified)} */}
-          </button>
-        </>
-      }
-    >
-      <div style={{ marginBottom: '3em' }}>
-        <div>
-          <NavPath
-            path={navs}
-            location={{ ...location }}
-            mirrorHomeUrl={data.mirror && locationToUrl({ selfSymbol: location.selfSymbol, openedLiPath: [] })}
+    <div className={classes.header}>
+      <h1
+        onMouseEnter={e => {
+          setShowHeaderHiddenBtns(true)
+        }}
+        onMouseLeave={e => {
+          setShowHeaderHiddenBtns(false)
+        }}
+      >
+        <div
+          className={classes.headerHiddenBtns}
+          style={showHeaderHiddenBtns ? { visibility: 'visible' } : { visibility: 'hidden' }}
+        >
+          {/* {doc.cardInput?.meta && ( */}
+          <CardMetaForm
+            cardId={doc.cid}
+            // selfCard={data.selfCard}
+            handleCardMetaSubmitted={handleCardMetaSubmitted}
+            btnClassName={classes.cardMetaBtn}
           />
-          {/* <button
-            // className="noBg"
-            onClick={() => {
-              if (meData || user) {
-                setReadonly(!readonly)
-              }
-              if (!meData && !user) {
-                setReadonly(true)
-                setShowLoginPopup(true)
-              }
-            }}
-          >
-            {readonly || !meData || !user ? '編輯' : '鎖定'}
-          </button> */}
-          {showLoginPopup && (
-            <Popup
-              visible={showLoginPopup}
-              hideBoard={() => {
-                setShowLoginPopup(false)
-              }}
-              buttons={
-                <button className="primary" onClick={() => setShowLoginPopup(false)}>
-                  確定
-                </button>
-              }
-            >
-              請先登入！
-            </Popup>
+          {/* )} */}
+          {doc?.symbol.startsWith('@http') && (
+            // <button>
+            <a className={classes.cardSource} href={doc?.symbol.substr(1)} target="_blank" rel="noreferrer">
+              <LinkIcon />
+              開啟來源
+            </a>
+            // </button>
           )}
-
-          {router.query.a && (
-            <button
-              className="transparent"
-              onClick={() => {
-                setAuthorName(prev => {
-                  if (prev) {
-                    return undefined
-                  } else {
-                    return (router.query.a as string) ?? undefined
-                  }
-                })
+        </div>
+        {symbol}
+      </h1>
+      {/* {cardMetaData?.cardMeta.keywords && (
+        <div className={classes.headerKw}>
+          {cardMetaData?.cardMeta.keywords.map((e, i) => {
+            if (i < 5) {
+              return (
+                <span className={classes.headerKwEl} key={i}>
+                  {e}
+                </span>
+              )
+            }
+            return null
+          })}
+          {cardMetaData.cardMeta.keywords.length > 5 && (
+            <span
+              className={classes.headerKwElHidden}
+              onClick={e => {
+                e.stopPropagation()
+                setShowKwTooltip(true)
               }}
             >
-              {router.query.a}
-
-              <div className={`${classes.toggle} ${authorName && classes.toggleClicked}`}></div>
-            </button>
-          )}
-
-          {/* // )} */}
-
-          <div className={classes.header}>
-            <h3
-              onMouseEnter={e => {
-                setShowHeaderHiddenBtns(true)
-              }}
-              onMouseLeave={e => {
-                setShowHeaderHiddenBtns(false)
-              }}
-            >
-              <div
-                className={classes.headerHiddenBtns}
-                style={showHeaderHiddenBtns ? { visibility: 'visible' } : { visibility: 'hidden' }}
+              ...+{cardMetaData.cardMeta.keywords.length - 5}項
+              <MyTooltip
+                className={classes.headerKwElTooltip}
+                visible={showKwTooltip}
+                handleVisibleState={() => {
+                  setShowKwTooltip(false)
+                }}
               >
-                {data.openedLi.children[0].rootBulletDraft && data?.selfCard.symbol && (
-                  <CardMetaForm
-                    symbol={data.selfCard.symbol}
-                    selfCard={data.selfCard}
-                    handleCardMetaSubmitted={handleCardMetaSubmitted}
-                    btnClassName={classes.cardMetaBtn}
-                  />
-                )}
-                {data.selfCard.link?.url && (
-                  // <button>
-                  <a className={classes.cardSource} href={data.selfCard.link?.url} target="_blank" rel="noreferrer">
-                    <LinkIcon />
-                    開啟來源
-                  </a>
-                  // </button>
-                )}
-              </div>
-              {router.query.p && Node.string(data.openedLi.children[0]).replace(rePoll, '').trimEnd()}
-              {data.mirror && !router.query.p && data.mirror.symbol}
-              {!router.query.p && !data.mirror && <>{cardMetaData?.cardMeta.title ?? data.selfCard.symbol}</>}
-            </h3>
-            {cardMetaData?.cardMeta.keywords && (
-              <div className={classes.headerKw}>
                 {cardMetaData?.cardMeta.keywords.map((e, i) => {
-                  if (i < 5) {
+                  if (i >= 5) {
                     return (
                       <span className={classes.headerKwEl} key={i}>
                         {e}
@@ -310,109 +97,211 @@ const CardSymbolPage = (): JSX.Element | null => {
                   }
                   return null
                 })}
-                {cardMetaData.cardMeta.keywords.length > 5 && (
-                  <span
-                    className={classes.headerKwElHidden}
-                    onClick={e => {
-                      e.stopPropagation()
-                      setShowKwTooltip(true)
-                    }}
-                  >
-                    ...+{cardMetaData.cardMeta.keywords.length - 5}項
-                    <MyTooltip
-                      className={classes.headerKwElTooltip}
-                      visible={showKwTooltip}
-                      handleVisibleState={() => {
-                        setShowKwTooltip(false)
-                      }}
-                    >
-                      {cardMetaData?.cardMeta.keywords.map((e, i) => {
-                        if (i >= 5) {
-                          return (
-                            <span className={classes.headerKwEl} key={i}>
-                              {e}
-                            </span>
-                          )
-                        }
-                        return null
-                      })}
-                    </MyTooltip>
-                  </span>
-                )}
-              </div>
-            )}
-            <div className={classes.headerBottom}>
-              {emojiData?.emojis && data?.openedLi.children[0].id && (
-                <div>
-                  {emojiData.emojis.findIndex(e => e.text === 'PIN') < 0 && (
-                    <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="PIN" />
-                  )}
-                  {emojiData.emojis.findIndex(e => e.text === 'UP') < 0 && (
-                    <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="UP" />
-                  )}
-                  {emojiData.emojis.findIndex(e => e.text === 'DOWN') < 0 && (
-                    <CreateEmojiBtn bulletId={data.openedLi.children[0].id ?? ''} emojiText="DOWN" />
-                  )}
-                  {/* {console.log(emojiData.emojis)} */}
-                  {emojiData.emojis.map((e, i) => (
-                    <EmojiHeaderBtn key={i} emoji={e} bulletId={data.openedLi.children[0].id ?? ''} />
-                  ))}
-                </div>
-              )}
-              {cardMetaData?.cardMeta.author && (
-                <>
-                  <div className={classes.divider}></div>
-                  <Link href={`/author/${encodeURIComponent('@' + cardMetaData?.cardMeta.author)}`}>
-                    <a className={classes.author}>@{cardMetaData?.cardMeta.author}</a>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-          {/* {openLiHashtags.length > 0 && (
-            <div>
-              {openLiHashtags.map((e, i) => {
-                return <EmojiButotn key={i} emoji={e} />
-              })}
-            </div>
+              </MyTooltip>
+            </span>
           )}
- */}
-          {/* {console.log(data.openedLi.children[0].id)} */}
-
-          {/* <h3>{Node.string(data.openedLi.children[0])}</h3> */}
-          {/* {data.selfCard.meta && ( */}
-          {/* {console.log(data.selfCard.meta)} */}
-          {/* {console.log(data.openedLi)} */}
         </div>
-        {/* <div
-        // onClick={e => {
-        //   // e.preventDefault()
-        //   if (!meLoading && !meData && !user) {
-        //     setShowLoginPopup(true)
-        //   }
-        // }}
-        > */}
-        {editor}
-        {/* </div> */}
-        {/* <Context.Provider
-                value={{
-                  author: authorName,
-                  login: meData ? true : false,
-                  showLoginPopup: (b: boolean) => {
-                    setShowLoginPopup(b)
-                  },
-                }}
-              >
-        <Popover
-            visible={!!router.query.m}
-            hideBoard={() => {
-              router.push(`/card/${encodeURIComponent(location.selfSymbol)}`)
+      )} */}
+      <div className={classes.headerBottom}>
+        {doc.cardCopy?.id && <HeaderCardEmojis cardId={doc.cardCopy?.id} />}
+        {doc?.cardInput?.meta?.author && (
+          <>
+            <div className={classes.divider}></div>
+            <Link href={`/author/${encodeURIComponent('@' + doc?.cardInput?.meta?.author)}`}>
+              <a className={classes.author}>@{doc?.cardInput?.meta?.author}</a>
+            </Link>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const DocEntryLink = ({ entry, symbol }: { entry?: DocEntry; symbol: string }): JSX.Element => {
+  if (entry) {
+    return (
+      <Link href={DocPathService.toURL(entry.symbol, entry.sourceCardId)}>
+        <a>{entry.title}</a>
+      </Link>
+    )
+  }
+  return (
+    <Link href={DocPathService.toURL(symbol)}>
+      <a>{symbol} (null doc)</a>
+    </Link>
+  )
+}
+
+const DocEntryPackLink = ({ pack }: { pack: DocEntryPack }): JSX.Element => {
+  if (pack.subs.length === 0) {
+    return <DocEntryLink {...pack.main} />
+  }
+  return (
+    <>
+      <DocEntryLink {...pack.main} />(
+      {pack.subs.map((e, i) => (
+        <DocEntryLink key={i} entry={e} symbol={e.symbol} />
+      ))}
+      )
+    </>
+  )
+}
+
+const WorkspaceComponent = ({
+  docPath,
+  given: { card, sourceCard },
+}: {
+  docPath: DocPath
+  given: {
+    card: Card | null
+    sourceCard: Card | null
+  }
+}): JSX.Element | null => {
+  const client = useApolloClient()
+  const router = useRouter()
+  const mainDoc = useObservable(() => workspace.mainDoc$)
+  const status = useObservable(() => workspace.status$)
+  const savedDocs = useObservable(() => workspace.savedDocs$)
+  const committedDocs = useObservable(() => workspace.committedDocs$)
+
+  // if (card) {
+  //   const a = new Date(card.updatedAt as unknown as string)
+  //   console.log(card.updatedAt)
+  //   console.log(a)
+  // }
+
+  // const saveEvery = useObservable(() =>
+  //   combineLatest([interval(60000), workspace.mainDoc$]).pipe(
+  //     switchMap(async ([_, mainDoc]) => {
+  //       if (mainDoc.doc) {
+  //         // console.log(mainDoc.doc)
+  //         await workspace.save(mainDoc.doc)
+  //       }
+  //       return null
+  //     }),
+  //     catchError(err => of('saveEvery error')),
+  //   ),
+  // )
+
+  // console.log(savedDocs, committedDocs)
+
+  useEffect(() => {
+    workspace.open({ docPath, card, sourceCard })
+  }, [docPath, card, sourceCard])
+
+  useEffect(() => {
+    if (status === 'droped') {
+      workspace.open({ docPath, card, sourceCard })
+    }
+  }, [status])
+
+  if (mainDoc === null) {
+    return null
+  }
+  if (mainDoc.doc === null) {
+    return <div>Unexpected error</div>
+  }
+  return (
+    <div>
+      {/* <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
+      <div>Committed:{committedDocs && committedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
+
+      <div>{status}</div>
+
+      <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div> */}
+
+      <CardHead doc={mainDoc.doc} card={card} symbol={mainDoc.doc.symbol} />
+
+      <BulletEditor doc={mainDoc.doc} />
+    </div>
+  )
+}
+
+const CardSymbolPage = (): JSX.Element | null => {
+  const client = useApolloClient()
+  const router = useRouter()
+  const [queryCard, card] = useCardLazyQuery()
+  const [querySourceCard, sourceCard] = useCardLazyQuery()
+  const [docPath, setDocPath] = useState<DocPath>()
+  const mainDoc = useObservable(() => workspace.mainDoc$)
+
+  // const { user, error: userError, isLoading } = useUser()
+  // const { data: meData, loading: meLoading } = useMeQuery({ fetchPolicy: 'cache-first' })
+
+  useEffect(() => {
+    if (router.isReady) {
+      const path = DocPathService.fromURLQuery(router.query)
+      setDocPath(path)
+
+      const { symbol, sourceCardId } = path
+      queryCard({ variables: { symbol } })
+      if (sourceCardId) {
+        querySourceCard({ variables: { id: sourceCardId } })
+      }
+    }
+  }, [router])
+
+  if (docPath === undefined || card.loading || sourceCard.loading) {
+    return null
+  }
+  if (card.error || sourceCard.error) {
+    console.error(card.error)
+    console.error(sourceCard.error)
+    return <div>Unexpected error</div>
+  }
+  if (card.data === undefined || (docPath.sourceCardId && sourceCard.data === undefined)) {
+    return <div>Unexpected error</div>
+  }
+  return (
+    <Layout
+      buttonRight={
+        <>
+          <button
+            className="secondary"
+            onClick={() => {
+              workspace.drop()
             }}
           >
-            {editor}
-          </Popover>
-        </Context.Provider> */}
-      </div>
+            Drop
+          </button>
+          <button
+            className="primary"
+            onClick={() => {
+              if (mainDoc === null) {
+                return
+              }
+              if (mainDoc.doc) {
+                workspace.save(mainDoc.doc)
+              }
+            }}
+            // disabled={!isValueModified}
+          >
+            {'儲存草稿'}
+            {/* {console.log(isValueModified)} */}
+          </button>
+          <button
+            onClick={async () => {
+              if (mainDoc === null) {
+                return
+              }
+              if (mainDoc.doc) {
+                await workspace.commit(mainDoc.doc, client)
+                // router.reload()
+              }
+            }}
+          >
+            同步至筆記
+          </button>
+        </>
+      }
+    >
+      <WorkspaceComponent
+        docPath={docPath}
+        given={{
+          card: card.data.card ?? null,
+          sourceCard: sourceCard.data?.card ?? null,
+        }}
+      />
     </Layout>
   )
 }

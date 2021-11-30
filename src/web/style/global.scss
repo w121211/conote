@@ -3,6 +3,11 @@
 // @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cantarell:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Noto+Serif+TC:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Outlined');
+// @tailwind base;
+// @tailwind components;
+// @tailwind utilities;
 // @font-face {
 //   font-family: 'jf-openhuninn-1.1';
 //   src: url('../font/jf-openhuninn-1.1.ttf') format('truetype');
@@ -113,6 +118,7 @@ button {
   }
 
   // box-sizing: content-box;
+
   &.transparent {
     background: none;
     padding: 0;
@@ -169,6 +175,17 @@ button {
     }
   }
   &.noBg {
+    background: none;
+  }
+}
+.noStyle {
+  display: inline-block;
+  height: fit-content;
+  background: none;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  &:hover {
     background: none;
   }
 }

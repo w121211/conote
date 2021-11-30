@@ -1,0 +1,18 @@
+.filtertagsContainer {
+  display: flex;
+  gap: 20px;
+}
+.subTitle {
+  color: $gray-text-dark;
+  font-weight: normal;
+  margin-top: 0;
+  padding: 0 10px;
+  border: 1px solid $gray;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  &.selected {
+    color: $link;
+    border-color: $link;
+  }
+}

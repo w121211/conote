@@ -10,7 +10,7 @@ type Option = {
   value: string
 }
 
-export function SearchAllForm(): JSX.Element {
+export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
   const router = useRouter()
   const [searchAll, { loading, data }] = useSearchAllLazyQuery()
   const [options, setOptions] = useState<Option[]>([])
@@ -83,9 +83,21 @@ export function SearchAllForm(): JSX.Element {
       ...provided,
       width: '100%',
       minHeight: '30px',
+      // height: height + 'px' ?? 'initial',
+      // marginTop: '1em',
       border: 'none',
       borderRadius: '10px',
       boxShadow: '0 1px 6px 0 #17171730',
+    }),
+    // singleValue: (provided: any) => ({
+    //   ...provided,
+    //   background: 'black',
+    // }),
+    option: (provided: any) => ({
+      ...provided,
+      lineHeight: small ? '1' : 'inherit',
+      // display: 'flex',
+      // height: height + 'px' ?? 'initial',
     }),
     control: (provided, { isFocused }) => ({
       ...provided,
@@ -93,7 +105,8 @@ export function SearchAllForm(): JSX.Element {
       // maxHeight: '30px',
       whiteSpace: 'nowrap',
       borderRadius: '99px',
-
+      minHeight: '36px',
+      lineHeight: small ? '1' : 'inherit',
       // borderColor: isFocused ? '#5c6cda' : 'hsl(0, 0%, 80%)',
       ':hover': {
         // ':hover': { cursor: 'text' },
@@ -107,6 +120,13 @@ export function SearchAllForm(): JSX.Element {
     valueContainer: (provided, state) => ({
       ...provided,
       padding: '0 8px',
+      // lineHeight: small ? '1' : 'inherit',
+    }),
+    input: (provided, state) => ({
+      ...provided,
+      display: 'flex',
+      alignItems: 'center',
+      // lineHeight: small ? '1' : 'inherit',
     }),
   }
 
@@ -122,7 +142,7 @@ export function SearchAllForm(): JSX.Element {
       onChange={handleChange}
       onCreateOption={handleCreate}
       menuIsOpen={openMenu}
-      placeholder="搜尋全站"
+      placeholder="搜尋 or 新增"
       formatCreateLabel={inputValue => <>創建:{inputValue}</>}
       // onClick={() => {
       //   setOpenMenu(prev => !prev)

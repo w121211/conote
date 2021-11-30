@@ -1,10 +1,12 @@
 // @import '../../style/global.scss';
 
 .sidebar {
+  display: flex;
+  flex-direction: column;
   position: absolute;
   z-index: 100;
   flex-shrink: 0;
-  width: 220px;
+  width: 280px;
   height: 100vh;
   background: $white;
 
@@ -17,7 +19,7 @@
     display: flex;
     align-items: center;
     // color: #3f4346;
-    font-weight: 500;
+    // font-weight: 500;
     &:hover {
       border-bottom: 0;
     }
@@ -28,14 +30,32 @@
       transition-delay: 0.2s;
     }
   }
+  .pushPin {
+    color: $text;
+    cursor: pointer;
+    &:hover {
+      color: $gray-text-dark;
+    }
+    &:global(.material-icons) {
+      transform: rotate(45deg);
+    }
+  }
+  .sidebarTop {
+    flex-shrink: 0;
+  }
   .sideList {
-    margin-top: 8px;
+    margin: 0;
     list-style: none;
     padding-inline-start: 0;
+    line-height: 1.5;
     li {
-      font-size: 13px;
-      margin: 4px 0;
-      padding: 8px 0;
+      // padding: 10px 0 0;
+      margin-bottom: 20px;
+      color: $text;
+      font-size: 14px;
+      font-weight: bold;
+      // margin: 4px 0;
+      // padding: 8px 0;
       overflow: hidden;
       word-break: keep-all;
     }
@@ -43,7 +63,7 @@
       flex-shrink: 0;
       width: 20px;
       height: 20px;
-      // fill: #ecedf2;
+      // fill: $text;
       // margin-right: 10px;
     }
   }
@@ -58,9 +78,9 @@
   /* background: white; */
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-
+  justify-content: space-between;
   margin: 0;
+
   @media screen and (max-width: 500px) {
     width: 40px;
     height: 40px;
@@ -69,5 +89,14 @@
   .menuIcon {
     width: 20px;
     height: 20px;
+    fill: $text;
+    cursor: pointer;
+    &:hover {
+      fill: $gray-text-dark;
+    }
   }
+}
+.searchBar {
+  height: 30px;
+  margin-bottom: 20px;
 }

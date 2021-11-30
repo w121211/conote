@@ -4,17 +4,115 @@ import { useRouter } from 'next/router'
 import { useApolloClient, useQuery } from '@apollo/client'
 import { useUser } from '@auth0/nextjs-auth0'
 import { useObservable } from 'rxjs-hooks'
-import { Card, CardMeta, useCardLazyQuery, useMeQuery } from '../../apollo/query.graphql'
+import { Card, CardMeta, CardMetaInput, useCardLazyQuery, useMeQuery } from '../../apollo/query.graphql'
 import Layout from '../../components/layout/layout'
 import { workspace } from '../../components/workspace/workspace'
 import { BulletEditor } from '../../components/editor/editor'
-import { DocEntry, DocEntryPack } from '../../components/workspace/doc'
+import { Doc, DocEntry, DocEntryPack } from '../../components/workspace/doc'
 import { DocPath, DocPathService } from '../../components/workspace/doc-path'
+import classes from '../../style/symbol.module.scss'
+import CardMetaForm from '../../components/card-meta-form/card-meta-form'
+import LinkIcon from '../../assets/svg/link.svg'
+import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
+import NavPath from '../../components/nav-path/nav-path'
 
-const CardHead = ({ card, symbol }: { card: Card | null; symbol: string }): JSX.Element => {
+const CardHead = ({ doc, card, symbol }: { doc: Doc; card: Card | null; symbol: string }): JSX.Element => {
+  // const mainDoc = useObservable(() => workspace.mainDoc$)
+  const status = useObservable(() => workspace.status$)
+  const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
+  const [cardMetaSubmitted, setCardMetaSubmitted] = useState(false)
+
+  const handleCardMetaSubmitted = () => {
+    setCardMetaSubmitted(true)
+  }
+
   return (
-    <div>
-      <h1>{symbol}</h1>
+    <div className={classes.header}>
+      <h1
+        onMouseEnter={e => {
+          setShowHeaderHiddenBtns(true)
+        }}
+        onMouseLeave={e => {
+          setShowHeaderHiddenBtns(false)
+        }}
+      >
+        <div
+          className={classes.headerHiddenBtns}
+          style={showHeaderHiddenBtns ? { visibility: 'visible' } : { visibility: 'hidden' }}
+        >
+          {/* {doc.cardInput?.meta && ( */}
+          <CardMetaForm
+            cardId={doc.cid}
+            // selfCard={data.selfCard}
+            handleCardMetaSubmitted={handleCardMetaSubmitted}
+            btnClassName={classes.cardMetaBtn}
+          />
+          {/* )} */}
+          {doc?.symbol.startsWith('@http') && (
+            // <button>
+            <a className={classes.cardSource} href={doc?.symbol.substr(1)} target="_blank" rel="noreferrer">
+              <LinkIcon />
+              開啟來源
+            </a>
+            // </button>
+          )}
+        </div>
+        {symbol}
+      </h1>
+      {/* {cardMetaData?.cardMeta.keywords && (
+        <div className={classes.headerKw}>
+          {cardMetaData?.cardMeta.keywords.map((e, i) => {
+            if (i < 5) {
+              return (
+                <span className={classes.headerKwEl} key={i}>
+                  {e}
+                </span>
+              )
+            }
+            return null
+          })}
+          {cardMetaData.cardMeta.keywords.length > 5 && (
+            <span
+              className={classes.headerKwElHidden}
+              onClick={e => {
+                e.stopPropagation()
+                setShowKwTooltip(true)
+              }}
+            >
+              ...+{cardMetaData.cardMeta.keywords.length - 5}項
+              <MyTooltip
+                className={classes.headerKwElTooltip}
+                visible={showKwTooltip}
+                handleVisibleState={() => {
+                  setShowKwTooltip(false)
+                }}
+              >
+                {cardMetaData?.cardMeta.keywords.map((e, i) => {
+                  if (i >= 5) {
+                    return (
+                      <span className={classes.headerKwEl} key={i}>
+                        {e}
+                      </span>
+                    )
+                  }
+                  return null
+                })}
+              </MyTooltip>
+            </span>
+          )}
+        </div>
+      )} */}
+      <div className={classes.headerBottom}>
+        {doc.cardCopy?.id && <HeaderCardEmojis cardId={doc.cardCopy?.id} />}
+        {doc?.cardInput?.meta?.author && (
+          <>
+            <div className={classes.divider}></div>
+            <Link href={`/author/${encodeURIComponent('@' + doc?.cardInput?.meta?.author)}`}>
+              <a className={classes.author}>@{doc?.cardInput?.meta?.author}</a>
+            </Link>
+          </>
+        )}
+      </div>
     </div>
   )
 }
@@ -85,7 +183,7 @@ const WorkspaceComponent = ({
   //   ),
   // )
 
-  // console.log(card, sourceCard)
+  // console.log(savedDocs, committedDocs)
 
   useEffect(() => {
     workspace.open({ docPath, card, sourceCard })
@@ -105,41 +203,14 @@ const WorkspaceComponent = ({
   }
   return (
     <div>
-      <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
+      {/* <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
       <div>Committed:{committedDocs && committedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
 
       <div>{status}</div>
 
-      <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div>
+      <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div> */}
 
-      <button
-        onClick={() => {
-          workspace.drop()
-        }}
-      >
-        Drop
-      </button>
-      <button
-        onClick={async () => {
-          if (mainDoc.doc) {
-            await workspace.commit(mainDoc.doc, client)
-            // router.reload()
-          }
-        }}
-      >
-        Commit
-      </button>
-      <button
-        onClick={() => {
-          if (mainDoc.doc) {
-            workspace.save(mainDoc.doc)
-          }
-        }}
-      >
-        Save
-      </button>
-
-      <CardHead card={card} symbol={mainDoc.doc.symbol} />
+      <CardHead doc={mainDoc.doc} card={card} symbol={mainDoc.doc.symbol} />
 
       <BulletEditor doc={mainDoc.doc} />
     </div>
@@ -147,10 +218,12 @@ const WorkspaceComponent = ({
 }
 
 const CardSymbolPage = (): JSX.Element | null => {
+  const client = useApolloClient()
   const router = useRouter()
   const [queryCard, card] = useCardLazyQuery()
   const [querySourceCard, sourceCard] = useCardLazyQuery()
   const [docPath, setDocPath] = useState<DocPath>()
+  const mainDoc = useObservable(() => workspace.mainDoc$)
 
   // const { user, error: userError, isLoading } = useUser()
   // const { data: meData, loading: meLoading } = useMeQuery({ fetchPolicy: 'cache-first' })
@@ -180,7 +253,48 @@ const CardSymbolPage = (): JSX.Element | null => {
     return <div>Unexpected error</div>
   }
   return (
-    <Layout>
+    <Layout
+      buttonRight={
+        <>
+          <button
+            className="secondary"
+            onClick={() => {
+              workspace.drop()
+            }}
+          >
+            Drop
+          </button>
+          <button
+            className="primary"
+            onClick={() => {
+              if (mainDoc === null) {
+                return
+              }
+              if (mainDoc.doc) {
+                workspace.save(mainDoc.doc)
+              }
+            }}
+            // disabled={!isValueModified}
+          >
+            {'儲存草稿'}
+            {/* {console.log(isValueModified)} */}
+          </button>
+          <button
+            onClick={async () => {
+              if (mainDoc === null) {
+                return
+              }
+              if (mainDoc.doc) {
+                await workspace.commit(mainDoc.doc, client)
+                // router.reload()
+              }
+            }}
+          >
+            同步至筆記
+          </button>
+        </>
+      }
+    >
       <WorkspaceComponent
         docPath={docPath}
         given={{

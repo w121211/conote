@@ -1,23 +1,23 @@
 import React, { useState } from 'react'
-import { Card, useCardMetaQuery } from '../../apollo/query.graphql'
+import { Card, useCardQuery } from '../../apollo/query.graphql'
 import HeaderForm from '../header-form/header-form'
 import Popover from '../popover/popover'
 
 const CardMetaForm = ({
-  symbol,
+  cardId,
   selfCard,
   handleCardMetaSubmitted,
   btnClassName,
 }: {
-  symbol: string
-  selfCard: Card
+  cardId: string
+  selfCard?: Card
   handleCardMetaSubmitted: (isSubmitted: boolean) => void
   btnClassName?: string
 }): JSX.Element => {
   const [showHeaderForm, setShowHeaderForm] = useState(false)
 
-  const { data: cardMetaData } = useCardMetaQuery({
-    variables: { symbol },
+  const { data: cardData } = useCardQuery({
+    variables: { id: cardId },
   })
   return (
     <>
@@ -36,17 +36,17 @@ const CardMetaForm = ({
         }}
       >
         <HeaderForm
-          symbol={symbol}
+          cardId={cardId}
           initialValue={{
-            author: cardMetaData?.cardMeta.author ?? '',
-            title: (cardMetaData?.cardMeta.title || selfCard.link?.url) ?? '',
-            url: (cardMetaData?.cardMeta.url || selfCard.link?.url) ?? '',
+            author: cardData?.card?.meta.author ?? '',
+            title: cardData?.card?.meta.title ?? '',
+            url: cardData?.card?.meta.url ?? '',
             keywords:
-              cardMetaData?.cardMeta.keywords?.map(e => {
+              cardData?.card?.meta.keywords?.map(e => {
                 return { label: e, value: e }
               }) ?? [],
-            redirects: cardMetaData?.cardMeta.redirects?.join(' ') ?? '',
-            duplicates: cardMetaData?.cardMeta.duplicates?.join(' ') ?? '',
+            redirects: cardData?.card?.meta.redirects?.join(' ') ?? '',
+            duplicates: cardData?.card?.meta.duplicates?.join(' ') ?? '',
             description: '',
             date: '',
           }}

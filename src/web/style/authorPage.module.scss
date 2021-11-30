@@ -1,7 +1,7 @@
 .authorContainer {
   & > ul {
     margin-top: 0;
-    border: 1px solid $gray;
+    // border: 1px solid $gray;
     border-radius: 3px;
   }
   h3 {
@@ -12,4 +12,24 @@
   h2 {
     color: $black;
   }
+}
+.authorMetaContainer {
+  width: 50%;
+}
+.shotContainer {
+  width: 50%;
+  border: 1px solid $gray;
+  border-radius: 6px;
+  padding: 0 20px;
+}
+.col2 {
+  display: flex;
+  width: 100%;
+  margin-bottom: 30px;
+}
+.articleContainer {
+  margin-bottom: 30px;
+  padding: 0 20px;
+  border: 1px solid $gray;
+  border-radius: 6px;
 }

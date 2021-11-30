@@ -82,7 +82,7 @@ const CreateShotForm = ({
         cache.writeQuery({
           query: ShotDocument,
           data: {
-            targetId: data.createShot.targetId,
+            targetId: data.createShot.symId,
             choice: data.createShot.choice,
             authorId: data.createShot.authorId,
             linkId: data.createShot.linkId,
@@ -116,7 +116,7 @@ const CreateShotForm = ({
       if (d.link) {
         queryLink({ variables: { url: d.link ?? '' } })
       }
-      console.log(targetId)
+      // console.log(targetId)
       if (targetId) {
         createShot({
           variables: {

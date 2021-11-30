@@ -44,7 +44,7 @@ const ListRow = ({
             {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
             <h3 className={classes.title}>
               {title}
-              {summary && <div className={classes.summary}>({summary})</div>}
+              {summary && <div className={classes.summary}>{summary}</div>}
             </h3>
 
             {author ? <div className={classes.author}>{author}</div> : ''}

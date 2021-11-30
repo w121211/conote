@@ -287,9 +287,11 @@ const AuthorPollForm = ({
                       value={`${i}`}
                       content={e}
                       total={
-                        pollData.poll.count.nVotes.length > 0 ? pollData.poll.count.nVotes.reduce((a, b) => a + b) : 0
+                        pollData.poll && pollData.poll.count.nVotes.length > 0
+                          ? pollData.poll.count.nVotes.reduce((a, b) => a + b)
+                          : 0
                       }
-                      count={pollData.poll.count.nVotes[i]}
+                      count={pollData.poll && pollData.poll.count.nVotes[i]}
                       // filterComments={filterComments}
                       key={i}
                       choiceValue={handleChoiceValue}

@@ -9,7 +9,7 @@
   display: flex;
   list-style: none;
   align-items: flex-start;
-  margin-left: -3em;
+  // margin-left: -28px;
   word-break: break-all;
   @media screen and(max-width:500px) {
     margin-left: 0;
@@ -33,15 +33,9 @@
     // display: none;
     visibility: hidden;
   }
-  &:hover {
-    .bulletTooltip {
-      // display: flex;
-      visibility: visible;
-    }
-    & ~ .bulletPanel {
-      visibility: visible;
-    }
-  }
+}
+.bulletPanelTooltip {
+  margin-left: calc(-50%);
 }
 .arrowWrapper {
   // position: absolute;
@@ -71,11 +65,8 @@
   }
 }
 .bulletEditorContainer {
-  // margin-left: 2em;
-  // background: $natual;
-  // padding: 10px 3.5em 10px 3.5em;
-  // box-shadow: 0 0px 0 1px $gray;
-  border-radius: 3px;
+  margin-left: -48px;
+
   color: $text;
   @media screen and (max-width: 500px) {
     padding: 10 3em;
@@ -108,7 +99,8 @@
   }
 }
 .mirrorLeaf {
-  color: #5395f0;
+  color: $link;
+  // vertical-align: middle;
   &:hover {
     cursor: pointer;
     box-shadow: 0 1px 0 #5395f0;
@@ -124,55 +116,131 @@
 .lcText {
   margin: 0;
 }
+// .shotBtn {
+//   height: fit-content;
+//   margin: 0;
+//   padding: 0;
+//   // border-radius: 3px;
+//   // border: 1px solid $gray;
+//   background: #ede9e8;
+//   color: $text;
+//   // text-shadow: 0px 1px #ffffffa1;
+//   // border: 1px solid #a2a8c1;
+//   // mix-blend-mode: multiply;
+//   span {
+//     display: flex;
+//     align-items: center;
+//     height: 100%;
+//     padding: 0 6px;
+//     &:first-child {
+//       border-top-left-radius: 3px;
+//       border-bottom-left-radius: 3px;
+//       // border-right: 1px solid $gray;
+//     }
+//     &:last-child {
+//       // border-left: 1px solid $gray;
+//       border-bottom-right-radius: 3px;
+//       border-top-right-radius: 3px;
+//     }
+//   }
+//   .shotAuthor {
+//     // color: #4d5c7e;
+//     // background-color: white;
+//     // color: white;
+//   }
+//   .shotTarget {
+//     // color: white;
+//     // background-color: #7a7a7a;
+//     // color: $primary;
+//     // background-color: #cadbff;
+//   }
+//   .shotChoice {
+//     &[data-choice='#LONG'] {
+//       color: #386829;
+//       background-color: #c1e3b7;
+//     }
+//     &[data-choice='#SHORT'] {
+//       color: #a71919;
+//       background-color: #ffb8b8;
+//     }
+//     &[data-choice='#WATCH'] {
+//       // color: white;
+//       background-color: #ffe7ba;
+//     }
+//   }
+// }
+
+//new
 .shotBtn {
-  height: 20px;
+  height: fit-content;
   margin: 0;
-  padding: 0;
-  // border-radius: 3px;
-  border: 1px solid $gray;
-  background: none;
-  color: $black;
-  text-shadow: 0px 1px #ffffffa1;
-  // border: 1px solid #a2a8c1;
+  padding: 1px 6px;
+  border-radius: 6px;
+  // border: 1px solid $gray;
+  background: $white;
+  color: #706b6b;
+  // text-shadow: 0px 1px #ffffffa1;
+  border: 1px solid #dfdddd;
+  font-size: 14px;
+  &:hover {
+    background-color: #e9e8e8;
+  }
   // mix-blend-mode: multiply;
   span {
     display: flex;
     align-items: center;
     height: 100%;
-    padding: 0 6px;
+    // padding: 0 6px;
     &:first-child {
       border-top-left-radius: 3px;
       border-bottom-left-radius: 3px;
-      border-right: 1px solid $gray;
+      // border-right: 1px solid $gray;
     }
     &:last-child {
-      border-left: 1px solid $gray;
+      // border-left: 1px solid $gray;
       border-bottom-right-radius: 3px;
       border-top-right-radius: 3px;
     }
   }
-  .shotAuthor {
-    // color: #4d5c7e;
-    background-color: white;
-  }
+
   .shotTarget {
-    // color: $link;
-    background-color: $natual;
-    // color: $primary;
-    // background-color: #cadbff;
+    font-weight: bold;
+    color: $link;
   }
   .shotChoice {
     &[data-choice='#LONG'] {
-      // color: #216c39;
-      background-color: #c1e3b7;
+      color: #1e811e;
+      // background-color: #c1e3b7;
     }
     &[data-choice='#SHORT'] {
-      // color: white;
-      background-color: #ffb8b8;
+      color: #d62b2b;
+      // background-color: #ffb8b8;
     }
     &[data-choice='#WATCH'] {
-      // color: white;
-      background-color: #ffe7ba;
+      color: #f39012;
+      // background-color: #ffe7ba;
     }
   }
+}
+//new
+
+.mirrorContainer a {
+  color: $link !important;
+  &:hover {
+    cursor: pointer;
+    color: $link !important;
+    box-shadow: 0 1px 0 $link !important;
+  }
+}
+.symbolContainer {
+  color: $link;
+  &:hover {
+    cursor: pointer;
+    color: $link;
+    box-shadow: 0 1px 0 $link;
+  }
+}
+.filterMirrorContainer {
+  background: $natual;
+  border-radius: 6px;
 }

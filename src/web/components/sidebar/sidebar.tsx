@@ -9,52 +9,83 @@ import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
 import { useMeQuery } from '../../apollo/query.graphql'
 import MenuIcon from '../../assets/svg/menu.svg'
 import layoutClasses from '../layout/layout.module.scss'
+import SidebarList from './sidebar-list'
+import { workspace } from '../workspace/workspace'
+import { useObservable } from 'rxjs-hooks'
 
-const SideBar = ({ style, showMenuHandler }: { style: React.CSSProperties; showMenuHandler: () => void }) => {
+const SideBar = ({
+  style,
+  showMenuHandler,
+  pinMenuHandler,
+  isPined,
+}: {
+  style: React.CSSProperties
+  showMenuHandler: (boo?: boolean) => void
+  pinMenuHandler: (boo?: boolean) => void
+  isPined: boolean
+}): JSX.Element => {
   // const { user, error, isLoading } = useUser()
-  const { data, loading } = useMeQuery()
+  // const { data, loading } = useMeQuery()
+  const savedDocs = useObservable(() => workspace.savedDocs$)
+  const committedDocs = useObservable(() => workspace.committedDocs$)
 
   return (
-    <div className={classes.sidebar} style={style}>
-      <div
-        className={`${classes.menuIconWrapper}`}
-        onClick={() => {
-          showMenuHandler()
-        }}
-      >
-        <MenuIcon className={classes.menuIcon} />
-      </div>
+    <div
+      className={classes.sidebar}
+      style={style}
+      onMouseLeave={() => {
+        if (isPined) return
+        showMenuHandler(false)
+        pinMenuHandler(false)
+      }}
+    >
+      <div className={classes.sidebarTop}>
+        <div className={`${classes.menuIconWrapper}`}>
+          <MenuIcon
+            className={classes.menuIcon}
+            onClick={() => {
+              showMenuHandler(false)
+              pinMenuHandler(false)
+            }}
+          />
+          <span
+            className={`${isPined ? 'material-icons' : 'material-icons-outlined'} ${classes.pushPin}`}
+            onClick={() => {
+              pinMenuHandler()
+            }}
+          >
+            push_pin
+          </span>
+        </div>
 
-      <div className="searchBar">
-        <SearchAllForm />
+        <div className={classes.searchBar}>
+          <SearchAllForm small />
+        </div>
+        <ul className={classes.sideList}>
+          <li>
+            {/* <HomeIcon /> */}
+            <a href="/">
+              <span>首頁</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              {/* <CocardIcon /> */}
+              <span>社群卡</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              {/* <HeartIcon /> */}
+              <span>收藏</span>
+            </a>
+          </li>
+        </ul>
       </div>
-      <ul className={classes.sideList}>
-        {/* <li>
-            <Link to="/">
-              <HomeIcon />
-              首頁
-            </Link>
-          </li> */}
-        <li>
-          <a href="#">
-            {/* <CocardIcon /> */}
-            <span>社群卡</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            {/* <HeartIcon /> */}
-            <span>收藏</span>
-          </a>
-        </li>
-        {/* <li>
-          <a href="https://www.notion.so/Work-Log-491e5e9bdff942cf96ab0e9dfbf86c4e">測試說明: 3/4 上線測試A1</a>
-        </li> */}
-      </ul>
-      {/* <span className="logo">
-        <Link href="/">COCARD</Link>
-      </span> */}
-      {data ? (
+      <SidebarList title="最近同步的筆記" entries={committedDocs} />
+      <SidebarList title="暫存區" entries={savedDocs} />
+
+      {/* {data ? (
         <>
           {window.location.protocol.includes('extension') ? (
             <>
@@ -68,15 +99,7 @@ const SideBar = ({ style, showMenuHandler }: { style: React.CSSProperties; showM
         </>
       ) : (
         <a href="/api/auth/login">Login</a>
-      )}
-      {/* <Search
-          className="search"
-          placeholder="Search..."
-          enterButton
-          size="middle"
-          // suffix={suffix}
-          // onSearch={onSearch}
-        /> */}
+      )} */}
     </div>
   )
 }

@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Nav } from '../../pages/card/[symbol]'
+// import { Nav } from '../../pages/card/[symbol]'
 import MyTooltip from '../my-tooltip/my-tooltip'
 import RightArrow from '../../assets/svg/right-arrow.svg'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import classes from './nav-path.module.scss'
 import { UrlObject } from 'url'
 import Link from 'next/link'
-import { useCardMetaQuery } from '../../apollo/query.graphql'
+import { useCardQuery } from '../../apollo/query.graphql'
+import { DocEntry } from '../workspace/doc'
+// import { DocEntry } from '../workspace/workspace'
 
 function getTextWidth(text: string, font?: any) {
   const canvas = document.createElement('canvas')
@@ -20,7 +22,7 @@ function getTextWidth(text: string, font?: any) {
 }
 
 export interface NavPathProps {
-  path?: Nav[]
+  path?: DocEntry[]
   mirrorHomeUrl?: UrlObject
   location: NavLocation
 }
@@ -28,17 +30,17 @@ export interface NavPathProps {
 const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/g
 
 const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX.Element => {
-  const [myPath, setMyPath] = useState<(Nav | string)[] | undefined>(path)
-  const [hiddenPath, setHiddenPath] = useState<(Nav | string)[]>([])
+  const [myPath, setMyPath] = useState<(DocEntry | string)[] | undefined>(path)
+  const [hiddenPath, setHiddenPath] = useState<(DocEntry | string)[]>([])
 
-  const [prevPath, setPrevPath] = useState<Nav[] | undefined>([])
+  const [prevPath, setPrevPath] = useState<DocEntry[] | undefined>([])
   const [viewPortWidth, setViewPortWidth] = useState(0)
   const [showTooltip, setShowTooltip] = useState(false)
 
   const router = useRouter()
 
   const pathRef = useRef<HTMLUListElement>(null)
-  const { data } = useCardMetaQuery({
+  const { data } = useCardQuery({
     fetchPolicy: 'cache-first',
     variables: { symbol: router.query.symbol as string },
   })
@@ -67,59 +69,56 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
   }, [])
 
   useEffect(() => {
-    if (path) {
-      if (path.length > 2 && viewPortWidth > 0 && 501 > viewPortWidth) {
-        const pathElementWidth: number[] = []
-        path.forEach((e, i) => {
-          const textWidth = getTextWidth(e.text)
-          if (textWidth) {
-            const newWidth = textWidth > 80 ? 80 : textWidth
-            pathElementWidth.push(newWidth)
-          }
-        })
-        if (pathElementWidth.reduce((a, b) => a + b) + 25 * (pathElementWidth.length - 1) > viewPortWidth - 62 - 16) {
-          let indx = 1
-          do {
-            pathElementWidth[indx] = 0
-            indx += 1
-          } while (
-            pathElementWidth.reduce((a, b) => a + b) + 25 * (pathElementWidth.length - indx) + 13 >=
-            viewPortWidth - 62 - 16
-          )
-          const copyArr = [...path]
-          const filterCopyArr = copyArr.slice(1, indx)
-
-          const newCopyArr: (Nav | string)[] = [...path]
-          newCopyArr.splice(1, indx - 1, '...')
-
-          newCopyArr.forEach(e => {
-            if (typeof e !== 'string') {
-              e.text.replace(rePoll, '')
-            }
-          })
-
-          setHiddenPath(filterCopyArr)
-          setMyPath(newCopyArr)
-        } else {
-          const newPath = JSON.parse(JSON.stringify(path)) as Nav[]
-          newPath.forEach(e => {
-            if (typeof e !== 'string') {
-              e.text = e.text.replace(rePoll, '').trimEnd()
-            }
-          })
-          setMyPath(newPath)
-        }
-      } else {
-        const newPath = JSON.parse(JSON.stringify(path)) as Nav[]
-        newPath.forEach(e => {
-          if (typeof e !== 'string') {
-            //去掉 !((poll))
-            e.text = e.text.replace(rePoll, '').trimEnd()
-          }
-        })
-        setMyPath(newPath)
-      }
-    }
+    // if (path) {
+    //   if (path.length > 2 && viewPortWidth > 0 && 501 > viewPortWidth) {
+    //     const pathElementWidth: number[] = []
+    //     path.forEach((e, i) => {
+    //       const textWidth = getTextWidth(e.title)
+    //       if (textWidth) {
+    //         const newWidth = textWidth > 80 ? 80 : textWidth
+    //         pathElementWidth.push(newWidth)
+    //       }
+    //     })
+    //     if (pathElementWidth.reduce((a, b) => a + b) + 25 * (pathElementWidth.length - 1) > viewPortWidth - 62 - 16) {
+    //       let indx = 1
+    //       do {
+    //         pathElementWidth[indx] = 0
+    //         indx += 1
+    //       } while (
+    //         pathElementWidth.reduce((a, b) => a + b) + 25 * (pathElementWidth.length - indx) + 13 >=
+    //         viewPortWidth - 62 - 16
+    //       )
+    //       const copyArr = [...path]
+    //       const filterCopyArr = copyArr.slice(1, indx)
+    //       const newCopyArr: (DocEntry | string)[] = [...path]
+    //       newCopyArr.splice(1, indx - 1, '...')
+    //       newCopyArr.forEach(e => {
+    //         if (typeof e !== 'string') {
+    //           e.title.replace(rePoll, '')
+    //         }
+    //       })
+    //       setHiddenPath(filterCopyArr)
+    //       setMyPath(newCopyArr)
+    //     } else {
+    //       const newPath = JSON.parse(JSON.stringify(path)) as DocEntry[]
+    //       newPath.forEach(e => {
+    //         if (typeof e !== 'string') {
+    //           e.text = e.text.replace(rePoll, '').trimEnd()
+    //         }
+    //       })
+    //       setMyPath(newPath)
+    //     }
+    //   } else {
+    //     const newPath = JSON.parse(JSON.stringify(path)) as Nav[]
+    //     newPath.forEach(e => {
+    //       if (typeof e !== 'string') {
+    //         //去掉 !((poll))
+    //         e.text = e.text.replace(rePoll, '').trimEnd()
+    //       }
+    //     })
+    //     setMyPath(newPath)
+    //   }
+    // }
   }, [viewPortWidth, path])
 
   return (
@@ -129,7 +128,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
         <li>
           <span>
             <Link href={mirrorHomeUrl}>
-              <a>{data?.cardMeta.title}</a>
+              <a>{data?.card && data?.card.meta.title}</a>
             </Link>
             {/* {console.log(path, location)} */}
           </span>
@@ -159,14 +158,14 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
                   justifyContent: `${e === '...' ? 'center' : 'flex-start'}`,
                 }}
               >
-                {typeof e !== 'string' && (
+                {/* {typeof e !== 'string' && (
                   <Link href={locationToUrl({ ...location, openedLiPath: e.path })}>
                     <a>
-                      {mirrorHomeUrl && e.path.length === 0 && '::'}
-                      {!mirrorHomeUrl && i === 0 ? data?.cardMeta.title || e.text : e.text}
+                      {mirrorHomeUrl && e.subEntries.length === 0 && '::'}
+                      {!mirrorHomeUrl && i === 0 &&data?.card? data.card.meta.title || e.title : e.text}
                     </a>
                   </Link>
-                )}
+                )} */}
                 {/* {typeof e !== 'string' && e.path.length === 0 && (
                   <Link href={`/card/${encodeURIComponent(e.text)}`}>
                     <a className="ui">{e.text}</a>
