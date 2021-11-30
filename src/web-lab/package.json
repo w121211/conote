@@ -26,6 +26,7 @@
     ]
   },
   "dependencies": {
+    "firebase": "^9.5.0",
     "immer": "^9.0.6",
     "localforage": "^1.10.0",
     "nanoid": "^3.1.30",
@@ -33,6 +34,8 @@
     "prismjs": "^1.24.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-firebase-hooks": "^4.0.1",
+    "react-firebaseui": "^6.0.0",
     "react-modal": "^3.14.3",
     "rxjs": "^7.4.0",
     "rxjs-hooks": "^0.7.0",
