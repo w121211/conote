@@ -3,7 +3,7 @@
  */
 // import _ from 'lodash'
 // import dayjs from 'dayjs'
-import { Card, CardType } from '@prisma/client'
+import { Sym, SymType } from '.prisma/client'
 import Fuse from 'fuse.js'
 // import { Symbol as PrismaSymbol } from '@prisma/client'
 import prisma from '../prisma'
@@ -51,15 +51,14 @@ export async function getAllSymbols(): Promise<string[]> {
   console.log('Loading symbols from database...')
 
   let symbols: string[] = []
-  let cursor: number | undefined = undefined
+  let cursor: string | undefined = undefined
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
     // eslint-disable-next-line no-await-in-loop
-    const res: Card[] = await prisma.card.findMany({
-      // select: { symbol: true},
+    const res: Sym[] = await prisma.sym.findMany({
       where: {
-        OR: [{ type: CardType.TICKER }, { type: CardType.TOPIC }],
+        OR: [{ type: SymType.TICKER }, { type: SymType.TOPIC }],
       },
       take: 100,
       // skip cursor

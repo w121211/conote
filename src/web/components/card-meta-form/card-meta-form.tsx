@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Card, useCardQuery } from '../../apollo/query.graphql'
+import { CardFragment, useCardQuery } from '../../apollo/query.graphql'
 import HeaderForm from '../header-form/header-form'
 import Popover from '../popover/popover'
 
@@ -10,7 +10,7 @@ const CardMetaForm = ({
   btnClassName,
 }: {
   cardId: string
-  selfCard?: Card
+  selfCard?: CardFragment
   handleCardMetaSubmitted: (isSubmitted: boolean) => void
   btnClassName?: string
 }): JSX.Element => {

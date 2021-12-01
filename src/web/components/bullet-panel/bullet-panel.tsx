@@ -5,9 +5,9 @@ import SrcIcon from '../../assets/svg/foreign.svg'
 import classes from './bullet-panel.module.scss'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
-import { BulletEmoji, BulletEmojiLike, EmojiCode } from '../../apollo/query.graphql'
-
 import BulletPanelEmojis from '../emoji-up-down/bullet-panel-emojis'
+import { EmojiCode } from '../../apollo/type-defs.graphqls'
+import { BulletEmojiFragment, BulletEmojiLikeFragment } from '../../apollo/query.graphql'
 
 interface Child {
   icon?: SVGComponentTransferFunctionElement | SVGElement | Element | string | ReactElement
@@ -26,8 +26,8 @@ export interface BulletPanelType {
   tooltipClassName?: string
   sourceUrl?: string
   authorName?: string
-  onEmojiCreated: (emoji: BulletEmoji, myEmojiLike: BulletEmojiLike) => void
-  emoji?: BulletEmoji[]
+  onEmojiCreated: (emoji: BulletEmojiFragment, myEmojiLike: BulletEmojiLikeFragment) => void
+  emoji?: BulletEmojiFragment[]
 }
 
 const BulletPanel = ({

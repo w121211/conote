@@ -1,10 +1,6 @@
 import React from 'react'
 import {
-  BulletEmoji,
-  CardEmoji,
-  EmojiCode,
-  // EmojiCode,
-  LikeChoice,
+  BulletEmojiFragment,
   MyCardEmojiLikeDocument,
   MyCardEmojiLikeQuery,
   MyCardEmojiLikeQueryVariables,
@@ -13,6 +9,7 @@ import {
   useMyCardEmojiLikeQuery,
   useUpsertCardEmojiLikeMutation,
 } from '../../apollo/query.graphql'
+import { EmojiCode } from '../../apollo/type-defs.graphqls'
 import BulletEmojiBtn from './bullet-emoji-btn'
 import EmojiTextToIcon from './emoji-text-to-icon'
 
@@ -70,7 +67,7 @@ const BulletPointEmojis = ({
   bulletEmojis,
 }: {
   bulletId: string
-  bulletEmojis?: BulletEmoji
+  bulletEmojis?: BulletEmojiFragment
 }): JSX.Element | null => {
   const { data: bulletEmojisData } = useBulletEmojisQuery({ variables: { bulletId } })
   if (

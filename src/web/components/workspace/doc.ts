@@ -1,9 +1,10 @@
 import { NodeChange, TreeChangeService, TreeNode } from '../../../packages/docdiff/src'
 import { LocalDBService } from './local-db'
-import { Card, CardInput, CardState, CardStateInput } from '../../apollo/query.graphql'
 import { Bullet } from '../bullet/types'
 import { LiElement } from '../editor/slate-custom-types'
 import { EditorSerializer } from '../editor/serializer'
+import { CardFragment, CardStateFragment } from '../../apollo/query.graphql'
+import { CardInput, CardStateInput } from '../../apollo/type-defs.graphqls'
 
 export type DocEntry = {
   symbol: string
@@ -22,15 +23,15 @@ export type DocEntryPack = {
 export type DocProps = {
   symbol: string
   cardInput: CardInput | null
-  cardCopy: Card | null
-  sourceCardCopy: Card | null
+  cardCopy: CardFragment | null
+  sourceCardCopy: CardFragment | null
   // value: TreeNode<Bullet>[]
   editorValue: LiElement[]
   // changes: NodeChange<Bullet>[]
   createdAt?: number
   updatedAt?: number
   committedAt?: number | null
-  committedState?: CardState | null
+  committedState?: CardStateFragment | null
 }
 
 const isBulletEqual = (a: Bullet, b: Bullet) => {
@@ -40,8 +41,8 @@ const isBulletEqual = (a: Bullet, b: Bullet) => {
 export class Doc {
   readonly cid: string
   readonly symbol: string // as CID
-  readonly cardCopy: Card | null // to keep the prev-state,
-  readonly sourceCardCopy: Card | null // indicate current doc is a mirror
+  readonly cardCopy: CardFragment | null // to keep the prev-state,
+  readonly sourceCardCopy: CardFragment | null // indicate current doc is a mirror
   cardInput: CardInput | null // required if card is null
   editorValue: LiElement[]
   // value: TreeNode<Bullet>[]
@@ -49,7 +50,7 @@ export class Doc {
   createdAt: number
   updatedAt: number
   committedAt: number | null = null
-  committedState: CardState | null = null
+  committedState: CardStateFragment | null = null
 
   constructor({
     cardInput,
@@ -246,7 +247,7 @@ export class Doc {
   }
 
   async getSubDocs(): Promise<Doc[]> {
-    return (await Doc.getAllDocs('docTable')).filter(e => e.sourceCardCopy?.sym.symbol === this.symbol)
+    return (await Doc.getAllDocs()).filter(e => e.sourceCardCopy?.sym.symbol === this.symbol)
   }
 
   getValue(): TreeNode<Bullet>[] {

@@ -14,7 +14,7 @@ const Dotenv = require('dotenv-webpack')
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const outDist = isDevelopment ? 'distdev' : 'dist'
+const outDist = isDevelopment ? 'devdist' : 'dist'
 
 module.exports = {
   mode: isDevelopment ? 'development' : 'production',

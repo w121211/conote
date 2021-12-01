@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { useApolloClient, useQuery } from '@apollo/client'
 import { useUser } from '@auth0/nextjs-auth0'
 import { useObservable } from 'rxjs-hooks'
-import { Card, CardMeta, CardMetaInput, useCardLazyQuery, useMeQuery } from '../../apollo/query.graphql'
+import { CardFragment, useCardLazyQuery } from '../../apollo/query.graphql'
 import Layout from '../../components/layout/layout'
 import { workspace } from '../../components/workspace/workspace'
 import { BulletEditor } from '../../components/editor/editor'
@@ -16,7 +16,7 @@ import LinkIcon from '../../assets/svg/link.svg'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 import NavPath from '../../components/nav-path/nav-path'
 
-const CardHead = ({ doc, card, symbol }: { doc: Doc; card: Card | null; symbol: string }): JSX.Element => {
+const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; symbol: string }): JSX.Element => {
   // const mainDoc = useObservable(() => workspace.mainDoc$)
   const status = useObservable(() => workspace.status$)
   const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
@@ -153,8 +153,8 @@ const WorkspaceComponent = ({
 }: {
   docPath: DocPath
   given: {
-    card: Card | null
-    sourceCard: Card | null
+    card: CardFragment | null
+    sourceCard: CardFragment | null
   }
 }): JSX.Element | null => {
   const client = useApolloClient()
