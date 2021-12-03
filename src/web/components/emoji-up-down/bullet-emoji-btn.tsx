@@ -71,7 +71,6 @@ const BulletEmojiBtn = ({
   })
   const [createBulletEmoji, { error: createBulletEmojiError }] = useCreateBulletEmojiMutation({
     // variables: { bulletId, emojiText },
-
     // TODO: 避免使用 @see https://www.apollographql.com/blog/apollo-client/caching/when-to-use-refetch-queries/
     update(cache, { data }) {
       const res = cache.readQuery<BulletEmojisQuery>({
@@ -89,7 +88,7 @@ const BulletEmojiBtn = ({
       }
     },
     onError(error) {
-      console.log(error.message)
+      console.error(error.message)
     },
     // refetchQueries: _ => [{ query: BulletEmojisDocument, variables: { bulletId } }],
   })

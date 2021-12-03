@@ -40,14 +40,15 @@ const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; 
           className={classes.headerHiddenBtns}
           style={showHeaderHiddenBtns ? { visibility: 'visible' } : { visibility: 'hidden' }}
         >
-          {/* {doc.cardInput?.meta && ( */}
-          <CardMetaForm
-            cardId={doc.cid}
-            // selfCard={data.selfCard}
-            handleCardMetaSubmitted={handleCardMetaSubmitted}
-            btnClassName={classes.cardMetaBtn}
-          />
-          {/* )} */}
+          {card && (
+            <CardMetaForm
+              cardId={card.id}
+              // selfCard={data.selfCard}
+              handleCardMetaSubmitted={handleCardMetaSubmitted}
+              btnClassName={classes.cardMetaBtn}
+            />
+          )}
+
           {doc?.symbol.startsWith('@http') && (
             // <button>
             <a className={classes.cardSource} href={doc?.symbol.substr(1)} target="_blank" rel="noreferrer">

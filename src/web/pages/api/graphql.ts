@@ -4,7 +4,9 @@ import { ApolloServer } from 'apollo-server-micro'
 import { schema } from '../../apollo/schema'
 import { IncomingMessage, ServerResponse } from 'http'
 
-// @see https://github.com/vercel/next.js/blob/canary/examples/api-routes-graphql/pages/api/graphql.js
+/**
+ * @see https://github.com/vercel/next.js/blob/canary/examples/api-routes-graphql/pages/api/graphql.js
+ */
 const apolloServer = new ApolloServer({
   schema,
   debug: true,
