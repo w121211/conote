@@ -7,7 +7,6 @@ import // useCreateReplyMutation,
 // RepliesQueryVariables,
 // RepliesDocument,
 '../../apollo/query.graphql'
-import CommentList from '../commentList/commentList'
 import CreateBoardFrom, { BoardFormInputs } from '../poll-form/_create-board-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import classes from './board-page.module.scss'

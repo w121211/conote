@@ -3,12 +3,11 @@ import { useRouter } from 'next/router'
 import { Node } from 'slate'
 import { BulletEditor } from '../../components/editor/editor'
 import { LiElement } from '../../components/editor/slate-custom-types'
-import { useLocalValue } from '../../components/editor/use-local-value'
 import { isLi } from '../../components/editor/with-list'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import Layout from '../../components/layout/layout'
 
-import { Poll, useCreateVoteMutation, useMeQuery } from '../../apollo/query.graphql'
+import { useCreateVoteMutation, useMeQuery } from '../../apollo/query.graphql'
 import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/authorPage.module.scss'
 import Popover from '../../components/popover/popover'
@@ -122,7 +121,7 @@ const AuthorPage = (): JSX.Element | null => {
     <Layout>
       <div className={classes.authorContainer} style={{ marginBottom: '3em' }}>
         <h1 className={classes.header}>
-          {router.query.authorName}
+          {router.query.author}
           {/* <span className={classes.author}>@{data.selfCard.meta.author}</span> */}
         </h1>
         <div className={classes.col2}>

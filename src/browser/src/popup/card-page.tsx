@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react'
 // import { QueryDataProvider } from '../../../web/components/data-provider'
 // import { CardHead, CardBody } from '../../../web/components/card'
 // import { CardForm } from '../../../web/components/card-form'
-import { useCardQuery, CardQuery, useWebpageCardQuery, WebpageCardQuery } from '../../../web/apollo/query.graphql'
-import { Editor, Section, ExtTokenStream, streamToStr, ExtToken } from '../../../packages/editor/src/index'
+import { useCardQuery, CardQuery } from '../../../web/apollo/query.graphql'
 
 function getTabUrl(): string | null {
   let url: string | null

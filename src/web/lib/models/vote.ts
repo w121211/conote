@@ -46,7 +46,6 @@ export async function createAuthorVote({
     data: {
       choiceIdx,
       user: { connect: { id: userId } },
-      author: { connect: { name: authorName } },
       poll: { connect: { id: poll.id } },
     },
   })

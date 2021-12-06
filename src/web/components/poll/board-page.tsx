@@ -7,7 +7,7 @@ import // useCreateReplyMutation,
 // RepliesQueryVariables,
 // RepliesDocument,
 '../../apollo/query.graphql'
-import CommentList from '../commentList/commentList'
+// import CommentList from '../commentList/commentList'
 import BoardFrom, { FormInputs } from '../poll-form/board-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import BarChart from '../bar/bar'
@@ -137,7 +137,7 @@ const BoardPage = ({
         {/* <div className={classes.outer} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
         {/* <div className={classes.inner}> */}
         {/* <div className={classes.element} style={{ height: `calc(100vh - ${bounds.height}px)` }}> */}
-        <CommentList
+        {/* <CommentList
           commentsList={commentsList}
           // filterCommentsList={filterCommentsList}
           // pollId={pollId}
@@ -145,7 +145,7 @@ const BoardPage = ({
           // anchorHLHandler={anchorHLHandler}
           // myScrollIntoView={myScrollIntoView}
           // resetHighLight={resetHighLight}
-        />
+        /> */}
         {/* </div>
           </div>
         </div> */}

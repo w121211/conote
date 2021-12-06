@@ -1,5 +1,5 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
-import { ShotChoice } from '../../apollo/query.graphql'
+import { ShotChoice } from '../../apollo/type-defs.graphqls'
 // import { parseInlineShotParams } from '../models/shot'
 import { tokenToString } from '../../lib/token'
 import { InlineItem } from './types'

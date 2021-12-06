@@ -1,15 +1,14 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
-import { Poll, usePollQuery } from '../../apollo/query.graphql'
+import { usePollQuery } from '../../apollo/query.graphql'
 
 import useMeasure from 'react-use-measure'
 // import { Hashtag, HashtagGroup } from '../../lib/hashtag/types'
-import // useCreateReplyMutation,
-// useCommentQuery,
-// useRepliesQuery,
-// RepliesQueryVariables,
-// RepliesDocument,
-'../../apollo/query.graphql'
-import CommentList from '../commentList/commentList'
+// import // useCreateReplyMutation,
+// // useCommentQuery,
+// // useRepliesQuery,
+// // RepliesQueryVariables,
+// // RepliesDocument,
+// '../../apollo/query.graphql'
 import PollForm, { FormInputs } from '../poll-form/poll-form'
 // import LineChart from '../../__deprecated__/lineChart'
 import BarChart from '../bar/bar'

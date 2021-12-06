@@ -1,7 +1,13 @@
 import { title } from 'process'
 import React, { useEffect, useState } from 'react'
 import { useForm, useController, useFormContext, FormProvider, useWatch, Control } from 'react-hook-form'
-import { useCreateVoteMutation, MyVotesDocument, MyVotesQuery, useMyVotesQuery, Vote } from '../../apollo/query.graphql'
+import {
+  useCreateVoteMutation,
+  MyVotesDocument,
+  MyVotesQuery,
+  useMyVotesQuery,
+  VoteFragment,
+} from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
 import classes from './board-form.module.scss'
 
@@ -29,7 +35,7 @@ export const RadioInput = ({
   content: string
   count?: number
   total?: number
-  myVote?: Vote
+  myVote?: VoteFragment
 
   // filterComments: (i: number) => void
   choiceValue?: (i: string) => void
@@ -113,7 +119,7 @@ const BoardForm = ({
   const { register, handleSubmit, setValue, reset, getValues } = methods
   const [choiceValue, setChoiceValue] = useState<number | null | undefined>()
   // const [check, setChecked] = useState<boolean[]>(Array(boardData?.board.poll?.choices.length).fill(false))
-  const [myVote, setMyVote] = useState<Vote>()
+  const [myVote, setMyVote] = useState<VoteFragment>()
 
   useEffect(() => {
     if (myVotesData) {

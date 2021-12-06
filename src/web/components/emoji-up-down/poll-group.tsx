@@ -4,7 +4,7 @@ import React, { HtmlHTMLAttributes, useContext, useEffect, useState } from 'reac
 import classes from './emoji-up-down.module.scss'
 import Popover from '../popover/popover'
 import PollPage from '../poll/poll-page'
-import { Poll, PollDocument, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'
+import { PollDocument, PollFragment, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'
 // import { Context } from '../../pages/card/[symbol]'
 
 const PollGroup = ({
@@ -26,7 +26,7 @@ const PollGroup = ({
   handleClickedIdx?: (i: number) => void
   handleShowPopover?: (b: boolean) => void
   handlePollId?: (id: string) => void
-  handlePollData?: (data: Poll) => void
+  handlePollData?: (data: PollFragment) => void
 } & HtmlHTMLAttributes<HTMLElement>): JSX.Element => {
   const [showPopover, setShowPopover] = useState(false)
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()

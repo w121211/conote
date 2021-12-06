@@ -1,5 +1,6 @@
 import React from 'react'
-import { CardEmojisDocument, EmojiCode, LikeChoice, useCreateCardEmojiMutation } from '../../apollo/query.graphql'
+import { CardEmojisDocument, useCreateCardEmojiMutation } from '../../apollo/query.graphql'
+import { EmojiCode } from '../../apollo/type-defs.graphqls'
 import EmojiTextToIcon from './emoji-text-to-icon'
 import classes from './emoji-up-down.module.scss'
 

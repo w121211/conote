@@ -1,16 +1,16 @@
+import { ApolloClient } from '@apollo/client'
 import { nanoid } from 'nanoid'
 import { BehaviorSubject } from 'rxjs'
-import { TreeNode } from '../../../packages/docdiff/src'
+import { NodeChange, TreeNode } from '../../../packages/docdiff/src'
 import { LocalDBService } from './local-db'
 import {
-  Card,
+  CardFragment,
   CreateCommitDocument,
   CreateCommitMutation,
   CreateCommitMutationVariables,
 } from '../../apollo/query.graphql'
 import { Bullet } from '../bullet/types'
 import { EditorSerializer } from '../editor/serializer'
-import { ApolloClient } from '@apollo/client'
 import { DocPath } from './doc-path'
 import { Doc, DocEntry, DocEntryPack } from './doc'
 
@@ -32,7 +32,15 @@ class Workspace {
     this.updateCommittedDocEntries()
   }
 
-  _create({ card, sourceCard, symbol }: { card: Card | null; sourceCard: Card | null; symbol: string }): Doc {
+  _create({
+    card,
+    sourceCard,
+    symbol,
+  }: {
+    card: CardFragment | null
+    sourceCard: CardFragment | null
+    symbol: string
+  }): Doc {
     if (card?.state) {
       const value = card.state.body.value as unknown as TreeNode<Bullet>[]
 
@@ -93,7 +101,9 @@ class Workspace {
     }
     const subDocs = await doc.getSubDocs()
     const allDocs = [doc, ...subDocs]
-    const cardStateInputs = allDocs.map(e => e.toCardStateInput()).filter(e => e.changes.length > 0)
+    const cardStateInputs = allDocs
+      .map(e => e.toCardStateInput())
+      .filter(e => (e.changes as NodeChange<Bullet>[]).length > 0)
 
     if (cardStateInputs.length === 0) {
       console.warn(`Doc(s) not changed, return`)
@@ -161,8 +171,8 @@ class Workspace {
     sourceCard,
   }: {
     docPath: DocPath
-    card: Card | null
-    sourceCard: Card | null
+    card: CardFragment | null
+    sourceCard: CardFragment | null
   }): Promise<void> {
     // Save current editing doc before opening another
     const curDoc = this.mainDoc$.getValue()

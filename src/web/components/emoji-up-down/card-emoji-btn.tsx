@@ -1,18 +1,17 @@
 import React from 'react'
 import {
-  CardEmoji,
-  // EmojiCode,
-  LikeChoice,
+  CardEmojiFragment,
   MyCardEmojiLikeDocument,
   MyCardEmojiLikeQuery,
   MyCardEmojiLikeQueryVariables,
   useMyCardEmojiLikeQuery,
   useUpsertCardEmojiLikeMutation,
 } from '../../apollo/query.graphql'
+import { LikeChoice } from '../../apollo/type-defs.graphqls'
 import EmojiTextToIcon from './emoji-text-to-icon'
 import classes from './emoji-up-down.module.scss'
 
-const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmoji }): JSX.Element => {
+const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Element => {
   const [upsertEmojiLike] = useUpsertCardEmojiLikeMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyCardEmojiLikeQuery>({

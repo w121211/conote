@@ -7,10 +7,8 @@ import {
   AuthorDocument,
   AuthorQuery,
   AuthorQueryVariables,
-  Shot,
-  ShotChoice,
   ShotDocument,
-  ShotInput,
+  ShotFragment,
   ShotQuery,
   useAuthorQuery,
   useCardLazyQuery,
@@ -19,6 +17,7 @@ import {
   useLinkLazyQuery,
   useLinkQuery,
 } from '../../apollo/query.graphql'
+import { ShotChoice } from '../../apollo/type-defs.graphqls'
 import Popup from '../popup/popup'
 import classes from './shot-form.module.scss'
 
@@ -34,7 +33,7 @@ const CreateShotForm = ({
   handleShotData,
 }: {
   initialInput: FormInput
-  handleShotData: (shot: Shot) => void
+  handleShotData: (shot: ShotFragment) => void
 }): JSX.Element => {
   const router = useRouter()
   const [showPopup, setShowPopup] = useState(false)

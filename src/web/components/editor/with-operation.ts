@@ -4,36 +4,36 @@ import { BulletOperation } from '../bullet/types'
 import { LcElement } from './slate-custom-types'
 import { isLc } from './with-list'
 
-export function withOperation(editor: Editor): Editor {
-  const { normalizeNode } = editor
+// export function withOperation(editor: Editor): Editor {
+//   const { normalizeNode } = editor
 
-  /**
-   * 用於標示op
-   * - CREATE: 沒有id、有head input
-   * - UPDATE: 有id、head/body與prev不同
-   * - DELETE: TODO 需要在close editor時才可以偵測到
-   * - MOVE: TODO
-   */
-  editor.normalizeNode = ([node, path]) => {
-    if (isLc(node)) {
-      let op: BulletOperation | undefined
-      const input = Node.string(node)
+//   /**
+//    * 用於標示op
+//    * - CREATE: 沒有id、有head input
+//    * - UPDATE: 有id、head/body與prev不同
+//    * - DELETE: TODO 需要在close editor時才可以偵測到
+//    * - MOVE: TODO
+//    */
+//   editor.normalizeNode = ([node, path]) => {
+//     if (isLc(node)) {
+//       let op: BulletOperation | undefined
+//       const input = Node.string(node)
 
-      // CREATE: 沒有 id、有 input
-      if (node.id === undefined && input.length > 0) {
-        op = 'CREATE'
-      }
-      // UPDATE: 有id、head/body與prev不同
-      if (node.id && node.prevHead && input !== node.prevHead) {
-        op = 'UPDATE'
-      }
-      if (op !== node.op) {
-        Transforms.setNodes<LcElement>(editor, { op }, { at: path })
-      }
-    }
+//       // CREATE: 沒有 id、有 input
+//       if (node.id === undefined && input.length > 0) {
+//         op = 'CREATE'
+//       }
+//       // UPDATE: 有id、head/body與prev不同
+//       if (node.id && node.prevHead && input !== node.prevHead) {
+//         op = 'UPDATE'
+//       }
+//       if (op !== node.op) {
+//         Transforms.setNodes<LcElement>(editor, { op }, { at: path })
+//       }
+//     }
 
-    normalizeNode([node, path])
-  }
+//     normalizeNode([node, path])
+//   }
 
-  return editor
-}
+//   return editor
+// }

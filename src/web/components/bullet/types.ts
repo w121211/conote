@@ -1,11 +1,12 @@
-import { Poll as GQLPoll, Shot as GQLShot, ShotChoice } from '../../apollo/query.graphql'
-
 /**
  * Bullet operation flow:
  * - Create: draft: BulletDraft {op: 'CREATE', ....}  -> next: Bullet {op: 'CREATE', draft, id, ....}
  * - Update: current: Bullet {id, ....} -> draft: BulletDraft {id, draft, op: 'UPDATE', ....}  -> next: Bullet {id, op: 'UPDATE', ....}
  * - Non-op: current: Bullet {id, op, ....} -> draft: BulletDraft {id, op, ....}  -> next: Bullet {id, op, ....} (會和 current 值相同)
  */
+
+import { PollFragment, ShotFragment } from '../../apollo/query.graphql'
+import { ShotChoice } from '../../apollo/type-defs.graphqls'
 
 type SymbolType = 'ticker' | 'title' | 'url'
 
@@ -50,7 +51,7 @@ export type InlinePoll = {
   str: string
   id?: string
   choices: string[]
-  poll?: GQLPoll
+  poll?: PollFragment
   // vote?: author vote
 }
 
@@ -59,7 +60,7 @@ export type InlineShot = {
   str: string
   id?: string
   params: string[]
-  shot?: GQLShot
+  shot?: ShotFragment
   authorName?: string
   targetSymbol?: string
   choice?: ShotChoice

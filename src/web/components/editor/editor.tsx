@@ -17,29 +17,18 @@ import {
 } from 'slate-react'
 import { withHistory } from 'slate-history'
 import {
-  BulletEmoji,
-  BulletEmojiLike,
-  Card,
-  LikeChoice,
   MyBulletEmojiLikeDocument,
   MyBulletEmojiLikeQuery,
   MyBulletEmojiLikeQueryVariables,
-  Poll,
-  PollDocument,
-  PollQuery,
-  useCreateBulletEmojiMutation,
-  useCreatePollMutation,
-  useCreateVoteMutation,
   useMyBulletEmojiLikeQuery,
-  useMyVotesLazyQuery,
   usePollLazyQuery,
-  usePollQuery,
   useUpsertBulletEmojiLikeMutation,
-  useBulletEmojisQuery,
-  useShotLazyQuery,
-  Shot,
   useCardQuery,
-  useShotQuery,
+  BulletEmojiFragment,
+  PollFragment,
+  ShotFragment,
+  BulletEmojiLikeFragment,
+  CardFragment,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import { tokenizeBulletString } from '../bullet/parser'
@@ -71,11 +60,10 @@ import {
 } from './slate-custom-types'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
-import { useApolloClient } from '@apollo/client'
-import { getLocalOrQueryRoot } from './use-local-value'
 import BulletPointEmojis from '../emoji-up-down/bullet-point-emojis'
 import { Doc } from '../workspace/doc'
 import Modal from '../modal/modal'
+import { LikeChoice } from '../../apollo/type-defs.graphqls'
 
 // import { Context } from '../../pages/card/[symbol]'
 // import { BulletNode } from '../bullet/node'
@@ -389,7 +377,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   )
 }
 
-const UpdateEmojiLike = ({ emoji }: { emoji: BulletEmoji }): JSX.Element | null => {
+const UpdateEmojiLike = ({ emoji }: { emoji: BulletEmojiFragment }): JSX.Element | null => {
   const { data, loading, error } = useMyBulletEmojiLikeQuery({
     variables: { bulletEmojiId: emoji.id },
   })
@@ -458,7 +446,7 @@ const UpdateEmojiLike = ({ emoji }: { emoji: BulletEmoji }): JSX.Element | null 
 /**
  * @returns 若 emoji 目前沒有人點贊，返回 null
  */
-export const EmojiButotn = ({ emoji }: { emoji: BulletEmoji }): JSX.Element | null => {
+export const EmojiButotn = ({ emoji }: { emoji: BulletEmojiFragment }): JSX.Element | null => {
   // console.log(emoji)
   // if (emoji.count.nUps === 0) {
   //   return null
@@ -655,7 +643,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
   const [pollId, setPollId] = useState(element.id)
   // const [pollData, setPollData] = useState<Poll | undefined>()
   // console.log(clickedIdx)
-  function onCreated(poll: Poll) {
+  function onCreated(poll: PollFragment) {
     // const editor = useSlateStatic()
     // const path = ReactEditor.findPath(editor, element)
     const inlinePoll = toInlinePoll({ id: poll.id, choices: poll.choices })
@@ -743,7 +731,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
             handlePollId={(id: string) => {
               setPollId(id)
             }}
-            handlePollData={(data: Poll) => {
+            handlePollData={(data: PollFragment) => {
               // setPollData(data)
             }}
             inline
@@ -778,10 +766,10 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
   const { children, attributes, element } = props
   const [showPopover, setShowPopover] = useState(false)
   const [shotId, setShotId] = useState(element.id)
-  const [shotData, setShotData] = useState<Shot | undefined>()
+  const [shotData, setShotData] = useState<ShotFragment | undefined>()
   const { data: targetData } = useCardQuery({ variables: { id: shotId } })
 
-  function onCreated(shot: Shot) {
+  function onCreated(shot: ShotFragment) {
     // const editor = useSlateStatic()
     if (shotId) {
       const path = ReactEditor.findPath(editor, element)
@@ -871,7 +859,7 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
                 choice: element.choice ?? '',
                 link: '',
               }}
-              handleShotData={(shot: Shot) => {
+              handleShotData={(shot: ShotFragment) => {
                 setShotId(shot.id)
                 setShotData(shot)
               }}
@@ -1077,7 +1065,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   const hasUl = ul !== undefined
   // const href = locationToUrl(location, ReactEditor.findPath(editor, element))
 
-  function onEmojiCreated(emoji: BulletEmoji, myEmojiLike: BulletEmojiLike) {
+  function onEmojiCreated(emoji: BulletEmojiFragment, myEmojiLike: BulletEmojiLikeFragment) {
     // const curEmojis = lc.emojis ?? []
     // const path = ReactEditor.findPath(editor, element)
     // Transforms.setNodes<LcElement>(editor,  { at: lcPath(path) })
@@ -1192,7 +1180,7 @@ const CustomElement = ({
   children,
   element,
   card,
-}: RenderElementProps & { card: Card | null }): JSX.Element => {
+}: RenderElementProps & { card: CardFragment | null }): JSX.Element => {
   switch (element.type) {
     case 'symbol':
       return <InlineSymbol {...{ attributes, children, element }} />

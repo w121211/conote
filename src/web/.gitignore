@@ -42,3 +42,4 @@ yarn-error.log*
 /lib/models/__tests__/local-cache.dump.json
 .out
 downloads
+.cache*

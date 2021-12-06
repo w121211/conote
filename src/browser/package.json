@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "rm -rf dist && webpack -w --config=webpack.config.js",
-    "dev:serve": "rm -rf dist && webpack-dev-server --hot --config=webpack.config.js",
+    "dev:serve": "rm -rf devdist && webpack-dev-server --hot --config=webpack.config.js",
     "test": "jest --config=jest.config.js",
     "build": "cross-env NODE_ENV=production webpack",
     "lint": "eslint --fix -c ./.eslintrc.js \"src/**/*.ts*\"",

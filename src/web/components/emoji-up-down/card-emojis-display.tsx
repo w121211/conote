@@ -1,8 +1,6 @@
 import React from 'react'
 import {
-  CardEmoji,
-  // EmojiCode,
-  LikeChoice,
+  CardEmojiFragment,
   MyCardEmojiLikeDocument,
   MyCardEmojiLikeQuery,
   MyCardEmojiLikeQueryVariables,
@@ -13,7 +11,7 @@ import {
 import EmojiTextToIcon from './emoji-text-to-icon'
 import classes from './emoji-up-down.module.scss'
 
-const CardEmojiDisplay = ({ cardEmoji }: { cardEmoji: CardEmoji }): JSX.Element | null => {
+const CardEmojiDisplay = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Element | null => {
   const {
     data: myEmojiLikeData,
     loading,

@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react'
-
+import React from 'react'
 import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-form'
-
+import { GroupBase, StylesConfig } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import classes from './header-form.module.scss'
-import { CardDocument, CardMeta, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
-import { RadioInput } from '../poll-form/board-form'
-import router from 'next/router'
-import { GroupTypeBase, Styles } from 'react-select'
+import { CardDocument, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
+
+type Option = {
+  label: string
+  value: string
+}
+
 type FormInputs = {
   title: string
   author: string
@@ -20,7 +22,7 @@ type FormInputs = {
 }
 const components = {
   DropdownIndicator: null,
-  ClearIndicator: null,
+  // ClearIndicator: null,
 }
 // type FormInputs = {
 //   // title: string
@@ -134,9 +136,10 @@ const HeaderForm = ({
     }
   }
 
-  const customStyles: Partial<
-    Styles<{ label: string; value: string }, true, GroupTypeBase<{ label: string; value: string }>>
-  > = {
+  const customStyles: StylesConfig<Option, true, GroupBase<Option>> = {
+    // const customStyles: Partial<
+    //   Styles<{ label: string; value: string }, true, GroupTypeBase<{ label: string; value: string }>>
+    // > = {
     valueContainer: (provided, state) => ({
       ...provided,
       height: '100%',
@@ -240,8 +243,8 @@ const HeaderForm = ({
               name="keywords"
               render={({ field: { onChange, value, ref } }) => (
                 <CreatableSelect
-                  styles={customStyles}
                   isMulti
+                  styles={customStyles}
                   onChange={e => {
                     onChange(e)
                     // console.log(e)

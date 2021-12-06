@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
-import { CardEmoji, BulletEmoji, EmojiCode } from '../../apollo/query.graphql'
 import classes from './emoji-text-to-icon.module.scss'
+import { BulletEmojiFragment, CardEmojiFragment } from '../../apollo/query.graphql'
+import { EmojiCode } from '../../apollo/type-defs.graphqls'
 
 const EmojiCodeToIcon = ({
   emoji,
@@ -12,7 +13,7 @@ const EmojiCodeToIcon = ({
   text,
   customClass,
 }: {
-  emoji?: CardEmoji | BulletEmoji
+  emoji?: CardEmojiFragment | BulletEmojiFragment
   emojiCode?: EmojiCode
   count?: number
   liked?: boolean

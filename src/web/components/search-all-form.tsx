@@ -3,7 +3,7 @@ import router, { useRouter } from 'next/router'
 import Creatable from 'react-select/creatable'
 // import { toUrlParams } from '../lib/helper'
 import { useSearchAllLazyQuery } from '../apollo/query.graphql'
-import { ActionMeta, GroupTypeBase, Styles } from 'react-select'
+import { ActionMeta, GroupBase, StylesConfig } from 'react-select'
 
 type Option = {
   label: string
@@ -73,7 +73,8 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
     }
   }
 
-  const customStyles: Partial<Styles<Option, false, GroupTypeBase<Option>>> = {
+  // const customStyles: Partial<Styles<Option, false, GroupTypeBase<Option>>> = {
+  const customStyles: StylesConfig<Option, false, GroupBase<Option>> = {
     container: (provided: any, state: any) => ({
       ...provided,
       width: '100%',

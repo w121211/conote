@@ -1,12 +1,10 @@
 // import { BulletLike } from '@prisma/client'
 import React, { useEffect, useState } from 'react'
 import {
-  BulletEmoji,
+  BulletEmojiFragment,
   BulletEmojisDocument,
   BulletEmojisQuery,
   BulletEmojisQueryVariables,
-  EmojiCode,
-  LikeChoice,
   MyBulletEmojiLikeDocument,
   MyBulletEmojiLikeQuery,
   MyBulletEmojiLikeQueryVariables,
@@ -16,6 +14,7 @@ import {
   useMyBulletEmojiLikeQuery,
   useUpsertBulletEmojiLikeMutation,
 } from '../../apollo/query.graphql'
+import { EmojiCode, LikeChoice } from '../../apollo/type-defs.graphqls'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import Popup from '../popup/popup'
 import EmojiCodeToIcon from './emoji-text-to-icon'
@@ -56,7 +55,7 @@ const BulletEmojiBtn = ({
   className?: string
   bulletId: string
   children?: React.ReactNode
-  bulletEmojis?: BulletEmoji
+  bulletEmojis?: BulletEmojiFragment
   // foundEmoji?: BulletEmoji
   emojiCode: EmojiCode
   count?: number
@@ -72,7 +71,6 @@ const BulletEmojiBtn = ({
   })
   const [createBulletEmoji, { error: createBulletEmojiError }] = useCreateBulletEmojiMutation({
     // variables: { bulletId, emojiText },
-
     // TODO: 避免使用 @see https://www.apollographql.com/blog/apollo-client/caching/when-to-use-refetch-queries/
     update(cache, { data }) {
       const res = cache.readQuery<BulletEmojisQuery>({
@@ -90,7 +88,7 @@ const BulletEmojiBtn = ({
       }
     },
     onError(error) {
-      console.log(error.message)
+      console.error(error.message)
     },
     // refetchQueries: _ => [{ query: BulletEmojisDocument, variables: { bulletId } }],
   })

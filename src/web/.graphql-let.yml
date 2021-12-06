@@ -1,9 +1,7 @@
 schema: apollo/type-defs.graphqls
-schemaEntrypoint: apollo/type-defs.graphqls
 documents: '**/*.graphql'
 cacheDir: .cache
 plugins:
-  - typescript
   - typescript-operations
   - typescript-react-apollo
 config:

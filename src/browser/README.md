@@ -6,7 +6,7 @@ cd .../conote/src/web
 yarn run buid:types
 
 # Start api server
-yarn run start
+yarn run dev
 
 # Output ./dist, use it to load from chrome (manually)
 cd .../conote/src/browser

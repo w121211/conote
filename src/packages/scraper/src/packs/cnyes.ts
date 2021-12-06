@@ -1,12 +1,28 @@
-import { $jsonld } from '../helpers'
-import { RuleSet } from '../scraper'
+import { ScraperPack } from '../types'
+import keywordsPack from './keywords'
 
-const reTicker = /^[A-Z]+$/
+const pack: ScraperPack = {
+  matchUrl: 'cnyes.com',
+  ruleMap: {
+    keywords: keywordsPack.ruleMap.keywords,
+    tickers: [],
+    // tickers: [
+    //   ({ $ }) => {
+    //     const results = $('script[type="text/javascript"]')
+    //       .map((i, e): string => $(e).contents().text())
+    //       .get()
+    //       .filter(e => e.includes('win.YAHOO.context.meta'))
 
-const ruleSet: RuleSet = {
-  matchUrl: ({ url }) => isDomain({ url, domain: 'cnyes.com' }),
-  keywords: [({ $ }) => $jsonld($, 'keywords')],
-  tickers: [],
+    //     for (const e of results) {
+    //       const match = reTickers.exec(e)
+    //       if (match) {
+    //         return match[1].split(';')
+    //       }
+    //     }
+    //     return []
+    //   },
+    // ],
+  },
 }
 
-export default ruleSet
+export default pack

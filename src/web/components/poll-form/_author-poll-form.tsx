@@ -6,10 +6,9 @@ import {
   MyVotesDocument,
   MyVotesQuery,
   useMyVotesQuery,
-  Vote,
-  Poll,
   PollDocument,
   usePollQuery,
+  VoteFragment,
 } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
 import classes from './poll-form.module.scss'
@@ -38,7 +37,7 @@ export const RadioInput = ({
   content: string
   count?: number
   total?: number
-  myVote?: Vote
+  myVote?: VoteFragment
 
   // filterComments: (i: number) => void
   choiceValue?: (i: string) => void
@@ -129,7 +128,7 @@ const AuthorPollForm = ({
   const { register, handleSubmit, setValue, reset, getValues } = methods
   const [choiceValue, setChoiceValue] = useState<number | null | undefined>()
   const [check, setChecked] = useState<boolean[]>(Array(3).fill(false))
-  const [myVote, setMyVote] = useState<Vote>()
+  const [myVote, setMyVote] = useState<VoteFragment>()
   const [pollCount, setPollCount] = useState<number[] | undefined>(
     (pollData?.poll && pollData?.poll?.count.nVotes) ?? [],
   )
@@ -291,7 +290,7 @@ const AuthorPollForm = ({
                           ? pollData.poll.count.nVotes.reduce((a, b) => a + b)
                           : 0
                       }
-                      count={pollData.poll && pollData.poll.count.nVotes[i]}
+                      // count={pollData.poll && pollData.poll.count.nVotes[i]}
                       // filterComments={filterComments}
                       key={i}
                       choiceValue={handleChoiceValue}

@@ -1,5 +1,5 @@
 import { BulletEmoji, BulletEmojiCount, BulletEmojiLike, LikeChoice } from '.prisma/client'
-import { EmojiCode } from '../../apollo/query.graphql'
+import { EmojiCode } from '../../apollo/type-defs.graphqls'
 import prisma from '../prisma'
 import { EmojiLike } from './emoji-like'
 

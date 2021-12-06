@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import assert from 'assert'
+import { nanoid } from 'nanoid'
 // import { ReactEditor } from 'slate-react'
 import { Editor, Transforms, Range, Element, Node, Path, Text, NodeEntry } from 'slate'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
@@ -39,7 +40,12 @@ export function insertNextUl(editor: Editor, entry: NodeEntry<LiElement>, root?:
     editor,
     {
       type: 'ul',
-      children: [{ type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] }],
+      children: [
+        {
+          type: 'li',
+          children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }],
+        },
+      ],
     },
     { at: insertPath },
   )
@@ -68,7 +74,7 @@ export function insertNextLi(editor: Editor, entry: NodeEntry<LiElement>): void 
   const [, path] = entry
   Transforms.insertNodes<LiElement>(
     editor,
-    { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
+    { type: 'li', children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }] },
     { at: Path.next(path) },
   )
   Transforms.move(editor)
@@ -78,7 +84,7 @@ function insertPrevLi(editor: Editor, entry: NodeEntry<LiElement>) {
   const [, path] = entry
   Transforms.insertNodes<LiElement>(
     editor,
-    { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
+    { type: 'li', children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }] },
     { at: path },
   )
   // Transforms.move(editor)
@@ -92,7 +98,7 @@ function insertNextIndentLi(editor: Editor, entry: NodeEntry<LiElement>) {
       editor,
       {
         type: 'ul',
-        children: [{ type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] }],
+        children: [{ type: 'li', children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }] }],
       },
       { at: [...ulPath(path)] },
     )
@@ -100,7 +106,7 @@ function insertNextIndentLi(editor: Editor, entry: NodeEntry<LiElement>) {
     // 有子ul，插入至第1個
     Transforms.insertNodes<LiElement>(
       editor,
-      { type: 'li', children: [{ type: 'lc', children: [{ text: '' }] }] },
+      { type: 'li', children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }] },
       { at: [...ulPath(path), 0] },
     )
   }
