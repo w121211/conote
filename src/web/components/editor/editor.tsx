@@ -75,6 +75,7 @@ import { useApolloClient } from '@apollo/client'
 import { getLocalOrQueryRoot } from './use-local-value'
 import BulletPointEmojis from '../emoji-up-down/bullet-point-emojis'
 import { Doc } from '../workspace/doc'
+import Modal from '../modal/modal'
 
 // import { Context } from '../../pages/card/[symbol]'
 // import { BulletNode } from '../bullet/node'
@@ -862,7 +863,7 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
       )}
       {showPopover && (
         <span contentEditable={false}>
-          <Popover visible={showPopover} hideBoard={() => setShowPopover(false)}>
+          <Modal visible={showPopover} onClose={() => setShowPopover(false)}>
             <CreateShotForm
               initialInput={{
                 author: element.authorName ?? '',
@@ -875,7 +876,7 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
                 setShotData(shot)
               }}
             />
-          </Popover>
+          </Modal>
         </span>
       )}
       <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
@@ -1023,7 +1024,7 @@ RenderElementProps & {
   // console.log(element, children)
   return (
     <div {...attributes}>
-      <div className={classes.lcText}>
+      <div>
         {children}
 
         {element.bulletCopy?.id && <BulletPointEmojis bulletId={element.bulletCopy.id} />}
@@ -1086,7 +1087,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   return (
     <div
       {...attributes}
-      className={classes.bulletLi}
+      className="relative break-all "
       onMouseOver={event => {
         event.stopPropagation()
         event.preventDefault()
@@ -1099,11 +1100,11 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
       }}
     >
       {/* <div contentEditable={false}></div> */}
-      <div className={classes.arrowBulletWrapper} contentEditable={false}>
-        {hasUl ? (
+      <div className="absolute inline-flex items-center h-8 -ml-6" contentEditable={false}>
+        {hasUl && (
           <>
             <span
-              className={classes.arrowWrapper}
+              className="flex items-center justify-center px-1 flex-shrink-0 flex-grow-0"
               onClick={event => {
                 // 設定 folded property
                 event.preventDefault()
@@ -1120,16 +1121,10 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
                 }
               }}
             >
-              <ArrowUpIcon
-                style={ulFolded === undefined ? { transform: 'rotate(180deg)' } : { transform: 'rotate(90deg)' }}
-              />
+              <ArrowUpIcon style={{ transform: ulFolded === undefined ? 'rotate(180deg)' : 'rotate(90deg)' }} />
             </span>
             {/* <BulletPanel><span className={classes.oauthorName}> @{authorName}</span></BulletPanel> */}
           </>
-        ) : (
-          <span className={classes.arrowWrapper}>
-            <ArrowUpIcon style={{ opacity: 0 }} />
-          </span>
         )}
 
         {/* <Link href={'/href'}>
@@ -1162,7 +1157,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
             
           </a>
         </Link> */}
-        <span onMouseEnter={() => setShowPanel(true)} onMouseLeave={() => setShowPanel(false)}>
+        <span className="" onMouseEnter={() => setShowPanel(true)} onMouseLeave={() => setShowPanel(false)}>
           <BulletSvg />
           {showPanel && (
             <BulletPanel
@@ -1178,7 +1173,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>
 
-      <div style={{ width: '100%' }}>{children}</div>
+      <div className="leading-loose">{children}</div>
     </div>
   )
 }
@@ -1260,7 +1255,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
 
   return (
     <div
-      className={`${classes.bulletEditorContainer} `}
+      className="text-gray-800"
       // onFocus={e => {
       //   if (!e.currentTarget.classList.contains(classes.focused)) {
       //     e.currentTarget.classList.add(classes.focused)

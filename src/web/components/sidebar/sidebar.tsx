@@ -39,17 +39,20 @@ const SideBar = ({
         pinMenuHandler(false)
       }}
     >
-      <div className={classes.sidebarTop}>
+      <div className="group flex-shrink-0">
         <div className={`${classes.menuIconWrapper}`}>
-          <MenuIcon
+          <a href="/">Conote</a>
+          {/* <MenuIcon
             className={classes.menuIcon}
             onClick={() => {
               showMenuHandler(false)
               pinMenuHandler(false)
             }}
-          />
+          /> */}
           <span
-            className={`${isPined ? 'material-icons' : 'material-icons-outlined'} ${classes.pushPin}`}
+            className={`${
+              isPined ? 'material-icons' : 'material-icons-outlined'
+            } text-gray-600 opacity-0 hover:text-gray-500 cursor-pointer group-hover:opacity-100 transform rotate-45 `}
             onClick={() => {
               pinMenuHandler()
             }}
@@ -61,26 +64,6 @@ const SideBar = ({
         <div className={classes.searchBar}>
           <SearchAllForm small />
         </div>
-        <ul className={classes.sideList}>
-          <li>
-            {/* <HomeIcon /> */}
-            <a href="/">
-              <span>首頁</span>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              {/* <CocardIcon /> */}
-              <span>社群卡</span>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              {/* <HeartIcon /> */}
-              <span>收藏</span>
-            </a>
-          </li>
-        </ul>
       </div>
       <SidebarList title="最近同步的筆記" entries={committedDocs} />
       <SidebarList title="暫存區" entries={savedDocs} />

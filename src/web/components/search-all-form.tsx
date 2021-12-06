@@ -105,7 +105,7 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
       // maxHeight: '30px',
       whiteSpace: 'nowrap',
       borderRadius: '99px',
-      minHeight: '36px',
+      minHeight: '40px',
       lineHeight: small ? '1' : 'inherit',
       // borderColor: isFocused ? '#5c6cda' : 'hsl(0, 0%, 80%)',
       ':hover': {

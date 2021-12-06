@@ -15,8 +15,11 @@ import { useRouter } from 'next/router'
 import BulletSvg from '../components/bullet-svg/bullet-svg'
 import ListLarge from '../components/list-large/list-large'
 import IndexHotList from '../components/index-hot-list/index-hot-list'
+import MeHeaderItem from '../components/profile/me-header-item'
+import TabsWithSlider from '../components/tabs-with-slider'
+import NewHotList from '../components/new-hot-list'
 
-function LatestCards(): JSX.Element | null {
+export function LatestCards(): JSX.Element | null {
   const router = useRouter()
   const { data, loading, error, fetchMore } = useLatestCardDigestsQuery({ fetchPolicy: 'cache-and-network' })
   const [hasMore, setHasMore] = useState<boolean>(true)
@@ -83,101 +86,26 @@ function HomePage(): JSX.Element {
   return (
     // <Layout navPath={<></>}>
     <div className={classes.container}>
-      <nav className={classes.nav}>
+      {/* <nav className={classes.nav}>
         <ul className={classes.navUl}>
           <li>首頁</li>
           <li>收藏</li>
         </ul>
-      </nav>
-      <div className={classes.outer}>
-        <div className={classes.search}>
-          <h1>Conote</h1>
-          <SearchAllForm />
+      </nav> */}
+      <div className="flex flex-col">
+        <div className="flex items-center justify-between mx-10 my-5">
+          <div className="flex-3 flex items-center max-w-2xl">
+            <h1 className="mr-6 text-blue-800">Conote</h1>
+            <SearchAllForm />
+          </div>
+          <MeHeaderItem className="flex-2 text-right" />
         </div>
         {/* {user && data ? ( */}
         <>
-          <div className={classes.innerTop}>
-            <h4
-              className={`${switchList === 'new' && classes.clickedTab}`}
-              onClick={() => {
-                setSwitchList('new')
-              }}
-            >
-              最新
-            </h4>
-            <h4
-              className={`${switchList === 'hot' && classes.clickedTab}`}
-              onClick={() => {
-                setSwitchList('hot')
-              }}
-            >
-              熱門
-            </h4>
-          </div>
           <div className={classes.inner}>
             <div className={classes.innerContent}>
-              <div className={classes.new}>
-                {/* {switchList === 'hot' && } */}
-                <div className={classes.latestCards}>
-                  {switchList === 'new' && <LatestCards />}
-                  {switchList === 'hot' && <IndexHotList />}
-                </div>
-              </div>
-              {/* <div className={classes.hot}>
-                <h3>Battle</h3>
-                <div className={classes.latestCards}>
-                  <div className={classes.latestCardsListText}>
-                    <div>
-                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
-                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
-                    </div>
-                  </div>
-                  <div className={classes.latestCardsListText}>
-                    <div>
-                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
-                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
-                    </div>
-                  </div>
-                  <div className={classes.latestCardsListText}>
-                    <div>
-                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
-                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
-                    </div>
-                  </div>
-                  <div className={classes.latestCardsListText}>
-                    <div>
-                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
-                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
-                    </div>
-                  </div>
-                  <div className={classes.latestCardsListText}>
-                    <div>
-                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
-                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
-                    </div>
-                  </div>
-                  <div className={classes.latestCardsListText}>
-                    <div>
-                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
-                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
-                    </div>
-                  </div>
-                  <div className={classes.latestCardsListText}>
-                    <div>
-                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
-                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
-                    </div>
-                  </div>
-                  <div className={classes.latestCardsListText}>
-                    <div>
-                      <div className={classes.lcElementSymbol}>美航空公司比較 $AAL vs $DAL vs $LUV</div>
-                      <div className={classes.lcElementHashtag}>#pin #up(30) #down(1) #new #trending </div>
-                    </div>
-                  </div>
+              <NewHotList />
 
-                
-                </div>
-              </div> */}
               <div className={classes.tickerList}>
                 <h3>自選股</h3>
                 <div className={classes.latestCards}>
@@ -198,24 +126,9 @@ function HomePage(): JSX.Element {
         //   <a href="/api/auth/login">Login</a>
         // )} */}
       </div>
-      {/* <div className={classes.newCardBtnContainer} onClick={() => router.push('./card/template')}>
-        <span className={classes.newCardBtn}>+</span>
-      </div> */}
     </div>
     // </Layout>
   )
-
-  // return (
-  //   <>
-  //     {/* <SideBar /> */}
-  //     {/* <SearchAllForm /> */}
-  //     {/* <Layout> */}
-  //     <div className={classes.routerPage}>
-  //       <LatestCards />
-  //     </div>
-  //     {/* </Layout> */}
-  //   </>
-  // )
 }
 
 export default HomePage

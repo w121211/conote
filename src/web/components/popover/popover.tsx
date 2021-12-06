@@ -2,29 +2,26 @@ import React from 'react'
 import CancelIcon from '../../assets/svg/cancel.svg'
 import classes from './popover.module.scss'
 
-const Popover = ({
-  children,
-  visible,
-  hideBoard,
-  subTitle,
-  mask,
-  buttons,
-  center,
-}: // width,
-{
+export interface PopoverProps {
   children: React.ReactNode
-  visible: boolean
   hideBoard: () => void
   subTitle?: string
   mask?: boolean
   buttons?: React.ReactNode
   center?: boolean
-  // width?: number
-}): JSX.Element | null => {
+}
+
+const Popover = ({
+  children,
+
+  hideBoard,
+  subTitle,
+  mask,
+  buttons,
+  center,
+}: PopoverProps): JSX.Element | null => {
   // console.log(mask)
-  if (!visible) {
-    return null
-  }
+
   return (
     <div
       className={classes.containerOuter}
@@ -34,6 +31,9 @@ const Popover = ({
           // width: `${typeof width === 'number' ? width + 'px' : 'initial'}`,
         }
       }
+      onMouseEnter={() => {
+        console.log('mouseenter')
+      }}
     >
       <div
         className={classes.mask}

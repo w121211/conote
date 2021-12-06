@@ -13,6 +13,7 @@ import CreateBoardFrom, { BoardFormInputs } from '../poll-form/_create-board-for
 import classes from './board-page.module.scss'
 import Popover from '../popover/popover'
 import BoardPage from './board-page'
+import Modal from '../modal/modal'
 
 const CreateBoardPage = ({
   cardId,
@@ -42,7 +43,7 @@ const CreateBoardPage = ({
   // console.log(boardId)
 
   return (
-    <Popover visible={visible} hideBoard={hideBoard} subTitle={subTitle}>
+    <Modal visible={visible} onClose={hideBoard} subTitle={subTitle}>
       <div className={classes.containerinner}>
         {/* {pollId && <LineChart />} */}
         {/* {boardId ? (
@@ -53,7 +54,7 @@ const CreateBoardPage = ({
           <CreateBoardFrom bulletId={bulletId} cardId={cardId} handleboardId={handleBoardId} />
         )} */}
       </div>
-    </Popover>
+    </Modal>
   )
 }
 

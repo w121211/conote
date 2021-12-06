@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useApolloClient, useQuery } from '@apollo/client'
@@ -21,44 +21,56 @@ const CardHead = ({ doc, card, symbol }: { doc: Doc; card: Card | null; symbol: 
   const status = useObservable(() => workspace.status$)
   const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
   const [cardMetaSubmitted, setCardMetaSubmitted] = useState(false)
+  const hiddenBtnRef = useRef<HTMLDivElement>(null)
+
+  // useEffect(()=>{
+  //   if(window){
+  //     window.addEventListener('mo')
+  //   }
+  // },[])
 
   const handleCardMetaSubmitted = () => {
     setCardMetaSubmitted(true)
   }
 
   return (
-    <div className={classes.header}>
-      <h1
-        onMouseEnter={e => {
-          setShowHeaderHiddenBtns(true)
+    <div className="flex flex-col mb-6">
+      <div
+        onMouseOver={e => {
+          if (!hiddenBtnRef.current?.contains(e.target as Node)) {
+            setShowHeaderHiddenBtns(false)
+          } else {
+            setShowHeaderHiddenBtns(true)
+          }
         }}
-        onMouseLeave={e => {
+        onMouseOut={e => {
           setShowHeaderHiddenBtns(false)
         }}
+        ref={hiddenBtnRef}
       >
-        <div
-          className={classes.headerHiddenBtns}
-          style={showHeaderHiddenBtns ? { visibility: 'visible' } : { visibility: 'hidden' }}
-        >
-          {/* {doc.cardInput?.meta && ( */}
+        <div className="flex items-center gap-4">
           <CardMetaForm
             cardId={doc.cid}
-            // selfCard={data.selfCard}
+            showBtn={showHeaderHiddenBtns}
             handleCardMetaSubmitted={handleCardMetaSubmitted}
             btnClassName={classes.cardMetaBtn}
           />
-          {/* )} */}
+
           {doc?.symbol.startsWith('@http') && (
-            // <button>
-            <a className={classes.cardSource} href={doc?.symbol.substr(1)} target="_blank" rel="noreferrer">
-              <LinkIcon />
+            <a
+              className={classes.cardSource}
+              href={doc?.symbol.substr(1)}
+              style={showHeaderHiddenBtns ? { opacity: 1 } : { opacity: 0 }}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span className="material-icons">open_in_new</span>
               開啟來源
             </a>
-            // </button>
           )}
         </div>
-        {symbol}
-      </h1>
+        <h1 className="mt-1 mb-4 line-clamp-2 break-all">{doc.cardInput?.meta?.title || symbol}</h1>
+      </div>
       {/* {cardMetaData?.cardMeta.keywords && (
         <div className={classes.headerKw}>
           {cardMetaData?.cardMeta.keywords.map((e, i) => {
@@ -253,56 +265,58 @@ const CardSymbolPage = (): JSX.Element | null => {
     return <div>Unexpected error</div>
   }
   return (
-    <Layout
-      buttonRight={
-        <>
-          <button
-            className="secondary"
-            onClick={() => {
-              workspace.drop()
-            }}
-          >
-            Drop
-          </button>
-          <button
-            className="primary"
-            onClick={() => {
-              if (mainDoc === null) {
-                return
-              }
-              if (mainDoc.doc) {
-                workspace.save(mainDoc.doc)
-              }
-            }}
-            // disabled={!isValueModified}
-          >
-            {'儲存草稿'}
-            {/* {console.log(isValueModified)} */}
-          </button>
-          <button
-            onClick={async () => {
-              if (mainDoc === null) {
-                return
-              }
-              if (mainDoc.doc) {
-                await workspace.commit(mainDoc.doc, client)
-                // router.reload()
-              }
-            }}
-          >
-            同步至筆記
-          </button>
-        </>
-      }
-    >
-      <WorkspaceComponent
-        docPath={docPath}
-        given={{
-          card: card.data.card ?? null,
-          sourceCard: sourceCard.data?.card ?? null,
-        }}
-      />
-    </Layout>
+    <>
+      <Layout
+        buttonRight={
+          <>
+            <button
+              className="secondary"
+              onClick={() => {
+                workspace.drop()
+              }}
+            >
+              Drop
+            </button>
+            <button
+              className="primary"
+              onClick={() => {
+                if (mainDoc === null) {
+                  return
+                }
+                if (mainDoc.doc) {
+                  workspace.save(mainDoc.doc)
+                }
+              }}
+              // disabled={!isValueModified}
+            >
+              {'儲存草稿'}
+              {/* {console.log(isValueModified)} */}
+            </button>
+            <button
+              onClick={async () => {
+                if (mainDoc === null) {
+                  return
+                }
+                if (mainDoc.doc) {
+                  await workspace.commit(mainDoc.doc, client)
+                  // router.reload()
+                }
+              }}
+            >
+              同步至筆記
+            </button>
+          </>
+        }
+      >
+        <WorkspaceComponent
+          docPath={docPath}
+          given={{
+            card: card.data.card ?? null,
+            sourceCard: sourceCard.data?.card ?? null,
+          }}
+        />
+      </Layout>
+    </>
   )
 }
 
