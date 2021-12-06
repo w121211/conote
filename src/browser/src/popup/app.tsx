@@ -10,27 +10,27 @@ import { CardPage } from './card-page'
 import '../../../web/style/global.scss'
 // import './app.css'
 
-class BrowserStorageWrapper implements PersistentStorage {
-  // See: https://github.com/apollographql/apollo-cache-persist/blob/master/src/storageWrappers/LocalStorageWrapper.ts
-  private storage
+// class BrowserStorageWrapper implements PersistentStorage {
+//   // See: https://github.com/apollographql/apollo-cache-persist/blob/master/src/storageWrappers/LocalStorageWrapper.ts
+//   private storage
 
-  constructor(storage: Storage.LocalStorageArea) {
-    this.storage = storage
-  }
+//   constructor(storage: Storage.LocalStorageArea) {
+//     this.storage = storage
+//   }
 
-  async getItem(key: string): Promise<string | null> {
-    const item = await this.storage.get(key)
-    return item[key]
-  }
+//   async getItem(key: string): Promise<string | null> {
+//     const item = await this.storage.get(key)
+//     return item[key]
+//   }
 
-  removeItem(key: string): void | Promise<void> {
-    return this.storage.remove(key)
-  }
+//   removeItem(key: string): void | Promise<void> {
+//     return this.storage.remove(key)
+//   }
 
-  setItem(key: string, value: string): void | Promise<void> {
-    return this.storage.set({ key: value })
-  }
-}
+//   setItem(key: string, value: string): void | Promise<void> {
+//     return this.storage.set({ key: value })
+//   }
+// }
 
 const onRedirectCallback = (appState: AppState) => {
   // If using a Hash Router, you need to use window.history.replaceState to

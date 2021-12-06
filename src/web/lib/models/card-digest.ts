@@ -1,5 +1,5 @@
+import { CardDigest as GQLCardDigest } from 'graphql-let/__generated__/__types__'
 import { NodeChange } from '../../../packages/docdiff/src'
-import { CardDigest as GQLCardDigest } from '../../apollo/type-defs.graphqls'
 import { Bullet } from '../../components/bullet/types'
 import prisma from '../prisma'
 import { CardModel, CardPrarsed } from './card'
@@ -43,7 +43,7 @@ export const CardDigestModel = {
 
   async commitToDigests(commit: RowCommit): Promise<GQLCardDigest[]> {
     const packs = CommitModel.toCardPacks(commit)
-    console.log(packs)
+    // console.log(packs)
 
     const promises = packs.map(async e => {
       const subs = e.subs.map(e => this.fromCardState(e))

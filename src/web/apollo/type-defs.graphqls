@@ -155,6 +155,10 @@ type Mutation {
 
   createVote(pollId: ID!, data: VoteInput!): Vote!
 
+  # csrf token not support yet
+  sessionLogin(idToken: String!, csrfToken: String): User!
+  sessionLogout: Boolean!
+
   # createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
   # createAuthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
 
@@ -169,10 +173,6 @@ type Mutation {
 
   # createBoardLike(boardId: ID!, data: LikeInput!): BoardLikeResponse!
   # updateBoardLike(id: ID!, data: LikeInput!): BoardLikeResponse!
-
-  # signIn(email: String!, password: String!): AuthPayload!
-  # signUp(email: String!, password: String!): User!
-  # signOut: Boolean!
 
   # --- NEXT ---
 

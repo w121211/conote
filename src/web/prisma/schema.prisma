@@ -223,7 +223,7 @@ model Vote {
 }
 
 model User {
-  id               String            @id @default(cuid())
+  id               String            @id
   email            String            @unique
   // profile      Profile
   // dailyProfile DailyProfile

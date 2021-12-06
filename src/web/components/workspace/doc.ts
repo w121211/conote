@@ -1,10 +1,10 @@
+import { CardInput, CardStateInput } from 'graphql-let/__generated__/__types__'
 import { NodeChange, TreeChangeService, TreeNode } from '../../../packages/docdiff/src'
-import { LocalDBService } from './local-db'
+import { CardFragment, CardStateFragment } from '../../apollo/query.graphql'
 import { Bullet } from '../bullet/types'
 import { LiElement } from '../editor/slate-custom-types'
 import { EditorSerializer } from '../editor/serializer'
-import { CardFragment, CardStateFragment } from '../../apollo/query.graphql'
-import { CardInput, CardStateInput } from '../../apollo/type-defs.graphqls'
+import { LocalDBService } from './local-db'
 
 export type DocEntry = {
   symbol: string

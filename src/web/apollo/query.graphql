@@ -197,6 +197,11 @@ fragment sym on Sym {
   symbol
 }
 
+fragment user on User {
+  __typename
+  id
+}
+
 fragment vote on Vote {
   __typename
   id
@@ -341,7 +346,7 @@ query Link($id: ID, $url: String) {
 
 query Me {
   me {
-    id
+    ...user
   }
 }
 
@@ -505,6 +510,16 @@ mutation CreateVote($pollId: ID!, $data: VoteInput!) {
   createVote(pollId: $pollId, data: $data) {
     ...vote
   }
+}
+
+mutation SessionLogin($idToken: String!, $csrfToken: String) {
+  sessionLogin(idToken: $idToken, csrfToken: $csrfToken) {
+    ...user
+  }
+}
+
+mutation SessionLogout {
+  sessionLogout
 }
 
 # mutation CreateComment($boardId: ID!, $pollId: ID, $data: CommentInput!) {

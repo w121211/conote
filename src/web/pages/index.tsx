@@ -3,7 +3,7 @@
  */
 import { useState } from 'react'
 import Link from 'next/link'
-import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
+// import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0'
 // import { getCardUrlParam } from '../lib/helper'
 import { useLatestCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
@@ -73,12 +73,12 @@ function LatestCards(): JSX.Element | null {
 }
 
 function HomePage(): JSX.Element {
-  const router = useRouter()
-  const { user, error, isLoading } = useUser()
+  // const router = useRouter()
+  // const { user, error, isLoading } = useUser()
   const { data, loading } = useMeQuery()
   const [switchList, setSwitchList] = useState('new')
   // console.log(data)
-  if (loading || isLoading) return <h1>Loading</h1>
+  if (loading) return <h1>Loading</h1>
 
   return (
     // <Layout navPath={<></>}>

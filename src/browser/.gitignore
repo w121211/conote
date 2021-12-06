@@ -28,4 +28,4 @@ __generated__
 # *.graphqls.d.ts
 /.cache
 
-/distdev
+/devdist

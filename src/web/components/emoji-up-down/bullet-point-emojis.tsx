@@ -1,4 +1,5 @@
 import React from 'react'
+import { EmojiCode } from 'graphql-let/__generated__/__types__'
 import {
   BulletEmojiFragment,
   MyCardEmojiLikeDocument,
@@ -9,7 +10,6 @@ import {
   useMyCardEmojiLikeQuery,
   useUpsertCardEmojiLikeMutation,
 } from '../../apollo/query.graphql'
-import { EmojiCode } from '../../apollo/type-defs.graphqls'
 import BulletEmojiBtn from './bullet-emoji-btn'
 import EmojiTextToIcon from './emoji-text-to-icon'
 

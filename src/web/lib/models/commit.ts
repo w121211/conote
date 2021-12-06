@@ -1,12 +1,11 @@
-import { Card, CardState, Commit, Link, Sym } from '.prisma/client'
+import { CardState, Commit } from '.prisma/client'
 import cuid from 'cuid'
-import { NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import {
   CardInput as GQLCardInput,
   CommitInput as GQLCommitInput,
   CardStateInput as GQLCardStateInput,
-  Commit as GQLCommit,
-} from '../../apollo/type-defs.graphqls'
+} from 'graphql-let/__generated__/__types__'
+import { NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { Bullet } from '../../components/bullet/types'
 import prisma from '../prisma'
 import { RowCard } from './card'

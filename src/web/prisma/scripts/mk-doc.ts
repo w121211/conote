@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid'
+import { Card, CardInput } from 'graphql-let/__generated__/__types__'
 import { NodeBody, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { Markerline } from '../../../packages/editor/src'
-import { Card, CardInput } from '../../apollo/type-defs.graphqls'
 import { Bullet } from '../../components/bullet/types'
 
 type MKDocProps = {

@@ -5,8 +5,8 @@
  * - Non-op: current: Bullet {id, op, ....} -> draft: BulletDraft {id, op, ....}  -> next: Bullet {id, op, ....} (會和 current 值相同)
  */
 
+import { ShotChoice } from 'graphql-let/__generated__/__types__'
 import { PollFragment, ShotFragment } from '../../apollo/query.graphql'
-import { ShotChoice } from '../../apollo/type-defs.graphqls'
 
 type SymbolType = 'ticker' | 'title' | 'url'
 

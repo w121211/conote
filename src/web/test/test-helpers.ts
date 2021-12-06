@@ -4,7 +4,6 @@ import { PrismaClient } from '@prisma/client'
 import { NodeChange, TreeChangeService, TreeNode } from '../../packages/docdiff/src'
 import { Bullet } from '../components/bullet/types'
 import { getBotEmail } from '../lib/models/user'
-import { CommitInput } from '../apollo/type-defs.graphqls'
 import { CommitModel } from '../lib/models/commit'
 
 // fake incremental id

@@ -1,9 +1,9 @@
 import { useState } from 'react'
+import { EmojiCode } from 'graphql-let/__generated__/__types__'
+import { BulletEmojiFragment, CardEmojiFragment } from '../../apollo/query.graphql'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
 import classes from './emoji-text-to-icon.module.scss'
-import { BulletEmojiFragment, CardEmojiFragment } from '../../apollo/query.graphql'
-import { EmojiCode } from '../../apollo/type-defs.graphqls'
 
 const EmojiCodeToIcon = ({
   emoji,

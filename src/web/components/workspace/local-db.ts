@@ -1,4 +1,4 @@
-import localforage from 'localforage'
+import * as localforage from 'localforage'
 
 const DB_NAME = 'conote-database'
 

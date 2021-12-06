@@ -1,5 +1,5 @@
 import { CardEmoji, CardEmojiCount, CardEmojiLike, LikeChoice } from '.prisma/client'
-import { EmojiCode } from '../../apollo/type-defs.graphqls'
+import { EmojiCode } from 'graphql-let/__generated__/__types__'
 import prisma from '../prisma'
 import { EmojiLike } from './emoji-like'
 

@@ -42,8 +42,8 @@ class Workspace {
     symbol: string
   }): Doc {
     if (card?.state) {
+      // Has card & card-state
       const value = card.state.body.value as unknown as TreeNode<Bullet>[]
-
       return new Doc({
         cardCopy: card,
         sourceCardCopy: sourceCard,
