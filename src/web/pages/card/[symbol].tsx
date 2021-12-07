@@ -243,10 +243,15 @@ const CardSymbolPage = (): JSX.Element | null => {
   useEffect(() => {
     if (router.isReady) {
       const path = DocPathService.fromURLQuery(router.query)
+
+      console.log(path)
+
       setDocPath(path)
 
+      console.log(path)
+
       const { symbol, sourceCardId } = path
-      queryCard({ variables: { symbol } })
+      queryCard({ variables: { symbol, id: '123' } })
       if (sourceCardId) {
         querySourceCard({ variables: { id: sourceCardId } })
       }

@@ -27,9 +27,9 @@ export async function getBotId(): Promise<string> {
   throw new Error('bot user not found')
 }
 
-export async function getOrCreateUser(email: string): Promise<User> {
+export async function getOrCreateUser(uid: string, email: string): Promise<User> {
   const user = await prisma.user.upsert({
-    create: { email },
+    create: { id: uid, email },
     update: {},
     where: { email },
   })

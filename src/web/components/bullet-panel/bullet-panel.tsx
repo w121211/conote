@@ -1,4 +1,5 @@
 import React, { ReactElement, useRef, useState } from 'react'
+import { EmojiCode } from 'graphql-let/__generated__/__types__'
 import MyTooltip from '../my-tooltip/my-tooltip'
 import BulletPanelSvg from './bullet-panel-svg'
 import SrcIcon from '../../assets/svg/foreign.svg'
@@ -6,7 +7,6 @@ import classes from './bullet-panel.module.scss'
 import PinIcon from '../../assets/svg/like.svg'
 import UpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanelEmojis from '../emoji-up-down/bullet-panel-emojis'
-import { EmojiCode } from '../../apollo/type-defs.graphqls'
 import { BulletEmojiFragment, BulletEmojiLikeFragment } from '../../apollo/query.graphql'
 
 interface Child {

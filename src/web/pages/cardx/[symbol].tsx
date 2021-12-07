@@ -233,6 +233,9 @@ const CardSymbolPage = (): JSX.Element | null => {
       setDocPath(path)
 
       const { symbol, sourceCardId } = path
+
+      console.log(symbol)
+
       queryCard({ variables: { symbol } })
       if (sourceCardId) {
         querySourceCard({ variables: { id: sourceCardId } })

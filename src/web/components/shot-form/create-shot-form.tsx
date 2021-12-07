@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { Controller, set, useForm } from 'react-hook-form'
 import AsyncSelect from 'react-select/async'
+import { ShotChoice } from 'graphql-let/__generated__/__types__'
 import {
   AuthorDocument,
   AuthorQuery,
@@ -17,7 +18,6 @@ import {
   useLinkLazyQuery,
   useLinkQuery,
 } from '../../apollo/query.graphql'
-import { ShotChoice } from '../../apollo/type-defs.graphqls'
 import Popup from '../popup/popup'
 import classes from './shot-form.module.scss'
 
@@ -30,10 +30,10 @@ export interface FormInput {
 
 const CreateShotForm = ({
   initialInput,
-  handleShotData,
+  onShotCreated,
 }: {
   initialInput: FormInput
-  handleShotData: (shot: ShotFragment) => void
+  onShotCreated: (shot: ShotFragment, targetSymbol: string) => void
 }): JSX.Element => {
   const router = useRouter()
   const [showPopup, setShowPopup] = useState(false)
@@ -44,16 +44,11 @@ const CreateShotForm = ({
   //   const { data: authorData } = useAuthorQuery({ variables: { id: authorId ?? '' } })
   //   let targetId: string
   let linkId: string
-  const { data: CardData } = useCardQuery({
+
+  const { data: targetCardData } = useCardQuery({
     fetchPolicy: 'cache-first',
     variables: { symbol: target },
     // skip: skipCardQuery,
-    onCompleted(data) {
-      console.log('queryCard')
-      if (data.card) {
-        // targetId = data.card?.id
-      }
-    },
   })
   const [queryLink] = useLinkLazyQuery({
     variables: { url: link },
@@ -64,10 +59,11 @@ const CreateShotForm = ({
     },
   })
   useEffect(() => {
-    if (CardData?.card) {
-      setTargetId(CardData.card.id)
+    console.log(targetCardData)
+    if (targetCardData?.card) {
+      setTargetId(targetCardData.card.id)
     }
-  }, [CardData])
+  }, [targetCardData])
 
   const { register, handleSubmit, control } = useForm<FormInput>({
     defaultValues: { ...initialInput, choice: choice ? (choice.substr(1) as ShotChoice) : '' },
@@ -90,9 +86,11 @@ const CreateShotForm = ({
       }
     },
     onCompleted(data) {
-      //   console.log(data.createShot.id)
-      if (data.createShot) {
-        handleShotData(data.createShot)
+      console.log(data.createShot, targetCardData)
+      if (data.createShot && targetCardData && targetCardData.card) {
+        onShotCreated(data.createShot, targetCardData.card.sym.symbol)
+      } else {
+        throw 'Create shot error'
       }
     },
   })

@@ -58,7 +58,7 @@ const initialValueDemo: LiElement[] = [
             type: 'mirror',
             children: [{ text: '::$AA' }],
           },
-          { text: 'Hello world' },
+          { text: ' Hello world' },
         ],
       },
     ],
@@ -394,7 +394,17 @@ const Mirror = ({
     }
   }, [focused, readonly, selected])
 
-  return <button {...attributes}>{children}</button>
+  return (
+    <button
+      {...attributes}
+      onClick={(event) => {
+        event.preventDefault()
+        console.log('clicked label')
+      }}
+    >
+      {children}
+    </button>
+  )
 }
 
 // const BulletComponent = ({ bullet }: { bullet: BulletDraft }) => {
@@ -427,7 +437,7 @@ const Lc = ({
   const readonly = useReadOnly()
 
   useEffect(() => {
-    if ((focused && !selected) || readonly) {
+    if (!focused || !selected || readonly) {
       // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
       console.log('cursor leaves lc, parse lc')
       const path = ReactEditor.findPath(editor, element)
@@ -445,7 +455,9 @@ const Lc = ({
           at: path,
           match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
         })
-        Transforms.select(editor, { path, offset: 60 })
+
+        // TODO: offset 需預先知道最大值，暫時設為0
+        Transforms.select(editor, { path, offset: 0 })
       } else {
         Transforms.unwrapNodes(editor, {
           at: path,
@@ -547,13 +559,6 @@ export const BulletEditor = (props: {
 }): JSX.Element => {
   const { initialValue = initialValueDemo, authorName, sourceUrl } = props
 
-  function parse(value: LiElement[]) {
-    const editor = createEditor()
-    editor.children = value
-    Transforms.removeNodes(editor, { at: [0] })
-  }
-  parse(initialValue)
-
   const [value, setValue] = useState<LiElement[]>(initialValue)
   const editor = useMemo(
     () => withInline(withHistory(withReact(createEditor()))),
@@ -577,6 +582,9 @@ export const BulletEditor = (props: {
       <button onClick={() => setReadonly(!readonly)}>
         Readonly {readonly ? 'Y' : 'N'}
       </button>
+
+      <hr />
+
       <Slate
         editor={editor}
         value={value}

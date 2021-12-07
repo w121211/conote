@@ -13,7 +13,7 @@ const ShotBtn = ({
   handleClick: () => void
 }): JSX.Element => {
   return (
-    <button className="noStyle" contentEditable={false} onClick={handleClick}>
+    <button className="noStyle" onClick={handleClick}>
       <span className={classes.left}>
         {author && <span className={classes.author}>{author}</span>}
 

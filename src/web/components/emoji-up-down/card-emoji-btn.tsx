@@ -1,4 +1,5 @@
 import React from 'react'
+import { LikeChoice } from 'graphql-let/__generated__/__types__'
 import {
   CardEmojiFragment,
   MyCardEmojiLikeDocument,
@@ -7,7 +8,6 @@ import {
   useMyCardEmojiLikeQuery,
   useUpsertCardEmojiLikeMutation,
 } from '../../apollo/query.graphql'
-import { LikeChoice } from '../../apollo/type-defs.graphqls'
 import EmojiTextToIcon from './emoji-text-to-icon'
 import classes from './emoji-up-down.module.scss'
 

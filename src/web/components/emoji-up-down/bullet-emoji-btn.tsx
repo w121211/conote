@@ -1,5 +1,5 @@
-// import { BulletLike } from '@prisma/client'
 import React, { useEffect, useState } from 'react'
+import { EmojiCode, LikeChoice } from 'graphql-let/__generated__/__types__'
 import {
   BulletEmojiFragment,
   BulletEmojisDocument,
@@ -14,7 +14,6 @@ import {
   useMyBulletEmojiLikeQuery,
   useUpsertBulletEmojiLikeMutation,
 } from '../../apollo/query.graphql'
-import { EmojiCode, LikeChoice } from '../../apollo/type-defs.graphqls'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import Popup from '../popup/popup'
 import EmojiCodeToIcon from './emoji-text-to-icon'

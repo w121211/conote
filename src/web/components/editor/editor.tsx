@@ -16,6 +16,7 @@ import {
   withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
+import { LikeChoice } from 'graphql-let/__generated__/__types__'
 import {
   MyBulletEmojiLikeDocument,
   MyBulletEmojiLikeQuery,
@@ -23,7 +24,6 @@ import {
   useMyBulletEmojiLikeQuery,
   usePollLazyQuery,
   useUpsertBulletEmojiLikeMutation,
-  useCardQuery,
   BulletEmojiFragment,
   PollFragment,
   ShotFragment,
@@ -501,7 +501,7 @@ const InlineSymbol = ({
 }): JSX.Element => {
   const [showPopover, setShowPopover] = useState(false)
   const router = useRouter()
-  const selected = useSelected()
+  // const selected = useSelected()
   // console.log(element)
   return (
     <span {...attributes} className={classes.symbolContainer}>
@@ -516,17 +516,18 @@ const InlineSymbol = ({
         >
           {children}
         </a> */}
-      <span
-        className="inline"
+      <button
+        className="noStyle"
         onClick={e => {
           // e.preventDefault()
           // e.stopPropagation()
           // router.push(`/card/${encodeURIComponent(element.symbol)}`)
+          console.log('hi~')
           setShowPopover(true)
         }}
       >
         {children}
-      </span>
+      </button>
       {/* </Link> */}
       {showPopover && (
         <span contentEditable={false}>
@@ -552,8 +553,8 @@ const InlineSymbol = ({
                   <button
                     className="primary"
                     onClick={e => {
-                      // e.preventDefault()
-                      // e.stopPropagation()
+                      e.preventDefault()
+                      e.stopPropagation()
                       setShowPopover(false)
                     }}
                   >
@@ -765,54 +766,45 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
 
   const { children, attributes, element } = props
   const [showPopover, setShowPopover] = useState(false)
-  const [shotId, setShotId] = useState(element.id)
-  const [shotData, setShotData] = useState<ShotFragment | undefined>()
-  const { data: targetData } = useCardQuery({ variables: { id: shotId } })
+  // const [shotId, setShotId] = useState(element.id)
+  // const [shotData, setShotData] = useState<ShotFragment | undefined>()
+  // const { data: targetData } = useCardQuery({ variables: { id: shotId } })
 
-  function onCreated(shot: ShotFragment) {
+  const onShotCreated = (shot: ShotFragment, targetSymbol: string) => {
     // const editor = useSlateStatic()
-    if (shotId) {
-      const path = ReactEditor.findPath(editor, element)
-      const inlineShot = toInlineShotString({
-        id: shotId,
-        choice: shot.choice,
-        targetSymbol: targetData?.card?.sym.symbol ?? '',
-        author: element.authorName ?? '',
-      })
-      Transforms.setNodes<InlineShotElement>(
-        editor,
-        {
-          id: shotId,
-        },
-        { at: path },
-      )
-      Transforms.insertText(editor, inlineShot, { at: path })
-    }
+    const path = ReactEditor.findPath(editor, element)
+    const inlineShot = toInlineShotString({
+      id: shot.id,
+      choice: shot.choice,
+      targetSymbol,
+      author: element.authorName ?? '',
+    })
+    Transforms.setNodes<InlineShotElement>(editor, { id: shot.id }, { at: path })
+    Transforms.insertText(editor, inlineShot, { at: path })
   }
 
   // console.log(element)
-  useEffect(() => {
-    // if (showPopover && !pollId) {
-    //   handleCreatePoll()
-    // }
-    // console.log(shotData, shotId)
+  // useEffect(() => {
+  //   // if (showPopover && !pollId) {
+  //   //   handleCreatePoll()
+  //   // }
+  //   // console.log(shotData, shotId)
 
-    if (!showPopover && !element.id && shotId && shotData) {
-      // const queryPollData = async () => {
-      //   queryPoll({ variables: { id: pollId } })
-      // }
-      // queryPollData()
-      // queryShot({ variables: { id:shotId } })
-      if (shotData) {
-        onCreated(shotData)
-      }
-    }
-  }, [showPopover, shotData, shotId])
+  //   if (!showPopover && !element.id && shotId && shotData) {
+  //     // const queryPollData = async () => {
+  //     //   queryPoll({ variables: { id: pollId } })
+  //     // }
+  //     // queryPollData()
+  //     // queryShot({ variables: { id:shotId } })
+  //     if (shotData) {
+  //       onCreated(shotData)
+  //     }
+  //   }
+  // }, [showPopover, shotData, shotId])
   return (
     <span {...attributes}>
-      {!selected && (
-        <>
-          {/* <button
+      {/* {!selected && ( */}
+      {/* <button
             className={classes.shotBtn}
             contentEditable={false}
             onClick={e => {
@@ -841,14 +833,13 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
             })}
           </button> */}
 
-          <ShotBtn
-            author={element.params.find(e => e.startsWith('@'))}
-            target={element.params.find(e => e.startsWith('$'))}
-            choice={element.params.find(e => e.startsWith('#'))}
-            handleClick={() => setShowPopover(true)}
-          />
-        </>
-      )}
+      <ShotBtn
+        author={element.params.find(e => e.startsWith('@'))}
+        target={element.params.find(e => e.startsWith('$'))}
+        choice={element.params.find(e => e.startsWith('#'))}
+        handleClick={() => setShowPopover(true)}
+      />
+
       {showPopover && (
         <span contentEditable={false}>
           <Modal visible={showPopover} onClose={() => setShowPopover(false)}>
@@ -859,10 +850,7 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
                 choice: element.choice ?? '',
                 link: '',
               }}
-              handleShotData={(shot: ShotFragment) => {
-                setShotId(shot.id)
-                setShotData(shot)
-              }}
+              onShotCreated={onShotCreated}
             />
           </Modal>
         </span>
@@ -942,11 +930,11 @@ const Lc = ({
   attributes,
   children,
   element,
-  curCardId,
-}: // sourceLinkId,
+}: // curCardId,
+// sourceLinkId,
 RenderElementProps & {
   element: LcElement
-  curCardId?: string
+  // curCardId?: string
   // sourceLinkId?: string
 }): JSX.Element => {
   const editor = useSlateStatic()
@@ -1008,13 +996,12 @@ RenderElementProps & {
     }
   }, [selected, readonly])
 
-  const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
+  // const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
   // console.log(element, children)
   return (
     <div {...attributes}>
       <div>
         {children}
-
         {element.bulletCopy?.id && <BulletPointEmojis bulletId={element.bulletCopy.id} />}
         {/* // <span contentEditable={false}>
           //   {emojiData.bulletEmojis?.map((e, i) => {
@@ -1141,7 +1128,6 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
             }}
           >
             <BulletSvg />
-            
           </a>
         </Link> */}
         <span
