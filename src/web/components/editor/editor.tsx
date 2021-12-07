@@ -1088,32 +1088,31 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
       }}
     >
       {/* <div contentEditable={false}></div> */}
-      <div className="absolute inline-flex items-center h-8 -ml-6" contentEditable={false}>
-        {hasUl && (
-          <>
-            <span
-              className="flex items-center justify-center px-1 flex-shrink-0 flex-grow-0"
-              onClick={event => {
-                // 設定 folded property
-                event.preventDefault()
-                const path = ReactEditor.findPath(editor, element)
-                try {
-                  const ul = Editor.node(editor, ulPath(path))
-                  if (isUl(ul[0])) {
-                    Transforms.deselect(editor)
-                    Transforms.setNodes<UlElement>(editor, { folded: ul[0].folded ? undefined : true }, { at: ul[1] })
-                    setUlFolded(ul[0].folded ? undefined : true)
-                  }
-                } catch (err) {
-                  // 不用處理
-                }
-              }}
-            >
-              <ArrowUpIcon style={{ transform: ulFolded === undefined ? 'rotate(180deg)' : 'rotate(90deg)' }} />
-            </span>
-            {/* <BulletPanel><span className={classes.oauthorName}> @{authorName}</span></BulletPanel> */}
-          </>
-        )}
+      <div className="absolute inline-flex items-center h-8 -ml-10" contentEditable={false}>
+        <span
+          className="flex items-center justify-center px-1 flex-shrink-0 flex-grow-0"
+          onClick={event => {
+            // 設定 folded property
+            event.preventDefault()
+            const path = ReactEditor.findPath(editor, element)
+            try {
+              const ul = Editor.node(editor, ulPath(path))
+              if (isUl(ul[0])) {
+                Transforms.deselect(editor)
+                Transforms.setNodes<UlElement>(editor, { folded: ul[0].folded ? undefined : true }, { at: ul[1] })
+                setUlFolded(ul[0].folded ? undefined : true)
+              }
+            } catch (err) {
+              // 不用處理
+            }
+          }}
+        >
+          <ArrowUpIcon
+            className={`w-2 h-2 ${hasUl ? 'opacity-1' : 'opacity-0'}`}
+            style={{ transform: ulFolded === undefined ? 'rotate(180deg)' : 'rotate(90deg)' }}
+          />
+        </span>
+        {/* <BulletPanel><span className={classes.oauthorName}> @{authorName}</span></BulletPanel> */}
 
         {/* <Link href={'/href'}>
           <a
@@ -1297,7 +1296,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
           // }}
 
           autoCorrect="false"
-          autoFocus={false}
+          autoFocus={true}
           decorate={renderDecorate}
           // readOnly={readOnly}
           renderElement={renderElement}
