@@ -76,7 +76,7 @@ const BulletPanel = ({
     // setShowPanel(state)
   }
   return (
-    <div className={`${classes.container} ${className ? className : ''}`} ref={containerRef}>
+    <div className={`absolute h-full -left-full ${className ? className : ''}`} ref={containerRef}>
       <MyTooltip
         className={`${classes.panelTooltip} ${tooltipClassName ? tooltipClassName : ''}`}
         visible={visible}

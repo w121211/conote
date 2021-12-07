@@ -1075,7 +1075,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   return (
     <div
       {...attributes}
-      className="relative break-all "
+      className="group relative break-all flex w-full"
       onMouseOver={event => {
         event.stopPropagation()
         event.preventDefault()
@@ -1088,9 +1088,9 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
       }}
     >
       {/* <div contentEditable={false}></div> */}
-      <div className="absolute inline-flex items-center h-8 -ml-10" contentEditable={false}>
+      <div className="inline-flex items-center h-8 " contentEditable={false}>
         <span
-          className="flex items-center justify-center px-1 flex-shrink-0 flex-grow-0"
+          className={`flex items-center justify-center flex-shrink-0 flex-grow-0 cursor-pointer opacity-0 group-hover:opacity-100`}
           onClick={event => {
             // 設定 folded property
             event.preventDefault()
@@ -1108,7 +1108,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           }}
         >
           <ArrowUpIcon
-            className={`w-2 h-2 ${hasUl ? 'opacity-1' : 'opacity-0'}`}
+            className={` w-2 h-2 fill-current text-gray-500 ${hasUl ? 'opacity-1' : 'opacity-0'}`}
             style={{ transform: ulFolded === undefined ? 'rotate(180deg)' : 'rotate(90deg)' }}
           />
         </span>
@@ -1144,12 +1144,18 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
             
           </a>
         </Link> */}
-        <span className="" onMouseEnter={() => setShowPanel(true)} onMouseLeave={() => setShowPanel(false)}>
+        <span
+          className={`relative flex items-center justify-center w-5 h-full ${
+            lc.bulletCopy?.id ? 'cursor-pointer' : 'cursor-default'
+          }`}
+          onMouseEnter={() => setShowPanel(true)}
+          onMouseLeave={() => setShowPanel(false)}
+        >
           <BulletSvg />
-          {showPanel && (
+          {showPanel && lc.bulletCopy?.id && (
             <BulletPanel
               className={classes.bulletPanel}
-              tooltipClassName={classes.bulletPanelTooltip}
+              // tooltipClassName={classes.bulletPanelTooltip}
               bulletId={lc.bulletCopy?.id}
               visible={showPanel}
               onEmojiCreated={onEmojiCreated}
@@ -1168,7 +1174,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
 const Ul = ({ attributes, children, element }: RenderElementProps & { element: UlElement }): JSX.Element => {
   const style: CSSProperties = element.folded ? { display: 'none' } : {} // { display: 'none', visibility: 'hidden', height: 0 }
   return (
-    <div {...attributes} className={classes.bulletUl} style={style}>
+    <div {...attributes} className="" style={style}>
       {children}
     </div>
   )
@@ -1242,7 +1248,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
 
   return (
     <div
-      className="text-gray-800"
+      className="-ml-7 text-gray-800"
       // onFocus={e => {
       //   if (!e.currentTarget.classList.contains(classes.focused)) {
       //     e.currentTarget.classList.add(classes.focused)

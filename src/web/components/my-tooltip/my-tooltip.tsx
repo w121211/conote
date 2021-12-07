@@ -32,7 +32,7 @@ const MyTooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
         // newStyle.maxHeight = window.innerHeight - myRef.current.getBoundingClientRect().top + 'px'
       } else {
         // newStyle.maxHeight = window.innerHeight - myRef.current.getBoundingClientRect().top + 'px'
-        newStyle.top = 'max(120%,30px)'
+        newStyle.top = 'max(110%,30px)'
 
         newStyle.transform = 'translateY(-8px)'
       }

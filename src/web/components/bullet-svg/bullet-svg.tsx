@@ -3,7 +3,7 @@ import classes from './bullet-svg.module.scss'
 
 const BulletSvg = ({ className }: { className?: string }) => {
   return (
-    <span className={`flex items-center justify-center w-6  flex-shrink-0 flex-grow-0 ${className ? className : ''}`}>
+    <span className={`flex items-center justify-center flex-shrink-0 flex-grow-0 ${className ? className : ''}`}>
       <span
         className={classes.bullet}
         // onClick={() => {
@@ -15,7 +15,7 @@ const BulletSvg = ({ className }: { className?: string }) => {
           // className={`${classes.bulletSvg} ${
           //   showChildren || (node.children.length === 0 && node.children) ? '' : classes.bulletSvgBg
           // }`}
-          className={classes.bulletSvg}
+          className="w-3 h-3 fill-current text-gray-800 "
         >
           <circle cx="9" cy="9" r="4" />
         </svg>
