@@ -16,7 +16,7 @@ import {
   withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
-import { LikeChoice } from 'graphql-let/__generated__/__types__'
+// import { LikeChoice } from 'graphql-let/__generated__/__types__'
 import {
   MyBulletEmojiLikeDocument,
   MyBulletEmojiLikeQuery,
@@ -63,7 +63,6 @@ import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
 import BulletPointEmojis from '../emoji-up-down/bullet-point-emojis'
 import { Doc } from '../workspace/doc'
 import Modal from '../modal/modal'
-import { LikeChoice } from '../../apollo/type-defs.graphqls'
 
 // import { Context } from '../../pages/card/[symbol]'
 // import { BulletNode } from '../bullet/node'
@@ -374,88 +373,6 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       {/* {leaf.text} */}
       {children}
     </span>
-  )
-}
-
-const UpdateEmojiLike = ({ emoji }: { emoji: BulletEmojiFragment }): JSX.Element | null => {
-  const { data, loading, error } = useMyBulletEmojiLikeQuery({
-    variables: { bulletEmojiId: emoji.id },
-  })
-  const [upsertEmojiLike] = useUpsertBulletEmojiLikeMutation({
-    update(cache, { data }) {
-      // TODO: 這裡忽略了更新 count
-      if (data?.upsertBulletEmojiLike) {
-        cache.writeQuery<MyBulletEmojiLikeQuery, MyBulletEmojiLikeQueryVariables>({
-          query: MyBulletEmojiLikeDocument,
-          variables: { bulletEmojiId: data.upsertBulletEmojiLike.like.bulletEmojiId },
-          data: { myBulletEmojiLike: data.upsertBulletEmojiLike.like },
-        })
-      }
-    },
-  })
-  function handleClickLike(choice: LikeChoice) {
-    const myLike = data?.myBulletEmojiLike
-    if (myLike && myLike.choice === choice) {
-      upsertEmojiLike({
-        variables: {
-          bulletEmojiId: emoji.id,
-          data: { choice: 'NEUTRAL' },
-        },
-      })
-    }
-    if (myLike && myLike.choice !== choice) {
-      upsertEmojiLike({
-        variables: {
-          bulletEmojiId: emoji.id,
-          data: { choice },
-        },
-      })
-    }
-    if (myLike === null) {
-      upsertEmojiLike({
-        variables: {
-          bulletEmojiId: emoji.id,
-          data: { choice },
-        },
-      })
-    }
-  }
-  if (loading) {
-    return null
-  }
-  if (error || data === undefined) {
-    return <span>Error</span>
-  }
-
-  return (
-    <button
-      className={`inline mR ${data.myBulletEmojiLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
-      onClick={() => {
-        handleClickLike('UP')
-      }}
-    >
-      {/* {data.myHashtagLike?.choice && hashtag.text} */}
-      {/* {hashtag.text} */}
-      <HashtagTextToIcon emoji={emoji} />
-
-      <span style={{ marginLeft: '3px' }}>{emoji.count.nUps}</span>
-    </button>
-  )
-}
-
-/**
- * @returns 若 emoji 目前沒有人點贊，返回 null
- */
-export const EmojiButotn = ({ emoji }: { emoji: BulletEmojiFragment }): JSX.Element | null => {
-  // console.log(emoji)
-  // if (emoji.count.nUps === 0) {
-  //   return null
-  // }
-
-  return (
-    // <span>
-    <UpdateEmojiLike emoji={emoji} />
-    // {/* </span> */}
   )
 }
 
@@ -997,7 +914,7 @@ RenderElementProps & {
   }, [selected, readonly])
 
   // const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
-  // console.log(element, children)
+  // console.log(element.bulletCopy?.id)
   return (
     <div {...attributes}>
       <div>
@@ -1152,7 +1069,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>
 
-      <div className="leading-loose">{children}</div>
+      <div className="w-full leading-loose">{children}</div>
     </div>
   )
 }

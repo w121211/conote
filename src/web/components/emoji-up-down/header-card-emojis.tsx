@@ -11,7 +11,7 @@ const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null =>
   const upEmoji = emojiData?.cardEmojis.find(e => e.code === 'UP')
   const downEmoji = emojiData?.cardEmojis.find(e => e.code === 'DOWN')
 
-  if (emojiData === null || !emojiData?.cardEmojis) return null
+  // if (emojiData === null || !emojiData?.cardEmojis) return null
   return (
     <div className={classes.headerCardEmojiContainer}>
       {pinEmoji ? <CardEmojiBtn cardEmoji={pinEmoji} /> : <CreateCardEmojiBtn cardId={cardId} emojiCode="PIN" />}

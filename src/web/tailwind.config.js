@@ -1,4 +1,5 @@
 const colors = require('tailwindcss/colors')
+const plugin = require('tailwindcss/plugin')
 module.exports = {
   // @see https://tailwindcss.com/docs/upcoming-changes
   future: {
@@ -16,16 +17,31 @@ module.exports = {
         3: 3,
       },
       colors: {
-        gray: colors.coolGray,
+        gray: colors.trueGray,
         red: colors.rose,
       },
       transformOrigin: {
         'center-left': 'center left',
       },
+      boxShadow: {
+        l2xl: '0 0 50px rgba(0, 0, 0, 0.25)',
+      },
     },
   },
-  variants: {},
-  plugins: [require('tailwindcss'), require('precss'), require('autoprefixer'), require('@tailwindcss/line-clamp')],
+  variants: {
+    overflow: ['responsive', 'hover'],
+  },
+  plugins: [
+    require('tailwindcss'),
+    require('precss'),
+    require('autoprefixer'),
+    require('@tailwindcss/line-clamp'),
+    // plugin(function({addVariant,e,postcss}){
+    //   addVariant('parent',({modifySelectors,seperator})=>{
+    //     modifySelectors(({className})=>{return ``})
+    //   })
+    // })
+  ],
 
   darkMode: false, // or 'media' or 'class'
 }

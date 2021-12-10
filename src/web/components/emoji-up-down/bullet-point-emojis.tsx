@@ -61,6 +61,26 @@ const defaultEmojis: DefaultEmojs[] = [
 //     </button>
 //   )
 // }
+function reorderBulletDataArr(data: BulletEmojiFragment[]) {
+  const newArr: BulletEmojiFragment[] = []
+  data.forEach(e => {
+    switch (e.code) {
+      case 'PIN': {
+        newArr[0] = e
+        break
+      }
+      case 'UP': {
+        newArr[1] = e
+        break
+      }
+      case 'DOWN': {
+        newArr[2] = e
+        break
+      }
+    }
+  })
+  return newArr
+}
 
 const BulletPointEmojis = ({
   bulletId,
@@ -70,16 +90,17 @@ const BulletPointEmojis = ({
   bulletEmojis?: BulletEmojiFragment
 }): JSX.Element | null => {
   const { data: bulletEmojisData } = useBulletEmojisQuery({ variables: { bulletId } })
+  // console.log(bulletEmojisData?.bulletEmojis)
   if (
     !bulletEmojisData ||
-    bulletEmojisData?.bulletEmojis.length <= 0 ||
+    bulletEmojisData?.bulletEmojis.length === 0 ||
     bulletEmojisData.bulletEmojis.every(e => e.count.nUps === 0)
   ) {
     return null
   }
   return (
     <span className={classes.bulletPointEmojisContainer} contentEditable={false}>
-      {bulletEmojisData.bulletEmojis.map((e, i) => {
+      {reorderBulletDataArr(bulletEmojisData.bulletEmojis).map((e, i) => {
         if (e.count.nUps === 0) {
           return null
         }

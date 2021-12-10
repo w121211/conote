@@ -69,7 +69,8 @@ const BulletPanelEmojis = ({
   bulletId: string
   bulletEmojis?: BulletEmojiFragment
 }): JSX.Element | null => {
-  const { data: bulletEmojisData } = useBulletEmojisQuery({ fetchPolicy: 'cache-first', variables: { bulletId } })
+  const { data: bulletEmojisData } = useBulletEmojisQuery({ variables: { bulletId } })
+  console.log(bulletEmojisData?.bulletEmojis)
   // if (!bulletEmojisData || bulletEmojisData?.bulletEmojis.length <= 0)
   //   return (
   //     <>

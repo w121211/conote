@@ -14,15 +14,15 @@ import { workspace } from '../workspace/workspace'
 import { useObservable } from 'rxjs-hooks'
 
 const SideBar = ({
-  style,
   showMenuHandler,
   pinMenuHandler,
   isPined,
+  showMenu,
 }: {
-  style: React.CSSProperties
   showMenuHandler: (boo?: boolean) => void
   pinMenuHandler: (boo?: boolean) => void
   isPined: boolean
+  showMenu: boolean
 }): JSX.Element => {
   // const { user, error, isLoading } = useUser()
   // const { data, loading } = useMeQuery()
@@ -31,8 +31,11 @@ const SideBar = ({
 
   return (
     <div
-      className={classes.sidebar}
-      style={style}
+      className={`absolute w-72 h-screen pt-0 px-6 pb-4 border-r border-gray-200 flex flex-col flex-shrink-0 bg-white z-50 transition-all 
+      ${showMenu ? 'transform-gpu translate-x-0 translate-y-0' : 'transform-gpu -translate-x-full translate-y-0 '} ${
+        isPined ? 'relative bg-gray-100' : 'absolute bg-white'
+      } ${isPined || !showMenu ? 'shadow-none' : 'shadow-l2xl'}
+      `}
       onMouseLeave={() => {
         if (isPined) return
         showMenuHandler(false)
@@ -52,7 +55,7 @@ const SideBar = ({
           <span
             className={`${
               isPined ? 'material-icons' : 'material-icons-outlined'
-            } text-gray-600 opacity-0 hover:text-gray-500 cursor-pointer group-hover:opacity-100 transform rotate-45 `}
+            } text-gray-600 opacity-0 hover:text-gray-500 cursor-pointer group-hover:opacity-100 transform rotate-45 select-none`}
             onClick={() => {
               pinMenuHandler()
             }}
@@ -60,10 +63,9 @@ const SideBar = ({
             push_pin
           </span>
         </div>
-
-        <div className={classes.searchBar}>
-          <SearchAllForm small />
-        </div>
+      </div>
+      <div className="mt-2 mb-5">
+        <SearchAllForm small />
       </div>
       <SidebarList title="最近同步的筆記" entries={committedDocs} />
       <SidebarList title="暫存區" entries={savedDocs} />

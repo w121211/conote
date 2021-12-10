@@ -65,12 +65,7 @@ export default function Layout({
       <SideBar
         showMenuHandler={showMenuHandler}
         pinMenuHandler={pinMenuHandler}
-        style={{
-          transform: showMenu ? 'translate3d(0,0,0)' : 'translate3d(-100%,0,0)',
-          position: pinSideBar ? 'relative' : 'absolute',
-          background: pinSideBar ? 'rgb(247 246 246)' : 'white',
-          boxShadow: pinSideBar || !showMenu ? '0 0 50px transparent' : '0 0 50px #322f2f36',
-        }}
+        showMenu={showMenu}
         isPined={pinSideBar}
       />
       <div className={classes.children} ref={layoutRef} style={{ padding: pinSideBar ? '0 15% 0' : '0 20vw 0' }}>
@@ -99,11 +94,11 @@ export default function Layout({
             {buttonRight}
             {meData ? (
               <button className="secondary">
-                <a href="/api/auth/logout">Logout</a>{' '}
+                <a href="/login">Logout</a>{' '}
               </button>
             ) : (
               <button className="primary">
-                <a href="/api/auth/login">Login</a>
+                <a href="/login">Login</a>
               </button>
             )}
           </div>

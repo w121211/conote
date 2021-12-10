@@ -174,7 +174,7 @@ const CreateShotForm = ({
           <h5> 送出</h5>
         </button>
       </form>
-      <Popup
+      {/* <Popup
         visible={showPopup}
         hideBoard={() => setShowPopup(false)}
         buttons={
@@ -194,7 +194,7 @@ const CreateShotForm = ({
         }
       >
         尚未儲存的內容將丟失，確立離開本頁嗎？
-      </Popup>
+      </Popup> */}
     </>
   )
 }

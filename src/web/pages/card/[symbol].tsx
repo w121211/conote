@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useApolloClient, useQuery } from '@apollo/client'
-import { useUser } from '@auth0/nextjs-auth0'
+// import { useUser } from '@auth0/nextjs-auth0'
 import { useObservable } from 'rxjs-hooks'
-import { CardFragment, useCardLazyQuery } from '../../apollo/query.graphql'
+import { CardFragment, useCardLazyQuery, useMeQuery } from '../../apollo/query.graphql'
 import Layout from '../../components/layout/layout'
 import { workspace } from '../../components/workspace/workspace'
 import { BulletEditor } from '../../components/editor/editor'
@@ -15,6 +15,8 @@ import CardMetaForm from '../../components/card-meta-form/card-meta-form'
 import LinkIcon from '../../assets/svg/link.svg'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 import NavPath from '../../components/nav-path/nav-path'
+import Modal from '../../components/modal/modal'
+import Account from '../account'
 
 const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; symbol: string }): JSX.Element => {
   // const mainDoc = useObservable(() => workspace.mainDoc$)
@@ -49,12 +51,14 @@ const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; 
         ref={hiddenBtnRef}
       >
         <div className="flex items-center gap-4">
-          <CardMetaForm
-            cardId={doc.cid}
-            showBtn={showHeaderHiddenBtns}
-            handleCardMetaSubmitted={handleCardMetaSubmitted}
-            btnClassName={classes.cardMetaBtn}
-          />
+          {card && (
+            <CardMetaForm
+              cardId={card?.id}
+              showBtn={showHeaderHiddenBtns}
+              handleCardMetaSubmitted={handleCardMetaSubmitted}
+              btnClassName={classes.cardMetaBtn}
+            />
+          )}
 
           {doc?.symbol.startsWith('@http') && (
             <a
@@ -115,7 +119,7 @@ const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; 
         </div>
       )} */}
       <div className={classes.headerBottom}>
-        {doc.cardCopy?.id && <HeaderCardEmojis cardId={doc.cardCopy?.id} />}
+        {card && <HeaderCardEmojis cardId={card?.id} />}
         {doc?.cardInput?.meta?.author && (
           <>
             <div className={classes.divider}></div>
@@ -175,7 +179,9 @@ const WorkspaceComponent = ({
   const status = useObservable(() => workspace.status$)
   const savedDocs = useObservable(() => workspace.savedDocs$)
   const committedDocs = useObservable(() => workspace.committedDocs$)
-
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const { data: meData } = useMeQuery({ fetchPolicy: 'cache-first' })
+  const { login } = router.query
   // if (card) {
   //   const a = new Date(card.updatedAt as unknown as string)
   //   console.log(card.updatedAt)
@@ -214,7 +220,19 @@ const WorkspaceComponent = ({
     return <div>Unexpected error</div>
   }
   return (
-    <div>
+    <div
+      onClick={e => {
+        e.stopPropagation()
+        // router.push({ pathname: `/card/${encodeURIComponent(docPath.symbol)}?mode=login` }, `/login`, {
+        //   scroll: false,
+        //   shallow: true,
+        // })
+        // setShowLoginModal(true)
+
+        // if (!meData) {
+        // }
+      }}
+    >
       {/* <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
       <div>Committed:{committedDocs && committedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
 
@@ -225,6 +243,9 @@ const WorkspaceComponent = ({
       <CardHead doc={mainDoc.doc} card={card} symbol={mainDoc.doc.symbol} />
 
       <BulletEditor doc={mainDoc.doc} />
+      <Modal visible={router.query.mode === 'login'} onClose={() => setShowLoginModal(false)}>
+        <Account />
+      </Modal>
     </div>
   )
 }
@@ -251,7 +272,7 @@ const CardSymbolPage = (): JSX.Element | null => {
       console.log(path)
 
       const { symbol, sourceCardId } = path
-      queryCard({ variables: { symbol, id: '123' } })
+      queryCard({ variables: { symbol } })
       if (sourceCardId) {
         querySourceCard({ variables: { id: sourceCardId } })
       }

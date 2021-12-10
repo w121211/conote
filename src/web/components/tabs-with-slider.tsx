@@ -40,6 +40,7 @@ const TabsWithSlider = ({
       if (activeTabs.current[activeTabIdx]) {
         moveSlider(activeTabs.current[activeTabIdx])
       }
+      console.log(activeTabIdx)
       //   for (const entry of entries) {
       //     console.log(entry)
       //   }
@@ -50,7 +51,7 @@ const TabsWithSlider = ({
     return () => {
       resizeObserver.disconnect()
     }
-  }, [])
+  }, [activeTabIdx])
 
   return (
     <div id="listContainer" className="relative mb-5 border-gray-200" ref={tabList}>
