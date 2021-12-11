@@ -63,7 +63,6 @@ import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
 import BulletPointEmojis from '../emoji-up-down/bullet-point-emojis'
 import { Doc } from '../workspace/doc'
 import Modal from '../modal/modal'
-import { LikeChoice } from '../../apollo/type-defs.graphqls'
 
 // import { Context } from '../../pages/card/[symbol]'
 // import { BulletNode } from '../bullet/node'
@@ -522,7 +521,6 @@ const InlineSymbol = ({
           // e.preventDefault()
           // e.stopPropagation()
           // router.push(`/card/${encodeURIComponent(element.symbol)}`)
-          console.log('hi~')
           setShowPopover(true)
         }}
       >
@@ -545,7 +543,7 @@ const InlineSymbol = ({
                       // e.preventDefault()
                       // e.stopPropagation()
                       setShowPopover(false)
-                      router.push(`/cardx/${encodeURI(element.symbol)}`)
+                      router.push(`/card/${encodeURI(element.symbol)}`)
                     }}
                   >
                     確定

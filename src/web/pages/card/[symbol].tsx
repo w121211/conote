@@ -14,7 +14,6 @@ import classes from '../../style/symbol.module.scss'
 import CardMetaForm from '../../components/card-meta-form/card-meta-form'
 import LinkIcon from '../../assets/svg/link.svg'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
-import NavPath from '../../components/nav-path/nav-path'
 
 const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; symbol: string }): JSX.Element => {
   // const mainDoc = useObservable(() => workspace.mainDoc$)
@@ -251,7 +250,7 @@ const CardSymbolPage = (): JSX.Element | null => {
       console.log(path)
 
       const { symbol, sourceCardId } = path
-      queryCard({ variables: { symbol, id: '123' } })
+      queryCard({ variables: { symbol } })
       if (sourceCardId) {
         querySourceCard({ variables: { id: sourceCardId } })
       }

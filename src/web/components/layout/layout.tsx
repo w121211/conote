@@ -7,13 +7,13 @@ import { useMeQuery } from '../../apollo/query.graphql'
 
 export default function Layout({
   children,
-  navPath,
+  // navPath,
   buttonRight,
 }: // handlePath,
 // handleSymbol,
 {
   children: React.ReactNode
-  navPath?: React.ReactNode
+  // navPath?: React.ReactNode
   buttonRight?: React.ReactNode
   // handlePath?: (i: number) => void
   // handleSymbol?: (e: string) => void
@@ -103,7 +103,7 @@ export default function Layout({
               </button>
             ) : (
               <button className="primary">
-                <a href="/api/auth/login">Login</a>
+                <a href="/login">Login</a>
               </button>
             )}
           </div>

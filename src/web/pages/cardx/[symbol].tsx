@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useApolloClient, useQuery } from '@apollo/client'
-import { useUser } from '@auth0/nextjs-auth0'
 import { useObservable } from 'rxjs-hooks'
 import { CardFragment, useCardLazyQuery } from '../../apollo/query.graphql'
 import Layout from '../../components/layout/layout'
@@ -233,8 +232,6 @@ const CardSymbolPage = (): JSX.Element | null => {
       setDocPath(path)
 
       const { symbol, sourceCardId } = path
-
-      console.log(symbol)
 
       queryCard({ variables: { symbol } })
       if (sourceCardId) {

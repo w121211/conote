@@ -23,6 +23,7 @@ import { CardEmojiModel } from '../lib/models/card-emoji'
 import { CommitModel } from '../lib/models/commit'
 import { CardDigestModel } from '../lib/models/card-digest'
 import { getFirebaseAdmin } from '../lib/auth/firebase-admin'
+import { inspect } from 'util'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -192,17 +193,13 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async card(_parent, { id, symbol, url }, _context, _info) {
-    console.log(id, symbol, url)
-    if (id) {
+    if (id && symbol === undefined && url === undefined) {
       return await CardModel.get(id)
     }
-    if (symbol) {
-      // return await CardModel.getBySymbol(symbol)
-      const card = await CardModel.getBySymbol(symbol)
-      console.log(card)
-      return card
+    if (symbol && id === undefined && url === undefined) {
+      return await CardModel.getBySymbol(symbol)
     }
-    if (url) {
+    if (url && id === undefined && symbol === undefined) {
       return await CardModel.getOrCreateByUrl({ scraper: fetcher, url })
     }
     throw 'Param requires to be either id, symbol or url'

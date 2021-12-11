@@ -3,7 +3,7 @@ import { UrlObject } from 'url'
 
 export type DocPath = {
   symbol: string
-  sourceCardId?: string
+  sourceCardId?: string // indicate current symbol is a mirror
   editorValuePath?: number[]
 }
 
