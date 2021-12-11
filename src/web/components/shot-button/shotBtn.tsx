@@ -12,8 +12,15 @@ const ShotBtn = ({
   choice?: string
   handleClick: () => void
 }): JSX.Element => {
+  if (!author && !target && !choice) {
+    return (
+      <button className="noStyle" onClick={handleClick} contentEditable={false}>
+        <span className={classes.left}>新增Shot</span>
+      </button>
+    )
+  }
   return (
-    <button className="noStyle" onClick={handleClick}>
+    <button className="noStyle" onClick={handleClick} contentEditable={false}>
       <span className={classes.left}>
         {author && <span className={classes.author}>{author}</span>}
 

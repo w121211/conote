@@ -82,10 +82,16 @@ const BulletEmojiBtn = ({
           data: { bulletEmojis: res.bulletEmojis.concat(data.createBulletEmoji.emoji) },
         })
       }
-      if (!res?.bulletEmojis && data?.createBulletEmoji) {
-        refetchBulletEmojis()
-      }
+      // if (!res?.bulletEmojis && data?.createBulletEmoji) {
+      //   cache.writeQuery<BulletEmojisQuery, BulletEmojisQueryVariables>({
+      //     query: BulletEmojisDocument,
+      //     variables: { bulletId },
+      //     data: { bulletEmojis: data.createBulletEmoji.emoji },
+      //   })
+      // }
+      // else refetchBulletEmojis()
     },
+    refetchQueries: [{ query: BulletEmojisDocument, variables: { bulletId } }],
     onError(error) {
       console.error(error.message)
     },
@@ -172,6 +178,7 @@ const BulletEmojiBtn = ({
       }
       // upsertEmojiLike({variables:{hashtagId:foundEmoji.id,data:{choice:}}})
     } else {
+      console.log(bulletId, emojiCode)
       createBulletEmoji({ variables: { bulletId, code: emojiCode } })
     }
     // }
