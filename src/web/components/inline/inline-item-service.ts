@@ -1,5 +1,5 @@
 import { RateChoice } from 'graphql-let/__generated__/__types__'
-import { InlinePoll } from './inline-types'
+import { InlinePoll } from './inline-item-types'
 
 const isRateChoice = (s: string): s is RateChoice => {
   return ['LONG', 'SHORT', 'HOLD'].includes(s)

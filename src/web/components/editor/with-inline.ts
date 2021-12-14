@@ -1,11 +1,11 @@
 import { Editor, Transforms, Node, Path, NodeEntry } from 'slate'
 import { BulletParser } from '../bullet/bullet-parser'
-import { InlineItem } from '../inline/inline-types'
+import { InlineItem } from '../inline/inline-item-types'
 import { CustomElement, CustomInlineElement, CustomText, LcElement } from './slate-custom-types'
 
-const toSlateInline = (item: InlineItem): CustomInlineElement | CustomText => {
+const toInlineElement = (item: InlineItem): CustomInlineElement | CustomText => {
   if (item.type === 'text') {
-    return { text: item.str, shift: false }
+    return { text: item.str }
   }
   const inline: CustomInlineElement = {
     ...item,
@@ -25,7 +25,7 @@ export const parseLcAndReplace = (props: { editor: Editor; lcEntry: NodeEntry<Lc
     return // all inlines are text, no need to replace
   }
 
-  const headInlines = inlines.map(e => toSlateInline(e))
+  const headInlines = inlines.map(e => toInlineElement(e))
   Transforms.removeNodes(editor, {
     at: lcPath,
     match: (n, p) => Path.isChild(p, lcPath),

@@ -1,5 +1,5 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
-import { InlineItem } from '../inline/inline-types'
+import { InlineItem } from '../inline/inline-item-types'
 import { InlineItemService } from '../inline/inline-item-service'
 import { TokenHelper } from '../../common/token-helper'
 
