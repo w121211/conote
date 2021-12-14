@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid'
 import { Node } from 'slate'
 import { TreeNode } from '../../../packages/docdiff/src'
-import { Bullet } from '../bullet/types'
+import { Bullet } from '../../components/bullet/bullet'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 
 export const EditorSerializer = {

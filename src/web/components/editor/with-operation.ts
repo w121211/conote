@@ -1,6 +1,5 @@
 import assert from 'assert'
 import { Editor, Transforms, Range, Element, Node, Path, Text, NodeEntry } from 'slate'
-import { BulletOperation } from '../bullet/types'
 import { LcElement } from './slate-custom-types'
 import { isLc } from './with-list'
 

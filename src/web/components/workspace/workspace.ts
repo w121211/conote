@@ -8,7 +8,7 @@ import {
   CreateCommitMutation,
   CreateCommitMutationVariables,
 } from '../../apollo/query.graphql'
-import { Bullet } from '../bullet/types'
+import { Bullet } from '../bullet/bullet'
 import { EditorSerializer } from '../editor/serializer'
 import { Doc, DocEntry, DocEntryPack } from './doc'
 import { DocPath } from './doc-path'

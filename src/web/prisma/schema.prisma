@@ -14,7 +14,7 @@ model Author {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   links     Link[]
-  shots     Shot[]
+  rates     Rate[]
 }
 
 model Bullet {
@@ -149,7 +149,7 @@ model Link {
   author   Author? @relation(fields: [authorId], references: [id])
   authorId String?
   card     Card? // 1-to-1
-  shots    Shot[] // Shots form this link(source)
+  rates    Rate[] // Rates form this link(source)
 }
 
 // Poll建立後不能修改？或者允許user修改？目前不行
@@ -182,7 +182,7 @@ model PollCount {
   updatedAt  DateTime @updatedAt
 }
 
-model Shot {
+model Rate {
   id        String     @id @default(cuid())
   link      Link?      @relation(fields: [linkId], references: [id]) // as source
   linkId    String?
@@ -192,7 +192,7 @@ model Shot {
   authorId  String?
   sym       Sym        @relation(fields: [symId], references: [id]) // as target
   symId     String
-  choice    ShotChoice
+  choice    RateChoice
   body      Json       @default("{}")
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -205,7 +205,7 @@ model Sym {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   card      Card? // 1-to-1
-  shots     Shot[]
+  rates     Rate[]
 }
 
 model Vote {
@@ -233,7 +233,7 @@ model User {
   commits          Commit[]
   votes            Vote[]
   polls            Poll[]
-  shots            Shot[]
+  rates            Rate[]
   // bulletEmojis     BulletEmoji[]
   // boards       Board[]
   // boardLikes   BoardLike[]
@@ -281,7 +281,7 @@ enum PollType {
   ADD_BY_POST // 需要reply才能新增選項
 }
 
-enum ShotChoice {
+enum RateChoice {
   LONG
   SHORT
   HOLD

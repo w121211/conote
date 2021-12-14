@@ -60,6 +60,6 @@ export const DocPathService = {
     if (sourceCardId) {
       query['src'] = sourceCardId
     }
-    return { pathname: '/cardx/[symbol]', query }
+    return { pathname: '/card/[symbol]', query }
   },
 }

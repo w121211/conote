@@ -136,7 +136,7 @@ const LoginPanel = (): JSX.Element | null => {
   // sessionLogout()
   // }
   if (user) {
-    console.log(user)
+    // console.log(user)
     // console.log(router.query)
     // if (router.query.mode === 'signIn') {
     //   if (getCookie('session') === null) {

@@ -170,7 +170,7 @@ fragment poll on Poll {
   updatedAt
 }
 
-fragment shot on Shot {
+fragment rate on Rate {
   __typename
   id
   userId
@@ -185,7 +185,7 @@ fragment shot on Shot {
   updatedAt
 }
 
-fragment shotBody on ShotBody {
+fragment rateBody on RateBody {
   comment
   quote
 }
@@ -350,9 +350,9 @@ query Me {
   }
 }
 
-query MyShots($symId: ID!) {
-  myShots(symId: $symId) {
-    ...shot
+query MyRates($symId: ID!) {
+  myRates(symId: $symId) {
+    ...rate
   }
 }
 
@@ -384,21 +384,21 @@ query SearchAll($term: String!) {
   searchAll(term: $term)
 }
 
-query Shot($id: ID!) {
-  shot(id: $id) {
-    ...shot
+query Rate($id: ID!) {
+  rate(id: $id) {
+    ...rate
   }
 }
 
-query ShotsBySource($linkId: ID!) {
-  shotsBySource(linkId: $linkId) {
-    ...shot
+query RatesBySource($linkId: ID!) {
+  ratesBySource(linkId: $linkId) {
+    ...rate
   }
 }
 
-query ShotsByAuthor($authorId: ID!, $symId: ID!) {
-  shotsByAuthor(authorId: $authorId, symId: $symId) {
-    ...shot
+query RatesByAuthor($authorId: ID!, $symId: ID!) {
+  ratesByAuthor(authorId: $authorId, symId: $symId) {
+    ...rate
   }
 }
 
@@ -494,15 +494,15 @@ mutation CreatePoll($data: PollInput!) {
   }
 }
 
-mutation CreateShot($data: ShotInput!) {
-  createShot(data: $data) {
-    ...shot
+mutation CreateRate($data: RateInput!) {
+  createRate(data: $data) {
+    ...rate
   }
 }
 
-mutation UpdateShot($id: ID!, $data: ShotInput!) {
-  updateShot(id: $id, data: $data) {
-    ...shot
+mutation UpdateRate($id: ID!, $data: RateInput!) {
+  updateRate(id: $id, data: $data) {
+    ...rate
   }
 }
 

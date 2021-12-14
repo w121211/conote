@@ -1,22 +1,9 @@
-import { BaseEditor, BaseRange } from 'slate'
+import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-import {
-  InlineMirror,
-  InlinePoll,
-  InlineSymbol,
-  RootBulletDraft,
-  InlineFiltertag,
-  InlineShot,
-  Bullet,
-} from '../bullet/types'
 import { ChangeType } from '../../../packages/docdiff/src'
-
-export type CommentInput = {
-  boardCode: !PinBoardCode
-  oauthorVote?: !number
-  oauthorComment?: string
-}
+import { Bullet } from '../bullet/bullet'
+import { InlineFiltertag, InlineMirror, InlinePoll, InlineRate, InlineSymbol } from '../inline/inline-types'
 
 export type EmptyText = {
   text: string
@@ -27,48 +14,36 @@ export type CustomText = {
   italic?: true
   code?: true
   text: string
-  type?: string // stream type
-  placeholder?: boolean
-  shift?: boolean
+  tokenType?: string
+  // placeholder?: boolean
 }
 
-export type InlineSymbolElement = InlineSymbol & {
+export type InlineFiltertagElement = InlineFiltertag & {
   children: CustomText[]
-  shift?: boolean
 }
 
 export type InlineMirrorElement = InlineMirror & {
   children: CustomText[]
-  root?: RootBulletDraft
-  shift?: boolean
-}
-
-// export type InlineHashtagElement = InlineHashtag & {
-//   children: CustomText[]
-// }
-export type InlineFiltertagElement = InlineFiltertag & {
-  children: CustomText[]
-  shift?: boolean
 }
 
 export type InlinePollElement = InlinePoll & {
   children: CustomText[]
-  shift?: boolean
   selected?: boolean
 }
-export type InlineShotElement = InlineShot & {
+
+export type InlineRateElement = InlineRate & {
   children: CustomText[]
-  shift?: boolean
 }
 
-/**
- * li的content，實際文字輸入、操作的element，所以將bullet properties集中在此
- */
+export type InlineSymbolElement = InlineSymbol & {
+  children: CustomText[]
+}
+
 export type LcElement = {
   type: 'lc'
-  children: (CustomText | LabelInlineElement)[]
+  children: (CustomText | CustomInlineElement)[]
 
-  cid: string
+  cid: string // client-side temporary id, not real bullet id
   bulletCopy?: Bullet // keeps original copy
   change?: ChangeType // record change-event lively
 
@@ -82,17 +57,11 @@ export type LcElement = {
   // insertBreakAsIndent?: true
 }
 
-/**
- * li只允許包2個child：[lc, ul?]
- */
 export type LiElement = {
   type: 'li'
   children: [LcElement, UlElement?]
 }
 
-/**
- * ul只允許包li child
- */
 export type UlElement = {
   type: 'ul'
   children: LiElement[]
@@ -100,19 +69,19 @@ export type UlElement = {
 }
 
 export type CustomInlineElement =
-  | InlineSymbolElement
+  | InlineFiltertagElement
   | InlineMirrorElement
   | InlinePollElement
-  | InlineFiltertagElement
-  | InlineShotElement
+  | InlineRateElement
+  | InlineSymbolElement
 
 type CustomElement = CustomInlineElement | LcElement | LiElement | UlElement
 
 type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
 type CustomRange = BaseRange & {
-  type?: string
-  placeholder?: boolean
+  tokenType?: string
+  // placeholder?: boolean
 }
 
 declare module 'slate' {

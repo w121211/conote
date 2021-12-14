@@ -7,7 +7,7 @@ import {
 } from 'graphql-let/__generated__/__types__'
 import { inspect } from 'util'
 import { NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
-import { Bullet } from '../../components/bullet/types'
+import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
 import { RowCard } from './card'
 import { CardStateBody, CardStateModel, CardStateParsed } from './card-state'

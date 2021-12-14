@@ -1,5 +1,5 @@
 import { cloneDeep } from '@apollo/client/utilities'
-import { Bullet, BulletDraft, RootBullet, RootBulletDraft } from './types'
+import { Bullet } from '../../components/bullet/bullet'
 
 // export type BulletDraftOrRootBulletDraft<T extends Bullet | RootBullet> = T extends Bullet
 //   ? RootBulletDraft
