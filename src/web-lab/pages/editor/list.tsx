@@ -41,67 +41,48 @@ import {
   UlElement,
 } from './slate-custom-types'
 import {
-  isLiArray,
-  onKeyDown as withListOnKeyDown,
+  createListOperator,
+  ListHelper,
+  onKeyDownWithList,
   withList,
 } from './with-list'
-import { withObserve } from './with-observe'
 // import { useSearch } from './search'
 
 const initialValueDemo: LiElement[] = [
   {
     type: 'li',
-    children: [
-      {
-        type: 'lc',
-        children: [
-          {
-            text: '::$XX',
-          },
-        ],
-      },
-    ],
+    children: [{ type: 'lc', id: '1', children: [{ text: '111' }] }],
+  },
+  {
+    type: 'li',
+    children: [{ type: 'lc', id: '1', children: [{ text: '222' }] }],
   },
   {
     type: 'li',
     children: [
-      {
-        type: 'lc',
-        children: [{ text: '11' }, { text: '11' }, { text: '' }],
-      },
-    ],
-  },
-  {
-    type: 'li',
-    children: [
-      {
-        type: 'lc',
-        children: [{ text: '22' }],
-      },
+      { type: 'lc', id: '1', children: [{ text: '111' }] },
       {
         type: 'ul',
         children: [
           {
             type: 'li',
-            children: [
-              {
-                type: 'lc',
-                children: [{ text: '33' }],
-              },
-            ],
+            children: [{ type: 'lc', id: '1', children: [{ text: '333' }] }],
           },
           {
             type: 'li',
-            children: [
-              {
-                type: 'lc',
-                children: [{ text: '44' }],
-              },
-            ],
+            children: [{ type: 'lc', id: '1', children: [{ text: '333' }] }],
           },
         ],
       },
     ],
+  },
+  {
+    type: 'li',
+    children: [{ type: 'lc', id: '1', children: [{ text: '222' }] }],
+  },
+  {
+    type: 'li',
+    children: [{ type: 'lc', id: '1', children: [{ text: '333' }] }],
   },
 ]
 
@@ -159,7 +140,7 @@ const Lc = (
       {((focused && !selected) || readonly) && (
         <span contentEditable={false} style={{ color: 'green' }}>
           {/* {author === element.author && element.author} */}
-          {sourceUrl === element.sourceUrl && sourceUrl}
+          {/* {sourceUrl === element.sourceUrl && sourceUrl} */}
           {/* {element.emojis?.map((e, i) => (
             <EmojiButotn key={i} emoji={e} />
           ))} */}
@@ -233,8 +214,9 @@ export const BulletEditor = (props: {
   const { initialValue = initialValueDemo, authorName, sourceUrl } = props
 
   const [value, setValue] = useState<LiElement[]>(initialValue)
+  const listOperator = useMemo(() => createListOperator({}), [])
   const editor = useMemo(
-    () => withObserve(withList(withHistory(withReact(createEditor())))),
+    () => withList(withHistory(withReact(createEditor())), listOperator),
     []
   )
   const renderElement = useCallback(
@@ -250,20 +232,22 @@ export const BulletEditor = (props: {
         editor={editor}
         value={value}
         onChange={(value) => {
-          if (isLiArray(value)) {
+          if (ListHelper.isLiArray(value)) {
             setValue(value)
           } else {
             throw new Error('value 需為 li array')
           }
         }}
       >
-        <Editable
-          autoCorrect="false"
-          renderElement={renderElement}
-          onKeyDown={(event) => {
-            withListOnKeyDown(event, editor)
-          }}
-        />
+        <ul>
+          <Editable
+            autoCorrect="false"
+            renderElement={renderElement}
+            onKeyDown={(event) => {
+              onKeyDownWithList(event, editor, listOperator)
+            }}
+          />
+        </ul>
       </Slate>
     </div>
   )

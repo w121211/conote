@@ -8,7 +8,7 @@ import {
   useMyCardEmojiLikeQuery,
   useUpsertCardEmojiLikeMutation,
 } from '../../apollo/query.graphql'
-import EmojiTextToIcon from './emoji-text-to-icon'
+import EmojiIcon from './emoji-icon'
 import classes from './emoji-up-down.module.scss'
 
 const CardEmojiDisplay = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Element | null => {
@@ -27,7 +27,12 @@ const CardEmojiDisplay = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.
     >
       {/* {data.myHashtagLike?.choice && hashtag.text} */}
       {/* {hashtag.text} */}
-      <EmojiTextToIcon emoji={cardEmoji} customClass={classes.cardDisplayIcon} />
+      <EmojiIcon
+        code={cardEmoji.code}
+        nUps={cardEmoji.count.nUps}
+        liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
+        className={classes.cardDisplayIcon}
+      />
     </button>
   )
 }

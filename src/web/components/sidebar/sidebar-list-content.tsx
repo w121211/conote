@@ -11,7 +11,7 @@ const SidebarListContent = ({ entries }: { entries: DocEntryPack[] }): JSX.Eleme
           <li className="text-gray-700">
             <span className="flex items-center gap-1 leading-relax hover:bg-gray-100 cursor-pointer mix-blend-multiply">
               <span className="material-icons-outlined text-lg text-gray-400">article</span>
-              <Link href={`/cardx/${encodeURIComponent(e.main.symbol)}`}>
+              <Link href={`/card/${encodeURIComponent(e.main.symbol)}`}>
                 <a className="inline-block min-w-0 flex-1 truncate">{e.main.entry?.title || e.main.symbol}</a>
               </Link>
             </span>

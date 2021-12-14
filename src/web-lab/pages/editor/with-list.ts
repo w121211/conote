@@ -13,6 +13,13 @@ import {
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 
 export const ListHelper = {
+  // getLiEntry(editor: Editor, path: Path): NodeEntry<LiElement> | undefined {
+  //   return Editor.above<LiElement>(editor, {
+  //     match: (n) => ListHelper.isLi(n),
+  //     at: path,
+  //   })
+  // },
+
   isUl(node: Node): node is UlElement {
     return (
       !Editor.isEditor(node) && Element.isElement(node) && node.type === 'ul'
@@ -278,74 +285,167 @@ export const createListOperator = ({
   }
 }
 
-export const createOnKeyDown =
-  () =>
-  (
-    event: React.KeyboardEvent,
-    editor: Editor,
-    listOperator: ListOperator
-  ): void => {
-    const { selection } = editor
+export const onKeyDownWithList = (
+  event: React.KeyboardEvent,
+  editor: Editor,
+  listOperator: ListOperator
+): void => {
+  const { selection } = editor
 
-    if (selection && Range.isCollapsed(selection)) {
-      if (!['Tab', 'Enter'].includes(event.key)) {
-        // 只考慮 tab, enter key
+  // Single bullet indent
+  if (selection && Range.isCollapsed(selection)) {
+    if (!['Tab', 'Enter'].includes(event.key)) {
+      return // only ['tab', 'enter'] keys are taken into account
+    }
+
+    const li = Editor.above<LiElement>(editor, {
+      match: (n) => ListHelper.isLi(n),
+    })
+    if (li) {
+      // const [, path] = li
+      let action: 'indent' | 'unindent' | 'edit-body' | undefined
+
+      if (event.shiftKey && event.key === 'Tab') {
+        action = 'unindent'
+      } else if (event.key === 'Tab') {
+        action = 'indent'
+      }
+      // else if (event.key === 'Enter' && Node.string(node).length === 0) {
+      //   op = 'unindent'
+      // }
+
+      switch (action) {
+        case 'unindent':
+          event.preventDefault()
+          listOperator.unindent(editor, li)
+          return
+        case 'indent':
+          event.preventDefault()
+          listOperator.indent(editor, li)
+          return
+      }
+
+      // if (event.shiftKey && event.key === 'Enter') {
+      //   event.preventDefault()
+      //   editBody(editor, [bullet, bulletPath])
+      //   return
+      // }
+    }
+
+    // 目前在bulletBody裡
+    // const [bulletBody] = Editor.nodes(editor, {
+    //   match: (n) =>
+    //     !Editor.isEditor(n) &&
+    //     Element.isElement(n) &&
+    //     n.type === 'bullet-body',
+    // })
+    // if (bulletBody) {
+    //   const [, bodyPath] = bulletBody
+    //   const [bullet, bulletPath] = Editor.parent(editor, bodyPath)
+    //   if (!Element.isElement(bullet) || bullet.type !== 'bullet') return
+    //   if (event.shiftKey && event.key === 'Enter') {
+    //     event.preventDefault()
+    //     finishEditBody(editor, [bullet, bulletPath])
+    //     return
+    //   }
+    // }
+
+    return
+  }
+
+  // Multi-bullet indent/unindent
+  if (selection && !Range.isCollapsed(selection)) {
+    if (!['Tab', 'Enter'].includes(event.key)) {
+      return // only ['tab', 'enter'] keys are taken into account
+    }
+
+    const { anchor, focus } = selection
+    const compare = Path.compare(anchor.path, focus.path)
+    if (compare === 0) {
+      return // anchor and focus in the same bullet
+    }
+    const [start, end] = compare < 0 ? [anchor, focus] : [focus, anchor]
+    const startLi = Editor.above<LiElement>(editor, {
+      match: (n) => ListHelper.isLi(n),
+      at: start,
+    })
+    const endLi = Editor.above<LiElement>(editor, {
+      match: (n) => ListHelper.isLi(n),
+      at: end,
+    })
+    if (startLi && endLi) {
+      if (
+        !Path.isSibling(startLi[1], endLi[1]) &&
+        // !Path.isDescendant(endLi[1], startLi[1])
+        endLi[1].length < startLi[1].length
+      ) {
+        // console.log(startLi[1], endLi[1])
+        console.warn(
+          'Multi indent not support start-li & end-li in different branch'
+        )
+        return
+      }
+      if (Path.isDescendant(endLi[1], startLi[1])) {
+        console.warn('Use normal indent indetead')
         return
       }
 
-      const li = Editor.above<LiElement>(editor, {
-        match: (n) => ListHelper.isLi(n),
-      })
-      if (li) {
-        // const [, path] = li
-        let action: 'indent' | 'unindent' | 'edit-body' | undefined
-
-        if (event.shiftKey && event.key === 'Tab') {
-          action = 'unindent'
-        } else if (event.key === 'Tab') {
-          action = 'indent'
-        }
-        // else if (event.key === 'Enter' && Node.string(node).length === 0) {
-        //   op = 'unindent'
-        // }
-
-        switch (action) {
-          case 'unindent':
-            event.preventDefault()
-            listOperator.unindent(editor, li)
-            return
-          case 'indent':
-            event.preventDefault()
-            listOperator.indent(editor, li)
-            return
-        }
-
-        // if (event.shiftKey && event.key === 'Enter') {
-        //   event.preventDefault()
-        //   editBody(editor, [bullet, bulletPath])
-        //   return
-        // }
+      event.preventDefault()
+      const common = Path.common(startLi[1], endLi[1])
+      const nIndents = endLi[1][common.length] - startLi[1][common.length] + 1
+      for (let i = 0; i < nIndents; i++) {
+        listOperator.indent(editor, startLi)
       }
-
-      // 目前在bulletBody裡
-      // const [bulletBody] = Editor.nodes(editor, {
-      //   match: (n) =>
-      //     !Editor.isEditor(n) &&
-      //     Element.isElement(n) &&
-      //     n.type === 'bullet-body',
-      // })
-      // if (bulletBody) {
-      //   const [, bodyPath] = bulletBody
-      //   const [bullet, bulletPath] = Editor.parent(editor, bodyPath)
-      //   if (!Element.isElement(bullet) || bullet.type !== 'bullet') return
-      //   if (event.shiftKey && event.key === 'Enter') {
-      //     event.preventDefault()
-      //     finishEditBody(editor, [bullet, bulletPath])
-      //     return
-      //   }
-      // }
     }
+
+    // console.log(anchor.path, focus.path, Path.common(anchor.path, focus.path))
+    // const common = Path.common(anchor.path, focus.path)
+
+    // const nodes = Editor.nodes<LiElement>(editor, {
+    //   match: (n) => ListHelper.isLi(n),
+    //   mode: 'lowest',
+    //   at: [...common, start.path[common.length]],
+    // })
+
+    // console.log([...common, start.path[common.length]], [...nodes])
+
+    // console.log(
+    //   [...common, anchor.path[common.length]],
+    //   [...common, focus.path[common.length]]
+    // )
+
+    // const common = Path.common(anchor.path, focus.path)
+    // console.log(
+    //   anchor.path.splice(0, common.length + 1),
+    //   focus.path.splice(0, common.length + 1)
+    // )
+
+    // event.preventDefault()
+    // const span: [Path, Path] = [
+    //   [...common, anchor.path[common.length]],
+    //   [...common, focus.path[common.length]],
+    // ]
+
+    // const nodes = Editor.nodes(editor, {
+    //   match: (n, p) => {
+    //     return (
+    //       ListHelper.isLi(n) &&
+    //       (Path.isCommon(p, span[0]) || Path.isCommon(p, span[1]))
+    //     )
+    //   },
+    //   mode: 'lowest',
+    //   at: span,
+    //   // at: [
+    //   //   [...common, anchor.path[common.length]],
+    //   //   [...common, focus.path[common.length]],
+    //   // ],
+    // })
+    // console.log([...nodes])
+    // console.log(anchor, focus)
+
+    return
   }
+}
 
 export const withList = (
   editor: Editor,

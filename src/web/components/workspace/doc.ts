@@ -64,7 +64,7 @@ export class Doc {
     committedState,
   }: DocProps) {
     if (cardCopy && cardCopy.sym.symbol !== symbol) {
-      throw 'cardSnapshot.symbol !== symbol'
+      throw `cardSnapshot.symbol !== symbol: ${cardCopy.sym.symbol}, ${symbol}`
     }
     if (cardCopy && cardInput) {
       throw 'Card-snapshot & card-input cannot co-exist'

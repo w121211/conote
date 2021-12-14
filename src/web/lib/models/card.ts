@@ -23,6 +23,7 @@ export type CardMeta = {
   keywords?: string[]
   // lang?: string
   title?: string
+  tickers?: string[]
 }
 
 export type RowCard = Card & { sym: Sym; link: Link | null }
@@ -51,7 +52,7 @@ export const CardModel = {
    *
    * @throw symbol parse error
    */
-  async getBySymbol(symbol: string): Promise<(Omit<CardPrarsed, 'state'> & { state: CardStateParsed }) | null> {
+  async getBySymbol(symbol: string): Promise<CardPrarsed | null> {
     const parsed = SymModel.parse(symbol)
     const sym = await prisma.sym.findUnique({
       where: { symbol: parsed.symbol },
@@ -60,9 +61,9 @@ export const CardModel = {
     if (sym?.card) {
       const { card, ...restSym } = sym
       const state = await CardStateModel.getLastCardState(card.id)
-      if (state === null) {
-        throw '[conote-web] symbol-card state cannot be null'
-      }
+      // if (state === null) {
+      //   throw '[conote-web] symbol-card state cannot be null'
+      // }
       return {
         ...card,
         meta: card.meta as unknown as CardMeta,
@@ -101,9 +102,10 @@ export const CardModel = {
       url: link.url,
       author: fetchResult?.authorName,
       publishedAt: fetchResult?.date,
-      description: fetchResult?.date,
+      description: fetchResult?.description,
       keywords: fetchResult?.keywords,
       title: fetchResult?.title,
+      tickers: fetchResult?.tickers,
     }
     const card = await prisma.card.create({
       data: {

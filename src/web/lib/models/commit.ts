@@ -5,6 +5,7 @@ import {
   CommitInput as GQLCommitInput,
   CardStateInput as GQLCardStateInput,
 } from 'graphql-let/__generated__/__types__'
+import { inspect } from 'util'
 import { NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { Bullet } from '../../components/bullet/types'
 import prisma from '../prisma'
@@ -95,10 +96,15 @@ export const CommitModel = {
     //   }),
     // )
 
+    console.log('inputs')
+    console.log(inspect(inputs, { depth: null }))
+
     const inserts = inputs.map<CardStateInsert>(input => {
       const { cid, prevStateId, cardId, sourceCardId, cardInput, changes, value } = input
 
-      // 直接置換 value 中每個 bullet 的 id (硬幹) -> 正常應該是要從 updates 著手
+      console.log({ cid, prevStateId, cardId, sourceCardId, cardInput, changes, value })
+
+      // 直接置換 value 中每個 bullet 的 id (硬幹) -> TODO: 要用 doc update
       const bulletInserts: BulletInsert[] = []
       const nodes = TreeService.toList(value as unknown as TreeNode<Bullet>[]).map(e => {
         if (e.data && e.data.id === e.data.cid) {
@@ -110,6 +116,9 @@ export const CommitModel = {
         }
         return e
       })
+
+      console.log('bulletInserts', bulletInserts)
+
       const finalValue = TreeService.fromList(nodes)
       // e.cid = gid // node cid aligns with bullet id for later retreival
 

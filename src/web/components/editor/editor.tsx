@@ -16,36 +16,24 @@ import {
   withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
-// import { LikeChoice } from 'graphql-let/__generated__/__types__'
-import {
-  MyBulletEmojiLikeDocument,
-  MyBulletEmojiLikeQuery,
-  MyBulletEmojiLikeQueryVariables,
-  useMyBulletEmojiLikeQuery,
-  usePollLazyQuery,
-  useUpsertBulletEmojiLikeMutation,
-  BulletEmojiFragment,
-  PollFragment,
-  ShotFragment,
-  BulletEmojiLikeFragment,
-  CardFragment,
-} from '../../apollo/query.graphql'
+import { usePollLazyQuery, PollFragment, ShotFragment, CardFragment } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import { tokenizeBulletString } from '../bullet/parser'
-import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../bullet/types'
+import { toInlinePoll, toInlineShotString } from '../bullet/types'
 import BulletPanel from '../bullet-panel/bullet-panel'
 import BulletSvg from '../bullet-svg/bullet-svg'
-import HashtagTextToIcon from '../emoji-up-down/emoji-text-to-icon'
 import PollGroup from '../emoji-up-down/poll-group'
-import PollPage from '../poll/poll-page'
-import AuthorPollPage from '../poll/author-poll-page'
-import CreatePollForm from '../poll-form/create-poll-form'
-import Popover from '../popover/popover'
+import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
+// import PollPage from '../poll/poll-page'
+// import AuthorPollPage from '../poll/author-poll-page'
+// import CreatePollForm from '../poll-form/create-poll-form'
+// import Popover from '../popover/popover'
+import Modal from '../modal/modal'
 import Popup from '../popup/popup'
 import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
 import ShotBtn from '../shot-button/shotBtn'
+import { Doc } from '../workspace/doc'
 import { DocPathService } from '../workspace/doc-path'
-// import { Doc } from '../workspace/workspace'
 import classes from './editor.module.scss'
 import {
   CustomRange,
@@ -59,15 +47,7 @@ import {
   UlElement,
 } from './slate-custom-types'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
-import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
-import BulletPointEmojis from '../emoji-up-down/bullet-point-emojis'
-import { Doc } from '../workspace/doc'
-import Modal from '../modal/modal'
-
-// import { Context } from '../../pages/card/[symbol]'
-// import { BulletNode } from '../bullet/node'
-// import UpdateShotForm from '../shot-form/update-shot-form'
-// import MirrorPopover from '../../pages/card/[selfSymbol]/modal/[m]'
+import { parseLcAndReplace, withParse } from './with-parse'
 
 const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
   const { authorName } = props
@@ -91,29 +71,7 @@ const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element
 }
 
 const decorate = ([node, path]: NodeEntry) => {
-  // const focused = useFocused() // 整個editor是否focus
-  // const selected = useSelected()
-
   const ranges: CustomRange[] = []
-  //   if (editor.selection != null) {
-  //     if (
-  //       !Editor.isEditor(node) &&
-  //       // Editor.string(editor, [path[0]]) === '' &&
-  //       Editor.string(editor, path) === '' &&
-  //       Range.includes(editor.selection, path) &&
-  //       Range.isCollapsed(editor.selection)
-  //     ) {
-  //       // ranges.push({
-  //       //   ...editor.selection,
-  //       //   placeholder: true,
-  //       // })
-  //       // console.log(editor.selection)
-  //       return [{ ...editor.selection, placeholder: true }]
-  //     }
-  //   }
-  //   //   if (!Text.isText(node)) {
-  //   //     return ranges
-  //   // }
 
   function getLength(token: string | Token): number {
     if (typeof token === 'string') {
@@ -126,11 +84,10 @@ const decorate = ([node, path]: NodeEntry) => {
       return 0
     }
   }
-  // if (selected) {
+
   if (!Text.isText(node)) {
     return ranges
   }
-  // const tokens = tokenize(Node.string(node), LINE_VALUE_GRAMMAR)
   const tokens = tokenizeBulletString(Node.string(node))
   let start = 0
 
@@ -156,8 +113,7 @@ const decorate = ([node, path]: NodeEntry) => {
           focus: { path, offset: end },
         })
       } else if (token.type === 'mirror-topic') {
-        const bracketMatches = Node.string(node).matchAll(/\[\[|\]\]/g)
-
+        const bracketMatches = Node.string(node).matchAll(/\[\[|\]\]/g) // TODO
         ranges.push({
           type: token.type,
           anchor: { path, offset: start },
@@ -183,56 +139,67 @@ const decorate = ([node, path]: NodeEntry) => {
     }
     start = end
   }
-  // }
-
   return ranges
 }
 
-const Leaf = (props: RenderLeafProps): JSX.Element => {
-  const { attributes, leaf, children } = props
+const Leaf = ({ attributes, leaf, children }: RenderLeafProps): JSX.Element => {
+  // const selected = useSelected()
 
-  const readonly = useReadOnly()
-  const selected = useSelected()
-  // const [isPressShift, setIsPressShift] = useState(false)
-  // console.log(isPressShift)
   let style: React.CSSProperties = {}
   let className = ''
 
-  // if (leaf.placeholder) {
-  //   return (
-  //     <span style={{ minWidth: '135px', display: 'inline-block', position: 'relative' }}>
-  //       <span {...attributes}>
-  //         {/* <DefaultLeaf {...props} /> */}
-  //         {children}
-  //       </span>
-  //       <span style={{ opacity: 0.3, position: 'absolute', top: 0 }} contentEditable={false}>
-  //         Type / to open menu
-  //       </span>
-  //     </span>
-  //   )
+  // if (selected) {
+  switch (leaf.type) {
+    case 'mirror-ticker':
+    case 'mirror-topic':
+    case 'mTopic-bracket': {
+      // className = classes.mirrorLeaf
+      style = { color: '#5395f0' }
+      break
+    }
+    case 'author': {
+      style = { color: '#0cb26e' }
+      break
+    }
+    case 'poll':
+    case 'new-poll': {
+      style = { color: '#329ead' }
+      break
+    }
+    case 'shot':
+    case 'new-shot': {
+      style = { color: 'rgb(215 159 29)' }
+      break
+    }
+    case 'ticker':
+    case 'topic-bracket':
+    case 'topic': {
+      // className = classes.topicLeaf
+      // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
+      style = { color: 'rgb(215 159 29)' }
+      break
+    }
+    case 'filtertag': {
+      className = classes.filtertagLeaf
+      style = { color: '#6a53fe' }
+      break
+    }
+    case 'url': {
+      style = { color: '#ff619b' }
+      break
+    }
+    default: {
+      style = { color: '#3d434a' }
+    }
+  }
   // }
-
-  /* grammer 參考 */
-  // 'mirror-ticker': { pattern: reMirrorTicker },
-  // 'mirror-topic': { pattern: reMirrorTopic },
-  // ticker: { pattern: /\$[A-Z-=]+/ },
-  // topic: { pattern: /\[\[[^\]\n]+\]\]/u },
-  // url: {
-  //   pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
-  // },
-  // user: { pattern: /\B@[\p{L}\d_]+\b/u },
-  // poll: { pattern: rePoll },
-  // 'new-poll': { pattern: reNewPoll },
-  // filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
-  // console.log(leaf.type, children)
-  // console.log(leaf)
-  // if (readonly || !selected) {
+  // else {
   //   switch (leaf.type) {
   //     case 'mirror-ticker':
   //     case 'mirror-topic':
   //     case 'topic':
   //     case 'ticker': {
-  //       className = classes.mirrorLeaf
+  //       // className = classes.mirrorLeaf
   //       // style = { color: '#5395f0' }
   //       break
   //     }
@@ -242,135 +209,17 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   //       break
   //     }
   //     case 'author':
-  //     case 'url':
-  //     case 'filtertag': {
+  //     case 'url': {
   //       style = { color: '#0cb26e' }
   //       break
   //     }
-  //     // case 'poll':
-  //     // case 'new-poll': {
-  //     //   style = { color: '#329ead' }
-  //     //   break
-  //     // }
-  //     // case 'shot':
-  //     // case 'new-shot': {
-  //     //   style = { color: 'rgb(215 159 29)' }
-  //     //   break
-  //     // }
-  //     // case 'filtertag': {
-  //     //   className = classes.filtertagLeaf
-  //     //   style = { color: '#6a53fe' }
-  //     //   break
-  //     // }
-  //     // case 'url': {
-  //     //   style = { color: '#ff619b' }
-  //     //   break
-  //     // }
-  //     // default: {
-  //     //   style = { color: '#3d434a' }
-  //     // }
+  //     case 'filtertag': {
+  //       style = { color: '#3f70de' }
+  //     }
   //   }
-  // } else {
-  if (selected) {
-    switch (leaf.type) {
-      case 'mirror-ticker':
-      case 'mirror-topic':
-      case 'mTopic-bracket': {
-        className = classes.mirrorLeaf
-        // style = { color: '#5395f0' }
-        break
-      }
-      case 'author': {
-        style = { color: '#0cb26e' }
-        break
-      }
-      case 'poll':
-      case 'new-poll': {
-        style = { color: '#329ead' }
-        break
-      }
-      case 'shot':
-      case 'new-shot': {
-        style = { color: 'rgb(215 159 29)' }
-        break
-      }
-      case 'ticker':
-      case 'topic-bracket':
-      case 'topic': {
-        className = classes.topicLeaf
-
-        // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
-        break
-      }
-      case 'filtertag': {
-        className = classes.filtertagLeaf
-        style = { color: '#6a53fe' }
-        break
-      }
-      case 'url': {
-        style = { color: '#ff619b' }
-        break
-      }
-      default: {
-        style = { color: '#3d434a' }
-      }
-    }
-  } else {
-    switch (leaf.type) {
-      case 'mirror-ticker':
-      case 'mirror-topic':
-      case 'topic':
-      case 'ticker': {
-        className = classes.mirrorLeaf
-        // style = { color: '#5395f0' }
-        break
-      }
-      case 'mTopic-bracket':
-      case 'topic-bracket': {
-        style = { color: '#b5b5b3' }
-        break
-      }
-
-      case 'author':
-      case 'url': {
-        style = { color: '#0cb26e' }
-        break
-      }
-      case 'filtertag': {
-        style = { color: '#3f70de' }
-      }
-    }
-  }
-
   // }
-
   return (
-    // {/* <span {...attributes}>{children}</span> */}
-    <span
-      {...attributes}
-      className={className}
-      style={style}
-      // onFocus={e => {
-      //   e.preventDefault
-      // }}
-
-      ref={e => {
-        if (
-          leaf.type === 'ticker' ||
-          leaf.type === 'topic' ||
-          leaf.type === 'mirror-ticker' ||
-          leaf.type === 'mirror-topic' ||
-          leaf.type === 'filtertag' ||
-          leaf.type === 'topic-bracket' ||
-          leaf.type === 'mTopic-bracket'
-        ) {
-          if (e) {
-            e.onselectstart = () => false
-          }
-        }
-      }}
-    >
-      {/* {leaf.text} */}
+    <span {...attributes} className={className} style={style}>
       {children}
     </span>
   )
@@ -777,20 +626,20 @@ const InlineShot = (props: RenderElementProps & { element: InlineShotElement }):
   )
 }
 
-const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
-  return (
-    <>
-      <li>{bullet.head}</li>
-      {bullet.children.length > 0 && (
-        <ul>
-          {bullet.children.map((e, i) => (
-            <BulletComponent key={i} bullet={e} />
-          ))}
-        </ul>
-      )}
-    </>
-  )
-}
+// const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
+//   return (
+//     <>
+//       <li>{bullet.head}</li>
+//       {bullet.children.length > 0 && (
+//         <ul>
+//           {bullet.children.map((e, i) => (
+//             <BulletComponent key={i} bullet={e} />
+//           ))}
+//         </ul>
+//       )}
+//     </>
+//   )
+// }
 
 // const FilterMirror = ({
 //   mirrors,
@@ -846,12 +695,8 @@ const Lc = ({
   attributes,
   children,
   element,
-}: // curCardId,
-// sourceLinkId,
-RenderElementProps & {
+}: RenderElementProps & {
   element: LcElement
-  // curCardId?: string
-  // sourceLinkId?: string
 }): JSX.Element => {
   const editor = useSlateStatic()
   const readonly = useReadOnly()
@@ -882,7 +727,7 @@ RenderElementProps & {
   //     }
   //   }
   // }, [author, element, sourceUrl])
-  // console.log(element)
+
   useEffect(() => {
     if (!focused || !selected || readonly) {
       // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
@@ -893,22 +738,10 @@ RenderElementProps & {
     if (selected) {
       // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
       const path = ReactEditor.findPath(editor, element)
-      //   const lcChildren = Node.children(editor, path)
-
-      //   for (const lcChild of lcChildren) {
-      //     if (!Text.isText(lcChild[0]) && (lcChild[0].type === 'poll' || lcChild[0].type === 'shot')) {
-      //       console.log(lcChild)
-      //       Transforms.insertText(editor, lcChild[0].str, { at: lcChild[1] })
-      //       // Transforms.setNodes(editor, { children: [{ text: `${lcChild[0].str}` }] }, { at: lcChild[1] })
-      //       // match:(n,p)=>!Text.isText(n)&&Element.isElement(n)&&isInlineElement(n)
-      //     }
-      //   }
-
       Transforms.unwrapNodes(editor, {
         at: path,
         match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
       })
-      //   // console.log('unwrapNodes', path)
     }
   }, [selected, readonly])
 
@@ -918,7 +751,7 @@ RenderElementProps & {
     <div {...attributes}>
       <div>
         {children}
-        {element.bulletCopy?.id && <BulletPointEmojis bulletId={element.bulletCopy.id} />}
+        {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />}
         {/* // <span contentEditable={false}>
           //   {emojiData.bulletEmojis?.map((e, i) => {
           //     return <BulletPointEmojis key={i} bulletId={e.id} bulletEmojis={e} />
@@ -966,29 +799,21 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
 
   const [lc, ul] = element.children
   const hasUl = ul !== undefined
-  // const href = locationToUrl(location, ReactEditor.findPath(editor, element))
-
-  function onEmojiCreated(emoji: BulletEmojiFragment, myEmojiLike: BulletEmojiLikeFragment) {
-    // const curEmojis = lc.emojis ?? []
-    // const path = ReactEditor.findPath(editor, element)
-    // Transforms.setNodes<LcElement>(editor,  { at: lcPath(path) })
-  }
-  // console.log(lc.emojis)
 
   return (
     <div
       {...attributes}
       className="group relative break-all flex w-full"
-      onMouseOver={event => {
-        event.stopPropagation()
-        event.preventDefault()
-        // setShowPanelIcon(true)
-      }}
-      onMouseOut={event => {
-        event.stopPropagation()
-        event.preventDefault()
-        // setShowPanelIcon(false)
-      }}
+      // onMouseOver={event => {
+      //   event.stopPropagation()
+      //   event.preventDefault()
+      //   // setShowPanelIcon(true)
+      // }}
+      // onMouseOut={event => {
+      //   event.stopPropagation()
+      //   event.preventDefault()
+      //   // setShowPanelIcon(false)
+      // }}
     >
       {/* <div contentEditable={false}></div> */}
       <div className="inline-flex items-center h-8 " contentEditable={false}>
@@ -1011,7 +836,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           }}
         >
           <ArrowUpIcon
-            className={` w-2 h-2 fill-current text-gray-500 ${hasUl ? 'opacity-1' : 'opacity-0'}`}
+            className={`w-2 h-2 fill-current text-gray-500 ${hasUl ? 'opacity-1' : 'opacity-0'}`}
             style={{ transform: ulFolded === undefined ? 'rotate(180deg)' : 'rotate(90deg)' }}
           />
         </span>
@@ -1056,11 +881,10 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           <BulletSvg />
           {showPanel && lc.bulletCopy?.id && (
             <BulletPanel
-              className={classes.bulletPanel}
+              // className={classes.bulletPanel}
               // tooltipClassName={classes.bulletPanelTooltip}
-              bulletId={lc.bulletCopy?.id}
+              bulletId={lc.bulletCopy.id}
               visible={showPanel}
-              onEmojiCreated={onEmojiCreated}
             />
           )}
         </span>
@@ -1117,22 +941,8 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
     [doc],
   )
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
-  const renderDecorate = useCallback(([node, path]) => decorate([node, path]), [])
-
-  // const [isPressShift, setIsPressShift] = useState(false)
-  // const withListOnKeyDownMemo = useCallback((event: React.KeyboardEvent) => {
-  //   withListOnKeyDown(event, editor)
-  //   // console.log(editor.children)
-  // }, [])
-
-  // const [searchPanel, onValueChange] = useSearch(editor)
+  const decorateMemo = useCallback(([node, path]) => decorate([node, path]), [])
   const [value, setValue] = useState<LiElement[]>(doc.editorValue ?? [])
-
-  // useEffect(() => {
-  //   // 當 initialValue 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
-  //   Transforms.deselect(editor)
-  //   setValue(initialValue)
-  // }, [initialValue])
 
   useEffect(() => {
     // 當 doc 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
@@ -1140,6 +950,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
     setValue(doc.editorValue ?? [])
   }, [doc])
 
+  // const [searchPanel, onValueChange] = useSearch(editor)
   // useEffect(() => {
   //   if (searchAllResult.data) {
   //     setSuggestions(searchAllResult.data.searchAll)
@@ -1149,24 +960,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
   // }, [searchAllResult])
 
   return (
-    <div
-      className="-ml-7 text-gray-800"
-      // onFocus={e => {
-      //   if (!e.currentTarget.classList.contains(classes.focused)) {
-      //     e.currentTarget.classList.add(classes.focused)
-      //   }
-      //   // if (!context.login) {
-      //   //   context.showLoginPopup(true)
-      //   // }
-      // }}
-      // onBlur={e => {
-      //   e.currentTarget.classList.remove(classes.focused)
-      // }}
-    >
-      {/* <div>
-        @{selfCard.link?.url ?? 'undefined'}; @{location.author ?? 'undefined'}
-      </div> */}
-
+    <div className="-ml-7 text-gray-800">
       <Slate
         editor={editor}
         value={value}
@@ -1185,30 +979,14 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
         }}
       >
         <Editable
-          // style={{ padding: '10px 10px 10px 3.5em' }}
-          // onSelect={e => {
-          //   if (!(window as any).chrome) return
-          //   if (editor.selection == null) return
-          //   try {
-          //     const domPoint = ReactEditor.toDOMPoint(editor, editor.selection.focus)
-          //     const node = domPoint[0]
-          //     if (node == null) return
-          //     const element = node.parentElement
-          //     if (element == null) return
-          //     element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-          //   } catch (e) {
-          //     /**
-          //      * Empty catch. Do nothing if there is an error.
-          //      */
-          //   }
-          // }}
-
+          autoCapitalize="false"
           autoCorrect="false"
           autoFocus={true}
-          decorate={renderDecorate}
+          decorate={decorateMemo}
           // readOnly={readOnly}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
+          spellCheck={false}
           onKeyDown={event => {
             withListOnKeyDown(event, editor)
             // setIsPressShift(event.key === 'Shift')

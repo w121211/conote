@@ -59,15 +59,16 @@ export function parseLcAndReplace(props: { editor: Editor; lcEntry: NodeEntry<Lc
     lcEntry: [lcNode, lcPath],
   } = props
   const { inlines } = BulletParser.parseBulletHead({ str: Node.string(lcNode) })
-  const headInlines = inlines.map(e => toSlateInline(e))
-  // console.log(headInlines)
 
-  // 移除 lc 原本的 children 並插入新的 inlines
+  if (inlines.filter(e => e.type !== 'text').length === 0) {
+    return // all inlines are text, no need to replace
+  }
+
+  const headInlines = inlines.map(e => toSlateInline(e))
   Transforms.removeNodes(editor, {
     at: lcPath,
     match: (n, p) => Path.isChild(p, lcPath),
-  })
-
+  }) // 移除 lc 原本的 children 並插入新的 inlines
   // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
   Transforms.insertNodes(editor, headInlines, { at: [...lcPath, 0] })
 }

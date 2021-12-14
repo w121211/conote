@@ -50,7 +50,7 @@ const LoginPanel = (): JSX.Element | null => {
   }
 
   const handleLogout = async () => {
-    console.log('session logout!')
+    // console.log('session logout!')
     router.push('/')
   }
 
@@ -102,7 +102,7 @@ const LoginPanel = (): JSX.Element | null => {
     callbacks: {
       signInSuccessWithAuthResult: (authResult: UserCredential, redirectUrl?: string) => {
         // callback not working for email link sign in, @see
-        console.log('signInSuccessWithAuthResult callback')
+        // console.log('signInSuccessWithAuthResult callback')
         // const idToken = await authResult.user.getIdToken()
         authResult.user.getIdToken().then(idToken => {
           // AuthService.sessionLogin(idToken)
@@ -174,10 +174,18 @@ const LoginPanel = (): JSX.Element | null => {
         <button
           onClick={() => {
             // AuthService.sessionLogout()
-            handleLogout()
+            router.back()
           }}
         >
-          logout
+          Return
+        </button>
+        <button
+          onClick={() => {
+            // AuthService.sessionLogout()
+            router.push('/')
+          }}
+        >
+          Home
         </button>
       </div>
     )
