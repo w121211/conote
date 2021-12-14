@@ -1,15 +1,16 @@
 import { RateChoice } from 'graphql-let/__generated__/__types__'
+import { InlinePoll } from './inline-types'
 
 const isRateChoice = (s: string): s is RateChoice => {
   return ['LONG', 'SHORT', 'HOLD'].includes(s)
 }
 
-export const InlineRateService = {
+export const InlineItemService = {
   /**
    * inline rate string `!((rate:$ID))($AUTHOR $TARGET|[[Target]] #CHOICE)`
    * 不會做 validation，這是為了保留 user 所輸入的內容，在 rate form 裡做檢驗、修正
    */
-  parseParams(params: string[]): {
+  parseInlineRateParams(params: string[]): {
     authorName?: string
     targetSymbol?: string
     choice?: RateChoice
@@ -24,7 +25,7 @@ export const InlineRateService = {
     }
   },
 
-  toString({
+  toInlineRateString({
     author,
     choice,
     symbol,
@@ -41,17 +42,17 @@ export const InlineRateService = {
     }
     return `!((rate))(@${author} ${symbol} #${choice})`
   },
-}
 
-// export function toInlinePoll({ id, choices }: { id: string | number; choices: string[] }): InlinePoll {
-//   const _id = typeof id === 'number' ? id.toString() : id
-//   return {
-//     type: 'poll',
-//     str: `!((poll:${_id}))(${choices.join(' ')})`,
-//     id: _id,
-//     choices: choices,
-//   }
-// }
+  toInlinePoll({ id, choices }: { id: string | number; choices: string[] }): InlinePoll {
+    const _id = typeof id === 'number' ? id.toString() : id
+    return {
+      type: 'poll',
+      str: `!((poll:${_id}))(${choices.join(' ')})`,
+      id: _id,
+      choices: choices,
+    }
+  },
+}
 
 // export function toInlineHashtag(hashtag: GQLHashtag | Hashtag): InlineHashtag {
 //   const isGQLHashtag = (obj: GQLHashtag | Hashtag): obj is GQLHashtag => {

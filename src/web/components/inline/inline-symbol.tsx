@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/router'
 import { RenderElementProps } from 'slate-react'
 import Popup from '../popup/popup'

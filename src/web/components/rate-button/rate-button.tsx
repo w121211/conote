@@ -1,7 +1,7 @@
 import React from 'react'
-import classes from './shotBtn.module.scss'
+import classes from './rate-button.module.scss'
 
-const ShotBtn = ({
+const RateButton = ({
   author,
   target,
   choice,
@@ -36,4 +36,5 @@ const ShotBtn = ({
     </button>
   )
 }
-export default ShotBtn
+
+export default RateButton

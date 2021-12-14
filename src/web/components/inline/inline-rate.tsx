@@ -1,9 +1,12 @@
-import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
-import { useRouter } from 'next/router'
-import { RenderElementProps } from 'slate-react'
-import Popup from '../popup/popup'
-import classes from '../editor/editor.module.scss'
+import React, { useState } from 'react'
+import { ReactEditor, RenderElementProps, useSelected, useSlateStatic } from 'slate-react'
 import { InlineRateElement } from '../editor/slate-custom-types'
+import Modal from '../modal/modal'
+import { Transforms } from 'slate'
+import { RateFragment } from '../../apollo/query.graphql'
+import { InlineItemService } from './inline-item-service'
+import RateButton from '../rate-button/rate-button'
+import CreateRateForm from '../rate-form/create-rate-form'
 
 const InlineRate = (props: RenderElementProps & { element: InlineRateElement }): JSX.Element => {
   const editor = useSlateStatic()
@@ -15,16 +18,16 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
   // const [shotData, setShotData] = useState<ShotFragment | undefined>()
   // const { data: targetData } = useCardQuery({ variables: { id: shotId } })
 
-  const onShotCreated = (shot: ShotFragment, targetSymbol: string) => {
+  const onRateCreated = (shot: RateFragment, targetSymbol: string) => {
     // const editor = useSlateStatic()
     const path = ReactEditor.findPath(editor, element)
-    const inlineShot = toInlineShotString({
+    const inlineShot = InlineItemService.toInlineRateString({
       id: shot.id,
       choice: shot.choice,
-      targetSymbol,
+      symbol: targetSymbol,
       author: element.authorName ?? '',
     })
-    Transforms.setNodes<InlineShotElement>(editor, { id: shot.id }, { at: path })
+    Transforms.setNodes<InlineRateElement>(editor, { id: shot.id }, { at: path })
     Transforms.insertText(editor, inlineShot, { at: path })
   }
 
@@ -78,7 +81,7 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
             })}
           </button> */}
 
-      <ShotBtn
+      <RateButton
         author={element.params.find(e => e.startsWith('@'))}
         target={element.params.find(e => e.startsWith('$'))}
         choice={element.params.find(e => e.startsWith('#'))}
@@ -88,14 +91,14 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
       {showPopover && (
         <span contentEditable={false}>
           <Modal visible={showPopover} onClose={() => setShowPopover(false)}>
-            <CreateShotForm
+            <CreateRateForm
               initialInput={{
                 author: element.authorName ?? '',
                 target: element.targetSymbol ?? '',
                 choice: element.choice ?? '',
                 link: '',
               }}
-              onShotCreated={onShotCreated}
+              onRateCreated={onRateCreated}
             />
           </Modal>
         </span>

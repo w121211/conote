@@ -1,41 +1,37 @@
 import { useApolloClient } from '@apollo/client'
-import { useRouter } from 'next/router'
+// import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { Controller, set, useForm } from 'react-hook-form'
 import AsyncSelect from 'react-select/async'
-import { ShotChoice } from 'graphql-let/__generated__/__types__'
+import { RateChoice } from 'graphql-let/__generated__/__types__'
 import {
   AuthorDocument,
   AuthorQuery,
   AuthorQueryVariables,
-  ShotDocument,
-  ShotFragment,
-  ShotQuery,
-  useAuthorQuery,
-  useCardLazyQuery,
+  RateDocument,
+  RateFragment,
+  RateQuery,
   useCardQuery,
-  useCreateShotMutation,
+  useCreateRateMutation,
   useLinkLazyQuery,
-  useLinkQuery,
 } from '../../apollo/query.graphql'
-import Popup from '../popup/popup'
 import classes from './shot-form.module.scss'
 
 export interface FormInput {
   author: string
-  choice: ShotChoice | ''
+  choice: RateChoice | ''
   target: string
   link?: string
 }
 
-const CreateShotForm = ({
+const CreateRateForm = ({
   initialInput,
-  onShotCreated,
+  onRateCreated,
 }: {
   initialInput: FormInput
-  onShotCreated: (shot: ShotFragment, targetSymbol: string) => void
+  onRateCreated: (rate: RateFragment, targetSymbol: string) => void
 }): JSX.Element => {
-  const router = useRouter()
+  // const router = useRouter()
   const [showPopup, setShowPopup] = useState(false)
   const [skipCardQuery, setSkipCardQuery] = useState(true)
   const { author, choice, target, link } = initialInput
@@ -66,29 +62,29 @@ const CreateShotForm = ({
   }, [targetCardData])
 
   const { register, handleSubmit, control } = useForm<FormInput>({
-    defaultValues: { ...initialInput, choice: choice ? (choice.substr(1) as ShotChoice) : '' },
+    defaultValues: { ...initialInput, choice: choice ? (choice.substring(1) as RateChoice) : '' },
   })
-  const [createShot, { data: shotData }] = useCreateShotMutation({
+  const [createShot, { data: rateData }] = useCreateRateMutation({
     update(cache, { data }) {
-      const res = cache.readQuery<ShotQuery>({
-        query: ShotDocument,
+      const res = cache.readQuery<RateQuery>({
+        query: RateDocument,
       })
-      if (data?.createShot && res?.shot) {
+      if (data?.createRate && res?.rate) {
         cache.writeQuery({
-          query: ShotDocument,
+          query: RateDocument,
           data: {
-            targetId: data.createShot.symId,
-            choice: data.createShot.choice,
-            authorId: data.createShot.authorId,
-            linkId: data.createShot.linkId,
+            targetId: data.createRate.symId,
+            choice: data.createRate.choice,
+            authorId: data.createRate.authorId,
+            linkId: data.createRate.linkId,
           },
         })
       }
     },
     onCompleted(data) {
-      console.log(data.createShot, targetCardData)
-      if (data.createShot && targetCardData && targetCardData.card) {
-        onShotCreated(data.createShot, targetCardData.card.sym.symbol)
+      console.log(data.createRate, targetCardData)
+      if (data.createRate && targetCardData && targetCardData.card) {
+        onRateCreated(data.createRate, targetCardData.card.sym.symbol)
       } else {
         throw 'Create shot error'
       }
@@ -198,4 +194,4 @@ const CreateShotForm = ({
     </>
   )
 }
-export default CreateShotForm
+export default CreateRateForm
