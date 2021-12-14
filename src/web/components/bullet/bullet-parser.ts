@@ -1,27 +1,29 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
-import { ShotChoice } from 'graphql-let/__generated__/__types__'
-// import { parseInlineShotParams } from '../models/shot'
-import { tokenToString } from '../../lib/token'
-import { InlineItem } from './types'
+import { InlineItem } from '../inline/inline-types'
+import { InlineRateService } from '../inline/inline-services'
+import { TokenHelper } from '../../common/token-helper'
 
 /**
  * Regex:
  * - url @see https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
  * - hashtag @see https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
  */
+
 const reTicker = /\$[A-Z-=]+/
 const reTopic = /\[\[[^\]\n]+\]\]/u
 export const reAuthor = /\B@[\p{L}\d_]+\b/u
 
 const decorateReMirrorTicker = /^(::\$[A-Z-=]+)\b/u
 const decorateReMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B/u
+
 const reMirrorTicker = /^(::\$[A-Z-=]+)\b(?:\s@([\p{Letter}\d_]+))?/u
 const reMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B(?:\s@([\p{Letter}\d_]+))?/u
 // const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const rePoll = /\B!\(\(poll:(c[a-z0-9]{24,29})\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const reNewPoll = /\B!\(\(poll\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
-const reShot = /\B!\(\(shot:(c[a-z0-9]{24,29})\)\)\(([^)]*)\)\B/
-const reNewShot = /\B!\(\(shot\)\)\(([^)]*)\)\B/
+const reRate = /\B!\(\(rate:(c[a-z0-9]{24,29})\)\)\(([^)]*)\)\B/
+const reNewRate = /\B!\(\(rate\)\)\(([^)]*)\)\B/
+const reURL = /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/
 
 const grammar: Grammar = {
   // 順序重要，先 mirror 後 ticker
@@ -31,17 +33,15 @@ const grammar: Grammar = {
   poll: { pattern: rePoll },
   'new-poll': { pattern: reNewPoll },
 
-  shot: { pattern: reShot },
-  'new-shot': { pattern: reNewShot },
+  rate: { pattern: reRate },
+  'new-rate': { pattern: reNewRate },
 
   ticker: { pattern: reTicker },
   topic: { pattern: reTopic },
 
   filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
 
-  url: {
-    pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
-  },
+  url: { pattern: reURL },
 
   author: { pattern: reAuthor },
 }
@@ -63,37 +63,43 @@ const decorationGrammar: Grammar = {
   },
   author: { pattern: reAuthor },
 }
+const decorateGrammar: Grammar = {
+  // 順序重要，先 mirror 後 ticker
+  'mirror-ticker': { pattern: reMirrorTicker },
+  'mirror-topic': { pattern: reMirrorTopic },
 
-export function decorationTokenizer(text: string): (string | Token)[] {
-  return prismTokenize(text, decorationGrammar)
+  poll: { pattern: rePoll },
+  'new-poll': { pattern: reNewPoll },
+
+  rate: { pattern: reRate },
+  'new-rate': { pattern: reNewRate },
+
+  ticker: { pattern: reTicker },
+  topic: {
+    pattern: reTopic,
+    inside: {
+      'topic-bracket-head': /^\[\[/,
+      'topic-bracket-tail': /]]$/,
+    },
+  },
+
+  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
+
+  url: { pattern: reURL },
+
+  author: { pattern: reAuthor },
 }
+
 export function tokenizeBulletString(text: string): (string | Token)[] {
   return prismTokenize(text, grammar)
 }
 
+export function tokenizeBulletStringWithDecorate(text: string): (string | Token)[] {
+  return prismTokenize(text, decorateGrammar)
+}
+
 export function inlinesToString(inlines: InlineItem[]): string {
   return inlines.reduce((acc, cur) => `${acc}${cur.str}`, '')
-}
-
-const isShotChoice = (s: string): s is ShotChoice => {
-  return ['#LONG', '#SHORT', '#HOLD'].includes(s)
-}
-
-const parseInlineShotParams = (
-  params: string[],
-): {
-  authorName?: string
-  targetSymbol?: string
-  choice?: ShotChoice
-} => {
-  const [_authorName, _targetSymbol, _choice] = params
-  // const matchAuthor = reAuthor.exec(_authorName)
-  // const matchSymbol = parseSymbol(_targetSymbol)
-  return {
-    authorName: _authorName,
-    targetSymbol: _targetSymbol,
-    choice: isShotChoice(_choice) ? _choice : undefined,
-  }
 }
 
 export const BulletParser = {
@@ -109,7 +115,7 @@ export const BulletParser = {
         return { type: 'text', str: token }
       }
 
-      const str = tokenToString(token.content)
+      const str = TokenHelper.toString(token.content)
       switch (token.type) {
         case 'mirror-ticker':
         case 'mirror-topic': {
@@ -162,14 +168,14 @@ export const BulletParser = {
             throw 'Parse error'
           }
         }
-        case 'shot': {
-          const match = reShot.exec(str)
+        case 'rate': {
+          const match = reRate.exec(str)
           if (match) {
             console.log(match[2])
             const params = match[2].split(' ')
-            const { authorName, targetSymbol, choice } = parseInlineShotParams(params)
+            const { authorName, targetSymbol, choice } = InlineRateService.parseParams(params)
             return {
-              type: 'shot',
+              type: 'rate',
               id: match[1],
               str,
               params,
@@ -182,13 +188,13 @@ export const BulletParser = {
             throw 'Parse error'
           }
         }
-        case 'new-shot': {
-          const match = reNewShot.exec(str)
+        case 'new-rate': {
+          const match = reNewRate.exec(str)
           if (match) {
             const params = match[1].split(' ')
-            const { authorName, targetSymbol, choice } = parseInlineShotParams(params)
+            const { authorName, targetSymbol, choice } = InlineRateService.parseParams(params)
             return {
-              type: 'shot',
+              type: 'rate',
               str,
               params,
               authorName,

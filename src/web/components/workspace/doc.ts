@@ -1,7 +1,7 @@
 import { CardInput, CardStateInput } from 'graphql-let/__generated__/__types__'
 import { NodeChange, TreeChangeService, TreeNode } from '../../../packages/docdiff/src'
 import { CardFragment, CardStateFragment } from '../../apollo/query.graphql'
-import { Bullet } from '../bullet/types'
+import { Bullet } from '../bullet/bullet'
 import { LiElement } from '../editor/slate-custom-types'
 import { EditorSerializer } from '../editor/serializer'
 import { LocalDBService } from './local-db'
@@ -64,7 +64,7 @@ export class Doc {
     committedState,
   }: DocProps) {
     if (cardCopy && cardCopy.sym.symbol !== symbol) {
-      throw 'cardSnapshot.symbol !== symbol'
+      throw `cardSnapshot.symbol !== symbol: ${cardCopy.sym.symbol}, ${symbol}`
     }
     if (cardCopy && cardInput) {
       throw 'Card-snapshot & card-input cannot co-exist'

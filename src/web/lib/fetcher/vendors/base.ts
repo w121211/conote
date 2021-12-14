@@ -43,13 +43,13 @@ export const base: DomainFetchFunction = async function (url) {
   // const {ke}
   const { keywords, tickers } = await extraScraper({ html, url: finalUrl })
 
-  // const { domain } = parseUrl(metadata.url)
+  const { domain } = parseUrl(finalUrl)
   // if (domain === undefined) {
   //   throw new Error(`Fetch error: ${url} ${finalUrl}`)
   // }
 
   return {
-    domain: 'domain',
+    domain,
     finalUrl: scrapedUrl,
     srcType: 'OTHER',
     authorName: author,

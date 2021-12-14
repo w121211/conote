@@ -43,7 +43,11 @@
     "@metascraper/helpers": "^5.24.8",
     "@prisma/client": "^3.4.1",
     "@svgr/webpack": "^6.0.0",
+<<<<<<< HEAD
     "@tailwindcss/line-clamp": "^0.3.0",
+=======
+    "@tailwindcss/line-clamp": "^0.2.2",
+>>>>>>> 3dd947adbaa8e7a93a3ea415fd0dfbc0e410fb31
     "apollo-server-micro": "^3.5.0",
     "apollo3-cache-persist": "^0.13.0",
     "cookie": "^0.4.1",

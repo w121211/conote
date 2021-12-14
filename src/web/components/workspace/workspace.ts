@@ -2,17 +2,17 @@ import { ApolloClient } from '@apollo/client'
 import { nanoid } from 'nanoid'
 import { BehaviorSubject } from 'rxjs'
 import { NodeChange, TreeNode } from '../../../packages/docdiff/src'
-import { LocalDBService } from './local-db'
 import {
   CardFragment,
   CreateCommitDocument,
   CreateCommitMutation,
   CreateCommitMutationVariables,
 } from '../../apollo/query.graphql'
-import { Bullet } from '../bullet/types'
+import { Bullet } from '../bullet/bullet'
 import { EditorSerializer } from '../editor/serializer'
-import { DocPath } from './doc-path'
 import { Doc, DocEntry, DocEntryPack } from './doc'
+import { DocPath } from './doc-path'
+import { LocalDBService } from './local-db'
 
 class Workspace {
   readonly mainDoc$ = new BehaviorSubject<{
@@ -58,35 +58,31 @@ class Workspace {
       if (card.link === undefined) {
         throw 'Expect card.link exist'
       }
-      const value: TreeNode<Bullet>[] = [
-        {
-          cid: nanoid(),
-          data: { id: nanoid(), head: `a new webpage-card ${symbol}` },
-          children: [],
-        },
-      ]
       return new Doc({
         symbol,
         cardInput: null,
         cardCopy: card,
         sourceCardCopy: null, // force set to null
-        editorValue: EditorSerializer.toLiArray(value),
+        editorValue: [
+          {
+            type: 'li',
+            children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new webpage-card ${symbol}` }] }],
+          },
+        ],
       })
     }
     // No card nor card-doc -> a new symbol-card
-    const value: TreeNode<Bullet>[] = [
-      {
-        cid: nanoid(),
-        data: { id: nanoid(), head: `a new symbol-card ${symbol}` },
-        children: [],
-      },
-    ]
     return new Doc({
       symbol,
       cardInput: { symbol, meta: {} },
       cardCopy: null,
       sourceCardCopy: sourceCard,
-      editorValue: EditorSerializer.toLiArray(value),
+      editorValue: [
+        {
+          type: 'li',
+          children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new symbol-card ${symbol}` }] }],
+        },
+      ],
     })
   }
 

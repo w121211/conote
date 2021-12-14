@@ -38,8 +38,8 @@ type Query {
 
   myCardEmojiLike(cardEmojiId: ID!): CardEmojiLike
 
-  # 可重複 shot
-  myShots(symId: ID!): [Shot!]!
+  # 可重複 rate
+  myRates(symId: ID!): [Rate!]!
 
   # 因為目前可重複投票，所以同一個 poll 可能會有多個 votes
   myVotes(pollId: ID!): [Vote!]!
@@ -53,11 +53,11 @@ type Query {
 
   searchTopic(term: String!): [String!]!
 
-  shot(id: ID!): Shot
+  rate(id: ID!): Rate
 
-  shotsByAuthor(authorId: ID!, symId: ID!): [Shot!]!
+  ratesByAuthor(authorId: ID!, symId: ID!): [Rate!]!
 
-  shotsBySource(linkId: ID!): [Shot!]!
+  ratesBySource(linkId: ID!): [Rate!]!
 
   # 以 card symbol 找該 card 所有的 active hashtags
   # hashtags(symbol: String!): [Hashtag!]
@@ -150,8 +150,8 @@ type Mutation {
 
   createPoll(data: PollInput!): Poll!
 
-  createShot(data: ShotInput!): Shot!
-  updateShot(id: ID!, data: ShotInput!): Shot!
+  createRate(data: RateInput!): Rate!
+  updateRate(id: ID!, data: RateInput!): Rate!
 
   createVote(pollId: ID!, data: VoteInput!): Vote!
 
@@ -370,19 +370,19 @@ type Scraped {
   tickers: [String!]
 }
 
-type Shot {
+type Rate {
   id: ID!
   userId: String!
   authorId: String
   linkId: String
   symId: String!
-  choice: ShotChoice!
+  choice: RateChoice!
   # body: ShotBody
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-type ShotBody {
+type RateBody {
   comment: String
   quote: String
 }
@@ -578,11 +578,11 @@ input PollInput {
   choices: [String!]!
 }
 
-input ShotInput {
-  choice: ShotChoice!
+input RateInput {
+  choice: RateChoice!
   targetId: ID! # Target card id
-  authorId: ID # Create author shot required
-  linkId: ID # Create author shot required
+  authorId: ID # Create author rate required
+  linkId: ID # Create author rate required
 }
 
 input VoteInput {
@@ -709,7 +709,7 @@ enum PollFailReason {
   OTHER
 }
 
-enum ShotChoice {
+enum RateChoice {
   LONG
   SHORT
   HOLD

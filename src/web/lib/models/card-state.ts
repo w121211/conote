@@ -1,6 +1,6 @@
 import { CardState } from '.prisma/client'
 import { NodeChange, TreeNode } from '../../../packages/docdiff/src'
-import { Bullet } from '../../components/bullet/types'
+import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
 
 export type CardStateBody = {

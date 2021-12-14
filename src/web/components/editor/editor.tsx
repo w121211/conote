@@ -1,7 +1,4 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { Token } from 'prismjs'
 import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element, Point } from 'slate'
 import {
   Editable,
@@ -16,48 +13,20 @@ import {
   withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
-// import { LikeChoice } from 'graphql-let/__generated__/__types__'
-import {
-  MyBulletEmojiLikeDocument,
-  MyBulletEmojiLikeQuery,
-  MyBulletEmojiLikeQueryVariables,
-  useMyBulletEmojiLikeQuery,
-  usePollLazyQuery,
-  useUpsertBulletEmojiLikeMutation,
-  BulletEmojiFragment,
-  PollFragment,
-  ShotFragment,
-  BulletEmojiLikeFragment,
-  CardFragment,
-} from '../../apollo/query.graphql'
+import { CardFragment } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import { decorationTokenizer, tokenizeBulletString } from '../bullet/parser'
 import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../bullet/types'
 import BulletPanel from '../bullet-panel/bullet-panel'
 import BulletSvg from '../bullet-svg/bullet-svg'
-import HashtagTextToIcon from '../emoji-up-down/emoji-text-to-icon'
-import PollGroup from '../emoji-up-down/poll-group'
-import PollPage from '../poll/poll-page'
-import AuthorPollPage from '../poll/author-poll-page'
-import CreatePollForm from '../poll-form/create-poll-form'
-import Popover from '../popover/popover'
-import Popup from '../popup/popup'
-import CreateShotForm, { FormInput } from '../shot-form/create-shot-form'
-import ShotBtn from '../shot-button/shotBtn'
-import { DocPathService } from '../workspace/doc-path'
-// import { Doc } from '../workspace/workspace'
+import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
+// import PollPage from '../poll/poll-page'
+// import AuthorPollPage from '../poll/author-poll-page'
+// import CreatePollForm from '../poll-form/create-poll-form'
+// import Popover from '../popover/popover'
+import { Doc } from '../workspace/doc'
 import classes from './editor.module.scss'
-import {
-  CustomRange,
-  InlineFiltertagElement,
-  InlineMirrorElement,
-  InlinePollElement,
-  InlineShotElement,
-  InlineSymbolElement,
-  LcElement,
-  LiElement,
-  UlElement,
-} from './slate-custom-types'
+import { LcElement, LiElement, UlElement } from './slate-custom-types'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { isInlineElement, parseLcAndReplace, withParse } from './with-parse'
 import BulletPointEmojis from '../emoji-up-down/bullet-point-emojis'
@@ -592,278 +561,83 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
       if (pollData?.poll) {
         onCreated(pollData.poll)
       }
+import { parseLcAndReplace, withInline } from './with-inline'
+import InlineSymbol from '../inline/inline-symbol'
+import InlineMirror from '../inline/inline-mirror'
+import InlineFiltertag from '../inline/inline-filtertag'
+import InlinePoll from '../inline/inline-poll'
+import InlineRate from '../inline/inline-rate'
+import { decorate } from './decorate'
+
+const Leaf = ({ attributes, leaf, children }: RenderLeafProps): JSX.Element => {
+  let style: React.CSSProperties = {}
+  let className = ''
+
+  switch (leaf.tokenType) {
+    case 'mirror-ticker':
+    case 'mirror-topic':
+    case 'mTopic-bracket': {
+      // className = classes.mirrorLeaf
+      style = { color: '#5395f0' }
+      break
     }
-  }, [showPopover, pollData, pollId])
-
-  // useEffect(() => {
-  //   // console.log(path, selection)
-  //   if (selected && selection) {
-  //     const isEnd = Point.equals(selection.focus, { path: [...path, 0], offset: element.str.length })
-  //     if (isEnd) {
-  //       Transforms.setSelection(editor, {
-  //         anchor: { path: Path.next(path), offset: 0 },
-  //         focus: { path: Path.next(path), offset: 0 },
-  //       })
-  //     }
-  //   }
-  // }, [selection, selected])
-
-  const handleHideBoard = () => {
-    setClickedIdx(undefined)
-    setShowPopover(false)
+    case 'author': {
+      style = { color: '#0cb26e' }
+      break
+    }
+    case 'poll':
+    case 'new-poll': {
+      style = { color: '#329ead' }
+      break
+    }
+    case 'shot':
+    case 'new-shot': {
+      style = { color: 'rgb(215 159 29)' }
+      break
+    }
+    case 'topic-bracket-head':
+    case 'topic-bracket-tail':
+      style = { color: 'blue' }
+      break
+    case 'ticker':
+    case 'topic': {
+      // className = classes.topicLeaf
+      // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
+      style = { color: 'rgb(215 159 29)' }
+      break
+    }
+    case 'filtertag': {
+      className = classes.filtertagLeaf
+      style = { color: '#6a53fe' }
+      break
+    }
+    case 'url': {
+      style = { color: '#ff619b' }
+      break
+    }
+    default: {
+      style = { color: '#3d434a' }
+    }
   }
-  // const queryPoll = usePollQuery({ variables: { id: element.id.toString() } })
-
-  // if (readonly) {
-  //   if (element.type === 'poll') {
-  //     return (
-  //       <span {...attributes}>
-  //         <MyHashtagGroup choices={element.choices} pollId={element.id?.toString() ?? ''} />
-  //       </span>
-  //     )
-  //   }
-  //   return (
-  //     <button {...attributes} className="inline mR">
-  //       {children}
-  //     </button>
-  //   )
-  // }
-  // if (element.type === 'poll') {
   return (
-    <span {...attributes}>
-      {/* <span style={selected ? undefined : { display: 'none' }}>{children}</span> */}
-
-      {!selected && (
-        <span contentEditable={false}>
-          <PollGroup
-            // bulletId={parent.id}
-            choices={element.choices}
-            pollId={element.id?.toString()}
-            handleShowPopover={b => {
-              setShowPopover(b)
-            }}
-            onCreatePoll={handleCreatePoll}
-            handleClickedIdx={i => {
-              setClickedIdx(i)
-            }}
-            handlePollId={(id: string) => {
-              setPollId(id)
-            }}
-            handlePollData={(data: PollFragment) => {
-              // setPollData(data)
-            }}
-            inline
-          />
-          {/* parent.id = bullet id */}
-          {/* {showPopover && parent.id && (
-            <Popover visible={showPopover} hideBoard={handleHideBoard}>
-              {pollId ? (
-                <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />
-              ) : (
-                <CreatePollForm
-                  choices={element.choices}
-                  handlePollId={(pollId: string) => {
-                    setPollId(pollId)
-                  }}
-                />
-              )}
-            </Popover>
-          )} */}
-        </span>
-      )}
-      {/* <span>{children}</span> */}
-      <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
+    <span {...attributes} className={className} style={style}>
+      {children}
     </span>
   )
 }
-
-const InlineShot = (props: RenderElementProps & { element: InlineShotElement }): JSX.Element => {
-  const editor = useSlateStatic()
-  const selected = useSelected()
-
-  const { children, attributes, element } = props
-  const [showPopover, setShowPopover] = useState(false)
-  // const [shotId, setShotId] = useState(element.id)
-  // const [shotData, setShotData] = useState<ShotFragment | undefined>()
-  // const { data: targetData } = useCardQuery({ variables: { id: shotId } })
-
-  const onShotCreated = (shot: ShotFragment, targetSymbol: string) => {
-    // const editor = useSlateStatic()
-    const path = ReactEditor.findPath(editor, element)
-    const inlineShot = toInlineShotString({
-      id: shot.id,
-      choice: shot.choice,
-      targetSymbol,
-      author: element.authorName ?? '',
-    })
-    Transforms.setNodes<InlineShotElement>(editor, { id: shot.id }, { at: path })
-    Transforms.insertText(editor, inlineShot, { at: path })
-  }
-
-  // console.log(element)
-  // useEffect(() => {
-  //   // if (showPopover && !pollId) {
-  //   //   handleCreatePoll()
-  //   // }
-  //   // console.log(shotData, shotId)
-
-  //   if (!showPopover && !element.id && shotId && shotData) {
-  //     // const queryPollData = async () => {
-  //     //   queryPoll({ variables: { id: pollId } })
-  //     // }
-  //     // queryPollData()
-  //     // queryShot({ variables: { id:shotId } })
-  //     if (shotData) {
-  //       onCreated(shotData)
-  //     }
-  //   }
-  // }, [showPopover, shotData, shotId])
-  return (
-    <span {...attributes}>
-      {/* {!selected && ( */}
-      {/* <button
-            className={classes.shotBtn}
-            contentEditable={false}
-            onClick={e => {
-              e.stopPropagation()
-              setShowPopover(true)
-            }}
-          >
-            {element.params.map((e, i) => {
-              return (
-                <span
-                  className={
-                    e.startsWith('@')
-                      ? classes.shotAuthor
-                      : e.startsWith('$') || e.startsWith('[[')
-                      ? classes.shotTarget
-                      : e.startsWith('#')
-                      ? classes.shotChoice
-                      : ''
-                  }
-                  data-choice={e.startsWith('#') ? e : ''}
-                  key={i}
-                >
-                  {e.startsWith('$') ? '  ' + e + '  ' : e.startsWith('#') ? e.substr(1) : e}
-                </span>
-              )
-            })}
-          </button> */}
-
-      <ShotBtn
-        author={element.params.find(e => e.startsWith('@'))}
-        target={element.params.find(e => e.startsWith('$'))}
-        choice={element.params.find(e => e.startsWith('#'))}
-        handleClick={() => setShowPopover(true)}
-      />
-
-      {showPopover && (
-        <span contentEditable={false}>
-          <Modal visible={showPopover} onClose={() => setShowPopover(false)}>
-            <CreateShotForm
-              initialInput={{
-                author: element.authorName ?? '',
-                target: element.targetSymbol ?? '',
-                choice: element.choice ?? '',
-                link: '',
-              }}
-              onShotCreated={onShotCreated}
-            />
-          </Modal>
-        </span>
-      )}
-      <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
-      {/* <span>{children}</span> */}
-    </span>
-  )
-}
-
-const BulletComponent = ({ bullet }: { bullet: BulletDraft }): JSX.Element => {
-  return (
-    <>
-      <li>{bullet.head}</li>
-      {bullet.children.length > 0 && (
-        <ul>
-          {bullet.children.map((e, i) => (
-            <BulletComponent key={i} bullet={e} />
-          ))}
-        </ul>
-      )}
-    </>
-  )
-}
-
-// const FilterMirror = ({
-//   mirrors,
-//   sourceCardId,
-// }: {
-//   mirrors: InlineMirrorElement[]
-//   sourceCardId?: string
-// }): JSX.Element | null => {
-//   const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
-//   const client = useApolloClient()
-
-//   useEffect(() => {
-//     const asyncRun = async () => {
-//       if (mirrors.length === 1) {
-//         const mirror = mirrors[0]
-//         const { rootLi } = await getLocalOrQueryRoot({ client, mirrorSymbol: mirror.mirrorSymbol })
-//         const rootBulletDraft = Serializer.toRootBulletDraft(rootLi)
-//         const filtered = BulletNode.filter({
-//           node: rootBulletDraft,
-//           match: ({ node }) => node.sourceCardId === sourceCardId,
-//         })
-//         setFilteredBullet(filtered)
-//       }
-//     }
-//     asyncRun().catch(err => {
-//       console.error(err)
-//     })
-//   }, [])
-
-//   if (mirrors.length === 0) {
-//     return null
-//   }
-//   if (mirrors.length > 1) {
-//     return <div>一行只允許一個 mirror</div>
-//   }
-//   if (filteredBullet === undefined) {
-//     return null
-//   }
-//   if (filteredBullet === null) {
-//     return <div>Click to edit</div>
-//   }
-//   return (
-//     <ul className={classes.filterMirrorContainer}>
-//       {/* 忽略 root，從 root children 開始 render */}
-//       {filteredBullet.children.map((e, i) => (
-//         <BulletComponent key={i} bullet={e} />
-//       ))}
-//     </ul>
-//   )
-// }
 
 const Lc = ({
   attributes,
   children,
   element,
-}: // curCardId,
-// sourceLinkId,
-RenderElementProps & {
+}: RenderElementProps & {
   element: LcElement
-  // curCardId?: string
-  // sourceLinkId?: string
 }): JSX.Element => {
   const editor = useSlateStatic()
   const readonly = useReadOnly()
   const focused = useFocused() // 整個editor是否focus
   const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
 
-  // TODO: 改成 lazyQuery + useEffect
-  // const { data: emojiData } = useBulletEmojisQuery({
-  //   fetchPolicy: 'cache-first',
-  //   variables: { bulletId: element.bulletCopy?.id ?? '' },
-  // })
   // const [author, authorSwitcher] = useAuthorSwitcher({ authorName })
   // const [placeholder, setPlaceholder] = useState<string | undefined>()
   // useEffect(() => {
@@ -871,19 +645,6 @@ RenderElementProps & {
   // }, [element])
   // const author = location.author
 
-  // useEffect(() => {
-  //   if (element.op === 'CREATE') {
-  //     let lcPath: number[] | undefined
-  //     if (author && element.author === undefined) {
-  //       lcPath = ReactEditor.findPath(editor, element)
-  //       Transforms.setNodes<LcElement>(editor, { author }, { at: lcPath })
-  //     }
-  //     if (sourceUrl && element.sourceUrl === undefined) {
-  //       Transforms.setNodes<LcElement>(editor, { sourceUrl }, { at: lcPath ?? ReactEditor.findPath(editor, element) })
-  //     }
-  //   }
-  // }, [author, element, sourceUrl])
-  // console.log(element)
   useEffect(() => {
     if (!focused || !selected || readonly) {
       // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
@@ -894,32 +655,21 @@ RenderElementProps & {
     if (selected) {
       // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
       const path = ReactEditor.findPath(editor, element)
-      //   const lcChildren = Node.children(editor, path)
-
-      //   for (const lcChild of lcChildren) {
-      //     if (!Text.isText(lcChild[0]) && (lcChild[0].type === 'poll' || lcChild[0].type === 'shot')) {
-      //       console.log(lcChild)
-      //       Transforms.insertText(editor, lcChild[0].str, { at: lcChild[1] })
-      //       // Transforms.setNodes(editor, { children: [{ text: `${lcChild[0].str}` }] }, { at: lcChild[1] })
-      //       // match:(n,p)=>!Text.isText(n)&&Element.isElement(n)&&isInlineElement(n)
-      //     }
-      //   }
-
       Transforms.unwrapNodes(editor, {
         at: path,
         match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
       })
-      //   // console.log('unwrapNodes', path)
     }
   }, [selected, readonly])
 
   // const mirrors = element.children.filter((e): e is InlineMirrorElement => e.type === 'mirror')
   // console.log(element.bulletCopy?.id)
+
   return (
     <div {...attributes}>
       <div>
         {children}
-        {element.bulletCopy?.id && <BulletPointEmojis bulletId={element.bulletCopy.id} />}
+        {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />}
         {/* // <span contentEditable={false}>
           //   {emojiData.bulletEmojis?.map((e, i) => {
           //     return <BulletPointEmojis key={i} bulletId={e.id} bulletEmojis={e} />
@@ -967,29 +717,21 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
 
   const [lc, ul] = element.children
   const hasUl = ul !== undefined
-  // const href = locationToUrl(location, ReactEditor.findPath(editor, element))
-
-  function onEmojiCreated(emoji: BulletEmojiFragment, myEmojiLike: BulletEmojiLikeFragment) {
-    // const curEmojis = lc.emojis ?? []
-    // const path = ReactEditor.findPath(editor, element)
-    // Transforms.setNodes<LcElement>(editor,  { at: lcPath(path) })
-  }
-  // console.log(lc.emojis)
 
   return (
     <div
       {...attributes}
       className="group relative break-all flex w-full"
-      onMouseOver={event => {
-        event.stopPropagation()
-        event.preventDefault()
-        // setShowPanelIcon(true)
-      }}
-      onMouseOut={event => {
-        event.stopPropagation()
-        event.preventDefault()
-        // setShowPanelIcon(false)
-      }}
+      // onMouseOver={event => {
+      //   event.stopPropagation()
+      //   event.preventDefault()
+      //   // setShowPanelIcon(true)
+      // }}
+      // onMouseOut={event => {
+      //   event.stopPropagation()
+      //   event.preventDefault()
+      //   // setShowPanelIcon(false)
+      // }}
     >
       {/* <div contentEditable={false}></div> */}
       <div className="inline-flex items-center h-8 " contentEditable={false}>
@@ -1059,11 +801,10 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           <BulletSvg />
           {showPanel && lc.bulletCopy?.id && (
             <BulletPanel
-              className={classes.bulletPanel}
+              // className={classes.bulletPanel}
               // tooltipClassName={classes.bulletPanelTooltip}
-              bulletId={lc.bulletCopy?.id}
+              bulletId={lc.bulletCopy.id}
               visible={showPanel}
-              onEmojiCreated={onEmojiCreated}
             />
           )}
         </span>
@@ -1100,8 +841,8 @@ const CustomElement = ({
       return <InlineFiltertag {...{ attributes, children, element }} />
     case 'poll':
       return <InlinePoll {...{ attributes, children, element }} />
-    case 'shot':
-      return <InlineShot {...{ attributes, children, element }} />
+    case 'rate':
+      return <InlineRate {...{ attributes, children, element }} />
     case 'lc':
       return <Lc {...{ attributes, children, element, curCardId: card?.id }} />
     case 'li':
@@ -1114,28 +855,14 @@ const CustomElement = ({
 }
 
 export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
-  const editor = useMemo(() => withParse(withList(withHistory(withReact(createEditor())))), [])
+  const editor = useMemo(() => withInline(withList(withHistory(withReact(createEditor())))), [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, card: doc.cardCopy }} />,
     [doc],
   )
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
-  const renderDecorate = useCallback(([node, path]) => decorate([node, path]), [])
-
-  // const [isPressShift, setIsPressShift] = useState(false)
-  // const withListOnKeyDownMemo = useCallback((event: React.KeyboardEvent) => {
-  //   withListOnKeyDown(event, editor)
-  //   // console.log(editor.children)
-  // }, [])
-
-  // const [searchPanel, onValueChange] = useSearch(editor)
+  const decorateMemo = useCallback(([node, path]) => decorate([node, path]), [])
   const [value, setValue] = useState<LiElement[]>(doc.editorValue ?? [])
-
-  // useEffect(() => {
-  //   // 當 initialValue 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
-  //   Transforms.deselect(editor)
-  //   setValue(initialValue)
-  // }, [initialValue])
 
   useEffect(() => {
     // 當 doc 變動時，重設 editor value @see https://github.com/ianstormtaylor/slate/issues/713
@@ -1143,6 +870,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
     setValue(doc.editorValue ?? [])
   }, [doc])
 
+  // const [searchPanel, onValueChange] = useSearch(editor)
   // useEffect(() => {
   //   if (searchAllResult.data) {
   //     setSuggestions(searchAllResult.data.searchAll)
@@ -1152,24 +880,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
   // }, [searchAllResult])
 
   return (
-    <div
-      className="-ml-7 text-gray-800"
-      // onFocus={e => {
-      //   if (!e.currentTarget.classList.contains(classes.focused)) {
-      //     e.currentTarget.classList.add(classes.focused)
-      //   }
-      //   // if (!context.login) {
-      //   //   context.showLoginPopup(true)
-      //   // }
-      // }}
-      // onBlur={e => {
-      //   e.currentTarget.classList.remove(classes.focused)
-      // }}
-    >
-      {/* <div>
-        @{selfCard.link?.url ?? 'undefined'}; @{location.author ?? 'undefined'}
-      </div> */}
-
+    <div className="-ml-7 text-gray-800">
       <Slate
         editor={editor}
         value={value}
@@ -1188,30 +899,14 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
         }}
       >
         <Editable
-          // style={{ padding: '10px 10px 10px 3.5em' }}
-          // onSelect={e => {
-          //   if (!(window as any).chrome) return
-          //   if (editor.selection == null) return
-          //   try {
-          //     const domPoint = ReactEditor.toDOMPoint(editor, editor.selection.focus)
-          //     const node = domPoint[0]
-          //     if (node == null) return
-          //     const element = node.parentElement
-          //     if (element == null) return
-          //     element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-          //   } catch (e) {
-          //     /**
-          //      * Empty catch. Do nothing if there is an error.
-          //      */
-          //   }
-          // }}
-
+          autoCapitalize="false"
           autoCorrect="false"
           autoFocus={true}
-          decorate={renderDecorate}
+          decorate={decorateMemo}
           // readOnly={readOnly}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
+          spellCheck={false}
           onKeyDown={event => {
             withListOnKeyDown(event, editor)
             // setIsPressShift(event.key === 'Shift')

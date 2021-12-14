@@ -10,12 +10,12 @@
  * https://github.com/vercel/next.js/tree/canary/examples/api-routes-apollo-server-and-client-auth
  */
 import { useApolloClient } from '@apollo/client'
-import { EmailAuthProvider, getAuth, GoogleAuthProvider, signOut, UserCredential } from '@firebase/auth'
+import { EmailAuthProvider, getAuth, GoogleAuthProvider, UserCredential } from '@firebase/auth'
 import firebaseui from 'firebaseui'
 import { useRouter } from 'next/router'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
-import { useMeQuery, useSessionLoginMutation, useSessionLogoutMutation } from '../apollo/query.graphql'
+import { useSessionLoginMutation } from '../apollo/query.graphql'
 import { useFirebaseClient } from '../components/auth/firebase-client'
 
 const LoginPanel = (): JSX.Element | null => {
@@ -26,7 +26,7 @@ const LoginPanel = (): JSX.Element | null => {
   // const { data, loading: loadingMe, error: queryMeError } = useMeQuery()
 
   const [sessionLogin, { loading: loadingSessionLogin }] = useSessionLoginMutation()
-  const [sessionLogout, { loading: loadingSessionLogout }] = useSessionLogoutMutation()
+  // const [sessionLogout, { loading: loadingSessionLogout }] = useSessionLogoutMutation()
 
   const firebaseAuth = getAuth(firebaseClient)
 
@@ -37,20 +37,20 @@ const LoginPanel = (): JSX.Element | null => {
         variables: { idToken },
       })
       if (data?.sessionLogin) {
-        console.log('session logined!')
-        // await router.push('/')
+        // console.log('session logined!')
+        router.back()
+      } else {
+        console.error('session login fail')
       }
     } catch (error) {
       // setErrorMsg(getErrorMessage(error))
-      console.error('error')
+      console.error('session login fail', error)
       // signOut(firebaseAuth)
     }
   }
 
   const handleLogout = async () => {
-    await sessionLogout()
-    await apolloClient.resetStore()
-    console.log('session logout!')
+    // console.log('session logout!')
     router.push('/')
   }
 
@@ -102,7 +102,7 @@ const LoginPanel = (): JSX.Element | null => {
     callbacks: {
       signInSuccessWithAuthResult: (authResult: UserCredential, redirectUrl?: string) => {
         // callback not working for email link sign in, @see
-        console.log('signInSuccessWithAuthResult callback')
+        // console.log('signInSuccessWithAuthResult callback')
         // const idToken = await authResult.user.getIdToken()
         authResult.user.getIdToken().then(idToken => {
           // AuthService.sessionLogin(idToken)
@@ -112,7 +112,7 @@ const LoginPanel = (): JSX.Element | null => {
       },
     },
   }
-  if (loadingFirebaseUser || loadingSessionLogin || loadingSessionLogout) {
+  if (loadingFirebaseUser || loadingSessionLogin) {
     return null
   }
   if (queryFirebaseUserError) {
@@ -136,7 +136,7 @@ const LoginPanel = (): JSX.Element | null => {
   // sessionLogout()
   // }
   if (user) {
-    console.log(user)
+    // console.log(user)
     // console.log(router.query)
     // if (router.query.mode === 'signIn') {
     //   if (getCookie('session') === null) {
@@ -174,10 +174,18 @@ const LoginPanel = (): JSX.Element | null => {
         <button
           onClick={() => {
             // AuthService.sessionLogout()
-            handleLogout()
+            router.back()
           }}
         >
-          logout
+          Return
+        </button>
+        <button
+          onClick={() => {
+            // AuthService.sessionLogout()
+            router.push('/')
+          }}
+        >
+          Home
         </button>
       </div>
     )

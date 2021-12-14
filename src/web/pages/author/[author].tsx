@@ -8,7 +8,6 @@ import { getNavLocation, locationToUrl, NavLocation } from '../../components/edi
 import Layout from '../../components/layout/layout'
 
 import { useCreateVoteMutation, useMeQuery } from '../../apollo/query.graphql'
-import { parseChildren } from '../../components/editor/with-parse'
 import classes from '../../style/authorPage.module.scss'
 import Popover from '../../components/popover/popover'
 import { useUser } from '@auth0/nextjs-auth0'

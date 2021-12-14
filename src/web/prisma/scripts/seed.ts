@@ -1,13 +1,13 @@
 import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
-import { Author, Card, CardState, Link, PrismaClient, Shot, ShotChoice, Sym } from '.prisma/client'
+import { Author, Card, CardState, Link, PrismaClient, Rate, RateChoice, Sym } from '.prisma/client'
 import { TreeService } from '../../../packages/docdiff/src'
 import { Editor as MKEditor, Markerline, splitByUrl } from '../../../packages/editor/src'
 import { FetchClient } from '../../lib/fetcher/fetcher'
 import { CardMeta, CardModel } from '../../lib/models/card'
 import { TestDataHelper, TESTUSERS } from '../../test/test-helpers'
-import { ShotBody, ShotModel } from '../../lib/models/shot'
+import { RateBody, RateModel } from '../../lib/models/rate'
 import { CommitModel } from '../../lib/models/commit'
 import { CardStateBody, CardStateParsed } from '../../lib/models/card-state'
 import { MKDoc } from './mk-doc'
@@ -28,9 +28,9 @@ const scraper = new FetchClient(resolve(process.cwd(), process.argv[2], '_local-
 const prisma = new PrismaClient({ errorFormat: 'pretty' })
 
 const NEAT_REPLY_CHOICE = [
-  { options: ['<BUY>', '<B>', '<買>', '<LONG>', '<L>', '<多>', '<看多>'], choiceIdx: 0, shotChoice: ShotChoice.LONG },
-  { options: ['<SELL>', '<S>', '<買>', '<SHORT>', '<空>', '<看空>'], choiceIdx: 1, shotChoice: ShotChoice.SHORT },
-  { options: ['<觀望>'], choiceIdx: 2, shotChoice: ShotChoice.HOLD },
+  { options: ['<BUY>', '<B>', '<買>', '<LONG>', '<L>', '<多>', '<看多>'], choiceIdx: 0, rateChoice: RateChoice.LONG },
+  { options: ['<SELL>', '<S>', '<買>', '<SHORT>', '<空>', '<看空>'], choiceIdx: 1, rateChoice: RateChoice.SHORT },
+  { options: ['<觀望>'], choiceIdx: 2, rateChoice: RateChoice.HOLD },
 ]
 
 async function getNeatReply({
@@ -46,7 +46,7 @@ async function getNeatReply({
   symbol: string
   userId: string
 }): Promise<
-  Shot & {
+  Rate & {
     author: Author
     sym: Sym
   }
@@ -62,39 +62,39 @@ async function getNeatReply({
   // 取得並檢查choice-index
   const choice = neatReply.pollChoices[0]
   let choiceIdx: number | undefined
-  let shotChoice: ShotChoice | undefined
+  let rateChoice: RateChoice | undefined
   for (const e of NEAT_REPLY_CHOICE) {
     if (e.options.indexOf(choice) >= 0) {
       choiceIdx = e.choiceIdx
-      shotChoice = e.shotChoice
+      rateChoice = e.rateChoice
       break
     }
   }
-  if (choiceIdx === undefined || shotChoice === undefined) {
+  if (choiceIdx === undefined || rateChoice === undefined) {
     console.error(neatReply)
     throw new Error('所給的 vote choice 非預設的那幾個')
   }
 
-  // 創 shot
-  const shotBody: ShotBody = {
+  // 創 rate
+  const rateBody: RateBody = {
     comment: neatReply.str,
   }
-  const shot = await ShotModel.create({
-    choice: shotChoice,
+  const rate = await RateModel.create({
+    choice: rateChoice,
     symbol,
     userId,
     authorId,
-    body: shotBody,
+    body: rateBody,
     linkId,
   })
 
-  if (shot.author) {
+  if (rate.author) {
     return {
-      ...shot,
-      author: shot.author,
+      ...rate,
+      author: rate.author,
     }
   }
-  throw 'shot must have an author'
+  throw 'rate must have an author'
 
   // auther 的 comment 併入 node children
   // const child: BulletDraft = {
@@ -195,31 +195,31 @@ const main = async () => {
         // }
         // console.log(mirrorDoc)
 
-        let inlineShotStr = ''
+        let inlineRateStr = ''
         const neatReplies = markerlines.filter(e => e.neatReply)
         if (neatReplies.length > 1) {
           console.warn(inspect(neatReplies, { depth: null }))
           throw '[conote-seed] neatReplies.length > 1'
         } else if (neatReplies.length === 1) {
           if (webpageCard.link.authorId && webpageCard.linkId) {
-            const shot = await getNeatReply({
+            const rate = await getNeatReply({
               authorId: webpageCard.link.authorId,
               neatReply: neatReplies[0],
               linkId: webpageCard.linkId,
               symbol: mirrorSymbol,
               userId: TESTUSERS[0].id,
             })
-            inlineShotStr = ShotModel.toInlineShotString({
-              author: shot.author.name,
-              choice: shot.choice,
-              symbol: shot.sym.symbol,
-              id: shot.id,
+            inlineRateStr = RateModel.toInlineRateString({
+              author: rate.author.name,
+              choice: rate.choice,
+              symbol: rate.sym.symbol,
+              id: rate.id,
             })
           }
         }
 
         // 在 root 上新增 mirror & shot (if any)
-        const bt = doc.createBullet({ head: `::${mirrorSymbol} ${inlineShotStr}` })
+        const bt = doc.createBullet({ head: `::${mirrorSymbol} ${inlineRateStr}` })
         // const bt = doc.createBullet({ head: `::${mirrorSymbol} {{inlineShotStr}}` })
         doc.insertBullet(bt, TreeService.tempRootCid)
       }

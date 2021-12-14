@@ -14,7 +14,6 @@ import classes from '../../style/symbol.module.scss'
 import CardMetaForm from '../../components/card-meta-form/card-meta-form'
 import LinkIcon from '../../assets/svg/link.svg'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
-import NavPath from '../../components/nav-path/nav-path'
 import Modal from '../../components/modal/modal'
 import Account from '../account'
 import LoginPage from '../login'
@@ -25,12 +24,6 @@ const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; 
   const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
   const [cardMetaSubmitted, setCardMetaSubmitted] = useState(false)
   const hiddenBtnRef = useRef<HTMLDivElement>(null)
-
-  // useEffect(()=>{
-  //   if(window){
-  //     window.addEventListener('mo')
-  //   }
-  // },[])
 
   const handleCardMetaSubmitted = () => {
     setCardMetaSubmitted(true)
@@ -271,14 +264,10 @@ const CardSymbolPage = (): JSX.Element | null => {
   useEffect(() => {
     if (router.isReady) {
       const path = DocPathService.fromURLQuery(router.query)
-
-      console.log(path)
-
       setDocPath(path)
 
-      console.log(path)
-
       const { symbol, sourceCardId } = path
+
       queryCard({ variables: { symbol } })
       if (sourceCardId) {
         querySourceCard({ variables: { id: sourceCardId } })
@@ -297,6 +286,9 @@ const CardSymbolPage = (): JSX.Element | null => {
   if (card.data === undefined || (docPath.sourceCardId && sourceCard.data === undefined)) {
     return <div>Unexpected error</div>
   }
+
+  console.log(card)
+
   return (
     <>
       <Layout

@@ -1,28 +1,25 @@
-import { serialize, parse } from 'cookie'
-import { NextApiRequest, NextApiResponse } from 'next'
+import { inspect } from 'util'
 import { AuthenticationError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
 // import { getSession } from '@auth0/nextjs-auth0'
-import { auth } from 'firebase-admin'
-import { DecodedIdToken } from 'firebase-admin/auth'
 import { BulletEmoji, BulletEmojiCount, CardEmoji, CardEmojiCount } from '.prisma/client'
 import prisma from '../lib/prisma'
 import fetcher from '../lib/fetcher'
 import { QueryResolvers, MutationResolvers } from 'graphql-let/__generated__/__types__'
 import { hasCount, toStringId } from '../lib/helpers'
+import { BulletEmojiModel } from '../lib/models/bullet-emoji'
 import { CardMeta, CardModel } from '../lib/models/card'
+import { CardDigestModel } from '../lib/models/card-digest'
+import { CardEmojiModel } from '../lib/models/card-emoji'
+import { CardStateModel } from '../lib/models/card-state'
+import { CommitModel } from '../lib/models/commit'
+import { PollMeta } from '../lib/models/poll'
+import { RateModel } from '../lib/models/rate'
 import { getOrCreateUser } from '../lib/models/user'
 import { createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
-import { PollMeta } from '../lib/models/poll'
-import { ShotModel } from '../lib/models/shot'
+import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import { ResolverContext } from './apollo-client'
-import { CardStateModel } from '../lib/models/card-state'
-import { BulletEmojiModel } from '../lib/models/bullet-emoji'
-import { CardEmojiModel } from '../lib/models/card-emoji'
-import { CommitModel } from '../lib/models/commit'
-import { CardDigestModel } from '../lib/models/card-digest'
-import { getFirebaseAdmin } from '../lib/auth/firebase-admin'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -61,92 +58,6 @@ import { getFirebaseAdmin } from '../lib/auth/firebase-admin'
 //   }
 //   throw new AuthenticationError('Not authenticated')
 // }
-
-const TOKEN_NAME = 'session'
-
-getFirebaseAdmin()
-
-const isAuthenticated = async (req: NextApiRequest): Promise<{ userId: string; email: string }> => {
-  try {
-    // const session = await getLoginSession(req)
-    // if (session) {
-    //   return findUser({ email: session.email })
-    // }
-    const sessionCookie = req.cookies[TOKEN_NAME] || ''
-    const decodedClaims = await auth().verifySessionCookie(sessionCookie, true)
-
-    if (decodedClaims.email === undefined) {
-      throw new AuthenticationError('Require email')
-    }
-    return {
-      email: decodedClaims.email,
-      userId: decodedClaims.uid,
-    }
-  } catch (error) {
-    console.log(error)
-    throw new AuthenticationError('Not authenticated')
-  }
-}
-
-const sessionLogin = async (req: NextApiRequest, res: NextApiResponse, idToken: string): Promise<DecodedIdToken> => {
-  // Get ID token and CSRF token.
-  // const idToken = req.body.idToken.toString()
-  // const csrfToken = req.body.csrfToken.toString()
-  // console.log('idToken', idToken)
-
-  // Guard against CSRF attacks.
-  // if (!req.cookies || csrfToken !== req.cookies.csrfToken) {
-  //   res.status(401).send('UNAUTHORIZED REQUEST!')
-  //   return
-  // }
-
-  // setLoginSession()
-
-  // Set session expiration to 5 days.
-  const expiresIn = 60 * 60 * 24 * 5 * 1000
-  // Create the session cookie. This will also verify the ID token in the process.
-  // The session cookie will have the same claims as the ID token.
-  // We could also choose to enforce that the ID token auth_time is recent.
-  const decodedClaims = await auth().verifyIdToken(idToken)
-
-  // In this case, we are enforcing that the user signed in in the last 5 minutes.
-  if (new Date().getTime() / 1000 - decodedClaims.auth_time < 5 * 60) {
-    const sessionToken = await auth().createSessionCookie(idToken, { expiresIn })
-    // console.log(sessionToken)
-    // res.setHeader('Set-Cookie', sessionCookie)
-    // res.end(JSON.stringify({ status: 'success' }))
-
-    const cookie = serialize(TOKEN_NAME, sessionToken, {
-      expires: new Date(Date.now() + expiresIn),
-      httpOnly: true,
-      maxAge: expiresIn / 1000,
-      path: '/',
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    })
-    res.setHeader('Set-Cookie', cookie)
-
-    return decodedClaims
-  }
-  throw new AuthenticationError('Not authenticated')
-}
-
-const sessionLogout = async (req: NextApiRequest, res: NextApiResponse) => {
-  const sessionCookie = req.cookies[TOKEN_NAME] || ''
-
-  if (sessionCookie.length > 0) {
-    const decodedClaims = await auth().verifySessionCookie(sessionCookie, true)
-    auth().revokeRefreshTokens(decodedClaims.sub) // revoke token
-  }
-
-  // Clear cookie
-  const cookie = serialize(TOKEN_NAME, '', {
-    maxAge: -1,
-    path: '/',
-    sameSite: 'lax',
-  })
-  res.setHeader('Set-Cookie', cookie)
-}
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
   async author(_parent, { id, name }, _context, _info) {
@@ -192,17 +103,13 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async card(_parent, { id, symbol, url }, _context, _info) {
-    console.log(id, symbol, url)
-    if (id) {
+    if (id && symbol === undefined && url === undefined) {
       return await CardModel.get(id)
     }
-    if (symbol) {
-      // return await CardModel.getBySymbol(symbol)
-      const card = await CardModel.getBySymbol(symbol)
-      console.log(card)
-      return card
+    if (symbol && id === undefined && url === undefined) {
+      return await CardModel.getBySymbol(symbol)
     }
-    if (url) {
+    if (url && id === undefined && symbol === undefined) {
       return await CardModel.getOrCreateByUrl({ scraper: fetcher, url })
     }
     throw 'Param requires to be either id, symbol or url'
@@ -260,7 +167,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     throw 'Param requires either id or url'
   },
 
-  async me(_parent, _args, { req, res }, _info) {
+  async me(_parent, _args, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     // const user = await getOrCreateUser(uid, email)
     // await prisma.user.findUnique({ where: { id: userId } })
@@ -273,7 +180,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return user
   },
 
-  async myBulletEmojiLike(_parent, { bulletEmojiId }, { req, res }, _info) {
+  async myBulletEmojiLike(_parent, { bulletEmojiId }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const like = await prisma.bulletEmojiLike.findUnique({
       where: {
@@ -283,7 +190,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return like ? toStringId(like) : null
   },
 
-  async myCardEmojiLike(_parent, { cardEmojiId }, { req, res }, _info) {
+  async myCardEmojiLike(_parent, { cardEmojiId }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const like = await prisma.cardEmojiLike.findUnique({
       where: {
@@ -293,18 +200,18 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return like ? toStringId(like) : null
   },
 
-  async myShots(_parent, { symId }, { req, res }, _info) {
-    throw 'Not implemented'
-    // const { userId } = isAuthenticated(req, res)
-    // const shots = await prisma.shot.findMany({
-    //   where: {
-    //     AND: { targetId, userId },
-    //   },
-    // })
-    // return shots
+  async myRates(_parent, { symId }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const rates = await prisma.rate.findMany({
+      where: {
+        AND: { symId, userId },
+      },
+      orderBy: { updatedAt: 'desc' },
+    })
+    return rates
   },
 
-  async myVotes(_parent, { pollId }, { req, res }, _info) {
+  async myVotes(_parent, { pollId }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const votes = await prisma.vote.findMany({
       where: {
@@ -341,29 +248,29 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     throw 'Not implemented yet.'
   },
 
-  async shot(_parent, { id }, _context, _info) {
-    return await prisma.shot.findUnique({
+  async rate(_parent, { id }, _context, _info) {
+    return await prisma.rate.findUnique({
       where: { id },
     })
   },
 
-  async shotsBySource(_parent, { linkId }, _context, _info) {
-    const shot = await prisma.shot.findMany({
+  async ratesBySource(_parent, { linkId }, _context, _info) {
+    const rate = await prisma.rate.findMany({
       where: { linkId },
       orderBy: { updatedAt: 'desc' },
       // cursor: afterId ? { id: afterId } : undefined,
       // take: 10,
       // skip: afterId ? 1 : 0,
     })
-    return shot
+    return rate
   },
 
-  async shotsByAuthor(_parent, { authorId, symId }, _context, _info) {
-    const shot = await prisma.shot.findMany({
+  async ratesByAuthor(_parent, { authorId, symId }, _context, _info) {
+    const rates = await prisma.rate.findMany({
       where: { AND: { authorId, symId } },
       orderBy: { updatedAt: 'desc' },
     })
-    return shot
+    return rates
   },
 
   // tagHints: (parent, { term }, { prisma }) => {
@@ -596,8 +503,9 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 }
 
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
-  async createBulletEmoji(_parent, { bulletId, code }, { req, res }, _info) {
+  async createBulletEmoji(_parent, { bulletId, code }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
+
     const { emoji, like } = await BulletEmojiModel.create({ bulletId, code, userId })
     return {
       emoji: {
@@ -608,7 +516,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async upsertBulletEmojiLike(_parent, { bulletEmojiId, data }, { req, res }, _info) {
+  async upsertBulletEmojiLike(_parent, { bulletEmojiId, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { like, count } = await BulletEmojiModel.upsertLike({
       choice: data.choice,
@@ -621,7 +529,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async createCardEmoji(_parent, { cardId, code }, { req, res }, _info) {
+  async createCardEmoji(_parent, { cardId, code }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { emoji, like } = await CardEmojiModel.create({ cardId, code, userId })
     return {
@@ -633,7 +541,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async upsertCardEmojiLike(_parent, { cardEmojiId, data }, { req, res }, _info) {
+  async upsertCardEmojiLike(_parent, { cardEmojiId, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { like, count } = await CardEmojiModel.upsertLike({
       choice: data.choice,
@@ -646,7 +554,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async updateCardMeta(_parent, { cardId, data }, { req, res }, _info) {
+  async updateCardMeta(_parent, { cardId, data }, { req }, _info) {
     await isAuthenticated(req)
     const card = await prisma.card.update({
       where: { id: cardId },
@@ -658,12 +566,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return meta
   },
 
-  async createCommit(_parent, { data }, { req, res }, _info) {
+  async createCommit(_parent, { data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     return await CommitModel.create(data, userId)
   },
 
-  async createPoll(_parent, { data }, { req, res }, _info) {
+  async createPoll(_parent, { data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const poll = await prisma.poll.create({
       data: {
@@ -682,8 +590,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     throw 'Database internal error'
   },
 
-  async createShot(_parent, { data }, { req, res }, _info) {
-    // throw 'Not implemented yet.'
+  async createRate(_parent, { data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { choice, targetId, authorId, linkId } = data
 
@@ -694,14 +601,14 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     if (card === null) {
       throw 'Target card not found'
     }
-    return await ShotModel.create({ choice, symbol: card.sym.symbol, userId, authorId, linkId })
+    return await RateModel.create({ choice, symbol: card.sym.symbol, userId, authorId, linkId })
   },
 
-  async updateShot(_parent, { id, data }, { req, res }, _info) {
+  async updateRate(_parent, { id, data }, { req }, _info) {
     throw 'Not implemented yet.'
   },
 
-  async createVote(_parent, { pollId, data }, { req, res }, _info) {
+  async createVote(_parent, { pollId, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const vote = await createVote({
       choiceIdx: data.choiceIdx,

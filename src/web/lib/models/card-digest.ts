@@ -1,6 +1,6 @@
 import { CardDigest as GQLCardDigest } from 'graphql-let/__generated__/__types__'
 import { NodeChange } from '../../../packages/docdiff/src'
-import { Bullet } from '../../components/bullet/types'
+import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
 import { CardModel, CardPrarsed } from './card'
 import { CardStateModel } from './card-state'

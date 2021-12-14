@@ -1,114 +1,54 @@
-import React, { ReactElement, useRef, useState } from 'react'
+import React, { useRef } from 'react'
 import { EmojiCode } from 'graphql-let/__generated__/__types__'
+import { BulletEmojiFragment } from '../../apollo/query.graphql'
+import BulletEmojiCreateButton from '../emoji-up-down/bullet-emoji-create-button'
 import MyTooltip from '../my-tooltip/my-tooltip'
-import BulletPanelSvg from './bullet-panel-svg'
-import SrcIcon from '../../assets/svg/foreign.svg'
 import classes from './bullet-panel.module.scss'
-import PinIcon from '../../assets/svg/like.svg'
-import UpIcon from '../../assets/svg/arrow-up.svg'
-import BulletPanelEmojis from '../emoji-up-down/bullet-panel-emojis'
-import { BulletEmojiFragment, BulletEmojiLikeFragment } from '../../apollo/query.graphql'
 
-interface Child {
-  icon?: SVGComponentTransferFunctionElement | SVGElement | Element | string | ReactElement
-  text?: string | React.ReactNode
-  emojiCode?: EmojiCode
-  sourceUrl?: string
-  authorName?: string
-}
-
-export interface BulletPanelType {
-  bulletId?: string
-  children?: Child[]
-  visible?: boolean
-  handleVisibleState?: (state: boolean) => void
-  className?: string
-  tooltipClassName?: string
-  sourceUrl?: string
-  authorName?: string
-  onEmojiCreated: (emoji: BulletEmojiFragment, myEmojiLike: BulletEmojiLikeFragment) => void
-  emoji?: BulletEmojiFragment[]
-}
+const BULLET_PANEL_EMOJIS: EmojiCode[] = ['UP', 'DOWN']
 
 const BulletPanel = ({
-  children,
-  visible,
-  handleVisibleState,
-  className,
-  sourceUrl,
   authorName,
   bulletId,
-  onEmojiCreated,
-  emoji,
-  tooltipClassName,
-}: BulletPanelType): JSX.Element => {
+  className,
+  sourceUrl,
+  visible,
+}: {
+  authorName?: string
+  bulletId?: string
+  className?: string
+  sourceUrl?: string
+  emoji?: BulletEmojiFragment[]
+  visible?: boolean
+  // onEmojiCreated: (emoji: BulletEmojiFragment, myEmojiLike: BulletEmojiLikeFragment) => void
+}): JSX.Element => {
   // const [showPanel, setShowPanel] = useState<boolean>(false)
   const containerRef = useRef<HTMLDivElement>(null)
-
-  const myChildren: Child[] = []
-  if (authorName) {
-    myChildren.unshift({ authorName: '@' + authorName.split(':')[0] })
-  }
-  if (bulletId) {
-    // myChildren.push(
-    //   {
-    //     // icon: <span className="material-icons-outlined">favorite_border</span>,
-    //     emojiCode: 'PIN',
-    //     text: 'Pin',
-    //   },
-    //   {
-    //     // icon: <UpIcon />,
-    //     emojiCode: 'UP',
-    //     text: 'Up',
-    //   },
-    //   {
-    //     // icon: <UpIcon style={{ transform: 'rotate(180deg)' }} />,
-    //     emojiCode: 'DOWN',
-    //     text: 'Down',
-    //   },
-    // )
-  }
-  if (sourceUrl) {
-    myChildren.push({ icon: <SrcIcon />, text: '來源連結', sourceUrl })
-  }
-
-  const handleShowPanel = (state: boolean) => {
-    // setShowPanel(state)
-  }
   return (
     <div className={`absolute h-full -left-full ${className ? className : ''}`} ref={containerRef}>
       <MyTooltip
-        className={`${classes.panelTooltip} ${tooltipClassName ? tooltipClassName : ''}`}
+        className={`${classes.panelTooltip}`}
         visible={visible}
-        handleVisibleState={handleShowPanel}
+        // handleVisibleState={handleShowPanel}
       >
-        {myChildren.map((e, i) => {
-          if (e.authorName)
-            return (
-              <div key={i} className={classes.titleContainer}>
-                <div className={` ${classes.title}`}>{e.authorName}</div>
-                <div role="none" className={classes.divider}></div>
-              </div>
-            )
-          if (e.sourceUrl)
-            return (
-              <div className={classes.panelElement} key={i}>
-                <a className="ui" href={e.sourceUrl} target="_blank" rel="noreferrer">
-                  <span className={classes.panelIcon}>{e.icon}</span>
-                  {e.text}
-                </a>
-              </div>
-            )
-
-          // return (
-          //   <div className={classes.panelElement} key={i}>
-          //     <span className={classes.panelIcon}>{e.icon}</span>
-
-          //     {e.text}
-          //   </div>
-          // )
-        })}
-        {bulletId && <BulletPanelEmojis bulletId={bulletId} />}
+        {authorName && (
+          <div className={classes.titleContainer}>
+            <div className={`${classes.title}`}>{authorName}</div>
+            <div role="none" className={classes.divider}></div>
+          </div>
+        )}
+        {sourceUrl && (
+          <div className={classes.panelElement}>
+            <a className="ui" href={sourceUrl} target="_blank" rel="noreferrer">
+              {/* <span className={classes.panelIcon}>{e.icon}</span> */}
+              來源連結
+            </a>
+          </div>
+        )}
+        {bulletId &&
+          BULLET_PANEL_EMOJIS.map((e, i) => (
+            <BulletEmojiCreateButton bulletId={bulletId} className={classes.bulletPanelBtn} emojiCode={e} key={i} />
+          ))}
       </MyTooltip>
     </div>
   )
