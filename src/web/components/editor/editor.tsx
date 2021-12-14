@@ -31,7 +31,7 @@ import {
   CardFragment,
 } from '../../apollo/query.graphql'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
-import { tokenizeBulletString } from '../bullet/parser'
+import { decorationTokenizer, tokenizeBulletString } from '../bullet/parser'
 import { Bullet, BulletDraft, RootBulletDraft, toInlinePoll, toInlineShotString } from '../bullet/types'
 import BulletPanel from '../bullet-panel/bullet-panel'
 import BulletSvg from '../bullet-svg/bullet-svg'
@@ -131,7 +131,7 @@ const decorate = ([node, path]: NodeEntry) => {
     return ranges
   }
   // const tokens = tokenize(Node.string(node), LINE_VALUE_GRAMMAR)
-  const tokens = tokenizeBulletString(Node.string(node))
+  const tokens = decorationTokenizer(Node.string(node))
   let start = 0
 
   for (const token of tokens) {
@@ -139,43 +139,41 @@ const decorate = ([node, path]: NodeEntry) => {
     const end = start + length
 
     if (typeof token !== 'string') {
-      if (token.type === 'topic') {
-        ranges.push({
-          type: token.type,
-          anchor: { path, offset: start },
-          focus: { path, offset: end },
-        })
-        ranges.push({
-          type: 'topic-bracket',
-          anchor: { path, offset: start },
-          focus: { path, offset: start + 2 },
-        })
-        ranges.push({
-          type: 'topic-bracket',
-          anchor: { path, offset: end - 2 },
-          focus: { path, offset: end },
-        })
-      } else if (token.type === 'mirror-topic') {
-        const bracketMatches = Node.string(node).matchAll(/\[\[|\]\]/g)
-
-        ranges.push({
-          type: token.type,
-          anchor: { path, offset: start },
-          focus: { path, offset: end },
-        })
-        for (const match of bracketMatches) {
-          if (match.index) {
-            ranges.push({
-              type: 'mTopic-bracket',
-              anchor: { path, offset: match.index },
-              focus: { path, offset: match.index + 2 },
-            })
+      if (token.type === 'topic' || token.type === 'mirror-topic') {
+        let tokenOffset = 0
+        if (Array.isArray(token.content)) {
+          for (const content of token.content.entries()) {
+            if (typeof content[1] === 'string') {
+              ranges.push({
+                leafType: token.type,
+                anchor: { path, offset: tokenOffset },
+                focus: { path, offset: tokenOffset + content[1].length },
+              })
+            } else if (typeof content[1] !== 'string' && content[1].type === 'punctuation') {
+              ranges.push({
+                leafType: 'punctuation',
+                anchor: { path, offset: tokenOffset },
+                focus: { path, offset: tokenOffset + content[1].length },
+              })
+            }
+            tokenOffset = tokenOffset + content[1].length
           }
         }
+        // ranges.push({
+        //   leafType: 'topic-bracket',
+        //   anchor: { path, offset: start },
+        //   focus: { path, offset: start + 2 },
+        // })
+        // ranges.push({
+        //   leafType: 'topic-bracket',
+        //   anchor: { path, offset: end - 2 },
+        //   focus: { path, offset: end },
+        // })
       } else {
+        // console.log(token)
         ranges.push({
           // [token.type]: true,
-          type: token.type,
+          leafType: token.type,
           anchor: { path, offset: start },
           focus: { path, offset: end },
         })
@@ -272,72 +270,75 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   //   }
   // } else {
   if (selected) {
-    switch (leaf.type) {
+    switch (leaf.leafType) {
       case 'mirror-ticker':
-      case 'mirror-topic':
-      case 'mTopic-bracket': {
-        className = classes.mirrorLeaf
+      case 'mirror-topic': {
+        className = 'text-blue-500 '
+        break
+      }
+      case 'punctuation': {
+        className = 'text-blue-500'
         // style = { color: '#5395f0' }
         break
       }
       case 'author': {
-        style = { color: '#0cb26e' }
+        className = 'text-green-500'
         break
       }
       case 'poll':
       case 'new-poll': {
-        style = { color: '#329ead' }
+        className = 'text-cyan-500'
         break
       }
       case 'shot':
       case 'new-shot': {
-        style = { color: 'rgb(215 159 29)' }
+        className = 'text-yellow-500'
         break
       }
       case 'ticker':
       case 'topic-bracket':
       case 'topic': {
-        className = classes.topicLeaf
+        className = 'text-pink-500'
 
         // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
         break
       }
       case 'filtertag': {
-        className = classes.filtertagLeaf
-        style = { color: '#6a53fe' }
+        className = 'text-purple-500'
+
         break
       }
       case 'url': {
-        style = { color: '#ff619b' }
+        className = 'text-sky-500'
         break
       }
       default: {
-        style = { color: '#3d434a' }
+        className = 'text-gray-600'
       }
     }
   } else {
-    switch (leaf.type) {
+    switch (leaf.leafType) {
       case 'mirror-ticker':
       case 'mirror-topic':
       case 'topic':
       case 'ticker': {
-        className = classes.mirrorLeaf
+        className = 'text-blue-500'
         // style = { color: '#5395f0' }
         break
       }
-      case 'mTopic-bracket':
-      case 'topic-bracket': {
-        style = { color: '#b5b5b3' }
+
+      case 'punctuation': {
+        className = 'text-gray-400'
         break
       }
 
       case 'author':
       case 'url': {
-        style = { color: '#0cb26e' }
+        className = 'text-green-500'
         break
       }
       case 'filtertag': {
-        style = { color: '#3f70de' }
+        className = 'text-purple-500'
       }
     }
   }
@@ -354,21 +355,20 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       //   e.preventDefault
       // }}
 
-      ref={e => {
-        if (
-          leaf.type === 'ticker' ||
-          leaf.type === 'topic' ||
-          leaf.type === 'mirror-ticker' ||
-          leaf.type === 'mirror-topic' ||
-          leaf.type === 'filtertag' ||
-          leaf.type === 'topic-bracket' ||
-          leaf.type === 'mTopic-bracket'
-        ) {
-          if (e) {
-            e.onselectstart = () => false
-          }
-        }
-      }}
+      // ref={e => {
+      //   if (
+      //     leaf.type === 'ticker' ||
+      //     leaf.type === 'topic' ||
+      //     leaf.type === 'mirror-ticker' ||
+      //     leaf.type === 'mirror-topic' ||
+      //     leaf.type === 'filtertag' ||
+      //     leaf.type === 'punctuation'
+      //   ) {
+      //     if (e) {
+      //       e.onselectstart = () => false
+      //     }
+      //   }
+      // }}
     >
       {/* {leaf.text} */}
       {children}
@@ -421,7 +421,7 @@ const InlineSymbol = ({
   // const selected = useSelected()
   // console.log(element)
   return (
-    <span {...attributes} className={classes.symbolContainer}>
+    <span {...attributes} className="text-blue-500 hover:cursor-pointer hover:shadow-underline hover:shadow-blue-500">
       {/* <span contentEditable={false}> */}
       {/* <Link href={`/card/${encodeURI(element.symbol)}`}> */}
       {/* <a
@@ -439,7 +439,7 @@ const InlineSymbol = ({
           // e.preventDefault()
           // e.stopPropagation()
           // router.push(`/card/${encodeURIComponent(element.symbol)}`)
-          console.log('hi~')
+          // console.log('hi~')
           setShowPopover(true)
         }}
       >
@@ -994,7 +994,9 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
       {/* <div contentEditable={false}></div> */}
       <div className="inline-flex items-center h-8 " contentEditable={false}>
         <span
-          className={`flex items-center justify-center flex-shrink-0 flex-grow-0 cursor-pointer opacity-0 group-hover:opacity-100`}
+          className={`flex items-center justify-center flex-shrink-0 flex-grow-0 opacity-0 ${
+            hasUl ? 'opacity-100' : 'opacity-0 select-none'
+          }`}
           onClick={event => {
             // 設定 folded property
             event.preventDefault()
@@ -1012,7 +1014,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           }}
         >
           <ArrowUpIcon
-            className={` w-2 h-2 fill-current text-gray-500 ${hasUl ? 'opacity-1' : 'opacity-0'}`}
+            className={` w-2 h-2 fill-current text-gray-500 `}
             style={{ transform: ulFolded === undefined ? 'rotate(180deg)' : 'rotate(90deg)' }}
           />
         </span>

@@ -24,7 +24,7 @@ const ShotBtn = ({
       <span className={classes.left}>
         {author && <span className={classes.author}>{author}</span>}
 
-        <span className={classes.target}>·{target}</span>
+        {choice && <span className={classes.target}>·{target}</span>}
       </span>
       <span
         className={`${classes.choice} ${

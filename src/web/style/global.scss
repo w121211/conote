@@ -16,7 +16,14 @@
   h1 {
     @apply text-3xl font-bold text-gray-700;
   }
+  h5 {
+    @apply text-sm font-bold text-gray-700;
+  }
+  .input {
+    @apply block w-full mt-2 mb-4 p-2 rounded-md text-sm text-gray-500 bg-gray-100 leading-loose;
+  }
 }
+
 // @font-face {
 //   font-family: 'jf-openhuninn-1.1';
 //   src: url('../font/jf-openhuninn-1.1.ttf') format('truetype');

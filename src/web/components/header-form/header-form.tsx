@@ -209,9 +209,8 @@ const HeaderForm = ({
 
   return (
     <FormProvider {...methods}>
-      <div className={classes.formContainer}>
+      <div className="w-[90%] my-4 mx-auto sm:w-[50vw]">
         <form
-          className={classes.form}
           onSubmit={handleSubmit(onSubmit)}
           // onChange={() => {
           //   setSubmitDisable(false)
@@ -225,15 +224,15 @@ const HeaderForm = ({
           {/* <div className={classes.section}> */}
           <label>
             <h5>標題</h5>
-            <input {...register('title')} type="text" placeholder="標題" />
+            <input {...register('title')} type="text" placeholder="標題" className="input" />
           </label>
           <label>
             <h5>作者</h5>
-            <input {...register('author')} type="text" placeholder="來源作者" />
+            <input {...register('author')} type="text" placeholder="來源作者" className="input" />
           </label>
           <label>
             <h5>網址</h5>
-            <input {...register('url')} type="text" placeholder="來源網址" />
+            <input {...register('url')} type="text" placeholder="來源網址" className="input" />
           </label>
           <label>
             <h5>Keywords</h5>
@@ -259,11 +258,11 @@ const HeaderForm = ({
           </label>
           <label>
             <h5>Redirects</h5>
-            <input {...register('redirects')} type="text" placeholder="請使用 '空格' 分隔" />
+            <input {...register('redirects')} type="text" placeholder="請使用 '空格' 分隔" className="input" />
           </label>
           <label>
             <h5>Duplicates</h5>
-            <input {...register('duplicates')} type="text" placeholder="請使用 '空格' 分隔" />
+            <input {...register('duplicates')} type="text" placeholder="請使用 '空格' 分隔" className="input" />
           </label>
           {/* <div className={classes.choiceWrapper}>
             <div>

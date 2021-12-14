@@ -61,36 +61,36 @@ export default function Layout({
   }
 
   return (
-    <div className={classes.layout} onScroll={handleScroll}>
+    <div className="flex h-screen bg-gray-50" onScroll={handleScroll}>
       <SideBar
         showMenuHandler={showMenuHandler}
         pinMenuHandler={pinMenuHandler}
         showMenu={showMenu}
         isPined={pinSideBar}
       />
-      <div className={classes.children} ref={layoutRef} style={{ padding: pinSideBar ? '0 15% 0' : '0 20vw 0' }}>
+      <div className={`mt-11 flex-1 overflow-y-auto ${pinSideBar ? 'px-[15%]' : 'px-[20vw]'}`} ref={layoutRef}>
         {children}
         {/* {childrenWithCallback()} */}
         {/* <footer>footer</footer> */}
       </div>
       <nav
-        className={classes.navBar}
-        style={showNav ? { transform: 'translateY(0)' } : { transform: 'translateY(-45px)' }}
+        className="fixed flex items-center justify-start w-screen h-11 bg-gray-50"
+        // style={showNav ? { transform: 'translateY(0)' } : { transform: 'translateY(-45px)' }}
       >
         <div
-          className={classes.menuIconWrapper}
+          className="flex px-6"
           onClick={() => {
             setShowMenu(prev => !prev)
           }}
         >
-          <MenuIcon className={classes.menuIcon} />
+          <MenuIcon className="w-5 h-5" />
         </div>
-        <div className={classes.navLinks}>
+        <div className="flex items-center justify-between w-full">
           <Link href="/">
             <a>Conote</a>
           </Link>
           {/* {navPath} */}
-          <div className={classes.left}>
+          <div>
             {buttonRight}
             {meData ? (
               <button className="secondary">

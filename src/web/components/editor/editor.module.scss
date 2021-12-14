@@ -93,18 +93,18 @@
 .topicLeaf {
   color: #ff619b;
   // font-weight: bold;
-  &:hover {
-    cursor: pointer;
-    box-shadow: 0 1px 0 #ff619b;
-  }
+  // &:hover {
+  //   cursor: pointer;
+  //   box-shadow: 0 1px 0 #ff619b;
+  // }
 }
 .mirrorLeaf {
   color: $link;
   // vertical-align: middle;
-  &:hover {
-    cursor: pointer;
-    box-shadow: 0 1px 0 #5395f0;
-  }
+  // &:hover {
+  //   cursor: pointer;
+  //   box-shadow: 0 1px 0 #5395f0;
+  // }
 }
 .filtertagLeaf {
   color: #6a53fe;

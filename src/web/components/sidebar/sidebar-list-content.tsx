@@ -5,11 +5,11 @@ import classes from './sidebar-list-content.module.scss'
 
 const SidebarListContent = ({ entries }: { entries: DocEntryPack[] }): JSX.Element => {
   return (
-    <div className="mt-1 overflow-hidden hover:overflow-y-auto">
+    <div className="overflow-hidden hover:overflow-y-auto">
       {entries.map((e, i) => (
         <div key={i} className="text-sm list-none">
           <li className="text-gray-700">
-            <span className="flex items-center gap-1 leading-relax hover:bg-gray-100 cursor-pointer mix-blend-multiply">
+            <span className="flex items-center gap-1 px-4 leading-relax hover:bg-gray-100 cursor-pointer mix-blend-multiply">
               <span className="material-icons-outlined text-lg text-gray-400">article</span>
               <Link href={`/cardx/${encodeURIComponent(e.main.symbol)}`}>
                 <a className="inline-block min-w-0 flex-1 truncate">{e.main.entry?.title || e.main.symbol}</a>

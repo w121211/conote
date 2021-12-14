@@ -17,6 +17,7 @@ import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 import NavPath from '../../components/nav-path/nav-path'
 import Modal from '../../components/modal/modal'
 import Account from '../account'
+import LoginPage from '../login'
 
 const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; symbol: string }): JSX.Element => {
   // const mainDoc = useObservable(() => workspace.mainDoc$)
@@ -180,7 +181,7 @@ const WorkspaceComponent = ({
   const savedDocs = useObservable(() => workspace.savedDocs$)
   const committedDocs = useObservable(() => workspace.committedDocs$)
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const { data: meData } = useMeQuery({ fetchPolicy: 'cache-first' })
+  const { data: meData, error: meError, loading: meLoading } = useMeQuery()
   const { login } = router.query
   // if (card) {
   //   const a = new Date(card.updatedAt as unknown as string)
@@ -219,34 +220,40 @@ const WorkspaceComponent = ({
   if (mainDoc.doc === null) {
     return <div>Unexpected error</div>
   }
-  return (
-    <div
-      onClick={e => {
-        e.stopPropagation()
-        // router.push({ pathname: `/card/${encodeURIComponent(docPath.symbol)}?mode=login` }, `/login`, {
-        //   scroll: false,
-        //   shallow: true,
-        // })
-        // setShowLoginModal(true)
 
-        // if (!meData) {
-        // }
-      }}
-    >
-      {/* <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
+  console.log(meData)
+
+  return (
+    <>
+      <div
+        onClick={e => {
+          e.stopPropagation()
+          // setShowLoginModal(true)
+
+          // if (!meLoading && meError) {
+          //   router.push(
+          //     { pathname: `/card/[symbol]`, query: { mode: 'login' } },
+          //     { pathname: `/card/${encodeURIComponent(docPath.symbol)}`, query: { mode: 'login' } },
+          //     {
+          //       scroll: false,
+          //       shallow: true,
+          //     },
+          //   )
+          // }
+        }}
+      >
+        {/* <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
       <div>Committed:{committedDocs && committedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
 
       <div>{status}</div>
 
       <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div> */}
 
-      <CardHead doc={mainDoc.doc} card={card} symbol={mainDoc.doc.symbol} />
+        <CardHead doc={mainDoc.doc} card={card} symbol={mainDoc.doc.symbol} />
 
-      <BulletEditor doc={mainDoc.doc} />
-      <Modal visible={router.query.mode === 'login'} onClose={() => setShowLoginModal(false)}>
-        <Account />
-      </Modal>
-    </div>
+        <BulletEditor doc={mainDoc.doc} />
+      </div>
+    </>
   )
 }
 
@@ -315,7 +322,7 @@ const CardSymbolPage = (): JSX.Element | null => {
               }}
               // disabled={!isValueModified}
             >
-              {'儲存草稿'}
+              儲存草稿
               {/* {console.log(isValueModified)} */}
             </button>
             <button
@@ -342,6 +349,18 @@ const CardSymbolPage = (): JSX.Element | null => {
           }}
         />
       </Layout>
+      <Modal
+        visible={!!router.query.mode}
+        onClose={() =>
+          router.push(
+            { pathname: `/card/[symbol]` },
+            { pathname: `/card/${encodeURIComponent(docPath.symbol)}` },
+            { scroll: false },
+          )
+        }
+      >
+        <LoginPage />
+      </Modal>
     </>
   )
 }

@@ -25,11 +25,11 @@ const SidebarList = ({ title, entries }: { title?: string; entries: DocEntryPack
           )}
         </div>
       )}
-      {title && entries && entries?.length > 0 ? (
-        <>{showMore && <SidebarListContent entries={entries} />}</>
-      ) : (
-        <>{showMore && <span className={classes.noNoteSpan}>尚無筆記</span>}</>
-      )}
+      {title && entries && entries?.length > 0
+        ? showMore && <SidebarListContent entries={entries} />
+        : showMore && (
+            <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow">尚無筆記</span>
+          )}
     </ul>
   )
 }

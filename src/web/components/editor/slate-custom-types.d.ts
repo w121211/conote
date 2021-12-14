@@ -30,6 +30,7 @@ export type CustomText = {
   type?: string // stream type
   placeholder?: boolean
   shift?: boolean
+  leafType?: string
 }
 
 export type InlineSymbolElement = InlineSymbol & {
@@ -111,7 +112,7 @@ type CustomElement = CustomInlineElement | LcElement | LiElement | UlElement
 type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
 type CustomRange = BaseRange & {
-  type?: string
+  leafType?: string
   placeholder?: boolean
 }
 

@@ -78,6 +78,7 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
     container: (provided: any, state: any) => ({
       ...provided,
       width: '100%',
+      padding: '0 1rem',
       flex: '1',
     }),
     menu: (provided: any, state: any) => ({
@@ -104,8 +105,9 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
       ...provided,
       width: '100%',
       // maxHeight: '30px',
+
       whiteSpace: 'nowrap',
-      borderRadius: '99px',
+      borderRadius: '6px',
       minHeight: '40px',
       lineHeight: small ? '1' : 'inherit',
       // borderColor: isFocused ? '#5c6cda' : 'hsl(0, 0%, 80%)',
