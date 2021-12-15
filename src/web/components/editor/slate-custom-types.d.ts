@@ -3,7 +3,7 @@ import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
 import { ChangeType } from '../../../packages/docdiff/src'
 import { Bullet } from '../bullet/bullet'
-import { InlineFiltertag, InlineMirror, InlinePoll, InlineRate, InlineSymbol } from '../inline/inline-types'
+import { InlineFiltertag, InlineMirror, InlinePoll, InlineRate, InlineSymbol } from '../inline/inline-item-types'
 
 export type EmptyText = {
   text: string

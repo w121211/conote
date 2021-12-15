@@ -1,21 +1,18 @@
-import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
-import { useRouter } from 'next/router'
-import { ReactEditor, RenderElementProps, useReadOnly, useSelected, useSlateStatic } from 'slate-react'
-import Popup from '../popup/popup'
-import classes from '../editor/editor.module.scss'
-import { InlinePollElement, LcElement } from '../editor/slate-custom-types'
+import React, { useState, useEffect } from 'react'
+import { ReactEditor, RenderElementProps, useSelected, useSlateStatic } from 'slate-react'
+import { InlinePollElement } from '../editor/slate-custom-types'
+import { Transforms } from 'slate'
 import { PollFragment, usePollLazyQuery } from '../../apollo/query.graphql'
-import { Transforms, Node } from 'slate'
 import PollGroup from '../emoji-up-down/poll-group'
+import { InlineItemService } from './inline-item-service'
 
 const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }): JSX.Element => {
   const { attributes, children, element } = props
   const selected = useSelected()
   // const context = useContext(Context)
   const editor = useSlateStatic()
-  const { selection } = editor
+  // const { selection } = editor
   const path = ReactEditor.findPath(editor, element)
-  const readonly = useReadOnly()
   const [showPopover, setShowPopover] = useState(false)
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()
   const [pollId, setPollId] = useState(element.id)
@@ -24,14 +21,14 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
   function onCreated(poll: PollFragment) {
     // const editor = useSlateStatic()
     // const path = ReactEditor.findPath(editor, element)
-    const inlinePoll = toInlinePoll({ id: poll.id, choices: poll.choices })
+    const inlinePoll = InlineItemService.toInlinePoll({ id: poll.id, choices: poll.choices })
     Transforms.setNodes<InlinePollElement>(editor, inlinePoll, { at: path })
     Transforms.insertText(editor, inlinePoll.str, { at: path })
   }
 
   const [queryPoll, { data: pollData, error, loading }] = usePollLazyQuery()
 
-  const parent = Node.parent(editor, path) as LcElement
+  // const parent = Node.parent(editor, path) as LcElement
 
   const handleCreatePoll = () => {
     // if (parent.id) {

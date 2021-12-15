@@ -1,6 +1,6 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
-import { InlineItem } from '../inline/inline-types'
-import { InlineRateService } from '../inline/inline-services'
+import { InlineItem } from '../inline/inline-item-types'
+import { InlineItemService } from '../inline/inline-item-service'
 import { TokenHelper } from '../../common/token-helper'
 
 /**
@@ -184,7 +184,7 @@ export const BulletParser = {
           if (match) {
             console.log(match[2])
             const params = match[2].split(' ')
-            const { authorName, targetSymbol, choice } = InlineRateService.parseParams(params)
+            const { authorName, targetSymbol, choice } = InlineItemService.parseInlineRateParams(params)
             return {
               type: 'rate',
               id: match[1],
@@ -203,7 +203,7 @@ export const BulletParser = {
           const match = reNewRate.exec(str)
           if (match) {
             const params = match[1].split(' ')
-            const { authorName, targetSymbol, choice } = InlineRateService.parseParams(params)
+            const { authorName, targetSymbol, choice } = InlineItemService.parseInlineRateParams(params)
             return {
               type: 'rate',
               str,

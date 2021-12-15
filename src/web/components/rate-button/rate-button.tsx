@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ShotBtn = ({
+const RateButton = ({
   author,
   target,
   choice,
@@ -43,4 +43,5 @@ const ShotBtn = ({
     </button>
   )
 }
-export default ShotBtn
+
+export default RateButton
