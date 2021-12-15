@@ -11,7 +11,6 @@ import {
   VoteFragment,
 } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
-import classes from './poll-form.module.scss'
 
 export type RadioInputs = {
   choice?: string
@@ -43,13 +42,10 @@ export const RadioInput = ({
   choiceValue?: (i: string) => void
   checked?: boolean
 }): JSX.Element => {
-  // const {field}=useController({value,content})
   const methods = useFormContext()
 
-  // const [checkedTarget, setCheckedTarget] = useState<any>(null)
-  // console.log(myVote)
   return (
-    <label className={classes.radioLabel}>
+    <label className="relative inline-flex items-center">
       <input
         {...methods.register('choice')}
         type="radio"
@@ -70,30 +66,6 @@ export const RadioInput = ({
         voted={myVote?.choiceIdx.toString() === value}
         checked={checked}
       />
-      {/* <svg width="32" height="32" viewBox="-4 -4 39 39" aria-hidden="true" focusable="false">
-        
-        <rect
-          className={classes.checkBg}
-          width="35"
-          height="35"
-          x="-2"
-          y="-2"
-          stroke="currentColor"
-          fill="none"
-          strokeWidth="3"
-          rx="6"
-          ry="6"
-        ></rect>
-        
-        <polyline
-          className={classes.checkMark}
-          points="4,14 12,23 28,5"
-          stroke="transparent"
-          strokeWidth="4"
-          fill="none"
-        ></polyline>
-      </svg> */}
-      {/* <span>{content}</span> */}
     </label>
   )
 }
@@ -151,23 +123,6 @@ const PollForm = ({
     initialValue.title && setValue('lines', initialValue.lines)
   }
 
-  // const [createComment] = useCreateCommentMutation({
-  //   update(cache, { data }) {
-  //     const res = cache.readQuery<CommentsQuery>({
-  //       query: CommentsDocument,
-  //     })
-  //     if (data?.createComment && res?.comments) {
-  //       cache.writeQuery({
-  //         query: CommentsDocument,
-  //         data: { comments: res.comments.concat([data.createComment]) },
-  //       })
-  //     }
-  //     // refetch()
-  //   },
-
-  //   // refetchQueries: [{ query: CommentsDocument, variables: { boardId: boardId } }],
-  // })
-
   const [createVote] = useCreateVoteMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyVotesQuery>({
@@ -192,22 +147,6 @@ const PollForm = ({
   })
 
   const myHandleSubmit = (d: FormInputs) => {
-    // if (d.lines) {
-    //   createComment({
-    //     variables: {
-    //       boardId,
-    //       pollId,
-    //       data: {
-    //         content: `${
-    //           boardData?.board.poll?.choices && d.choice
-    //             ? '<' + boardData?.board.poll?.choices[parseInt(d.choice)] + '>'
-    //             : ''
-    //         } ${d.lines}`,
-    //       },
-    //     },
-    //   })
-    // }
-
     if (d.choice && pollId) {
       // setPollCount(prev => {
       //   if (prev) {
@@ -223,7 +162,6 @@ const PollForm = ({
           data: { choiceIdx: parseInt(d.choice) },
         },
       })
-      // console.log(typeof d.choice, pollId)
       setChecked(Array(3).fill(false))
       setChoiceValue(null)
       reset({ title: '', lines: '' })
@@ -246,14 +184,9 @@ const PollForm = ({
       return newArr
     })
     setChoiceValue(prev => {
-      // console.log(prev, i, prev === i)
-
       return iToNum === prev ? null : iToNum
     })
   }
-  // useEffect(()=>{
-
-  // },[choiceValue])
 
   useEffect(() => {
     // filterComments(
@@ -261,21 +194,15 @@ const PollForm = ({
     //   // check,
     // )
   }, [choiceValue])
-  // console.log(pollChoices)
 
   if (pollData && pollData.poll) {
     return (
       <FormProvider {...methods}>
-        <div className={classes.formContainer}>
-          <form className={classes.form} onSubmit={handleSubmit(myHandleSubmit)}>
-            {/* <div className={classes.section}> */}
-            {/* <label>Symbol/Topic</label> */}
-            {/* <input type="text" {...register('title')} placeholder="Symbol 或 Topic" /> */}
-            {/* </div> */}
-            <div className={classes.section}>
-              <div className={classes.choiceWrapper}>
-                {/* <label>@作者</label> */}
-                <div className={classes.radioWrapper}>
+        <div>
+          <form className="flex flex-col mt-4 mb-8" onSubmit={handleSubmit(myHandleSubmit)}>
+            <div className="mb-4 last:mb-0">
+              <div>
+                <div className="flex flex-col">
                   {pollData.poll.choices.map((e, i) => (
                     <RadioInput
                       value={`${i}`}
@@ -294,18 +221,18 @@ const PollForm = ({
                     />
                   ))}
                 </div>
-                <span className={classes.votedCount}>
+                <div className="text-right text-gray-400">
                   共
                   {pollData.poll.count.nVotes && pollData.poll.count.nVotes.length > 0
                     ? pollData?.poll.count.nVotes.reduce((a, b) => a + b)
                     : 0}
                   人參與投票
-                </span>
+                </div>
               </div>
 
               {/* <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." /> */}
             </div>
-            <button className="primary" disabled={myVote !== undefined}>
+            <button className="btn-primary" disabled={myVote !== undefined}>
               {myVote ? '已投票' : '送出'}
             </button>
           </form>

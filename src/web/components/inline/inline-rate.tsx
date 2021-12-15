@@ -1,9 +1,14 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
 import { useRouter } from 'next/router'
-import { RenderElementProps } from 'slate-react'
+import { ReactEditor, RenderElementProps, useSelected, useSlateStatic } from 'slate-react'
 import Popup from '../popup/popup'
 import classes from '../editor/editor.module.scss'
 import { InlineRateElement } from '../editor/slate-custom-types'
+import { Transforms } from 'slate'
+import { RateFragment } from '../../apollo/query.graphql'
+import Modal from '../modal/modal'
+import CreateShotForm from '../shot-form/create-shot-form'
+import ShotBtn from '../shot-button/shotBtn'
 
 const InlineRate = (props: RenderElementProps & { element: InlineRateElement }): JSX.Element => {
   const editor = useSlateStatic()
@@ -15,16 +20,16 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
   // const [shotData, setShotData] = useState<ShotFragment | undefined>()
   // const { data: targetData } = useCardQuery({ variables: { id: shotId } })
 
-  const onShotCreated = (shot: ShotFragment, targetSymbol: string) => {
+  const onShotCreated = (shot: RateFragment, targetSymbol: string) => {
     // const editor = useSlateStatic()
     const path = ReactEditor.findPath(editor, element)
-    const inlineShot = toInlineShotString({
+    const inlineShot = toInlineRateString({
       id: shot.id,
       choice: shot.choice,
       targetSymbol,
       author: element.authorName ?? '',
     })
-    Transforms.setNodes<InlineShotElement>(editor, { id: shot.id }, { at: path })
+    Transforms.setNodes<InlineRateElement>(editor, { id: shot.id }, { at: path })
     Transforms.insertText(editor, inlineShot, { at: path })
   }
 

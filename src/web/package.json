@@ -43,11 +43,7 @@
     "@metascraper/helpers": "^5.24.8",
     "@prisma/client": "^3.4.1",
     "@svgr/webpack": "^6.0.0",
-<<<<<<< HEAD
     "@tailwindcss/line-clamp": "^0.3.0",
-=======
-    "@tailwindcss/line-clamp": "^0.2.2",
->>>>>>> 3dd947adbaa8e7a93a3ea415fd0dfbc0e410fb31
     "apollo-server-micro": "^3.5.0",
     "apollo3-cache-persist": "^0.13.0",
     "cookie": "^0.4.1",
@@ -62,7 +58,6 @@
     "graphql-scalars": "^1.9.0",
     "jsonwebtoken": "^8.5.1",
     "localforage": "^1.10.0",
-    "lodash": "^4.17.21",
     "metascraper": "^5.24.8",
     "metascraper-author": "^5.24.8",
     "metascraper-date": "^5.24.8",
@@ -84,6 +79,7 @@
     "react-modal": "^3.14.3",
     "react-select": "^5.2.1",
     "react-use-measure": "^2.0.4",
+    "rfdc": "^1.3.0",
     "rxjs": "^7.4.0",
     "rxjs-hooks": "^0.7.0",
     "sass": "^1.38.1",

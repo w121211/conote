@@ -163,7 +163,7 @@ export const blank = () => {
 //           <input {...register('link')} type="text" />
 //         </label>
 
-//         <button className="primary" type="submit">
+//         <button className="btn-primary" type="submit">
 //           <h5> 送出</h5>
 //         </button>
 //       </form>
@@ -173,14 +173,14 @@ export const blank = () => {
 //         buttons={
 //           <>
 //             <button
-//               className="secondary"
+//               className="btn-secondary"
 //               onClick={() => {
 //                 router.push(`/author/${initialInput.author}`)
 //               }}
 //             >
 //               確定
 //             </button>
-//             <button className="primary" onClick={() => setShowPopup(false)}>
+//             <button className="btn-primary" onClick={() => setShowPopup(false)}>
 //               取消
 //             </button>
 //           </>

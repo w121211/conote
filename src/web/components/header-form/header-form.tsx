@@ -2,7 +2,6 @@ import React from 'react'
 import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-form'
 import { GroupBase, StylesConfig } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
-import classes from './header-form.module.scss'
 import { CardDocument, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
 
 type Option = {
@@ -24,13 +23,6 @@ const components = {
   DropdownIndicator: null,
   // ClearIndicator: null,
 }
-// type FormInputs = {
-//   // title: string
-//   // authorChoice: string
-//   // authorLines: string
-//   authorName: string
-//   props: { title: string; value: string }[]
-// }
 
 const HeaderForm = ({
   initialValue,
@@ -53,15 +45,6 @@ const HeaderForm = ({
     control,
     formState: { isDirty, isSubmitSuccessful, isSubmitted },
   } = methods
-
-  // useEffect(() => {
-  //   setSubmitDisable(false)
-  //   setSubmitFinished(false)
-  // }, [watch()])
-  // const { fields, append, remove } = useFieldArray({
-  //   name: `props`,
-  //   control,
-  // })
 
   const [updateCardMeta] = useUpdateCardMetaMutation({
     update(cache, { data }) {
@@ -119,7 +102,6 @@ const HeaderForm = ({
           keywordArr.push(e.value)
         })
       }
-
       updateCardMeta({
         variables: {
           cardId,
@@ -137,9 +119,6 @@ const HeaderForm = ({
   }
 
   const customStyles: StylesConfig<Option, true, GroupBase<Option>> = {
-    // const customStyles: Partial<
-    //   Styles<{ label: string; value: string }, true, GroupTypeBase<{ label: string; value: string }>>
-    // > = {
     valueContainer: (provided, state) => ({
       ...provided,
       height: '100%',
@@ -217,11 +196,6 @@ const HeaderForm = ({
           //   setSubmitFinished(false)
           // }}
         >
-          {/* <div className={classes.section}> */}
-          {/* <label>Symbol/Topic</label> */}
-          {/* <input type="text" {...register('title')} placeholder="Symbol 或 Topic" /> */}
-          {/* </div> */}
-          {/* <div className={classes.section}> */}
           <label>
             <h5>標題</h5>
             <input {...register('title')} type="text" placeholder="標題" className="input" />
@@ -264,20 +238,8 @@ const HeaderForm = ({
             <h5>Duplicates</h5>
             <input {...register('duplicates')} type="text" placeholder="請使用 '空格' 分隔" className="input" />
           </label>
-          {/* <div className={classes.choiceWrapper}>
-            <div>
-              {authorName ? (
-                <label>@{authorName.split(':', 1)}</label>
-              ) : (
-                <input {...register('author')} type="text" placeholder="來源作者" />
-                )}
-                </div>
-              </div> */}
-
-          {/* <input type="text" {...register('authorLines')} placeholder="來源作者看法" /> */}
-          {/* </div> */}
-          <div className={classes.submitBtn}>
-            <button className="primary" type="submit" disabled={!isDirty}>
+          <div className="text-center">
+            <button className="btn-primary" type="submit" disabled={!isDirty}>
               {isSubmitted ? (isDirty ? '提交' : '已提交') : '提交'}
             </button>
           </div>

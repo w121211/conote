@@ -7,7 +7,7 @@ const NewHotList = () => {
   const [activeList, setActiveList] = useState(0)
   const listContainer = useRef<HTMLDivElement>(null)
   return (
-    <div className="flex-grow-3 flex-shrink min-w-0" ref={listContainer}>
+    <div className="max-w-xl flex-grow flex-shrink min-w-0" ref={listContainer}>
       <TabsWithSlider
         tabs={['最新', '熱門']}
         tabListWidth={listContainer.current?.getBoundingClientRect().width}

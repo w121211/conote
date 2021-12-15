@@ -1,0 +1,102 @@
+// // @import '../../style/global.scss';
+
+// .sidebar {
+//   display: flex;
+//   flex-direction: column;
+//   position: absolute;
+//   z-index: 100;
+//   flex-shrink: 0;
+//   width: 280px;
+//   height: 100vh;
+//   background: $white;
+
+//   padding: 0 1.5em 1em;
+//   border-right: 1px solid #ecedf2;
+//   // border-left: 1px solid #e3eaf7;
+//   transition: transform 0.2s ease-in-out;
+//   overflow-wrap: break-word;
+//   a {
+//     display: flex;
+//     align-items: center;
+//     // color: #3f4346;
+//     // font-weight: 500;
+//     &:hover {
+//       border-bottom: 0;
+//     }
+//     span {
+//       // margin-left: 10px;
+//       display: inline-block;
+//       transition: display 0.5s;
+//       transition-delay: 0.2s;
+//     }
+//   }
+//   .pushPin {
+//     color: $text;
+//     cursor: pointer;
+//     &:hover {
+//       color: $gray-text-dark;
+//     }
+//     &:global(.material-icons) {
+//       transform: rotate(45deg);
+//     }
+//   }
+//   .sidebarTop {
+//     flex-shrink: 0;
+//   }
+//   .sideList {
+//     margin: 0;
+//     list-style: none;
+//     padding-inline-start: 0;
+//     line-height: 1.5;
+//     li {
+//       // padding: 10px 0 0;
+//       margin-bottom: 20px;
+//       color: $text;
+//       font-size: 14px;
+//       font-weight: bold;
+//       // margin: 4px 0;
+//       // padding: 8px 0;
+//       overflow: hidden;
+//       word-break: keep-all;
+//     }
+//     svg {
+//       flex-shrink: 0;
+//       width: 20px;
+//       height: 20px;
+//       // fill: $text;
+//       // margin-right: 10px;
+//     }
+//   }
+//   a {
+//     border: none;
+//   }
+// }
+// .menuIconWrapper {
+//   position: relative;
+
+//   height: 45px;
+//   /* background: white; */
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+//   margin: 0;
+
+//   @media screen and (max-width: 500px) {
+//     width: 40px;
+//     height: 40px;
+//     //
+//   }
+//   .menuIcon {
+//     width: 20px;
+//     height: 20px;
+//     fill: $text;
+//     cursor: pointer;
+//     &:hover {
+//       fill: $gray-text-dark;
+//     }
+//   }
+// }
+// .searchBar {
+//   height: 30px;
+//   margin-bottom: 20px;
+// }

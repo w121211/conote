@@ -1,9 +1,12 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
 import { useRouter } from 'next/router'
-import { RenderElementProps } from 'slate-react'
+import { ReactEditor, RenderElementProps, useReadOnly, useSelected, useSlateStatic } from 'slate-react'
 import Popup from '../popup/popup'
 import classes from '../editor/editor.module.scss'
-import { InlinePollElement } from '../editor/slate-custom-types'
+import { InlinePollElement, LcElement } from '../editor/slate-custom-types'
+import { PollFragment, usePollLazyQuery } from '../../apollo/query.graphql'
+import { Transforms, Node } from 'slate'
+import PollGroup from '../emoji-up-down/poll-group'
 
 const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }): JSX.Element => {
   const { attributes, children, element } = props
@@ -87,7 +90,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
   // }
   // if (element.type === 'poll') {
   return (
-    <span {...attributes}>
+    <button className="btn-reset-style" {...attributes}>
       {/* <span style={selected ? undefined : { display: 'none' }}>{children}</span> */}
 
       {!selected && (
@@ -130,7 +133,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
       )}
       {/* <span>{children}</span> */}
       <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
-    </span>
+    </button>
   )
 }
 

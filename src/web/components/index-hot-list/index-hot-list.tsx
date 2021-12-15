@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import ListLarge from '../list-large/list-large'
-import classes from './index-hot-list.module.scss'
 
 type Hashtags = '#討論' | '#機會' | '#Battle' | '#事件'
 
@@ -52,33 +51,43 @@ const IndexHotList = () => {
   }
   return (
     <div>
-      <div className={classes.filtertagsContainer}>
+      <div className="flex gap-5">
         <h4
-          className={`${classes.subTitle} ${currentHashtag === '' ? classes.selected : ''}`}
+          className={`mt-0 px-3 border  rounded text-sm  hover:cursor-pointer ${
+            currentHashtag === '' ? 'text-blue-500 border-blue-500' : 'border-gray-400 text-gray-400'
+          }`}
           onClick={() => handleFilter('全部')}
         >
           全部
         </h4>
         <h4
-          className={`${classes.subTitle} ${currentHashtag === '#討論' ? classes.selected : ''}`}
+          className={`mt-0 px-3 border rounded text-sm hover:cursor-pointer ${
+            currentHashtag === '#討論' ? 'text-blue-500 border-blue-500' : 'text-gray-400 border-gray-400'
+          }`}
           onClick={() => handleFilter('#討論')}
         >
           #討論
         </h4>
         <h4
-          className={`${classes.subTitle} ${currentHashtag === '#機會' ? classes.selected : ''}`}
+          className={`mt-0 px-3 border rounded text-sm hover:cursor-pointer ${
+            currentHashtag === '#機會' ? 'text-blue-500 border-blue-500' : 'text-gray-400 border-gray-400'
+          }`}
           onClick={() => handleFilter('#機會')}
         >
           #機會
         </h4>
         <h4
-          className={`${classes.subTitle} ${currentHashtag === '#Battle' ? classes.selected : ''}`}
+          className={` '#Bmt-0 px-3 border rounded text-sm hover:cursor-pointer ${
+            currentHashtag === '#Battle' ? 'text-blue-500 border-blue-500' : 'text-gray-400 border-gray-400'
+          }`}
           onClick={() => handleFilter('#Battle')}
         >
           #Battle
         </h4>
         <h4
-          className={`${classes.subTitle} ${currentHashtag === '#事件' ? classes.selected : ''}`}
+          className={`mt-0 px-3 border rounded text-sm hover:cursor-pointer ${
+            currentHashtag === '#事件' ? 'text-blue-500 border-blue-500' : 'text-gray-400 border-gray-400'
+          }`}
           onClick={() => handleFilter('#事件')}
         >
           #事件
@@ -97,19 +106,6 @@ const IndexHotList = () => {
           />
         )
       })}
-      {/* <ListLarge
-                        title="原油 vs 天然氣，哪個比較適合投資？"
-                        href="#"
-                        source="[[原油]]"
-                        hashtags={['#討論']}
-                      />
-                      <ListLarge
-                        title="全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI
-                            #多 @匿名)"
-                        href="#"
-                        source="[[原油]]"
-                        hashtags={['#討論', '#機會']}
-                      /> */}
     </div>
   )
 }

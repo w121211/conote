@@ -1,6 +1,5 @@
 import React from 'react'
 import CancelIcon from '../../assets/svg/cancel.svg'
-import classes from './popup.module.scss'
 
 const Popup = ({
   children,
@@ -26,7 +25,7 @@ const Popup = ({
   // console.log(mask)
   return (
     <div
-      className={classes.containerOuter}
+      className="fixed flex items-center justify-center w-screen h-screen top-0 left-0 z-50"
       style={{
         visibility: `${visible ? 'visible' : 'hidden'}`,
         width: `${noMask ? 'fit-content' : '100vw'}`,
@@ -36,31 +35,31 @@ const Popup = ({
     >
       {!noMask && (
         <div
-          className={classes.mask}
+          className={`absolute w-full h-full  ${mask ? 'bg-gray-500/50' : 'bg-none'}`}
           onClick={e => {
             // e.preventDefault()
             e.stopPropagation()
             hideBoard()
           }}
-          style={mask ? undefined : { background: 'none' }}
         ></div>
       )}
 
-      <div className={classes.containerInner}>
-        <div className={classes.topBar}>
+      <div className="absolute flex flex-col w-[90vw] max-h-[70vh] sm:w-[60vw] sm:max-h-[90vh] mt-[5vh] p-6 pt-2 overflow-y-auto bg-white shadow-2xl">
+        <div className="flex items-center w-full h-8">
           <span
-            className={classes.cancelIconWrapper}
             onClick={(e: any) => {
               e.stopPropagation()
               hideBoard()
             }}
           >
-            <CancelIcon />
+            <CancelIcon className="flex items-center justify-center w-4 h-4" />
           </span>
-          <span className={classes.subTitle}>{subTitle && subTitle} </span>
+          <span className="ml-5 overflow-hidden whitespace-nowrap text-ellipsis text-gray-600">
+            {subTitle && subTitle}{' '}
+          </span>
         </div>
-        <div className={classes.children}>{children}</div>
-        {buttons && <div className={classes.buttons}>{buttons}</div>}
+        <div className="my-3 mx-auto">{children}</div>
+        {buttons && <div className="flex justify-center">{buttons}</div>}
       </div>
     </div>
   )

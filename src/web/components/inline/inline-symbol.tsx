@@ -17,7 +17,7 @@ const InlineSymbol = ({
   // const selected = useSelected()
   // console.log(element)
   return (
-    <span {...attributes} className={classes.symbolContainer}>
+    <span {...attributes}>
       {/* <span contentEditable={false}> */}
       {/* <Link href={`/card/${encodeURI(element.symbol)}`}> */}
       {/* <a
@@ -30,7 +30,7 @@ const InlineSymbol = ({
             {children}
           </a> */}
       <button
-        className="noStyle"
+        className="btn-reset-style text-blue-500 hover:cursor-pointer hover:underline hover:underline-offset-2"
         onClick={e => {
           // e.preventDefault()
           // e.stopPropagation()
@@ -43,7 +43,7 @@ const InlineSymbol = ({
       {/* </Link> */}
       {showPopover && (
         <span contentEditable={false}>
-          {router.query.symbol !== element.symbol && router.query.m !== '::' + element.symbol ? (
+          {/* {router.query.symbol !== element.symbol && router.query.m !== '::' + element.symbol ? (
             <Popup
               visible={showPopover}
               hideBoard={() => {
@@ -52,7 +52,7 @@ const InlineSymbol = ({
               buttons={
                 <>
                   <button
-                    className="secondary"
+                    className="btn-secondary"
                     onClick={e => {
                       // e.preventDefault()
                       // e.stopPropagation()
@@ -63,7 +63,7 @@ const InlineSymbol = ({
                     確定
                   </button>
                   <button
-                    className="primary"
+                    className="btn-primary"
                     onClick={e => {
                       e.preventDefault()
                       e.stopPropagation()
@@ -86,7 +86,7 @@ const InlineSymbol = ({
               }}
               buttons={
                 <button
-                  className="primary"
+                  className="btn-primary"
                   onClick={() => {
                     setShowPopover(false)
                   }}
@@ -98,7 +98,7 @@ const InlineSymbol = ({
             >
               你就在這頁了!
             </Popup>
-          )}
+          )} */}
         </span>
       )}
       {/* </span> */}

@@ -17,7 +17,7 @@ const decorateReMirrorTicker = /^(::\$[A-Z-=]+)\b/u
 const decorateReMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B/u
 
 const reMirrorTicker = /^(::\$[A-Z-=]+)\b(?:\s@([\p{Letter}\d_]+))?/u
-const reMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),-]+\]\])\B(?:\s@([\p{Letter}\d_]+))?/u
+const reMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),$%-]+\]\])\B(?:\s@([\p{Letter}\d_]+))?/u
 // const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const rePoll = /\B!\(\(poll:(c[a-z0-9]{24,29})\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const reNewPoll = /\B!\(\(poll\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
@@ -46,27 +46,38 @@ const grammar: Grammar = {
   author: { pattern: reAuthor },
 }
 
-const decorationGrammar: Grammar = {
-  // 'mirror-ticker': { pattern: /^::\$[A-Z-=]+\b/ },
-  // 'mirror-topic': { pattern: /^::\[\[[^\]\n]+\]\]\B/u },
-  'mirror-ticker': { pattern: decorateReMirrorTicker, inside: { punctuation: /^::|\[\[|\]\]/g } },
-  'mirror-topic': { pattern: decorateReMirrorTopic, inside: { punctuation: /^::|\[\[|\]\]/g } },
-  poll: { pattern: rePoll },
-  'new-poll': { pattern: reNewPoll },
-  shot: { pattern: reShot },
-  'new-shot': { pattern: reNewShot },
-  ticker: { pattern: reTicker },
-  topic: { pattern: reTopic, inside: { punctuation: /^::|\[\[|\]\]/g } },
-  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
-  url: {
-    pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
-  },
-  author: { pattern: reAuthor },
-}
+// const decorationGrammar: Grammar = {
+//   // 'mirror-ticker': { pattern: /^::\$[A-Z-=]+\b/ },
+//   // 'mirror-topic': { pattern: /^::\[\[[^\]\n]+\]\]\B/u },
+//   'mirror-ticker': { pattern: decorateReMirrorTicker, inside: { punctuation: /^::|\[\[|\]\]/g } },
+//   'mirror-topic': { pattern: decorateReMirrorTopic, inside: { punctuation: /^::|\[\[|\]\]/g } },
+//   poll: { pattern: rePoll },
+//   'new-poll': { pattern: reNewPoll },
+//   shot: { pattern: reShot },
+//   'new-shot': { pattern: reNewShot },
+//   ticker: { pattern: reTicker },
+//   topic: { pattern: reTopic, inside: { punctuation: /^::|\[\[|\]\]/g } },
+//   filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
+//   url: {
+//     pattern: /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/,
+//   },
+//   author: { pattern: reAuthor },
+// }
 const decorateGrammar: Grammar = {
   // 順序重要，先 mirror 後 ticker
-  'mirror-ticker': { pattern: reMirrorTicker },
-  'mirror-topic': { pattern: reMirrorTopic },
+  'mirror-ticker': {
+    pattern: reMirrorTicker,
+    inside: {
+      'mirror-head': /^:{2}/,
+    },
+  },
+  'mirror-topic': {
+    pattern: reMirrorTopic,
+    inside: {
+      'mirror-topic-bracket-head': /^:{2}\[\[/,
+      'topic-bracket-tail': /]]$/,
+    },
+  },
 
   poll: { pattern: rePoll },
   'new-poll': { pattern: reNewPoll },

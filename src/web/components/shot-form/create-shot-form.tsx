@@ -2,28 +2,25 @@ import { useApolloClient } from '@apollo/client'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { Controller, set, useForm } from 'react-hook-form'
-import AsyncSelect from 'react-select/async'
-import { ShotChoice } from 'graphql-let/__generated__/__types__'
+import { RateChoice } from 'graphql-let/__generated__/__types__'
 import {
   AuthorDocument,
   AuthorQuery,
   AuthorQueryVariables,
-  ShotDocument,
-  ShotFragment,
-  ShotQuery,
+  RateDocument,
+  RateFragment,
+  RateQuery,
   useAuthorQuery,
   useCardLazyQuery,
   useCardQuery,
-  useCreateShotMutation,
+  useCreateRateMutation,
   useLinkLazyQuery,
   useLinkQuery,
 } from '../../apollo/query.graphql'
-import Popup from '../popup/popup'
-import classes from './shot-form.module.scss'
 
 export interface FormInput {
   author: string
-  choice: ShotChoice | ''
+  choice: RateChoice | ''
   target: string
   link?: string
 }
@@ -33,16 +30,12 @@ const CreateShotForm = ({
   onShotCreated,
 }: {
   initialInput: FormInput
-  onShotCreated: (shot: ShotFragment, targetSymbol: string) => void
+  onShotCreated: (shot: RateFragment, targetSymbol: string) => void
 }): JSX.Element => {
-  const router = useRouter()
-  const [showPopup, setShowPopup] = useState(false)
-  const [skipCardQuery, setSkipCardQuery] = useState(true)
   const { author, choice, target, link } = initialInput
   const [targetId, setTargetId] = useState<string | undefined>()
   const client = useApolloClient()
-  //   const { data: authorData } = useAuthorQuery({ variables: { id: authorId ?? '' } })
-  //   let targetId: string
+  //   const { data: authorData
   let linkId: string
 
   const { data: targetCardData } = useCardQuery({
@@ -59,36 +52,34 @@ const CreateShotForm = ({
     },
   })
   useEffect(() => {
-    console.log(targetCardData)
     if (targetCardData?.card) {
       setTargetId(targetCardData.card.id)
     }
   }, [targetCardData])
 
   const { register, handleSubmit, control } = useForm<FormInput>({
-    defaultValues: { ...initialInput, choice: choice ? (choice.substr(1) as ShotChoice) : '' },
+    defaultValues: { ...initialInput, choice: choice ? (choice.substr(1) as RateChoice) : '' },
   })
-  const [createShot, { data: shotData }] = useCreateShotMutation({
+  const [createRate] = useCreateRateMutation({
     update(cache, { data }) {
-      const res = cache.readQuery<ShotQuery>({
-        query: ShotDocument,
+      const res = cache.readQuery<RateQuery>({
+        query: RateDocument,
       })
-      if (data?.createShot && res?.shot) {
+      if (data?.createRate && res?.rate) {
         cache.writeQuery({
-          query: ShotDocument,
+          query: RateDocument,
           data: {
-            targetId: data.createShot.symId,
-            choice: data.createShot.choice,
-            authorId: data.createShot.authorId,
-            linkId: data.createShot.linkId,
+            targetId: data.createRate.symId,
+            choice: data.createRate.choice,
+            authorId: data.createRate.authorId,
+            linkId: data.createRate.linkId,
           },
         })
       }
     },
     onCompleted(data) {
-      console.log(data.createShot, targetCardData)
-      if (data.createShot && targetCardData && targetCardData.card) {
-        onShotCreated(data.createShot, targetCardData.card.sym.symbol)
+      if (data.createRate && targetCardData && targetCardData.card) {
+        onShotCreated(data.createRate, targetCardData.card.sym.symbol)
       } else {
         throw 'Create shot error'
       }
@@ -108,14 +99,12 @@ const CreateShotForm = ({
 
   const myHandleSubmit = (d: FormInput) => {
     if (d.target && d.choice !== '') {
-      setSkipCardQuery(false)
-
       if (d.link) {
         queryLink({ variables: { url: d.link ?? '' } })
       }
       // console.log(targetId)
       if (targetId) {
-        createShot({
+        createRate({
           variables: {
             data: {
               targetId: targetId,
@@ -130,15 +119,11 @@ const CreateShotForm = ({
   }
   return (
     <>
-      <form className={classes.form} onSubmit={handleSubmit(myHandleSubmit)}>
+      <form className="flex flex-col mt-4 mb-8" onSubmit={handleSubmit(myHandleSubmit)}>
         <label>
           <h5> 作者</h5>
           {
-            initialInput.author ? (
-              <button type="button" onClick={() => setShowPopup(true)}>
-                {initialInput.author}
-              </button>
-            ) : null
+            initialInput.author ? <button type="button">{initialInput.author}</button> : null
             // <Controller
             //   control={control}
             //   name="author"
@@ -147,7 +132,7 @@ const CreateShotForm = ({
             // <input {...register('author')} type="text" />
           }
         </label>
-        <div className={classes.radioWrapper}>
+        <div className="flex">
           <label>
             <input {...register('choice')} type="radio" value="LONG" />
             <h5> 看多</h5>
@@ -170,7 +155,7 @@ const CreateShotForm = ({
           <input {...register('link')} type="text" />
         </label>
 
-        <button className="primary" type="submit">
+        <button className="btn-primary" type="submit">
           <h5> 送出</h5>
         </button>
       </form>
@@ -180,14 +165,14 @@ const CreateShotForm = ({
         buttons={
           <>
             <button
-              className="secondary"
+              className="btn-secondary"
               onClick={() => {
                 router.push(`/author/${initialInput.author}`)
               }}
             >
               確定
             </button>
-            <button className="primary" onClick={() => setShowPopup(false)}>
+            <button className="btn-primary" onClick={() => setShowPopup(false)}>
               取消
             </button>
           </>

@@ -1,6 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react'
 import SideBar from '../sidebar/sidebar'
-import classes from './layout.module.scss'
 import MenuIcon from '../../assets/svg/menu.svg'
 import Link from 'next/link'
 import { useMeQuery } from '../../apollo/query.graphql'
@@ -93,11 +92,11 @@ export default function Layout({
           <div>
             {buttonRight}
             {meData ? (
-              <button className="secondary">
+              <button className="btn-secondary">
                 <a href="/login">Logout</a>{' '}
               </button>
             ) : (
-              <button className="primary">
+              <button className="btn-primary">
                 <a href="/login">Login</a>
               </button>
             )}

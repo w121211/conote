@@ -6,7 +6,6 @@ import {
   useCreateBulletEmojiMutation,
 } from '../../apollo/query.graphql'
 import EmojiIcon from './emoji-icon'
-import classes from './emoji-up-down.module.scss'
 import Popup from '../popup/popup'
 
 const BulletEmojiCreateButton = ({
@@ -22,15 +21,20 @@ const BulletEmojiCreateButton = ({
     variables: { bulletId, code: emojiCode },
 
     update(cache, { data }) {
-      const res = cache.readQuery<BulletEmojisQuery>({
+      const res = cache.readQuery<BulletEmojisQuery, BulletEmojisQueryVariables>({
         query: BulletEmojisDocument,
+        variables: { bulletId },
       })
       if (data?.createBulletEmoji) {
-        cache.writeQuery<BulletEmojisQuery, BulletEmojisQueryVariables>({
-          query: BulletEmojisDocument,
-          variables: { bulletId },
-          data: { bulletEmojis: (res?.bulletEmojis ?? []).concat(data.createBulletEmoji.emoji) },
-        })
+        if (res?.bulletEmojis.find(e => e.id === data.createBulletEmoji.emoji.id)) {
+          //
+        } else {
+          cache.writeQuery<BulletEmojisQuery, BulletEmojisQueryVariables>({
+            query: BulletEmojisDocument,
+            variables: { bulletId },
+            data: { bulletEmojis: (res?.bulletEmojis ?? []).concat(data.createBulletEmoji.emoji) },
+          })
+        }
       }
       // if (!res?.bulletEmojis && data?.createBulletEmoji) {
       //   cache.writeQuery<BulletEmojisQuery, BulletEmojisQueryVariables>({
@@ -68,13 +72,13 @@ const BulletEmojiCreateButton = ({
   return (
     <>
       <button
-        className={`noStyle ${classes.bulletEmojiDefaultBtn} ${className ? className : ''} `}
+        className={`btn-reset-style flex ${className ? className : ''} `}
         onClick={e => {
           e.stopPropagation()
           createBulletEmoji()
         }}
       >
-        <EmojiIcon code={emojiCode} />
+        <EmojiIcon code={emojiCode} showText />
       </button>
     </>
   )

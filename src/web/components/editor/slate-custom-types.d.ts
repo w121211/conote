@@ -15,9 +15,6 @@ export type CustomText = {
   code?: true
   text: string
   type?: string // stream type
-  placeholder?: boolean
-  shift?: boolean
-  leafType?: string
   tokenType?: string
   // placeholder?: boolean
 }
@@ -84,8 +81,6 @@ type CustomElement = CustomInlineElement | LcElement | LiElement | UlElement
 type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
 type CustomRange = BaseRange & {
-  leafType?: string
-  placeholder?: boolean
   tokenType?: string
   // placeholder?: boolean
 }

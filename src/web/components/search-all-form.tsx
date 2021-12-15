@@ -38,8 +38,6 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
       router.push(`/card/${encodeURIComponent(value.value)}`)
     }
     setValue(value)
-
-    console.log(action)
   }
 
   const handleCreate = (inputValue: string) => {
@@ -77,9 +75,9 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
   const customStyles: StylesConfig<Option, false, GroupBase<Option>> = {
     container: (provided: any, state: any) => ({
       ...provided,
-      width: '100%',
-      padding: '0 1rem',
+      maxWidth: '36rem',
       flex: '1',
+      padding: small ? '0 1rem' : '0',
     }),
     menu: (provided: any, state: any) => ({
       ...provided,
@@ -98,21 +96,16 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
     option: (provided: any) => ({
       ...provided,
       lineHeight: small ? '1' : 'inherit',
-      // display: 'flex',
-      // height: height + 'px' ?? 'initial',
     }),
     control: (provided, { isFocused }) => ({
       ...provided,
       width: '100%',
-      // maxHeight: '30px',
 
       whiteSpace: 'nowrap',
       borderRadius: '6px',
       minHeight: '40px',
       lineHeight: small ? '1' : 'inherit',
-      // borderColor: isFocused ? '#5c6cda' : 'hsl(0, 0%, 80%)',
       ':hover': {
-        // ':hover': { cursor: 'text' },
         borderColor: '#fff',
         boxShadow: '0 1px 6px 0 #17171730',
         cursor: 'text',
@@ -123,13 +116,11 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
     valueContainer: (provided, state) => ({
       ...provided,
       padding: '0 8px',
-      // lineHeight: small ? '1' : 'inherit',
     }),
     input: (provided, state) => ({
       ...provided,
       display: 'flex',
       alignItems: 'center',
-      // lineHeight: small ? '1' : 'inherit',
     }),
   }
 

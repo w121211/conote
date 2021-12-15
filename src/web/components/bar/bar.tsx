@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from 'react'
-// import { Poll } from '../../apollo/query.graphql'
-
-import classes from './bar.module.scss'
 
 const BarChart = ({
   content,
@@ -9,55 +6,44 @@ const BarChart = ({
   count,
   total,
   voted,
-
   checked,
 }: {
-  // pollData?: Poll
   content: string
   value: number
   total: number
   count: number
   voted: boolean
-
   checked?: boolean
 }): JSX.Element => {
-  // const [myData, setMyData] = useState(pollData)
   const persentage = (count: number, total: number) => Math.round((count / total + Number.EPSILON) * 100) || 0
-  // const total = myData?.count.nVotes.length === 0 ? 0 : myData?.count.nVotes.reduce((a, b) => a + b)
-  // useEffect(() => {
-  //   setMyData(pollData)
-  // }, [pollData])
 
   return (
-    <div className={classes.barChartWrapper}>
-      <span className={` ${classes.vote} ${classes.text} ${checked && classes.clicked}`}>
+    <div className="w-full p-1 text-gray-700">
+      <span
+        className={`relative block w-full h-9 rounded bg-gray-200 hover:bg-gray-300 font-bold ${
+          checked ? 'outline outline-blue-300' : ''
+        }`}
+      >
         <div
-          className={`${classes.voteColorBlock} ${voted ? classes.voted : ''}`}
+          className={`absolute flex w-full h-9 rounded overflow-hidden bg-blue-500 ${voted ? 'bg-blue-700' : ''}`}
           style={{
             clipPath: `inset(0  ${100 - persentage(count, total)}% 0 0 round 4px) `,
-
-            // width: `${persentage(count, total)}%`,
           }}
         >
-          <span className={classes.voteColorBlockText}>
+          <span className="flex items-center justify-between w-full mx--4 capitalize text-white">
             {content}
-            {/* {typeof e === 'string' && e.replace(/^<(.+)>$/g, '$1').toLowerCase()} */}
-            <span>
+            <span className="text-white">
               {persentage(count, total)}%({count || 0})
             </span>
           </span>
         </div>
-        <span className={classes.voteText}>
+        <span className="flex items-center justify-between h-full mx-4 font-bold capitalize">
           {content}
-          {/* {typeof e === 'string' && e.replace(/^<(.+)>$/g, '$1').toLowerCase()} */}
           <span>
             {persentage(count, total)}%({count || 0})
           </span>
         </span>
-        {/* <span className={quesClasses.voteColorBlockText}>{e.content}</span> */}
       </span>
-
-      {/* ))} */}
     </div>
   )
 }

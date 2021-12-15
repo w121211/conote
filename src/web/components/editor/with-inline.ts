@@ -5,7 +5,7 @@ import { CustomElement, CustomInlineElement, CustomText, LcElement } from './sla
 
 const toSlateInline = (item: InlineItem): CustomInlineElement | CustomText => {
   if (item.type === 'text') {
-    return { text: item.str, shift: false }
+    return { text: item.str }
   }
   const inline: CustomInlineElement = {
     ...item,
