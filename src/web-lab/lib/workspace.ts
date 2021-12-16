@@ -38,7 +38,7 @@ export type DocLocation = {
 }
 
 type DocProps = {
-  cardInput: CardInput | null
+  cardInput: CardInput | null // require if card is null
   cardSnapshot: Card | null
   // prevState: CardState | null
   subSymbols?: string[] // 動態儲存還是只有在 submit 的時候直接輸出？
@@ -52,7 +52,7 @@ export class Doc {
   readonly symbol: string // as CID
   readonly cardSnapshot: Card | null // to keep the prev-state
 
-  cardInput: CardInput | null // required if card is null
+  cardInput: CardInput | null // require if card is null
   subSymbols: string[]
   value: TreeNode<Bullet>[]
 
@@ -189,7 +189,7 @@ export class Doc {
       await LocalDBService.docTable.getItem(symbol) // symbol as cid
 
     if (saved) {
-      console.log('Doc loaded', saved)
+      console.log('Doc loaded', symbol, saved)
       return Doc.fromJSON(saved)
       // this.check(doc)
     }
@@ -321,6 +321,7 @@ class Workspace {
     card: Card | null
     loc: DocLocation
   }): Promise<void> {
+    console.log('open doc', loc)
     // Save current editing doc before opening another
     // console.log(this.curDoc$.getValue())
     const curDoc = this.curDoc$.getValue()

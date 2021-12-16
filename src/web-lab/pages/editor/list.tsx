@@ -206,7 +206,7 @@ const CustomElement = ({
   }
 }
 
-export const BulletEditor = (props: {
+export const ListEditor = (props: {
   initialValue?: LiElement[]
   authorName?: string
   sourceUrl?: string
@@ -253,12 +253,12 @@ export const BulletEditor = (props: {
   )
 }
 
-const TestPage = (): JSX.Element => {
+const Page = (): JSX.Element => {
   return (
     <div>
-      <BulletEditor />
+      <ListEditor />
     </div>
   )
 }
 
-export default TestPage
+export default Page

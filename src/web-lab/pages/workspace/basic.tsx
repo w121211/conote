@@ -4,9 +4,45 @@ import { nanoid } from 'nanoid'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import Modal from 'react-modal'
 import { useObservable } from 'rxjs-hooks'
 import { TreeNode } from '../../../packages/docdiff/src'
 import { Bullet, Card, Doc, DocLocation, workspace } from '../../lib/workspace'
+
+Modal.setAppElement('#__next')
+
+const callMockAPI = (symbol: string): Card | null => {
+  // Mocking query card result
+  if (symbol === 'BBB') {
+    return null // mocking card 'BBB' is not found
+  }
+  if (symbol === 'URL') {
+    // mocking card 'URL' is a new webpage-card
+    // setCard({ id: nanoid(), symbol, link: 'some-url.com', state: null })
+    return { id: nanoid(), symbol, link: 'some-url.com', state: null }
+  }
+  return {
+    id: nanoid(),
+    symbol,
+    state: {
+      id: nanoid(),
+      body: {
+        prevStateId: nanoid(),
+        subStateIds: [],
+        value: [
+          {
+            cid: 'fake-id',
+            data: {
+              id: 'fake-id',
+              head: `${symbol}: A queried card doc`,
+            },
+            children: [],
+          },
+        ],
+      },
+    },
+  }
+}
 
 const Editor = ({ doc }: { doc: Doc }): JSX.Element => {
   const [value, setValue] = useState<TreeNode<Bullet>[]>(doc.value)
@@ -31,7 +67,7 @@ const Editor = ({ doc }: { doc: Doc }): JSX.Element => {
           // shareValue.setPartial([], v)
         }}
       >
-        Mutate
+        Change
       </button>
 
       {value.map((e, i) => (
@@ -116,7 +152,7 @@ const getDocLocation = (query: ParsedUrlQuery): DocLocation => {
   const author = query['a']
 
   if (typeof symbol !== 'string') {
-    throw '[conote] Symbol not found in url query'
+    throw `[conote] 'symbol' not found in url query, ${symbol}`
   }
   return {
     symbol,
@@ -128,63 +164,64 @@ const getDocLocation = (query: ParsedUrlQuery): DocLocation => {
   }
 }
 
+type DocPath = {
+  symbol: string // use 'symbol' as the cid in local-db
+  given: {
+    card: Card | null
+  }
+}
+
 const Page = (): JSX.Element | null => {
   const router = useRouter()
-  const [loc, setLoc] = useState<DocLocation>()
-  const [card, setCard] = useState<Card | null>(null)
+  const [docPath, setDocPath] = useState<DocPath | null>(null)
+  const [modalDocPath, setModalDocPath] = useState<DocPath | null>(null)
 
-  const allDocCids = useObservable(() => workspace.allDocCids$)
+  // const allDocCids = useObservable(() => workspace.allDocCids$)
 
   useEffect(() => {
+    console.log('useEffect')
     if (router.isReady) {
-      const loc = getDocLocation(router.query)
-      setLoc(loc)
-
-      const { symbol } = loc
-
-      // Mocking query card result
-      if (symbol === 'BBB') {
-        // mocking card 'BBB' is not found
-        setCard(null)
-      } else if (symbol === 'URL') {
-        // mocking card 'URL' is a new webpage-card
-        setCard({ id: nanoid(), symbol, link: 'some-url.com', state: null })
-      } else {
-        setCard({
-          id: nanoid(),
-          symbol,
-          state: {
-            id: nanoid(),
-            body: {
-              prevStateId: nanoid(),
-              subStateIds: [],
-              value: [
-                {
-                  cid: 'fake-id',
-                  data: {
-                    id: 'fake-id',
-                    head: `${symbol}: A queried card doc`,
-                  },
-                  children: [],
-                },
-              ],
-            },
-          },
-        })
+      const { symbol } = router.query
+      if (typeof symbol === 'string') {
+        const card = callMockAPI(symbol)
+        setDocPath({ symbol, given: { card } })
       }
+      // if (typeof symbol2 === 'string') {
+      //   const card = callMockAPI(symbol2)
+      //   setModalDocPath({ symbol: symbol2, given: { card } })
+      // }
     }
   }, [router])
 
-  if (loc === undefined) {
-    return null
-  }
   return (
     <div>
-      {allDocCids && allDocCids.map((e, i) => <button key={i}>{e}</button>)}
+      {/* {allDocCids &&
+        allDocCids.map((e, i) => (
+          <Link
+            key={i}
+            href={{
+              pathname: '/workspace/basic',
+              query: { symbol: e },
+            }}
+          >
+            <a>{e}</a>
+          </Link>
+        ))} */}
+      <p>
+        <button
+          onClick={() => {
+            const symbol2 = 'CCC'
+            const card = callMockAPI(symbol2)
+            setModalDocPath({ symbol: symbol2, given: { card } })
+          }}
+        >
+          <a>Modal (CCC)</a>
+        </button>
+      </p>
       <p>
         <Link
           href={{
-            pathname: '/workspace/workspace',
+            pathname: '/workspace/basic',
             query: { symbol: 'AAA' },
           }}
         >
@@ -194,7 +231,7 @@ const Page = (): JSX.Element | null => {
       <p>
         <Link
           href={{
-            pathname: '/workspace/workspace',
+            pathname: '/workspace/basic',
             query: { symbol: 'BBB' },
           }}
         >
@@ -204,7 +241,7 @@ const Page = (): JSX.Element | null => {
       <p>
         <Link
           href={{
-            pathname: '/workspace/workspace',
+            pathname: '/workspace/basic',
             query: { symbol: 'AAA', path: '1.2' },
           }}
         >
@@ -212,7 +249,31 @@ const Page = (): JSX.Element | null => {
         </Link>
       </p>
 
-      <Workspace card={card} loc={loc} />
+      {/* {docPath && modalDocPath === null && (
+        <Workspace card={docPath.given.card} loc={{ symbol: docPath.symbol }} />
+      )} */}
+
+      <h1>Modal</h1>
+
+      {/* <Modal
+        isOpen={modalDocPath !== null}
+        // isOpen={postId !== undefined}
+        onRequestClose={() =>
+          // router.push({
+          //   pathname: '/workspace/basic',
+          //   query: { symbol: 'AAA' },
+          // })
+          setModalDocPath(null)
+        }
+        // contentLabel="Post modal"
+      > */}
+      {modalDocPath && (
+        <Workspace
+          card={modalDocPath.given.card}
+          loc={{ symbol: modalDocPath.symbol }}
+        />
+      )}
+      {/* </Modal> */}
     </div>
   )
 }
