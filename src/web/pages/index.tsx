@@ -5,9 +5,9 @@ import { useState } from 'react'
 import { useLatestCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
 import { useRouter } from 'next/router'
-import ListLarge from '../components/list-large/list-large'
 import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/new-hot-list'
+import NewList from '../components/list/new-list'
 
 export function LatestCards(): JSX.Element | null {
   const router = useRouter()
@@ -28,7 +28,7 @@ export function LatestCards(): JSX.Element | null {
   // console.log(data.latestCardDigests)
   return (
     <>
-      <ListLarge
+      <NewList
         cardId={'cardId'}
         title={'水力發電短缺 冰島減供工業用電 拒與新的比特幣礦工簽約'}
         href={'https://news.cnyes.com/news/id/4782741?exp=a'}
@@ -44,7 +44,7 @@ export function LatestCards(): JSX.Element | null {
         shot={'SHOT'}
       />
 
-      <ListLarge
+      <NewList
         cardId={'cardId'}
         title={'日本央行副總裁：沒有必要調整超寬鬆貨幣政策'}
         href={'https://news.cnyes.com/news/id/4782649?exp=a'}
@@ -60,7 +60,7 @@ export function LatestCards(): JSX.Element | null {
         shot={'SHOT'}
       />
 
-      <ListLarge
+      <NewList
         cardId={'cardId'}
         title={'玉晶光11月營收19.25億元創同期新高 年增6.49%'}
         href={'https://news.cnyes.com/news/id/4782820?exp=a'}
@@ -74,7 +74,7 @@ export function LatestCards(): JSX.Element | null {
         hashtags={['$AAPL', '$3406:TW', '光學元件', '元宇宙', 'iPhone']}
       />
 
-      <ListLarge
+      <NewList
         cardId={'cardId'}
         title={'晶片荒惡化費半大跌 交期拉長至逾20周'}
         href={'https://news.cnyes.com/news/id/4700195'}
@@ -88,7 +88,7 @@ export function LatestCards(): JSX.Element | null {
 
       {data.latestCardDigests &&
         data.latestCardDigests.map((e, i) => (
-          <ListLarge
+          <NewList
             key={i}
             cardId={e.cardId}
             title={e.cardMeta.title ?? e.title}
@@ -129,18 +129,18 @@ function HomePage(): JSX.Element {
   return (
     <div className="flex flex-col w-screen h-screen overflow-auto">
       <div className="flex flex-col">
-        <div className="flex items-center justify-between mx-10 my-5">
+        <div className="flex items-center justify-between mx-10 mt-8 mb-10">
           <div className="flex-3 flex items-center max-w-2xl">
-            <h1 className="mr-6 text-blue-800">Conote</h1>
+            <h3 className="mr-10 text-2xl">Conote</h3>
             <SearchAllForm />
           </div>
           <MeHeaderItem className="flex-2 text-right" />
         </div>
         <>
           <div className="flex flex-col justify-center pb-[9vh]">
-            <div className="flex px-[calc(4rem+102px)] gap-10">
+            <div className="flex justify-between w-3/4 ml-[calc(4rem+98px)] gap-16">
               <NewHotList />
-              <div className="flex-grow min-w-[300px] h-fit px-4 rounded border border-gray-300">
+              <div className="flex-shrink-0 w-1/3 h-fit px-4 rounded border border-gray-300">
                 <h3>自選股</h3>
                 <div>
                   <div className="flex mb-3 pb-3 border-b border-gray-300 text-gray-700">

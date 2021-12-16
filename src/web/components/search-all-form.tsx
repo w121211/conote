@@ -102,7 +102,7 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
       width: '100%',
 
       whiteSpace: 'nowrap',
-      borderRadius: '6px',
+      borderRadius: '4px',
       minHeight: '40px',
       lineHeight: small ? '1' : 'inherit',
       ':hover': {

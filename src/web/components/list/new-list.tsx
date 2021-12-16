@@ -2,7 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import CardEmojis from '../emoji-up-down/card-emojis-display'
 
-const ListLarge = ({
+const NewList = ({
   href,
   title,
   sourceUrl,
@@ -26,11 +26,11 @@ const ListLarge = ({
   currentHashtag?: string
 }): JSX.Element => {
   return (
-    <div className="overflow-hidden mb-4 pb-4">
+    <div className="overflow-hidden mt-6 mb-4 pb-4">
       <div className="flex mb-2 items-center text-sm">
         {author && (
           <Link href={`/author/${author}`}>
-            <a className="text-blue-500 overflow-hidden whitespace-nowrap text-ellipsis hover:underline hover:underline-offset-2">
+            <a className="text-gray-600 overflow-hidden whitespace-nowrap text-ellipsis hover:underline hover:underline-offset-2">
               {author}
             </a>
           </Link>
@@ -40,17 +40,26 @@ const ListLarge = ({
 
         {(author || hashtags || source) && <span className="h-4 mx-2 border-r border-gray-300"></span>}
         {sourceUrl && (
-          <div className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis">{sourceUrl}</div>
+          <a
+            href={`${sourceUrl}`}
+            className="overflow-hidden whitespace-nowrap text-ellipsis"
+            rel="noreferrer"
+            target="_blank"
+          >
+            <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-gray-500 hover:underline hover:underline-offset-2">
+              {sourceUrl}
+            </span>
+          </a>
         )}
         {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
       </div>
       <Link href={href}>
-        <a className="overflow-hidden whitespace-nowrap text-ellipsis">
-          <h3 className="m-0 overflow-hidden whitespace-nowrap text-ellipsis text-blue-800 text-xl">{title}</h3>
+        <a className="overflow-hidden whitespace-nowrap text-ellipsis text-blue-800 hover:underline hover:underline-offset-2 ">
+          <h3 className="m-0 overflow-hidden whitespace-nowrap text-ellipsis text-xl">{title}</h3>
         </a>
       </Link>
       {summary && (
-        <div className="mb-1 line-clamp-2 text-ellipsis text-sm">
+        <div className="mb-1 line-clamp-2 text-ellipsis text-sm text-gray-500">
           {summary.map((e, i) => {
             return (
               <span key={i}>
@@ -84,4 +93,4 @@ const ListLarge = ({
   )
 }
 
-export default ListLarge
+export default NewList
