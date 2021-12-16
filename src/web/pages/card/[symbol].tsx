@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useApolloClient, useQuery } from '@apollo/client'
-// import { useUser } from '@auth0/nextjs-auth0'
 import { useObservable } from 'rxjs-hooks'
 import { CardFragment, useCardLazyQuery, useMeQuery } from '../../apollo/query.graphql'
 import Layout from '../../components/layout/layout'
@@ -10,12 +9,11 @@ import { workspace } from '../../components/workspace/workspace'
 import { BulletEditor } from '../../components/editor/editor'
 import { Doc, DocEntry, DocEntryPack } from '../../components/workspace/doc'
 import { DocPath, DocPathService } from '../../components/workspace/doc-path'
-import classes from '../../style/symbol.module.scss'
 import CardMetaForm from '../../components/card-meta-form/card-meta-form'
 import LinkIcon from '../../assets/svg/link.svg'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 import Modal from '../../components/modal/modal'
-import Account from '../account'
+import LoginPage from '../login'
 
 const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; symbol: string }): JSX.Element => {
   // const mainDoc = useObservable(() => workspace.mainDoc$)
@@ -43,30 +41,36 @@ const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; 
         }}
         ref={hiddenBtnRef}
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mb-2">
           {card && (
             <CardMetaForm
               cardId={card?.id}
               showBtn={showHeaderHiddenBtns}
               handleCardMetaSubmitted={handleCardMetaSubmitted}
-              btnClassName={classes.cardMetaBtn}
             />
           )}
 
           {doc?.symbol.startsWith('@http') && (
             <a
-              className={classes.cardSource}
+              className="inline-flex items-center overflow-hidden text-gray-500 hover:text-gray-700"
               href={doc?.symbol.substr(1)}
               style={showHeaderHiddenBtns ? { opacity: 1 } : { opacity: 0 }}
               target="_blank"
               rel="noreferrer"
             >
-              <span className="material-icons">open_in_new</span>
-              開啟來源
+              <span className="material-icons text-lg">open_in_new</span>
+              <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis">
+                {card?.meta.url}
+              </span>
             </a>
           )}
         </div>
-        <h1 className="mt-1 mb-4 line-clamp-2 break-all">{doc.cardInput?.meta?.title || symbol}</h1>
+        {card?.meta?.author && (
+          <Link href={`/author/${encodeURIComponent('@' + card?.meta?.author)}`}>
+            <a className="text-sm text-blue-500 hover:underline hover:underline-offset-1">@{card?.meta?.author}</a>
+          </Link>
+        )}
+        <h1 className="mb-4 line-clamp-2 break-all">{card?.meta.title || symbol}</h1>
       </div>
       {/* {cardMetaData?.cardMeta.keywords && (
         <div className={classes.headerKw}>
@@ -111,17 +115,7 @@ const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; 
           )}
         </div>
       )} */}
-      <div className={classes.headerBottom}>
-        {card && <HeaderCardEmojis cardId={card?.id} />}
-        {doc?.cardInput?.meta?.author && (
-          <>
-            <div className={classes.divider}></div>
-            <Link href={`/author/${encodeURIComponent('@' + doc?.cardInput?.meta?.author)}`}>
-              <a className={classes.author}>@{doc?.cardInput?.meta?.author}</a>
-            </Link>
-          </>
-        )}
-      </div>
+      <div className="flex items-center w-full">{card && <HeaderCardEmojis cardId={card?.id} />}</div>
     </div>
   )
 }
@@ -173,7 +167,7 @@ const WorkspaceComponent = ({
   const savedDocs = useObservable(() => workspace.savedDocs$)
   const committedDocs = useObservable(() => workspace.committedDocs$)
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const { data: meData } = useMeQuery({ fetchPolicy: 'cache-first' })
+  const { data: meData, error: meError, loading: meLoading } = useMeQuery()
   const { login } = router.query
   // if (card) {
   //   const a = new Date(card.updatedAt as unknown as string)
@@ -212,34 +206,40 @@ const WorkspaceComponent = ({
   if (mainDoc.doc === null) {
     return <div>Unexpected error</div>
   }
-  return (
-    <div
-      onClick={e => {
-        e.stopPropagation()
-        // router.push({ pathname: `/card/${encodeURIComponent(docPath.symbol)}?mode=login` }, `/login`, {
-        //   scroll: false,
-        //   shallow: true,
-        // })
-        // setShowLoginModal(true)
 
-        // if (!meData) {
-        // }
-      }}
-    >
-      {/* <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
+  console.log(meData)
+
+  return (
+    <>
+      <div
+        onClick={e => {
+          e.stopPropagation()
+          // setShowLoginModal(true)
+
+          // if (!meLoading && meError) {
+          //   router.push(
+          //     { pathname: `/card/[symbol]`, query: { mode: 'login' } },
+          //     { pathname: `/card/${encodeURIComponent(docPath.symbol)}`, query: { mode: 'login' } },
+          //     {
+          //       scroll: false,
+          //       shallow: true,
+          //     },
+          //   )
+          // }
+        }}
+      >
+        {/* <div>Saved:{savedDocs && savedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
       <div>Committed:{committedDocs && committedDocs.map((e, i) => <DocEntryPackLink key={i} pack={e} />)}</div>
 
       <div>{status}</div>
 
       <div>Source: {mainDoc.doc.sourceCardCopy?.sym.symbol}</div> */}
 
-      <CardHead doc={mainDoc.doc} card={card} symbol={mainDoc.doc.symbol} />
+        <CardHead doc={mainDoc.doc} card={card} symbol={mainDoc.doc.symbol} />
 
-      <BulletEditor doc={mainDoc.doc} />
-      <Modal visible={router.query.mode === 'login'} onClose={() => setShowLoginModal(false)}>
-        <Account />
-      </Modal>
-    </div>
+        <BulletEditor doc={mainDoc.doc} />
+      </div>
+    </>
   )
 }
 
@@ -279,14 +279,13 @@ const CardSymbolPage = (): JSX.Element | null => {
   if (card.data === undefined || (docPath.sourceCardId && sourceCard.data === undefined)) {
     return <div>Unexpected error</div>
   }
-
   return (
     <>
       <Layout
         buttonRight={
           <>
             <button
-              className="secondary"
+              className="btn-secondary"
               onClick={() => {
                 workspace.drop()
               }}
@@ -294,7 +293,7 @@ const CardSymbolPage = (): JSX.Element | null => {
               Drop
             </button>
             <button
-              className="primary"
+              className="btn-primary"
               onClick={() => {
                 if (mainDoc === null) {
                   return
@@ -305,7 +304,7 @@ const CardSymbolPage = (): JSX.Element | null => {
               }}
               // disabled={!isValueModified}
             >
-              {'儲存草稿'}
+              儲存草稿
               {/* {console.log(isValueModified)} */}
             </button>
             <button
@@ -332,6 +331,18 @@ const CardSymbolPage = (): JSX.Element | null => {
           }}
         />
       </Layout>
+      <Modal
+        visible={!!router.query.mode}
+        onClose={() =>
+          router.push(
+            { pathname: `/card/[symbol]` },
+            { pathname: `/card/${encodeURIComponent(docPath.symbol)}` },
+            { scroll: false },
+          )
+        }
+      >
+        <LoginPage />
+      </Modal>
     </>
   )
 }

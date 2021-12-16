@@ -18,7 +18,7 @@ module.exports = withReactSvg({
   // },
   sassOptions: {
     includePaths: ['./src'],
-    prependData: `@import "style/variables.scss";`,
+    // prependData: `@import "style/variables.scss";`,
   },
   webpack(config, options) {
     config.module.rules.push({

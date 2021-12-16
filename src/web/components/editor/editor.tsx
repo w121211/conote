@@ -14,18 +14,6 @@ import {
 } from 'slate-react'
 import { withHistory } from 'slate-history'
 import { CardFragment } from '../../apollo/query.graphql'
-import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
-import BulletPanel from '../bullet-panel/bullet-panel'
-import BulletSvg from '../bullet-svg/bullet-svg'
-import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
-// import PollPage from '../poll/poll-page'
-// import AuthorPollPage from '../poll/author-poll-page'
-// import CreatePollForm from '../poll-form/create-poll-form'
-// import Popover from '../popover/popover'
-import { Doc } from '../workspace/doc'
-import classes from './editor.module.scss'
-import { LcElement, LiElement, UlElement } from './slate-custom-types'
-import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { parseLcAndReplace, withInline } from './with-inline'
 import InlineSymbol from '../inline/inline-symbol'
 import InlineMirror from '../inline/inline-mirror'
@@ -33,59 +21,98 @@ import InlineFiltertag from '../inline/inline-filtertag'
 import InlinePoll from '../inline/inline-poll'
 import InlineRate from '../inline/inline-rate'
 import { decorate } from './decorate'
+import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
+import BulletPanel from '../bullet-panel/bullet-panel'
+import BulletSvg from '../bullet-svg/bullet-svg'
+import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
+import { Doc } from '../workspace/doc'
+import { LcElement, LiElement, UlElement } from './slate-custom-types'
+import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
+import Modal from '../modal/modal'
 
-const Leaf = ({ attributes, leaf, children }: RenderLeafProps): JSX.Element => {
-  let style: React.CSSProperties = {}
+const Leaf = (props: RenderLeafProps): JSX.Element => {
+  const { attributes, leaf, children } = props
+
+  const selected = useSelected()
+  // const [isPressShift, setIsPressShift] = useState(false)
+  // console.log(isPressShift)
+  // let style: React.CSSProperties = {}
   let className = ''
 
+  // if (selected) {
+  // switch (leaf.tokenType) {
+  //   case 'mirror-ticker':
+  //   case 'mirror-topic':
+  //   case 'mirror-topic-bracket-head':
+  //   case 'mirror-head':
+  //   case 'topic-bracket-head':
+  //   case 'topic-bracket-tail': {
+  //     className = 'text-blue-500 '
+  //     break
+  //   }
+  //   case 'author': {
+  //     className = 'text-green-500'
+  //     break
+  //   }
+  //   case 'poll':
+  //   case 'new-poll': {
+  //     className = 'text-cyan-500'
+  //     break
+  //   }
+  //   case 'rate':
+  //   case 'new-rate': {
+  //     className = 'text-yellow-500'
+  //     break
+  //   }
+  //   case 'ticker':
+  //   case 'topic-bracket':
+  //   case 'topic': {
+  //     className = 'text-pink-500'
+  //     break
+  //   }
+  //   case 'filtertag': {
+  //     className = 'text-purple-500'
+  //     break
+  //   }
+  //   case 'url': {
+  //     className = 'text-sky-500'
+  //     break
+  //   }
+  //   default: {
+  //     className = 'text-gray-600'
+  //   }
+  // }
+  // } else {
   switch (leaf.tokenType) {
     case 'mirror-ticker':
     case 'mirror-topic':
-    case 'mTopic-bracket': {
-      // className = classes.mirrorLeaf
-      style = { color: '#5395f0' }
+    case 'rate':
+    case 'topic':
+    case 'ticker': {
+      className = 'text-blue-500'
       break
     }
-    case 'author': {
-      style = { color: '#0cb26e' }
-      break
-    }
-    case 'poll':
-    case 'new-poll': {
-      style = { color: '#329ead' }
-      break
-    }
-    case 'shot':
-    case 'new-shot': {
-      style = { color: 'rgb(215 159 29)' }
-      break
-    }
+    case 'mirror-topic-bracket-head':
+    case 'mirror-head':
     case 'topic-bracket-head':
-    case 'topic-bracket-tail':
-      style = { color: 'blue' }
+    case 'topic-bracket-tail': {
+      className = 'text-gray-400'
       break
-    case 'ticker':
-    case 'topic': {
-      // className = classes.topicLeaf
-      // style = { color: '#ff619b', fontWeight: 'bold',cursor:'pointer'}
-      style = { color: 'rgb(215 159 29)' }
+    }
+    case 'author':
+    case 'url': {
+      className = 'text-green-500'
       break
     }
     case 'filtertag': {
-      className = classes.filtertagLeaf
-      style = { color: '#6a53fe' }
-      break
-    }
-    case 'url': {
-      style = { color: '#ff619b' }
-      break
-    }
-    default: {
-      style = { color: '#3d434a' }
+      className = 'text-purple-500'
     }
   }
+  // }
+
   return (
-    <span {...attributes} className={className} style={style}>
+    // {/* <span {...attributes}>{children}</span> */}
+    <span {...attributes} className={className}>
       {children}
     </span>
   )
@@ -135,11 +162,6 @@ const Lc = ({
       <div>
         {children}
         {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />}
-        {/* // <span contentEditable={false}>
-          //   {emojiData.bulletEmojis?.map((e, i) => {
-          //     return <BulletPointEmojis key={i} bulletId={e.id} bulletEmojis={e} />
-          //   })}
-          // </span> */}
       </div>
       {/* {sourceCardId && ( 
        <span contentEditable={false}>
@@ -201,7 +223,9 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
       {/* <div contentEditable={false}></div> */}
       <div className="inline-flex items-center h-8 " contentEditable={false}>
         <span
-          className={`flex items-center justify-center flex-shrink-0 flex-grow-0 cursor-pointer opacity-0 group-hover:opacity-100`}
+          className={`flex items-center justify-center flex-shrink-0 flex-grow-0 opacity-0 ${
+            hasUl ? 'opacity-100' : 'opacity-0 select-none'
+          }`}
           onClick={event => {
             // 設定 folded property
             event.preventDefault()
@@ -219,41 +243,10 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           }}
         >
           <ArrowUpIcon
-            className={`w-2 h-2 fill-current text-gray-500 ${hasUl ? 'opacity-1' : 'opacity-0'}`}
+            className={` w-2 h-2 fill-current text-gray-500 `}
             style={{ transform: ulFolded === undefined ? 'rotate(180deg)' : 'rotate(90deg)' }}
           />
         </span>
-        {/* <BulletPanel><span className={classes.oauthorName}> @{authorName}</span></BulletPanel> */}
-
-        {/* <Link href={'/href'}>
-          <a
-            onMouseOver={e => {
-              e.stopPropagation()
-              // e.preventDefault()
-              // if (e.currentTarget.contains(containerRef.current)) {
-              setShowPanel(true)
-              // }
-              // console.log('hover')
-            }}
-            onMouseLeave={e => {
-              e.stopPropagation()
-              // e.preventDefault()
-
-              setShowPanel(true)
-              // if (!e.currentTarget.contains(containerRef.current)) {
-              //  setTimeout(
-              //   () => {
-              //   },
-              //   100,
-              //   false,
-              // )
-              // }
-              // console.log('mouseout')
-            }}
-          >
-            <BulletSvg />
-          </a>
-        </Link> */}
         <span
           className={`relative flex items-center justify-center w-5 h-full ${
             lc.bulletCopy?.id ? 'cursor-pointer' : 'cursor-default'
@@ -264,7 +257,6 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           <BulletSvg />
           {showPanel && lc.bulletCopy?.id && (
             <BulletPanel
-              // className={classes.bulletPanel}
               // tooltipClassName={classes.bulletPanelTooltip}
               bulletId={lc.bulletCopy.id}
               visible={showPanel}
@@ -281,9 +273,8 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
 }
 
 const Ul = ({ attributes, children, element }: RenderElementProps & { element: UlElement }): JSX.Element => {
-  const style: CSSProperties = element.folded ? { display: 'none' } : {} // { display: 'none', visibility: 'hidden', height: 0 }
   return (
-    <div {...attributes} className="" style={style}>
+    <div {...attributes} className={`${element.folded ? 'hidden' : 'block'}`}>
       {children}
     </div>
   )
@@ -372,12 +363,6 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
           spellCheck={false}
           onKeyDown={event => {
             withListOnKeyDown(event, editor)
-            // setIsPressShift(event.key === 'Shift')
-            // if (search) {
-            //   onKeyDownForSuggest(event)
-            // } else {
-            //   onKeyDownForBullet(event)
-            // }
           }}
         />
         {/* {searchPanel} */}

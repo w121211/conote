@@ -40,10 +40,6 @@ const TabsWithSlider = ({
       if (activeTabs.current[activeTabIdx]) {
         moveSlider(activeTabs.current[activeTabIdx])
       }
-      console.log(activeTabIdx)
-      //   for (const entry of entries) {
-      //     console.log(entry)
-      //   }
     })
     if (tabList.current) {
       resizeObserver.observe(tabList.current)
@@ -70,7 +66,7 @@ const TabsWithSlider = ({
                 }
                 return el
               }}
-              className={`px-4 py-2 text-gray-500 ${activeTabIdx === i && 'text-blue-800'} cursor-pointer `}
+              className={`px-4 py-2 ${activeTabIdx === i ? 'text-blue-800' : 'text-gray-400'} cursor-pointer `}
               onClick={e => {
                 handleActiveList(i)
                 setActiveTabIdx(i)

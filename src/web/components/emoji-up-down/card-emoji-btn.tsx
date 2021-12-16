@@ -9,7 +9,6 @@ import {
   useUpsertCardEmojiLikeMutation,
 } from '../../apollo/query.graphql'
 import EmojiIcon from './emoji-icon'
-import classes from './emoji-up-down.module.scss'
 
 const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Element => {
   const [upsertEmojiLike] = useUpsertCardEmojiLikeMutation({
@@ -38,20 +37,6 @@ const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Elem
   } = useMyCardEmojiLikeQuery({
     variables: { cardEmojiId: cardEmoji.id },
   })
-
-  // const handleMyChoice = () => {
-  //   if (commentId) {
-  //     return myCommentLikeData?.myCommentLikes.find(e => e.commentId === parseInt(commentId))
-  //   }
-  //   // if (bulletId) {
-  //   //   return myBulletLikeData?.myBulletLikes.find(e => e.bulletId === parseInt(bulletId))
-  //   // }
-  //   return undefined
-  // }
-  // useEffect(() => {
-  //   const res = handleMyChoice()
-  //   setMyChoice(res)
-  // }, [myCommentLikeData, myBulletLikeData])
 
   const handleLike = (choice: LikeChoice = 'UP') => {
     const myLike = myEmojiLikeData?.myCardEmojiLike
@@ -84,7 +69,7 @@ const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Elem
   }
   return (
     <button
-      className={`noStyle ${myEmojiLikeData?.myCardEmojiLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
+      className={`btn-reset-style`}
       onClick={() => {
         handleLike('UP')
       }}

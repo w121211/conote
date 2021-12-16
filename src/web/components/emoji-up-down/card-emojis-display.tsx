@@ -9,7 +9,6 @@ import {
   useUpsertCardEmojiLikeMutation,
 } from '../../apollo/query.graphql'
 import EmojiIcon from './emoji-icon'
-import classes from './emoji-up-down.module.scss'
 
 const CardEmojiDisplay = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Element | null => {
   const {
@@ -22,27 +21,27 @@ const CardEmojiDisplay = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.
 
   if (cardEmoji.count.nUps === 0) return null
   return (
-    <button
-      className={`noStyle ${myEmojiLikeData?.myCardEmojiLike?.choice === 'UP' ? classes.clicked : classes.hashtag}`}
-    >
+    <button className={`btn-reset-style`}>
       {/* {data.myHashtagLike?.choice && hashtag.text} */}
       {/* {hashtag.text} */}
       <EmojiIcon
+        className="hover:text-gray-500"
         code={cardEmoji.code}
         nUps={cardEmoji.count.nUps}
         liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
-        className={classes.cardDisplayIcon}
       />
     </button>
   )
 }
 
 const CardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null => {
-  const { data: cardEmojisData } = useCardEmojisQuery({ fetchPolicy: 'cache-first', variables: { cardId } })
-  if (!cardEmojisData || cardEmojisData?.cardEmojis.length <= 0) return null
+  const { data, error, loading } = useCardEmojisQuery({ fetchPolicy: 'cache-first', variables: { cardId } })
+  if (!data || error || loading || data?.cardEmojis.length === 0 || data.cardEmojis.every(e => e.count.nUps === 0)) {
+    return null
+  }
   return (
-    <div className={classes.cardEmojisContainer}>
-      {cardEmojisData.cardEmojis.map((e, i) => {
+    <div className="inline-flex">
+      {data.cardEmojis.map((e, i) => {
         return <CardEmojiDisplay key={i} cardEmoji={e} />
       })}
     </div>

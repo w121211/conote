@@ -8,13 +8,11 @@ const CardMetaForm = ({
   cardId,
   selfCard,
   handleCardMetaSubmitted,
-  btnClassName,
   showBtn,
 }: {
   cardId: string
   selfCard?: CardFragment
   handleCardMetaSubmitted: (isSubmitted: boolean) => void
-  btnClassName?: string
   showBtn?: boolean
 }): JSX.Element => {
   const [showHeaderForm, setShowHeaderForm] = useState(false)
@@ -22,17 +20,19 @@ const CardMetaForm = ({
   const { data: cardData } = useCardQuery({
     variables: { id: cardId },
   })
+
   return (
     <>
       <button
-        className={btnClassName ? btnClassName : ''}
-        style={showBtn ? { opacity: 1, pointerEvents: 'auto' } : { opacity: 0, pointerEvents: 'none' }}
+        className={`btn-reset-style inline-flex items-center text-gray-500 hover:text-gray-700 ${
+          showBtn ? 'opacity-100' : 'opacity-0'
+        }`}
         onClick={() => {
           setShowHeaderForm(true)
         }}
       >
         <span className="material-icons">edit_note</span>
-        編輯卡片資訊
+        <span className="whitespace-nowrap">編輯卡片資訊</span>
       </button>
       <Modal
         visible={showHeaderForm}

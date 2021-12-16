@@ -59,5 +59,6 @@
       "changeProcessCWD": true
     }
   ],
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.bracketPairColorization.enabled": true
 }

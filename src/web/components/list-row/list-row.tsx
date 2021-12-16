@@ -1,6 +1,5 @@
 import React from 'react'
 import Link from 'next/link'
-import classes from './list-row.module.scss'
 
 const ListRow = ({
   href,
@@ -20,16 +19,16 @@ const ListRow = ({
   shot?: string
 }): JSX.Element => {
   return (
-    <div className={classes.container}>
+    <div className="flex  mb-2 pb-2 border-b border-b-gray-300 overflow-hidden">
       <Link href={href}>
         {/* <a>{e.link.url.substring(0, 50).replace('//', '').replace('[[', '').replace(']]', '')}</a> */}
-        <a className={classes.link}>
+        <a className="flex items-center justify-between overflow-hidden">
           {/* <div> */}
-          <div className={classes.left}>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
             {shot && (
               <span
-                className={`${classes.shot} ${
-                  shot.match('buy') ? classes.shotGreen : shot.match('sell') ? classes.shotRed : ''
+                className={`px-2 rounded text-white ${
+                  shot.match('buy') ? 'bg-green-700' : shot.match('sell') ? 'bg-rose-700' : 'bg-yellow-700'
                 }`}
               >
                 {shot}
@@ -42,20 +41,20 @@ const ListRow = ({
                 </div>
               )} */}
             {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
-            <h3 className={classes.title}>
-              {title}
-              {summary && <div className={classes.summary}>{summary}</div>}
-            </h3>
+            <div className="flex flex-col">
+              <h3 className="flex-shrink-0 overflow-hidden whitespace-nowrap text-ellipsis text-blue-800">{title}</h3>
+              {summary && <span className="whitespace-nowrap text-gray-500 text-sm font-normal">{summary}</span>}
+            </div>
 
-            {author ? <div className={classes.author}>{author}</div> : ''}
+            {author ? <div className="text-blue-500">{author}</div> : ''}
           </div>
           {/* </div> */}
-          <div className={classes.emojisContainer}>
-            <span>👍22</span>
-            <span>👎10</span>
-          </div>
         </a>
       </Link>
+      <div className="flex">
+        <span>👍22</span>
+        <span>👎10</span>
+      </div>
     </div>
   )
 }

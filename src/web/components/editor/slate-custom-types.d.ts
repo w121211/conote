@@ -14,6 +14,7 @@ export type CustomText = {
   italic?: true
   code?: true
   text: string
+  type?: string // stream type
   tokenType?: string
   // placeholder?: boolean
 }

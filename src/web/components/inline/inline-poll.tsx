@@ -87,7 +87,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
   // }
   // if (element.type === 'poll') {
   return (
-    <span {...attributes}>
+    <button className="btn-reset-style" {...attributes}>
       {/* <span style={selected ? undefined : { display: 'none' }}>{children}</span> */}
 
       {!selected && (
@@ -130,7 +130,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
       )}
       {/* <span>{children}</span> */}
       <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
-    </span>
+    </button>
   )
 }
 

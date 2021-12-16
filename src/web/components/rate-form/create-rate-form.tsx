@@ -15,7 +15,6 @@ import {
   useCreateRateMutation,
   useLinkLazyQuery,
 } from '../../apollo/query.graphql'
-import classes from './shot-form.module.scss'
 
 export interface FormInput {
   author: string
@@ -37,8 +36,7 @@ const CreateRateForm = ({
   const { author, choice, target, link } = initialInput
   const [targetId, setTargetId] = useState<string | undefined>()
   const client = useApolloClient()
-  //   const { data: authorData } = useAuthorQuery({ variables: { id: authorId ?? '' } })
-  //   let targetId: string
+  //   const { data: authorData
   let linkId: string
 
   const { data: targetCardData } = useCardQuery({
@@ -55,7 +53,6 @@ const CreateRateForm = ({
     },
   })
   useEffect(() => {
-    console.log(targetCardData)
     if (targetCardData?.card) {
       setTargetId(targetCardData.card.id)
     }
@@ -104,14 +101,12 @@ const CreateRateForm = ({
 
   const myHandleSubmit = (d: FormInput) => {
     if (d.target && d.choice !== '') {
-      setSkipCardQuery(false)
-
       if (d.link) {
         queryLink({ variables: { url: d.link ?? '' } })
       }
       // console.log(targetId)
       if (targetId) {
-        createShot({
+        createRate({
           variables: {
             data: {
               targetId: targetId,
@@ -126,15 +121,11 @@ const CreateRateForm = ({
   }
   return (
     <>
-      <form className={classes.form} onSubmit={handleSubmit(myHandleSubmit)}>
+      <form className="flex flex-col mt-4 mb-8" onSubmit={handleSubmit(myHandleSubmit)}>
         <label>
           <h5> 作者</h5>
           {
-            initialInput.author ? (
-              <button type="button" onClick={() => setShowPopup(true)}>
-                {initialInput.author}
-              </button>
-            ) : null
+            initialInput.author ? <button type="button">{initialInput.author}</button> : null
             // <Controller
             //   control={control}
             //   name="author"
@@ -143,7 +134,7 @@ const CreateRateForm = ({
             // <input {...register('author')} type="text" />
           }
         </label>
-        <div className={classes.radioWrapper}>
+        <div className="flex">
           <label>
             <input {...register('choice')} type="radio" value="LONG" />
             <h5> 看多</h5>
@@ -166,7 +157,7 @@ const CreateRateForm = ({
           <input {...register('link')} type="text" />
         </label>
 
-        <button className="primary" type="submit">
+        <button className="btn-primary" type="submit">
           <h5> 送出</h5>
         </button>
       </form>
@@ -176,14 +167,14 @@ const CreateRateForm = ({
         buttons={
           <>
             <button
-              className="secondary"
+              className="btn-secondary"
               onClick={() => {
                 router.push(`/author/${initialInput.author}`)
               }}
             >
               確定
             </button>
-            <button className="primary" onClick={() => setShowPopup(false)}>
+            <button className="btn-primary" onClick={() => setShowPopup(false)}>
               取消
             </button>
           </>

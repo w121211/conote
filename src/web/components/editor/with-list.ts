@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import React from 'react'
 import assert from 'assert'
 import { nanoid } from 'nanoid'
 // import { ReactEditor } from 'slate-react'

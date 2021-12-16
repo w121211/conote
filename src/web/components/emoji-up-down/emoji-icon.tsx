@@ -1,5 +1,4 @@
 import { EmojiCode } from 'graphql-let/__generated__/__types__'
-import classes from './emoji-icon.module.scss'
 
 const emojiToChinese = (code: EmojiCode): string => {
   switch (code) {
@@ -20,47 +19,57 @@ const EmojiIcon = ({
   code,
   nUps,
   liked,
+  showText,
   className,
 }: {
   code: EmojiCode
   nUps?: number
   liked?: boolean
+  showText?: boolean
   className?: string
 }): JSX.Element => {
   const text = emojiToChinese(code)
   switch (code) {
     case 'PIN':
       return (
-        <span className={`${classes.container} ${className ?? ''}`}>
-          <span className={`material-icons-outlined ${classes.favoriteIcon}`}>
+        <span className={`inline-flex items-center gap-1 text-gray-700 ${className ?? ''}`}>
+          <span className={`material-icons-outlined text-lg text-rose-600`}>
             {liked ? 'favorite' : 'favorite_border'}
           </span>
           {nUps}
-          {text}
+          {showText && text}
         </span>
       )
     case 'UP':
       return (
-        <span className={`${classes.container} ${className ?? ''}`}>
-          <span className={`${liked ? 'material-icons' : 'material-icons-outlined'}`}>thumb_up</span>
+        <span className={`inline-flex items-center gap-1 text-gray-700 ${className ?? ''}`}>
+          <span
+            className={`${liked ? 'material-icons text-blue-500' : 'material-icons-outlined text-gray-600'} text-lg`}
+          >
+            thumb_up
+          </span>
           {nUps}
-          {text}
+          {showText && text}
         </span>
       )
     case 'DOWN':
       return (
-        <span className={`${classes.container} ${className ?? ''}`}>
-          <span className={`${liked ? 'material-icons' : 'material-icons-outlined'}`}>thumb_down</span>
+        <span className={`inline-flex items-center gap-1 text-gray-700 ${className ?? ''}`}>
+          <span
+            className={`${liked ? 'material-icons text-blue-500' : 'material-icons-outlined text-gray-600'} text-lg`}
+          >
+            thumb_down
+          </span>
           {nUps}
-          {text}
+          {showText && text}
         </span>
       )
     default:
       return (
-        <span className={`${classes.container} ${className ?? ''}`}>
+        <span className={`inline-flex items-center gap-1 text-gray-700 ${className ?? ''}`}>
           {code}
           {nUps}
-          {text}
+          {showText && text}
         </span>
       )
   }

@@ -1,10 +1,10 @@
 import React, { HtmlHTMLAttributes, useContext, useEffect, useState } from 'react'
 // import PinIcon from '../../assets/svg/like.svg'
 // import UpIcon from '../../assets/svg/arrow-up.svg'
-import classes from './emoji-up-down.module.scss'
 import Popover from '../popover/popover'
-import PollPage from '../poll/poll-page'
+import PollPage from '../../__deprecated__/poll/poll-page'
 import { PollDocument, PollFragment, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'
+import Modal from '../modal/modal'
 // import { Context } from '../../pages/card/[symbol]'
 
 const PollGroup = ({
@@ -65,21 +65,11 @@ const PollGroup = ({
     // }
     handleShowPopover && handleShowPopover(true)
     setClickedIdx(i)
-    // if (context.login) {
-    //   handleClickedIdx && handleClickedIdx(i)
-    //   if (!pollId && bulletId) {
-    //     createPoll({ variables: { bulletId, data: { choices } } })
-    //   }
-    //   handleShowPopover && handleShowPopover(true)
-    //   setClickedIdx(i)
-    // } else {
-    //   context.showLoginPopup(true)
-    // }
   }
 
   return (
     <>
-      <span className={classes.groupContainer}>
+      <span className="inline-flex bg-gray-300 rounded first:rounded-l last:rounded-r">
         {/* <button className={inline ? 'inline mR' : undefined}> */}
         {choices.map((e, i) => {
           //first child
@@ -98,8 +88,8 @@ const PollGroup = ({
           }
           //others
           return (
-            <span key={i} className={classes.hasDividerDiv}>
-              <div className={classes.divider}></div>
+            <span key={i} className="flex">
+              <div className="inline-block w-0 mx-1 border-r border-gray-400"></div>
               <button
                 className="inline"
                 onClick={(ev: React.MouseEvent) => {
@@ -113,12 +103,12 @@ const PollGroup = ({
         })}
       </span>
       {/* </button> */}
-      {/* {showPopover && (
-        <Popover visible={showPopover} hideBoard={handleHideBoard}>
+      {showPopover && (
+        <Modal visible={showPopover} onClose={handleHideBoard}>
           {pollId && <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />}
           {!pollId && <span>loading</span>}
-        </Popover>
-      )} */}
+        </Modal>
+      )}
     </>
   )
 }

@@ -2,7 +2,6 @@ import React from 'react'
 import { useCardEmojisQuery } from '../../apollo/query.graphql'
 import CreateCardEmojiBtn from './create-card-emoji-btn'
 import CardEmojiBtn from './card-emoji-btn'
-import classes from './emoji-up-down.module.scss'
 
 const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null => {
   const { data: emojiData } = useCardEmojisQuery({ variables: { cardId } })
@@ -13,7 +12,7 @@ const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null =>
 
   // if (emojiData === null || !emojiData?.cardEmojis) return null
   return (
-    <div className={classes.headerCardEmojiContainer}>
+    <div className="flex gap-3">
       {pinEmoji ? <CardEmojiBtn cardEmoji={pinEmoji} /> : <CreateCardEmojiBtn cardId={cardId} emojiCode="PIN" />}
       {upEmoji ? <CardEmojiBtn cardEmoji={upEmoji} /> : <CreateCardEmojiBtn cardId={cardId} emojiCode="UP" />}
       {downEmoji ? <CardEmojiBtn cardEmoji={downEmoji} /> : <CreateCardEmojiBtn cardId={cardId} emojiCode="DOWN" />}

@@ -12,9 +12,9 @@ const InlineMirror = ({
 }: RenderElementProps & { element: InlineMirrorElement; sourceCardId?: string }): JSX.Element => {
   const router = useRouter()
   return (
-    <span {...attributes} className={classes.mirrorContainer}>
+    <span {...attributes} className="hover:cursor-pointer">
       <button
-        className="noStyle"
+        className="btn-reset-style text-blue-500 hover:underline hover:underline-offset-2"
         onClick={e => {
           // e.preventDefault()
           // e.stopPropagation()

@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 // import { Nav } from '../../pages/card/[symbol]'
-import MyTooltip from '../my-tooltip/my-tooltip'
+import MyTooltip from '../tooltip/tooltip'
 import RightArrow from '../../assets/svg/right-arrow.svg'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
-import classes from './nav-path.module.scss'
 import { UrlObject } from 'url'
 import Link from 'next/link'
 import { useCardQuery } from '../../apollo/query.graphql'
@@ -123,24 +122,20 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
 
   return (
     // <ul className={classes.pathUl} ref={pathRef} style={{ width: `calc(${viewPortWidth}px - 40vw)` }}>
-    <ul className={classes.pathUl} ref={pathRef}>
+    <ul className="flex items-center flex-wrap text-gray-500" ref={pathRef}>
       {mirrorHomeUrl && (
         <li>
-          <span>
-            <Link href={mirrorHomeUrl}>
-              <a>{data?.card && data?.card.meta.title}</a>
-            </Link>
-            {/* {console.log(path, location)} */}
-          </span>
-
-          <div className={classes.rightArrow}>/{/* <RightArrow /> */}</div>
+          <Link href={mirrorHomeUrl}>
+            <a>{data?.card && data?.card.meta.title}</a>
+          </Link>
+          <div className="flex items-center flex-shrink-0 mx-2">/{/* <RightArrow /> */}</div>
         </li>
       )}
       {myPath &&
         myPath.length !== 0 &&
         myPath.map((e, i) => (
           <li key={i}>
-            {i !== 0 && <div className={classes.rightArrow}>{/* <RightArrow /> */}/</div>}
+            {i !== 0 && <div className="flex items-center flex-shrink-0 mx-2">{/* <RightArrow /> */}/</div>}
 
             {
               <span
