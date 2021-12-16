@@ -11,9 +11,9 @@ import { IncomingMessage, ServerResponse } from 'http'
 const apolloServer = new ApolloServer({
   schema,
   debug: true,
-  // context(ctx) {
-  //   return ctx
-  // },
+  context(ctx) {
+    return ctx
+  },
   formatError(error) {
     console.error(util.inspect(error, { showHidden: false, depth: null }))
     return error
