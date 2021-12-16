@@ -280,8 +280,6 @@ const CardSymbolPage = (): JSX.Element | null => {
     return <div>Unexpected error</div>
   }
 
-  console.log(card)
-
   return (
     <>
       <Layout
