@@ -99,20 +99,30 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       className = 'text-gray-400'
       break
     }
+    case 'filtertag':
     case 'author':
     case 'url': {
       className = 'text-green-500'
       break
     }
-    case 'filtertag': {
-      className = 'text-purple-500'
+
+    default: {
+      className = 'text-gray-600'
     }
   }
   // }
 
   return (
     // {/* <span {...attributes}>{children}</span> */}
-    <span {...attributes} className={className}>
+    <span
+      {...attributes}
+      className={className}
+      ref={e => {
+        if (e && !selected && leaf.tokenType) {
+          e.onselectstart = () => false
+        }
+      }}
+    >
       {children}
     </span>
   )

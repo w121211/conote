@@ -22,6 +22,7 @@ module.exports = {
         cyan: colors.cyan,
         sky: colors.sky,
         pink: colors.pink,
+        // blue: colors.Indigo,
       },
       transformOrigin: {
         'center-left': 'center left',

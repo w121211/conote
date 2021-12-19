@@ -207,8 +207,6 @@ const WorkspaceComponent = ({
     return <div>Unexpected error</div>
   }
 
-  console.log(meData)
-
   return (
     <>
       <div
@@ -282,46 +280,46 @@ const CardSymbolPage = (): JSX.Element | null => {
   return (
     <>
       <Layout
-        buttonRight={
-          <>
-            <button
-              className="btn-secondary"
-              onClick={() => {
-                workspace.drop()
-              }}
-            >
-              Drop
-            </button>
-            <button
-              className="btn-primary"
-              onClick={() => {
-                if (mainDoc === null) {
-                  return
-                }
-                if (mainDoc.doc) {
-                  workspace.save(mainDoc.doc)
-                }
-              }}
-              // disabled={!isValueModified}
-            >
-              儲存草稿
-              {/* {console.log(isValueModified)} */}
-            </button>
-            <button
-              onClick={async () => {
-                if (mainDoc === null) {
-                  return
-                }
-                if (mainDoc.doc) {
-                  await workspace.commit(mainDoc.doc, client)
-                  // router.reload()
-                }
-              }}
-            >
-              同步至筆記
-            </button>
-          </>
-        }
+      // buttonRight={
+      //   <>
+      //     <button
+      //       className="btn-secondary"
+      //       onClick={() => {
+      //         workspace.drop()
+      //       }}
+      //     >
+      //       Drop
+      //     </button>
+      //     <button
+      //       className="btn-primary"
+      //       onClick={() => {
+      //         if (mainDoc === null) {
+      //           return
+      //         }
+      //         if (mainDoc.doc) {
+      //           workspace.save(mainDoc.doc)
+      //         }
+      //       }}
+      //       // disabled={!isValueModified}
+      //     >
+      //       儲存草稿
+      //       {/* {console.log(isValueModified)} */}
+      //     </button>
+      //     <button
+      //       onClick={async () => {
+      //         if (mainDoc === null) {
+      //           return
+      //         }
+      //         if (mainDoc.doc) {
+      //           await workspace.commit(mainDoc.doc, client)
+      //           // router.reload()
+      //         }
+      //       }}
+      //     >
+      //       同步至筆記
+      //     </button>
+      //   </>
+      // }
       >
         <WorkspaceComponent
           docPath={docPath}

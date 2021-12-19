@@ -34,8 +34,8 @@ const InlineSymbol = ({
         onClick={e => {
           // e.preventDefault()
           // e.stopPropagation()
-          // router.push(`/card/${encodeURIComponent(element.symbol)}`)
-          setShowPopover(true)
+          router.push(`/card/${encodeURIComponent(element.symbol)}`)
+          // setShowPopover(true)
         }}
       >
         {children}

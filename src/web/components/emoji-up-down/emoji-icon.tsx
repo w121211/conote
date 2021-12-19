@@ -32,9 +32,11 @@ const EmojiIcon = ({
   switch (code) {
     case 'PIN':
       return (
-        <span className={`inline-flex items-center gap-1 text-gray-700 ${className ?? ''}`}>
-          <span className={`material-icons-outlined text-lg text-rose-600`}>
-            {liked ? 'favorite' : 'favorite_border'}
+        <span
+          className={`inline-flex items-center gap-1 ${liked ? 'text-gray-500' : 'text-gray-400'} ${className ?? ''}`}
+        >
+          <span className={`material-icons text-lg text-rose-600 ${liked ? 'text-rose-600' : 'text-gray-400'}`}>
+            favorite
           </span>
           {nUps}
           {showText && text}
@@ -42,23 +44,21 @@ const EmojiIcon = ({
       )
     case 'UP':
       return (
-        <span className={`inline-flex items-center gap-1 text-gray-700 ${className ?? ''}`}>
-          <span
-            className={`${liked ? 'material-icons text-blue-500' : 'material-icons-outlined text-gray-600'} text-lg`}
-          >
-            thumb_up
-          </span>
+        <span
+          className={`inline-flex items-center gap-1 ${liked ? 'text-gray-500' : 'text-gray-400'} ${className ?? ''}`}
+        >
+          <span className={`material-icons ${liked ? ' text-blue-500' : ' text-gray-400'} text-lg`}>thumb_up_alt</span>
           {nUps}
           {showText && text}
         </span>
       )
     case 'DOWN':
       return (
-        <span className={`inline-flex items-center gap-1 text-gray-700 ${className ?? ''}`}>
-          <span
-            className={`${liked ? 'material-icons text-blue-500' : 'material-icons-outlined text-gray-600'} text-lg`}
-          >
-            thumb_down
+        <span
+          className={`inline-flex items-center gap-1 ${liked ? 'text-gray-500' : 'text-gray-400'} ${className ?? ''}`}
+        >
+          <span className={`material-icons ${liked ? ' text-blue-500' : ' text-gray-400'} text-lg`}>
+            thumb_down_alt
           </span>
           {nUps}
           {showText && text}
