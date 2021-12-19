@@ -35,9 +35,7 @@ import {
 import { withHistory } from 'slate-history'
 import {
   LabelInlineElement,
-  LcBodyElement,
   LcElement,
-  LcHeadElement,
   LiElement,
   MirrorInlineElement,
   UlElement,
@@ -330,80 +328,54 @@ const Label = ({ attributes, children, element }: RenderElementProps) => {
   )
 }
 
-const _Label = ({
-  attributes,
-  children,
-  element,
-}: RenderElementProps & { element: LabelInlineElement }) => {
-  const readonly = useReadOnly()
-  const selected = useSelected()
-
-  // useEffect(() => {
-  //   // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
-  //   if (selected) {
-  //     const path = ReactEditor.findPath(editor, element)
-  //     // parseLcHead(editor, [element, path])
-  //     Transforms.unwrapNodes(editor, { at: path })
-  //   }
-  // }, [selected])
-
-  // useEffect(() => {
-  //   // console.log(readonly, focused, selected)
-  // }, [readonly, focused, selected])
-
-  if (readonly) {
-    return <button {...attributes}>{children}</button>
-  }
-  return (
-    <span {...attributes} style={{ color: 'red' }}>
-      <button
-        onClick={(event) => {
-          event.preventDefault()
-          console.log('clicked label')
-        }}
-      >
-        {children}
-      </button>
-    </span>
-  )
-}
-
 const Mirror = ({
   attributes,
   children,
   element,
 }: RenderElementProps & { element: MirrorInlineElement }) => {
-  const editor = useSlateStatic()
-  const focused = useFocused() // 整個editor是否focus
-  const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
-  const readonly = useReadOnly()
-
-  useEffect(() => {
-    if ((focused && !selected) || readonly) {
-      // cursor 離開 element
-      // const path = ReactEditor.findPath(editor, element)
-      console.log('cursor leaves mirror')
-    }
-    if (selected) {
-      // const path = ReactEditor.findPath(editor, element)
-      // Transforms.unwrapNodes(editor, {
-      //   at: path,
-      //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
-      // })
-      console.log('cursor enters mirror')
-    }
-  }, [focused, readonly, selected])
+  // const editor = useSlateStatic()
+  // const focused = useFocused() // 整個editor是否focus
+  // const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
+  // const readonly = useReadOnly()
+  // useEffect(() => {
+  //   if ((focused && !selected) || readonly) {
+  //     // cursor 離開 element
+  //     // const path = ReactEditor.findPath(editor, element)
+  //     console.log('cursor leaves mirror')
+  //   }
+  //   if (selected) {
+  //     // const path = ReactEditor.findPath(editor, element)
+  //     // Transforms.unwrapNodes(editor, {
+  //     //   at: path,
+  //     //   match: (n, p) => Element.isElement(n) && Path.isChild(p, path),
+  //     // })
+  //     console.log('cursor enters mirror')
+  //   }
+  // }, [focused, readonly, selected])
 
   return (
-    <button
+    <span
       {...attributes}
-      onClick={(event) => {
-        event.preventDefault()
-        console.log('clicked label')
-      }}
+      // ref={(e) => {
+      //   if (e) {
+      //     e.onselectstart = () => false
+      //   }
+      // }}
+      contentEditable={false}
     >
-      {children}
-    </button>
+      {/* <span contentEditable={false}> */}
+      <button
+        // contentEditable={false}
+        // {...attributes}
+        onClick={(event) => {
+          event.preventDefault()
+          console.log('clicked Mirror')
+        }}
+      >
+        {children}
+      </button>
+      {/* </span> */}
+    </span>
   )
 }
 
