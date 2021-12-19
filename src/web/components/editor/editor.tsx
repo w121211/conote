@@ -117,11 +117,11 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
     <span
       {...attributes}
       className={className}
-      ref={e => {
-        if (e && !selected && leaf.tokenType) {
-          e.onselectstart = () => false
-        }
-      }}
+      // ref={e => {
+      //   if (e && !selected && leaf.tokenType) {
+      //     e.onselectstart = () => false
+      //   }
+      // }}
     >
       {children}
     </span>

@@ -15,12 +15,12 @@ const MeHeaderItem = ({ className }: { className?: string }) => {
   }
   return (
     <div className="flex items-center gap-3">
-      <div className="flex items-center">
+      {/* <div className="flex items-center">
         <button className=" h-10 hover:bg-gray-100">
           <span className="material-icons mr-1 text-red-600 text-lg">favorite</span>
           <span className="text-sm text-gray-700">我的收藏</span>
         </button>
-      </div>
+      </div> */}
       <div className={`flex items-center text-gray-400 ${className ? className : ''}`}>
         <Link href="/login">
           <a>

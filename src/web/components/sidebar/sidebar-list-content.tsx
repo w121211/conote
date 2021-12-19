@@ -14,7 +14,6 @@ const SidebarListContent = ({ entries }: { entries: DocEntryPack[] }): JSX.Eleme
               <Link href={`/card/${encodeURIComponent(e.main.symbol)}`}>
                 <a className="inline-block min-w-0 flex-1 truncate">{e.main.entry?.title || e.main.symbol}</a>
               </Link>
-              s{' '}
             </span>
 
             {e.subs.length > 0 && (

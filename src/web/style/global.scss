@@ -12,6 +12,7 @@
 @layer base {
   body {
     overflow: hidden;
+    // font-size: 14px;
   }
   h1 {
     @apply text-3xl font-bold text-gray-700;
@@ -26,7 +27,7 @@
     @apply text-sm font-bold text-gray-700;
   }
   .input {
-    @apply block w-full mt-2 mb-4 p-2 rounded-md text-sm text-gray-500 bg-gray-100 leading-loose;
+    @apply mt-2 mb-4 p-2 rounded-md text-sm text-gray-500 bg-gray-100 leading-loose;
   }
   button {
     @apply inline-flex items-center px-3 py-1 rounded text-center;

@@ -2,7 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import CardEmojis from '../emoji-up-down/card-emojis-display'
 
-const HotList = ({
+const HotListItme = ({
   href,
   title,
   source,
@@ -24,7 +24,7 @@ const HotList = ({
   currentTab: string
 }): JSX.Element => {
   return (
-    <div className="overflow-hidden p-4 border border-t-0 first:border-t border-gray-200 first:rounded-t last:rounded-b">
+    <div className="overflow-hidden p-4 border-b  border-gray-200 first:rounded-t last:rounded-b">
       <div className="items-center text-sm">
         {hashtags && (
           <span className="">
@@ -67,10 +67,8 @@ const HotList = ({
         {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
       </div>
       <Link href={href}>
-        <a className="overflow-hidden whitespace-nowrap text-ellipsis">
-          <h3 className="m-0 overflow-hidden whitespace-nowrap text-ellipsis text-blue-800 text-lg hover:underline-offset-2 hover:underline">
-            {title}
-          </h3>
+        <a className="truncate">
+          <h3 className="m-0 truncate text-gray-700 text-lg hover:underline-offset-2 hover:underline">{title}</h3>
         </a>
       </Link>
       {summary && (
@@ -91,4 +89,4 @@ const HotList = ({
   )
 }
 
-export default HotList
+export default HotListItme

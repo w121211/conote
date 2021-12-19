@@ -22,27 +22,16 @@ const Popover = ({
   // console.log(mask)
 
   return (
-    <div
-      className="fixed flex justify-center top-0 left-0 w-screen h-screen z-50"
-      style={
-        {
-          // visibility: `${visible ? 'visible' : 'hidden'}`,
-          // width: `${typeof width === 'number' ? width + 'px' : 'initial'}`,
-        }
-      }
-      onMouseEnter={() => {
-        console.log('mouseenter')
-      }}
-    >
+    <div className="fixed flex justify-center top-0 left-0 w-screen h-screen z-50">
       <div
-        className={`absolute w-full h-full  ${mask ? 'bg-gray-500/50' : 'bg-none'}`}
+        className={`w-full h-full  ${mask ? 'bg-gray-500/50' : 'bg-none'}`}
         onClick={e => {
           e.stopPropagation()
           hideBoard()
         }}
       ></div>
 
-      <div className="absolute flex flex-col w-[90vw] max-h-[70vh] sm:w-[60vw] sm:max-h-[90vh] mt-[5vh] p-6 pt-2 overflow-y-auto bg-white shadow-2xl">
+      <div className="absolute flex flex-col w-[90vw] max-h-[70vh] sm:w-[60vw] sm:max-h-[90vh] mt-[5vh] px-6 py-4 overflow-y-auto rounded bg-white shadow-2xl">
         <div className="flex items-center w-full h-8">
           <span
             onClick={(e: any) => {
@@ -56,7 +45,7 @@ const Popover = ({
             {subTitle && subTitle}{' '}
           </span>
         </div>
-        <div>{children}</div>
+        <div className="px-8 pt-2 pb-8">{children}</div>
         {buttons && <div className="flex">{buttons}</div>}
       </div>
     </div>

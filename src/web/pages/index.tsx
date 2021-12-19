@@ -7,7 +7,7 @@ import { SearchAllForm } from '../components/search-all-form'
 import { useRouter } from 'next/router'
 import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/new-hot-list'
-import NewList from '../components/list/new-list'
+import NewListItem from '../components/list/new-list-item'
 
 export function LatestCards(): JSX.Element | null {
   const router = useRouter()
@@ -28,7 +28,7 @@ export function LatestCards(): JSX.Element | null {
   // console.log(data.latestCardDigests)
   return (
     <>
-      <NewList
+      <NewListItem
         cardId={'cardId'}
         title={'水力發電短缺 冰島減供工業用電 拒與新的比特幣礦工簽約'}
         href={'https://news.cnyes.com/news/id/4782741?exp=a'}
@@ -44,7 +44,7 @@ export function LatestCards(): JSX.Element | null {
         shot={'SHOT'}
       />
 
-      <NewList
+      <NewListItem
         cardId={'cardId'}
         title={'日本央行副總裁：沒有必要調整超寬鬆貨幣政策'}
         href={'https://news.cnyes.com/news/id/4782649?exp=a'}
@@ -60,7 +60,7 @@ export function LatestCards(): JSX.Element | null {
         shot={'SHOT'}
       />
 
-      <NewList
+      <NewListItem
         cardId={'cardId'}
         title={'玉晶光11月營收19.25億元創同期新高 年增6.49%'}
         href={'https://news.cnyes.com/news/id/4782820?exp=a'}
@@ -74,7 +74,7 @@ export function LatestCards(): JSX.Element | null {
         hashtags={['$AAPL', '$3406:TW', '光學元件', '元宇宙', 'iPhone']}
       />
 
-      <NewList
+      <NewListItem
         cardId={'cardId'}
         title={'晶片荒惡化費半大跌 交期拉長至逾20周'}
         href={'https://news.cnyes.com/news/id/4700195'}
@@ -88,7 +88,7 @@ export function LatestCards(): JSX.Element | null {
 
       {data.latestCardDigests &&
         data.latestCardDigests.map((e, i) => (
-          <NewList
+          <NewListItem
             key={i}
             cardId={e.cardId}
             title={e.cardMeta.title ?? e.title}

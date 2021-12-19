@@ -31,8 +31,8 @@ const CardMetaForm = ({
           setShowHeaderForm(true)
         }}
       >
-        <span className="material-icons">edit_note</span>
-        <span className="whitespace-nowrap">編輯卡片資訊</span>
+        <span className="material-icons text-base">edit_note</span>
+        <span className="whitespace-nowrap text-sm">編輯卡片資訊</span>
       </button>
       <Modal
         visible={showHeaderForm}

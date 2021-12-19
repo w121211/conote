@@ -188,12 +188,12 @@ const PollForm = ({
     })
   }
 
-  useEffect(() => {
-    // filterComments(
-    //   check.findIndex((e, i) => e),
-    //   // check,
-    // )
-  }, [choiceValue])
+  // useEffect(() => {
+  //   // filterComments(
+  //   //   check.findIndex((e, i) => e),
+  //   //   // check,
+  //   // )
+  // }, [choiceValue])
 
   if (pollData && pollData.poll) {
     return (
@@ -229,8 +229,6 @@ const PollForm = ({
                   人參與投票
                 </div>
               </div>
-
-              {/* <input className={classes.comment} type="text" {...register('lines')} placeholder="留言..." /> */}
             </div>
             <button className="btn-primary" disabled={myVote !== undefined}>
               {myVote ? '已投票' : '送出'}

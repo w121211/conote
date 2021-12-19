@@ -58,10 +58,8 @@ const CardHead = ({ doc, card, symbol }: { doc: Doc; card: CardFragment | null; 
               target="_blank"
               rel="noreferrer"
             >
-              <span className="material-icons text-lg">open_in_new</span>
-              <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis">
-                {card?.meta.url}
-              </span>
+              <span className="material-icons text-base">open_in_new</span>
+              <span className="flex-shrink min-w-0 truncate text-sm">{card?.meta.url}</span>
             </a>
           )}
         </div>

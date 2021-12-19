@@ -60,7 +60,7 @@ export default function Layout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50" onScroll={handleScroll}>
+    <div className="flex h-screen " onScroll={handleScroll}>
       <SideBar
         showMenuHandler={showMenuHandler}
         pinMenuHandler={pinMenuHandler}
@@ -73,7 +73,7 @@ export default function Layout({
         {/* <footer>footer</footer> */}
       </div>
       <nav
-        className="fixed flex items-center justify-start w-screen h-11 bg-gray-50"
+        className="fixed flex items-center justify-start w-screen h-11 "
         // style={showNav ? { transform: 'translateY(0)' } : { transform: 'translateY(-45px)' }}
       >
         <div

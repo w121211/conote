@@ -14,7 +14,7 @@ const SidebarList = ({ title, entries }: { title?: string; entries: DocEntryPack
           `}
           onClick={() => setShowMore(!showMore)}
         >
-          <div className="flex">
+          <div className="flex items-center">
             {showMore ? (
               <span className="material-icons">expand_more</span>
             ) : (

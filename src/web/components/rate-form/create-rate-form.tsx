@@ -36,9 +36,11 @@ const CreateRateForm = ({
   const { author, choice, target, link } = initialInput
   const [targetId, setTargetId] = useState<string | undefined>()
   const client = useApolloClient()
-  //   const { data: authorData
-  let linkId: string
+  const { register, handleSubmit, control, watch } = useForm<FormInput>({
+    defaultValues: { ...initialInput, choice: choice ? (choice.substring(1) as RateChoice) : '' },
+  })
 
+  let linkId: string
   const { data: targetCardData } = useCardQuery({
     fetchPolicy: 'cache-first',
     variables: { symbol: target },
@@ -58,10 +60,9 @@ const CreateRateForm = ({
     }
   }, [targetCardData])
 
-  const { register, handleSubmit, control } = useForm<FormInput>({
-    defaultValues: { ...initialInput, choice: choice ? (choice.substring(1) as RateChoice) : '' },
-  })
-  const [createShot, { data: rateData }] = useCreateRateMutation({
+  const watchChoice = watch('choice')
+
+  const [createRate, { data: rateData }] = useCreateRateMutation({
     update(cache, { data }) {
       const res = cache.readQuery<RateQuery>({
         query: RateDocument,
@@ -87,17 +88,17 @@ const CreateRateForm = ({
       }
     },
   })
-  const filterAuthor = (inputValue: string) => {
-    return [inputValue]
-  }
-  const promiseOptions = (inputValue: string, callback: (authors: string[]) => void) =>
-    new Promise(resolve => {
-      client.query<AuthorQuery, AuthorQueryVariables>({
-        query: AuthorDocument,
-        variables: { name: inputValue },
-      })
-      resolve(filterAuthor)
-    })
+  // const filterAuthor = (inputValue: string) => {
+  //   return [inputValue]
+  // }
+  // const promiseOptions = (inputValue: string, callback: (authors: string[]) => void) =>
+  //   new Promise(resolve => {
+  //     client.query<AuthorQuery, AuthorQueryVariables>({
+  //       query: AuthorDocument,
+  //       variables: { name: inputValue },
+  //     })
+  //     resolve(filterAuthor)
+  //   })
 
   const myHandleSubmit = (d: FormInput) => {
     if (d.target && d.choice !== '') {
@@ -120,69 +121,82 @@ const CreateRateForm = ({
     }
   }
   return (
-    <>
-      <form className="flex flex-col mt-4 mb-8" onSubmit={handleSubmit(myHandleSubmit)}>
+    <div className="">
+      <form className="flex flex-col " onSubmit={handleSubmit(myHandleSubmit)}>
         <label>
-          <h5> 作者</h5>
+          <h5 className="inlin-block"> 作者</h5>
           {
-            initialInput.author ? <button type="button">{initialInput.author}</button> : null
+            // initialInput.author ? <button type="button">{initialInput.author}</button> : null
             // <Controller
             //   control={control}
             //   name="author"
             //   render={({ field: { value } }) => <AsyncSelect cacheOptions loadOptions={promiseOptions} />}
             // />
-            // <input {...register('author')} type="text" />
+            <input {...register('author')} className="input inline w-fit" type="text" />
           }
         </label>
-        <div className="flex">
-          <label>
-            <input {...register('choice')} type="radio" value="LONG" />
-            <h5> 看多</h5>
+        <div className="inline-flex gap-4 mb-4 select-none">
+          <label
+            className={`inline-flex items-center gap-2 px-3 py-2 border rounded cursor-pointer tracking-wider ${
+              watchChoice === 'LONG' ? 'bg-blue-700 border-transparent' : 'bg-white border-gray-200'
+            }`}
+          >
+            {/* <span
+              className={`material-icons-outlined text-lg ${
+                watchChoice === 'LONG' ? 'text-blue-700' : 'text-gray-300'
+              }`}
+            >
+              {watchChoice === 'LONG' ? 'radio_button_checked' : 'radio_button_unchecked'}
+            </span> */}
+
+            <input {...register('choice')} className="absolute opacity-0" type="radio" value="LONG" />
+            <h5 className={`font-normal ${watchChoice === 'LONG' ? 'text-white' : 'text-gray-600'}`}> 看多</h5>
           </label>
-          <label>
-            <input {...register('choice')} type="radio" value="SHORT" />
-            <h5> 看空</h5>
+          <label
+            className={`inline-flex items-center gap-2 px-3 py-2 border rounded cursor-pointer tracking-wider ${
+              watchChoice === 'SHORT' ? 'bg-blue-700 border-transparent' : 'bg-white border-gray-200'
+            }`}
+          >
+            {/* <span
+              className={`material-icons-outlined text-lg ${
+                watchChoice === 'SHORT' ? 'text-blue-700' : 'text-gray-300'
+              }`}
+            >
+              {watchChoice === 'SHORT' ? 'radio_button_checked' : 'radio_button_unchecked'}
+            </span> */}
+            <input {...register('choice')} className="absolute opacity-0" type="radio" value="SHORT" />
+            <h5 className={`font-normal ${watchChoice === 'SHORT' ? 'text-white' : 'text-gray-600'}`}>看空</h5>
           </label>
-          <label>
-            <input {...register('choice')} type="radio" value="HOLD" />
-            <h5> 觀望</h5>
+          <label
+            className={`inline-flex items-center gap-2 px-3 py-2 border rounded cursor-pointer tracking-wider ${
+              watchChoice === 'HOLD' ? 'bg-blue-700 border-transparent' : 'bg-white border-gray-200'
+            }`}
+          >
+            {/* <span
+              className={`material-icons-outlined text-lg ${
+                watchChoice === 'HOLD' ? 'text-blue-700' : 'text-gray-300 '
+              }`}
+            >
+              {watchChoice === 'HOLD' ? 'radio_button_checked' : 'radio_button_unchecked'}
+            </span> */}
+            <input {...register('choice')} className="absolute opacity-0" type="radio" value="HOLD" />
+            <h5 className={`font-normal ${watchChoice === 'HOLD' ? 'text-white' : 'text-gray-600'}`}> 觀望</h5>
           </label>
         </div>
         <label>
-          <h5>Ticker</h5>
-          <input {...register('target')} type="text" />
+          <h5>標的</h5>
+          <input {...register('target')} className="input" type="text" />
         </label>
         <label>
           <h5> 來源網址</h5>
-          <input {...register('link')} type="text" />
+          <input {...register('link')} className="input" type="text" />
         </label>
 
         <button className="btn-primary" type="submit">
-          <h5> 送出</h5>
+          送出
         </button>
       </form>
-      {/* <Popup
-        visible={showPopup}
-        hideBoard={() => setShowPopup(false)}
-        buttons={
-          <>
-            <button
-              className="btn-secondary"
-              onClick={() => {
-                router.push(`/author/${initialInput.author}`)
-              }}
-            >
-              確定
-            </button>
-            <button className="btn-primary" onClick={() => setShowPopup(false)}>
-              取消
-            </button>
-          </>
-        }
-      >
-        尚未儲存的內容將丟失，確立離開本頁嗎？
-      </Popup> */}
-    </>
+    </div>
   )
 }
 export default CreateRateForm
