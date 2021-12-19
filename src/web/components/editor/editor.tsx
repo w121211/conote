@@ -28,12 +28,10 @@ import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
 import { Doc } from '../workspace/doc'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
-import Modal from '../modal/modal'
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, leaf, children } = props
 
-  const selected = useSelected()
   // const [isPressShift, setIsPressShift] = useState(false)
   // console.log(isPressShift)
   // let style: React.CSSProperties = {}
@@ -82,7 +80,6 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   //     className = 'text-gray-600'
   //   }
   // }
-  // } else {
   switch (leaf.tokenType) {
     case 'mirror-ticker':
     case 'mirror-topic':
@@ -110,19 +107,9 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       className = 'text-gray-600'
     }
   }
-  // }
 
   return (
-    // {/* <span {...attributes}>{children}</span> */}
-    <span
-      {...attributes}
-      className={className}
-      // ref={e => {
-      //   if (e && !selected && leaf.tokenType) {
-      //     e.onselectstart = () => false
-      //   }
-      // }}
-    >
+    <span {...attributes} className={className}>
       {children}
     </span>
   )
