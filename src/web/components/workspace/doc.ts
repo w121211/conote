@@ -1,32 +1,20 @@
-import { CardInput, CardStateInput } from 'graphql-let/__generated__/__types__'
+import { nanoid } from 'nanoid'
+import { CardInput, CardMetaInput, CardStateInput } from 'graphql-let/__generated__/__types__'
 import { NodeChange, TreeChangeService, TreeNode } from '../../../packages/docdiff/src'
 import { CardFragment, CardStateFragment } from '../../apollo/query.graphql'
 import { Bullet } from '../bullet/bullet'
 import { LiElement } from '../editor/slate-custom-types'
 import { EditorSerializer } from '../editor/serializer'
-import { LocalDBService } from './local-db'
-
-export type DocEntry = {
-  symbol: string
-  title: string // webpage-card use title instead of symbol
-  cardId?: string
-  sourceCardId?: string
-  commitId?: string
-  updatedAt: number
-}
-
-export type DocEntryPack = {
-  main: { symbol: string; entry?: DocEntry }
-  subs: DocEntry[]
-}
+import { LocalDatabaseService } from './local-database'
+import { isDeepStrictEqual } from 'util'
 
 export type DocProps = {
-  symbol: string
+  cid?: string
+  fromDocCid: string | null // null for roots, TODO: handle if remote symbol name changed
   cardInput: CardInput | null
   cardCopy: CardFragment | null
-  sourceCardCopy: CardFragment | null
-  // value: TreeNode<Bullet>[]
   editorValue: LiElement[]
+  // value: TreeNode<Bullet>[]
   // changes: NodeChange<Bullet>[]
   createdAt?: number
   updatedAt?: number
@@ -40,11 +28,10 @@ const isBulletEqual = (a: Bullet, b: Bullet) => {
 
 export class Doc {
   readonly cid: string
-  readonly symbol: string // as CID
-  readonly cardCopy: CardFragment | null // to keep the prev-state,
-  readonly sourceCardCopy: CardFragment | null // indicate current doc is a mirror
-  cardInput: CardInput | null // required if card is null
-  editorValue: LiElement[]
+  readonly fromDocCid: string | null
+  readonly cardCopy: CardFragment | null // keep the previous state, TODO: sync to the latest card state if remote updated
+  private cardInput: CardInput | null // required if card is null
+  private editorValue: LiElement[]
   // value: TreeNode<Bullet>[]
   // changes: NodeChange<Bullet>[] = []
   createdAt: number
@@ -53,48 +40,90 @@ export class Doc {
   committedState: CardStateFragment | null = null
 
   constructor({
-    cardInput,
+    cid,
+    fromDocCid,
     cardCopy,
-    sourceCardCopy,
-    symbol,
+    cardInput,
     editorValue,
     createdAt,
     updatedAt,
     committedAt,
     committedState,
   }: DocProps) {
-    if (cardCopy && cardCopy.sym.symbol !== symbol) {
-      throw `cardSnapshot.symbol !== symbol: ${cardCopy.sym.symbol}, ${symbol}`
+    if (!((cardCopy && cardInput === null) || (cardCopy === null && cardInput))) {
+      throw '!((cardCopy && cardInput === null) || (cardCopy === null && cardInput))'
     }
-    if (cardCopy && cardInput) {
-      throw 'Card-snapshot & card-input cannot co-exist'
-    }
-    if (cardCopy === null && cardInput === null) {
-      throw 'Need card-input if no card-snapshot'
-    }
-    this.cid = symbol
-    this.symbol = symbol
+    this.cid = cid ?? nanoid()
+    this.fromDocCid = fromDocCid
     this.cardCopy = cardCopy
-    this.sourceCardCopy = sourceCardCopy
-    // this.subSymbols = subSymbols ?? []
     this.cardInput = cardInput
     this.editorValue = editorValue
     this.createdAt = createdAt ?? Date.now()
     this.updatedAt = updatedAt ?? Date.now()
-    // this.getChanges()
     this.committedAt = committedAt ?? null
     this.committedState = committedState ?? null
   }
 
+  static createDoc({
+    symbol,
+    card,
+    fromDocCid,
+  }: {
+    symbol: string // required if card is null
+    card: CardFragment | null
+    fromDocCid: string | null
+  }): Doc {
+    if (card) {
+      if (card.state) {
+        const value = card.state.body.value as unknown as TreeNode<Bullet>[]
+        return new Doc({
+          fromDocCid,
+          cardCopy: card,
+          cardInput: null,
+          editorValue: EditorSerializer.toLiArray(value),
+        })
+      } else {
+        // Has card but no card-state -> ie a new webpage-card, use webpage-template
+        if (card.link === undefined) {
+          throw 'card.link === undefined'
+        }
+        return new Doc({
+          fromDocCid,
+          cardCopy: card,
+          cardInput: null,
+          editorValue: [
+            {
+              type: 'li',
+              children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new webpage-card ${symbol}` }] }],
+            },
+          ],
+        })
+      }
+    }
+    // No card -> a new symbol-card
+    // TODO: check symbol format is valid
+    return new Doc({
+      fromDocCid,
+      cardCopy: null,
+      cardInput: { symbol, meta: {} },
+      editorValue: [
+        {
+          type: 'li',
+          children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new symbol-card ${symbol}` }] }],
+        },
+      ],
+    })
+  }
+
   static async getAllDocs(): Promise<Doc[]> {
-    console.log('Get all docs...')
-    const cids = await LocalDBService.docTable.keys()
+    console.log('Get all docs... (heavy, use with caution)')
+    const cids = await LocalDatabaseService.docTable.keys()
     const promises = cids.map(async e => {
-      const loaded = await Doc.load(e)
-      if (loaded === null) {
+      const found = await Doc.find({ cid: e })
+      if (found === null) {
         throw 'getAllDocs() unexpected error'
       }
-      return loaded
+      return found
     })
     const docs = await Promise.all(promises)
     return docs
@@ -102,29 +131,43 @@ export class Doc {
 
   static async getAllCommittedDocs(): Promise<Doc[]> {
     console.log('Get all committed docs...')
-    const cids = await LocalDBService.docCommittedTable.keys()
+    const cids = await LocalDatabaseService.committedDocTable.keys()
     const promises = cids.map(async e => {
-      const loaded = await Doc.loadFromCommittedTable(e)
-      if (loaded === null) {
+      const found = await Doc.findCommittedDoc(e)
+      if (found === null) {
         throw 'getAllCommittedDocs() unexpected error'
       }
-      return loaded
+      return found
     })
     const docs = await Promise.all(promises)
     return docs
   }
 
-  static async load(cid: string): Promise<Doc | null> {
-    const found: Required<DocProps> | null = await LocalDBService.docTable.getItem(cid)
-    if (found) {
-      // this.check(doc) // check remote for updates
-      return new Doc(found)
+  static async find({ cid, symbol }: { cid?: string; symbol?: string }): Promise<Doc | null> {
+    if (cid) {
+      const found = await LocalDatabaseService.docTable.getItem<Required<DocProps>>(cid)
+      if (found) {
+        // this.check(doc) // check remote for updates
+        return new Doc(found)
+      }
+      return null
     }
-    return null
+    if (symbol) {
+      const allDocs = await this.getAllDocs()
+      const filtered = allDocs.filter(e => e.getSymbol() === symbol)
+      if (filtered.length > 1) {
+        throw 'found more than one doc has same symbol name'
+      }
+      if (filtered.length === 1) {
+        return filtered[0]
+      }
+      return null
+    }
+    throw 'find({cid, symbol}) requires cid or symbol'
   }
 
-  static async loadFromCommittedTable(cid: string): Promise<Doc | null> {
-    const found: Required<DocProps> | null = await LocalDBService.docCommittedTable.getItem(cid)
+  static async findCommittedDoc(cid: string): Promise<Doc | null> {
+    const found = await LocalDatabaseService.committedDocTable.getItem<Required<DocProps>>(cid)
     if (found) {
       // this.check(doc)
       return new Doc(found)
@@ -134,15 +177,15 @@ export class Doc {
 
   static async removeDoc(cid: string): Promise<void> {
     try {
-      await LocalDBService.docTable.removeItem(cid)
+      await LocalDatabaseService.docTable.removeItem(cid)
     } catch (err) {
       console.error(err)
     }
   }
 
-  static async removeFromCommittedTable(cid: string): Promise<void> {
+  static async removeCommittedDoc(cid: string): Promise<void> {
     try {
-      await LocalDBService.docTable.removeItem(cid)
+      await LocalDatabaseService.docTable.removeItem(cid)
     } catch (err) {
       console.error(err)
     }
@@ -164,7 +207,7 @@ export class Doc {
   async save(): Promise<void> {
     this.updatedAt = Date.now()
     try {
-      await LocalDBService.docTable.setItem(this.cid, this.toJSON())
+      await LocalDatabaseService.docTable.setItem(this.cid, this.toJSON())
       // this.updateChanges()
       // this.getChanges()
     } catch (err) {
@@ -172,11 +215,11 @@ export class Doc {
     }
   }
 
-  async saveToCommittedTable(): Promise<void> {
+  async saveCommittedDoc(): Promise<void> {
     const { committedAt, committedState } = this
     if (committedAt && committedState) {
       try {
-        await LocalDBService.docCommittedTable.setItem(this.cid, this.toJSON()) // overwrite previous doc
+        await LocalDatabaseService.committedDocTable.setItem(this.cid, this.toJSON()) // overwrite previous doc
       } catch (err) {
         console.error(err)
       }
@@ -185,24 +228,13 @@ export class Doc {
     throw 'Save to committed-table require committedState & committedAt'
   }
 
-  toDocEntry(): DocEntry {
-    const { symbol, cardInput, cardCopy, sourceCardCopy, editorValue, updatedAt } = this
-    const title = cardCopy?.meta.title ? cardCopy?.meta.title : symbol
-    return {
-      symbol,
-      title,
-      cardId: cardCopy?.id,
-      sourceCardId: sourceCardCopy?.id,
-      updatedAt,
-    }
-  }
-
   toJSON(): Required<DocProps> {
     const {
-      symbol,
+      cid,
+      fromDocCid,
       cardInput,
       cardCopy,
-      sourceCardCopy,
+      // sourceCardCopy,
       editorValue,
       createdAt,
       updatedAt,
@@ -210,10 +242,11 @@ export class Doc {
       committedState,
     } = this
     return {
-      symbol,
+      cid,
+      fromDocCid,
       cardInput,
       cardCopy,
-      sourceCardCopy,
+      // sourceCardCopy,
       editorValue,
       createdAt,
       updatedAt,
@@ -223,17 +256,27 @@ export class Doc {
   }
 
   toCardStateInput(): CardStateInput {
-    const { cid, cardInput, cardCopy, sourceCardCopy, editorValue } = this
+    const { cid, fromDocCid, cardInput, cardCopy, editorValue } = this
     // const changes = this.updateChanges()
     return {
       cid,
-      prevStateId: cardCopy?.state?.id,
+      fromDocCid,
       cardInput,
       cardId: cardCopy?.id,
-      sourceCardId: sourceCardCopy?.id,
+      prevStateId: cardCopy?.state?.id,
       changes: this.getChanges(), // TODO: flatten
       value: EditorSerializer.toTreeNodes(editorValue), // TODO: flatten
     }
+  }
+
+  getCardMetaInput(): CardMetaInput {
+    if (this.cardInput?.meta) {
+      return this.cardInput.meta
+    }
+    if (this.cardCopy?.meta) {
+      return this.cardCopy.meta
+    }
+    return {}
   }
 
   getChanges(): NodeChange<Bullet>[] {
@@ -241,16 +284,60 @@ export class Doc {
       ? (this.cardCopy.state.body.value as unknown as TreeNode<Bullet>[])
       : []
     const changes = TreeChangeService.getChnages(this.getValue(), startValue, isBulletEqual)
-    console.log(this.editorValue)
-    console.log(this.cardCopy?.state?.body.value, this.getValue(), changes)
+    // console.log(this.editorValue)
+    // console.log(this.cardCopy?.state?.body.value, this.getValue(), changes)
     return changes
   }
 
-  async getSubDocs(): Promise<Doc[]> {
-    return (await Doc.getAllDocs()).filter(e => e.sourceCardCopy?.sym.symbol === this.symbol)
+  getTitle(): string | undefined {
+    if (this.cardInput) {
+      return this.cardInput.meta?.title ?? undefined
+    }
+    if (this.cardCopy) {
+      return this.cardCopy.meta.title ?? undefined
+    }
+    throw 'doc cardCopy & cardInput are both null'
+  }
+
+  getSymbol(): string {
+    if (this.cardCopy) {
+      return this.cardCopy.sym.symbol
+    }
+    if (this.cardInput) {
+      return this.cardInput.symbol
+    }
+    throw 'doc cardCopy & cardInput are both null'
   }
 
   getValue(): TreeNode<Bullet>[] {
     return EditorSerializer.toTreeNodes(this.editorValue)
+  }
+
+  updateCardMetaInput(metaInput: CardMetaInput): { isUpdated: boolean } {
+    if (this.cardInput?.meta && isDeepStrictEqual(metaInput, this.cardInput.meta)) {
+      return { isUpdated: false }
+    }
+    if (this.cardInput) {
+      this.cardInput.meta = metaInput
+    } else {
+      this.cardInput = {
+        symbol: this.getSymbol(),
+        meta: metaInput,
+      }
+    }
+    return { isUpdated: true }
+  }
+
+  updateCardSymbol(newSymbol: string): void {
+    if (this.cardCopy) {
+      console.warn('Rename created card symbol is not supported yet.')
+      return
+    }
+    if (this.getSymbol() === newSymbol) {
+      return // no need to change
+    }
+    if (this.cardInput) {
+      this.cardInput.symbol = newSymbol
+    }
   }
 }

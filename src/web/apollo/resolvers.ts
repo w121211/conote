@@ -20,6 +20,7 @@ import { createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import { ResolverContext } from './apollo-client'
+import { TreeService } from '../../packages/docdiff/src'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -568,7 +569,11 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   async createCommit(_parent, { data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    return await CommitModel.create(data, userId)
+    const { commit, stateGidToCid } = await CommitModel.create(data, userId)
+    return {
+      ...commit,
+      stateIdToCidDictArray: Object.entries(stateGidToCid).map<{ k: string; v: string }>(([k, v]) => ({ k, v })),
+    }
   },
 
   async createPoll(_parent, { data }, { req }, _info) {

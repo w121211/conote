@@ -1,13 +1,14 @@
 import { CardState } from '.prisma/client'
-import { NodeChange, TreeNode } from '../../../packages/docdiff/src'
+import { NodeBody, NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
 
 export type CardStateBody = {
   prevStateId: string | null // initial state
-  sourceCardId: string | null
   changes: NodeChange<Bullet>[]
   value: TreeNode<Bullet>[]
+  // sourceCardId: string | null
+  fromCardId?: string // doc is created from which during editing, not strong binding
 }
 
 export type CardStateParsed = Omit<CardState, 'body'> & {

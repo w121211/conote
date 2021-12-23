@@ -2,7 +2,7 @@
 import { isEqual } from 'lodash'
 import { PrismaClient } from '@prisma/client'
 import { NodeChange, TreeChangeService, TreeNode } from '../../packages/docdiff/src'
-import { Bullet } from '../components/bullet/types'
+import { Bullet } from '../components/bullet/bullet'
 import { getBotEmail } from '../lib/models/user'
 import { CommitModel } from '../lib/models/commit'
 
@@ -100,8 +100,10 @@ export const TestDataHelper = {
       },
       TESTUSERS[0].id,
     )
-    const state0 = commit0.cardStates[0]
-    if (state0 === undefined) throw 'createCommits(): state0 === undefined'
+    const state0 = commit0.commit.cardStates[0]
+    if (state0 === undefined) {
+      throw 'createCommits(): state0 === undefined'
+    }
 
     const commit1 = await CommitModel.create(
       {
@@ -116,7 +118,7 @@ export const TestDataHelper = {
           {
             cid: '$BB',
             prevStateId: null,
-            sourceCardId: state0.cardId,
+            // sourceCardId: state0.cardId,
             cardInput: { symbol: '$BB' },
             value: values[0][1],
             changes: values[0][2],
@@ -124,7 +126,7 @@ export const TestDataHelper = {
           {
             cid: '$CC',
             prevStateId: null,
-            sourceCardId: state0.cardId,
+            // sourceCardId: state0.cardId,
             cardInput: { symbol: '$CC' },
             value: values[0][1],
             changes: values[0][2],

@@ -15,7 +15,7 @@ import firebaseui from 'firebaseui'
 import { useRouter } from 'next/router'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
-import { useSessionLoginMutation } from '../apollo/query.graphql'
+import { useSessionLoginMutation, useSessionLogoutMutation } from '../apollo/query.graphql'
 import { useFirebaseClient } from '../components/auth/firebase-client'
 
 const LoginPanel = (): JSX.Element | null => {
@@ -26,7 +26,7 @@ const LoginPanel = (): JSX.Element | null => {
   // const { data, loading: loadingMe, error: queryMeError } = useMeQuery()
 
   const [sessionLogin, { loading: loadingSessionLogin }] = useSessionLoginMutation()
-  // const [sessionLogout, { loading: loadingSessionLogout }] = useSessionLogoutMutation()
+  const [sessionLogout, { loading: loadingSessionLogout }] = useSessionLogoutMutation()
 
   const firebaseAuth = getAuth(firebaseClient)
 
@@ -181,12 +181,19 @@ const LoginPanel = (): JSX.Element | null => {
         </button>
         <button
           onClick={() => {
+            sessionLogout()
+          }}
+        >
+          Logout
+        </button>
+        {/* <button
+          onClick={() => {
             // AuthService.sessionLogout()
             router.push('/')
           }}
         >
           Home
-        </button>
+        </button> */}
       </div>
     )
   }

@@ -92,11 +92,17 @@ export default function Layout({
           <div>
             {buttonRight}
             {meData ? (
-              <button className="btn-secondary">
-                <a href="/login">Logout</a>{' '}
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                // className="btn-secondary"
+              >
+                <a href="/login">Logout</a>
               </button>
             ) : (
-              <button className="btn-primary">
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                // className="btn-primary"
+              >
                 <a href="/login">Login</a>
               </button>
             )}

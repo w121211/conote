@@ -39,12 +39,11 @@ export const TreeService = {
     const pcDict: Record<string, NodeBody<T>[]> = Object.fromEntries(
       nodes.map((e): [string, NodeBody<T>[]] => [e.cid, []]),
     )
-
     for (const e of nodes) {
       const { index, parentCid } = e
       if (index === undefined || parentCid === undefined) {
         console.error(e)
-        throw 'index === undefined || parentCid === undefined'
+        throw '[docdiff] index === undefined || parentCid === undefined'
       }
 
       if (pcDict[parentCid]) {
@@ -62,26 +61,29 @@ export const TreeService = {
    * P.S. Node's index is followed by the given array, not by the node's index
    */
   fromParentChildrenDict<T>(dict: Record<string, NodeBody<T>[]>): TreeNode<T>[] {
+    if (!(this.tempRootCid in dict)) {
+      return [] // temp-root has no children, return an empty array
+    }
     const tempRoot: TreeNode<T> = {
       cid: this.tempRootCid,
       children: [],
     }
-    const addedIds: string[] = [tempRoot.cid]
+    const seenIds: string[] = [tempRoot.cid]
     const parents: TreeNode<T>[] = [tempRoot]
     while (parents.length > 0) {
       const p = parents.shift()
       if (p === undefined || !(p.cid in dict)) {
         console.error(dict, p)
-        throw '[bullet-doc] p === undefined || !(p.cid in dict)'
+        throw '[docdiff] p === undefined || !(p.cid in dict)'
       }
-      addedIds.push(p.cid)
+      seenIds.push(p.cid)
       p.children = dict[p.cid].map<TreeNode<T>>(e => ({
         ...e,
         children: [],
       }))
       p.children.forEach(e => {
-        if (addedIds.includes(e.cid)) {
-          throw '[bullet-doc] Input data error' // id 不能重複，會造成循環錯誤
+        if (seenIds.includes(e.cid)) {
+          throw '[docdiff] input data form a loop tree' // id 不能重複，會造成循環錯誤
         }
         parents.push(e)
       })
@@ -117,7 +119,7 @@ export const TreeService = {
     while (stack.length > 0) {
       const p = stack.shift()
       if (p === undefined) {
-        throw '[bullet-doc] unexpected error'
+        throw '[docdiff] p === undefined, unexpected error'
       }
       p.children.forEach((c, i) => {
         c.parentCid = p.cid
@@ -128,12 +130,16 @@ export const TreeService = {
     return tempRoot.children
   },
 
+  isRoot<T>(node: TreeNode<T>): boolean {
+    return node.parentCid === TreeService.tempRootCid
+  },
+
   sortParentChildrenDict_<T>(dict: Record<string, NodeBody<T>[]>): void {
     Object.entries(dict).forEach(([k, v]) => {
       // sort children by its index
       dict[k] = v.sort((a, b) => {
         if (a.index === undefined || b.index === undefined) {
-          throw '[bullet-doc] a.index === undefined || b.index === undefined'
+          throw '[docdiff] a.index === undefined || b.index === undefined'
         }
         return a.index - b.index
       })
@@ -150,7 +156,7 @@ export const TreeService = {
     while (parents.length > 0) {
       const p = parents.shift()
       if (p === undefined) {
-        throw '[bullet-doc] unexpected error'
+        throw '[docdiff] unexpected error'
       }
       const { children, ...rest } = p
       children.forEach((v, i) => {
@@ -185,7 +191,7 @@ export const TreeService = {
     Object.entries(nodeDict).forEach(([, node]) => {
       const { parentCid } = node
       if (parentCid === undefined) {
-        throw `[bullet-doc] parentCid === undefined`
+        throw `[docdiff] parentCid === undefined`
       }
       if (dict[parentCid]) {
         dict[parentCid].push(node)

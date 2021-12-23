@@ -1,4 +1,4 @@
-# See https://github.com/vercel/next.js/tree/canary/examples/with-docker
+# @see https://github.com/vercel/next.js/tree/canary/examples/with-docker
 
 # Install dependencies only when needed
 FROM node:14-alpine AS packages-deps

@@ -3,9 +3,10 @@ import { UrlObject } from 'url'
 
 export type DocPath = {
   symbol: string
+  fromSymbol?: string // for docs tree, local use only, TODO: cope if symbol name changed
   // url?: string
-  sourceCardId?: string // indicate current symbol is a mirror
-  editorValuePath?: number[]
+  // sourceCardId?: string // indicate current symbol is a mirror
+  // editorValuePath?: number[] // open-li
 }
 
 export const DocPathService = {
@@ -29,7 +30,7 @@ export const DocPathService = {
       return {
         symbol,
         // url,
-        sourceCardId: typeof src === 'string' ? src : undefined,
+        // sourceCardId: typeof src === 'string' ? src : undefined,
         // path: typeof path === 'string' ? path.split('.').map(e => parseInt(e)) : [],
         // mirror: typeof mirror === 'string' ? mirror : undefined,
         // mirrorSymbol: typeof mirror === 'string' ? mirror : undefined,

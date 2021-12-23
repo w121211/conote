@@ -14,10 +14,10 @@ const apolloServer = new ApolloServer({
   context(ctx) {
     return ctx
   },
-  formatError(error) {
-    console.error(util.inspect(error, { showHidden: false, depth: null }))
-    return error
-  },
+  // formatError(error) {
+  //   console.error(util.inspect(error, { showHidden: false, depth: null }))
+  //   return error
+  // },
 })
 
 const startServer = apolloServer.start()
