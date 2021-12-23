@@ -1,4 +1,7 @@
-import cheerio, { CheerioAPI } from 'cheerio'
+/**
+ * Code mostly borrow from metascraper, @see
+ */
+import cheerio from 'cheerio'
 import { fromPairs, isNull, isString } from 'lodash'
 import memoizeOne from 'memoize-one'
 import { Rule, RuleMap, RuleParams, Scraper, ScrapeResult, ScraperPack } from './types'
@@ -34,13 +37,12 @@ const mergePacks = (packs: ScraperPack[]): RuleMap => {
   const merged: RuleMap = {}
   for (const pack of packs) {
     const matchUrlFn = pack.matchUrl ? memoizeOne(createMatchUrlFn(pack.matchUrl)) : undefined
-
     Object.entries(pack.ruleMap).forEach(([k, v]) => {
       if (isKeyOfRuleMap(k)) {
         const rules = matchUrlFn ? v.map((e): Rule => withMatchUrl(e, matchUrlFn)) : v
         merged[k] = [...(merged[k] ?? []), ...rules]
       } else {
-        throw `Key is not defined in ScrapeData: ${k}`
+        throw `isKeyOfRuleMap(k) === false, rule map key is not defined in ScrapeResult, ${k}`
       }
     })
   }
@@ -84,10 +86,9 @@ export const createScraper = (packs: ScraperPack[]): Scraper => {
   const merged = mergePacks(packs)
   const scraper: Scraper = async ({ url, html }) => {
     return scrape({
+      ruleMap: merged,
       url,
       $: cheerio.load(html),
-      // rules: mergeRules(inlineRules, loadedRules),
-      ruleMap: merged,
       // ...kwargs,
     })
   }

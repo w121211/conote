@@ -184,7 +184,7 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
 
   useEffect(() => {
     if (data) {
-      workspace.open({ symbol, card: data.card ?? null })
+      workspace.openDoc({ symbol, card: data.card ?? null })
     }
   }, [data])
 
@@ -224,9 +224,9 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   const modalDoc = useObservable(() => workspace.modalDoc$)
 
   useEffect(() => {
-    if (data && mainDoc) {
-      // make sure main-doc is existed
-      workspace.open({ symbol, card: data.card ?? null, isModal: true })
+    if (data && mainDoc?.doc) {
+      // make sure main-doc is existed before open modal-doc
+      workspace.openDoc({ symbol, card: data.card ?? null, isModal: true })
     }
   }, [data, mainDoc])
 
@@ -259,6 +259,9 @@ const CardSymbolPage = (): JSX.Element | null => {
 
   const [mainSymbol, setMainSymbol] = useState<string>()
   const [modalSymbol, setModalSymbol] = useState<string | null>(null)
+  const mainDoc = useObservable(() => workspace.mainDoc$)
+  const modalDoc = useObservable(() => workspace.modalDoc$)
+
   const mainCardComponent = useMemo<JSX.Element | null>(() => {
     if (mainSymbol) {
       return <MainCardComponent symbol={mainSymbol} />
@@ -271,8 +274,6 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
     return null
   }, [modalSymbol])
-  const mainDoc = useObservable(() => workspace.mainDoc$)
-  const modalDoc = useObservable(() => workspace.modalDoc$)
 
   useEffect(() => {
     const { pathname } = router
@@ -283,8 +284,9 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
     if (symbol !== mainSymbol) {
       if (mainDoc?.doc && mainDoc.doc.getChanges().length > 0) {
-        workspace.save(mainDoc.doc)
+        workspace.save(mainDoc.doc) // save previous main-doc before switch to another
       }
+      workspace.closeDoc({}) // close doc to prevent component rerender
       setMainSymbol(symbol)
     }
     if (typeof pop === 'string') {
@@ -296,11 +298,15 @@ const CardSymbolPage = (): JSX.Element | null => {
         return // /$A?pop=$B -> /$A?pop=$B
       }
       if (mainDoc?.doc && mainDoc.doc.getChanges().length > 0) {
-        workspace.save(mainDoc.doc)
+        workspace.save(mainDoc.doc) // save current main-doc before open modal
       }
+      workspace.closeDoc({ isModal: true }) // close doc to prevent component rerender
       setModalSymbol(pop)
+      // console.log(`setModalSymbol ${pop}`)
     } else {
+      workspace.closeDoc({ isModal: true }) // close doc to prevent component rerender
       setModalSymbol(null)
+      // console.log(`setModalSymbol null`)
     }
   }, [router])
 
@@ -311,10 +317,13 @@ const CardSymbolPage = (): JSX.Element | null => {
         onClose={async () => {
           if (mainDoc?.doc && modalDoc?.doc) {
             if (modalDoc.doc.getChanges().length > 0) {
+              // console.log(modalDoc.doc.getChanges())
+              // TODO: strictly check if doc is truly updated
               if ((await Doc.find({ cid: mainDoc.doc.cid })) === null) {
                 await workspace.save(mainDoc.doc) // ensure main-doc also save
               }
               await workspace.save(modalDoc.doc)
+              workspace.closeDoc({ isModal: true }) // close doc to prevent component rerender
             }
           }
           router.push({ pathname: router.pathname, query: { symbol: router.query.symbol } })
@@ -322,6 +331,8 @@ const CardSymbolPage = (): JSX.Element | null => {
       >
         {modalCardComponent}
       </Modal>
+      {/* {modalCardComponent} */}
+      {/* {modalSymbol && <ModalCardComponent symbol={modalSymbol} />} */}
       <button
         onClick={() => {
           workspace.dropAll()
@@ -341,6 +352,7 @@ const CardSymbolPage = (): JSX.Element | null => {
       />
       {/* <Layout>{mainCardComponent}</Layout> */}
       {mainCardComponent}
+      {/* {mainSymbol && <MainCardComponent symbol={mainSymbol} />} */}
     </>
   )
 }

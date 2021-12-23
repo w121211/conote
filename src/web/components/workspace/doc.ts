@@ -31,7 +31,7 @@ export class Doc {
   readonly fromDocCid: string | null
   readonly cardCopy: CardFragment | null // keep the previous state, TODO: sync to the latest card state if remote updated
   private cardInput: CardInput | null // required if card is null
-  private editorValue: LiElement[]
+  editorValue: LiElement[]
   // value: TreeNode<Bullet>[]
   // changes: NodeChange<Bullet>[] = []
   createdAt: number
@@ -110,6 +110,7 @@ export class Doc {
         {
           type: 'li',
           children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new symbol-card ${symbol}` }] }],
+          // children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }],
         },
       ],
     })

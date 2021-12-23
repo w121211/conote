@@ -34,19 +34,25 @@ class Workspace {
     // this.updateCommittedDocEntries()
   }
 
-  _whichDoc(isModal?: true): BehaviorSubject<{
-    doc: Doc | null
-    error?: string
-    // warn?: 'prev_doc_behind'
-  }> {
+  // _whichDoc(isModal?: true): BehaviorSubject<{
+  //   doc: Doc | null
+  //   error?: string
+  //   // warn?: 'prev_doc_behind'
+  // }> {
+  //   const doc$ = isModal ? this.modalDoc$ : this.mainDoc$
+  //   if (isModal) {
+  //     // check is allow to open in modal
+  //     if (this.mainDoc$.getValue().doc === null) {
+  //       throw 'main-doc is null, not able to open a modal-doc'
+  //     }
+  //   }
+  //   return doc$
+  // }
+
+  closeDoc({ isModal }: { isModal?: true }): void {
+    // const _doc$ = this._whichDoc(isModal)
     const doc$ = isModal ? this.modalDoc$ : this.mainDoc$
-    if (isModal) {
-      // check is allow to open in modal
-      if (this.mainDoc$.getValue() === null) {
-        throw 'main-doc is null, not able to open a modal-doc'
-      }
-    }
-    return doc$
+    doc$.next({ doc: null })
   }
 
   /**
@@ -131,9 +137,19 @@ class Workspace {
     await this.updateEditingDocIndicies()
   }
 
-  async open({ symbol, card, isModal }: { symbol: string; card: CardFragment | null; isModal?: true }): Promise<void> {
-    const _doc$ = this._whichDoc(isModal)
-    _doc$.next({ doc: null })
+  async openDoc({
+    symbol,
+    card,
+    isModal,
+  }: {
+    symbol: string
+    card: CardFragment | null
+    isModal?: true
+  }): Promise<void> {
+    const _doc$ = isModal ? this.modalDoc$ : this.mainDoc$
+    if (_doc$.getValue().doc !== null) {
+      throw '_doc$.getValue().doc !== null, call closeDoc() first before open another'
+    }
     this.status$.next('loading')
 
     const found = await Doc.find({ symbol })
@@ -147,7 +163,6 @@ class Workspace {
     // No local doc, create one
     let fromDocCid: string | null = null
     if (isModal) {
-      // console.log(this.mainDoc$.getValue())
       const { doc: mainDoc } = this.mainDoc$.getValue()
       if (mainDoc === null) {
         throw 'mainDoc === null: modal doc require main doc exist'

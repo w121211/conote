@@ -321,6 +321,13 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
     setValue(doc.editorValue ?? [])
   }, [doc])
 
+  useEffect(() => {
+    console.log(`BulletEditor enter ${doc.getSymbol()}`)
+    return () => {
+      console.log(`BulletEditor unmount ${doc.getSymbol()}`)
+    }
+  }, [])
+
   // const [searchPanel, onValueChange] = useSearch(editor)
   // useEffect(() => {
   //   if (searchAllResult.data) {
