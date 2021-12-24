@@ -99,8 +99,8 @@ const SideBar = ({
       <div className="mt-2 mb-5">
         <SearchAllForm small />
       </div>
-      <SidebarList title="最近同步的筆記" entries={committedDocs} />
-      <SidebarList title="暫存區" entries={savedDocs} />
+      <SidebarList title="最近同步的筆記" entries={committedDocIndicies} />
+      <SidebarList title="暫存區" entries={editingdDocIndicies} />
     </div>
   )
 }

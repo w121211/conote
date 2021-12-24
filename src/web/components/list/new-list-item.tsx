@@ -38,7 +38,7 @@ const NewListItem = ({
         {/* {shot && <span className={classes.shot}>{shot}</span>} */}
         {/* {source && <div className={classes.source}>{source}</div>} */}
 
-        {(author || hashtags || source) && <span className="h-4 mx-1 border-gray-300"></span>}
+        {author && sourceUrl && <span className="h-4 mx-1 border-gray-300"></span>}
         {sourceUrl && (
           <a href={`${sourceUrl}`} className="truncate text-gray-500" rel="noreferrer" target="_blank">
             <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis hover:underline hover:underline-offset-2">

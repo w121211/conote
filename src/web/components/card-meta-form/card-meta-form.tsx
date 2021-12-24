@@ -1,18 +1,21 @@
 import React, { useState } from 'react'
 import { CardFragment, useCardQuery } from '../../apollo/query.graphql'
+import { CardMetaInput } from '../../apollo/type-defs.graphqls'
 import HeaderForm from '../header-form/header-form'
 import Modal from '../modal/modal'
 import Popover from '../popover/popover'
 
 const CardMetaForm = ({
   cardId,
+  initialValue,
   // selfCard,
-  handleCardMetaSubmitted,
+  onSubmitted,
   showBtn,
 }: {
   cardId: string
+  initialValue: CardMetaInput
   // selfCard?: CardFragment
-  handleCardMetaSubmitted: (isSubmitted: boolean) => void
+  onSubmitted: (input: CardMetaInput) => void
   showBtn?: boolean
 }): JSX.Element => {
   const [showHeaderForm, setShowHeaderForm] = useState(false)
@@ -40,22 +43,23 @@ const CardMetaForm = ({
           setShowHeaderForm(false)
         }}
       >
+        <h2 className="mb-6 text-2xl font-bold text-gray-800">卡片資訊</h2>
         <HeaderForm
           cardId={cardId}
           initialValue={{
-            author: cardData?.card?.meta.author ?? '',
-            title: cardData?.card?.meta.title ?? '',
-            url: cardData?.card?.meta.url ?? '',
+            author: initialValue?.author ?? '',
+            title: initialValue?.title ?? '',
+            url: initialValue?.url ?? '',
             keywords:
-              cardData?.card?.meta.keywords?.map(e => {
+              initialValue?.keywords?.map(e => {
                 return { label: e, value: e }
               }) ?? [],
-            redirects: cardData?.card?.meta.redirects?.join(' ') ?? '',
-            duplicates: cardData?.card?.meta.duplicates?.join(' ') ?? '',
+            redirects: initialValue?.redirects?.join(' ') ?? '',
+            duplicates: initialValue?.duplicates?.join(' ') ?? '',
             description: '',
             date: '',
           }}
-          handleSubmitted={handleCardMetaSubmitted}
+          onSubmitted={onSubmitted}
         />
       </Modal>
     </>

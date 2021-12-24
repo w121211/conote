@@ -82,7 +82,7 @@ const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
 
   return (
     <div
-      className={`absolute flex flex-col p-3 overflow-auto whitespace-nowrap rounded bg-white shadow-lg z-50 transition-all ${
+      className={`absolute flex flex-col p-3 overflow-auto whitespace-nowrap border border-gray-100 rounded bg-white shadow-md z-50 transition-all ${
         className ? className : ''
       }`}
       style={styleState}

@@ -141,11 +141,11 @@ const CreateRateForm = ({
             // />
           }
           <h5
-            // className={`absolute top-0 left-2 leading-none font-normal text-gray-500
+            // className={`absolute top-0 left-2 leading-none font-normal text-gray-700 font-normal
             // transition-all transform origin-top-left
             //   group-focus-within:translate-y-2 group-focus-within:scale-[0.8] group-focus-within:text-blue-600
             //   ${watchAuthor === '' ? 'translate-y-4 scale-100' : 'translate-y-2 scale-[0.8]'}`}
-            className="w-20 text-gray-500"
+            className="w-20 text-gray-700 font-normal"
           >
             名字
           </h5>
@@ -157,7 +157,7 @@ const CreateRateForm = ({
           />
         </label>
         <div className="flex items-center mb-4 select-none">
-          <h5 className="w-20 text-gray-500 ">預測</h5>
+          <h5 className="w-20 text-gray-700 font-normal ">預測</h5>
           <div className="flex gap-3">
             <label
               className={`inline-flex items-center gap-2 px-4 py-2 border rounded cursor-pointer tracking-wider transition-all ${
@@ -214,7 +214,7 @@ const CreateRateForm = ({
           </div>
         </div>
         <label className="flex items-center w-fit mb-4">
-          <h5 className="w-20 text-gray-500 ">標的</h5>
+          <h5 className="w-20 text-gray-700 font-normal ">標的</h5>
           <input
             {...register('target')}
             className="input w-32  border border-gray-300 focus:outline-blue-800"
@@ -223,7 +223,7 @@ const CreateRateForm = ({
           />
         </label>
         <label className="flex items-center w-fit mb-4">
-          <h5 className="w-20 text-gray-500 "> 來源網址</h5>
+          <h5 className="w-20 text-gray-700 font-normal "> 來源網址</h5>
           <input
             {...register('link')}
             className="input w-96 border border-gray-300 focus:outline-blue-800"

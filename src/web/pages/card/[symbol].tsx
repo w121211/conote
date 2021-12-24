@@ -151,56 +151,72 @@ const _CardMetaForm = ({
 }
 
 const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
+  const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
+  const [cardMetaSubmitted, setCardMetaSubmitted] = useState(false)
+  const hiddenBtnRef = useRef<HTMLDivElement>(null)
   return (
-    <div>
-      <_CardMetaForm
-        curInput={doc.getCardMetaInput()}
-        onSubmitted={input => {
-          const { isUpdated } = doc.updateCardMetaInput(input)
-          if (isUpdated) {
-            workspace.save(doc)
-            // workspace.updateEditingDocIndicies() // force update since doc symbol, title may change
-          }
-        }}
-      />
-      <h1>
+    <div className="mb-4">
+      {/* <h1>
         {doc.getTitle()}
         {doc.getSymbol()}
-      </h1>
-      <button
+      </h1> */}
+      {/* <button
         onClick={() => {
           doc.updateCardSymbol('[[Hahaha]]')
         }}
+      > */}
+      <div
+        onMouseOver={e => {
+          if (!hiddenBtnRef.current?.contains(e.target as Node)) {
+            setShowHeaderHiddenBtns(false)
+          } else {
+            setShowHeaderHiddenBtns(true)
+          }
+        }}
+        onMouseOut={e => {
+          setShowHeaderHiddenBtns(false)
+        }}
+        ref={hiddenBtnRef}
       >
         <div className="flex items-center gap-4 mb-2">
-          {card && (
+          {doc.cardCopy && (
             <CardMetaForm
-              cardId={card?.id}
+              cardId={doc.cardCopy.id}
               showBtn={showHeaderHiddenBtns}
-              handleCardMetaSubmitted={handleCardMetaSubmitted}
+              initialValue={doc.getCardMetaInput()}
+              onSubmitted={input => {
+                const { isUpdated } = doc.updateCardMetaInput(input)
+                if (isUpdated) {
+                  workspace.save(doc)
+                  // workspace.updateEditingDocIndicies() // force update since doc symbol, title may change
+                }
+              }}
             />
           )}
 
-          {doc?.symbol.startsWith('@http') && (
+          {doc.cardCopy?.sym.symbol.startsWith('@http') && (
             <a
               className="inline-flex items-center overflow-hidden text-gray-500 hover:text-gray-700"
-              href={doc?.symbol.substr(1)}
+              href={doc.cardCopy?.sym.symbol.substring(1)}
               style={showHeaderHiddenBtns ? { opacity: 1 } : { opacity: 0 }}
               target="_blank"
               rel="noreferrer"
             >
               <span className="material-icons text-base">open_in_new</span>
-              <span className="flex-shrink min-w-0 truncate text-sm">{card?.meta.url}</span>
+              <span className="flex-shrink min-w-0 truncate text-sm">{doc.cardCopy?.meta.url}</span>
             </a>
           )}
         </div>
-        {card?.meta?.author && (
-          <Link href={`/author/${encodeURIComponent('@' + card?.meta?.author)}`}>
-            <a className="text-sm text-blue-500 hover:underline hover:underline-offset-1">@{card?.meta?.author}</a>
+        {doc.cardCopy?.meta?.author && (
+          <Link href={`/author/${encodeURIComponent('@' + doc.cardCopy?.meta?.author)}`}>
+            <a className="text-sm text-blue-500 hover:underline hover:underline-offset-1">
+              @{doc.cardCopy?.meta?.author}
+            </a>
           </Link>
         )}
-        <h1 className="mb-4 line-clamp-2 break-all">{card?.meta.title || symbol}</h1>
+        <h1 className="line-clamp-2 break-all text-gray-700">{doc.getTitle() || doc.getSymbol()}</h1>
       </div>
+      {/* </div> */}
       {/* {cardMetaData?.cardMeta.keywords && (
         <div className={classes.headerKw}>
           {cardMetaData?.cardMeta.keywords.map((e, i) => {
@@ -244,9 +260,11 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
           )}
         </div>
       )} */}
-      <div className="flex items-center w-full">{card && <HeaderCardEmojis cardId={card?.id} />}</div>
-        Change Symbol
-      </button>
+
+      {doc.cardCopy && <HeaderCardEmojis cardId={doc.cardCopy?.id} />}
+
+      {/* //   Change Symbol
+      // </button> */}
     </div>
   )
 }
@@ -317,13 +335,10 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
     return null
   }
   return (
-    <>
-      <Link href={{ pathname: '/card/[symbol]', query: { symbol } }}>
-        <a>Expand</a>
-      </Link>
+    <div className="min-w-[90%] h-[80%] sm:min-w-[50%] pl-4">
       <CardHead doc={modalDoc.doc} />
       <BulletEditor doc={modalDoc.doc} />
-    </>
+    </div>
   )
 }
 
@@ -386,6 +401,14 @@ const CardSymbolPage = (): JSX.Element | null => {
   return (
     <>
       <Modal
+        topRightBtn={
+          <Link href={{ pathname: '/card/[symbol]', query: { symbol: modalSymbol } }}>
+            <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
+              <span className="material-icons text-lg">open_in_full</span>
+              整頁顯示
+            </a>
+          </Link>
+        }
         visible={modalSymbol !== null}
         onClose={async () => {
           if (mainDoc?.doc && modalDoc?.doc) {
@@ -406,14 +429,14 @@ const CardSymbolPage = (): JSX.Element | null => {
       </Modal>
       {/* {modalCardComponent} */}
       {/* {modalSymbol && <ModalCardComponent symbol={modalSymbol} />} */}
-      <button
+      {/* <button
         onClick={() => {
           workspace.dropAll()
         }}
       >
         Drop All
-      </button>
-      <SideBar
+      </button> */}
+      {/* <SideBar
         showMenuHandler={() => {
           //
         }}
@@ -422,9 +445,10 @@ const CardSymbolPage = (): JSX.Element | null => {
         }}
         isPined={false}
         showMenu={false}
-      />
-      {/* <Layout>{mainCardComponent}</Layout> */}
-      {mainCardComponent}
+      /> */}
+      <Layout>{mainCardComponent}</Layout>
+      {/* {mainCardComponent} */}
+
       {/* {mainSymbol && <MainCardComponent symbol={mainSymbol} />} */}
     </>
   )

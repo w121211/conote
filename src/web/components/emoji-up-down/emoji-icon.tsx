@@ -33,9 +33,11 @@ const EmojiIcon = ({
     case 'PIN':
       return (
         <span
-          className={`inline-flex items-center gap-1 ${liked ? 'text-gray-500' : 'text-gray-400'} ${className ?? ''}`}
+          className={`inline-flex items-center gap-1 text-sm ${liked ? 'text-gray-700' : 'text-gray-500'} ${
+            className ?? ''
+          }`}
         >
-          <span className={`material-icons text-lg text-rose-600 ${liked ? 'text-rose-600' : 'text-gray-400'}`}>
+          <span className={`material-icons text-lg text-rose-600 ${liked ? 'text-rose-600' : 'text-gray-500'}`}>
             favorite
           </span>
           {nUps}
@@ -45,9 +47,11 @@ const EmojiIcon = ({
     case 'UP':
       return (
         <span
-          className={`inline-flex items-center gap-1 ${liked ? 'text-gray-500' : 'text-gray-400'} ${className ?? ''}`}
+          className={`inline-flex items-center gap-1 text-sm ${liked ? 'text-gray-700' : 'text-gray-500'} ${
+            className ?? ''
+          }`}
         >
-          <span className={`material-icons ${liked ? ' text-blue-500' : ' text-gray-400'} text-lg`}>thumb_up_alt</span>
+          <span className={`material-icons ${liked ? ' text-blue-500' : ' text-gray-500'} text-lg`}>thumb_up_alt</span>
           {nUps}
           {showText && text}
         </span>
@@ -55,9 +59,11 @@ const EmojiIcon = ({
     case 'DOWN':
       return (
         <span
-          className={`inline-flex items-center gap-1 ${liked ? 'text-gray-500' : 'text-gray-400'} ${className ?? ''}`}
+          className={`inline-flex items-center gap-1 text-sm ${liked ? 'text-gray-700' : 'text-gray-500'} ${
+            className ?? ''
+          }`}
         >
-          <span className={`material-icons ${liked ? ' text-blue-500' : ' text-gray-400'} text-lg`}>
+          <span className={`material-icons ${liked ? ' text-blue-500' : ' text-gray-500'} text-lg`}>
             thumb_down_alt
           </span>
           {nUps}
@@ -66,7 +72,7 @@ const EmojiIcon = ({
       )
     default:
       return (
-        <span className={`inline-flex items-center gap-1 text-gray-700 ${className ?? ''}`}>
+        <span className={`inline-flex items-center gap-1 text-sm text-gray-700 ${className ?? ''}`}>
           {code}
           {nUps}
           {showText && text}

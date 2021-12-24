@@ -12,7 +12,7 @@ const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null =>
 
   // if (emojiData === null || !emojiData?.cardEmojis) return null
   return (
-    <div className="flex gap-3">
+    <div className="flex items-center w-full mt-3 gap-3">
       {pinEmoji ? <CardEmojiBtn cardEmoji={pinEmoji} /> : <CreateCardEmojiBtn cardId={cardId} emojiCode="PIN" />}
       {upEmoji ? <CardEmojiBtn cardEmoji={upEmoji} /> : <CreateCardEmojiBtn cardId={cardId} emojiCode="UP" />}
       {downEmoji ? <CardEmojiBtn cardEmoji={downEmoji} /> : <CreateCardEmojiBtn cardId={cardId} emojiCode="DOWN" />}

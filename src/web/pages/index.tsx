@@ -85,13 +85,13 @@ export const LatestCards = (): JSX.Element | null => {
         ]}
         author={'鉅亨網編譯羅昀玫'}
       />
-
+      {console.log(router.pathname)}
       {data.latestCardDigests &&
         data.latestCardDigests.map((e, i) => (
           <NewListItem
             key={i}
             cardId={e.cardId}
-            title={e.cardMeta.title ?? ''}
+            title={e.cardMeta.title ?? e.sym.symbol}
             href={`/card/${encodeURIComponent(e.sym.symbol)}`}
             sourceUrl={e.sym.type === 'URL' && e.cardMeta.url ? e.cardMeta.url : `${router.asPath}card/${e.sym.symbol}`}
             summary={e.picks}

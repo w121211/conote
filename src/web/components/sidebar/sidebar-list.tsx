@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { DocEntryPack } from '../workspace/doc'
+import { TreeNode } from '../../../packages/docdiff/src'
+import { DocIndex } from '../workspace/doc-index'
 import ContentPanel from './content-panel'
 import SidebarListContent from './sidebar-list-content'
 
-const SidebarList = ({ title, entries }: { title?: string; entries: DocEntryPack[] | null }): JSX.Element => {
+const SidebarList = ({ title, entries }: { title?: string; entries: TreeNode<DocIndex>[] | null }): JSX.Element => {
   const [showMore, setShowMore] = useState(true)
   return (
     <div className="flex flex-col min-h-0 overflow-hidden">

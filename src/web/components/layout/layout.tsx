@@ -67,7 +67,7 @@ export default function Layout({
         showMenu={showMenu}
         isPined={pinSideBar}
       />
-      <div className={`mt-11 flex-1 overflow-y-auto ${pinSideBar ? 'px-[15%]' : 'px-[20vw]'}`} ref={layoutRef}>
+      <div className={`mt-11 pb-20 flex-1 overflow-y-auto ${pinSideBar ? 'px-[15%]' : 'px-[20vw]'}`} ref={layoutRef}>
         {children}
         {/* {childrenWithCallback()} */}
         {/* <footer>footer</footer> */}

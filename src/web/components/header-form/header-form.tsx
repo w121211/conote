@@ -3,6 +3,7 @@ import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-for
 import { components, ControlProps, GroupBase, OptionProps, StylesConfig } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import { CardDocument, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
+import { CardMetaInput } from '../../apollo/type-defs.graphqls'
 
 type Option = {
   label: string
@@ -40,14 +41,26 @@ const customComponents = {
   Control,
 }
 
+const changeInputwidth = (name: string) => {
+  switch (name) {
+    case 'title':
+    case 'author':
+      return 'w-48'
+    case 'url':
+      return 'w-96'
+    case 'redirects':
+      return 'w-64'
+  }
+}
+
 const HeaderForm = ({
   initialValue,
   cardId,
-  handleSubmitted,
+  onSubmitted,
 }: {
   initialValue: FormInputs
   cardId: string
-  handleSubmitted: (isSubmitted: boolean) => void
+  onSubmitted: (input: CardMetaInput) => void
 }): JSX.Element => {
   const methods = useForm<FormInputs>({
     defaultValues: initialValue,
@@ -104,7 +117,7 @@ const HeaderForm = ({
           },
           { keepIsSubmitted: true },
         )
-        handleSubmitted(isSubmitted)
+        onSubmitted(data.updateCardMeta)
       }
     },
     // refetchQueries: [{ query: CardDocument, variables: { symbol } }],
@@ -134,62 +147,6 @@ const HeaderForm = ({
     }
   }
 
-  const customStyles: StylesConfig<Option, true, GroupBase<Option>> = {
-    valueContainer: (provided, state) => ({
-      ...provided,
-      // height: '100%',
-      // padding: '0',
-    }),
-
-    placeholder: (provided, state) => ({
-      ...provided,
-      fontSize: '14px',
-    }),
-    container: (provided: any, state: any) => ({
-      ...provided,
-      margin: '0.5em 0 1em',
-    }),
-    input: (provided, state) => ({
-      ...provided,
-      // height: '90%',
-    }),
-    multiValue: (provided, state) => ({
-      ...provided,
-      // height: '100%',
-      // padding: '0',
-      color: '#5c6cda',
-      backgroundColor: '#d6daff',
-      // mixBlendMode: 'multiply',
-    }),
-    multiValueLabel: (provided, state) => ({
-      ...provided,
-      // height: '100%',
-      // paddingTop: '0',
-      // paddingBottom: '0',
-      color: '#5c6cda',
-
-      // mixBlendMode: 'multiply',
-    }),
-    multiValueRemove: (provided, state) => ({
-      ...provided,
-      // height: '100%',
-      // padding: '0',
-      color: '#5c6cda',
-      backgroundColor: 'none',
-      // mixBlendMode: 'multiply',
-      ':hover': {
-        color: 'white',
-
-        backgroundColor: '#5c6cda',
-      },
-    }),
-    option: provided => ({
-      ...provided,
-      height: '30px',
-      padding: '0 8px',
-    }),
-  }
-
   return (
     <FormProvider {...methods}>
       <div className="w-[90%] mx-auto sm:w-[50vw]">
@@ -207,7 +164,7 @@ const HeaderForm = ({
             ['url', '來源網址', '例如:http://www.youtube.com/xxx...'],
             ['keywords', '關鍵字', ''],
             ['redirects', '重新導向', '請使用 "空格" 分隔'],
-          ].map(([name, title, placeholder]) => {
+          ].map(([name, title, placeholder], i) => {
             return (
               <label key={name} className="flex items-center">
                 <h5 className="flex-shrink-0 w-20 text-gray-700 font-normal">{title}</h5>
@@ -217,12 +174,10 @@ const HeaderForm = ({
                     name="keywords"
                     render={({ field: { onChange, value, ref } }) => (
                       <CreatableSelect
+                        id="1"
+                        instanceId="1"
                         isMulti
                         styles={{ control: () => ({}) }}
-                        onChange={e => {
-                          onChange(e)
-                          // console.log(e)
-                        }}
                         value={value}
                         components={customComponents}
                         noOptionsMessage={() => null}
@@ -234,7 +189,7 @@ const HeaderForm = ({
                   <input
                     {...register(name as keyof FormInputs)}
                     type="text"
-                    className="input border border-gray-300 focus:outline-blue-800"
+                    className={`input border border-gray-300 focus:outline-blue-800 ${changeInputwidth(name)}`}
                     placeholder={placeholder}
                   />
                 )}
@@ -242,7 +197,11 @@ const HeaderForm = ({
             )
           })}
           <div className="text-center">
-            <button className="btn-primary h-10 w-24 mt-4" type="submit" disabled={!isDirty}>
+            <button
+              className="btn-primary h-10 w-24 mt-4"
+              type="submit"
+              disabled={!isDirty || isSubmitSuccessful || isSubmitted}
+            >
               {isSubmitted ? (isDirty ? '送出' : '已送出') : '送出'}
             </button>
           </div>

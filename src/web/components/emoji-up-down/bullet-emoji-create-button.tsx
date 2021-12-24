@@ -72,7 +72,7 @@ const BulletEmojiCreateButton = ({
   return (
     <>
       <button
-        className={`btn-reset-style flex ${className ? className : ''} `}
+        className={`btn-reset-style flex justify-start ${className ? className : ''} `}
         onClick={e => {
           e.stopPropagation()
           createBulletEmoji()
