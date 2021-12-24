@@ -9,7 +9,7 @@ import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/new-hot-list'
 import NewListItem from '../components/list/new-list-item'
 
-export function LatestCards(): JSX.Element | null {
+export const LatestCards = (): JSX.Element | null => {
   const router = useRouter()
   const { data, loading, error, fetchMore } = useLatestCardDigestsQuery({ fetchPolicy: 'cache-and-network' })
   const [hasMore, setHasMore] = useState<boolean>(true)
@@ -91,11 +91,12 @@ export function LatestCards(): JSX.Element | null {
           <NewListItem
             key={i}
             cardId={e.cardId}
-            title={e.cardMeta.title ?? e.title}
+            title={e.cardMeta.title ?? ''}
             href={`/card/${encodeURIComponent(e.sym.symbol)}`}
             sourceUrl={e.sym.type === 'URL' && e.cardMeta.url ? e.cardMeta.url : `${router.asPath}card/${e.sym.symbol}`}
             summary={e.picks}
             author={e.cardMeta.author ?? undefined}
+            hashtags={e.subSyms.map(e => e.symbol)}
           />
         ))}
       {hasMore ? (

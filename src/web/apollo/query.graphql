@@ -64,26 +64,22 @@ fragment card on Card {
   updatedAt
 }
 
-fragment cardDigestMono on CardDigest {
+fragment cardDigest on CardDigest {
   __typename
   commitId
   cardId
   cardMeta {
     ...cardMeta
   }
+  fromCardId
   sym {
     ...sym
   }
-  title
+  subSyms {
+    ...sym
+  }
   picks
   updatedAt
-}
-
-fragment cardDigest on CardDigest {
-  ...cardDigestMono
-  subs {
-    ...cardDigestMono
-  }
 }
 
 fragment cardEmoji on CardEmoji {
@@ -126,7 +122,6 @@ fragment cardMeta on CardMeta {
 fragment cardState on CardState {
   __typename
   id
-  cid
   cardId
   userId
   commitId
@@ -147,6 +142,10 @@ fragment commit on Commit {
   updatedAt
   cardStates {
     ...cardState
+  }
+  stateIdToCidDictEntryArray {
+    k
+    v
   }
 }
 

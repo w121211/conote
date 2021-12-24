@@ -47,15 +47,15 @@
       "changeProcessCWD": true
     },
     {
+      "directory": "./src/packages/docdiff",
+      "changeProcessCWD": true
+    },
+    {
       "directory": "./src/packages/editor",
       "changeProcessCWD": true
     },
     {
       "directory": "./src/packages/scraper",
-      "changeProcessCWD": true
-    },
-    {
-      "directory": "./src/packages/docdiff",
       "changeProcessCWD": true
     }
   ],

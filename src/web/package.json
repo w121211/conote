@@ -104,7 +104,6 @@
     "@types/bcryptjs": "^2.4.2",
     "@types/cookie": "^0.4.0",
     "@types/jest": "^27.0.3",
-    "@types/lodash": "^4.14.177",
     "@types/micro-cors": "^0.1.1",
     "@types/node": "^16.11.11",
     "@types/prismjs": "^1.16.6",

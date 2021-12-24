@@ -1,48 +1,41 @@
 import { nanoid } from 'nanoid'
-import { Card, CardInput } from 'graphql-let/__generated__/__types__'
+import {
+  Card as GQLCard,
+  CardInput as GQLCardInput,
+  CardStateInput as GQLCardStateInput,
+} from 'graphql-let/__generated__/__types__'
 import { NodeBody, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { Markerline } from '../../../packages/editor/src'
-import { Bullet } from '../../components/bullet/types'
+import { Bullet } from '../../components/bullet/bullet'
 
 type MKDocProps = {
-  symbol: string
-  cardInput: CardInput | null
-  cardCopy: Card | null
-  sourceCardCopy: Card | null
-  // subSymbols?: string[]
+  cardCopy: GQLCard | null
+  cardInput: GQLCardInput | null
+  fromDocCid: string | null
   updatedAt?: number
   value: TreeNode<Bullet>[]
-  // syncValue: LiElement[]
-  // editorValue: LiElement[]
 }
 
 export class MKDoc {
+  // readonly symbol: string // as CID
   readonly cid: string
-  readonly symbol: string // as CID
-  readonly cardCopy: Card | null // to keep the prev-state,
-  readonly sourceCardCopy: Card | null // indicate current doc is a mirror
-  cardInput: CardInput | null // required if card is null
+  readonly cardCopy: GQLCard | null // to keep the prev-state,
+  readonly fromDocCid: string | null
+  cardInput: GQLCardInput | null // required if card is null
   updatedAt: number = Date.now() // timestamp
   value: TreeNode<Bullet>[]
 
-  constructor({ symbol, cardInput, cardCopy, sourceCardCopy, value }: MKDocProps) {
-    if (cardCopy && cardCopy.sym.symbol !== symbol) {
-      throw 'cardSnapshot.symbol !== symbol'
-    }
+  constructor({ cardInput, cardCopy, fromDocCid, value }: MKDocProps) {
     if (cardCopy && cardInput) {
       throw 'Card-snapshot & card-input cannot co-exist'
     }
     if (cardCopy === null && cardInput === null) {
       throw 'Need card-input if no card-snapshot'
     }
-    this.cid = symbol
-    // this.editorValue = editorValue
-    this.symbol = symbol
+    this.cid = nanoid()
+    this.fromDocCid = fromDocCid
     this.cardCopy = cardCopy
-    this.sourceCardCopy = sourceCardCopy
-    // this.subSymbols = subSymbols ?? []
     this.cardInput = cardInput
-    // this.store = new NestedNodeValueStore(value)
     this.value = value
   }
 
@@ -91,5 +84,19 @@ export class MKDoc {
 
   insertBullet(bullet: NodeBody<Bullet>, toParentCid: string, toIndex = -1): void {
     this.value = TreeService.insert(this.value, bullet, toParentCid, toIndex)
+  }
+
+  toGQLCardStateInput(): GQLCardStateInput {
+    const { cid, fromDocCid, cardInput, cardCopy, value } = this
+    // const changes = this.updateChanges()
+    return {
+      cid,
+      fromDocCid,
+      cardInput,
+      cardId: cardCopy?.id,
+      prevStateId: cardCopy?.state?.id,
+      changes: [], // TODO
+      value,
+    }
   }
 }

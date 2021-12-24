@@ -1,7 +1,6 @@
 import { ApolloClient } from '@apollo/client'
-import { nanoid } from 'nanoid'
 import { BehaviorSubject } from 'rxjs'
-import { NodeChange, TreeNode } from '../../../packages/docdiff/src'
+import { NodeChange, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import {
   CardFragment,
   CreateCommitDocument,
@@ -9,10 +8,9 @@ import {
   CreateCommitMutationVariables,
 } from '../../apollo/query.graphql'
 import { Bullet } from '../bullet/bullet'
-import { EditorSerializer } from '../editor/serializer'
-import { Doc, DocEntry, DocEntryPack } from './doc'
-import { DocPath } from './doc-path'
-import { LocalDBService } from './local-db'
+import { Doc } from './doc'
+import { DocIndex, DocIndexService } from './doc-index'
+import { LocalDatabaseService } from './local-database'
 
 class Workspace {
   readonly mainDoc$ = new BehaviorSubject<{
@@ -20,91 +18,66 @@ class Workspace {
     error?: string
     // warn?: 'prev_doc_behind'
   }>({ doc: null })
-
-  readonly status$ = new BehaviorSubject<'starting' | 'loading' | 'saving' | 'pushing' | 'droped' | null>('starting')
-
-  readonly committedDocs$ = new BehaviorSubject<DocEntryPack[] | null>(null)
-
-  readonly savedDocs$ = new BehaviorSubject<DocEntryPack[] | null>(null) // docs not pushed yet
+  readonly modalDoc$ = new BehaviorSubject<{
+    doc: Doc | null
+    error?: string
+    // warn?: 'prev_doc_behind'
+  }>({ doc: null })
+  readonly committedDocIndicies$ = new BehaviorSubject<TreeNode<DocIndex>[] | null>(null)
+  readonly editingDocIndicies$ = new BehaviorSubject<TreeNode<DocIndex>[] | null>(null) // docs in editing and not committed yet
+  readonly status$ = new BehaviorSubject<'initiating' | 'loading' | 'saving' | 'pushing' | 'droped' | null>(
+    'initiating',
+  )
 
   constructor() {
-    this.updateEditingDocEntries()
-    this.updateCommittedDocEntries()
+    this.updateEditingDocIndicies()
+    // this.updateCommittedDocEntries()
   }
 
-  _create({
-    card,
-    sourceCard,
-    symbol,
-  }: {
-    card: CardFragment | null
-    sourceCard: CardFragment | null
-    symbol: string
-  }): Doc {
-    if (card?.state) {
-      // Has card & card-state
-      const value = card.state.body.value as unknown as TreeNode<Bullet>[]
-      return new Doc({
-        cardCopy: card,
-        sourceCardCopy: sourceCard,
-        cardInput: null,
-        // editorValue: null,
-        symbol,
-        editorValue: EditorSerializer.toLiArray(value),
-      })
-    }
-    if (card) {
-      // Has card but no card-state -> ie a new webpage-card, use webpage-template
-      if (card.link === undefined) {
-        throw 'Expect card.link exist'
-      }
-      return new Doc({
-        symbol,
-        cardInput: null,
-        cardCopy: card,
-        sourceCardCopy: null, // force set to null
-        editorValue: [
-          {
-            type: 'li',
-            children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new webpage-card ${symbol}` }] }],
-          },
-        ],
-      })
-    }
-    // No card nor card-doc -> a new symbol-card
-    return new Doc({
-      symbol,
-      cardInput: { symbol, meta: {} },
-      cardCopy: null,
-      sourceCardCopy: sourceCard,
-      editorValue: [
-        {
-          type: 'li',
-          children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new symbol-card ${symbol}` }] }],
-        },
-      ],
-    })
+  // _whichDoc(isModal?: true): BehaviorSubject<{
+  //   doc: Doc | null
+  //   error?: string
+  //   // warn?: 'prev_doc_behind'
+  // }> {
+  //   const doc$ = isModal ? this.modalDoc$ : this.mainDoc$
+  //   if (isModal) {
+  //     // check is allow to open in modal
+  //     if (this.mainDoc$.getValue().doc === null) {
+  //       throw 'main-doc is null, not able to open a modal-doc'
+  //     }
+  //   }
+  //   return doc$
+  // }
+
+  closeDoc({ isModal }: { isModal?: true }): void {
+    // const _doc$ = this._whichDoc(isModal)
+    const doc$ = isModal ? this.modalDoc$ : this.mainDoc$
+    doc$.next({ doc: null })
   }
 
   /**
-   * Commit a doc and its sub-docs to remote, once completed mvoe to commited-doc of local-db
+   * Commit a doc and its children to remote, once completed mvoe to commited-doc of local-db
    */
   // eslint-disable-next-line @typescript-eslint/ban-types
-  async commit(doc: Doc, client: ApolloClient<object>): Promise<void> {
-    if (doc.sourceCardCopy) {
-      console.warn(`Need to commit from source card ${doc.sourceCardCopy.sym.symbol}`)
-      return
+  async commit(rootDocIndex: TreeNode<DocIndex>, client: ApolloClient<object>): Promise<void> {
+    if (rootDocIndex.parentCid !== TreeService.tempRootCid) {
+      throw 'docNode.parentCid !== TreeService.tempRootCid, need to commit from root-doc(s)'
     }
-    const subDocs = await doc.getSubDocs()
-    const allDocs = [doc, ...subDocs]
-    const cardStateInputs = allDocs
-      .map(e => e.toCardStateInput())
-      .filter(e => (e.changes as NodeChange<Bullet>[]).length > 0)
+    const promises = TreeService.toList<DocIndex>([rootDocIndex]).map<Promise<Doc>>(async e => {
+      const found = await Doc.find({ cid: e.cid })
+      if (found === null) {
+        throw 'found === null'
+      }
+      return found
+    })
+    const docs = await Promise.all<Doc>(promises)
+    const cardStateInputs = docs.map(e => e.toCardStateInput())
+    // .filter(e => (e.changes as NodeChange<Bullet>[]).length > 0)
 
-    if (cardStateInputs.length === 0) {
-      console.warn(`Doc(s) not changed, return`)
-      return
-    }
+    // if (cardStateInputs.length === 0) {
+    //   console.warn(`Doc(s) not changed, return`)
+    //   return
+    // }
 
     const { data, errors } = await client.mutate<CreateCommitMutation, CreateCommitMutationVariables>({
       mutation: CreateCommitDocument,
@@ -122,25 +95,28 @@ class Workspace {
     }
     if (data) {
       console.log('CreateCommitMutation', data)
+      const { cardStates, stateIdToCidDictEntryArray } = data.createCommit
+      const stateIdToCid = Object.fromEntries(stateIdToCidDictEntryArray.map(e => [e.k, e.v]))
 
-      for (const state of data.createCommit.cardStates) {
-        if (state.cid === undefined || state.cid === null) {
-          throw 'Commit return state error: should have cid'
+      for (const state of cardStates) {
+        const cid = stateIdToCid[state.id]
+        if (cid === undefined) {
+          throw 'Commit return state error: cid === undefined'
         }
-        const found = allDocs.find(e => e.cid === state.cid)
+        const found = docs.find(e => e.cid === cid)
         if (found === undefined) {
-          throw 'Commit return state error: cannot find corresponding doc'
+          throw 'Commit return state error: return state cid not found matching doc'
         }
         found.committedAt = new Date(data.createCommit.updatedAt).getTime()
         found.committedState = state
 
-        console.log(found)
-
-        await found.saveToCommittedTable()
+        // console.log(found)
+        await found.saveCommittedDoc()
         await found.remove() // remove from doc-table
-        // await Doc.removeDoc(e.cid)
       }
     }
+    await this.updateCommittedDocIndicies()
+    await this.updateEditingDocIndicies()
   }
 
   /**
@@ -153,46 +129,47 @@ class Workspace {
   /**
    * Drop all tables
    */
-  async drop(): Promise<void> {
+  async dropAll(): Promise<void> {
     console.log('Droping local database')
-    await LocalDBService.drop()
+    await LocalDatabaseService.dropAll()
     this.mainDoc$.next({ doc: null })
     this.status$.next('droped')
-    await this.updateEditingDocEntries()
+    await this.updateEditingDocIndicies()
   }
 
-  async open({
-    docPath,
+  async openDoc({
+    symbol,
     card,
-    sourceCard,
+    isModal,
   }: {
-    docPath: DocPath
+    symbol: string
     card: CardFragment | null
-    sourceCard: CardFragment | null
+    isModal?: true
   }): Promise<void> {
-    // Save current editing doc before opening another
-    const curDoc = this.mainDoc$.getValue()
-    if (curDoc.doc) {
-      await this.save(curDoc.doc)
+    const _doc$ = isModal ? this.modalDoc$ : this.mainDoc$
+    if (_doc$.getValue().doc !== null) {
+      throw '_doc$.getValue().doc !== null, call closeDoc() first before open another'
     }
-
-    // console.log(sourceCard)
-
-    const { symbol } = docPath
-    this.mainDoc$.next({ doc: null })
     this.status$.next('loading')
 
-    // TODO: check with remote has card-state updated?
-    const loaded = await Doc.load(symbol)
-    if (loaded) {
-      this.mainDoc$.next({ doc: loaded })
+    const found = await Doc.find({ symbol })
+    if (found) {
+      // TODO: check with remote has card-state updated?
+      _doc$.next({ doc: found })
       this.status$.next(null)
       return
     }
 
     // No local doc, create one
-    const doc = this._create({ card, sourceCard, symbol })
-    this.mainDoc$.next({ doc })
+    let fromDocCid: string | null = null
+    if (isModal) {
+      const { doc: mainDoc } = this.mainDoc$.getValue()
+      if (mainDoc === null) {
+        throw 'mainDoc === null: modal doc require main doc exist'
+      }
+      fromDocCid = mainDoc.cid
+    }
+    _doc$.next({ doc: Doc.createDoc({ symbol, card, fromDocCid }) })
     this.status$.next(null)
   }
 
@@ -200,13 +177,11 @@ class Workspace {
    * Save to local IndexedDB
    */
   async save(doc: Doc): Promise<void> {
-    console.log('Saving')
+    console.log('Saving...')
     this.status$.next('saving')
     try {
       await doc.save()
-      await this.updateEditingDocEntries()
-
-      doc.getChanges()
+      await this.updateEditingDocIndicies(doc)
     } catch (err) {
       console.error(err)
     }
@@ -217,57 +192,31 @@ class Workspace {
     throw 'Not implemented'
   }
 
-  toDocEntries(docs: Doc[]): DocEntryPack[] {
-    console.log('Get doc entries...')
-    const dict: Record<string, { main: { symbol: string; entry?: DocEntry }; subs: DocEntry[] }> = {}
-    // const docs = await Doc.getAllDocs()
-    for (const e of docs) {
-      const { sourceCardCopy } = e
-      const entry = e.toDocEntry()
-      if (sourceCardCopy) {
-        const { symbol } = sourceCardCopy.sym
-        if (symbol in dict) {
-          dict[symbol].subs.push(entry)
-        } else {
-          dict[symbol] = {
-            main: { symbol },
-            subs: [entry],
-          }
-        }
-      } else {
-        const { symbol } = e
-        dict[symbol] =
-          symbol in dict
-            ? {
-                ...dict[symbol],
-                main: { symbol, entry },
-              }
-            : {
-                main: { symbol, entry },
-                subs: [],
-              }
+  async updateEditingDocIndicies(newDoc?: Doc): Promise<void> {
+    const cur = this.editingDocIndicies$.getValue()
+    if (cur && newDoc) {
+      const [indicies, { merged }] = DocIndexService.mergeDoc(cur, newDoc)
+      if (merged) {
+        this.editingDocIndicies$.next(indicies)
       }
+      return
     }
-    const entries = Object.values(dict)
+    this.editingDocIndicies$.next(DocIndexService.toDocIndexNodes(await Doc.getAllDocs()))
+  }
 
-    // sort entries
-    // for (const entry of entries) {
-    //   entry.subEntries.sort(e => -e.updatedAt)
-    //   if (entry.subEntries.length > 0 && entry.updatedAt < entry.subEntries[0].updatedAt) {
-    //     entry.updatedAt = entry.subEntries[0].updatedAt // align entry's updated with subEntries latest update
-    //   }
+  async updateCommittedDocIndicies(appendDocs?: Doc[]): Promise<void> {
+    // this.committedDocEntries$.next(this.toDocEntries(await Doc.getAllCommittedDocs()))
+    const cur = this.committedDocIndicies$.getValue()
+    if (cur === null) {
+      // this.committedDocIndicies$.next(DocIndexService.toDocIndexTreeNodes(await Doc.getAllDocs()))
+      return
+    }
+    // if (insertDoc && TreeService.find(cur, node => node.cid === insertDoc.cid).length === 0) {
+    //   // if insert-doc is not in current indicies, append
+    //   const indicies = TreeService.toList<DocIndex>(cur)
+    //   const nodes = TreeService.fromList<DocIndex>([...indicies, insertDoc.toDocIndex()])
+    //   this.editingdDocIndicies$.next(nodes)
     // }
-    // entries.sort(e => -e.updatedAt)
-
-    return entries
-  }
-
-  async updateEditingDocEntries(docSaved?: Doc): Promise<void> {
-    this.savedDocs$.next(this.toDocEntries(await Doc.getAllDocs()))
-  }
-
-  async updateCommittedDocEntries(): Promise<void> {
-    this.committedDocs$.next(this.toDocEntries(await Doc.getAllCommittedDocs()))
   }
 }
 

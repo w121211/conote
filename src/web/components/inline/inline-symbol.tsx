@@ -17,7 +17,14 @@ const InlineSymbol = ({
         onClick={e => {
           // e.preventDefault()
           // e.stopPropagation()
-          router.push(`/card/${encodeURIComponent(element.symbol)}`)
+          // router.push(`/card/${encodeURIComponent(element.symbol)}`)
+          router.push({
+            pathname: router.pathname,
+            query: {
+              symbol: router.query.symbol,
+              pop: element.symbol,
+            },
+          })
         }}
       >
         {children}

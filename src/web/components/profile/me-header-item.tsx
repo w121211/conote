@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
-import { useMeQuery } from '../../__generated__/apollo/query.graphql'
+import { useMeQuery } from '../../apollo/query.graphql'
 
 const MeHeaderItem = ({ className }: { className?: string }) => {
   const { data, loading, error } = useMeQuery()

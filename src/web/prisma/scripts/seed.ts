@@ -1,9 +1,11 @@
 import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
+import { CardStateInput as GQLCardStateInput } from 'graphql-let/__generated__/__types__'
 import { Author, Card, CardState, Link, PrismaClient, Rate, RateChoice, Sym } from '.prisma/client'
 import { TreeService } from '../../../packages/docdiff/src'
 import { Editor as MKEditor, Markerline, splitByUrl } from '../../../packages/editor/src'
+import { InlineItemService } from '../../components/inline/inline-item-service'
 import { FetchClient } from '../../lib/fetcher/fetcher'
 import { CardMeta, CardModel } from '../../lib/models/card'
 import { TestDataHelper, TESTUSERS } from '../../test/test-helpers'
@@ -109,7 +111,7 @@ async function getNeatReply({
 
 const main = async () => {
   console.log('Truncating databse...')
-  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Link", "Poll", "Shot", "Sym", "User" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Link", "Poll", "Rate", "Sym", "User" CASCADE;`
 
   console.log('Creating test users...')
   await TestDataHelper.createUsers(prisma)
@@ -143,24 +145,11 @@ const main = async () => {
         continue
       }
 
-      // {
-      //   symbol: string
-      //   cardInput: CardInput | null
-      //   cardCopy: Card | null
-      //   sourceCardCopy: Card | null
-      //   // subSymbols?: string[]
-      //   updatedAt?: number
-      //   // value: TreeNode<Bullet>[]
-      //   // syncValue: LiElement[]
-      //   editorValue: LiElement[]
-      // }
-
       const doc = new MKDoc({
-        symbol: webpageCard.sym.symbol,
         cardInput: null,
         cardCopy: webpageCard,
-        sourceCardCopy: null,
-        value: webpageCard.state ? (webpageCard.state.body as unknown as CardStateBody).value : [],
+        fromDocCid: null,
+        value: webpageCard.state ? webpageCard.state.body.value : [],
       })
       const subDocs: MKDoc[] = []
 
@@ -169,25 +158,23 @@ const main = async () => {
       mkEditor.flush()
 
       for (const [cardlabel, markerlines] of mkEditor.getNestedMarkerlines()) {
-        const mirrorSymbol = cardlabel.symbol
-        const mirrorCard = await CardModel.getBySymbol(mirrorSymbol)
-        const mirrorDoc = mirrorCard
+        const modalSymbol = cardlabel.symbol
+        const modalCard = await CardModel.getBySymbol(modalSymbol)
+        const modalDoc = modalCard
           ? new MKDoc({
-              symbol: mirrorSymbol,
               cardInput: null,
-              cardCopy: mirrorCard,
-              sourceCardCopy: webpageCard,
-              value: (mirrorCard.state.body as unknown as CardStateBody).value,
+              cardCopy: modalCard,
+              fromDocCid: doc.cid,
+              value: modalCard.state?.body.value ?? [],
             })
           : new MKDoc({
-              symbol: mirrorSymbol,
-              cardInput: { symbol: mirrorSymbol, meta: {} },
+              cardInput: { symbol: modalSymbol, meta: {} },
               cardCopy: null,
-              sourceCardCopy: webpageCard,
+              fromDocCid: doc.cid,
               value: [],
             })
-        mirrorDoc.insertMarkerLines({ markerlines })
-        subDocs.push(mirrorDoc)
+        modalDoc.insertMarkerLines({ markerlines })
+        subDocs.push(modalDoc)
 
         // if (mirrorCard) {
         //   console.log(inspect((mirrorCard.state.body as unknown as CardStateBody).value, { depth: null }))
@@ -206,10 +193,10 @@ const main = async () => {
               authorId: webpageCard.link.authorId,
               neatReply: neatReplies[0],
               linkId: webpageCard.linkId,
-              symbol: mirrorSymbol,
+              symbol: modalSymbol,
               userId: TESTUSERS[0].id,
             })
-            inlineRateStr = RateModel.toInlineRateString({
+            inlineRateStr = InlineItemService.toInlineRateString({
               author: rate.author.name,
               choice: rate.choice,
               symbol: rate.sym.symbol,
@@ -219,26 +206,13 @@ const main = async () => {
         }
 
         // 在 root 上新增 mirror & shot (if any)
-        const bt = doc.createBullet({ head: `::${mirrorSymbol} ${inlineRateStr}` })
+        const bt = doc.createBullet({ head: `::${modalSymbol} ${inlineRateStr}` })
         // const bt = doc.createBullet({ head: `::${mirrorSymbol} {{inlineShotStr}}` })
         doc.insertBullet(bt, TreeService.tempRootCid)
       }
 
       const commit = await CommitModel.create(
-        {
-          cardStateInputs: [doc, ...subDocs].map(e => {
-            const { cid, cardCopy, sourceCardCopy, cardInput, value } = e
-            return {
-              cid,
-              prevStateId: cardCopy?.state?.id,
-              cardId: cardCopy?.id,
-              sourceCardId: sourceCardCopy?.id,
-              changes: [],
-              value,
-              cardInput,
-            }
-          }),
-        },
+        { cardStateInputs: [doc, ...subDocs].map(e => e.toGQLCardStateInput()) },
         TESTUSERS[0].id,
       )
       // console.log(inspect(selfRootDraft, { depth: null }))
@@ -250,7 +224,7 @@ const main = async () => {
 
 main()
   .catch(err => {
-    console.error(err)
+    console.error('error', err)
     throw new Error()
   })
   .finally(async () => {

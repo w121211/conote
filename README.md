@@ -17,7 +17,7 @@ sudo docker exec -it <container_app> zsh
 
 kubectl Cheat Sheet: https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 
-### skaffold: dev locally
+### Skaffold: dev locally
 
 ```sh
 # install minikube, skaffold, helm
@@ -231,23 +231,6 @@ npm install
 # 啟動，需要一段時間....
 npm run start
 ```
-
-### Client playground
-
-1. 啟動後用瀏覽器打開：http://localhost:3010/，即可看到網站
-2. login 帳號: aaa@aaa.com 密碼: aaa
-3. vscode 打開 fullstack-tutorial/app/client/src/pages/stage.tsx，找到`const demo = (...)`，依下面指示編輯後存檔
-
-```
-const demo = (
-    <>
-        <h1>hello world</h1>  # 加入此行
-        ...
-    </>
-)
-```
-
-4. 瀏覽器會自動更新頁面資訊
 
 ### Deployment
 

@@ -1,8 +1,58 @@
 import React, { forwardRef, ReactPropTypes, useState } from 'react'
+import Link from 'next/link'
 import { SearchAllForm } from '../search-all-form'
 import SidebarList from './sidebar-list'
 import { workspace } from '../workspace/workspace'
 import { useObservable } from 'rxjs-hooks'
+import { TreeNode, TreeService } from '../../../packages/docdiff/src'
+import { DocIndex } from '../workspace/doc-index'
+import { Doc } from '../workspace/doc'
+import { useApolloClient } from '@apollo/client'
+
+const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }) => {
+  const client = useApolloClient()
+  if (node.data === undefined) {
+    throw 'node.data === undefined'
+  }
+  return (
+    <>
+      <Link href={{ pathname: '/card/[symbol]', query: { symbol: node.data.symbol } }}>
+        <a>{node.data.title ?? node.data.symbol}</a>
+      </Link>
+      {TreeService.isRoot(node) && (
+        <button
+          onClick={async () => {
+            await workspace.commit(node, client) // commit node-doc and all of its child-docs
+          }}
+        >
+          (Commit)
+        </button>
+      )}
+      <button
+        onClick={async () => {
+          if (node.children.length > 0) {
+            console.warn('will remove all sub docs')
+          } else {
+            await Doc.removeDoc(node.cid)
+            await workspace.updateEditingDocIndicies()
+          }
+        }}
+      >
+        (X)
+      </button>
+
+      {node.children.length > 0 && (
+        <p>
+          {node.children.map((e, i) => (
+            <span key={i}>
+              - <DocIndexComponent node={e} />
+            </span>
+          ))}
+        </p>
+      )}
+    </>
+  )
+}
 
 const SideBar = ({
   showMenuHandler,
@@ -15,8 +65,8 @@ const SideBar = ({
   isPined: boolean
   showMenu: boolean
 }): JSX.Element => {
-  const savedDocs = useObservable(() => workspace.savedDocs$)
-  const committedDocs = useObservable(() => workspace.committedDocs$)
+  const editingdDocIndicies = useObservable(() => workspace.editingDocIndicies$)
+  const committedDocIndicies = useObservable(() => workspace.committedDocIndicies$)
 
   return (
     <div

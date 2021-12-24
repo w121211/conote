@@ -295,13 +295,14 @@ type CardEmojiLike {
 type CardDigest {
   commitId: String!
   cardId: String!
-  cardMeta: CardMeta!
+  cardMeta: CardMeta! # includes title
+  fromCardId: String
   sym: Sym!
-  title: String!
+  subSyms: [Sym!]!
+  # title: String!
   picks: [String!]!
-  # shots: [String!]!
+  # rates: [String!]!
   updatedAt: DateTime!
-  subs: [CardDigest!]!
 }
 
 type CardMeta {
@@ -318,7 +319,6 @@ type CardMeta {
 
 type CardState {
   id: ID!
-  cid: String # for client to match committed docs
   cardId: String!
   userId: String!
   commitId: String!
@@ -334,14 +334,16 @@ type CardStateBody {
   # value: [BulletTreeNode!]!
   changes: JSON!
   value: JSON!
-  # symbolToCardId: JSON!  # a symbol-cardId map, so later the cahnge of symbol name won't affect
+  # symbolToCardId: JSON!
+  # a symbol-cardId map, so later the cahnge of symbol name won't affect
 }
 
 type Commit {
   id: String!
   userId: String!
-  updatedAt: DateTime!
   cardStates: [CardState!]!
+  updatedAt: DateTime!
+  stateIdToCidDictEntryArray: [DictEntryArray!]! # for client to match committed docs
 }
 
 type CreateBulletEmojiResponse {
@@ -352,6 +354,11 @@ type CreateBulletEmojiResponse {
 type CreateCardEmojiResponse {
   emoji: CardEmoji!
   like: CardEmojiLike! # 創 emoji 會同時創 emoji-like，表示 user 點讚此 emoji
+}
+
+type DictEntryArray {
+  k: String!
+  v: String!
 }
 
 type Link {
@@ -557,12 +564,12 @@ input CardInput {
 
 input CardStateInput {
   cid: String!
+  fromDocCid: String # for doc-index tree
+  cardInput: CardInput # for creating card or update card-meta
   cardId: String
-  sourceCardId: String # 用此來分辨 sub-docs
   prevStateId: String
-  cardInput: CardInput # 當需要同時創新 card 時 (目前只適用於創 symbol-card 的情況)
   changes: JSON!
-  value: JSON! # 用於比較 applyChanges() 是否相同，不存入
+  value: JSON! # for comparing changes
 }
 
 input CommitInput {

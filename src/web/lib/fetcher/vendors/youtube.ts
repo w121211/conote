@@ -1,5 +1,6 @@
 import { google } from 'googleapis'
 import { DomainFetchFunction, DomainNotFitError } from './index'
+import { FetchResult } from '../fetcher'
 
 const patterns = {
   video_id: [
@@ -39,18 +40,19 @@ export const youtube: DomainFetchFunction = async function (url) {
   })
   if (resp.data.items && resp.data.items[0]) {
     const e = resp.data.items[0]
-    return {
+    const res: FetchResult = {
       domain: 'youtube.com',
       finalUrl: url, // TODO: Bug 可能會有redirect, short-url, mobile-url
       srcType: 'VIDEO',
       srcId: vid,
-      srcTitle: e.snippet?.title ?? undefined,
       authorId: e.snippet?.channelId ?? undefined,
       authorName: e.snippet?.channelTitle ?? undefined,
       date: e.snippet?.publishedAt ? new Date(e.snippet.publishedAt).toISOString() : undefined,
       description: e.snippet?.description ?? undefined,
+      title: e.snippet?.title ?? undefined,
       keywords: e.snippet?.tags ?? undefined,
     }
+    return res
   }
 
   throw new Error(`youtube fetcher failed: ${url}`)

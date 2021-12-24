@@ -6,12 +6,12 @@ import Popover from '../popover/popover'
 
 const CardMetaForm = ({
   cardId,
-  selfCard,
+  // selfCard,
   handleCardMetaSubmitted,
   showBtn,
 }: {
   cardId: string
-  selfCard?: CardFragment
+  // selfCard?: CardFragment
   handleCardMetaSubmitted: (isSubmitted: boolean) => void
   showBtn?: boolean
 }): JSX.Element => {
