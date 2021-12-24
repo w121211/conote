@@ -1,6 +1,6 @@
 import React from 'react'
 import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-form'
-import { GroupBase, StylesConfig } from 'react-select'
+import { components, ControlProps, GroupBase, OptionProps, StylesConfig } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import { CardDocument, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
 
@@ -19,9 +19,25 @@ type FormInputs = {
   date: string
   description: string
 }
-const components = {
-  DropdownIndicator: null,
-  // ClearIndicator: null,
+
+const Control = (props: ControlProps<Option[], true>) => {
+  const { children, ...rest } = props
+  return (
+    <components.Control
+      {...rest}
+      className={`flex-grow min-w-[300px] min-h-[38px] border rounded outline outline-2 outline-offset-0 ${
+        rest.isFocused ? 'outline-blue-800 border-transparent' : 'border-gray-300 outline-transparent'
+      }  `}
+    >
+      {children}
+    </components.Control>
+  )
+}
+
+const customComponents = {
+  DropdownIndicator: undefined,
+  ClearIndicator: undefined,
+  Control,
 }
 
 const HeaderForm = ({
@@ -121,22 +137,10 @@ const HeaderForm = ({
   const customStyles: StylesConfig<Option, true, GroupBase<Option>> = {
     valueContainer: (provided, state) => ({
       ...provided,
-      height: '100%',
-      padding: '0',
-    }),
-    control: (provided, { isFocused }) => ({
-      ...provided,
-      height: '44px',
       // height: '100%',
-      padding: '0 8px',
-      border: 'none',
-      borderRadius: '6px',
-      background: '#f6f7fb',
-      ':hover': {
-        background: '#eef1fd',
-      },
-      boxShadow: isFocused ? 'none' : 'none',
+      // padding: '0',
     }),
+
     placeholder: (provided, state) => ({
       ...provided,
       fontSize: '14px',
@@ -147,12 +151,12 @@ const HeaderForm = ({
     }),
     input: (provided, state) => ({
       ...provided,
-      // height: '100%',
+      // height: '90%',
     }),
     multiValue: (provided, state) => ({
       ...provided,
       // height: '100%',
-      padding: '0',
+      // padding: '0',
       color: '#5c6cda',
       backgroundColor: '#d6daff',
       // mixBlendMode: 'multiply',
@@ -160,8 +164,8 @@ const HeaderForm = ({
     multiValueLabel: (provided, state) => ({
       ...provided,
       // height: '100%',
-      paddingTop: '0',
-      paddingBottom: '0',
+      // paddingTop: '0',
+      // paddingBottom: '0',
       color: '#5c6cda',
 
       // mixBlendMode: 'multiply',
@@ -188,59 +192,58 @@ const HeaderForm = ({
 
   return (
     <FormProvider {...methods}>
-      <div className="w-[90%] my-4 mx-auto sm:w-[50vw]">
+      <div className="w-[90%] mx-auto sm:w-[50vw]">
         <form
+          className="flex flex-col gap-4"
           onSubmit={handleSubmit(onSubmit)}
           // onChange={() => {
           //   setSubmitDisable(false)
           //   setSubmitFinished(false)
           // }}
         >
-          <label>
-            <h5>標題</h5>
-            <input {...register('title')} type="text" placeholder="標題" className="input" />
-          </label>
-          <label>
-            <h5>作者</h5>
-            <input {...register('author')} type="text" placeholder="來源作者" className="input" />
-          </label>
-          <label>
-            <h5>網址</h5>
-            <input {...register('url')} type="text" placeholder="來源網址" className="input" />
-          </label>
-          <label>
-            <h5>Keywords</h5>
-            {/* <input {...register('keywords')} type="text" placeholder="請使用 '空格' 分隔" /> */}
-            <Controller
-              control={control}
-              name="keywords"
-              render={({ field: { onChange, value, ref } }) => (
-                <CreatableSelect
-                  isMulti
-                  styles={customStyles}
-                  onChange={e => {
-                    onChange(e)
-                    // console.log(e)
-                  }}
-                  value={value}
-                  components={components}
-                  noOptionsMessage={() => null}
-                  placeholder="新增keyword"
-                />
-              )}
-            ></Controller>
-          </label>
-          <label>
-            <h5>Redirects</h5>
-            <input {...register('redirects')} type="text" placeholder="請使用 '空格' 分隔" className="input" />
-          </label>
-          <label>
-            <h5>Duplicates</h5>
-            <input {...register('duplicates')} type="text" placeholder="請使用 '空格' 分隔" className="input" />
-          </label>
+          {[
+            ['title', '標題', ''],
+            ['author', '來源作者', '例如:@巴菲特'],
+            ['url', '來源網址', '例如:http://www.youtube.com/xxx...'],
+            ['keywords', '關鍵字', ''],
+            ['redirects', '重新導向', '請使用 "空格" 分隔'],
+          ].map(([name, title, placeholder]) => {
+            return (
+              <label key={name} className="flex items-center">
+                <h5 className="flex-shrink-0 w-20 text-gray-700 font-normal">{title}</h5>
+                {name === 'keywords' ? (
+                  <Controller
+                    control={control}
+                    name="keywords"
+                    render={({ field: { onChange, value, ref } }) => (
+                      <CreatableSelect
+                        isMulti
+                        styles={{ control: () => ({}) }}
+                        onChange={e => {
+                          onChange(e)
+                          // console.log(e)
+                        }}
+                        value={value}
+                        components={customComponents}
+                        noOptionsMessage={() => null}
+                        placeholder={placeholder}
+                      />
+                    )}
+                  />
+                ) : (
+                  <input
+                    {...register(name as keyof FormInputs)}
+                    type="text"
+                    className="input border border-gray-300 focus:outline-blue-800"
+                    placeholder={placeholder}
+                  />
+                )}
+              </label>
+            )
+          })}
           <div className="text-center">
-            <button className="btn-primary" type="submit" disabled={!isDirty}>
-              {isSubmitted ? (isDirty ? '提交' : '已提交') : '提交'}
+            <button className="btn-primary h-10 w-24 mt-4" type="submit" disabled={!isDirty}>
+              {isSubmitted ? (isDirty ? '送出' : '已送出') : '送出'}
             </button>
           </div>
         </form>

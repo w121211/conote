@@ -18,10 +18,15 @@ import {
 
 export interface FormInput {
   author: string
-  choice: RateChoice | ''
+  choice: RateChoice
   target: string
   link?: string
 }
+
+// const AsyncAuthor = () => {
+//   const
+//   return <AsyncSelect cacheOptions defaultOptions loadOptions={} />
+// }
 
 const CreateRateForm = ({
   initialInput,
@@ -37,7 +42,7 @@ const CreateRateForm = ({
   const [targetId, setTargetId] = useState<string | undefined>()
   const client = useApolloClient()
   const { register, handleSubmit, control, watch } = useForm<FormInput>({
-    defaultValues: { ...initialInput, choice: choice ? (choice.substring(1) as RateChoice) : '' },
+    defaultValues: { ...initialInput },
   })
 
   let linkId: string
@@ -61,6 +66,8 @@ const CreateRateForm = ({
   }, [targetCardData])
 
   const watchChoice = watch('choice')
+  const watchAuthor = watch('author')
+  console.log(watchChoice)
 
   const [createRate, { data: rateData }] = useCreateRateMutation({
     update(cache, { data }) {
@@ -80,7 +87,7 @@ const CreateRateForm = ({
       }
     },
     onCompleted(data) {
-      console.log(data.createRate, targetCardData)
+      // console.log(data.createRate, targetCardData)
       if (data.createRate && targetCardData && targetCardData.card) {
         onRateCreated(data.createRate, targetCardData.card.sym.symbol)
       } else {
@@ -101,7 +108,7 @@ const CreateRateForm = ({
   //   })
 
   const myHandleSubmit = (d: FormInput) => {
-    if (d.target && d.choice !== '') {
+    if (d.target) {
       if (d.link) {
         queryLink({ variables: { url: d.link ?? '' } })
       }
@@ -122,9 +129,9 @@ const CreateRateForm = ({
   }
   return (
     <div className="">
+      <h2 className="mb-6 text-2xl font-bold text-gray-800">新增預測</h2>
       <form className="flex flex-col " onSubmit={handleSubmit(myHandleSubmit)}>
-        <label>
-          <h5 className="inlin-block"> 作者</h5>
+        <label className="group flex items-center relative w-fit mb-4">
           {
             // initialInput.author ? <button type="button">{initialInput.author}</button> : null
             // <Controller
@@ -132,16 +139,34 @@ const CreateRateForm = ({
             //   name="author"
             //   render={({ field: { value } }) => <AsyncSelect cacheOptions loadOptions={promiseOptions} />}
             // />
-            <input {...register('author')} className="input inline w-fit" type="text" />
           }
-        </label>
-        <div className="inline-flex gap-4 mb-4 select-none">
-          <label
-            className={`inline-flex items-center gap-2 px-3 py-2 border rounded cursor-pointer tracking-wider ${
-              watchChoice === 'LONG' ? 'bg-blue-700 border-transparent' : 'bg-white border-gray-200'
-            }`}
+          <h5
+            // className={`absolute top-0 left-2 leading-none font-normal text-gray-500
+            // transition-all transform origin-top-left
+            //   group-focus-within:translate-y-2 group-focus-within:scale-[0.8] group-focus-within:text-blue-600
+            //   ${watchAuthor === '' ? 'translate-y-4 scale-100' : 'translate-y-2 scale-[0.8]'}`}
+            className="w-20 text-gray-500"
           >
-            {/* <span
+            名字
+          </h5>
+          <input
+            {...register('author')}
+            className="input w-40  border border-gray-300 focus:outline-blue-800"
+            // className="input inline w-fit h-12 pt-6 border border-gray-300 focus:outline-blue-600"
+            type="text"
+          />
+        </label>
+        <div className="flex items-center mb-4 select-none">
+          <h5 className="w-20 text-gray-500 ">預測</h5>
+          <div className="flex gap-3">
+            <label
+              className={`inline-flex items-center gap-2 px-4 py-2 border rounded cursor-pointer tracking-wider transition-all ${
+                watchChoice === 'LONG'
+                  ? 'bg-blue-800 border-transparent '
+                  : 'bg-white border-gray-200 hover:bg-gray-100'
+              }`}
+            >
+              {/* <span
               className={`material-icons-outlined text-lg ${
                 watchChoice === 'LONG' ? 'text-blue-700' : 'text-gray-300'
               }`}
@@ -149,52 +174,68 @@ const CreateRateForm = ({
               {watchChoice === 'LONG' ? 'radio_button_checked' : 'radio_button_unchecked'}
             </span> */}
 
-            <input {...register('choice')} className="absolute opacity-0" type="radio" value="LONG" />
-            <h5 className={`font-normal ${watchChoice === 'LONG' ? 'text-white' : 'text-gray-600'}`}> 看多</h5>
-          </label>
-          <label
-            className={`inline-flex items-center gap-2 px-3 py-2 border rounded cursor-pointer tracking-wider ${
-              watchChoice === 'SHORT' ? 'bg-blue-700 border-transparent' : 'bg-white border-gray-200'
-            }`}
-          >
-            {/* <span
+              <input {...register('choice')} className="absolute opacity-0" type="radio" value="LONG" />
+              <h5 className={`font-normal ${watchChoice === 'LONG' ? 'text-white' : 'text-gray-900'}`}> 看多</h5>
+            </label>
+            <label
+              className={`inline-flex items-center gap-2 px-4 py-2 border rounded cursor-pointer tracking-wider transition-all ${
+                watchChoice === 'SHORT'
+                  ? 'bg-blue-800 border-transparent '
+                  : 'bg-white hover:bg-gray-100 border-gray-200'
+              }`}
+            >
+              {/* <span
               className={`material-icons-outlined text-lg ${
                 watchChoice === 'SHORT' ? 'text-blue-700' : 'text-gray-300'
               }`}
             >
               {watchChoice === 'SHORT' ? 'radio_button_checked' : 'radio_button_unchecked'}
             </span> */}
-            <input {...register('choice')} className="absolute opacity-0" type="radio" value="SHORT" />
-            <h5 className={`font-normal ${watchChoice === 'SHORT' ? 'text-white' : 'text-gray-600'}`}>看空</h5>
-          </label>
-          <label
-            className={`inline-flex items-center gap-2 px-3 py-2 border rounded cursor-pointer tracking-wider ${
-              watchChoice === 'HOLD' ? 'bg-blue-700 border-transparent' : 'bg-white border-gray-200'
-            }`}
-          >
-            {/* <span
+              <input {...register('choice')} className="absolute opacity-0" type="radio" value="SHORT" />
+              <h5 className={`font-normal ${watchChoice === 'SHORT' ? 'text-white' : 'text-gray-900'}`}>看空</h5>
+            </label>
+            <label
+              className={`inline-flex items-center gap-2 px-4 py-2 border rounded cursor-pointer tracking-wider transition-all ${
+                watchChoice === 'HOLD'
+                  ? 'bg-blue-800 border-transparent '
+                  : 'bg-white border-gray-200 hover:bg-gray-100'
+              }`}
+            >
+              {/* <span
               className={`material-icons-outlined text-lg ${
                 watchChoice === 'HOLD' ? 'text-blue-700' : 'text-gray-300 '
               }`}
             >
               {watchChoice === 'HOLD' ? 'radio_button_checked' : 'radio_button_unchecked'}
             </span> */}
-            <input {...register('choice')} className="absolute opacity-0" type="radio" value="HOLD" />
-            <h5 className={`font-normal ${watchChoice === 'HOLD' ? 'text-white' : 'text-gray-600'}`}> 觀望</h5>
-          </label>
+              <input {...register('choice')} className="absolute opacity-0" type="radio" value="HOLD" />
+              <h5 className={`font-normal ${watchChoice === 'HOLD' ? 'text-white' : 'text-gray-900'}`}> 觀望</h5>
+            </label>
+          </div>
         </div>
-        <label>
-          <h5>標的</h5>
-          <input {...register('target')} className="input" type="text" />
+        <label className="flex items-center w-fit mb-4">
+          <h5 className="w-20 text-gray-500 ">標的</h5>
+          <input
+            {...register('target')}
+            className="input w-32  border border-gray-300 focus:outline-blue-800"
+            type="text"
+            placeholder="例如:$GOOG"
+          />
         </label>
-        <label>
-          <h5> 來源網址</h5>
-          <input {...register('link')} className="input" type="text" />
+        <label className="flex items-center w-fit mb-4">
+          <h5 className="w-20 text-gray-500 "> 來源網址</h5>
+          <input
+            {...register('link')}
+            className="input w-96 border border-gray-300 focus:outline-blue-800"
+            type="text"
+            placeholder="例如:https://www.youtube.com/xxx..."
+          />
         </label>
-
-        <button className="btn-primary" type="submit">
-          送出
-        </button>
+        <div className="text-center">
+          <button className="btn-primary h-10 w-24 mt-8" type="submit">
+            送出
+          </button>
+        </div>
       </form>
     </div>
   )

@@ -54,11 +54,15 @@ const NewListItem = ({
         </a>
       </Link>
       {summary && (
-        <div className="mb-1 line-clamp-2 text-ellipsis text-sm text-gray-500">
+        <div className="mb-2 line-clamp-2 text-ellipsis text-sm text-gray-500">
           {summary.map((e, i) => {
             return (
               <span key={i} className="">
-                {i > 0 && <span className="inline-block mx-1 font-[Arial]">-</span>}
+                {
+                  <span className={`material-icons ${i > 0 ? 'ml-2' : 'ml-0'} text-xs leading-5 align-bottom`}>
+                    fiber_manual_record
+                  </span>
+                }
                 {e}
               </span>
             )

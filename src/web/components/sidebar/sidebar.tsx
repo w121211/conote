@@ -20,9 +20,9 @@ const SideBar = ({
 
   return (
     <div
-      className={`absolute w-72 h-screen pt-0 pb-4 border-r border-gray-200 flex flex-col flex-shrink-0 bg-gray-50 z-50 transition-all 
+      className={`absolute w-72 h-screen pt-0 pb-4 border-r border-gray-200 flex flex-col flex-shrink-0 bg-white z-50 transition-all 
       ${showMenu ? 'transform-gpu translate-x-0 translate-y-0' : 'transform-gpu -translate-x-full translate-y-0 '} ${
-        isPined ? 'relative bg-gray-100' : 'absolute bg-gray-50'
+        isPined ? 'relative bg-gray-100' : 'absolute bg-white'
       } ${isPined || !showMenu ? 'shadow-none' : 'shadow-l2xl'}
       `}
       onMouseLeave={() => {

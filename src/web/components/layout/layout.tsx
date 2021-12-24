@@ -89,7 +89,7 @@ export default function Layout({
             <a>Conote</a>
           </Link>
           {/* {navPath} */}
-          <div>
+          <div className="mr-4">
             {buttonRight}
             {meData ? (
               <button className="btn-secondary">

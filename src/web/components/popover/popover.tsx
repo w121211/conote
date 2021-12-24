@@ -31,21 +31,23 @@ const Popover = ({
         }}
       ></div>
 
-      <div className="absolute flex flex-col w-[90vw] max-h-[70vh] sm:w-[60vw] sm:max-h-[90vh] mt-[5vh] px-6 py-4 overflow-y-auto rounded bg-white shadow-2xl">
+      <div className="absolute flex flex-col w-[90vw] max-h-[70vh] sm:w-fit sm:max-h-[90vh] mt-[5vh] px-4 py-2 overflow-y-auto rounded bg-white shadow-2xl">
         <div className="flex items-center w-full h-8">
           <span
+            className="material-icons-outlined hover:cursor-pointer hover:text-gray-600"
             onClick={(e: any) => {
               e.stopPropagation()
               hideBoard()
             }}
           >
-            <CancelIcon className="flex items-center justify-center w-4 h-4" />
+            close
           </span>
-          <span className="ml-5 overflow-hidden whitespace-nowrap text-ellipsis text-gray-600">
-            {subTitle && subTitle}{' '}
-          </span>
+
+          {subTitle && (
+            <span className="ml-5 overflow-hidden whitespace-nowrap text-ellipsis text-gray-600">{subTitle}</span>
+          )}
         </div>
-        <div className="px-8 pt-2 pb-8">{children}</div>
+        <div className="pt-2 px-8 pb-8">{children}</div>
         {buttons && <div className="flex">{buttons}</div>}
       </div>
     </div>

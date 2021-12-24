@@ -7,6 +7,7 @@ import { RateFragment } from '../../apollo/query.graphql'
 import { InlineItemService } from './inline-item-service'
 import RateButton from '../rate-button/rate-button'
 import CreateRateForm from '../rate-form/create-rate-form'
+import { RateChoice } from '@prisma/client'
 
 const InlineRate = (props: RenderElementProps & { element: InlineRateElement }): JSX.Element => {
   const editor = useSlateStatic()
@@ -93,9 +94,9 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
           <Modal visible={showPopover} onClose={() => setShowPopover(false)}>
             <CreateRateForm
               initialInput={{
-                author: element.authorName ?? '',
-                target: element.targetSymbol ?? '',
-                choice: element.choice ?? '',
+                author: element.params.find(e => e.startsWith('@')) ?? '',
+                target: element.params.find(e => e.startsWith('$')) ?? '',
+                choice: (element.params.find(e => e.startsWith('#'))?.substring(1) as RateChoice) ?? 'LONG',
                 link: '',
               }}
               onRateCreated={onRateCreated}

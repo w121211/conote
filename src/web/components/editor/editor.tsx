@@ -205,7 +205,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   return (
     <div
       {...attributes}
-      className="group relative break-all flex w-full"
+      className="relative break-all flex w-full"
       // onMouseOver={event => {
       //   event.stopPropagation()
       //   event.preventDefault()
