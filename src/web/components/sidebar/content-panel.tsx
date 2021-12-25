@@ -11,15 +11,19 @@ const ContentPanel = () => {
       <button className="btn-reset-style">
         <span
           className="material-icons-outlined text-xl text-gray-500"
-          onClick={async () => {
-            if (mainDoc === null) {
-              return
-            }
-            if (mainDoc.doc) {
-              await workspace.commit(mainDoc.doc, client)
-              // router.reload()
-            }
-          }}
+          onClick={
+            () => workspace.commitAll()
+            //單獨commit
+            //   async () => {
+            //   if (mainDoc === null) {
+            //     return
+            //   }
+            //   if (mainDoc.doc) {
+            //     await workspace.commit(mainDoc.doc, client)
+            //     // router.reload()
+            //   }
+            // }
+          }
         >
           cloud_upload
         </span>
@@ -28,7 +32,7 @@ const ContentPanel = () => {
         <span
           className="material-icons-outlined text-xl text-gray-500"
           onClick={() => {
-            workspace.drop()
+            workspace.dropAll()
           }}
         >
           delete_forever

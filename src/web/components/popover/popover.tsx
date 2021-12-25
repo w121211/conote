@@ -23,7 +23,7 @@ const Popover = ({ children, hideBoard, subTitle, mask, buttons, topRightBtn }: 
         }}
       ></div>
 
-      <div className="relative  flex flex-col w-[90vw] h-fit max-h-[70vh] sm:w-fit sm:max-w-[60vw] sm:max-h-[90vh] mt-[5vh] px-4 py-2  rounded bg-white shadow-2xl">
+      <div className="relative  flex flex-col w-[90vw] h-fit max-h-[70vh] sm:w-fit sm:min-w-[20vw] sm:max-w-[60vw] sm:max-h-[80vh] mt-[5vh] px-4 py-2  rounded bg-white shadow-2xl">
         <div className="flex items-center justify-between w-full h-8 bg-white">
           <div>
             <span
@@ -42,8 +42,8 @@ const Popover = ({ children, hideBoard, subTitle, mask, buttons, topRightBtn }: 
           </div>
           {topRightBtn}
         </div>
-        <div className="overflow-y-auto mt-2 pl-8 pr-4 pb-8">{children}</div>
-        {buttons && <div className="flex">{buttons}</div>}
+        <div className="overflow-y-auto mt-2 px-8 pb-8">{children}</div>
+        {buttons && <div className="flex items-center justify-center mb-4">{buttons}</div>}
       </div>
     </div>
   )

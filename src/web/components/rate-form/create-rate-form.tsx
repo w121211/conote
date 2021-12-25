@@ -130,8 +130,8 @@ const CreateRateForm = ({
   return (
     <div className="">
       <h2 className="mb-6 text-2xl font-bold text-gray-800">新增預測</h2>
-      <form className="flex flex-col " onSubmit={handleSubmit(myHandleSubmit)}>
-        <label className="group flex items-center relative w-fit mb-4">
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit(myHandleSubmit)}>
+        <label className="group flex items-center relative">
           {
             // initialInput.author ? <button type="button">{initialInput.author}</button> : null
             // <Controller
@@ -151,88 +151,50 @@ const CreateRateForm = ({
           </h5>
           <input
             {...register('author')}
-            className="input w-40  border border-gray-300 focus:outline-blue-800"
-            // className="input inline w-fit h-12 pt-6 border border-gray-300 focus:outline-blue-600"
+            className="input w-40 "
+            // className="input inline h-12 pt-6"
             type="text"
           />
         </label>
-        <div className="flex items-center mb-4 select-none">
+        <div className="flex items-center select-none">
           <h5 className="w-20 text-gray-700 font-normal ">預測</h5>
           <div className="flex gap-3">
-            <label
-              className={`inline-flex items-center gap-2 px-4 py-2 border rounded cursor-pointer tracking-wider transition-all ${
-                watchChoice === 'LONG'
-                  ? 'bg-blue-800 border-transparent '
-                  : 'bg-white border-gray-200 hover:bg-gray-100'
-              }`}
-            >
-              {/* <span
-              className={`material-icons-outlined text-lg ${
-                watchChoice === 'LONG' ? 'text-blue-700' : 'text-gray-300'
-              }`}
-            >
-              {watchChoice === 'LONG' ? 'radio_button_checked' : 'radio_button_unchecked'}
-            </span> */}
-
-              <input {...register('choice')} className="absolute opacity-0" type="radio" value="LONG" />
-              <h5 className={`font-normal ${watchChoice === 'LONG' ? 'text-white' : 'text-gray-900'}`}> 看多</h5>
-            </label>
-            <label
-              className={`inline-flex items-center gap-2 px-4 py-2 border rounded cursor-pointer tracking-wider transition-all ${
-                watchChoice === 'SHORT'
-                  ? 'bg-blue-800 border-transparent '
-                  : 'bg-white hover:bg-gray-100 border-gray-200'
-              }`}
-            >
-              {/* <span
-              className={`material-icons-outlined text-lg ${
-                watchChoice === 'SHORT' ? 'text-blue-700' : 'text-gray-300'
-              }`}
-            >
-              {watchChoice === 'SHORT' ? 'radio_button_checked' : 'radio_button_unchecked'}
-            </span> */}
-              <input {...register('choice')} className="absolute opacity-0" type="radio" value="SHORT" />
-              <h5 className={`font-normal ${watchChoice === 'SHORT' ? 'text-white' : 'text-gray-900'}`}>看空</h5>
-            </label>
-            <label
-              className={`inline-flex items-center gap-2 px-4 py-2 border rounded cursor-pointer tracking-wider transition-all ${
-                watchChoice === 'HOLD'
-                  ? 'bg-blue-800 border-transparent '
-                  : 'bg-white border-gray-200 hover:bg-gray-100'
-              }`}
-            >
-              {/* <span
-              className={`material-icons-outlined text-lg ${
-                watchChoice === 'HOLD' ? 'text-blue-700' : 'text-gray-300 '
-              }`}
-            >
-              {watchChoice === 'HOLD' ? 'radio_button_checked' : 'radio_button_unchecked'}
-            </span> */}
-              <input {...register('choice')} className="absolute opacity-0" type="radio" value="HOLD" />
-              <h5 className={`font-normal ${watchChoice === 'HOLD' ? 'text-white' : 'text-gray-900'}`}> 觀望</h5>
-            </label>
+            {[
+              ['LONG', '看多'],
+              ['SHORT', '看空'],
+              ['HOLD', '觀望'],
+            ].map(([value, label]) => {
+              return (
+                <label
+                  key={value}
+                  className={`inline-flex items-center gap-2 px-4 py-2 border rounded cursor-pointer tracking-wider transition-all ${
+                    watchChoice === value
+                      ? 'bg-blue-600 border-transparent '
+                      : 'bg-white border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  <input {...register('choice')} className="absolute opacity-0" type="radio" value={value} />
+                  <h5 className={`font-normal ${watchChoice === value ? 'text-white' : 'text-gray-900'}`}>{label}</h5>
+                </label>
+              )
+            })}
           </div>
         </div>
-        <label className="flex items-center w-fit mb-4">
+        <label className="flex items-center">
           <h5 className="w-20 text-gray-700 font-normal ">標的</h5>
-          <input
-            {...register('target')}
-            className="input w-32  border border-gray-300 focus:outline-blue-800"
-            type="text"
-            placeholder="例如:$GOOG"
-          />
+          <input {...register('target')} className="input w-32 " type="text" placeholder="例如:$GOOG" />
         </label>
-        <label className="flex items-center w-fit mb-4">
-          <h5 className="w-20 text-gray-700 font-normal "> 來源網址</h5>
+        <label className="flex items-center">
+          <h5 className="w-20 text-gray-700 font-normal ">來源網址</h5>
           <input
             {...register('link')}
-            className="input w-96 border border-gray-300 focus:outline-blue-800"
+            className="input w-96"
             type="text"
             placeholder="例如:https://www.youtube.com/xxx..."
           />
         </label>
         <div className="text-center">
-          <button className="btn-primary h-10 w-24 mt-8" type="submit">
+          <button className="btn-primary h-10 w-24 mt-4" type="submit">
             送出
           </button>
         </div>

@@ -3,29 +3,24 @@ import SideBar from '../sidebar/sidebar'
 import MenuIcon from '../../assets/svg/menu.svg'
 import Link from 'next/link'
 import { useMeQuery } from '../../apollo/query.graphql'
+import Modal from '../modal/modal'
 
 export default function Layout({
   children,
-  // navPath,
   buttonRight,
-}: // handlePath,
-// handleSymbol,
-{
+}: {
   children: React.ReactNode
-  // navPath?: React.ReactNode
   buttonRight?: React.ReactNode
-  // handlePath?: (i: number) => void
-  // handleSymbol?: (e: string) => void
 }): JSX.Element {
   const { data: meData, error, loading } = useMeQuery()
-  const [showNav, setShowNav] = useState(true)
+  const [showLoginModal, setShowLoginModal] = useState(false)
   const [showMenu, setShowMenu] = useState(true)
   const [pinSideBar, setPinSideBar] = useState(true)
-  const [scroll, setScroll] = useState(0)
+  // const [scroll, setScroll] = useState(0)
 
   const layoutRef = useRef<HTMLDivElement>(null)
 
-  const childrenWithCallback = useCallback(() => children, [children])
+  // const childrenWithCallback = useCallback(() => children, [children])
 
   const showMenuHandler = (boo?: boolean) => {
     if (boo === undefined) {
@@ -67,15 +62,18 @@ export default function Layout({
         showMenu={showMenu}
         isPined={pinSideBar}
       />
-      <div className={`mt-11 pb-20 flex-1 overflow-y-auto ${pinSideBar ? 'px-[15%]' : 'px-[20vw]'}`} ref={layoutRef}>
-        {children}
-        {/* {childrenWithCallback()} */}
-        {/* <footer>footer</footer> */}
-      </div>
-      <nav
-        className="fixed flex items-center justify-start w-screen h-11 "
-        // style={showNav ? { transform: 'translateY(0)' } : { transform: 'translateY(-45px)' }}
+      <div
+        className={`mt-11 pb-20 flex-1 overflow-y-auto ${pinSideBar ? 'px-[15%]' : 'px-[20vw]'} `}
+        ref={layoutRef}
+        onClick={e => {
+          if (!meData) {
+            setShowLoginModal(true)
+          }
+        }}
       >
+        <div className={!meData ? 'pointer-events-none' : 'pointer-events-auto'}>{children}</div>
+      </div>
+      <nav className="fixed flex items-center justify-start w-screen h-11 ">
         <div
           className="flex px-6"
           onClick={() => {
@@ -92,34 +90,28 @@ export default function Layout({
           <div className="mr-4">
             {buttonRight}
             {meData ? (
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                // className="btn-secondary"
-              >
+              <button className="btn-secondary">
                 <a href="/login">Logout</a>
               </button>
             ) : (
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                // className="btn-primary"
-              >
+              <button className="btn-primary">
                 <a href="/login">Login</a>
               </button>
             )}
           </div>
         </div>
       </nav>
-
-      {/* <div className={classes.sideBarContainer} style={showMenu ? { visibility: 'visible' } : { visibility: 'hidden' }}> */}
-      {/* <div
-        className={classes.mask}
-        style={showMenu ? { opacity: 1, visibility: 'visible' } : { opacity: 0, visibility: 'hidden' }}
-        onClick={() => {
-          setShowMenu(false)
-        }}
-      ></div> */}
-
-      {/* </div> */}
+      <Modal
+        visible={showLoginModal}
+        buttons={
+          <button className="btn-primary">
+            <a href="/login">Login</a>
+          </button>
+        }
+        onClose={() => setShowLoginModal(false)}
+      >
+        <div className="text-center">請先登入!</div>
+      </Modal>
     </div>
   )
 }

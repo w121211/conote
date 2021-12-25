@@ -335,7 +335,7 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
     return null
   }
   return (
-    <div className="min-w-[90%] h-[80%] sm:min-w-[50%] pl-4">
+    <div className="min-w-[90vw] h-[70vh] sm:min-w-[50vw] pl-4">
       <CardHead doc={modalDoc.doc} />
       <BulletEditor doc={modalDoc.doc} />
     </div>

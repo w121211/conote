@@ -1,6 +1,14 @@
 import React from 'react'
 import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-form'
-import { components, ControlProps, GroupBase, OptionProps, StylesConfig } from 'react-select'
+import {
+  components,
+  ControlProps,
+  GroupBase,
+  MultiValueGenericProps,
+  MultiValueProps,
+  OptionProps,
+  StylesConfig,
+} from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import { CardDocument, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
 import { CardMetaInput } from '../../apollo/type-defs.graphqls'
@@ -26,8 +34,8 @@ const Control = (props: ControlProps<Option[], true>) => {
   return (
     <components.Control
       {...rest}
-      className={`flex-grow min-w-[300px] min-h-[38px] border rounded outline outline-2 outline-offset-0 ${
-        rest.isFocused ? 'outline-blue-800 border-transparent' : 'border-gray-300 outline-transparent'
+      className={`flex-grow min-w-[300px] min-h-[38px] rounded hover:bg-gray-100 ${
+        rest.isFocused ? 'bg-gray-100 ' : ''
       }  `}
     >
       {children}
@@ -189,7 +197,7 @@ const HeaderForm = ({
                   <input
                     {...register(name as keyof FormInputs)}
                     type="text"
-                    className={`input border border-gray-300 focus:outline-blue-800 ${changeInputwidth(name)}`}
+                    className={`input ${changeInputwidth(name)}`}
                     placeholder={placeholder}
                   />
                 )}
