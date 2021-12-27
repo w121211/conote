@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
+import { CardMetaInput } from 'graphql-let/__generated__/__types__'
 import { CardFragment, useCardQuery } from '../../apollo/query.graphql'
-import { CardMetaInput } from '../../apollo/type-defs.graphqls'
 import HeaderForm from '../header-form/header-form'
 import Modal from '../modal/modal'
 import Popover from '../popover/popover'
@@ -9,13 +9,13 @@ const CardMetaForm = ({
   cardId,
   initialValue,
   // selfCard,
-  onSubmitted,
+  onSubmit,
   showBtn,
 }: {
   cardId: string
   initialValue: CardMetaInput
   // selfCard?: CardFragment
-  onSubmitted: (input: CardMetaInput) => void
+  onSubmit: (input: CardMetaInput) => void
   showBtn?: boolean
 }): JSX.Element => {
   const [showHeaderForm, setShowHeaderForm] = useState(false)
@@ -59,7 +59,7 @@ const CardMetaForm = ({
             description: '',
             date: '',
           }}
-          onSubmitted={onSubmitted}
+          // onSubmitted={onSubmit}
         />
       </Modal>
     </>

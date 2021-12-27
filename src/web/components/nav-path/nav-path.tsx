@@ -7,8 +7,7 @@ import { getNavLocation, locationToUrl, NavLocation } from '../../components/edi
 import { UrlObject } from 'url'
 import Link from 'next/link'
 import { useCardQuery } from '../../apollo/query.graphql'
-import { DocEntry } from '../workspace/doc'
-// import { DocEntry } from '../workspace/workspace'
+import { DocIndex } from '../workspace/doc-index'
 
 function getTextWidth(text: string, font?: any) {
   const canvas = document.createElement('canvas')
@@ -21,7 +20,7 @@ function getTextWidth(text: string, font?: any) {
 }
 
 export interface NavPathProps {
-  path?: DocEntry[]
+  path?: DocIndex[]
   mirrorHomeUrl?: UrlObject
   location: NavLocation
 }
@@ -29,10 +28,10 @@ export interface NavPathProps {
 const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/g
 
 const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX.Element => {
-  const [myPath, setMyPath] = useState<(DocEntry | string)[] | undefined>(path)
-  const [hiddenPath, setHiddenPath] = useState<(DocEntry | string)[]>([])
+  const [myPath, setMyPath] = useState<(DocIndex | string)[] | undefined>(path)
+  const [hiddenPath, setHiddenPath] = useState<(DocIndex | string)[]>([])
 
-  const [prevPath, setPrevPath] = useState<DocEntry[] | undefined>([])
+  const [prevPath, setPrevPath] = useState<DocIndex[] | undefined>([])
   const [viewPortWidth, setViewPortWidth] = useState(0)
   const [showTooltip, setShowTooltip] = useState(false)
 

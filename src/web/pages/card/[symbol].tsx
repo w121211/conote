@@ -184,7 +184,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
               cardId={doc.cardCopy.id}
               showBtn={showHeaderHiddenBtns}
               initialValue={doc.getCardMetaInput()}
-              onSubmitted={input => {
+              onSubmit={input => {
                 const { isUpdated } = doc.updateCardMetaInput(input)
                 if (isUpdated) {
                   workspace.save(doc)
@@ -294,15 +294,6 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
   }
   return (
     <>
-      {/* <button
-        onClick={e => {
-          if (mainDoc.doc) {
-            workspace.save(mainDoc.doc)
-          }
-        }}
-      >
-        Save
-      </button> */}
       <CardHead doc={mainDoc.doc} />
       <BulletEditor doc={mainDoc.doc} />
     </>

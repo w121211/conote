@@ -51,7 +51,7 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
   //   }
   // }, [showPopover, shotData, shotId])
   return (
-    <span {...attributes}>
+    <span {...attributes} contentEditable={false}>
       {/* {!selected && ( */}
       {/* <button
             className={classes.shotBtn}
@@ -86,23 +86,21 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
         author={element.params.find(e => e.startsWith('@'))}
         target={element.params.find(e => e.startsWith('$'))}
         choice={element.params.find(e => e.startsWith('#'))}
-        handleClick={() => setShowPopover(true)}
+        onClick={() => setShowPopover(true)}
       />
 
       {showPopover && (
-        <span contentEditable={false}>
-          <Modal visible={showPopover} onClose={() => setShowPopover(false)}>
-            <CreateRateForm
-              initialInput={{
-                author: element.params.find(e => e.startsWith('@')) ?? '',
-                target: element.params.find(e => e.startsWith('$')) ?? '',
-                choice: (element.params.find(e => e.startsWith('#'))?.substring(1) as RateChoice) ?? 'LONG',
-                link: '',
-              }}
-              onRateCreated={onRateCreated}
-            />
-          </Modal>
-        </span>
+        <Modal visible={showPopover} onClose={() => setShowPopover(false)}>
+          <CreateRateForm
+            initialInput={{
+              author: element.params.find(e => e.startsWith('@')) ?? '',
+              target: element.params.find(e => e.startsWith('$')) ?? '',
+              choice: (element.params.find(e => e.startsWith('#'))?.substring(1) as RateChoice) ?? 'LONG',
+              link: '',
+            }}
+            onRateCreated={onRateCreated}
+          />
+        </Modal>
       )}
       <span style={selected ? undefined : { fontSize: '0px' }}>{children}</span>
       {/* <span>{children}</span> */}

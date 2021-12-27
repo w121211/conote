@@ -14,44 +14,44 @@ export const getCookie = (name: string): string | null => {
   return v ? v[2] : null
 }
 
-export const AuthService = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  logout: async (client: ApolloClient<object>): Promise<void> => {
-    // client.mutate()
+// export const AuthService = {
+//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//   logout: async (client: ApolloClient<object>): Promise<void> => {
+//     // client.mutate()
 
-    const { data, errors } = await client.mutate<SessionLogoutMutation, SessionLogoutMutationVariables>({
-      mutation: SessionLogoutDocument,
-      // variables: {},
-    })
-    await client.resetStore()
-    // console.log('session logout!')
-    // router.push('/')
-    // await signOut(auth)
-  },
+//     const { data, errors } = await client.mutate<SessionLogoutMutation, SessionLogoutMutationVariables>({
+//       mutation: SessionLogoutDocument,
+//       // variables: {},
+//     })
+//     await client.resetStore()
+//     // console.log('session logout!')
+//     // router.push('/')
+//     // await signOut(auth)
+//   },
 
-  sessionLogin: async (idToken: string): Promise<void> => {
-    console.log('sessionLogin...')
+//   sessionLogin: async (idToken: string): Promise<void> => {
+//     console.log('sessionLogin...')
 
-    // const idToken = await authResult.user.getIdToken()
-    const csrfToken = getCookie('csrfToken')
+//     // const idToken = await authResult.user.getIdToken()
+//     const csrfToken = getCookie('csrfToken')
 
-    const resp = await fetch('/api/auth/session-login', {
-      method: 'POST',
-      body: JSON.stringify({ idToken, csrfToken }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+//     const resp = await fetch('/api/auth/session-login', {
+//       method: 'POST',
+//       body: JSON.stringify({ idToken, csrfToken }),
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     })
 
-    if (resp.status === 401) {
-      await AuthService.logout()
-    }
-    // console.log(resp.status)
-  },
+//     if (resp.status === 401) {
+//       await AuthService.logout()
+//     }
+//     // console.log(resp.status)
+//   },
 
-  sessionLogout: async (): Promise<void> => {
-    console.log('sessionLogout...')
-    await AuthService.logout()
-    await fetch('/api/auth/session-logout')
-  },
-}
+//   sessionLogout: async (): Promise<void> => {
+//     console.log('sessionLogout...')
+//     await AuthService.logout()
+//     await fetch('/api/auth/session-logout')
+//   },
+// }

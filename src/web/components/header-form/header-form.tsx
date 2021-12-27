@@ -10,8 +10,6 @@ import {
   StylesConfig,
 } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
-import { CardDocument, CardQuery, useUpdateCardMetaMutation } from '../../apollo/query.graphql'
-import { CardMetaInput } from '../../apollo/type-defs.graphqls'
 
 type Option = {
   label: string
@@ -64,11 +62,11 @@ const changeInputwidth = (name: string) => {
 const HeaderForm = ({
   initialValue,
   cardId,
-  onSubmitted,
-}: {
+}: // onSubmit,
+{
   initialValue: FormInputs
   cardId: string
-  onSubmitted: (input: CardMetaInput) => void
+  // onSubmit: (input: CardMetaInput) => void
 }): JSX.Element => {
   const methods = useForm<FormInputs>({
     defaultValues: initialValue,
@@ -83,53 +81,53 @@ const HeaderForm = ({
     formState: { isDirty, isSubmitSuccessful, isSubmitted },
   } = methods
 
-  const [updateCardMeta] = useUpdateCardMetaMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<CardQuery>({ query: CardDocument })
-      if (data?.updateCardMeta && res?.card?.meta) {
-        cache.writeQuery({
-          query: CardDocument,
-          data: {
-            ...res.card.meta,
-            title: data.updateCardMeta.title,
-            author: data.updateCardMeta.author,
-            keywords: data.updateCardMeta.keywords,
-            duplicates: data.updateCardMeta.duplicates,
-            redirects: data.updateCardMeta.redirects,
-            url: data.updateCardMeta.url,
-          },
-        })
-      }
-    },
-    onCompleted(data) {
-      // console.log(data.updateCardMeta)
-      if (data.updateCardMeta) {
-        const newData = data.updateCardMeta
-        // setValue('title', newData.title ?? '', { shouldDirty: false })
-        // setValue('author', newData.author ?? '', { shouldDirty: false })
-        // setValue('url', newData.url ?? '', { shouldDirty: false })
-        // setValue('redirects', newData.redirects?.join(' ') ?? '', { shouldDirty: false })
-        // setValue('keywords', newData.keywords?.join(' ') ?? '', { shouldDirty: false })
-        // setValue('duplicates', newData.duplicates?.join(' ') ?? '', { shouldDirty: false })
-        reset(
-          {
-            title: newData.title ?? '',
-            author: newData.author ?? '',
-            url: newData.url ?? '',
-            redirects: newData.redirects?.join(' ') ?? '',
-            keywords:
-              newData.keywords?.map(e => {
-                return { label: e, value: e }
-              }) ?? [],
-            duplicates: newData.duplicates?.join(' ') ?? '',
-          },
-          { keepIsSubmitted: true },
-        )
-        onSubmitted(data.updateCardMeta)
-      }
-    },
-    // refetchQueries: [{ query: CardDocument, variables: { symbol } }],
-  })
+  // const [updateCardMeta] = useUpdateCardMetaMutation({
+  //   update(cache, { data }) {
+  //     const res = cache.readQuery<CardQuery>({ query: CardDocument })
+  //     if (data?.updateCardMeta && res?.card?.meta) {
+  //       cache.writeQuery({
+  //         query: CardDocument,
+  //         data: {
+  //           ...res.card.meta,
+  //           title: data.updateCardMeta.title,
+  //           author: data.updateCardMeta.author,
+  //           keywords: data.updateCardMeta.keywords,
+  //           duplicates: data.updateCardMeta.duplicates,
+  //           redirects: data.updateCardMeta.redirects,
+  //           url: data.updateCardMeta.url,
+  //         },
+  //       })
+  //     }
+  //   },
+  //   onCompleted(data) {
+  //     // console.log(data.updateCardMeta)
+  //     if (data.updateCardMeta) {
+  //       const newData = data.updateCardMeta
+  //       // setValue('title', newData.title ?? '', { shouldDirty: false })
+  //       // setValue('author', newData.author ?? '', { shouldDirty: false })
+  //       // setValue('url', newData.url ?? '', { shouldDirty: false })
+  //       // setValue('redirects', newData.redirects?.join(' ') ?? '', { shouldDirty: false })
+  //       // setValue('keywords', newData.keywords?.join(' ') ?? '', { shouldDirty: false })
+  //       // setValue('duplicates', newData.duplicates?.join(' ') ?? '', { shouldDirty: false })
+  //       reset(
+  //         {
+  //           title: newData.title ?? '',
+  //           author: newData.author ?? '',
+  //           url: newData.url ?? '',
+  //           redirects: newData.redirects?.join(' ') ?? '',
+  //           keywords:
+  //             newData.keywords?.map(e => {
+  //               return { label: e, value: e }
+  //             }) ?? [],
+  //           duplicates: newData.duplicates?.join(' ') ?? '',
+  //         },
+  //         { keepIsSubmitted: true },
+  //       )
+  //       onSubmitted(data.updateCardMeta)
+  //     }
+  //   },
+  //   // refetchQueries: [{ query: CardDocument, variables: { symbol } }],
+  // })
 
   const onSubmit = (d: FormInputs) => {
     if (d) {
@@ -139,19 +137,19 @@ const HeaderForm = ({
           keywordArr.push(e.value)
         })
       }
-      updateCardMeta({
-        variables: {
-          cardId,
-          data: {
-            author: d.author,
-            title: d.title,
-            url: d.url,
-            redirects: d.redirects.split(' '),
-            duplicates: d.duplicates.split(' '),
-            keywords: keywordArr,
-          },
-        },
-      })
+      // updateCardMeta({
+      //   variables: {
+      //     cardId,
+      //     data: {
+      //       author: d.author,
+      //       title: d.title,
+      //       url: d.url,
+      //       redirects: d.redirects.split(' '),
+      //       duplicates: d.duplicates.split(' '),
+      //       keywords: keywordArr,
+      //     },
+      //   },
+      // })
     }
   }
 

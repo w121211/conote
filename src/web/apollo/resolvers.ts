@@ -572,7 +572,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { commit, stateGidToCid } = await CommitModel.create(data, userId)
     return {
       ...commit,
-      stateIdToCidDictArray: Object.entries(stateGidToCid).map<{ k: string; v: string }>(([k, v]) => ({ k, v })),
+      stateIdToCidDictEntryArray: Object.entries(stateGidToCid).map<{ k: string; v: string }>(([k, v]) => ({ k, v })),
     }
   },
 

@@ -2,7 +2,6 @@ import React, { HtmlHTMLAttributes, useContext, useEffect, useState } from 'reac
 // import PinIcon from '../../assets/svg/like.svg'
 // import UpIcon from '../../assets/svg/arrow-up.svg'
 import Popover from '../popover/popover'
-import PollPage from '../../__deprecated__/poll/poll-page'
 import { PollDocument, PollFragment, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'
 import Modal from '../modal/modal'
 // import { Context } from '../../pages/card/[symbol]'
@@ -105,7 +104,7 @@ const PollGroup = ({
       {/* </button> */}
       {showPopover && (
         <Modal visible={showPopover} onClose={handleHideBoard}>
-          {pollId && <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />}
+          {/* {pollId && <PollPage pollId={pollId} clickedChoiceIdx={clickedIdx} />} */}
           {!pollId && <span>loading</span>}
         </Modal>
       )}

@@ -4,22 +4,22 @@ const RateButton = ({
   author,
   target,
   choice,
-  handleClick,
+  onClick,
 }: {
   author?: string
   target?: string
   choice?: string
-  handleClick: () => void
+  onClick: () => void
 }): JSX.Element => {
   if (!author && !target && !choice) {
     return (
-      <button className="btn-reset-style" onClick={handleClick} contentEditable={false}>
+      <button className="btn-reset-style" onClick={onClick}>
         <span className="p-1 border border-white rounded text-sm bg-gray-100 hover:bg-gray-200">新增Shot</span>
       </button>
     )
   }
   return (
-    <button className="group btn-reset-style inline-flex text-gray-600" onClick={handleClick} contentEditable={false}>
+    <button className="group btn-reset-style inline-flex text-gray-600" onClick={onClick}>
       {(author || target) && (
         <span className="flex items-center p-1 border border-gray-200 rounded text-sm bg-white group-hover:bg-gray-100">
           {author && (

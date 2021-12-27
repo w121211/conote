@@ -1,14 +1,14 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-import Modal from '../components/modal/modal'
 
-const Account = () => {
+const AccountPage = () => {
   const router = useRouter()
   const mode = router.query.mode
-  router.push({ pathname: '/login', query: { mode: 'login' } }, '/login')
+  // router.push({ pathname: '/login', query: { mode: 'login' } }, '/login')
   return (
     <div>
+      Account
       {/* <Link href={{ pathname: '/account', query: { mode: 'login' } }} as="/login">
         <a>Login</a>
       </Link> */}
@@ -16,4 +16,4 @@ const Account = () => {
   )
 }
 
-export default Account
+export default AccountPage

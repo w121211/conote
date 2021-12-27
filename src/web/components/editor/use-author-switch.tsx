@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 export const useAuthorSwitcher = (props: { authorName?: string }): [string, JSX.Element] => {
   const { authorName } = props
   const [author, setAuthor] = useState<string>(authorName ?? '@self')
