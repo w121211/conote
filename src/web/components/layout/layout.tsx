@@ -74,14 +74,14 @@ export default function Layout({
         <div className={!meData ? 'pointer-events-none' : 'pointer-events-auto'}>{children}</div>
       </div>
       <nav className="fixed flex items-center justify-start w-screen h-11 ">
-        <div
-          className="flex px-6"
+        <span
+          className="material-icons px-4 hover:text-gray-500 hover:cursor-pointer"
           onClick={() => {
             setShowMenu(prev => !prev)
           }}
         >
-          <MenuIcon className="w-5 h-5" />
-        </div>
+          menu
+        </span>
         <div className="flex items-center justify-between w-full">
           <Link href="/">
             <a>Conote</a>

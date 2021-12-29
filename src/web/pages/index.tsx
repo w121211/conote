@@ -85,7 +85,6 @@ export const LatestCards = (): JSX.Element | null => {
         ]}
         author={'鉅亨網編譯羅昀玫'}
       />
-      {console.log(router.pathname)}
       {data.latestCardDigests &&
         data.latestCardDigests.map((e, i) => (
           <NewListItem

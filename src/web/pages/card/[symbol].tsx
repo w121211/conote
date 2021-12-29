@@ -8,7 +8,7 @@ import Layout from '../../components/layout/layout'
 import { workspace } from '../../components/workspace/workspace'
 import { BulletEditor } from '../../components/editor/editor'
 import { Doc } from '../../components/workspace/doc'
-import CardMetaForm from '../../components/card-meta-form/card-meta-form'
+import CardHeadMeta from '../../components/card-head-meta/card-head-meta'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 import Modal from '../../components/modal/modal'
 import SideBar from '../../components/sidebar/sidebar'
@@ -180,7 +180,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
       >
         <div className="flex items-center gap-4 mb-2">
           {doc.cardCopy && (
-            <CardMetaForm
+            <CardHeadMeta
               cardId={doc.cardCopy.id}
               showBtn={showHeaderHiddenBtns}
               initialValue={doc.getCardMetaInput()}
@@ -396,7 +396,6 @@ const CardSymbolPage = (): JSX.Element | null => {
           <Link href={{ pathname: '/card/[symbol]', query: { symbol: modalSymbol } }}>
             <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
               <span className="material-icons text-lg">open_in_full</span>
-              整頁顯示
             </a>
           </Link>
         }

@@ -1,7 +1,7 @@
 import React, { forwardRef, ReactPropTypes, useState } from 'react'
 import Link from 'next/link'
 import { SearchAllForm } from '../search-all-form'
-import SidebarList from './sidebar-list'
+import DocIndexList from './docIndexList'
 import { workspace } from '../workspace/workspace'
 import { useObservable } from 'rxjs-hooks'
 import { TreeNode, TreeService } from '../../../packages/docdiff/src'
@@ -99,8 +99,8 @@ const SideBar = ({
       <div className="mt-2 mb-5">
         <SearchAllForm small />
       </div>
-      <SidebarList title="最近同步的筆記" entries={committedDocIndicies} />
-      <SidebarList title="暫存區" entries={editingdDocIndicies} />
+      <DocIndexList title="最近同步的筆記" indexArray={committedDocIndicies} />
+      <DocIndexList title="暫存區" indexArray={editingdDocIndicies} />
     </div>
   )
 }

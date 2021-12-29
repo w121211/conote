@@ -74,15 +74,19 @@ const NewListItem = ({
         <div className="flex">
           {hashtags.map((e, i) => {
             return (
-              <span
-                className={`my-0 last:mr-0 rounded text-sm text-blue-500 cursor-pointer ${
-                  e === '#watch' ? 'bg-gray-600' : ''
-                } ${currentHashtag === e ? 'text-blue-500' : ''}`}
-                key={i}
+              <Link
+                href={`/card/${encodeURIComponent(!e.startsWith('$') && !e.startsWith('#') ? `[[${e}]]` : e)}`}
+                key={e}
               >
-                {i > 0 && <span className="inline-block mx-1 font-[Arial]">·</span>}
-                {e}
-              </span>
+                <a
+                  className={`my-0 last:mr-0 rounded text-sm text-blue-500 cursor-pointer hover:underline hover:underline-offset-2 ${
+                    currentHashtag === e ? 'text-blue-500' : ''
+                  }`}
+                >
+                  {i > 0 && <span className="inline-block mx-1 font-[Arial]">·</span>}
+                  {e}
+                </a>
+              </Link>
             )
           })}
         </div>
