@@ -24,7 +24,7 @@
     "incremental": true,
     "downlevelIteration": true
   },
-  "exclude": ["node_modules", ".next", "out", "prisma", "test", "__deprecated__", "**/__tests__", "stories"],
+  "exclude": ["node_modules", ".next", ".cache", "out", "prisma", "test", "__deprecated__", "**/__tests__", "stories"],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
   "ts-node": {
     // options are overrides used only by ts-node

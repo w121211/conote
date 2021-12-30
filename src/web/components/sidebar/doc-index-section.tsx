@@ -1,43 +1,41 @@
 import React, { useState } from 'react'
 import { TreeNode } from '../../../packages/docdiff/src'
 import { DocIndex } from '../workspace/doc-index'
-import DocIndexPanel from './doc-index-panel'
-import DocIndexComponent from './docIndexComponent'
+import DocIndexComponent from './doc-index-component'
 
-const DocIndexHeader = ({
-  title,
-  indexLength,
-  showMore,
-  onClickShowMore,
-}: {
-  title?: string
-  indexLength: number
-  showMore: boolean
-  onClickShowMore: () => void
-}): JSX.Element => {
+const DocIndexSection = ({ docIndicies, title }: { docIndicies: TreeNode<DocIndex>[]; title: string }): JSX.Element => {
+  const [folded, setFolded] = useState(false)
   return (
     <div className="flex flex-col min-h-0 overflow-hidden">
-      {title && (
+      <div className="flex flex-col min-h-0 overflow-hidden">
         <div
           className={`group flex justify-between items-center px-2 text-sm text-gray-700 font-bold 
           tracking-wide leading-7 cursor-pointer select-none  hover:bg-gray-200 
           `}
-          onClick={onClickShowMore}
+          onClick={() => {
+            setFolded(!folded)
+          }}
         >
           <div className="flex items-center">
-            {showMore ? (
+            {folded ? (
               <span className="material-icons">expand_more</span>
             ) : (
               <span className="material-icons">chevron_right</span>
             )}
             <span className="flex items-center gap-1">
               {title}
-              <span className="text-gray-500 font-normal">{indexLength}</span>
+              <span className="text-gray-500 font-normal">{docIndicies.length}</span>
             </span>
           </div>
         </div>
-      )}
+      </div>
+
+      {docIndicies?.length > 0
+        ? !folded && docIndicies.map((e, i) => <DocIndexComponent key={i} node={e} />)
+        : !folded && (
+            <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow">尚無筆記</span>
+          )}
     </div>
   )
 }
-export default DocIndexHeader
+export default DocIndexSection

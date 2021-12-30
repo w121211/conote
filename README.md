@@ -23,9 +23,12 @@ kubectl Cheat Sheet: https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 # install minikube, skaffold, helm
 brew install minikube, skaffold, helm...
 
+minikube start # start minikube cluster
+kubectl get pods -A
+
 # 確認context是在local
 kubectl config get-contexts
-kubectl config use-context docker-desktop
+kubectl config use-context minikube
 
 # from project root folder, first test dockerfile works
 docker build --progress=plain .

@@ -13,6 +13,10 @@ export type TreeNode<T> = NodeBody<T> & {
   children: TreeNode<T>[]
 }
 
+export const isTreeNode = <T>(node: TreeNode<T> | NodeBody<T>): node is TreeNode<T> => {
+  return (node as TreeNode<T>).children !== undefined
+}
+
 export type Match<T> = (node: NodeBody<T>) => boolean
 
 export const TreeService = {

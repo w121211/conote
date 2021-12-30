@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash'
 import { nanoid } from 'nanoid'
 import { CardInput, CardMetaInput, CardStateInput } from 'graphql-let/__generated__/__types__'
 import { NodeChange, TreeChangeService, TreeNode } from '../../../packages/docdiff/src'
@@ -6,7 +7,6 @@ import { Bullet } from '../bullet/bullet'
 import { LiElement } from '../editor/slate-custom-types'
 import { EditorSerializer } from '../editor/serializer'
 import { LocalDatabaseService } from './local-database'
-import { isDeepStrictEqual } from 'util'
 
 export type DocProps = {
   cid?: string
@@ -290,16 +290,6 @@ export class Doc {
     return changes
   }
 
-  getTitle(): string | undefined {
-    if (this.cardInput) {
-      return this.cardInput.meta?.title ?? undefined
-    }
-    if (this.cardCopy) {
-      return this.cardCopy.meta.title ?? undefined
-    }
-    throw 'doc cardCopy & cardInput are both null'
-  }
-
   getSymbol(): string {
     if (this.cardCopy) {
       return this.cardCopy.sym.symbol
@@ -315,7 +305,7 @@ export class Doc {
   }
 
   updateCardMetaInput(metaInput: CardMetaInput): { isUpdated: boolean } {
-    if (this.cardInput?.meta && isDeepStrictEqual(metaInput, this.cardInput.meta)) {
+    if (this.cardInput?.meta && isEqual(metaInput, this.cardInput.meta)) {
       return { isUpdated: false }
     }
     if (this.cardInput) {

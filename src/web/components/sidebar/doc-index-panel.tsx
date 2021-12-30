@@ -1,17 +1,28 @@
 import { useApolloClient } from '@apollo/client'
-import React from 'react'
-import { useObservable } from 'rxjs-hooks'
-import { workspace } from '../workspace/workspace'
-import { TreeNode, TreeService } from '../../../packages/docdiff/src'
+import { isTreeNode, NodeBody, TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { Doc } from '../workspace/doc'
 import { DocIndex } from '../workspace/doc-index'
+import { workspace } from '../workspace/workspace'
 
-const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> }) => {
+const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> | NodeBody<DocIndex> }) => {
   const client = useApolloClient()
-  const mainDoc = useObservable(() => workspace.mainDoc$)
+  const commitButton =
+    isTreeNode(node) && TreeService.isRoot(node) ? (
+      <button
+        className="btn-reset-style"
+        onClick={async () => {
+          await workspace.commit(node, client) // commit node-doc and all of its child-docs
+        }}
+      >
+        <span className="material-icons-outlined text-xl text-gray-500">cloud_upload</span>
+      </button>
+    ) : null
+
   return (
     <div className="hidden group-hover:flex items-center gap-2 ">
-      {TreeService.isRoot(node) && (
+      {/* <div className="group-hover:flex items-center gap-2 "> */}
+      {commitButton}
+      {/* {TreeService.isRoot(node) && (
         <button
           className="btn-reset-style"
           onClick={async () => {
@@ -20,16 +31,18 @@ const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> }) => {
         >
           <span className="material-icons-outlined text-xl text-gray-500">cloud_upload</span>
         </button>
-      )}
+      )} */}
       <button
         className="btn-reset-style"
         onClick={async () => {
-          if (node.children.length > 0) {
-            console.warn('will remove all sub docs')
-          } else {
-            await Doc.removeDoc(node.cid)
-            await workspace.updateEditingDocIndicies()
-          }
+          await Doc.removeDoc(node.cid)
+          await workspace.updateEditingDocIndicies()
+          // if (node.children.length > 0) {
+          //   console.warn('will remove all sub docs')
+          // } else {
+          //   await Doc.removeDoc(node.cid)
+          //   await workspace.updateEditingDocIndicies()
+          // }
         }}
       >
         <span className="material-icons-outlined text-xl text-gray-500">delete_forever</span>

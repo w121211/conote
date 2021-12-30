@@ -10,6 +10,7 @@ import {
   StylesConfig,
 } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
+import { CardMetaInput } from 'graphql-let/__generated__/__types__'
 
 type Option = {
   label: string
@@ -59,17 +60,44 @@ const changeInputwidth = (name: string) => {
   }
 }
 
+const toCardMetaInput = (input: FormInputs): CardMetaInput => {
+  const { title, author, url, keywords, redirects, duplicates, date, description } = input
+  const stringOrUndefined = (str: string) => (str === '' ? undefined : str)
+  const stringArrayOrUndefined = (str: string, splitter: string) =>
+    str === '' ? undefined : duplicates.split(splitter)
+  return {
+    author: stringOrUndefined(author),
+    date: stringOrUndefined(date),
+    description: stringOrUndefined(description),
+    duplicates: stringArrayOrUndefined(duplicates, ' '),
+    keywords: keywords.map(e => e.value),
+    redirects: stringArrayOrUndefined(redirects, ' '),
+    title: stringOrUndefined(title),
+    url: stringOrUndefined(url),
+  }
+}
+
 const CardMetaForm = ({
-  initialValue,
-  cardId,
-}: // onSubmit,
-{
-  initialValue: FormInputs
-  cardId: string
-  // onSubmit: (input: CardMetaInput) => void
+  metaInput,
+  onSubmit,
+}: {
+  metaInput?: CardMetaInput
+  onSubmit: (input: CardMetaInput) => void
 }): JSX.Element => {
   const methods = useForm<FormInputs>({
-    defaultValues: initialValue,
+    defaultValues: {
+      author: metaInput?.author ?? '',
+      title: metaInput?.title ?? '',
+      url: metaInput?.url ?? '',
+      keywords:
+        metaInput?.keywords?.map(e => {
+          return { label: e, value: e }
+        }) ?? [],
+      redirects: metaInput?.redirects?.join(' ') ?? '',
+      duplicates: metaInput?.duplicates?.join(' ') ?? '',
+      description: metaInput?.description ?? '',
+      date: metaInput?.date ?? '',
+    },
   })
   const {
     register,
@@ -129,40 +157,39 @@ const CardMetaForm = ({
   //   // refetchQueries: [{ query: CardDocument, variables: { symbol } }],
   // })
 
-  const onSubmit = (d: FormInputs) => {
-    if (d) {
-      const keywordArr: string[] = []
-      if (d.keywords) {
-        d.keywords.forEach(e => {
-          keywordArr.push(e.value)
-        })
-      }
-      // updateCardMeta({
-      //   variables: {
-      //     cardId,
-      //     data: {
-      //       author: d.author,
-      //       title: d.title,
-      //       url: d.url,
-      //       redirects: d.redirects.split(' '),
-      //       duplicates: d.duplicates.split(' '),
-      //       keywords: keywordArr,
-      //     },
-      //   },
-      // })
-    }
-  }
+  // const onSubmit = (d: FormInputs) => {
+  //   if (d) {
+  //     const keywordArr: string[] = []
+  //     if (d.keywords) {
+  //       d.keywords.forEach(e => {
+  //         keywordArr.push(e.value)
+  //       })
+  //     }
+  //     // updateCardMeta({
+  //     //   variables: {
+  //     //     cardId,
+  //     //     data: {
+  //     //       author: d.author,
+  //     //       title: d.title,
+  //     //       url: d.url,
+  //     //       redirects: d.redirects.split(' '),
+  //     //       duplicates: d.duplicates.split(' '),
+  //     //       keywords: keywordArr,
+  //     //     },
+  //     //   },
+  //     // })
+  //   }
+  // }
 
   return (
     <FormProvider {...methods}>
       <div className="w-[90%] mx-auto sm:w-[50vw]">
         <form
           className="flex flex-col gap-4"
-          onSubmit={handleSubmit(onSubmit)}
-          // onChange={() => {
-          //   setSubmitDisable(false)
-          //   setSubmitFinished(false)
-          // }}
+          onSubmit={handleSubmit(input => {
+            console.log(input)
+            onSubmit(toCardMetaInput(input))
+          })}
         >
           {[
             ['title', '標題', ''],

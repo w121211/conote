@@ -2,219 +2,88 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useObservable } from 'rxjs-hooks'
-import { CardMetaInput } from 'graphql-let/__generated__/__types__'
 import { CardFragment, useCardLazyQuery, useCardQuery, useMeQuery } from '../../apollo/query.graphql'
 import Layout from '../../components/layout/layout'
 import { workspace } from '../../components/workspace/workspace'
 import { BulletEditor } from '../../components/editor/editor'
 import { Doc } from '../../components/workspace/doc'
-import CardHeadMeta from '../../components/card-head-meta/card-head-meta'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 import Modal from '../../components/modal/modal'
-import SideBar from '../../components/sidebar/sidebar'
-
-// const CardHead = ({ doc }: { doc: Doc }): JSX.Element => {
-//   // const mainDoc = useObservable(() => workspace.mainDoc$)
-//   // const status = useObservable(() => workspace.status$)
-//   const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
-//   const [cardMetaSubmitted, setCardMetaSubmitted] = useState(false)
-//   const hiddenBtnRef = useRef<HTMLDivElement>(null)
-
-//   const handleCardMetaSubmitted = () => {
-//     setCardMetaSubmitted(true)
-//   }
-
-//   const symbol = doc.getSymbol()
-
-//   return (
-//     <div className="flex flex-col mb-6">
-//       <div
-//         onMouseOver={e => {
-//           if (!hiddenBtnRef.current?.contains(e.target as Node)) {
-//             setShowHeaderHiddenBtns(false)
-//           } else {
-//             setShowHeaderHiddenBtns(true)
-//           }
-//         }}
-//         onMouseOut={e => {
-//           setShowHeaderHiddenBtns(false)
-//         }}
-//         ref={hiddenBtnRef}
-//       >
-//         <div className="flex items-center gap-4 mb-2">
-//           {card && (
-//             <CardMetaForm
-//               cardId={card?.id}
-//               showBtn={showHeaderHiddenBtns}
-//               handleCardMetaSubmitted={handleCardMetaSubmitted}
-//             />
-//           )}
-
-//           {symbol.startsWith('@http') && (
-//             <a
-//               className="inline-flex items-center overflow-hidden text-gray-500 hover:text-gray-700"
-//               href={symbol.substring(1)}
-//               style={showHeaderHiddenBtns ? { opacity: 1 } : { opacity: 0 }}
-//               target="_blank"
-//               rel="noreferrer"
-//             >
-//               <span className="material-icons text-lg">open_in_new</span>
-//               <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis">
-//                 {card?.meta.url}
-//               </span>
-//             </a>
-//           )}
-//         </div>
-//         {card?.meta?.author && (
-//           <Link href={`/author/${encodeURIComponent('@' + card?.meta?.author)}`}>
-//             <a className="text-sm text-blue-500 hover:underline hover:underline-offset-1">@{card?.meta?.author}</a>
-//           </Link>
-//         )}
-//         <h1 className="mb-4 line-clamp-2 break-all">{card?.meta.title || symbol}</h1>
-//       </div>
-//       {/* {cardMetaData?.cardMeta.keywords && (
-//         <div className={classes.headerKw}>
-//           {cardMetaData?.cardMeta.keywords.map((e, i) => {
-//             if (i < 5) {
-//               return (
-//                 <span className={classes.headerKwEl} key={i}>
-//                   {e}
-//                 </span>
-//               )
-//             }
-//             return null
-//           })}
-//           {cardMetaData.cardMeta.keywords.length > 5 && (
-//             <span
-//               className={classes.headerKwElHidden}
-//               onClick={e => {
-//                 e.stopPropagation()
-//                 setShowKwTooltip(true)
-//               }}
-//             >
-//               ...+{cardMetaData.cardMeta.keywords.length - 5}項
-//               <MyTooltip
-//                 className={classes.headerKwElTooltip}
-//                 visible={showKwTooltip}
-//                 handleVisibleState={() => {
-//                   setShowKwTooltip(false)
-//                 }}
-//               >
-//                 {cardMetaData?.cardMeta.keywords.map((e, i) => {
-//                   if (i >= 5) {
-//                     return (
-//                       <span className={classes.headerKwEl} key={i}>
-//                         {e}
-//                       </span>
-//                     )
-//                   }
-//                   return null
-//                 })}
-//               </MyTooltip>
-//             </span>
-//           )}
-//         </div>
-//       )} */}
-//       <div className="flex items-center w-full">{card && <HeaderCardEmojis cardId={card?.id} />}</div>
-//     </div>
-//   )
-// }
-
-// const DocEntryLink = ({ entry, symbol }: { entry?: DocEntry; symbol: string }): JSX.Element => {
-//   if (entry) {
-//     return (
-//       <Link href={DocPathService.toURL(entry.symbol, entry.sourceCardId)}>
-//         <a>{entry.title}</a>
-//       </Link>
-//     )
-//   }
-//   return (
-//     <Link href={DocPathService.toURL(symbol)}>
-//       <a>{symbol} (null doc)</a>
-//     </Link>
-//   )
-// }
-
-const _CardMetaForm = ({
-  curInput,
-  onSubmitted,
-}: {
-  curInput: CardMetaInput
-  onSubmitted: (input: CardMetaInput) => void
-}): JSX.Element | null => {
-  return (
-    <form>
-      Title: <input>{curInput.title}</input>
-      Author: <input>{curInput.author}</input>
-    </form>
-  )
-}
+import CardMetaForm from '../../components/card-meta-form/card-meta-form'
 
 const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
-  const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
-  const [cardMetaSubmitted, setCardMetaSubmitted] = useState(false)
+  const [showBtns, setShowBtns] = useState(false)
+  const [showMetaFormModal, setShowMetaFormModal] = useState(false)
   const hiddenBtnRef = useRef<HTMLDivElement>(null)
+  const metaInput = doc.getCardMetaInput()
+
   return (
     <div className="mb-4">
-      {/* <h1>
-        {doc.getTitle()}
-        {doc.getSymbol()}
-      </h1> */}
-      {/* <button
-        onClick={() => {
-          doc.updateCardSymbol('[[Hahaha]]')
-        }}
-      > */}
       <div
         onMouseOver={e => {
           if (!hiddenBtnRef.current?.contains(e.target as Node)) {
-            setShowHeaderHiddenBtns(false)
+            setShowBtns(false)
           } else {
-            setShowHeaderHiddenBtns(true)
+            setShowBtns(true)
           }
         }}
         onMouseOut={e => {
-          setShowHeaderHiddenBtns(false)
+          setShowBtns(false)
         }}
         ref={hiddenBtnRef}
       >
         <div className="flex items-center gap-4 mb-2">
-          {doc.cardCopy && (
-            <CardHeadMeta
-              cardId={doc.cardCopy.id}
-              showBtn={showHeaderHiddenBtns}
-              initialValue={doc.getCardMetaInput()}
+          <Modal
+            visible={showMetaFormModal}
+            onClose={() => {
+              setShowMetaFormModal(false)
+            }}
+          >
+            <h2 className="mb-6 text-2xl font-bold text-gray-800">卡片資訊</h2>
+            <CardMetaForm
+              metaInput={metaInput}
               onSubmit={input => {
                 const { isUpdated } = doc.updateCardMetaInput(input)
                 if (isUpdated) {
-                  workspace.save(doc)
-                  // workspace.updateEditingDocIndicies() // force update since doc symbol, title may change
+                  doc.save()
+                } else {
+                  console.warn('card meta input not updated, skip saving')
                 }
               }}
             />
-          )}
+          </Modal>
 
-          {doc.cardCopy?.sym.symbol.startsWith('@http') && (
+          <button
+            className={`btn-reset-style inline-flex items-center text-gray-500 hover:text-gray-700 ${
+              showBtns ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={() => {
+              setShowMetaFormModal(true)
+            }}
+          >
+            <span className="material-icons text-base">edit_note</span>
+            <span className="whitespace-nowrap text-sm">編輯卡片資訊</span>
+          </button>
+
+          {doc.cardCopy?.link && (
             <a
               className="inline-flex items-center overflow-hidden text-gray-500 hover:text-gray-700"
-              href={doc.cardCopy?.sym.symbol.substring(1)}
-              style={showHeaderHiddenBtns ? { opacity: 1 } : { opacity: 0 }}
+              href={doc.cardCopy.link.url}
+              style={showBtns ? { opacity: 1 } : { opacity: 0 }}
               target="_blank"
               rel="noreferrer"
             >
               <span className="material-icons text-base">open_in_new</span>
-              <span className="flex-shrink min-w-0 truncate text-sm">{doc.cardCopy?.meta.url}</span>
+              <span className="flex-shrink min-w-0 truncate text-sm">{doc.cardCopy.link.url}</span>
             </a>
           )}
         </div>
-        {doc.cardCopy?.meta?.author && (
-          <Link href={`/author/${encodeURIComponent('@' + doc.cardCopy?.meta?.author)}`}>
-            <a className="text-sm text-blue-500 hover:underline hover:underline-offset-1">
-              @{doc.cardCopy?.meta?.author}
-            </a>
+        {metaInput.author && (
+          <Link href={{ pathname: '/author/[author]', query: { author: metaInput.author } }}>
+            <a className="text-sm text-blue-500 hover:underline hover:underline-offset-1">@{metaInput.author}</a>
           </Link>
         )}
-        <h1 className="line-clamp-2 break-all text-gray-700">{doc.getTitle() || doc.getSymbol()}</h1>
+        <h1 className="line-clamp-2 break-all text-gray-700">{metaInput.title ?? doc.getSymbol()}</h1>
       </div>
       {/* </div> */}
       {/* {cardMetaData?.cardMeta.keywords && (
@@ -261,7 +130,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         </div>
       )} */}
 
-      {doc.cardCopy && <HeaderCardEmojis cardId={doc.cardCopy?.id} />}
+      {doc.cardCopy && <HeaderCardEmojis cardId={doc.cardCopy.id} />}
 
       {/* //   Change Symbol
       // </button> */}

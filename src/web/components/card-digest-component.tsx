@@ -1,30 +1,19 @@
 import React from 'react'
 import Link from 'next/link'
-import CardEmojis from '../emoji-up-down/card-emojis-display'
+import { CardDigestFragment } from '../apollo/query.graphql'
+import { SymbolHelper } from '../common/symbol-helper'
+import CardEmojis from './emoji-up-down/card-emojis-display'
 
-const NewListItem = ({
-  href,
-  title,
-  sourceUrl,
-  source,
-  summary,
-  hashtags,
-  author,
-  shot,
-  currentHashtag,
+const CardDigestComponent = ({
+  commitId,
   cardId,
-}: {
-  cardId: string
-  href: string
-  title: string
-  sourceUrl?: string
-  source?: string
-  author?: string
-  summary?: string[]
-  hashtags?: string[]
-  shot?: string
-  currentHashtag?: string
-}): JSX.Element => {
+  fromCardId,
+  picks,
+  updatedAt,
+  cardMeta: { author, keywords, title, url },
+  sym,
+  subSyms,
+}: CardDigestFragment): JSX.Element => {
   return (
     <div className="overflow-hidden mt-6 mb-4 pb-4">
       <div className="flex mb-2 items-center text-sm">
@@ -38,24 +27,24 @@ const NewListItem = ({
         {/* {shot && <span className={classes.shot}>{shot}</span>} */}
         {/* {source && <div className={classes.source}>{source}</div>} */}
 
-        {author && sourceUrl && <span className="h-4 mx-1 border-gray-300"></span>}
-        {sourceUrl && (
-          <a href={`${sourceUrl}`} className="truncate text-gray-500" rel="noreferrer" target="_blank">
+        {author && url && <span className="h-4 mx-1 border-gray-300"></span>}
+        {url && (
+          <a href={url} className="truncate text-gray-500" rel="noreferrer" target="_blank">
             <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis hover:underline hover:underline-offset-2">
-              {sourceUrl}
+              {url}
             </span>
           </a>
         )}
         {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
       </div>
-      <Link href={href}>
+      <Link href={{ pathname: '/card/[symbol]', query: { symbol: sym.symbol } }}>
         <a className="overflow-hidden whitespace-nowrap text-ellipsis text-gray-700 hover:underline hover:underline-offset-2 ">
-          <h3 className="m-0 truncate  text-xl">{title}</h3>
+          <h3 className="m-0 truncate  text-xl">{title ?? sym.symbol}</h3>
         </a>
       </Link>
-      {summary && (
+      {picks.length > 0 && (
         <div className="mb-2 line-clamp-2 text-ellipsis text-sm text-gray-500">
-          {summary.map((e, i) => {
+          {picks.map((e, i) => {
             return (
               <span key={i} className="">
                 {
@@ -70,30 +59,25 @@ const NewListItem = ({
         </div>
       )}
       {/* {hashtags && source && <span className="mx-2 border-r border-gray-300"></span>} */}
-      {hashtags && (
-        <div className="flex">
-          {hashtags.map((e, i) => {
-            return (
-              <Link
-                href={`/card/${encodeURIComponent(!e.startsWith('$') && !e.startsWith('#') ? `[[${e}]]` : e)}`}
-                key={e}
-              >
-                <a
-                  className={`my-0 last:mr-0 rounded text-sm text-blue-500 cursor-pointer hover:underline hover:underline-offset-2 ${
-                    currentHashtag === e ? 'text-blue-500' : ''
-                  }`}
-                >
-                  {i > 0 && <span className="inline-block mx-1 font-[Arial]">·</span>}
-                  {e}
-                </a>
-              </Link>
-            )
-          })}
-        </div>
-      )}
+      <div className="flex">
+        {subSyms.map((e, i) => (
+          <Link
+            key={i}
+            href={{ pathname: '/card/[symbol]', query: { symbol: e.symbol } }}
+            // href={`/card/${encodeURIComponent(!e.startsWith('$') && !e.startsWith('#') ? `[[${e}]]` : e)}`}
+          >
+            <a
+              className={`my-0 last:mr-0 rounded text-sm text-blue-500 cursor-pointer hover:underline hover:underline-offset-2`}
+            >
+              {i > 0 && <span className="inline-block mx-1 font-[Arial]">·</span>}
+              {e.type === 'TOPIC' ? SymbolHelper.removeTopicPrefixSuffix(e.symbol) : e.symbol}
+            </a>
+          </Link>
+        ))}
+      </div>
       <CardEmojis cardId={cardId} />
     </div>
   )
 }
 
-export default NewListItem
+export default CardDigestComponent

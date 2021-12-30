@@ -1,27 +1,29 @@
 # @see https://github.com/vercel/next.js/tree/canary/examples/with-docker
 
 # Install dependencies only when needed
-FROM node:14-alpine AS packages-deps
+FROM node:14-alpine AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat gettext
 COPY tsconfig.base.json /app/
-
+WORKDIR /app/src/packages
+COPY src/packages ./
 WORKDIR /app/src/packages/editor
-COPY src/packages/editor ./
-# COPY src/lib/editor/package.json src/lib/editor/yarn.lock ./
 RUN yarn install --frozen-lockfile
-RUN yarn build
+WORKDIR /app/src/packages/docdiff
+RUN yarn install --frozen-lockfile
+WORKDIR /app/src/packages/scraper
+RUN yarn install --frozen-lockfile
+# WORKDIR /app/src/packages/editor
+# COPY src/packages/editor ./
+# RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
-FROM node:14-alpine AS deps
+FROM node:14-alpine AS builder
 COPY tsconfig.base.json /app/
-COPY --from=packages-deps /app/src/packages/editor /app/src/packages/editor
+COPY --from=deps /app/src/packages /app/src/packages
 WORKDIR /app/src/web
 COPY src/web ./
 RUN yarn install --frozen-lockfile
-
-FROM deps AS builder
-WORKDIR /app/src/web
 RUN yarn build
 
 # Only use for okteto dev

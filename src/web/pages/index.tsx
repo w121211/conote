@@ -2,20 +2,30 @@
  * @see https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
  */
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 import { useLatestCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
-import { useRouter } from 'next/router'
 import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/new-hot-list'
-import NewListItem from '../components/list/new-list-item'
+import CardDigestComponent from '../components/card-digest-component'
 
 export const LatestCards = (): JSX.Element | null => {
   const router = useRouter()
   const { data, loading, error, fetchMore } = useLatestCardDigestsQuery({ fetchPolicy: 'cache-and-network' })
   const [hasMore, setHasMore] = useState<boolean>(true)
 
-  if (error || !data) return <p>Something goes wrong...</p>
-  if (data.latestCardDigests.length === 0) return <p>No cards</p>
+  if (loading) {
+    return null
+  }
+  if (!data || data.latestCardDigests === undefined) {
+    return null
+  }
+  if (error) {
+    return <p>Something goes wrong...</p>
+  }
+  if (data.latestCardDigests.length === 0) {
+    return <p>No cards</p>
+  }
 
   const afterCommitId = data.latestCardDigests[data.latestCardDigests.length - 1].commitId
 
@@ -28,7 +38,7 @@ export const LatestCards = (): JSX.Element | null => {
   // console.log(data.latestCardDigests)
   return (
     <>
-      <NewListItem
+      {/* <NewListItem
         cardId={'cardId'}
         title={'水力發電短缺 冰島減供工業用電 拒與新的比特幣礦工簽約'}
         href={'https://news.cnyes.com/news/id/4782741?exp=a'}
@@ -84,20 +94,10 @@ export const LatestCards = (): JSX.Element | null => {
           '美國商務部長雷蒙多 7 月中旬表示，已開始看到全球晶片短缺問題有所緩解，晶片製造商也承諾生產更多車用晶片，但最新數據卻道出更真實的情況。',
         ]}
         author={'鉅亨網編譯羅昀玫'}
-      />
-      {data.latestCardDigests &&
-        data.latestCardDigests.map((e, i) => (
-          <NewListItem
-            key={i}
-            cardId={e.cardId}
-            title={e.cardMeta.title ?? e.sym.symbol}
-            href={`/card/${encodeURIComponent(e.sym.symbol)}`}
-            sourceUrl={e.sym.type === 'URL' && e.cardMeta.url ? e.cardMeta.url : `${router.asPath}card/${e.sym.symbol}`}
-            summary={e.picks}
-            author={e.cardMeta.author ?? undefined}
-            hashtags={e.subSyms.map(e => e.symbol)}
-          />
-        ))}
+      /> */}
+      {data.latestCardDigests.map((e, i) => (
+        <CardDigestComponent key={i} {...e} />
+      ))}
       {hasMore ? (
         <div>
           {loading ? (

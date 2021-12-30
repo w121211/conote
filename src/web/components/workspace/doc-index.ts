@@ -20,7 +20,7 @@ export const DocIndexService = {
     return {
       cid,
       symbol: doc.getSymbol(),
-      title: doc.getTitle(),
+      title: doc.getCardMetaInput().title ?? undefined,
       cardId: cardCopy?.id,
       createdAt,
       updatedAt,

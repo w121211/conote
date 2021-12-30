@@ -1,58 +1,13 @@
 import React, { forwardRef, ReactPropTypes, useState } from 'react'
 import Link from 'next/link'
 import { SearchAllForm } from '../search-all-form'
-import DocIndexList from './docIndexList'
+import DocIndexSection from './doc-index-section'
 import { workspace } from '../workspace/workspace'
 import { useObservable } from 'rxjs-hooks'
 import { TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { DocIndex } from '../workspace/doc-index'
 import { Doc } from '../workspace/doc'
 import { useApolloClient } from '@apollo/client'
-
-const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }) => {
-  const client = useApolloClient()
-  if (node.data === undefined) {
-    throw 'node.data === undefined'
-  }
-  return (
-    <>
-      <Link href={{ pathname: '/card/[symbol]', query: { symbol: node.data.symbol } }}>
-        <a>{node.data.title ?? node.data.symbol}</a>
-      </Link>
-      {TreeService.isRoot(node) && (
-        <button
-          onClick={async () => {
-            await workspace.commit(node, client) // commit node-doc and all of its child-docs
-          }}
-        >
-          (Commit)
-        </button>
-      )}
-      <button
-        onClick={async () => {
-          if (node.children.length > 0) {
-            console.warn('will remove all sub docs')
-          } else {
-            await Doc.removeDoc(node.cid)
-            await workspace.updateEditingDocIndicies()
-          }
-        }}
-      >
-        (X)
-      </button>
-
-      {node.children.length > 0 && (
-        <p>
-          {node.children.map((e, i) => (
-            <span key={i}>
-              - <DocIndexComponent node={e} />
-            </span>
-          ))}
-        </p>
-      )}
-    </>
-  )
-}
 
 const SideBar = ({
   showMenuHandler,
@@ -64,10 +19,12 @@ const SideBar = ({
   pinMenuHandler: (boo?: boolean) => void
   isPined: boolean
   showMenu: boolean
-}): JSX.Element => {
+}): JSX.Element | null => {
   const editingdDocIndicies = useObservable(() => workspace.editingDocIndicies$)
-  const committedDocIndicies = useObservable(() => workspace.committedDocIndicies$)
-
+  // const committedDocIndicies = useObservable(() => workspace.committedDocIndicies$)
+  if (editingdDocIndicies === null) {
+    return null
+  }
   return (
     <div
       className={`absolute w-72 h-screen pt-0 pb-4 border-r border-gray-200 flex flex-col flex-shrink-0 z-50 transition-all 
@@ -76,7 +33,9 @@ const SideBar = ({
       } ${isPined || !showMenu ? 'shadow-none' : 'shadow-l2xl'}
       `}
       onMouseLeave={() => {
-        if (isPined) return
+        if (isPined) {
+          return
+        }
         showMenuHandler(false)
         pinMenuHandler(false)
       }}
@@ -99,8 +58,8 @@ const SideBar = ({
       <div className="mt-2 mb-5">
         <SearchAllForm small />
       </div>
-      <DocIndexList title="最近同步的筆記" indexArray={committedDocIndicies} />
-      <DocIndexList title="暫存區" indexArray={editingdDocIndicies} />
+      {/* <DocIndexSection title="最近同步的筆記" indexArray={committedDocIndicies} /> */}
+      <DocIndexSection title="暫存區" docIndicies={editingdDocIndicies} />
     </div>
   )
 }
