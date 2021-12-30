@@ -3,15 +3,15 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useObservable } from 'rxjs-hooks'
 import { CardMetaInput } from 'graphql-let/__generated__/__types__'
-import { CardFragment, useCardLazyQuery, useCardQuery, useMeQuery } from '../../apollo/query.graphql'
+import { useCardQuery } from '../../apollo/query.graphql'
 import Layout from '../../components/layout/layout'
 import { workspace } from '../../components/workspace/workspace'
 import { BulletEditor } from '../../components/editor/editor'
 import { Doc } from '../../components/workspace/doc'
-import CardHeadMeta from '../../components/card-head-meta/card-head-meta'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 import Modal from '../../components/modal/modal'
-import SideBar from '../../components/sidebar/sidebar'
+import CardHeadAuthor from '../../components/card-head-author'
+import CardHeadHiddenBtn from '../../components/card-head-hidden-btn/card-head-hidden-btn'
 
 // const CardHead = ({ doc }: { doc: Doc }): JSX.Element => {
 //   // const mainDoc = useObservable(() => workspace.mainDoc$)
@@ -152,8 +152,17 @@ const _CardMetaForm = ({
 
 const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   const [showHeaderHiddenBtns, setShowHeaderHiddenBtns] = useState(false)
-  const [cardMetaSubmitted, setCardMetaSubmitted] = useState(false)
   const hiddenBtnRef = useRef<HTMLDivElement>(null)
+  const onMouseOver = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (!hiddenBtnRef.current?.contains(e.target as Node)) {
+      setShowHeaderHiddenBtns(false)
+    } else {
+      setShowHeaderHiddenBtns(true)
+    }
+  }
+  const onMouseOut = () => {
+    setShowHeaderHiddenBtns(false)
+  }
   return (
     <div className="mb-4">
       {/* <h1>
@@ -165,57 +174,23 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
           doc.updateCardSymbol('[[Hahaha]]')
         }}
       > */}
-      <div
-        onMouseOver={e => {
-          if (!hiddenBtnRef.current?.contains(e.target as Node)) {
-            setShowHeaderHiddenBtns(false)
-          } else {
-            setShowHeaderHiddenBtns(true)
-          }
-        }}
-        onMouseOut={e => {
-          setShowHeaderHiddenBtns(false)
-        }}
-        ref={hiddenBtnRef}
-      >
-        <div className="flex items-center gap-4 mb-2">
-          {doc.cardCopy && (
-            <CardHeadMeta
-              cardId={doc.cardCopy.id}
-              showBtn={showHeaderHiddenBtns}
-              initialValue={doc.getCardMetaInput()}
-              onSubmit={input => {
-                const { isUpdated } = doc.updateCardMetaInput(input)
-                if (isUpdated) {
-                  workspace.save(doc)
-                  // workspace.updateEditingDocIndicies() // force update since doc symbol, title may change
-                }
-              }}
-            />
-          )}
-
-          {doc.cardCopy?.sym.symbol.startsWith('@http') && (
-            <a
-              className="inline-flex items-center overflow-hidden text-gray-500 hover:text-gray-700"
-              href={doc.cardCopy?.sym.symbol.substring(1)}
-              style={showHeaderHiddenBtns ? { opacity: 1 } : { opacity: 0 }}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span className="material-icons text-base">open_in_new</span>
-              <span className="flex-shrink min-w-0 truncate text-sm">{doc.cardCopy?.meta.url}</span>
-            </a>
-          )}
-        </div>
-        {doc.cardCopy?.meta?.author && (
-          <Link href={`/author/${encodeURIComponent('@' + doc.cardCopy?.meta?.author)}`}>
-            <a className="text-sm text-blue-500 hover:underline hover:underline-offset-1">
-              @{doc.cardCopy?.meta?.author}
-            </a>
-          </Link>
+      <div onMouseOver={onMouseOver} onMouseOut={onMouseOut} ref={hiddenBtnRef}>
+        <CardHeadHiddenBtn visible={showHeaderHiddenBtns} doc={doc} />
+        {doc.cardCopy?.meta?.author && <CardHeadAuthor author={doc.cardCopy?.meta.author} />}
+        {doc.cardCopy?.meta.url && (
+          <a
+            className="overflow-hidden text-gray-500 hover:underline hover:underline-offset-2"
+            href={doc.cardCopy?.sym.symbol.substring(1)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {/* <span className="material-icons text-base">open_in_new</span> */}
+            <span className="flex-shrink min-w-0 truncate text-sm">{doc.cardCopy?.meta.url}</span>
+          </a>
         )}
         <h1 className="line-clamp-2 break-all text-gray-700">{doc.getTitle() || doc.getSymbol()}</h1>
       </div>
+      {doc.cardCopy && <HeaderCardEmojis cardId={doc.cardCopy?.id} />}
       {/* </div> */}
       {/* {cardMetaData?.cardMeta.keywords && (
         <div className={classes.headerKw}>
@@ -260,8 +235,6 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
           )}
         </div>
       )} */}
-
-      {doc.cardCopy && <HeaderCardEmojis cardId={doc.cardCopy?.id} />}
 
       {/* //   Change Symbol
       // </button> */}

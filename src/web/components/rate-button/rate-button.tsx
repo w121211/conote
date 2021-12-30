@@ -14,19 +14,19 @@ const RateButton = ({
   if (!author && !target && !choice) {
     return (
       <button className="btn-reset-style" onClick={onClick}>
-        <span className="p-1 border border-white rounded text-sm bg-gray-100 hover:bg-gray-200">新增Shot</span>
+        <span className="p-1 border border-white rounded text-sm bg-gray-100 hover:bg-gray-200">新增Rate</span>
       </button>
     )
   }
   return (
-    <button className="group btn-reset-style inline-flex text-gray-600" onClick={onClick}>
+    <button className="group btn-reset-style inline-flex text-gray-600" onClick={onClick} role="button">
       {(author || target) && (
         <span className="flex items-center p-1 border border-gray-200 rounded text-sm bg-white group-hover:bg-gray-100">
           {author && (
             <span className="inline-block max-w-[100px] overflow-hidden whitespace-nowrap text-ellipsis">{author}</span>
           )}
-
-          {choice && <span className="font-bold">·{target}</span>}
+          {author && target && <span className="font-bold">·</span>}
+          {target && <span className="font-bold">{target}</span>}
         </span>
       )}
       {choice && (

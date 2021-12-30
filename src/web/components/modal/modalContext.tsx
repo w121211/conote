@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import Modal from './modal'
-import useModal from './useModal'
 
 export const ModalContext = React.createContext<any>(null)
 const { Provider } = ModalContext

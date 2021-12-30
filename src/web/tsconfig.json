@@ -25,7 +25,7 @@
     "downlevelIteration": true
   },
   "exclude": ["node_modules", ".next", "out", "prisma", "test", "__deprecated__", "**/__tests__", "stories"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+  "include": ["next-env.d.ts", "jestsetup.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "babel.config.js"],
   "ts-node": {
     // options are overrides used only by ts-node
     "compilerOptions": {

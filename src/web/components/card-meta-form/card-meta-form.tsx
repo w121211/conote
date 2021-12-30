@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { CardMetaInput } from 'graphql-let/__generated__/__types__'
 import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-form'
 import {
   components,
@@ -61,15 +62,24 @@ const changeInputwidth = (name: string) => {
 
 const CardMetaForm = ({
   initialValue,
-  cardId,
-}: // onSubmit,
-{
-  initialValue: FormInputs
-  cardId: string
-  // onSubmit: (input: CardMetaInput) => void
+
+  onSubmit,
+  submitSuccessful,
+}: {
+  initialValue: CardMetaInput
+
+  onSubmit: (input: CardMetaInput) => void
+  submitSuccessful: (boo: boolean) => void
 }): JSX.Element => {
   const methods = useForm<FormInputs>({
-    defaultValues: initialValue,
+    defaultValues: {
+      title: initialValue.title ?? '',
+      author: initialValue.author ?? '',
+      keywords:
+        initialValue.keywords?.map(e => {
+          return { label: e, value: e }
+        }) ?? [],
+    },
   })
   const {
     register,
@@ -80,7 +90,9 @@ const CardMetaForm = ({
     control,
     formState: { isDirty, isSubmitSuccessful, isSubmitted },
   } = methods
-
+  useEffect(() => {
+    submitSuccessful(isSubmitSuccessful)
+  }, [isSubmitSuccessful])
   // const [updateCardMeta] = useUpdateCardMetaMutation({
   //   update(cache, { data }) {
   //     const res = cache.readQuery<CardQuery>({ query: CardDocument })
@@ -129,33 +141,33 @@ const CardMetaForm = ({
   //   // refetchQueries: [{ query: CardDocument, variables: { symbol } }],
   // })
 
-  const onSubmit = (d: FormInputs) => {
-    if (d) {
-      const keywordArr: string[] = []
-      if (d.keywords) {
-        d.keywords.forEach(e => {
-          keywordArr.push(e.value)
-        })
-      }
-      // updateCardMeta({
-      //   variables: {
-      //     cardId,
-      //     data: {
-      //       author: d.author,
-      //       title: d.title,
-      //       url: d.url,
-      //       redirects: d.redirects.split(' '),
-      //       duplicates: d.duplicates.split(' '),
-      //       keywords: keywordArr,
-      //     },
-      //   },
-      // })
-    }
-  }
+  // const onSubmit = (d: FormInputs) => {
+  //   if (d) {
+  //     const keywordArr: string[] = []
+  //     if (d.keywords) {
+  //       d.keywords.forEach(e => {
+  //         keywordArr.push(e.value)
+  //       })
+  //     }
+  //     // updateCardMeta({
+  //     //   variables: {
+  //     //     cardId,
+  //     //     data: {
+  //     //       author: d.author,
+  //     //       title: d.title,
+  //     //       url: d.url,
+  //     //       redirects: d.redirects.split(' '),
+  //     //       duplicates: d.duplicates.split(' '),
+  //     //       keywords: keywordArr,
+  //     //     },
+  //     //   },
+  //     // })
+  //   }
+  // }
 
   return (
     <FormProvider {...methods}>
-      <div className="w-[90%] mx-auto sm:w-[50vw]">
+      <div className="w-[90vw] sm:w-[50vw]">
         <form
           className="flex flex-col gap-4"
           onSubmit={handleSubmit(onSubmit)}
@@ -165,12 +177,12 @@ const CardMetaForm = ({
           // }}
         >
           {[
-            ['title', '標題', ''],
-            ['author', '來源作者', '例如:@巴菲特'],
-            ['url', '來源網址', '例如:http://www.youtube.com/xxx...'],
-            ['keywords', '關鍵字', ''],
-            ['redirects', '重新導向', '請使用 "空格" 分隔'],
-          ].map(([name, title, placeholder], i) => {
+            ['title', '標題', '', ''],
+            ['author', '來源作者', '例如:@巴菲特', ''],
+            // ['url', '來源網址', '例如:http://www.youtube.com/xxx...', 'disable'],
+            ['keywords', '關鍵字', '', ''],
+            // ['redirects', '重新導向', '請使用 "空格" 分隔'],
+          ].map(([name, title, placeholder, disable], i) => {
             return (
               <label key={name} className="flex items-center">
                 <h5 className="flex-shrink-0 w-20 text-gray-700 font-normal">{title}</h5>
@@ -178,16 +190,16 @@ const CardMetaForm = ({
                   <Controller
                     control={control}
                     name="keywords"
-                    render={({ field: { onChange, value, ref } }) => (
+                    render={({ field: { onChange, value } }) => (
                       <CreatableSelect
-                        id="1"
-                        instanceId="1"
+                        instanceId="keywords"
                         isMulti
                         styles={{ control: () => ({}) }}
                         value={value}
                         components={customComponents}
                         noOptionsMessage={() => null}
                         placeholder={placeholder}
+                        onChange={onChange}
                       />
                     )}
                   />
@@ -195,7 +207,7 @@ const CardMetaForm = ({
                   <input
                     {...register(name as keyof FormInputs)}
                     type="text"
-                    className={`input ${changeInputwidth(name)}`}
+                    className={`input flex-grow`}
                     placeholder={placeholder}
                   />
                 )}
@@ -206,7 +218,7 @@ const CardMetaForm = ({
             <button
               className="btn-primary h-10 w-24 mt-4"
               type="submit"
-              disabled={!isDirty || isSubmitSuccessful || isSubmitted}
+              disabled={!isDirty && (isSubmitSuccessful || isSubmitted)}
             >
               {isSubmitted ? (isDirty ? '送出' : '已送出') : '送出'}
             </button>

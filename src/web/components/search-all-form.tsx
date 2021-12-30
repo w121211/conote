@@ -126,6 +126,7 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
 
   return (
     <Creatable
+      instanceId="search-all-form"
       components={components}
       styles={customStyles}
       isClearable
