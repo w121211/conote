@@ -37,12 +37,6 @@ const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> | NodeBody<DocIndex>
         onClick={async () => {
           await Doc.removeDoc(node.cid)
           await workspace.updateEditingDocIndicies()
-          // if (node.children.length > 0) {
-          //   console.warn('will remove all sub docs')
-          // } else {
-          //   await Doc.removeDoc(node.cid)
-          //   await workspace.updateEditingDocIndicies()
-          // }
         }}
       >
         <span className="material-icons-outlined text-xl text-gray-500">delete_forever</span>

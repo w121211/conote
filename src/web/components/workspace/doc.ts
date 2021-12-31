@@ -50,8 +50,8 @@ export class Doc {
     committedAt,
     committedState,
   }: DocProps) {
-    if (!((cardCopy && cardInput === null) || (cardCopy === null && cardInput))) {
-      throw '!((cardCopy && cardInput === null) || (cardCopy === null && cardInput))'
+    if (cardCopy === null && cardInput === null) {
+      throw 'cardCopy === null && cardInput === null'
     }
     this.cid = cid ?? nanoid()
     this.fromDocCid = fromDocCid
@@ -94,7 +94,8 @@ export class Doc {
           editorValue: [
             {
               type: 'li',
-              children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new webpage-card ${symbol}` }] }],
+              children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }],
+              // children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new webpage-card ${symbol}` }] }],
             },
           ],
         })
@@ -109,8 +110,8 @@ export class Doc {
       editorValue: [
         {
           type: 'li',
-          children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new symbol-card ${symbol}` }] }],
-          // children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }],
+          children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }],
+          // children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new symbol-card ${symbol}` }] }],
         },
       ],
     })

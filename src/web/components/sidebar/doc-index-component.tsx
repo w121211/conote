@@ -66,7 +66,7 @@ const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }): JSX.Element 
           <span className="group flex items-center gap-1 pl-8 pr-4 leading-relax hover:bg-gray-200 cursor-pointer ">
             <span className="material-icons-outlined text-lg text-gray-400">article</span>
             <Link href={{ pathname: '/card/[symbol]', query: { symbol: node.data.symbol } }}>
-              <a className="inline-block min-w-0 flex-1 truncate">{node.data.title || node.data.symbol}</a>
+              <a className="inline-block min-w-0 flex-1 truncate">{node.data.title ?? node.data.symbol}</a>
             </Link>
             <DocIndexPanel node={node} />
           </span>

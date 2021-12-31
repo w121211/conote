@@ -4,16 +4,17 @@ import { CardDigestFragment } from '../apollo/query.graphql'
 import { SymbolHelper } from '../common/symbol-helper'
 import CardEmojis from './emoji-up-down/card-emojis-display'
 
-const CardDigestComponent = ({
-  commitId,
-  cardId,
-  fromCardId,
-  picks,
-  updatedAt,
-  cardMeta: { author, keywords, title, url },
-  sym,
-  subSyms,
-}: CardDigestFragment): JSX.Element => {
+const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.Element => {
+  const {
+    // commitId,
+    cardId,
+    // fromCardId,
+    picks,
+    // updatedAt,
+    cardMeta: { author, keywords, title, url },
+    sym,
+    subSyms,
+  } = digest
   return (
     <div className="overflow-hidden mt-6 mb-4 pb-4">
       <div className="flex mb-2 items-center text-sm">

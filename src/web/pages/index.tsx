@@ -96,7 +96,7 @@ export const LatestCards = (): JSX.Element | null => {
         author={'鉅亨網編譯羅昀玫'}
       /> */}
       {data.latestCardDigests.map((e, i) => (
-        <CardDigestComponent key={i} {...e} />
+        <CardDigestComponent key={i} digest={e} />
       ))}
       {hasMore ? (
         <div>
