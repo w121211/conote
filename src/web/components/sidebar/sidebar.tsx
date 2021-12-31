@@ -42,7 +42,9 @@ const SideBar = ({
     >
       <div className="group flex-shrink-0 px-4">
         <div className="flex items-center justify-between h-11">
-          <a href="/">Conote</a>
+          <a href="/" className=" px-2 rounded hover:bg-gray-200 mix-blend-multiply ">
+            Conote
+          </a>
           <span
             className={`${
               isPined ? 'material-icons' : 'material-icons-outlined'

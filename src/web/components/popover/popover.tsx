@@ -14,7 +14,7 @@ const Popover = ({ children, hideBoard, subTitle, mask, buttons, topRightBtn }: 
   // console.log(mask)
 
   return (
-    <div className="fixed flex justify-center top-0 left-0 w-screen h-screen z-50">
+    <div className="fixed flex justify-center top-0 left-0 w-screen h-screen z-50" role="dialog">
       <div
         className={`absolute w-full h-full  ${mask ? 'bg-gray-900/50' : 'bg-none'}`}
         onClick={e => {

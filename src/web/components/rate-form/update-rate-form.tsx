@@ -9,8 +9,8 @@ import {
   RateFragment,
   RateQuery,
   useCardQuery,
-  useCreateRateMutation,
   useLinkLazyQuery,
+  useUpdateRateMutation,
 } from '../../apollo/query.graphql'
 
 export interface FormInput {
@@ -25,10 +25,12 @@ export interface FormInput {
 //   return <AsyncSelect cacheOptions defaultOptions loadOptions={} />
 // }
 
-const CreateRateForm = ({
+const UpdateRateForm = ({
+  rateId,
   initialInput,
   onRateCreated,
 }: {
+  rateId: string
   initialInput: FormInput
   onRateCreated: (rate: RateFragment, targetSymbol: string) => void
 }): JSX.Element => {
@@ -65,27 +67,27 @@ const CreateRateForm = ({
   const watchChoice = watch('choice')
   const watchAuthor = watch('author')
 
-  const [createRate, { data: rateData }] = useCreateRateMutation({
+  const [updateRate, { data: rateData }] = useUpdateRateMutation({
     update(cache, { data }) {
       const res = cache.readQuery<RateQuery>({
         query: RateDocument,
       })
-      if (data?.createRate && res?.rate) {
+      if (data?.updateRate && res?.rate) {
         cache.writeQuery({
           query: RateDocument,
           data: {
-            targetId: data.createRate.symId,
-            choice: data.createRate.choice,
-            authorId: data.createRate.authorId,
-            linkId: data.createRate.linkId,
+            targetId: data.updateRate.symId,
+            choice: data.updateRate.choice,
+            authorId: data.updateRate.authorId,
+            linkId: data.updateRate.linkId,
           },
         })
       }
     },
     onCompleted(data) {
       // console.log(data.createRate, targetCardData)
-      if (data.createRate && targetCardData && targetCardData.card) {
-        onRateCreated(data.createRate, targetCardData.card.sym.symbol)
+      if (data.updateRate && targetCardData && targetCardData.card) {
+        onRateCreated(data.updateRate, targetCardData.card.sym.symbol)
       } else {
         throw 'Create shot error'
       }
@@ -110,8 +112,9 @@ const CreateRateForm = ({
       }
       // console.log(targetId)
       if (targetId) {
-        createRate({
+        updateRate({
           variables: {
+            id: rateId,
             data: {
               targetId: targetId,
               linkId: linkId ?? undefined,
@@ -125,7 +128,7 @@ const CreateRateForm = ({
   }
   return (
     <div className="w-[40vw]">
-      <h2 className="mb-6 text-2xl font-bold text-gray-800">新增預測</h2>
+      <h2 className="mb-6 text-2xl font-bold text-gray-800">編輯預測</h2>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit(myHandleSubmit)}>
         <label className="group flex items-center relative">
           {
@@ -147,9 +150,10 @@ const CreateRateForm = ({
           </h5>
           <input
             {...register('author')}
-            className="input flex-grow"
+            className="input flex-grow text-gray-500 bg-transparent hover:bg-transparent"
             // className="input inline h-12 pt-6"
             type="text"
+            disabled={true}
           />
         </label>
         <div className="flex items-center select-none">
@@ -198,4 +202,4 @@ const CreateRateForm = ({
     </div>
   )
 }
-export default CreateRateForm
+export default UpdateRateForm
