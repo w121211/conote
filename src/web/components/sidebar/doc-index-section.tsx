@@ -9,8 +9,8 @@ const DocIndexSection = ({ docIndicies, title }: { docIndicies: TreeNode<DocInde
     <div className="flex flex-col min-h-0 overflow-hidden">
       <div className="flex flex-col min-h-0 overflow-hidden">
         <div
-          className={`group flex justify-between items-center px-2 text-sm text-gray-700 font-bold 
-          tracking-wide leading-7 cursor-pointer select-none  hover:bg-gray-200 
+          className={`group flex justify-between items-center px-2 text-sm text-gray-600 
+          tracking-wide leading-7 cursor-pointer select-none  hover:bg-gray-200/70 
           `}
           onClick={() => {
             setFolded(!folded)
@@ -18,13 +18,15 @@ const DocIndexSection = ({ docIndicies, title }: { docIndicies: TreeNode<DocInde
         >
           <div className="flex items-center">
             {folded ? (
-              <span className="material-icons">expand_more</span>
-            ) : (
               <span className="material-icons">chevron_right</span>
+            ) : (
+              <span className="material-icons">expand_more</span>
             )}
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 font-medium">
               {title}
-              <span className="text-gray-500 font-normal">{docIndicies.length}</span>
+              <span className="leading-snug px-2 rounded-full text-xs bg-gray-200 text-gray-700 font-medium mix-blend-multiply">
+                {docIndicies.length}
+              </span>
             </span>
           </div>
         </div>

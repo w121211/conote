@@ -1,7 +1,7 @@
 import React, { HtmlHTMLAttributes, useContext, useEffect, useState } from 'react'
 // import PinIcon from '../../assets/svg/like.svg'
 // import UpIcon from '../../assets/svg/arrow-up.svg'
-import Popover from '../popover/popover'
+import Popover from '../popover'
 import { PollDocument, PollFragment, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'
 import Modal from '../modal/modal'
 // import { Context } from '../../pages/card/[symbol]'

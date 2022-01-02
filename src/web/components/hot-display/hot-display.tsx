@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import HotListItem from '../list/hot-list-item'
+import HotListItem from '../hot-list-item'
 import HotTabsWithSlider from './hot-tabs-with-slider'
 
 type Hashtags = '#討論' | '#機會' | '#Battle' | '#事件'

@@ -5,10 +5,11 @@ import { useObservable } from 'rxjs-hooks'
 import { useCardQuery } from '../../apollo/query.graphql'
 import CardHead from '../../components/card-head'
 import { BulletEditor } from '../../components/editor/editor'
-import Layout from '../../components/layout/layout'
+import Layout from '../../components/layout'
 import Modal from '../../components/modal/modal'
 import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
+import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 
 const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data, error, loading } = useCardQuery({ variables: { symbol } })
@@ -34,10 +35,17 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
     return null
   }
   return (
-    <>
-      <CardHead doc={mainDoc.doc} />
-      <BulletEditor doc={mainDoc.doc} />
-    </>
+    <div className="flex gap-16 ">
+      <div className="flex-grow max-w-2xl">
+        <CardHead doc={mainDoc.doc} />
+        <BulletEditor doc={mainDoc.doc} />
+      </div>
+      {mainDoc.doc.cardCopy && (
+        <div className="p-2 border-gray-200 ">
+          <HeaderCardEmojis cardId={mainDoc.doc.cardCopy.id} />
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -67,7 +75,7 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
     return null
   }
   return (
-    <div className="min-w-[90vw] h-[70vh] sm:min-w-[50vw] pl-4">
+    <div className="min-w-[90vw] h-[70vh] sm:min-w-[50vw]">
       <CardHead doc={modalDoc.doc} />
       <BulletEditor doc={modalDoc.doc} />
     </div>
@@ -136,7 +144,7 @@ const CardSymbolPage = (): JSX.Element | null => {
         topRightBtn={
           <Link href={{ pathname: '/card/[symbol]', query: { symbol: modalSymbol } }}>
             <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
-              <span className="material-icons text-lg">open_in_full</span>
+              <span className="material-icons text-lg text-gray-500 hover:text-gray-700">open_in_full</span>
             </a>
           </Link>
         }

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import Link from 'next/link'
-import CardMetaForm from './card-meta-form/card-meta-form'
+import CardMetaForm from './card-meta-form'
 import HeaderCardEmojis from './emoji-up-down/header-card-emojis'
 import Modal from './modal/modal'
 import { Doc } from './workspace/doc'
@@ -22,10 +22,10 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   }
   const metaInput = doc.getCardMetaInput()
   const title = metaInput.title ?? null
-  const symbol = doc.cardCopy?.sym.type === 'URL' ? null : doc.getSymbol()
+  const symbol = doc.getSymbol()
 
   return (
-    <>
+    <div className="ml-7">
       <Modal
         visible={showModal}
         onClose={() => {
@@ -39,6 +39,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
             const { isUpdated } = doc.updateCardMetaInput(input)
             if (isUpdated) {
               doc.save()
+              setShowModal(false)
             } else {
               console.warn('card meta input not updated, skip saving')
             }
@@ -59,30 +60,35 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
               <span className="whitespace-nowrap text-sm">編輯卡片資訊</span>
             </button>
           </div>
+          <div className="flex gap-4 mb-1 text-gray-500">
+            {(doc.cardCopy?.sym.type === 'TICKER' || (doc.cardCopy === null && doc.getSymbol().startsWith('$'))) &&
+              metaInput.title && <span className="text-sm ">{metaInput.title}</span>}
+            {metaInput.author && (
+              <Link href={{ pathname: '/author/[author]', query: { author: metaInput.author } }}>
+                <a className="flex-shrink-0 text-sm  hover:underline hover:underline-offset-2">@{metaInput.author}</a>
+              </Link>
+            )}
+            {doc.cardCopy?.link && (
+              <a
+                className="flex-shrink min-w-0 truncate text-sm  hover:underline hover:underline-offset-2"
+                href={doc.cardCopy.link.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {/* <span className="material-icons text-base">open_in_new</span> */}
+                <span className="truncate">{doc.cardCopy.link.url}</span>
+              </a>
+            )}
+          </div>
 
-          {metaInput.author && (
-            <Link href={{ pathname: '/author/[author]', query: { author: metaInput.author } }}>
-              <a className="mr-4 text-sm text-gray-500 hover:underline hover:underline-offset-2">@{metaInput.author}</a>
-            </Link>
-          )}
-          {doc.cardCopy?.link && (
-            <a
-              className="overflow-hidden text-gray-500 hover:underline hover:underline-offset-2"
-              href={doc.cardCopy.link.url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {/* <span className="material-icons text-base">open_in_new</span> */}
-              <span className="flex-shrink min-w-0 truncate text-sm">{doc.cardCopy.link.url}</span>
-            </a>
-          )}
-          <h1 className="line-clamp-2 break-all text-gray-700">
-            {symbol}
-            {title}
+          <h1 className="line-clamp-2 break-all text-gray-800">
+            {doc.cardCopy?.sym.type === 'TICKER' || (doc.cardCopy === null && doc.getSymbol().startsWith('$'))
+              ? symbol
+              : title || symbol}
           </h1>
         </div>
 
-        {doc.cardCopy && <HeaderCardEmojis cardId={doc.cardCopy.id} />}
+        {/* {doc.cardCopy && <HeaderCardEmojis cardId={doc.cardCopy.id} />} */}
 
         {/* {cardMetaData?.cardMeta.keywords && (
         <div className={classes.headerKw}>
@@ -128,7 +134,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         </div>
       )} */}
       </div>
-    </>
+    </div>
   )
 }
 

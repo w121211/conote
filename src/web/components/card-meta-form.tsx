@@ -183,20 +183,20 @@ const CardMetaForm = ({
 
   return (
     <FormProvider {...methods}>
-      <div className="w-[90%] mx-auto sm:w-[50vw]">
+      <div className="w-[90vw] mx-auto sm:w-[50vw]">
         <form
           className="flex flex-col gap-4"
           onSubmit={handleSubmit(input => {
-            console.log(input)
             onSubmit(toCardMetaInput(input))
           })}
+          autoComplete="off"
         >
           {[
             ['title', '標題', ''],
             ['author', '來源作者', '例如:@巴菲特'],
-            ['url', '來源網址', '例如:http://www.youtube.com/xxx...'],
+            // ['url', '來源網址', '例如:http://www.youtube.com/xxx...'],
             ['keywords', '關鍵字', ''],
-            ['redirects', '重新導向', '請使用 "空格" 分隔'],
+            // ['redirects', '重新導向', '請使用 "空格" 分隔'],
           ].map(([name, title, placeholder], i) => {
             return (
               <label key={name} className="flex items-center">
@@ -207,7 +207,6 @@ const CardMetaForm = ({
                     name="keywords"
                     render={({ field: { onChange, value, ref } }) => (
                       <CreatableSelect
-                        id="1"
                         instanceId="1"
                         isMulti
                         styles={{ control: () => ({}) }}
@@ -215,6 +214,7 @@ const CardMetaForm = ({
                         components={customComponents}
                         noOptionsMessage={() => null}
                         placeholder={placeholder}
+                        onChange={onChange}
                       />
                     )}
                   />
@@ -222,7 +222,7 @@ const CardMetaForm = ({
                   <input
                     {...register(name as keyof FormInputs)}
                     type="text"
-                    className={`input ${changeInputwidth(name)}`}
+                    className={`input flex-grow`}
                     placeholder={placeholder}
                   />
                 )}

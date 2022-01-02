@@ -23,7 +23,7 @@ import InlineRate from '../inline/inline-rate'
 import { decorate } from './decorate'
 import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
-import BulletSvg from '../bullet-svg/bullet-svg'
+import BulletSvg from '../bullet-svg'
 import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
 import { Doc } from '../workspace/doc'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
@@ -220,7 +220,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
       {/* <div contentEditable={false}></div> */}
       <div className="inline-flex items-center h-8 " contentEditable={false}>
         <span
-          className={`flex items-center justify-center flex-shrink-0 flex-grow-0 opacity-0 ${
+          className={`flex items-center justify-center flex-shrink-0 flex-grow-0 cursor-pointer ${
             hasUl ? 'opacity-100' : 'opacity-0 select-none'
           }`}
           onClick={event => {
@@ -338,7 +338,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
   // }, [searchAllResult])
 
   return (
-    <div className="-ml-7 text-gray-800">
+    <div className=" text-gray-800">
       <Slate
         editor={editor}
         value={value}

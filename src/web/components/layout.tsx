@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react'
-import SideBar from '../sidebar/sidebar'
-import LoginModal from '../Login-modal'
-import Navbar from '../navbar'
+import SideBar from './sidebar/sidebar'
+import LoginModal from './login-modal'
+import Navbar from './navbar'
 
 export default function Layout({
   children,
@@ -58,7 +58,11 @@ export default function Layout({
         showMenu={showMenu}
         isPined={pinSideBar}
       />
-      <div className={`mt-11 pb-20 flex-1 overflow-y-auto ${pinSideBar ? 'px-[15%]' : 'px-[20vw]'} `} ref={layoutRef}>
+      <div
+        className={`flex-1 overflow-y-auto mt-11 pb-[20vh] scroll-smooth ${
+          pinSideBar ? 'pl-[10%] pr-[10%] ' : 'pl-[20vw] pr-[15vw]'
+        } `}
+      >
         <LoginModal>{children}</LoginModal>
       </div>
       <Navbar rbtn={buttonRight} onClickMenu={triggerMenuHandler} />

@@ -12,14 +12,17 @@ const CreateCardEmojiBtn = ({ cardId, emojiCode }: { cardId: string; emojiCode: 
     createCardEmoji({ variables: { cardId, code: emojiCode } })
   }
   return (
-    <button
-      className={`btn-reset-style`}
-      onClick={() => {
-        handleLike()
-      }}
-    >
-      <EmojiIcon code={emojiCode} nUps={0} />
-    </button>
+    <div className="flex flex-col items-center">
+      <button
+        className={`btn-reset-style`}
+        onClick={() => {
+          handleLike()
+        }}
+      >
+        <EmojiIcon code={emojiCode} />
+      </button>
+      <span className="text-gray-500">{0}</span>
+    </div>
   )
 }
 export default CreateCardEmojiBtn
