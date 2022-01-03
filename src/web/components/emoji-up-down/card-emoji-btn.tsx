@@ -68,18 +68,23 @@ const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Elem
     // upsertEmojiLike({variables:{hashtagId:foundEmoji.id,data:{choice:}}})
   }
   return (
-    <button
-      className={`btn-reset-style`}
-      onClick={() => {
-        handleLike('UP')
-      }}
-    >
-      <EmojiIcon
-        code={cardEmoji.code}
-        nUps={cardEmoji.count.nUps}
-        liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
-      />
-    </button>
+    <div className="flex items-center gap-1">
+      <button
+        className={`btn-reset-style group w-8 h-8 rounded-full ${
+          cardEmoji.code === 'PIN' ? 'hover:bg-red-100' : 'hover:bg-blue-100'
+        }`}
+        onClick={() => {
+          handleLike('UP')
+        }}
+      >
+        <EmojiIcon
+          className={cardEmoji.code === 'PIN' ? 'text-red-400' : 'text-gray-400'}
+          code={cardEmoji.code}
+          liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
+        />
+      </button>
+      <span className="min-w-[10px] text-gray-500 text-sm font-['Red Hat Mono']">{cardEmoji.count.nUps}</span>
+    </div>
   )
 }
 export default CardEmojiBtn

@@ -14,7 +14,7 @@ const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> | NodeBody<DocIndex>
           await workspace.commit(node, client) // commit node-doc and all of its child-docs
         }}
       >
-        <span className="material-icons-outlined text-xl text-gray-500">cloud_upload</span>
+        <span className="material-icons-outlined text-xl text-gray-400 hover:text-gray-500">cloud_upload</span>
       </button>
     ) : null
 
@@ -39,7 +39,7 @@ const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> | NodeBody<DocIndex>
           await workspace.updateEditingDocIndicies()
         }}
       >
-        <span className="material-icons-outlined text-xl text-gray-500">delete_forever</span>
+        <span className="material-icons-outlined text-xl text-gray-400 hover:text-gray-500">delete_forever</span>
       </button>
     </div>
   )

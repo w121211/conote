@@ -27,7 +27,7 @@ const SideBar = ({
   }
   return (
     <div
-      className={`absolute w-72 h-screen pt-0 pb-4 border-r border-gray-200 flex flex-col flex-shrink-0 z-50 transition-all 
+      className={`absolute w-72 h-screen pt-0 pb-4  border-gray-200 flex flex-col flex-shrink-0 z-50 transition-all 
       ${showMenu ? 'transform-gpu translate-x-0 translate-y-0' : 'transform-gpu -translate-x-full translate-y-0 '} ${
         isPined ? 'relative bg-gray-100' : 'absolute bg-white'
       } ${isPined || !showMenu ? 'shadow-none' : 'shadow-l2xl'}
@@ -42,13 +42,14 @@ const SideBar = ({
     >
       <div className="group flex-shrink-0 px-4">
         <div className="flex items-center justify-between h-11">
-          <a href="/" className=" px-2 rounded hover:bg-gray-200 mix-blend-multiply ">
+          <a href="/" className="py-1 px-2 rounded mix-blend-multiply ">
             Conote
           </a>
           <span
             className={`${
               isPined ? 'material-icons' : 'material-icons-outlined'
-            } text-gray-600 opacity-0 hover:text-gray-500 cursor-pointer group-hover:opacity-100 transform rotate-45 select-none`}
+            } text-gray-400 opacity-0 rounded-full bg-transparent hover:text-gray-600 
+            cursor-pointer group-hover:opacity-100 transform rotate-45 select-none`}
             onClick={() => {
               pinMenuHandler()
             }}

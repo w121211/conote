@@ -129,7 +129,7 @@ const UpdateRateForm = ({
   return (
     <div className="w-[40vw]">
       <h2 className="mb-6 text-2xl font-bold text-gray-800">編輯預測</h2>
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit(myHandleSubmit)}>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit(myHandleSubmit)} autoComplete="off">
         <label className="group flex items-center relative">
           {
             // initialInput.author ? <button type="button">{initialInput.author}</button> : null

@@ -1,6 +1,6 @@
 import React from 'react'
 // import { Anchor } from 'antd'
-import { Editor, Section, ExtTokenStream, streamToStr } from '../../../packages/editor/src/index'
+import { Editor, Section, ExtTokenStream, streamToStr } from '../../../../packages/editor/src/index'
 // import { CocardFragment } from '../../apollo/query.graphql'
 import classes from './tickerAnchor.module.scss'
 

@@ -7,7 +7,6 @@ const sortBulletEmojis = (emojis: BulletEmojiFragment[]): BulletEmojiFragment[] 
   const clone = require('rfdc/default')
   const arr: BulletEmojiFragment[] = clone(emojis)
   arr.sort((a, b) => order.indexOf(a.code) - order.indexOf(b.code))
-  console.log(arr)
   return arr
 }
 
