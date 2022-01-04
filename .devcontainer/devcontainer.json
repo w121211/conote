@@ -6,22 +6,20 @@
   "workspaceFolder": "/workspace",
   // Set *default* container specific settings.json values on container create.
   "settings": {
-    "terminal.integrated.shell.linux": "/bin/zsh"
+    "#terminal.integrated.defaultProfile.linux#": "/bin/zsh"
   },
   // Add the IDs of extensions you want installed when the container is created.
   "extensions": [
     "Prisma.prisma",
-    "apollographql.vscode-apollo",
-    "visualstudioexptteam.vscodeintellicode",
+    // "visualstudioexptteam.vscodeintellicode",
     "dbaeumer.vscode-eslint",
     // "EditorConfig.editorconfig",
     "esbenp.prettier-vscode",
-    "orta.vscode-jest"
-    // "graphql.vscode-graphql"
+    "orta.vscode-jest",
+    "graphql.vscode-graphql"
     // "exiasr.hadolint",
     // "bierner.markdown-mermaid",
     // "ecmel.vscode-html-css",
-    // "dbaeumer.vscode-eslint",
     // "foxundermoon.shell-format",
     // "timonwong.shellcheck",
     // "felixfbecker.css-stacking-contexts",

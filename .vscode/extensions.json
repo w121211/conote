@@ -1,9 +1,0 @@
-{
-  "recommendations": [
-    "Prisma.prisma",
-    "apollographql.vscode-apollo",
-    "visualstudioexptteam.vscodeintellicode",
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode"
-  ]
-}

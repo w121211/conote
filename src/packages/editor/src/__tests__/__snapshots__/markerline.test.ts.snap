@@ -1,0 +1,229 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`function updateMarkerlines() parse new added lines & avoid duplicated-stamp 1`] = `
+Array [
+  Object {
+    "broken": true,
+    "linenumber": 0,
+    "marker": Object {
+      "key": "[?]",
+      "value": "inline inline inline",
+    },
+    "nestedCard": undefined,
+    "stampId": "%000",
+    "str": " inline inline inline %000",
+  },
+  Object {
+    "broken": true,
+    "linenumber": 2,
+    "marker": Object {
+      "key": "[+]",
+      "value": "111 111",
+    },
+    "nestedCard": undefined,
+    "stampId": "%001",
+    "str": "111 111 %001",
+  },
+  Object {
+    "comment": undefined,
+    "linenumber": 3,
+    "marker": Object {
+      "key": "[+]",
+      "value": "222 222",
+    },
+    "neatReply": undefined,
+    "nestedCard": undefined,
+    "new": true,
+    "noStamp": true,
+    "oauthor": undefined,
+    "poll": undefined,
+    "pollChoices": undefined,
+    "src": undefined,
+    "stampId": "%002",
+    "str": "222 222",
+  },
+]
+`;
+
+exports[`function updateMarkerlines() parse text to markerlines 1`] = `
+Object {
+  "markerheaders": Array [
+    Object {
+      "inline": true,
+      "linenumber": 0,
+      "marker": Object {
+        "key": "[~]",
+      },
+    },
+    Object {
+      "inline": true,
+      "linenumber": 1,
+      "marker": Object {
+        "key": "[=]",
+      },
+    },
+    Object {
+      "linenumber": 2,
+      "marker": Object {
+        "key": "[?]",
+      },
+    },
+    Object {
+      "linenumber": 8,
+      "marker": Object {
+        "key": "[+]",
+      },
+    },
+    Object {
+      "inline": true,
+      "linenumber": 11,
+      "marker": Object {
+        "key": "[-]",
+      },
+    },
+    Object {
+      "inline": true,
+      "linenumber": 12,
+      "marker": Object {
+        "key": "[?]",
+      },
+    },
+    Object {
+      "inline": true,
+      "linenumber": 13,
+      "marker": Object {
+        "key": "[小標句尾多了空格111]",
+      },
+    },
+    Object {
+      "inline": true,
+      "linenumber": 14,
+      "marker": Object {
+        "key": "[小標句尾多了空格222]",
+      },
+    },
+    Object {
+      "inline": true,
+      "linenumber": 18,
+      "marker": Object {
+        "key": "[小標沒有連在一起]",
+      },
+    },
+  ],
+  "markerlines": Array [
+    Object {
+      "linenumber": 0,
+      "marker": Object {
+        "key": "[~]",
+        "value": "inline 111",
+      },
+      "new": true,
+      "noStamp": true,
+      "stampId": "%000",
+      "str": " inline 111 ",
+    },
+    Object {
+      "linenumber": 1,
+      "marker": Object {
+        "key": "[=]",
+        "value": "inline 222",
+      },
+      "new": true,
+      "noStamp": true,
+      "stampId": "%001",
+      "str": " inline 222 ",
+    },
+    Object {
+      "linenumber": 3,
+      "marker": Object {
+        "key": "[?]",
+        "value": "<AAA> <BBB> poll 111",
+      },
+      "new": true,
+      "noStamp": true,
+      "poll": true,
+      "pollChoices": Array [
+        "<AAA>",
+        "<BBB>",
+      ],
+      "stampId": "%002",
+      "str": "<AAA> <BBB> poll 111",
+    },
+    Object {
+      "linenumber": 4,
+      "marker": Object {
+        "key": "[?]",
+        "value": "poll 222 <AAA> <BBB>",
+      },
+      "new": true,
+      "noStamp": true,
+      "poll": true,
+      "pollChoices": Array [
+        "<AAA>",
+        "<BBB>",
+      ],
+      "stampId": "%003",
+      "str": "poll 222 <AAA> <BBB>",
+    },
+    Object {
+      "linenumber": 9,
+      "marker": Object {
+        "key": "[+]",
+        "value": "point 111",
+      },
+      "new": true,
+      "noStamp": true,
+      "stampId": "%004",
+      "str": "point 111",
+    },
+    Object {
+      "linenumber": 10,
+      "marker": Object {
+        "key": "[+]",
+        "value": "point 222",
+      },
+      "new": true,
+      "noStamp": true,
+      "stampId": "%005",
+      "str": "point 222",
+    },
+    Object {
+      "linenumber": 12,
+      "marker": Object {
+        "key": "[?]",
+        "value": "<CCC> neat reply",
+      },
+      "neatReply": true,
+      "new": true,
+      "noStamp": true,
+      "pollChoices": Array [
+        "<CCC>",
+      ],
+      "stampId": "%006",
+      "str": " <CCC> neat reply",
+    },
+    Object {
+      "linenumber": 13,
+      "marker": Object {
+        "key": "[小標句尾多了空格111]",
+        "value": "s",
+      },
+      "new": true,
+      "noStamp": true,
+      "stampId": "%007",
+      "str": "s",
+    },
+    Object {
+      "linenumber": 14,
+      "marker": Object {
+        "key": "[小標句尾多了空格222]",
+        "value": "s",
+      },
+      "new": true,
+      "noStamp": true,
+      "stampId": "%008",
+      "str": "s",
+    },
+  ],
+}
+`;

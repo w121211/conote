@@ -18,8 +18,8 @@ services:
     #   - ../..:/workspace:delegated
 
     ports:
-      - 4000:4000
       - 3000:3000
+      - 4000:4000
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
@@ -28,11 +28,12 @@ services:
     #   - default
     # - twint_default
 
-  postgres:
-    image: postgres:13.2-alpine
+  postgresql:
+    image: bitnami/postgresql:11.13.0-debian-10-r21
     environment:
-      POSTGRES_USER: postgresuser
-      POSTGRES_PASSWORD: postgrespassword
+      POSTGRESQL_USERNAME: postgresuser
+      POSTGRESQL_PASSWORD: postgrespassword
+      POSTGRESQL_DATABASE: postgres
 
   pgadmin:
     image: dpage/pgadmin4:latest

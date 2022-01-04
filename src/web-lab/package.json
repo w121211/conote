@@ -1,0 +1,73 @@
+{
+  "name": "with-typescript-eslint-jest",
+  "author": "@erikdstock",
+  "license": "MIT",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "type-check": "tsc --pretty --noEmit",
+    "format": "prettier --write .",
+    "lint": "eslint . --ext ts --ext tsx --ext js",
+    "test": "jest",
+    "test-all": "yarn lint && yarn type-check && yarn test"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "yarn run type-check"
+    }
+  },
+  "lint-staged": {
+    "*.@(ts|tsx)": [
+      "yarn lint",
+      "yarn format"
+    ]
+  },
+  "dependencies": {
+    "cookie": "^0.4.1",
+    "firebase": "^9.6.0",
+    "firebase-admin": "^10.0.0",
+    "immer": "^9.0.7",
+    "localforage": "^1.10.0",
+    "nanoid": "^3.1.30",
+    "next": "latest",
+    "prismjs": "^1.24.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-firebase-hooks": "^4.0.1",
+    "react-firebaseui": "^6.0.0",
+    "react-modal": "^3.14.3",
+    "rxjs": "^7.4.0",
+    "rxjs-hooks": "^0.7.0",
+    "slate": "^0.71.0",
+    "slate-history": "^0.66.0",
+    "slate-react": "^0.71.0",
+    "yjs": "^13.5.22"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-unicode-regex": "^7.12.13",
+    "@testing-library/react": "^12.1.2",
+    "@types/cookie": "^0.4.1",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^16.11.11",
+    "@types/prismjs": "^1.16.6",
+    "@types/react": "^17.0.37",
+    "@types/react-dom": "^17.0.3",
+    "@types/react-modal": "^3.12.1",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "babel-jest": "^27.4.2",
+    "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.27.1",
+    "husky": "^7.0.4",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^27.4.3",
+    "jest-watch-typeahead": "^1.0.0",
+    "lint-staged": "^12.1.2",
+    "prettier": "^2.5.0",
+    "typescript": "^4.5.2"
+  }
+}

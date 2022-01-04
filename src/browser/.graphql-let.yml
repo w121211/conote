@@ -1,0 +1,13 @@
+schema: ../web/apollo/type-defs.graphqls
+documents: '**/*.graphql'
+cacheDir: .cache/.cache # 避免生成的檔案在parent folder
+plugins:
+  - typescript-operations
+  - typescript-react-apollo
+config:
+  enumsAsTypes: true
+  preResolveTypes: true # 產生flatten-type，避免Pick<...>，增加易讀性
+  scalars: # mapping to typescript types
+    BigInt: BigInt
+    JSON: object
+    DateTime: 'string | Date'

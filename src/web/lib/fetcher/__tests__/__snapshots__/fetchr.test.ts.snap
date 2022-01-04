@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`function tryFetch fetch general 1`] = `
+Object {
+  "domain": "test.com",
+  "resolvedUrl": "https://test.com",
+  "srcType": "OTHER",
+}
+`;
+
+exports[`function tryFetch fetch youtube 1`] = `
+Object {
+  "authorId": "UCACB9uLz5-62dEfpd8c5m7A",
+  "authorName": "YumYum얌얌",
+  "description": "#한식 #몰아보기
+💗
+00:00 대구 마을불고기 돼지불백 정식
+https://goo.gl/maps/RuNUo6a4U59nFWjC7
+11:13 담양 삼거리 농원 닭볶음탕
+https://goo.gl/maps/omjY4W6RWjuAHs1r5
+18:21 수원 지동시장 올레 쭈꾸미
+https://goo.gl/maps/gdZiBRct6gHQSHC16
+23:11 구미 성주순대
+https://goo.gl/maps/s61Eax3tXottBmwp6
+31:16 석계역 서진박사 곱창마을
+https://goo.gl/maps/aA3jxQW5HKoUAFfSA
+37:59 대구 서문시장 약초골목 칼국수
+https://goo.gl/maps/aXj4GKQwCMXj9eWa6
+45:12 서울 창동 즐거운 술상
+https://goo.gl/maps/1B4XRuCfyaWcDhkt6
+
+💗Social media
+▶인스타그램 : https://bit.ly/39D5adW
+▶네이버블로그 : https://bit.ly/2VQ3mdA
+
+💗비즈니스 문의
+
+▶akongfood@gmail.com
+
+Copyright 2020. Yum Yum All Videos Cannot Be Copied Without Permission",
+  "domain": "youtube.com",
+  "resolvedUrl": "https://www.youtube.com/watch?v=CKljNQ5xe2w",
+  "srcId": "CKljNQ5xe2w",
+  "srcPublishDate": "2021-05-19T03:00:03.000Z",
+  "srcTitle": "이런게 바로 한식 ! 돼지 불백, 닭볶음탕, 순대국밥, 칼국수, 쭈꾸미 | A collection of various Korean foods | Korean Street food",
+  "srcType": "VIDEO",
+  "tags": Array [
+    "한국음식",
+    "길거리음식",
+    "Korean street food",
+    "street food",
+    "yum yum",
+    "korean food",
+    "japanese food",
+    "만들기",
+    "수제",
+    "recipes",
+    "seafood",
+    "맛집 추천",
+    "food",
+    "kroean rice soup",
+    "cooking",
+    "homemade",
+    "kpop",
+    "spicy food",
+    "korean seafood",
+    "korean recipes",
+    "korean chicken",
+    "김치음식",
+    "요리레시피",
+    "street of food",
+    "street food market",
+    "recipe to",
+    "snacks",
+    "spicy korean rice",
+    "korean fried food",
+    "korean food in korea",
+    "생활의달인",
+    "레시피영상",
+    "best street foods",
+    "Koreanseafood",
+    "kfood",
+    "얌얌",
+    "yumyum얌얌",
+    "korean street food",
+    "돼지불백",
+    "이모카세",
+    "수제비",
+    "쭈꾸미",
+    "순대국밥",
+    "곱창",
+    "닭볶음탕",
+    "pork",
+    "sujebi",
+    "sundae",
+    "chicken",
+  ],
+}
+`;

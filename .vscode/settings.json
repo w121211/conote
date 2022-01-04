@@ -11,7 +11,11 @@
     "**/.cache": true,
     "**/.nyc_output": true,
     "doc/_resources/assets": true,
-    "**/.eslintcache": true
+    "**/.eslintcache": true,
+    "**/.next": true,
+    "**/__deprecated__/**": true,
+    "**/__generated__/**": true,
+    "**/dist": true
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -21,9 +25,9 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  // "[javascript]": {
-  //   "editor.defaultFormatter": "esbenp.prettier-vscode"
-  // },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
@@ -31,22 +35,30 @@
   "eslint.options": { "cache": true },
   "eslint.workingDirectories": [
     {
-      "directory": "./src/frontend/browser",
+      "directory": "./src/browser",
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/frontend/web",
+      "directory": "./src/web",
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/backend",
+      "directory": "./src/web-lab",
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/lib/editor",
+      "directory": "./src/packages/docdiff",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "./src/packages/editor",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "./src/packages/scraper",
       "changeProcessCWD": true
     }
   ],
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "jest.autoEnable": false
+  "editor.bracketPairColorization.enabled": true
 }

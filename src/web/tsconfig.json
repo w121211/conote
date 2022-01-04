@@ -1,0 +1,37 @@
+{
+  "references": [
+    { "path": "../packages/docdiff" },
+    { "path": "../packages/editor" },
+    { "path": "../packages/scraper" }
+  ],
+  "compilerOptions": {
+    // copy from nextjs example: https://github.com/vercel/next.js/blob/canary/examples/with-typescript-eslint-jest/tsconfig.json
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+
+    // Custom settings
+    "incremental": true,
+    "downlevelIteration": true
+  },
+  "exclude": ["node_modules", ".next", ".cache", "out", "prisma", "test", "__deprecated__", "**/__tests__", "stories"],
+  "include": ["next-env.d.ts", "jestsetup.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "babel.config.js"],
+  "ts-node": {
+    // options are overrides used only by ts-node
+    "compilerOptions": {
+      "module": "commonjs",
+      "allowJs": false
+    },
+    "files": true // to load custom .d.ts
+  }
+}

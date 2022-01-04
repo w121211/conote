@@ -1,0 +1,114 @@
+// .formContainer {
+//   // border-bottom: 1px solid $gray-text;
+// }
+// .form {
+//   display: flex;
+//   margin: 1em 0 2em;
+//   flex-direction: column;
+//   // width: 70%;
+//   //   font-size: 14px;
+//   ul {
+//     list-style: none;
+//   }
+//   li {
+//     margin-bottom: 10px;
+//     button {
+//       margin-left: 10px;
+//     }
+//   }
+//   label {
+//     display: inline-block;
+//     margin-right: 0;
+//     font-weight: 700;
+//   }
+//   input {
+//     // background: $white;
+//     &[type='text'] {
+//       border: 0;
+//       background: $natual;
+//       padding: 8px;
+//       border-radius: 3px;
+//       font-size: 14px;
+//       // border-bottom: 1px solid $primary;
+//       // display: block;
+//       // width: 100%;
+//       color: $text;
+//       &:focus-visible {
+//         outline: 0;
+//         border-bottom-width: 2px;
+//       }
+//     }
+//   }
+//   button {
+//     margin: 0;
+
+//     width: fit-content;
+//     align-self: center;
+//   }
+//   .radioLabel {
+//     position: relative;
+//     display: inline-flex;
+//     font-weight: 400;
+
+//     align-items: center;
+//     margin-right: 0;
+//     // border: 1px solid $primary;
+//     svg {
+//       width: 1em;
+//       height: 1em;
+//       stroke: $primary;
+//       margin-right: 3px;
+//     }
+//     input {
+//       position: absolute;
+//       margin: 0;
+//       opacity: 0;
+
+//       //   visibility: hidden;
+//       &:checked + svg {
+//         .checkBg {
+//           fill: $primary;
+//           stroke: $primary;
+//         }
+//         .checkMark {
+//           stroke: $white;
+//         }
+//       }
+//     }
+//     span {
+//       // color: $text;
+//       font-weight: 500;
+//     }
+//   }
+// }
+// .radioWrapper {
+//   display: flex;
+//   flex-direction: column;
+// }
+// .section:not(:last-child) {
+//   margin-bottom: 1em;
+// }
+// .choiceWrapper {
+//   // display: flex;
+// }
+// .comment {
+//   line-height: 2;
+//   margin-top: 1em;
+// }
+// .votedCount {
+//   display: block;
+//   text-align: end;
+//   color: $gray-text;
+// }
+// .errorMsg {
+//   color: red;
+//   &::before {
+//     display: inline;
+//     content: '⚠ ';
+//   }
+// }
+// // .fieldsInput {
+// //   &:invalid {
+// //     outline: red;
+// //   }
+// // }

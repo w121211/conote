@@ -1,0 +1,67 @@
+// @import '../style/global.module.scss';
+.container {
+  width: 70%;
+  margin: 30px auto 0;
+}
+.buttonContainer {
+  // position: fixed;
+  // top: 100px;
+  // left: 90%;
+}
+.textAreaContainer {
+  flex: auto;
+}
+// .textArea {
+//   &:global(.ant-input) {
+//     border: none;
+//     border-radius: 10px;
+//     resize: none;
+//     background-color: $natualHover;
+//     color: $black;
+//   }
+// }
+.button:global(.ant-btn-primary) {
+  // @extend %Round_sm_ch;
+  // width: 58px;
+  // height: 58px;
+  // border-radius: 29px;
+  // // left: 30%;
+  // box-shadow: 0 8px 16px $primary50;
+}
+.button:global(.ant-btn) {
+  // position: fixed;
+  width: 50px;
+  height: 50px;
+  // top: 5em;
+  // right: 360px;
+  padding: 0;
+  border-radius: 29px;
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 3px 6px #00000029;
+  .saveIcon {
+    width: 25px;
+    height: 25px;
+    display: block;
+    position: relative;
+    margin: 0 auto;
+    fill: $icon;
+    left: 1px;
+  }
+  &:hover {
+    background: $natual;
+    .saveIcon {
+      fill: $primary;
+    }
+  }
+}
+.saveIcon {
+  display: block;
+  width: 26px;
+  fill: white;
+}
+.formItemWrapper {
+  // display: flex;
+  flex: auto;
+  margin: 0 30px;
+}

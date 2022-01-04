@@ -1,0 +1,31 @@
+// @import '../../style/global.module.scss';
+
+.comment {
+  cursor: pointer;
+  &:hover {
+    background-color: #f7f8fb;
+  }
+}
+.upDownWrapper {
+  color: $gray;
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: $gray;
+  }
+}
+.arrowUpIcon {
+  // width: 16px;
+  // height: 16px;
+}
+.arrowDownIcon {
+  svg {
+    transform: rotate(180deg);
+  }
+}
+.liked {
+  color: $primary;
+  svg {
+    fill: $primary;
+  }
+}

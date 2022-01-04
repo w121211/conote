@@ -1,0 +1,46 @@
+// @import '../../style/global.module.scss';
+
+.Anchor {
+  &:global(.ant-anchor-wrapper) {
+    background-color: transparent;
+    :global(.ant-anchor-ink) {
+      &::before {
+        // background-color: $natual2;
+      }
+      :global(.ant-anchor-ink-ball) {
+        width: 2px;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  }
+  :global(.ant-anchor) {
+    // font-size: $font-sm;
+  }
+}
+.anchor {
+  // flex-shrink: 0;
+
+  position: fixed;
+  // z-index: 1;
+  display: flex;
+  flex-direction: column;
+
+  margin: 2em;
+  max-width: 13vw;
+  padding-left: 0;
+  margin-left: 10vw;
+  @media screen and (max-width: 500px) {
+    margin-left: 10px;
+    visibility: hidden;
+  }
+  div {
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    line-clamp: 1;
+    text-overflow: ellipsis;
+    // padding-bottom: 10px;
+    // line-height: 1.3;
+  }
+}

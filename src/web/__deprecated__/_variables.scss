@@ -1,0 +1,49 @@
+// $primary: #313d92;
+// $primary: #313544;
+$primary: #2f3fa9;
+// $primaryHover: rgba(70, 70, 72, 0.9);
+$primaryHover: #8b96e6;
+$primaryHover-light: #d7dbfc;
+// $natual: #f6f7fb;
+$natual: #f7f6f6;
+$link: #0f69ff;
+$gray: #cccccc;
+$gray-hover: #dadad7;
+$gray-light: #cacac7;
+$gray-text: #b5b5b3;
+$gray-text-dark: #787572;
+$title: #4a5e77;
+$text: #434552;
+$white: #fff;
+$icon: #494d50;
+$black: #3d434a;
+$black50: rgba(55, 58, 70, 0.5);
+$black25: rgba(55, 58, 70, 0.25);
+$green: #4d8b17;
+$red: #eb0f29;
+
+// $border: #dedfe2;
+$bullet: #555863;
+// $natualHover: #f7f7fb;
+// $light-blue: #e0f2ff;
+// $gray-natual: #8c8c8c;
+// $gray-hover: #595959;
+
+// $white: #ffffff;
+// $black: #393939;
+
+/* Fonts */
+$serif: 'Noto Serif TC', 'Noto Serif SC', serif;
+
+%Round_sm_ch {
+  // font-family: 'cwTeXYen';
+  font-size: 15px;
+  color: $primary;
+}
+%Round_sm_gray_en {
+  font-size: 0.9em;
+  font-weight: 500;
+  // font-family: 'Varela Round';
+  color: $text;
+  text-transform: capitalize;
+}
