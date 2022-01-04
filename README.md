@@ -26,11 +26,11 @@ brew install minikube, skaffold, helm...
 minikube start # start minikube cluster
 kubectl get pods -A
 
-# 確認context是在local
+# check is context in local
 kubectl config get-contexts
 kubectl config use-context minikube
 
-# from project root folder, first test dockerfile works
+# from project root folder, test dockerfile works first
 docker build --progress=plain .
 
 # dev
@@ -53,18 +53,18 @@ GCP Samples
 - https://github.com/GoogleCloudPlatform/solutions-modern-cicd-anthos
 - https://github.com/GoogleCloudPlatform/python-docs-samples
 
-步驟
+Steps:
 
-- 在 cloud 建立 gke cluster https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
-- 修改 .env.local 的 url （對應到 gke 的 external IP）
-- 至 auth0 網站修改 url
+- create a GKE cluster https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
+- modiy .env.local url (corresponding GKE's external IP）
+- change URL on auth0 website
 
 ```sh
 # switch context to cloud cluster
 kubectl config get-contexts
 kubectl config use-context ...
 
-# dev, conote-try需換成對應的project name
+# change conote-try to corresponding project name
 skaffold dev --default-repo=gcr.io/conote-try --port-forward
 
 # deploy
@@ -80,6 +80,8 @@ https://gist.github.com/ricjcosme/cf576d3d4272cc35de1335a98c547da6
 https://cwienczek.com/2020/06/simple-backup-of-postgres-database-in-kubernetes/
 https://simplebackups.io/blog/postgresql-pgdump-and-pgrestore-guide-examples/#summary-of-the-pg_restore-command
 https://github.com/rinormaloku/postgre-backup-container
+
+#### Install postgres chart
 
 ```sh
 # 用 helm 裝 postgres chart https://bitnami.com/stack/postgresql/helm
@@ -97,30 +99,37 @@ export POSTGRES_ADMIN_PASSWORD=$(kubectl get secret --namespace default conote-r
 
 export POSTGRES_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
 
-# 另外開一個 temp-pg-client （保持 psql 開啟狀態，然後執行後面的 dump/restore ）
-kubectl run temp-pg-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.13.0-debian-10-r12 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
+# open a psql client called conote-release-postgresql-client, and keeps it alive for dump/restore
+kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.14.0-debian-10-r18 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
+```
 
+#### Dump
+
+```sh
 # psql commands
 \l # list databases
 \c prisma # change to prisma database
 \dt # list tables
-SELECT * FROM "User"
+SELECT * FROM "User";
 
-# Dump from local docker
-#docker exec -i 8ac632cf6317 sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > prisma_dump.tar
+# dump from local docker
+docker exec -i 8ac632cf6317 sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > prisma_dump.tar
 
-# Dump from k8s
-kubectl exec -i temp-pg-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > gke_conote_prisma_dump-$(date +%Y%m%d).tar
+# dump from k8s
+kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > gke_conote_prisma_dump-$(date +%Y%m%d).tar
+```
 
+#### Restore
+
+```sh
 # Restore to k8s
+# create database if not exist in psql
+$(psql) CREATE DATABASE prisma;  # DROP DATABASE prisma;
 
-# 若沒有 database 需要先建立 (psql)
-$(psql) CREATE DATABASE prisma;
+# restore to k8s
+kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft --clean --if-exists < gke_conote_prisma_dump-$(date +%Y%m%d).tar
 
-# restore
-kubectl exec -i temp-pg-client -- pg_restore --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft --clean --if-exists < gke_conote_prisma_dump-$(date +%Y%m%d).tar
-
-# Restore to local docker
+# restore to local docker
 docker exec -i ${container_id} sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > gke_conote_prisma_dump-${date}.tar
 ```
 

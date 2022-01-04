@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: conote-backend
+  name: web-not-use-now
 spec:
   template:
     spec:
       containers:
-        - name: backen
+        - name: web-not-use-now
           env:
             # - name: IEX_TOKEN
             #   value: ${IEX_TOKEN}
