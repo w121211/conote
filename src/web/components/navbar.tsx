@@ -2,14 +2,16 @@ import Link from 'next/link'
 import React, { ReactNode } from 'react'
 import { useMeQuery } from '../apollo/query.graphql'
 
-const Navbar = ({ rbtn, onClickMenu }: { rbtn: ReactNode; onClickMenu: () => void }) => {
+const Navbar = ({ rbtn, onClickMenu }: { rbtn: ReactNode; onClickMenu: (boo: boolean) => void }) => {
   const { data: meData, error, loading } = useMeQuery()
   return (
     <nav className="fixed flex items-center justify-start w-screen h-11 ">
       <span className="px-2">
         <span
-          className="material-icons flex items-center p-1 rounded hover:bg-gray-200 hover:cursor-pointer"
-          onClick={onClickMenu}
+          className="material-icons flex items-center p-1 rounded hover:bg-gray-200/70 hover:cursor-pointer"
+          onClick={() => {
+            onClickMenu(true)
+          }}
         >
           menu
         </span>

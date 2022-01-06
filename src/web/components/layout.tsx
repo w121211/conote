@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import SideBar from './sidebar/sidebar'
 import LoginModal from './login-modal'
 import Navbar from './navbar'
@@ -11,22 +11,46 @@ export default function Layout({
   buttonRight?: React.ReactNode
 }): JSX.Element {
   const [showMenu, setShowMenu] = useState(true)
-  const [pinSideBar, setPinSideBar] = useState(true)
+  const [pinMenu, setPinMenu] = useState(true)
   // const [scroll, setScroll] = useState(0)
-
   const layoutRef = useRef<HTMLDivElement>(null)
 
   // const childrenWithCallback = useCallback(() => children, [children])
 
+  useEffect(() => {
+    const storageMenu = localStorage.getItem('showMenu')
+    const storagePin = localStorage.getItem('pinMenu')
+    if (storageMenu !== null && storagePin !== null) {
+      setShowMenu(storageMenu === 'true' ? true : false)
+      setPinMenu(storagePin === 'true' ? true : false)
+    } else {
+      localStorage.setItem('showMenu', 'true')
+      localStorage.setItem('pinMenu', 'true')
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('showMenu', `${showMenu}`)
+    console.log(showMenu)
+  }, [showMenu])
+
+  useEffect(() => {
+    localStorage.setItem('pinMenu', `${pinMenu}`)
+  }, [pinMenu])
+
   const triggerMenuHandler = (boo?: boolean) => {
     if (boo === undefined) {
       setShowMenu(!showMenu)
-    } else setShowMenu(boo)
+    } else {
+      setShowMenu(boo)
+    }
   }
   const pinMenuHandler = (boo?: boolean) => {
     if (boo === undefined) {
-      setPinSideBar(!pinSideBar)
-    } else setPinSideBar(boo)
+      setPinMenu(!pinMenu)
+    } else {
+      setPinMenu(boo)
+    }
   }
 
   const handleScroll = (e: any) => {
@@ -56,14 +80,12 @@ export default function Layout({
         showMenuHandler={triggerMenuHandler}
         pinMenuHandler={pinMenuHandler}
         showMenu={showMenu}
-        isPined={pinSideBar}
+        isPined={pinMenu}
       />
-      <div
-        className={`flex-1 overflow-y-auto mt-11 pb-[20vh] scroll-smooth ${
-          pinSideBar ? 'pl-[10%] pr-[10%] ' : 'pl-[20vw] pr-[15vw]'
-        } `}
-      >
-        <LoginModal>{children}</LoginModal>
+      <div className={`flex-grow overflow-y-auto mt-11 pb-[20vh] scroll-smooth  `}>
+        <div className="max-w-3xl mx-auto scroll-smooth">
+          <LoginModal>{children}</LoginModal>
+        </div>
       </div>
       <Navbar rbtn={buttonRight} onClickMenu={triggerMenuHandler} />
     </div>

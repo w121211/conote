@@ -35,9 +35,10 @@ const SideBar = ({
       onMouseLeave={() => {
         if (isPined) {
           return
+        } else {
+          showMenuHandler(false)
+          pinMenuHandler(false)
         }
-        showMenuHandler(false)
-        pinMenuHandler(false)
       }}
     >
       <div className="group flex-shrink-0 px-4">
@@ -48,7 +49,7 @@ const SideBar = ({
           <span
             className={`${
               isPined ? 'material-icons' : 'material-icons-outlined'
-            } text-gray-400 opacity-0 rounded-full bg-transparent hover:text-gray-600 
+            } text-gray-500 opacity-0 rounded-full bg-transparent hover:text-gray-600 
             cursor-pointer group-hover:opacity-100 transform rotate-45 select-none`}
             onClick={() => {
               pinMenuHandler()

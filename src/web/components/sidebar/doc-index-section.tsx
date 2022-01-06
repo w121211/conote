@@ -9,7 +9,7 @@ const DocIndexSection = ({ docIndicies, title }: { docIndicies: TreeNode<DocInde
     <div className="flex flex-col min-h-0 overflow-hidden">
       <div className="flex flex-col min-h-0 overflow-hidden">
         <div
-          className={`group flex justify-between items-center px-2 text-sm text-gray-600 
+          className={`group flex justify-between items-center px-2 text-sm text-gray-700 
           tracking-wide leading-7 cursor-pointer select-none  hover:bg-gray-200/70 
           `}
           onClick={() => {

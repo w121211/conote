@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import React from 'react'
 import { TreeNode, TreeService } from '../../../packages/docdiff/src'
 import { DocIndex } from '../workspace/doc-index'
@@ -49,6 +50,29 @@ import DocIndexPanel from './doc-index-panel'
 //     </>
 //   )
 // }
+function changeTitle({ symbol, title }: DocIndex) {
+  if (symbol.startsWith('$')) {
+    return (
+      <>
+        {symbol}
+        <span className="ml-2 text-gray-500/70 font-light text-xs">{title}</span>
+      </>
+    )
+  }
+  if (symbol.startsWith('@')) {
+    const newSym = symbol.substring(1)
+    const url = new URL(newSym).hostname.replace('www.', '')
+    return (
+      <>
+        <span className="flex-shrink-0 inline-flex max-w-[135px] ">
+          <span className="truncate ">{title ?? symbol}</span>
+        </span>
+        <span className="ml-2 text-gray-500/70 font-light text-xs">{url}</span>
+      </>
+    )
+  }
+  return symbol
+}
 
 /**
  * TODO: not recursive, only allow one-level children
@@ -58,17 +82,21 @@ const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }): JSX.Element 
     throw 'node.data === undefined'
   }
   const children = TreeService.toList(node.children)
-
+  const router = useRouter()
   return (
-    <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-600">
-      <span className="group flex items-center gap-1 pl-8 pr-4 leading-relax hover:bg-gray-200/70 cursor-pointer ">
-        <span className="material-icons-outlined text-lg text-[20px] text-gray-400/50">
-          {node.data.symbol.startsWith('@') ? 'web' : 'article'}
+    <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-500 mix-blend-multiply">
+      <span
+        className={`group flex items-center gap-1 pl-8 pr-4 leading-relax ${
+          router.query.symbol == node.data.symbol
+            ? 'bg-gray-200/70 hover:bg-gray-300/70'
+            : 'bg-transparent hover:bg-gray-200/70'
+        }  cursor-pointer`}
+      >
+        <span className="material-icons-outlined text-lg text-[20px] text-gray-300 mix-blend-multiply">
+          {node.data.symbol.startsWith('@') ? 'web' : 'insert_drive_file'}
         </span>
         <Link href={{ pathname: '/card/[symbol]', query: { symbol: node.data.symbol } }}>
-          <a className="inline-block min-w-0 flex-1 truncate">
-            {node.data.symbol.startsWith('$') ? node.data.symbol : node.data.title ?? node.data.symbol}
-          </a>
+          <a className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">{changeTitle(node.data)}</a>
         </Link>
         <DocIndexPanel node={node} />
       </span>
@@ -80,16 +108,20 @@ const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }): JSX.Element 
               throw 'e.data === undefined'
             }
             return (
-              <li key={idx} className="group flex items-center gap-1 pl-14 pr-4  cursor-pointer hover:bg-gray-200/70">
-                <span className={`material-icons text-lg text-gray-400/50 mix-blend-multiply`}>subject</span>
+              <li
+                key={idx}
+                className={`group flex items-center gap-1 pl-14 pr-4 cursor-pointer ${
+                  router.query.symbol == e.data.symbol
+                    ? 'bg-gray-200/70 hover:bg-gray-300/70'
+                    : 'bg-transparent hover:bg-gray-200/70'
+                } `}
+              >
+                <span className={`material-icons text-lg text-gray-300 mix-blend-multiply`}>insert_drive_file</span>
 
                 <Link href={{ pathname: '/card/[symbol]', query: { symbol: e.data.symbol } }}>
-                  <a className="inline-block min-w-0 flex-1 truncate">
-                    {e.data.symbol.startsWith('$') ? e.data.symbol : e.data.title ?? e.data.symbol}
-                  </a>
+                  <a className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">{changeTitle(e.data)}</a>
                 </Link>
 
-                {/* <span className="truncate">{e.data?.symbol}</span> */}
                 <DocIndexPanel node={e} />
               </li>
             )

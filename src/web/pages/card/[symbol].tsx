@@ -35,13 +35,13 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
     return null
   }
   return (
-    <div className="flex gap-16 ">
-      <div className="flex-grow max-w-2xl">
+    <div className="flex gap-12 ">
+      <div className="flex-grow">
         <CardHead doc={mainDoc.doc} />
         <BulletEditor doc={mainDoc.doc} />
       </div>
       {mainDoc.doc.cardCopy && (
-        <div className="p-2 border-gray-200 ">
+        <div className="">
           <HeaderCardEmojis cardId={mainDoc.doc.cardCopy.id} />
         </div>
       )}

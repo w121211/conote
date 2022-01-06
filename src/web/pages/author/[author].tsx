@@ -2,34 +2,56 @@ import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/layout'
 import Popup from '../../components/popup/popup'
-import ListRow from '../../components/list-row/list-row'
+import AuthorRateTable, { TableData } from '../../components/list-row/author-rate-table'
 import AuthorArticleList from '../../components/list-row/author-article-list'
 import AuthorInfo from '../../components/author-info'
+
+const mockRateData: TableData[] = [
+  {
+    ticker: '$TSLA',
+    title: 'Tesla Inc.',
+    srcSym: '@http://www.youtube.com/xxx',
+    rate: 'LONG',
+  },
+  {
+    ticker: '$F',
+    title: 'Ford Motor Company',
+    srcSym: '@http://www.youtube.com/xwef',
+    rate: 'LONG',
+  },
+  {
+    ticker: '$AAPL',
+    title: 'Apple Inc.',
+    srcSym: '@http://www.youtube.com/sdjd',
+    rate: 'LONG',
+  },
+  {
+    ticker: '$NDVA',
+    title: 'Nvidia Corporation',
+    srcSym: '@http://www.youtube.com/ndewe',
+    rate: 'HOLD',
+  },
+  {
+    ticker: '$NFLX',
+    title: '',
+    srcSym: '@http://www.youtube.com/nflw',
+    rate: 'SHORT',
+  },
+]
 
 const AuthorPage = (): JSX.Element | null => {
   const router = useRouter()
   const [showMentionedPopup, setShowMentionedPopup] = useState(false)
   return (
     <Layout>
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-8">
         <h1>{router.query.author}</h1>
-        <div className=" w-full">
-          <div className="w-1/2">
-            <AuthorInfo />
-          </div>
-          {/* <div className="mx-6 border-l border-gray-200"></div> */}
-          <div className="flex-grow ">
-            {/* <h2 className="mb-4 text-xl text-gray-900 font-medium">
-              Rate
-              <span className="text-gray-500 text-base font-normal">(預測)</span>
-            </h2> */}
-            <ListRow href="#" title="$AA" rate="LONG" summary="AAA Company" />
-            <ListRow href="#" title="$BB" rate="SHORT" />
-            <ListRow href="#" title="$BB" rate="HOLD" />
-          </div>
-        </div>
+
+        <AuthorRateTable data={mockRateData} />
+        <AuthorInfo />
+
         <div className="">
-          <h2 className="my-7  text-xl text-gray-700 font-bold">文章</h2>
+          <h2 className="my-5  text-lg text-gray-800 ">文章</h2>
           <AuthorArticleList
             href="#"
             title="晶片荒惡化費半大跌 交期拉長至逾20周"
