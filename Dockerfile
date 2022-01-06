@@ -13,17 +13,20 @@ WORKDIR /app/src/packages/docdiff
 RUN yarn install --frozen-lockfile
 WORKDIR /app/src/packages/scraper
 RUN yarn install --frozen-lockfile
+WORKDIR /app/src/web
+COPY src/web/package.json src/web/yarn.lock ./
+RUN yarn install --frozen-lockfile
 # WORKDIR /app/src/packages/editor
 # COPY src/packages/editor ./
 # RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM node:14-alpine AS builder
-COPY tsconfig.base.json /app/
 COPY --from=deps /app/src/packages /app/src/packages
+COPY --from=deps /app/src/web/node_modules /app/src/web/node_modules
+COPY tsconfig.base.json /app/
 WORKDIR /app/src/web
 COPY src/web ./
-RUN yarn install --frozen-lockfile
 RUN yarn build
 
 # Only use for okteto dev

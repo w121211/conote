@@ -60,6 +60,8 @@ export const sessionLogin = async (
   res: NextApiResponse,
   idToken: string,
 ): Promise<DecodedIdToken> => {
+  // console.log('API sessionLogin')
+
   // Get ID token and CSRF token.
   // const idToken = req.body.idToken.toString()
   // const csrfToken = req.body.csrfToken.toString()
@@ -93,7 +95,7 @@ export const sessionLogin = async (
       maxAge: expiresIn / 1000,
       path: '/',
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      // secure: process.env.NODE_ENV === 'production',  // needs https, @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
     })
     res.setHeader('Set-Cookie', cookie)
 
@@ -103,11 +105,16 @@ export const sessionLogin = async (
 }
 
 export const sessionLogout = async (req: NextApiRequest, res: NextApiResponse) => {
+  // console.log('API sessionLogout')
   const sessionCookie = req.cookies[TOKEN_NAME] || ''
 
   if (sessionCookie.length > 0) {
-    const decodedClaims = await auth().verifySessionCookie(sessionCookie, true)
-    auth().revokeRefreshTokens(decodedClaims.sub) // revoke token
+    try {
+      const decodedClaims = await auth().verifySessionCookie(sessionCookie, true)
+      auth().revokeRefreshTokens(decodedClaims.sub) // revoke token
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   // Clear cookie

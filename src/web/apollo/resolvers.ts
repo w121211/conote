@@ -20,7 +20,6 @@ import { createVote } from '../lib/models/vote'
 import { searchAllSymbols } from '../lib/search/fuzzy'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import { ResolverContext } from './apollo-client'
-import { TreeService } from '../../packages/docdiff/src'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T

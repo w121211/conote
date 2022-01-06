@@ -6,16 +6,16 @@ import { EmojiCode } from '@prisma/client'
 
 const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null => {
   const { data: emojiData } = useCardEmojisQuery({ variables: { cardId } })
-  const order: EmojiCode[] = ['PIN', 'UP', 'DOWN']
+  const emojis: EmojiCode[] = ['PIN', 'UP', 'DOWN']
 
   return (
     <div className="flex flex-col gap-1">
-      {order.map(e => {
+      {emojis.map((e, i) => {
         const foundData = emojiData?.cardEmojis.find(el => el.code === e)
         return foundData !== undefined ? (
-          <CardEmojiBtn cardEmoji={foundData} />
+          <CardEmojiBtn key={i} cardEmoji={foundData} />
         ) : (
-          <CreateCardEmojiBtn cardId={cardId} emojiCode={e} />
+          <CreateCardEmojiBtn key={i} cardId={cardId} emojiCode={e} />
         )
       })}
     </div>

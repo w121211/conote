@@ -34,7 +34,7 @@ kubectl config use-context minikube
 docker build --progress=plain .
 
 # dev
-skaffold dev --port-forward
+skaffold dev --profile=minikube --port-forward
 
 ### Debug ###
 
@@ -64,11 +64,12 @@ Steps:
 kubectl config get-contexts
 kubectl config use-context ...
 
-# change conote-try to corresponding project name
-skaffold dev --default-repo=gcr.io/conote-try --port-forward
+# change repo name based on google cloud artifact registry https://cloud.google.com/artifact-registry/docs/docker/quickstart
+skaffold dev --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-try/conote-docker-repo' --port-forward
 
 # deploy
-skaffold run --default-repo=gcr.io/conote-try --tail
+# skaffold run --default-repo=gcr.io/conote-try --tail
+skaffold run --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-try/conote-docker-repo' --tail
 skaffold delete # remove deploy
 ```
 

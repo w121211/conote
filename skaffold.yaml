@@ -9,23 +9,28 @@ build:
   artifacts:
     - image: conote-web
       context: .
-      # docker:
-      #   dockerfile: Dockerfile
-      #   target: builder
 deploy:
-  # helm:
-  #   releases:
-  #     - name: postgres-release
-  #       repo: https://charts.bitnami.com/bitnami
-  #       remoteChart: postgresql
-  #       setValues:
-  #         postgresqlUsername: 'postgresuser'
-  #         postgresqlPassword: 'postgrespassword'
   kustomize:
     paths:
       - k8s/dev
     buildArgs: ['--load-restrictor LoadRestrictionsNone']
-# profiles:
+profiles:
+  - name: gcb
+    build:
+      artifacts:
+        - image: conote-web
+          context: .
+          kaniko:
+            cache: {}
+      googleCloudBuild:
+        # diskSizeGb: 300
+        # machineType: N1_HIGHCPU_32
+        projectId: conote-try
+        timeout: 4000s
+  - name: minikube
+    activation:
+      - command: debug
+      - kubeContext: minikube
 #   - name: dev
 #     deploy:
 #       kubeContext: docker-desktop

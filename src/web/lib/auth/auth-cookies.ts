@@ -11,7 +11,7 @@ export function setTokenCookie(res: NextApiResponse, token: string): void {
     maxAge: MAX_AGE,
     expires: new Date(Date.now() + MAX_AGE * 1000),
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    // secure: process.env.NODE_ENV === 'production',  // needs https, @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
     path: '/',
     sameSite: 'lax',
   })

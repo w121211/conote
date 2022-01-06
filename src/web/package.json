@@ -6,7 +6,7 @@
   "scripts": {
     "codegen": "graphql-let",
     "dev": "yarn codegen && NODE_OPTIONS=--max_old_space_size=4096 next dev",
-    "build": "yarn codegen && next build",
+    "build": "yarn prisma generate && yarn codegen && next build",
     "start": "next start",
     "start:okteto": "next start -p 8080",
     "type-check": "tsc --pretty --noEmit",
