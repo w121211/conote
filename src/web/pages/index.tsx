@@ -2,7 +2,6 @@
  * @see https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
  */
 import { useState } from 'react'
-import { useRouter } from 'next/router'
 import { useLatestCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
 import MeHeaderItem from '../components/profile/me-header-item'
@@ -10,8 +9,7 @@ import NewHotList from '../components/new-hot-list'
 import CardDigestComponent from '../components/card-digest-component'
 
 export const LatestCards = (): JSX.Element | null => {
-  const router = useRouter()
-  const { data, loading, error, fetchMore } = useLatestCardDigestsQuery({ fetchPolicy: 'cache-and-network' })
+  const { data, loading, error, fetchMore } = useLatestCardDigestsQuery() // { fetchPolicy: 'cache-and-network' }
   const [hasMore, setHasMore] = useState<boolean>(true)
 
   if (loading) {
