@@ -73,6 +73,12 @@ skaffold run --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-try
 skaffold delete # remove deploy
 ```
 
+Setup external-ip
+
+- Google cloud VPC Network
+  - firewall -> open port
+  - external ip
+
 ### Postgresql install, dump, restore
 
 See:
@@ -143,31 +149,6 @@ Troubleshoots:
   ```
   https://github.com/bitnami/charts/issues/2061
 
-### with Okteto
-
-Sample app: https://github.com/okteto/movies
-
-```sh
-# install okteto, see: https://okteto.com/docs/getting-started
-...
-
-# dev
-cd .../conote/src/web
-okteto up --build
-
-# in terminal
-yarn run start:okteto
-
-# access
-kubectl get pods
-kubectl exec -it conote-backend-7875dc7fd8-tzdvl zsh
-
-# from project root folder
-cd .../conote
-okteto pipeline deploy
-okteto pipeline destroy
-```
-
 # Hints
 
 ```sh
@@ -181,29 +162,58 @@ cd src/frontend/web
 yarn upgrade @conote/editor
 ```
 
-# Dev
+# Todos
+
+v-next
+
+- inline-poll
 
 v0.2
 
-- author page
-- discuss modal
+- /index
+  - announcement
+  - SSR
+- /author
+- inline-discuss
+  - inline element, #a discussion topic here#
+  - modal
+- card-meta
+  - support author and its company, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
 - card-digest add card emojis
-- /Index -> SSR
+- /editor
+  - parse url, eg https://arxiv.org/abs/2112.00114
+  - auto-complete brackets, eg [[]], (()), ->, ##
+  - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
+  - (dsq) root li without bullet icon?
+- inline-comment
 
 v0.1.1
 
-- Card-meta-form
-  - field width
-  - keywords broken
+- [v] (bug) digests load more
+
+- card-meta-form
+  - (ui) field width align
+  - (bug) keywords broken
   - (req) card-meta-form field should not memorize value
 - (bug) doc-index tree fail when removing parent docs
 - (bug) child doc-index-panel hidden delete not show
-- Doc-index title/symbol display
+- (ui) doc-index title/symbol display
   - Webpage -> symbol, title
-  - Ticker -> $BA Google -> Alphabet Boeing 波音
-  - Topic -> symbol
-  - $2350-TW (title) @http:// @author [[topic]]
-  - meta
-- [v] (bug) digests load more
+  - Ticker -> symbol + title, eg $BA 波音
+  - Topic -> symbol only
 - (bug) editor cmd+z need twice to perform correctly
-- (req) able to change card symbol name
+- (req) change card symbol name
+- /index
+  - (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
+- /card?url
+  - (req) a better error message and report
+- card-head
+  - (ui) card-emojis horizontal display
+  - (ui) card-emoji pin should not display count
+- editor
+  - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
+  - (bug) press [delete-key] error <- 1. (empty line) 2. $XX (any inlines)
+  - (ui) min width -> left/right margin
+  - [x] (ui) modal editor scroll bar
+- (req) domain name
+- (req) browser extension
