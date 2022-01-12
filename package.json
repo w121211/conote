@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "syncpack": "^6.2.0"
+  },
+  "private": true,
+  "scripts": {
+    "build-pkgs": "yarn --cwd packages/docdiff build & yarn --cwd packages/editor build & yarn --cwd packages/scraper build",
+    "sync": "syncpack fix-mismatches --source \"packages/*/package.json\" --source \"apps/*/package.json\""
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}
