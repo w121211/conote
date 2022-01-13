@@ -35,27 +35,27 @@
   "eslint.options": { "cache": true },
   "eslint.workingDirectories": [
     {
-      "directory": "./src/browser",
+      "directory": "./apps/browser",
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/web",
+      "directory": "./apps/web",
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/web-lab",
+      "directory": "./apps/weblab",
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/packages/docdiff",
+      "directory": "./packages/docdiff",
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/packages/editor",
+      "directory": "./packages/editor",
       "changeProcessCWD": true
     },
     {
-      "directory": "./src/packages/scraper",
+      "directory": "./packages/scraper",
       "changeProcessCWD": true
     }
   ],

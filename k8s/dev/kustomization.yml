@@ -12,6 +12,10 @@ secretGenerator:
   - name: web-local-env
     envs:
       - '../../src/web/.env.local'
+  # - name: postgres-user-pass
+  #   literals:
+  #     - username=postgresuser
+  #     - password=postgrespassword
   # The secrets file should not be checked into Git. It's published only for demonstration purpose.
   # - name: postgres-user-pass
   #   literals:

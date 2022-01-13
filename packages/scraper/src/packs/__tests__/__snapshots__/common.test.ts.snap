@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`keywords https://news.cnyes.com/news/id/4738961 1`] = `
+Array [
+  "本周大事",
+  "台積電",
+  "國安基金",
+  "宏碁",
+  "宏達電",
+]
+`;
+
+exports[`keywords https://news.cnyes.com/news/id/4741929?exp=a 1`] = `
+Array [
+  "萬寶投顧",
+  "楊惠宇",
+  "台股",
+]
+`;
+
+exports[`keywords https://www.mobile01.com/topicdetail.php?f=793&t=6520838 1`] = `
+Array [
+  "股票 / ETF",
+  "理財",
+]
+`;
+
+exports[`tickers https://news.cnyes.com/news/id/4738961 1`] = `undefined`;
+
+exports[`tickers https://news.cnyes.com/news/id/4741929?exp=a 1`] = `
+Array [
+  "5299-TW",
+  "8261-TW",
+  "3317-TW",
+  "6435-TW",
+  "6138-TW",
+  "6217-TW",
+  "6510-TW",
+  "6223-TW",
+]
+`;
+
+exports[`tickers https://www.mobile01.com/topicdetail.php?f=793&t=6520838 1`] = `undefined`;

@@ -1,3 +1,23 @@
+# Quickstart
+
+Adopt monorepo style through yarn workspace, see https://github.com/vercel/next.js/tree/canary/examples/with-yarn-workspaces
+
+```sh
+/           # root
+- /packages # packages used by apps, independent, not dependes on each other
+- /apps # web app and browser app, depends on packages
+- /k8s # deployment configs
+```
+
+```sh
+# from project-root, sync packages versions in order to share dependencies, @see https://github.com/JamieMason/syncpack/
+npx syncpack list-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
+npx syncpack fix-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
+
+yarn install  # install all packages
+yarn run build-pkgs  # compile & build side-packages so apps can import
+```
+
 # Use Docker
 
 Install [docker-sync](https://github.com/EugenMayer/docker-sync) for much better performance
@@ -34,7 +54,7 @@ kubectl config use-context minikube
 docker build --progress=plain .
 
 # dev
-skaffold dev --port-forward
+skaffold dev --profile=minikube --port-forward
 
 ### Debug ###
 
@@ -64,13 +84,20 @@ Steps:
 kubectl config get-contexts
 kubectl config use-context ...
 
-# change conote-try to corresponding project name
-skaffold dev --default-repo=gcr.io/conote-try --port-forward
+# change repo name based on google cloud artifact registry https://cloud.google.com/artifact-registry/docs/docker/quickstart
+skaffold dev --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-try/conote-docker-repo' --port-forward
 
 # deploy
-skaffold run --default-repo=gcr.io/conote-try --tail
+# skaffold run --default-repo=gcr.io/conote-try --tail
+skaffold run --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-try/conote-docker-repo' --tail
 skaffold delete # remove deploy
 ```
+
+Setup external-ip
+
+- Google cloud VPC Network
+  - firewall -> open port
+  - external ip
 
 ### Postgresql install, dump, restore
 
@@ -142,31 +169,6 @@ Troubleshoots:
   ```
   https://github.com/bitnami/charts/issues/2061
 
-### with Okteto
-
-Sample app: https://github.com/okteto/movies
-
-```sh
-# install okteto, see: https://okteto.com/docs/getting-started
-...
-
-# dev
-cd .../conote/src/web
-okteto up --build
-
-# in terminal
-yarn run start:okteto
-
-# access
-kubectl get pods
-kubectl exec -it conote-backend-7875dc7fd8-tzdvl zsh
-
-# from project root folder
-cd .../conote
-okteto pipeline deploy
-okteto pipeline destroy
-```
-
 # Hints
 
 ```sh
@@ -180,17 +182,53 @@ cd src/frontend/web
 yarn upgrade @conote/editor
 ```
 
-# Dev
+# NLP Todos
+
+v0.1.0
+
+- [v] greedy rate samples from cnyes news
+- training on greedy samples
+
+# Todos
+
+v-next
+
+- inline-poll
+- optimize react
+  - avoid rerender if possible
 
 v0.2
 
-- author page
-- discuss modal
-- card-digest add card emojis
-- /Index -> SSR
+- /index
+  - announcement
+  - SSR
+- /author
+- card-meta
+  - support author and its company, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
+- card-digest
+  - [pending] add card emojis
+- /editor
+  - parse url, eg https://arxiv.org/abs/2112.00114
+  - auto-complete brackets, eg [[]], (()), ->, ##
+  - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
+  - (dsq) root li without bullet icon?
+- inline-discuss `#a discussion topic here#`
+  - editor parser, inline element
+  - modal
+- inline-comment `- some input // here is a comment followed by '//', ignores using '...' when exceeding one line`
+- inline-rate
+  - user can also rate
+-
+
+- browser
+  - add inline-rate
+- add card emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
+- (?) add [[topic:sub-title]], eg [[人身保險:比較]]
+- give & take
 
 v0.1.1
 
+<<<<<<< HEAD
 - Card-meta-form
   - [v]field width
   - [v]keywords broken
@@ -203,6 +241,41 @@ v0.1.1
   - Topic -> symbol
   - $2350-TW (title) @http:// @author [[topic]]
   - meta
+=======
+>>>>>>> 43ea36a53c42dccee92e8ea88285cfc2540e1aae
 - [v] (bug) digests load more
-- (bug) editor cmd+z need twice to perform correctly
-- (req) able to change card symbol name
+
+- card-meta-form
+  - (ui) field width align -> keywords
+  - [v] (bug) keywords broken
+  - [v] (req) card-meta-form field should not memorize value
+- doc-index
+  - (bug) doc-index tree fail when removing parent docs
+  - (bug) child doc-index-panel hidden delete not show
+  - (ui) doc-index title/symbol display
+    - Webpage -> symbol, title
+    - Ticker -> symbol + title, eg $BA 波音
+    - Topic -> symbol only
+- /index
+  - (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
+- /card?url
+  - (req) a better error message and report
+- card-head
+  - (ui) card-emojis horizontal display
+  - (ui) card-emoji pin should not display count
+  - [investigating] (req) change card symbol name
+- editor
+  - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
+  - [x] (ui) modal editor scroll bar
+  - [working] (bug) 'delete-key' error at the end of string followed by 1. inlines, 2. nested
+    - 1. -a -\t b 2. -a -$X
+  - [pending] (bug) require cmd+z twice to redo
+  - (ui) min width -> left/right margin
+  - (ui) line space
+-
+
+- (req) domain name
+- (req) browser extension
+- search box
+  - (bug) 'home', 'end' key has no effect
+- (?) testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves

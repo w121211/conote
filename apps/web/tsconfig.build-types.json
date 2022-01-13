@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": true,
+    "declarationMap": true,
+    "rootDir": ".",
+    "outDir": "dist"
+  },
+  "ts-node": {
+    // options are overrides used only by ts-node
+    "compilerOptions": {
+      "module": "commonjs",
+      "allowJs": false
+    }
+  }
+}

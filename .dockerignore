@@ -3,7 +3,8 @@ node_modules
 dist
 build
 .next
-__deprecated__
-__generated__
+.cache
 .docker-sync
 .git
+__deprecated__
+__generated__
