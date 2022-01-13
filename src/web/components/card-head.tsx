@@ -49,7 +49,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
 
       <div className="mb-4">
         <div onMouseOver={onMouseOver} onMouseOut={onMouseOut} ref={hiddenDivRef}>
-          <div className={`flex items-center gap-4 mb-2 ${showHiddenDiv ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`flex items-center gap-4 ${showHiddenDiv ? 'opacity-100' : 'opacity-0'}`}>
             <button
               className={`btn-reset-style inline-flex items-center px-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-200`}
               onClick={() => {
@@ -60,26 +60,28 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
               <span className="whitespace-nowrap text-sm">編輯卡片資訊</span>
             </button>
           </div>
-          <div className="flex gap-4 mb-1 text-gray-500">
-            {(doc.cardCopy?.sym.type === 'TICKER' || (doc.cardCopy === null && doc.getSymbol().startsWith('$'))) &&
-              metaInput.title && <span className="text-sm ">{metaInput.title}</span>}
-            {metaInput.author && (
-              <Link href={{ pathname: '/author/[author]', query: { author: metaInput.author } }}>
-                <a className="flex-shrink-0 text-sm  hover:underline hover:underline-offset-2">@{metaInput.author}</a>
-              </Link>
-            )}
-            {doc.cardCopy?.link && (
-              <a
-                className="flex-shrink min-w-0 truncate text-sm  hover:underline hover:underline-offset-2"
-                href={doc.cardCopy.link.url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {/* <span className="material-icons text-base">open_in_new</span> */}
-                <span className="truncate">{doc.cardCopy.link.url}</span>
-              </a>
-            )}
-          </div>
+          {(metaInput.title || metaInput.author || doc.cardCopy?.link) && (
+            <div className="flex gap-4 pt-2 text-gray-500">
+              {(doc.cardCopy?.sym.type === 'TICKER' || (doc.cardCopy === null && doc.getSymbol().startsWith('$'))) &&
+                metaInput.title && <span className="text-sm ">{metaInput.title}</span>}
+              {metaInput.author && (
+                <Link href={{ pathname: '/author/[author]', query: { author: metaInput.author } }}>
+                  <a className="flex-shrink-0 text-sm  hover:underline hover:underline-offset-2">@{metaInput.author}</a>
+                </Link>
+              )}
+              {doc.cardCopy?.link && (
+                <a
+                  className="flex-shrink min-w-0 truncate text-sm  hover:underline hover:underline-offset-2"
+                  href={doc.cardCopy.link.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {/* <span className="material-icons text-base">open_in_new</span> */}
+                  <span className="truncate">{doc.cardCopy.link.url}</span>
+                </a>
+              )}
+            </div>
+          )}
 
           <h1 className="line-clamp-2 break-all text-gray-800">
             {doc.cardCopy?.sym.type === 'TICKER' || (doc.cardCopy === null && doc.getSymbol().startsWith('$'))

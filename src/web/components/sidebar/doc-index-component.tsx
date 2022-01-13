@@ -92,8 +92,8 @@ const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }): JSX.Element 
             : 'bg-transparent hover:bg-gray-200/70'
         }  cursor-pointer`}
       >
-        <span className="material-icons-outlined text-lg text-[20px] text-gray-300 mix-blend-multiply">
-          {node.data.symbol.startsWith('@') ? 'web' : 'insert_drive_file'}
+        <span className="material-icons text-lg text-[20px] text-gray-300 mix-blend-multiply">
+          {node.data.symbol.startsWith('@') ? 'language' : 'insert_drive_file'}
         </span>
         <Link href={{ pathname: '/card/[symbol]', query: { symbol: node.data.symbol } }}>
           <a className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">{changeTitle(node.data)}</a>

@@ -33,9 +33,7 @@ const Control = (props: ControlProps<Option[], true>) => {
   return (
     <components.Control
       {...rest}
-      className={`flex-grow min-w-[300px] min-h-[38px] rounded hover:bg-gray-100 ${
-        rest.isFocused ? 'bg-gray-100 ' : ''
-      }  `}
+      className={`flex-grow min-h-[38px] rounded hover:bg-gray-100 ${rest.isFocused ? 'bg-gray-100 ' : ''}  `}
     >
       {children}
     </components.Control>
@@ -209,7 +207,10 @@ const CardMetaForm = ({
                       <CreatableSelect
                         instanceId="1"
                         isMulti
-                        styles={{ control: () => ({}) }}
+                        styles={{
+                          control: () => ({}),
+                          container: () => ({ position: 'relative', width: '100%', cursor: 'text' }),
+                        }}
                         value={value}
                         components={customComponents}
                         noOptionsMessage={() => null}

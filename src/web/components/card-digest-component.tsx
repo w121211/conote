@@ -20,7 +20,7 @@ const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.El
       <div className="flex mb-2 items-center text-sm">
         {author && (
           <Link href={`/author/${author}`}>
-            <a className="text-blue-500 overflow-hidden whitespace-nowrap text-ellipsis hover:underline hover:underline-offset-2">
+            <a className="text-gray-500 overflow-hidden whitespace-nowrap text-ellipsis hover:underline hover:underline-offset-2">
               {author}
             </a>
           </Link>

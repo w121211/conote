@@ -82,8 +82,9 @@ export default function Layout({
         showMenu={showMenu}
         isPined={pinMenu}
       />
-      <div className={`flex-grow overflow-y-auto mt-11 pb-[20vh] scroll-smooth  `}>
-        <div className="max-w-3xl mx-auto scroll-smooth">
+      <div className={`flex-grow min-w-0 overflow-y-auto mt-11 px-4 pb-[20vh] scroll-smooth  `}>
+        <div className="w-11/12 sm:max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto scroll-smooth">
+          {/* {children} */}
           <LoginModal>{children}</LoginModal>
         </div>
       </div>

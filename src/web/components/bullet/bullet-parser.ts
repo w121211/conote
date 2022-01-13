@@ -36,10 +36,10 @@ const grammar: Grammar = {
   rate: { pattern: reRate },
   'new-rate': { pattern: reNewRate },
 
-  ticker: { pattern: reTicker },
   topic: { pattern: reTopic },
+  ticker: { pattern: reTicker },
 
-  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
+  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()\u4E00-\u9FFF]+(?=\s|$)/ },
 
   url: { pattern: reURL },
 
@@ -85,7 +85,6 @@ const decorateGrammar: Grammar = {
   rate: { pattern: reRate },
   'new-rate': { pattern: reNewRate },
 
-  ticker: { pattern: reTicker },
   topic: {
     pattern: reTopic,
     inside: {
@@ -93,8 +92,9 @@ const decorateGrammar: Grammar = {
       'topic-bracket-tail': /]]$/,
     },
   },
+  ticker: { pattern: reTicker },
 
-  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()]+(?=\s|$)/ },
+  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()\u4E00-\u9FFF]+(?=\s|$)/ },
 
   url: { pattern: reURL },
 

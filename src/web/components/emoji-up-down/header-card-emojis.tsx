@@ -10,12 +10,12 @@ const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null =>
 
   return (
     <div className="flex flex-col gap-1">
-      {order.map(e => {
+      {order.map((e, i) => {
         const foundData = emojiData?.cardEmojis.find(el => el.code === e)
         return foundData !== undefined ? (
-          <CardEmojiBtn cardEmoji={foundData} />
+          <CardEmojiBtn cardEmoji={foundData} key={i} />
         ) : (
-          <CreateCardEmojiBtn cardId={cardId} emojiCode={e} />
+          <CreateCardEmojiBtn cardId={cardId} emojiCode={e} key={i} />
         )
       })}
     </div>

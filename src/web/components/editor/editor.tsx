@@ -85,7 +85,8 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
     case 'mirror-topic':
     case 'rate':
     case 'topic':
-    case 'ticker': {
+    case 'ticker':
+    case 'author': {
       className = 'text-blue-500'
       break
     }
@@ -97,9 +98,8 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       break
     }
     case 'filtertag':
-    case 'author':
     case 'url': {
-      className = 'text-green-500'
+      className = 'text-green-600'
       break
     }
 
@@ -155,11 +155,10 @@ const Lc = ({
   // console.log(element.bulletCopy?.id)
 
   return (
-    <div {...attributes}>
-      <div>
-        {children}
-        {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />}
-      </div>
+    <div {...attributes} className=" ">
+      {children}
+      {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />}
+
       {/* {sourceCardId && ( 
        <span contentEditable={false}>
         {author === element.author && element.author}
@@ -205,7 +204,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   return (
     <div
       {...attributes}
-      className="relative break-all flex w-full"
+      className="relative break-all flex items-start w-full py-1"
       // onMouseOver={event => {
       //   event.stopPropagation()
       //   event.preventDefault()
@@ -218,7 +217,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
       // }}
     >
       {/* <div contentEditable={false}></div> */}
-      <div className="inline-flex items-center h-8 " contentEditable={false}>
+      <div className="inline-flex items-center h-7 " contentEditable={false}>
         <span
           className={`flex items-center justify-center flex-shrink-0 flex-grow-0 cursor-pointer ${
             hasUl ? 'opacity-100' : 'opacity-0 select-none'
@@ -264,7 +263,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>
 
-      <div className="w-full leading-loose">{children}</div>
+      <div className="h-full w-full">{children}</div>
     </div>
   )
 }

@@ -35,12 +35,12 @@ const EmojiIcon = ({
     case 'PIN':
       return (
         <span
-          className={`inline-flex items-center gap-1 text-sm text-gray-600 ${isColumn ? 'flex-col' : 'flex-row'} ${
-            className ?? ''
-          }`}
+          className={`inline-flex items-center gap-1 text-sm leading-tight text-gray-600 ${
+            isColumn ? 'flex-col' : 'flex-row'
+          } ${className ?? ''}`}
         >
           <span className={`material-icons text-lg text-rose-600 ${liked ? 'text-rose-600' : 'text-gray-700'}`}>
-            favorite
+            {liked ? 'favorite' : 'favorite_border'}
           </span>
           {nUps}
           {showText && text}
@@ -49,13 +49,13 @@ const EmojiIcon = ({
     case 'UP':
       return (
         <span
-          className={`inline-flex items-center gap-1 text-sm text-gray-600 ${isColumn ? 'flex-col' : 'flex-row'} ${
-            className ?? ''
-          }`}
+          className={`inline-flex items-center gap-1 text-sm leading-tight text-gray-600 ${
+            isColumn ? 'flex-col' : 'flex-row'
+          } ${className ?? ''}`}
         >
           <span
-            className={`material-icons-outlined ${
-              liked ? ' text-blue-600' : ' text-inherit'
+            className={` ${
+              liked ? 'material-icons text-blue-600' : 'material-icons-outlined text-inherit'
             } text-lg group-hover:text-blue-600 `}
           >
             thumb_up_alt
@@ -67,13 +67,13 @@ const EmojiIcon = ({
     case 'DOWN':
       return (
         <span
-          className={`inline-flex items-center gap-1 text-sm text-gray-600 ${isColumn ? 'flex-col' : 'flex-row'} ${
-            className ?? ''
-          }`}
+          className={`inline-flex items-center gap-1 text-sm leading-tight text-gray-600 ${
+            isColumn ? 'flex-col' : 'flex-row'
+          } ${className ?? ''}`}
         >
           <span
-            className={`material-icons-outlined ${
-              liked ? ' text-blue-600' : 'text-inherit'
+            className={` ${
+              liked ? 'material-icons text-blue-600' : 'material-icons-outlined text-inherit'
             } text-lg group-hover:text-blue-600`}
           >
             thumb_down_alt
@@ -85,9 +85,9 @@ const EmojiIcon = ({
     default:
       return (
         <span
-          className={`inline-flex items-center gap-1 text-sm text-gray-600 ${isColumn ? 'flex-col' : 'flex-row'} ${
-            className ?? ''
-          }`}
+          className={`inline-flex items-center gap-1 text-sm leading-tight text-gray-600 ${
+            isColumn ? 'flex-col' : 'flex-row'
+          } ${className ?? ''}`}
         >
           {code}
           {nUps}

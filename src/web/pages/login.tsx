@@ -198,8 +198,12 @@ const LoginPanel = (): JSX.Element | null => {
     )
   }
   return (
-    <div>
-      <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebaseAuth} />
+    <div className="flex justify-center w-screen h-screen bg-gray-100">
+      <div className="h-fit mt-[20vh] p-10  rounded bg-white shadow-2xl">
+        <h1 className="mb-4">免費登入</h1>
+        <div className="mb-10 text-gray-600">馬上登入開始在Conote上寫筆記吧!</div>
+        <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebaseAuth} />
+      </div>
       {/* <button onClick={loginGoogle}>Log in (Google)</button>
       <button onClick={loginEmail}>Log in (Email)</button> */}
     </div>

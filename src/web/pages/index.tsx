@@ -123,7 +123,23 @@ export const LatestCards = (): JSX.Element | null => {
 
 function HomePage(): JSX.Element {
   const { data, loading } = useMeQuery()
-  if (loading) return <h1>Loading</h1>
+  if (loading)
+    return (
+      <div className="flex flex-col items-center justify-center w-screen h-screen">
+        <svg className="origin-center animate-loadingSpinner" width="100" height="100">
+          <circle
+            className="stroke-blue-500 origin-center [stroke-dasharray:187] [stroke-dashoffset:0] animate-loadingCircle"
+            cx="50"
+            cy="50"
+            r="25"
+            fill="none"
+            strokeWidth={5}
+            strokeLinecap="round"
+          />
+        </svg>
+        {/* <h1>Loading</h1> */}
+      </div>
+    )
   return (
     <div className="flex flex-col w-screen h-screen overflow-auto">
       <div className="flex flex-col">

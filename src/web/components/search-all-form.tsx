@@ -119,8 +119,8 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
     }),
     input: (provided, state) => ({
       ...provided,
-      display: 'flex',
-      alignItems: 'center',
+      // display: 'flex',
+      // alignItems: 'center',
     }),
   }
 

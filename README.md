@@ -192,12 +192,12 @@ v0.2
 v0.1.1
 
 - Card-meta-form
-  - field width
-  - keywords broken
+  - [v]field width
+  - [v]keywords broken
   - (req) card-meta-form field should not memorize value
 - (bug) doc-index tree fail when removing parent docs
 - (bug) child doc-index-panel hidden delete not show
-- Doc-index title/symbol display
+- [v]Doc-index title/symbol display
   - Webpage -> symbol, title
   - Ticker -> $BA Google -> Alphabet Boeing 波音
   - Topic -> symbol
