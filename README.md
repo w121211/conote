@@ -228,21 +228,6 @@ v0.2
 
 v0.1.1
 
-<<<<<<< HEAD
-- Card-meta-form
-  - [v]field width
-  - [v]keywords broken
-  - (req) card-meta-form field should not memorize value
-- (bug) doc-index tree fail when removing parent docs
-- (bug) child doc-index-panel hidden delete not show
-- [v]Doc-index title/symbol display
-  - Webpage -> symbol, title
-  - Ticker -> $BA Google -> Alphabet Boeing 波音
-  - Topic -> symbol
-  - $2350-TW (title) @http:// @author [[topic]]
-  - meta
-=======
->>>>>>> 43ea36a53c42dccee92e8ea88285cfc2540e1aae
 - [v] (bug) digests load more
 
 - card-meta-form
