@@ -18,7 +18,7 @@ const Navbar = ({ rbtn, onClickMenu }: { rbtn: ReactNode; onClickMenu: (boo: boo
       </span>
       <div className="flex items-center justify-between w-full">
         <Link href="/">
-          <a>Conote</a>
+          <a>Konote</a>
         </Link>
         {/* {navPath} */}
         <div className="mr-4">

@@ -145,7 +145,7 @@ function HomePage(): JSX.Element {
       <div className="flex flex-col">
         <div className="flex items-center justify-between mx-10 mt-8 mb-10">
           <div className="flex-3 flex items-center max-w-2xl">
-            <h3 className="mr-10 text-2xl">Conote</h3>
+            <h3 className="mr-10 text-2xl">Konote</h3>
             <SearchAllForm />
           </div>
           <MeHeaderItem className="flex-2 text-right" />

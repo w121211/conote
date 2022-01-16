@@ -33,7 +33,6 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
     Transforms.insertText(editor, inlineRate, { at: path })
   }
 
-  console.log(element)
   // useEffect(() => {
   //   // if (showPopover && !pollId) {
   //   //   handleCreatePoll()
