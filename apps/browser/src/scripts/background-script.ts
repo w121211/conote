@@ -1,5 +1,5 @@
-import { browser, Tabs } from 'webextension-polyfill-ts'
 import { ApolloClient, InMemoryCache } from '@apollo/client'
+import browser, { Tabs } from 'webextension-polyfill'
 // import { cache } from '../popup/cache'
 import { LinkDocument, LinkQuery, LinkQueryVariables } from '../../../web/apollo/query.graphql'
 
@@ -19,7 +19,7 @@ async function getLink(url: string): Promise<LinkQuery> {
 }
 
 /**
- * 網頁變動、開新 tab 時，依照該頁面的 url 調整 icon 的 badge
+ * change icon's badge when url changed, new tab opened
  */
 async function onTabActivated(tab: Tabs.Tab): Promise<void> {
   if (tab.url) {
@@ -52,7 +52,7 @@ browser.tabs.onActivated.addListener(async info => {
 // })
 
 /**
- * 點擊 extension icon，讀取目前 tab 的 url & title，創一個新視窗並載入 conote 對應的 URL
+ * user click icon: get current tab's url, title and open a new window to navigate to conote's site
  */
 browser.browserAction.onClicked.addListener(async tab => {
   console.log(tab)
@@ -122,11 +122,45 @@ browser.browserAction.onClicked.addListener(async tab => {
 
 browser.menus.create(
   {
-    id: 'remove-me',
-    title: browser.i18n.getMessage('menuItemRemoveMe'),
-    contexts: ['all'],
+    id: 'conote-rate',
+    // title: browser.i18n.getMessage('menuItemRemoveMe'),
+    title: 'rate',
+    contexts: ['selection'], // show only if selection exist
   },
   () => {
     console.log('menu created')
   },
 )
+
+/**
+ * user click menu, get user's selection
+ */
+browser.menus.onClicked.addListener(async (info, tab) => {
+  console.log(info, tab)
+  if (info.menuItemId === 'conote-rate') {
+    console.log(info, tab)
+    console.log(info.selectionText, info.pageUrl)
+  }
+
+  const params = new URLSearchParams({
+    url: info.pageUrl ?? '',
+    text: info.selectionText ?? '',
+  })
+  // const tabUrl = encodeURIComponent(tab.url ?? '')
+
+  const window = await browser.windows.create({
+    // type: 'popup',
+    // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
+    // url: 'http://localhost:3000/card/' + encodeUri,
+    url: `${process.env.APP_BASE_URL}/lab/rate?${params.toString()}`,
+    // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
+    width: 500,
+    height: 900,
+    left: 100,
+  })
+
+  // browser.search.search({
+  //   query: info.selectionText ?? '',
+  //   engine: info.menuItemId,
+  // })
+})

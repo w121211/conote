@@ -24,7 +24,7 @@ module.exports = {
   entry: {
     'background-script': path.resolve(__dirname, 'src/scripts/background-script.ts'),
     // 'content-script': path.resolve(__dirname, 'src/scripts/content-script.ts'),
-    'content-script': path.resolve(__dirname, 'src/select/content-script.ts'),
+    'content-script': path.resolve(__dirname, 'src/annotate/content-script.ts'),
     popup: path.resolve(__dirname, 'src/popup/index.tsx'),
     // main: path.resolve(__dirname, 'src/index.tsx'),
   },

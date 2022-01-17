@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 // import { cache } from './cache'
 // import { CardPage } from '../components/card'
 // import '../scss/app.scss'

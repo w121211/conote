@@ -196,6 +196,9 @@ v-next
 - inline-poll
 - optimize react
   - avoid rerender if possible
+- give & take
+  - share cards
+- credit
 
 v0.2
 
@@ -215,16 +218,21 @@ v0.2
 - inline-discuss `#a discussion topic here#`
   - editor parser, inline element
   - modal
-- inline-comment `- some input // here is a comment followed by '//', ignores using '...' when exceeding one line`
+- inline-comment `- some input # here is a comment, ignores using '...' when exceeding one line`
 - inline-rate
   - user can also rate
+- /rate
+  - rate form with annotate
 -
 
 - browser
   - add inline-rate
 - add card emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
-- (?) add [[topic:sub-title]], eg [[人身保險:比較]]
-- give & take
+- (?) add [[topic:heading]], eg [[人身保險:比較]]
+
+- nlp
+  - train ner -> entities, subj/obj
+  - train classifier -> rate (long, short, hold)
 
 v0.1.1
 
@@ -252,14 +260,13 @@ v0.1.1
 - editor
   - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [x] (ui) modal editor scroll bar
-  - [working] (bug) 'delete-key' error at the end of string followed by 1. inlines, 2. nested
-    - 1. -a -\t b 2. -a -$X
+  - [working] (bug) 'delete-key' error at the end of string followed by 1. inlines, 2. nested, cases: 1. -a --b 2. -a -$X
   - [pending] (bug) require cmd+z twice to redo
   - (ui) min width -> left/right margin
   - (ui) line space
 -
 
-- (req) domain name
+- [v] (req) domain name
 - (req) browser extension
 - search box
   - (bug) 'home', 'end' key has no effect

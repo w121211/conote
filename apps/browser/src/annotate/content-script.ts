@@ -1,3 +1,8 @@
+/**
+ * Run:
+ * # ensure content-script is set properly: browser/public/manifest.json, webpack.config.js
+ * $ yarn run dev
+ */
 import 'regenerator-runtime/runtime'
 import 'core-js/stable'
 // import { SiderApp } from '../sider/sider'
@@ -11,6 +16,7 @@ import {
   highlightText,
 } from '@apache-annotator/dom'
 import { TextQuoteSelector } from '@apache-annotator/selector'
+import { isProbablyReaderable, Readability } from '@mozilla/readability'
 
 const describeCurrentSelection = async () => {
   const userSelection = window.getSelection()?.getRangeAt(0)
@@ -42,7 +48,7 @@ const highlightStoredSelectors = async () => {
   }
 }
 
-const copySelection = (): void => {
+const getSelection = (): void => {
   const selectedText = window.getSelection()?.toString().trim()
   console.log(selectedText)
   // if (selectedText) {
@@ -51,33 +57,38 @@ const copySelection = (): void => {
 }
 
 const main = async (): Promise<void> => {
-  // injectExtensionMarker()
-  // browser.runtime.onMessage.addListener(injectExtensionMarker)
-  // document.addEventListener('mouseup', copySelection)
   console.log('extension main...')
 
-  highlightStoredSelectors()
+  document.addEventListener('mouseup', getSelection)
 
-  document.addEventListener('mouseup', async () => {
-    const selector = await describeCurrentSelection()
-    if (selector) {
-      const existingSelectors = JSON.parse(localStorage[document.URL] || '[]')
-      localStorage[document.URL] = JSON.stringify([...existingSelectors, selector])
+  // highlightStoredSelectors()
 
-      await highlightSelectorTarget(selector)
-    }
-  })
+  // document.addEventListener('mouseup', async () => {
+  // const selector = await describeCurrentSelection()
+  // if (selector) {
+  //   const existingSelectors = JSON.parse(localStorage[document.URL] || '[]')
+  //   localStorage[document.URL] = JSON.stringify([...existingSelectors, selector])
+  //   await highlightSelectorTarget(selector)
+  // }
+  // })
+
+  // html to text, @see https://gist.github.com/cojahmetov/b7070c6b4085498caba1
+  // if (isProbablyReaderable(document)) {
+  const documentClone = document.cloneNode(true)
+  const article = new Readability(documentClone as Document).parse()
+  console.log(article)
+  // }
+  // const article = new Readability(document).parse()
+  // console.log(article)
 }
 
-// main().catch(console.error.bind(console))
 main().catch(err => {
   console.error(err)
 })
 
-console.log(document.readyState)
-
-document.onreadystatechange = function () {
+document.onreadystatechange = () => {
   if (document.readyState === 'complete') {
+    // for some websites requires page to be ready
     main().catch(err => {
       console.error(err)
     })

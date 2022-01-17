@@ -2,7 +2,7 @@ import 'regenerator-runtime/runtime'
 import 'core-js/stable'
 import * as React from 'react'
 import { render } from 'react-dom'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 // import { SiderApp } from '../sider/sider'
 import { App } from '../popup/app'
 

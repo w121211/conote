@@ -1,19 +1,19 @@
 # Development
 
 ```sh
-# Build /conote/src/web to use shared components
+# build /conote/src/web to use shared components
 cd .../conote/src/web
 yarn run buid:types
 
-# Start api server
+# start api server
 yarn run dev
 
-# Output ./dist, use it to load from chrome (manually)
+# output ./dist, use it to load from chrome (manually)
 cd .../conote/src/browser
 yarn run dev
 ```
 
-# Ref
+# References
 
 https://github.com/sivertschou/snow-extension
 https://github.com/aeksco/react-typescript-web-extension-starter
