@@ -23,7 +23,11 @@ const CreateCardEmojiBtn = ({ cardId, emojiCode }: { cardId: string; emojiCode: 
       >
         <EmojiIcon className={emojiCode === 'PIN' ? 'text-red-400' : 'text-gray-400'} code={emojiCode} />
       </button>
-      <span className="min-w-[10px] text-gray-500 text-sm font-['Red Hat Mono']">{0}</span>
+      <span
+        className={`min-w-[10px] text-gray-500 text-sm font-['Red Hat Mono'] ${emojiCode === 'PIN' ? 'hidden' : ''}`}
+      >
+        {0}
+      </span>
     </div>
   )
 }
