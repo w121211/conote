@@ -231,23 +231,23 @@ v0.1.1
 - [v] (bug) digests load more
 
 - card-meta-form
-  - (ui) field width align -> keywords
+  - [v] (ui) field width align -> keywords
   - [v] (bug) keywords broken
   - [v] (req) card-meta-form field should not memorize value
 - doc-index
   - (bug) doc-index tree fail when removing parent docs
-  - (bug) child doc-index-panel hidden delete not show
-  - (ui) doc-index title/symbol display
+  - [v] (bug) child doc-index-panel hidden delete not show
+  - [v] (ui) doc-index title/symbol display
     - Webpage -> symbol, title
     - Ticker -> symbol + title, eg $BA 波音
     - Topic -> symbol only
 - /index
-  - (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
+  - [v] (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
 - /card?url
   - (req) a better error message and report
 - card-head
-  - (ui) card-emojis horizontal display
-  - (ui) card-emoji pin should not display count
+  - [v] (ui) card-emojis horizontal display
+  - [v] (ui) card-emoji pin should not display count
   - [investigating] (req) change card symbol name
 - editor
   - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
@@ -255,8 +255,8 @@ v0.1.1
   - [working] (bug) 'delete-key' error at the end of string followed by 1. inlines, 2. nested
     - 1. -a -\t b 2. -a -$X
   - [pending] (bug) require cmd+z twice to redo
-  - (ui) min width -> left/right margin
-  - (ui) line space
+  - [v] (ui) min width -> left/right margin
+  - [v] (ui) line space
 -
 
 - (req) domain name
