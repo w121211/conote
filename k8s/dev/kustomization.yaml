@@ -1,17 +1,17 @@
-# @see: https://github.com/GoogleCloudPlatform/cloud-code-samples/tree/master/nodejs/nodejs-guestbook/kubernetes-manifests
+# @see https://github.com/GoogleCloudPlatform/cloud-code-samples/tree/master/nodejs/nodejs-guestbook/kubernetes-manifests
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namePrefix: conote-
 resources:
-  - web.yml
+  - webapp.yaml
+  - managed-cert.yaml
   # - ingress.yml
 # patchesStrategicMerge:
 #   - env.yml
 secretGenerator:
-  - name: web-local-env
+  - name: conote-webapp-envlocal
     envs:
-      - '../../src/web/.env.local'
+      - '../../apps/web/.env.local'
   # - name: postgres-user-pass
   #   literals:
   #     - username=postgresuser

@@ -1,4 +1,4 @@
-# See:
+# @see
 # - https://github.com/Azure-Samples/payara-on-aks/blob/main/payara-cafe.yml
 # - https://github.com/GoogleCloudPlatform/cloud-code-samples/blob/master/nodejs/nodejs-guestbook/kubernetes-manifests/guestbook-backend.deployment.yaml
 # - https://github.com/GoogleCloudPlatform/solutions-modern-cicd-anthos/blob/master/starter-repos/shared-kustomize-bases/online-boutique/emailservice.yaml
@@ -6,16 +6,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: web
+  name: conote-webapp
 spec:
   selector:
     matchLabels:
-      app: web
+      app: conote-webapp
   replicas: 1 # No. of replicas/pods to run in this deployment
   template:
     metadata:
       labels:
-        app: web
+        app: conote-webapp
     spec:
       # initContainers:
       #   - name: init-db-ready
@@ -34,15 +34,15 @@ spec:
         # - name: tester
         #   image: node:14-alpine
         #   command: ['sleep', 'infinity']
-        - name: web
-          image: conote-web
+        - name: conote-webapp-container
+          image: conote-webapp-image
           command: ['/bin/sh', '-c']
           args: ['yarn run start']
           ports:
             - containerPort: 3000 # The port that the container exposes
           envFrom:
             - secretRef:
-                name: web-local-env
+                name: conote-webapp-envlocal
           env:
             - name: ENVIRONMENT
               value: dev
@@ -111,17 +111,21 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: web
+  name: conote-webapp-service
 spec:
   # type: ClusterIP
   type: NodePort
   selector:
-    app: web
-  ports:
-    - port: 31251
-      targetPort: 3000
-      nodePort: 31251 # GKE needs to open firewall @see https://stackoverflow.com/questions/68452384/how-can-i-visit-nodeport-service-in-gke
+    app: conote-webapp
+  # ports:
+  # - port: 31251
+  #   targetPort: 3000
+  #   nodePort: 31251 # GKE needs to open firewall @see https://stackoverflow.com/questions/68452384/how-can-i-visit-nodeport-service-in-gke
   # ports:
   #   - name: http
   #     port: 80
   #     targetPort: 3000
+  ports:
+    - protocol: TCP
+      port: 50000
+      targetPort: 3000
