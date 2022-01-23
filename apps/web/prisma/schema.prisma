@@ -1,3 +1,7 @@
+// Ref:
+// - https://github.com/discourse/discourse/tree/main/app/models
+//
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -293,6 +297,53 @@ enum SymType {
   URL
 }
 
+// model Thread {
+//   id        String   @id @default(cuid())
+//   user      User     @relation(fields: [userId], references: [id])
+//   userId    String
+//   // status    DiscussStatus @default(ACTIVE)
+//   meta      String
+//   topic     String
+//   content   String
+//   // comments  Comment[]
+//   // likes     BoardLike[]
+//   // count     BoardCount? // 1-to-1
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// model ThreadEmoji {
+
+// }
+
+// model ThreadEmojiCount {
+
+// }
+
+// model ThreadPost {
+//   id         Int           @id @default(autoincrement())
+//   user       User          @relation(fields: [userId], references: [id])
+//   userId     String
+//   board      Thread         @relation(fields: [boardId], references: [id])
+//   boardId    String
+//   status     CommentStatus @default(ACTIVE)
+//   createdAt  DateTime      @default(now())
+//   updatedAt  DateTime      @updatedAt
+//   content    String
+//   emojis      ThreadPostEmoji[]
+// }
+
+// model ThreadPostEmoji {
+
+// }
+
+// model ThreadPostEmojiCount {
+
+// }
+
+// model ThreadPostComment {
+// }
+
 // enum CardStatus {
 //   ACTIVE
 //   ARCHIVE
@@ -404,92 +455,6 @@ enum SymType {
 //   nTickerFollows Int      @default(0)
 //   createdAt      DateTime @default(now())
 //   updatedAt      DateTime @updatedAt
-// }
-
-// model CommentLike {
-//   id        Int        @id @default(autoincrement())
-//   user      User       @relation(fields: [userId], references: [id])
-//   userId    String
-//   comment   Comment    @relation(fields: [commentId], references: [id])
-//   commentId Int
-//   choice    LikeChoice
-//   createdAt DateTime   @default(now())
-//   updatedAt DateTime   @updatedAt
-//   @@unique([userId, commentId])
-// }
-
-// model CommentCount {
-//   id        Int      @id @default(autoincrement())
-//   comment   Comment  @relation(fields: [commentId], references: [id])
-//   commentId Int      @unique
-//   nViews    Int      @default(0)
-//   nUps      Int      @default(0)
-//   nDowns    Int      @default(0)
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
-// model Comment {
-//   id         Int           @id @default(autoincrement())
-//   user       User          @relation(fields: [userId], references: [id])
-//   userId     String
-//   author     Author?       @relation(fields: [authorName], references: [name])
-//   authorName String?
-//   board      Board         @relation(fields: [boardId], references: [id])
-//   boardId    Int
-//   vote       Vote?         @relation(fields: [voteId], references: [id])
-//   voteId     Int?          @unique
-//   status     CommentStatus @default(ACTIVE)
-//   createdAt  DateTime      @default(now())
-//   updatedAt  DateTime      @updatedAt
-//   content    String
-//   count      CommentCount?
-//   likes      CommentLike[]
-// }
-
-// model BoardLike {
-//   id        Int        @id @default(autoincrement())
-//   user      User       @relation(fields: [userId], references: [id])
-//   userId    String
-//   board     Board      @relation(fields: [boardId], references: [id])
-//   boardId   Int
-//   choice    LikeChoice
-//   createdAt DateTime   @default(now())
-//   updatedAt DateTime   @updatedAt
-//   @@unique([userId, boardId])
-// }
-
-// model BoardCount {
-//   id        Int      @id @default(autoincrement())
-//   board     Board    @relation(fields: [boardId], references: [id])
-//   boardId   Int      @unique
-//   nViews    Int      @default(0)
-//   nUps      Int      @default(0)
-//   nDowns    Int      @default(0)
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
-// model Board {
-//   id        Int         @id @default(autoincrement())
-//   user      User        @relation(fields: [userId], references: [id])
-//   userId    String
-//   bullet    Bullet      @relation(fields: [bulletId], references: [id])
-//   bulletId  String
-//   card      Card        @relation(fields: [cardId], references: [id])
-//   cardId    String
-//   status    BoardStatus @default(ACTIVE)
-//   hashtag   String // 用hashtag作為bullet與board的連結
-//   meta      String
-//   content   String
-//   comments  Comment[]
-//   pollId    Int?
-//   poll      Poll?       @relation(fields: [pollId], references: [id]) // 1-to-1
-//   likes     BoardLike[]
-//   count     BoardCount? // 1-to-1
-//   createdAt DateTime    @default(now())
-//   updatedAt DateTime    @updatedAt
-//   @@unique([cardId, bulletId, hashtag])
 // }
 
 // model Selfcard {

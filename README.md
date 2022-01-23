@@ -95,7 +95,7 @@ skaffold delete # remove deploy
 
 Setup external-ip
 
-- Google cloud VPC Network
+- Google cloud VPC network
   - firewall -> open port
   - external ip
 
@@ -214,10 +214,14 @@ v0.2
   - parse url, eg https://arxiv.org/abs/2112.00114
   - auto-complete brackets, eg [[]], (()), ->, ##
   - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
-  - (dsq) root li without bullet icon?
+  - (?) root li without bullet icon?
 - inline-discuss `#a discussion topic here#`
+  - ref
+    - https://github.com/prisma/prisma/discussions
+    - https://github.com/discourse/discourse/tree/main/app/models
   - editor parser, inline element
-  - modal
+  - (ui) modal
+  - [working] (bk) prisma model, graphql api
 - inline-comment `- some input # here is a comment, ignores using '...' when exceeding one line`
 - inline-rate
   - user can also rate
@@ -237,7 +241,6 @@ v0.2
 v0.1.1
 
 - [v] (bug) digests load more
-
 - card-meta-form
   - [v] (ui) field width align -> keywords
   - [v] (bug) keywords broken
@@ -251,6 +254,7 @@ v0.1.1
     - Topic -> symbol only
 - /index
   - [v] (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
+  - (ui) fit differnt window width
 - /card?url
   - (req) a better error message and report
 - card-head
@@ -260,10 +264,14 @@ v0.1.1
 - editor
   - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [x] (ui) modal editor scroll bar
-  - [working] (bug) 'delete-key' error at the end of string followed by 1. inlines, 2. nested, cases: 1. -a --b 2. -a -$X
+  - [v] (bug) 'delete-key' error at the end of string followed by 1. inlines, 2. nested, cases: 1. -a --b 2. -a -$X
   - [pending] (bug) require cmd+z twice to redo
   - [v] (ui) min width -> left/right margin
   - [v] (ui) line space
+  - (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
+  - [v] (ui) :pin emoji should not have count
+  - (ui) :pin emoji color -> gray (unclick)
+  - (ui) conote -> konote & when on-hover button add some feedback
 -
 
 - [v] (req) domain name
