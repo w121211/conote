@@ -94,7 +94,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
     case 'mirror-head':
     case 'topic-bracket-head':
     case 'topic-bracket-tail': {
-      className = 'text-gray-400'
+      className = 'text-gray-400 '
       break
     }
     case 'filtertag':
@@ -155,7 +155,25 @@ const Lc = ({
   // console.log(element.bulletCopy?.id)
 
   return (
-    <div {...attributes} className=" ">
+    <div
+      {...attributes}
+      className="py-1"
+      onMouseEnter={e => {
+        // console.log(
+        const arrow = e.currentTarget.parentElement?.parentElement?.firstElementChild?.firstElementChild as HTMLElement
+        if (arrow) {
+          arrow.style.visibility = 'visible'
+        }
+
+        // )
+      }}
+      onMouseLeave={e => {
+        const arrow = e.currentTarget.parentElement?.parentElement?.firstElementChild?.firstElementChild as HTMLElement
+        if (arrow) {
+          arrow.style.removeProperty('visibility')
+        }
+      }}
+    >
       {children}
       {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />}
 
@@ -202,25 +220,12 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   const hasUl = ul !== undefined
 
   return (
-    <div
-      {...attributes}
-      className="relative break-all flex items-start w-full py-1"
-      // onMouseOver={event => {
-      //   event.stopPropagation()
-      //   event.preventDefault()
-      //   // setShowPanelIcon(true)
-      // }}
-      // onMouseOut={event => {
-      //   event.stopPropagation()
-      //   event.preventDefault()
-      //   // setShowPanelIcon(false)
-      // }}
-    >
+    <div {...attributes} className="relative break-all flex items-start w-full ">
       {/* <div contentEditable={false}></div> */}
-      <div className="inline-flex items-center h-7 " contentEditable={false}>
+      <div className="group inline-flex items-center h-8 select-none" contentEditable={false}>
         <span
-          className={`flex items-center justify-center flex-shrink-0 flex-grow-0 cursor-pointer ${
-            hasUl ? 'opacity-100' : 'opacity-0 select-none'
+          className={`flex-shrink-0 flex-grow-0 invisible group-hover:visible  ${
+            hasUl ? 'opacity-100 group-hover:cursor-pointer' : 'opacity-0 '
           }`}
           onClick={event => {
             // 設定 folded property
@@ -238,10 +243,13 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
             }
           }}
         >
-          <ArrowUpIcon
+          <span className={`material-icons w-4 text-lg `}>
+            {ulFolded === undefined ? 'arrow_drop_down' : 'arrow_right'}
+          </span>
+          {/* <ArrowUpIcon
             className={` w-2 h-2 fill-current text-gray-500 `}
             style={{ transform: ulFolded === undefined ? 'rotate(180deg)' : 'rotate(90deg)' }}
-          />
+          /> */}
         </span>
         <span
           className={`relative flex items-center justify-center w-5 h-full ${
@@ -250,12 +258,20 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           onMouseEnter={() => setShowPanel(true)}
           onMouseLeave={() => setShowPanel(false)}
         >
-          <BulletSvg />
-          {showPanel && lc.bulletCopy?.id && (
+          <span
+            className={`material-icons relative text-xs scale-[.65] text-gray-600 
+            before:content-['']  before:w-5 before:h-5 before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:absolute before:rounded-full before:-z-10 
+            ${ulFolded === undefined ? 'before:bg-transparent' : 'before:bg-gray-300'}`}
+          >
+            fiber_manual_record
+          </span>
+
+          {lc.bulletCopy?.id && (
             <BulletPanel
               // tooltipClassName={classes.bulletPanelTooltip}
               bulletId={lc.bulletCopy.id}
               visible={showPanel}
+              onClose={() => setShowPanel(false)}
             />
           )}
         </span>
@@ -263,7 +279,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>
 
-      <div className="h-full w-full">{children}</div>
+      <div className=" w-full">{children}</div>
     </div>
   )
 }

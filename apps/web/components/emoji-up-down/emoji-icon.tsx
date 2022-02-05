@@ -22,6 +22,7 @@ const EmojiIcon = ({
   showText,
   className,
   isColumn,
+  upDownClassName,
 }: {
   code: EmojiCode
   nUps?: number
@@ -29,6 +30,7 @@ const EmojiIcon = ({
   showText?: boolean
   className?: string
   isColumn?: boolean
+  upDownClassName?: string
 }): JSX.Element => {
   const text = emojiToChinese(code)
   switch (code) {
@@ -54,9 +56,9 @@ const EmojiIcon = ({
           } ${className ?? ''}`}
         >
           <span
-            className={` ${
-              liked ? 'material-icons text-blue-600' : 'material-icons-outlined text-inherit'
-            } text-lg group-hover:text-blue-600 `}
+            className={` ${liked ? 'material-icons text-blue-600' : 'material-icons-outlined text-inherit'} text-lg ${
+              upDownClassName ? upDownClassName : ''
+            } `}
           >
             thumb_up_alt
           </span>
@@ -72,9 +74,9 @@ const EmojiIcon = ({
           } ${className ?? ''}`}
         >
           <span
-            className={` ${
-              liked ? 'material-icons text-blue-600' : 'material-icons-outlined text-inherit'
-            } text-lg group-hover:text-blue-600`}
+            className={` ${liked ? 'material-icons text-blue-600' : 'material-icons-outlined text-inherit'} text-lg ${
+              upDownClassName ? upDownClassName : ''
+            }`}
           >
             thumb_down_alt
           </span>

@@ -51,8 +51,8 @@ const SideBar = ({
     >
       <div className="group flex-shrink-0 px-4">
         <div className="flex items-center justify-between h-11">
-          <a href="/" className="py-1 px-2 rounded mix-blend-multiply ">
-            Conote
+          <a href="/" className="py-1  rounded mix-blend-multiply ">
+            Konote
           </a>
           <span
             className={`hidden sm:block ${
@@ -67,7 +67,7 @@ const SideBar = ({
           </span>
         </div>
       </div>
-      <div className="mt-2 mb-5">
+      <div className="mt-2 mb-5 mx-4">
         <SearchAllForm small />
       </div>
       {/* <DocIndexSection title="最近同步的筆記" indexArray={committedDocIndicies} /> */}

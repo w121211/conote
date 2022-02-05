@@ -200,7 +200,7 @@ v-next
 v0.2
 
 - /index
-  - announcement
+  - [v] announcement
   - SSR
 - /author
 - card-meta

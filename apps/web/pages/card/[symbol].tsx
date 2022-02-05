@@ -42,7 +42,7 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
         <BulletEditor doc={mainDoc.doc} />
       </div>
       {mainDoc.doc.cardCopy && (
-        <div className="">
+        <div className="z-50">
           <HeaderCardEmojis cardId={mainDoc.doc.cardCopy.id} />
         </div>
       )}

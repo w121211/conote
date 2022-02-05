@@ -12,13 +12,15 @@ const BulletPanel = ({
   className,
   sourceUrl,
   visible,
+  onClose,
 }: {
   authorName?: string
   bulletId?: string
   className?: string
   sourceUrl?: string
   emoji?: BulletEmojiFragment[]
-  visible?: boolean
+  visible: boolean
+  onClose: () => void
   // onEmojiCreated: (emoji: BulletEmojiFragment, myEmojiLike: BulletEmojiLikeFragment) => void
 }): JSX.Element => {
   // const [showPanel, setShowPanel] = useState<boolean>(false)
@@ -28,6 +30,7 @@ const BulletPanel = ({
     <MyTooltip
       className={`py-2 px-0`}
       visible={visible}
+      onClose={onClose}
       // handleVisibleState={handleShowPanel}
     >
       <div className="flex flex-col items-start">

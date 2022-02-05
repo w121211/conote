@@ -25,7 +25,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   const symbol = doc.getSymbol()
 
   return (
-    <div className="ml-7">
+    <div className="ml-9">
       <Modal
         visible={showModal}
         onClose={() => {
