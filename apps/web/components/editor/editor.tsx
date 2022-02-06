@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
+import { cloneDeep } from 'lodash'
 import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element, Point } from 'slate'
 import {
   Editable,
@@ -14,7 +15,7 @@ import {
 } from 'slate-react'
 import { withHistory } from 'slate-history'
 import { CardFragment } from '../../apollo/query.graphql'
-import { parseLcAndReplace, withInline } from './with-inline'
+import { withInline, wrapToInlines } from './with-inline'
 import InlineSymbol from '../inline/inline-symbol'
 import InlineMirror from '../inline/inline-mirror'
 import InlineFiltertag from '../inline/inline-filtertag'
@@ -27,7 +28,8 @@ import BulletSvg from '../bullet-svg'
 import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
 import { Doc } from '../workspace/doc'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
-import { isLiArray, isUl, lcPath, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
+import { isLiArray, isUl, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
+import { withAutoComplete } from './with-auto-complete'
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, leaf, children } = props
@@ -124,8 +126,8 @@ const Lc = ({
 }): JSX.Element => {
   const editor = useSlateStatic()
   const readonly = useReadOnly()
-  const focused = useFocused() // 整個editor是否focus
-  const selected = useSelected() // 這個element是否被select（等同指標在這個element裡）
+  const focused = useFocused() // is editor in focus
+  const selected = useSelected() // is element selected, ie cursor inside this element
 
   // const [author, authorSwitcher] = useAuthorSwitcher({ authorName })
   // const [placeholder, setPlaceholder] = useState<string | undefined>()
@@ -136,13 +138,27 @@ const Lc = ({
 
   useEffect(() => {
     if (!focused || !selected || readonly) {
-      // cursor 離開 lc-head，將 text 轉 tokens、驗證 tokens、轉成 inline-elements
+      // console.log(editor.history.undos)
+      // cursor exited lc, wrap lc to inlines
       const path = ReactEditor.findPath(editor, element)
-      parseLcAndReplace({ editor, lcEntry: [element, path] })
+      wrapToInlines({ editor, lcEntry: [element, path] })
       return
     }
     if (selected) {
-      // cursor 進入 lc-head，將 inlines 轉回 text，避免直接操作 inlines
+      // fix undo bug
+      const { undos } = editor.history
+      if (undos.length >= 2) {
+        const lastBatch = undos[undos.length - 1]
+        // looks like wrap lc just happened, merge undos
+        if (lastBatch.length >= 2 && lastBatch[0].type === 'remove_node' && lastBatch[1].type === 'insert_node') {
+          const _lastBatch = undos.pop()
+          if (_lastBatch) {
+            undos[undos.length - 1] = undos[undos.length - 1].concat(_lastBatch)
+          }
+        }
+      }
+
+      // cursor enters lc, unwrap inlines to string
       const path = ReactEditor.findPath(editor, element)
       Transforms.unwrapNodes(editor, {
         at: path,
@@ -305,7 +321,7 @@ const CustomElement = ({
 }
 
 export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
-  const editor = useMemo(() => withInline(withList(withHistory(withReact(createEditor())))), [])
+  const editor = useMemo(() => withInline(withList(withAutoComplete(withHistory(withReact(createEditor()))))), [])
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, card: doc.cardCopy }} />,
     [doc],

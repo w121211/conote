@@ -118,22 +118,21 @@ export class Doc {
   }
 
   static async getAllDocs(): Promise<Doc[]> {
-    console.log('Get all docs... (heavy, use with caution)')
-    try {
-      const cids = await LocalDatabaseService.docTable.keys()
-      const promises = cids.map(async e => {
-        const found = await Doc.find({ cid: e })
-        if (found === null) {
-          throw 'getAllDocs() unexpected error'
-        }
-        return found
-      })
-      const docs = await Promise.all(promises)
-      return docs
-    } catch (err) {
-      console.error(err)
+    if (typeof window === 'undefined') {
       return []
     }
+
+    console.log('Get all docs... (heavy, use with caution)')
+    const cids = await LocalDatabaseService.docTable.keys()
+    const promises = cids.map(async e => {
+      const found = await Doc.find({ cid: e })
+      if (found === null) {
+        throw 'getAllDocs() unexpected error'
+      }
+      return found
+    })
+    const docs = await Promise.all(promises)
+    return docs
   }
 
   static async getAllCommittedDocs(): Promise<Doc[]> {

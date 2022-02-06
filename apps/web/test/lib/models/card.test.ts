@@ -8,7 +8,7 @@ import { resolve } from 'path'
 import { Card, PrismaClient } from '@prisma/client'
 // import { getOrCreateCardBySymbol, getOrCreateCardByLink, CardMeta } from '../card'
 import { FetchClient } from '../../../lib/fetcher/fetcher'
-import { CardModel } from '../../../lib/models/card'
+import { CardModel } from '../../../lib/models/card-model'
 import prisma from '../../../lib/prisma'
 import { clean } from '../../test-helpers'
 
@@ -122,7 +122,7 @@ afterAll(async () => {
 //   expect(clean({ ...body, content: omitDeep(JSON.parse(body.content), ['timestamp']) })).toMatchSnapshot()
 // })
 
-test.each(['https://zhuanlan.zhihu.com/p/75120221', 'https://www.mobile01.com/topicdetail.php?f=793&t=6520838'])(
+it.each(['https://zhuanlan.zhihu.com/p/75120221', 'https://www.mobile01.com/topicdetail.php?f=793&t=6520838'])(
   'getOrCreateByUrl()',
   async url => {
     const card = await CardModel.getOrCreateByUrl({ url: url })

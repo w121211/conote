@@ -179,7 +179,7 @@ export function unindent(editor: Editor, entry: NodeEntry<LiElement>): void {
   Transforms.setNodes<LcElement>(editor, { change: 'change-parent' }, { at: lcPath(grandparentPath) })
 }
 
-export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
+export const onKeyDown = (event: React.KeyboardEvent, editor: Editor): void => {
   const { selection } = editor
 
   // if (event.key === 'Shift') {
@@ -278,8 +278,8 @@ export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
   }
 }
 
-export function withList(editor: Editor): Editor {
-  const { deleteBackward, deleteForward, insertBreak, insertData, insertText, normalizeNode } = editor
+export const withList = (editor: Editor): Editor => {
+  const { deleteBackward, deleteForward, insertBreak, insertData, normalizeNode } = editor
 
   /**
    * Delete backward rules:

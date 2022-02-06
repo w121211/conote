@@ -2,11 +2,11 @@
 import { resolve } from 'path'
 import cuid from 'cuid'
 import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
-import { CommitInput as GQLCommitInput } from '../../../apollo/type-defs.graphqls'
-import { Bullet } from '../../../components/bullet/types'
+import { CommitInput as GQLCommitInput } from 'graphql-let/__generated__/__types__'
+import { Bullet } from '../../../components/bullet/bullet'
 import prisma from '../../../lib/prisma'
-import { CardModel } from '../../../lib/models/card'
-import { CommitModel } from '../../../lib/models/commit'
+import { CardModel } from '../../../lib/models/card-model'
+import { CommitModel } from '../../../lib/models/commit-model'
 import { bt, clean, TestDataHelper, TESTUSERS } from '../../test-helpers'
 
 let fakeId = 0

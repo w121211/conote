@@ -10,9 +10,9 @@ import { inspect } from 'util'
 import { NodeChange, TreeNode, TreeService } from '@conote/docdiff'
 import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
-import { RowCard } from './card'
-import { CardStateBody, CardStateModel, CardStateParsed } from './card-state'
-import { SymbolParsed, SymModel } from './sym'
+import { RowCard } from './card-model'
+import { CardStateBody, CardStateModel, CardStateParsed } from './card-state-model'
+import { SymbolParsed, SymModel } from './sym-model'
 
 type BulletInsert = {
   gid: string // pre-generated bullet id

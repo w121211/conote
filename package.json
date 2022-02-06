@@ -6,7 +6,7 @@
   "scripts": {
     "build-packages": "yarn --cwd packages/docdiff build & yarn --cwd packages/editor build & yarn --cwd packages/scraper build",
     "sync": "syncpack fix-mismatches --source \"packages/*/package.json\" --source \"apps/*/package.json\"",
-    "clear": "find . -type d -name node_modules -prune -exec rm -rf {} \\;"
+    "clean": "find . -type d -name node_modules -prune -exec rm -rf {} \\;"
   },
   "workspaces": [
     "packages/*",

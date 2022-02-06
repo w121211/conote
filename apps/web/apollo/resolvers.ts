@@ -2,23 +2,35 @@ import { inspect } from 'util'
 import { AuthenticationError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
 // import { getSession } from '@auth0/nextjs-auth0'
-import { BulletEmoji, BulletEmojiCount, CardEmoji, CardEmojiCount } from '@prisma/client'
-import prisma from '../lib/prisma'
-import fetcher from '../lib/fetcher'
+import {
+  BulletEmoji,
+  BulletEmojiCount,
+  CardEmoji,
+  CardEmojiCount,
+  DiscussEmoji,
+  DiscussEmojiCount,
+  DiscussPostEmoji,
+  DiscussPostEmojiCount,
+} from '@prisma/client'
 import { QueryResolvers, MutationResolvers } from 'graphql-let/__generated__/__types__'
-import { hasCount, toStringId } from '../lib/helpers'
-import { BulletEmojiModel } from '../lib/models/bullet-emoji'
-import { CardMeta, CardModel } from '../lib/models/card'
-import { CardDigestModel } from '../lib/models/card-digest'
-import { CardEmojiModel } from '../lib/models/card-emoji'
-import { CardStateModel } from '../lib/models/card-state'
-import { CommitModel } from '../lib/models/commit'
-import { PollMeta } from '../lib/models/poll'
-import { RateModel } from '../lib/models/rate'
-import { getOrCreateUser } from '../lib/models/user'
-import { createVote } from '../lib/models/vote'
-import { searchAllSymbols } from '../lib/search/fuzzy'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
+import fetcher from '../lib/fetcher'
+import { hasCount, toStringId } from '../lib/helpers'
+import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
+import { CardMeta, CardModel } from '../lib/models/card-model'
+import { CardDigestModel } from '../lib/models/card-digest-model'
+import { CardEmojiModel } from '../lib/models/card-emoji-model'
+import { CardStateModel } from '../lib/models/card-state-model'
+import { CommitModel } from '../lib/models/commit-model'
+import { PollMeta } from '../lib/models/poll-model'
+import { RateModel } from '../lib/models/rate-model'
+import { getOrCreateUser } from '../lib/models/user-model'
+import { createVote } from '../lib/models/vote-model'
+import { DiscussEmojiModel } from '../lib/models/discuss-emoji-model'
+import { DiscussPostEmojiModel } from '../lib/models/discuss-post-emoji-model'
+import prisma from '../lib/prisma'
+import { SearchDiscussService } from '../lib/search/search-discuss-service'
+import { SearchSymbolService } from '../lib/search/search-symbol-service'
 import { ResolverContext } from './apollo-client'
 
 // function _deleteNull<T>(obj: T) {
@@ -153,8 +165,76 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   //   // return meta
   // },
 
-  async latestCardDigests(_parent, { afterCommitId }, _context, _info) {
+  async cardDigests(_parent, { afterCommitId }, _context, _info) {
     return await CardDigestModel.getLatest(afterCommitId ?? undefined)
+  },
+
+  async discuss(_parent, { id }, _context, _info) {
+    const discuss = await prisma.discuss.findUnique({
+      where: { id },
+      include: { count: true },
+    })
+    if (discuss && discuss.count) {
+      const a = {
+        ...discuss,
+        meta: {},
+        count: { ...toStringId(discuss.count) },
+      }
+      return a
+    }
+    return null
+  },
+
+  async discussEmojis(_parent, { discussId }, _context, _info) {
+    const emojis = (
+      await prisma.discussEmoji.findMany({
+        where: { discussId },
+        include: { count: true },
+      })
+    ).filter(
+      (
+        e,
+      ): e is DiscussEmoji & {
+        count: DiscussEmojiCount
+      } => e.count !== null,
+    )
+    return emojis.map(e => {
+      return {
+        ...e,
+        id: e.id.toString(),
+        count: { ...toStringId(e.count) },
+      }
+    })
+  },
+
+  async discussPosts(_parent, { discussId }, _context, _info) {
+    const posts = (
+      await prisma.discussPost.findMany({
+        where: { discussId },
+      })
+    ).map(e => toStringId(e))
+    return posts
+  },
+
+  async discussPostEmojis(_parent, { discussPostId }, _context, _info) {
+    const emojis = (
+      await prisma.discussPostEmoji.findMany({
+        where: { discussPostId: parseInt(discussPostId) },
+        include: { count: true },
+      })
+    ).filter(
+      (
+        e,
+      ): e is DiscussPostEmoji & {
+        count: DiscussPostEmojiCount
+      } => e.count !== null,
+    )
+    return emojis.map(e => {
+      return {
+        ...toStringId(e),
+        count: { ...toStringId(e.count) },
+      }
+    })
   },
 
   async link(_parent, { id, url }, _context, _info) {
@@ -200,6 +280,26 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return like ? toStringId(like) : null
   },
 
+  async myDiscussEmojiLike(_parent, { discussEmojiId }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const like = await prisma.discussEmojiLike.findUnique({
+      where: {
+        userId_discussEmojiId: { discussEmojiId: parseInt(discussEmojiId), userId },
+      },
+    })
+    return like ? toStringId(like) : null
+  },
+
+  async myDiscussPostEmojiLike(_parent, { discussPostEmojiId }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const like = await prisma.discussPostEmojiLike.findUnique({
+      where: {
+        userId_discussPostEmojiId: { discussPostEmojiId: parseInt(discussPostEmojiId), userId },
+      },
+    })
+    return like ? toStringId(like) : null
+  },
+
   async myRates(_parent, { symId }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const rates = await prisma.rate.findMany({
@@ -237,15 +337,20 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   searchAll(_parent, { term }, _context, _info) {
-    return searchAllSymbols(term)
+    return SearchSymbolService.search(term)
   },
 
   searchTicker(_parent, { term }, _context, _info) {
-    throw 'Not implemented yet.'
+    return SearchSymbolService.search(term, 'TICKER')
   },
 
   searchTopic(_parent, { term }, _context, _info) {
-    throw 'Not implemented yet.'
+    return SearchSymbolService.search(term, 'TOPIC')
+  },
+
+  searchDiscuss(_parent, { term }, _context, _info) {
+    // throw 'Not implemented yet.'
+    return SearchDiscussService.search(term)
   },
 
   async rate(_parent, { id }, _context, _info) {
@@ -505,7 +610,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
   async createBulletEmoji(_parent, { bulletId, code }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-
     const { emoji, like } = await BulletEmojiModel.create({ bulletId, code, userId })
     return {
       emoji: {
@@ -554,16 +658,168 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async updateCardMeta(_parent, { cardId, data }, { req }, _info) {
-    await isAuthenticated(req)
-    const card = await prisma.card.update({
-      where: { id: cardId },
+  // async updateCardMeta(_parent, { cardId, data }, { req }, _info) {
+  //   await isAuthenticated(req)
+  //   const card = await prisma.card.update({
+  //     where: { id: cardId },
+  //     data: {
+  //       meta: data, // TODO 需要檢查 input
+  //     },
+  //   })
+  //   const meta = card.meta as unknown as CardMeta
+  //   return meta
+  // },
+
+  async createDiscuss(_parent, { cardId, data }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const { title, content } = data
+    const discuss = await prisma.discuss.create({
       data: {
-        meta: data, // TODO 需要檢查 input
+        user: { connect: { id: userId } },
+        cards: { connect: [{ id: cardId }] },
+        meta: {},
+        title,
+        content,
+        // choices: data.choices,
+        count: { create: {} },
+      },
+      include: { count: true },
+    })
+    if (hasCount(discuss)) {
+      return {
+        ...discuss,
+        meta: {},
+        count: toStringId(discuss.count),
+      }
+    }
+    throw 'Internal error'
+  },
+
+  async updateDiscuss(_parent, { id, data }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const discuss = await prisma.discuss.findUnique({
+      where: { id },
+    })
+    if (discuss?.userId === userId) {
+      const { title, content } = data
+      const discuss = await prisma.discuss.update({
+        where: { id },
+        data: {
+          title,
+          content,
+        },
+        include: { count: true },
+      })
+      if (hasCount(discuss)) {
+        return {
+          ...discuss,
+          meta: {},
+          count: toStringId(discuss.count),
+        }
+      }
+      throw 'Internal error'
+    }
+    throw 'Not authorized, only author is allowed to update discuss'
+  },
+
+  async connectDiscussToCard(_parent, { discussId, cardId, disconnect }, { req }, _info) {
+    await isAuthenticated(req)
+    const discuss = disconnect
+      ? await prisma.discuss.update({
+          where: { id: discussId },
+          data: {
+            cards: { disconnect: [{ id: cardId }] },
+          },
+        })
+      : await prisma.discuss.update({
+          where: { id: discussId },
+          data: {
+            cards: { connect: [{ id: cardId }] },
+          },
+        })
+    if (discuss) {
+      return true
+    }
+    throw 'Internal error'
+  },
+
+  async createDiscussEmoji(_parent, { discussId, code }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const { emoji, like } = await DiscussEmojiModel.create({ discussId, code, userId })
+    return {
+      emoji: {
+        ...toStringId(emoji),
+        count: toStringId(emoji.count),
+      },
+      like: toStringId(like),
+    }
+  },
+
+  async upsertDiscussEmojiLike(_parent, { discussEmojiId, liked }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const { like, count } = await DiscussEmojiModel.upsertLike({
+      liked,
+      discussEmojiId: parseInt(discussEmojiId),
+      userId,
+    })
+    return {
+      like: toStringId(like),
+      count: toStringId(count),
+    }
+  },
+
+  async createDiscussPost(_parent, { discussId, data }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const { content } = data
+    const post = await prisma.discussPost.create({
+      data: {
+        user: { connect: { id: userId } },
+        discuss: { connect: { id: discussId } },
+        content,
       },
     })
-    const meta = card.meta as unknown as CardMeta
-    return meta
+    return toStringId(post)
+  },
+
+  async updateDiscussPost(_parent, { id, data }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const post = await prisma.discussPost.findUnique({
+      where: { id: parseInt(id) },
+    })
+    if (post?.userId === userId) {
+      const { content } = data
+      const post = await prisma.discussPost.update({
+        where: { id: parseInt(id) },
+        data: { content },
+      })
+      return toStringId(post)
+    }
+    throw 'Not authorized, only author is allowed to update discuss'
+  },
+
+  async createDiscussPostEmoji(_parent, { discussPostId, code }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const { emoji, like } = await DiscussPostEmojiModel.create({ discussPostId: parseInt(discussPostId), code, userId })
+    return {
+      emoji: {
+        ...toStringId(emoji),
+        count: toStringId(emoji.count),
+      },
+      like: toStringId(like),
+    }
+  },
+
+  async upsertDiscussPostEmojiLike(_parent, { discussPostEmojiId, liked }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const { like, count } = await DiscussPostEmojiModel.upsertLike({
+      liked,
+      discussPostEmojiId: parseInt(discussPostEmojiId),
+      userId,
+    })
+    return {
+      like: toStringId(like),
+      count: toStringId(count),
+    }
   },
 
   async createCommit(_parent, { data }, { req }, _info) {
@@ -636,216 +892,6 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return true
   },
 
-  // async createComment(_parent, { boardId, pollId, data }, { req, res }, _info) {
-  //   const { userId } = isAuthenticated(req, res)
-  //   const board = await prisma.board.findUnique({
-  //     include: { count: true },
-  //     where: { id: parseInt(boardId) },
-  //   })
-  //   if (board === null) throw new Error(`Given boardId not found`)
-  //   // if (post.status !== PostStatus.ACTIVE) throw new Error("post is not active")
-
-  //   let vote: Vote | undefined
-  //   if (pollId && data.vote?.choiceIdx) {
-  //     vote = await createVote({
-  //       choiceIdx: data.vote.choiceIdx,
-  //       pollId: parseInt(pollId),
-  //       userId,
-  //     })
-  //   }
-  //   const comment = await prisma.comment.create({
-  //     include: { count: true, vote: true },
-  //     data: {
-  //       content: data.content,
-  //       user: { connect: { id: userId } },
-  //       // oauthor: { connect: { name: e.oauthor } },
-  //       count: { create: {} },
-  //       board: { connect: { id: parseInt(boardId) } },
-  //       vote: vote && { connect: { id: vote.id } },
-  //     },
-  //   })
-  //   // await prisma.commentCount.update({
-  //   //   data: { nReplies: comment.count.nComments + 1 },
-  //   //   where: { commentId: comment.id }
-  //   // })
-
-  //   if (comment.count) {
-  //     return {
-  //       ..._toStringId(comment),
-  //       count: _toStringId(comment.count),
-  //       vote: comment.vote && _toStringId(comment.vote),
-  //     }
-  //   } else {
-  //     throw new Error()
-  //   }
-  // },
-
-  // async createAuthorVote(_parent, { pollId, authorName, data }, { req, res }, _info) {
-  //   const { userId } = isAuthenticated(req, res)
-  //   const vote = await createAuthorVote({
-  //     choiceIdx: data.choiceIdx,
-  //     pollId: parseInt(pollId),
-  //     authorName,
-  //     userId,
-  //   })
-  //   return _toStringId(vote)
-  // },
-
-  // async createOauthorComment(_parent, { boardId, pollId, oauthorName, data }, { req, res }, _info) {
-  //   throw 'Consider to remove'
-  //   const { userId } = isAuthenticated(req, res)
-  //   const board = await prisma.board.findUnique({
-  //     include: { count: true },
-  //     where: { id: parseInt(boardId) },
-  //   })
-  //   if (board === null) throw new Error(`Given boardId not found`)
-  //   // if (post.status !== PostStatus.ACTIVE) throw new Error("post is not active")
-  //   let vote: Vote | undefined
-  //   if (pollId && data.vote?.choiceIdx !== undefined) {
-  //     vote = await createOauthorVote({
-  //       choiceIdx: data.vote.choiceIdx,
-  //       pollId: parseInt(pollId),
-  //       oauthorName,
-  //       userId,
-  //     })
-  //   }
-  //   const comment = await prisma.comment.create({
-  //     include: { count: true },
-  //     data: {
-  //       content: data.content,
-  //       user: { connect: { id: userId } },
-  //       oauthor: { connect: { name: oauthorName } },
-  //       count: { create: {} },
-  //       board: { connect: { id: parseInt(boardId) } },
-  //       vote: vote && { connect: { id: vote.id } },
-  //     },
-  //   })
-  //   // await prisma.commentCount.update({
-  //   //   data: { nReplies: comment.count.nComments + 1 },
-  //   //   where: { commentId: comment.id }
-  //   // })
-  //   if (comment.count) {
-  //     return {
-  //       ..._toStringId(comment),
-  //       count: _toStringId(comment.count),
-  //     }
-  //   } else {
-  //     throw new Error()
-  //   }
-  // },
-
-  // async createCommentLike(_parent, { commentId, data }, { req, res }, _info) {
-  //   const { userId } = isAuthenticated(req, res)
-  //   const count = await prisma.commentCount.findUnique({ where: { commentId: parseInt(commentId) } })
-  //   if (count === null) {
-  //     throw new Error('Prisma error')
-  //   }
-  //   const like = await prisma.commentLike.create({
-  //     data: {
-  //       choice: data.choice,
-  //       user: { connect: { id: userId } },
-  //       comment: { connect: { id: parseInt(commentId) } },
-  //     },
-  //   })
-  //   const { dUp, dDown } = deltaLike(like)
-  //   const updatedCount = await prisma.commentCount.update({
-  //     data: {
-  //       nUps: count.nUps + dUp,
-  //       nDowns: count.nDowns + dDown,
-  //     },
-  //     where: { commentId: like.commentId },
-  //   })
-  //   return {
-  //     like: { ..._toStringId(like), choice: like.choice },
-  //     count: _toStringId(updatedCount),
-  //   }
-  // },
-
-  // async updateCommentLike(_parent, { id, data }, { req, res }, _info) {
-  //   const { userId } = isAuthenticated(req, res)
-  //   const prevLike = await prisma.commentLike.findUnique({ where: { id: parseInt(id) } })
-  //   if (prevLike === null || prevLike?.userId !== userId || data.choice === prevLike.choice) {
-  //     throw new Error('No matched data')
-  //   }
-  //   const count = await prisma.commentCount.findUnique({ where: { commentId: prevLike.commentId } })
-  //   if (count === null) {
-  //     throw new Error('Prisma error, update fail')
-  //   }
-  //   const like = await prisma.commentLike.update({
-  //     data: { choice: data.choice },
-  //     where: { id: prevLike.id },
-  //   })
-  //   const { dUp, dDown } = deltaLike(like, prevLike)
-  //   const updatedCount = await prisma.commentCount.update({
-  //     data: {
-  //       nUps: count.nUps + dUp,
-  //       nDowns: count.nDowns + dDown,
-  //     },
-  //     where: { commentId: like.commentId },
-  //   })
-  //   return {
-  //     like: { ..._toStringId(like), choice: like.choice },
-  //     count: _toStringId(updatedCount),
-  //   }
-  // },
-
-  // async createBoardLike(_parent, { boardId, data }, { req, res }, _info) {
-  //   const { userId } = isAuthenticated(req, res)
-  //   const count = await prisma.boardCount.findUnique({
-  //     where: { boardId: parseInt(boardId) },
-  //   })
-  //   if (count === null) {
-  //     throw new Error('Prisma error')
-  //   }
-  //   const like = await prisma.boardLike.create({
-  //     data: {
-  //       choice: data.choice,
-  //       user: { connect: { id: userId } },
-  //       board: { connect: { id: parseInt(boardId) } },
-  //     },
-  //   })
-  //   const { dUp, dDown } = deltaLike(like)
-  //   const updatedCount = await prisma.boardCount.update({
-  //     data: {
-  //       nUps: count.nUps + dUp,
-  //       nDowns: count.nDowns + dDown,
-  //     },
-  //     where: { boardId: like.boardId },
-  //   })
-  //   return {
-  //     like: { ..._toStringId(like), choice: like.choice },
-  //     count: _toStringId(updatedCount),
-  //   }
-  // },
-
-  // async updateBoardLike(_parent, { id, data }, { req, res }, _info) {
-  //   const { userId } = isAuthenticated(req, res)
-  //   const prevLike = await prisma.boardLike.findUnique({ where: { id: parseInt(id) } })
-  //   if (prevLike === null || prevLike?.userId !== userId || data.choice === prevLike.choice) {
-  //     throw new Error('No matched data')
-  //   }
-  //   const count = await prisma.boardCount.findUnique({ where: { boardId: prevLike.boardId } })
-  //   if (count === null) {
-  //     throw new Error('Prisma error, update fail')
-  //   }
-  //   const like = await prisma.boardLike.update({
-  //     data: { choice: data.choice },
-  //     where: { id: prevLike.id },
-  //   })
-  //   const { dUp, dDown } = deltaLike(like, prevLike)
-  //   const updatedCount = await prisma.boardCount.update({
-  //     data: {
-  //       nUps: count.nUps + dUp,
-  //       nDowns: count.nDowns + dDown,
-  //     },
-  //     where: { boardId: like.boardId },
-  //   })
-  //   return {
-  //     like: { ..._toStringId(like), choice: like.choice },
-  //     count: _toStringId(updatedCount),
-  //   }
-  // },
-
   // async signIn(_parent, { email, password }, { res }, _info) {
   //   console.log(res)
   //   const user = await prisma.user.findUnique({
@@ -895,146 +941,6 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   // updateVote: (parent, { pollId, data }, { prisma, req }) => {
   //   return prisma.pollVote.update({ userId: req.userId, ...data })
-  // },
-
-  // updateComment: (parent, { id, data }, { prisma, req }) => {
-  //   return prisma.comment.update({
-  //     data: { content: data.cotent },
-  //     where: { id: parseInt(id) }
-  //   })
-  // },
-
-  // createVotePost: async function (parent, { pollId, choiceId, data }, { prisma, req }) {
-  //   return prisma.post.create({
-  //     data: {
-  //       cat: data.cat,
-  //       text: data.text,
-  //       user: { connect: { id: req.userId } },
-  //       poll: pollId ? { connect: { id: parseInt(pollId) } } : undefined,
-  //       symbols: { connect: (data.symbolIds as string[]).map(x => ({ name: x })) },
-  //       count: { create: {} },
-  //       votes: {
-  //         create: [
-  //           {
-  //             user: { connect: { id: req.userId } },
-  //             poll: { connect: { id: parseInt(pollId) } },
-  //             choice: { connect: { id: parseInt(choiceId) } }
-  //           }
-  //         ]
-  //       }
-  //     },
-  //     include: {
-  //       count: true,
-  //       symbols: true,
-  //       votes: true,
-  //       // poll: true,
-  //     },
-  //   })
-  // },
-
-  // createPoll: async (parent, { data }, { prisma, req }) => {
-  //   const start = dayjs().startOf('d')
-  //   const end = start.add(data.nDays, 'd')
-  //   return prisma.poll.create({
-  //     data: {
-  //       cat: data.cat,
-  //       title: data.title,
-  //       text: data.text,
-  //       start: start.toDate(),
-  //       end: end.toDate(),
-  //       nDays: data.nDays,
-  //       choices: {
-  //         create: data.choices.map((e: String) => (
-  //           {
-  //             text: e,
-  //             user: { connect: { id: req.userId } }
-  //           }
-  //         ))
-  //       },
-  //       user: { connect: { id: req.userId } },
-  //       count: { create: {} },
-  //       symbols: { connect: (data.symbolIds as string[]).map(e => ({ name: e })) },
-  //     },
-  //     include: {
-  //       choices: true,
-  //       symbols: true,
-  //       count: true,
-  //       posts: { include: { count: true } },
-  //     },
-  //   })
-  // },
-
-  // createPollLike: async (parent, { pollId, data }, { prisma, req }) => {
-  //   const like = await prisma.pollLike.create({
-  //     data: {
-  //       choice: data.choice,
-  //       user: { connect: { id: req.userId } },
-  //       poll: { connect: { id: parseInt(pollId) } },
-  //     }
-  //   })
-  // const count = await prisma.pollCount.findUnique({ where: { pollId: like.pollId } })
-  //   if (count === null) throw new Error('Something went wrong')
-
-  //   const delta = deltaLike(like)
-  //   const updatedCount = await prisma.pollCount.update({
-  //     data: {
-  //       nUps: count.nUps + delta.dUps,
-  //       nDowns: count.nDowns + delta.dDowns,
-  //     },
-  //     where: { pollId: like.pollId }
-  //   })
-  //   return { like, count: updatedCount }
-  // },
-
-  // updatePollLike: async (parent, { id, data }, { prisma, req }) => {
-  //   const oldLike = await prisma.pollLike.findOne({
-  //     where: { id: parseInt(id) }
-  //   })
-  //   if (oldLike === null || data.choice === oldLike.choice)
-  //     throw new Error('No matched data')
-
-  //   const like = await prisma.pollLike.update({
-  //     data: { choice: data.choice },
-  //     where: { id: oldLike.id }
-  //   })
-
-  //   const delta = deltaLike(like, oldLike)
-  //   const count = await prisma.pollCount.findOne({ where: { pollId: like.pollId } })
-  //   if (count === null) throw new Error('Something went wrong')
-
-  //   const updatedCount = await prisma.pollCount.update({
-  //     data: {
-  //       nUps: count.nUps + delta.dUps,
-  //       nDowns: count.nDowns + delta.dDowns,
-  //     },
-  //     where: { pollId: like.pollId }
-  //   })
-  //   return { like, count: updatedCount }
-  // },
-
-  // createCommit: (parent, { data }, { prisma, req }) => {
-  //   // invite random reviewers by creating commitReview
-  //   return prisma.comment.create({ userId: req.userId, ...data })
-  // },
-
-  // updateCommit: (parent, { id, data }, { prisma, req }) => {
-  //   return prisma.comment.create({ userId: req.userId, ...data })
-  // },
-
-  // updateCommitReview: (parent, { id, data }, { prisma, req }) => {
-  //   return prisma.comment.create({ userId: req.userId, ...data })
-  // },
-
-  // applyCommitReview: (parent, { id, data }, { prisma, req }) => {
-  //   return prisma.comment.create({ userId: req.userId, ...data })
-  // },
-
-  // createFollow: (parent, { symbolId, data }, { prisma, req }) => {
-  //   return prisma.comment.create({ userId: req.userId, ...data })
-  // },
-
-  // updateFollow: (parent, { symbolId, data }, { prisma, req }) => {
-  //   return prisma.comment.create({ userId: req.userId, ...data })
   // },
 }
 

@@ -15,7 +15,7 @@ npx syncpack list-mismatches --source "packages/*/package.json" --source "apps/*
 npx syncpack fix-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
 
 yarn install  # install all packages
-yarn run build-pkgs  # compile & build side-packages so apps can import
+yarn run build-packages  # compile & build side-packages so apps can import
 ```
 
 # Use Docker
@@ -212,7 +212,7 @@ v0.2
   - [pending] add card emojis
 - /editor
   - parse url, eg https://arxiv.org/abs/2112.00114
-  - auto-complete brackets, eg [[]], (()), ->, ##
+  - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
   - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
   - (?) root li without bullet icon?
 - inline-discuss `#a discussion topic here#`
@@ -221,7 +221,7 @@ v0.2
     - https://github.com/discourse/discourse/tree/main/app/models
   - editor parser, inline element
   - (ui) modal
-  - [working] (bk) prisma model, graphql api
+  - [v] (bk) prisma model, graphql api, resolvers
 - inline-comment `- some input # here is a comment, ignores using '...' when exceeding one line`
 - inline-rate
   - user can also rate

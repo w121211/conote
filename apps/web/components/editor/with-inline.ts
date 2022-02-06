@@ -14,26 +14,6 @@ const toInlineElement = (item: InlineItem): CustomInlineElement | CustomText => 
   return inline
 }
 
-export const parseLcAndReplace = (props: { editor: Editor; lcEntry: NodeEntry<LcElement> }): void => {
-  const {
-    editor,
-    lcEntry: [lcNode, lcPath],
-  } = props
-  const { inlines } = BulletParser.parseBulletHead({ str: Node.string(lcNode) })
-
-  if (inlines.filter(e => e.type !== 'text').length === 0) {
-    return // all inlines are text, no need to replace
-  }
-
-  const headInlines = inlines.map(e => toInlineElement(e))
-  Transforms.removeNodes(editor, {
-    at: lcPath,
-    match: (n, p) => Path.isChild(p, lcPath),
-  }) // 移除 lc 原本的 children 並插入新的 inlines
-  // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
-  Transforms.insertNodes(editor, headInlines, { at: [...lcPath, 0] })
-}
-
 export const isInlineElement = (element: CustomElement): element is CustomInlineElement => {
   const inlineTypes = ['mirror', 'poll', 'filtertag', 'symbol', 'rate']
   return inlineTypes.includes(element.type)
@@ -47,6 +27,34 @@ export const withInline = (editor: Editor): Editor => {
   }
 
   return editor
+}
+
+export const wrapToInlines = ({
+  editor,
+  lcEntry: [lcNode, lcPath],
+}: {
+  editor: Editor
+  lcEntry: NodeEntry<LcElement>
+}): void => {
+  if (lcNode.children.find(e => e.type !== undefined)) {
+    return // at least one inline element existed in lc, no need to wrap again
+  }
+
+  const str = Node.string(lcNode)
+  const { inlines } = BulletParser.parseBulletHead({ str })
+  if (inlines.filter(e => e.type !== 'text').length === 0) {
+    return // all inlines are text, no need to replace
+  }
+  const headInlines = inlines.map(e => toInlineElement(e))
+
+  Editor.withoutNormalizing(editor, () => {
+    Transforms.removeNodes(editor, {
+      at: lcPath,
+      match: (n, p) => Path.isChild(p, lcPath),
+    }) // remove lc children & insert inlines
+    // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
+    Transforms.insertNodes(editor, headInlines, { at: [...lcPath, 0] })
+  })
 }
 
 // export function parseChildren(lis: LiElement[]): LiElement[] {

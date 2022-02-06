@@ -3,8 +3,8 @@ import { isEqual } from 'lodash'
 import { PrismaClient } from '@prisma/client'
 import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
 import { Bullet } from '../components/bullet/bullet'
-import { getBotEmail } from '../lib/models/user'
-import { CommitModel } from '../lib/models/commit'
+import { getBotEmail } from '../lib/models/user-model'
+import { CommitModel } from '../lib/models/commit-model'
 
 // fake incremental id
 let i = 0

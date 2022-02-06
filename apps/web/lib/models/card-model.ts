@@ -1,9 +1,9 @@
 import { Card, Link, Sym, SymType } from '@prisma/client'
 import { FetchClient } from '../fetcher/fetcher'
 import prisma from '../prisma'
-import { CardStateModel, CardStateParsed } from './card-state'
-import { LinkService } from './link'
-import { SymModel } from './sym'
+import { CardStateModel, CardStateParsed } from './card-state-model'
+import { LinkService } from './link-model'
+import { SymModel } from './sym-model'
 
 export type CardPrarsed = Omit<Card, 'meta'> & {
   meta: CardMeta
