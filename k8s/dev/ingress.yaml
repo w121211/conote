@@ -1,17 +1,3 @@
-# apiVersion: extensions/v1beta1
-# kind: Ingress
-# metadata:
-#   name: ingress
-#   # annotations:
-#   #   dev.okteto.com/generate-host: 'true'
-# spec:
-#   rules:
-#     - http:
-#         paths:
-#           - path: /
-#             backend:
-#               serviceName: web
-#               servicePort: 3000
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

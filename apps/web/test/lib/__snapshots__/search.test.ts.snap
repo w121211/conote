@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SearchSymbolService.search() 1`] = `
+Array [
+  "$AI",
+  "$ICE",
+  "$IPOE",
+  "$WISH",
+  "$ABBV",
+  "$ABNB",
+  "$ADBE",
+  "$AAPL",
+  "$DIS",
+  "$NIO",
+  "$COIN",
+  "[[PIPE]]",
+  "$NUAN",
+  "$NDAQ",
+  "$DMYI",
+  "[[Unit]]",
+  "[[Warrant]]",
+  "[[pointbet]]",
+  "$UFPI",
+  "[[SPAC]]",
+  "[[SoFi]]",
+  "[[Bill Miller]]",
+]
+`;
+
+exports[`SearchSymbolService.search() 2`] = `
+Array [
+  "$AI",
+  "$ICE",
+  "$IPOE",
+  "$WISH",
+  "$ABBV",
+  "$ABNB",
+  "$ADBE",
+  "$AAPL",
+  "$DIS",
+  "$NIO",
+  "$COIN",
+  "$NUAN",
+  "$NDAQ",
+  "$DMYI",
+  "$UFPI",
+]
+`;
+
+exports[`SearchSymbolService.search() 3`] = `
+Array [
+  "[[PIPE]]",
+  "[[Unit]]",
+  "[[Warrant]]",
+  "[[pointbet]]",
+  "[[SPAC]]",
+  "[[SoFi]]",
+  "[[Bill Miller]]",
+]
+`;
+
+exports[`SearchSymbolService.search() 4`] = `
+Array [
+  "[[半導體]]",
+]
+`;
+
+exports[`SearchSymbolService.search() 5`] = `
+Array [
+  "[[半導體]]",
+]
+`;

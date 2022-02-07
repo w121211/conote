@@ -1,3 +1,11 @@
+/**
+ * Run
+ * ```
+ * $ yarn run migrate # init db, one-time only
+ * $ yarn run seed
+ * ```
+ */
+
 import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'

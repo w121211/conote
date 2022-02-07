@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
-import { Bullet } from '../../../components/bullet/types'
+import { Bullet } from '../../../components/bullet/bullet'
 import prisma from '../../../lib/prisma'
 import { clean, TestDataHelper, TESTUSERS } from '../../test-helpers'
-import { CardDigestModel } from '../../../lib/models/card-digest'
+import { CardDigestModel } from '../../../lib/models/card-digest-model'
 
 // let fetcher: FetchClient
 

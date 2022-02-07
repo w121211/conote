@@ -1,31 +1,31 @@
 /**
  * @see https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
  */
-import { useEffect, useState } from 'react'
-import { useLatestCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
+import { useState } from 'react'
+import { useCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
 import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/new-hot-list'
 import CardDigestComponent from '../components/card-digest-component'
 
 export const LatestCards = (): JSX.Element | null => {
-  const { data, loading, error, fetchMore } = useLatestCardDigestsQuery() // { fetchPolicy: 'cache-and-network' }
+  const { data, loading, error, fetchMore } = useCardDigestsQuery() // { fetchPolicy: 'cache-and-network' }
   const [hasMore, setHasMore] = useState<boolean>(true)
 
   if (loading) {
     return null
   }
-  if (!data || data.latestCardDigests === undefined) {
+  if (!data || data.cardDigests === undefined) {
     return null
   }
   if (error) {
     return <p>Something goes wrong...</p>
   }
-  if (data.latestCardDigests.length === 0) {
+  if (data.cardDigests.length === 0) {
     return <p>No cards</p>
   }
 
-  const afterCommitId = data.latestCardDigests[data.latestCardDigests.length - 1].commitId
+  const afterCommitId = data.cardDigests[data.cardDigests.length - 1].commitId
 
   // async function onClickMore() {
   //   const result = await fetchMore({ variables: { afterId } })
@@ -93,7 +93,7 @@ export const LatestCards = (): JSX.Element | null => {
         ]}
         author={'鉅亨網編譯羅昀玫'}
       /> */}
-      {data.latestCardDigests.map((e, i) => (
+      {data.cardDigests.map((e, i) => (
         <CardDigestComponent key={i} digest={e} />
       ))}
       {hasMore ? (
@@ -105,7 +105,7 @@ export const LatestCards = (): JSX.Element | null => {
               className={`btn-primary w-full text-center`}
               onClick={async () => {
                 const result = await fetchMore({ variables: { afterCommitId } })
-                if (result.data.latestCardDigests.length === 0) {
+                if (result.data.cardDigests.length === 0) {
                   setHasMore(false)
                 }
               }}

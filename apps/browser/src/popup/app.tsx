@@ -1,13 +1,13 @@
-import { browser, Storage } from 'webextension-polyfill-ts'
+import browser, { Storage } from 'webextension-polyfill'
 import React, { useCallback, useEffect, useState } from 'react'
 import { ApolloClient, ApolloProvider, createHttpLink, NormalizedCacheObject } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
-import { CachePersistor, PersistentStorage, LocalStorageWrapper } from 'apollo3-cache-persist'
-import { AppState, useAuth0 } from '@auth0/auth0-react'
+// import { CachePersistor, PersistentStorage, LocalStorageWrapper } from 'apollo3-cache-persist'
+// import { AppState, useAuth0 } from '@auth0/auth0-react'
 import { cache } from './cache'
 import { useMeQuery, MeQuery } from '../../../web/apollo/query.graphql'
 import { CardPage } from './card-page'
-import '../../../web/style/global.scss'
+// import '../../../web/style/global.scss'
 // import './app.css'
 
 // class BrowserStorageWrapper implements PersistentStorage {
@@ -32,12 +32,12 @@ import '../../../web/style/global.scss'
 //   }
 // }
 
-const onRedirectCallback = (appState: AppState) => {
-  // If using a Hash Router, you need to use window.history.replaceState to
-  // remove the `code` and `state` query parameters from the callback url.
-  window.history.replaceState({}, document.title, window.location.pathname)
-  // history.replace((appState && appState.returnTo) || window.location.pathname)
-}
+// const onRedirectCallback = (appState: AppState) => {
+//   // If using a Hash Router, you need to use window.history.replaceState to
+//   // remove the `code` and `state` query parameters from the callback url.
+//   window.history.replaceState({}, document.title, window.location.pathname)
+//   // history.replace((appState && appState.returnTo) || window.location.pathname)
+// }
 
 const Protected = ({ children }: { children: React.ReactNode }): JSX.Element | null => {
   const { data, refetch } = useMeQuery({ fetchPolicy: 'network-only', nextFetchPolicy: 'cache-first' })
@@ -90,19 +90,20 @@ const Protected = ({ children }: { children: React.ReactNode }): JSX.Element | n
 
 export const App = (): JSX.Element => {
   const [client, setClient] = useState<ApolloClient<NormalizedCacheObject>>()
-  const [persistor, setPersistor] = useState<CachePersistor<NormalizedCacheObject>>()
+  // const [persistor, setPersistor] = useState<CachePersistor<NormalizedCacheObject>>()
+
   // console.log('test')
   useEffect(() => {
     async function init() {
-      const newPersistor = new CachePersistor({
-        cache,
-        storage: new LocalStorageWrapper(localStorage),
-        // storage: new LocalStorageWrapper(window.localStorage),
-        // storage: new BrowserStorageWrapper(browser.storage.local),
-        debug: true,
-        trigger: 'write',
-      })
-      await newPersistor.restore()
+      // const newPersistor = new CachePersistor({
+      //   cache,
+      //   storage: new LocalStorageWrapper(localStorage),
+      //   // storage: new LocalStorageWrapper(window.localStorage),
+      //   // storage: new BrowserStorageWrapper(browser.storage.local),
+      //   debug: true,
+      //   trigger: 'write',
+      // })
+      // await newPersistor.restore()
 
       const httpLink = createHttpLink({
         uri: 'http://localhost:3000/api/graphql',
@@ -139,7 +140,7 @@ export const App = (): JSX.Element => {
         // typeDefs,
       })
 
-      setPersistor(newPersistor)
+      // setPersistor(newPersistor)
       setClient(client)
     }
 
@@ -147,10 +148,10 @@ export const App = (): JSX.Element => {
     browser.runtime.sendMessage({ popupMounted: true })
   }, [])
 
-  const clearCache = useCallback(() => {
-    if (!persistor) return
-    persistor.purge()
-  }, [persistor])
+  // const clearCache = useCallback(() => {
+  //   if (!persistor) return
+  //   persistor.purge()
+  // }, [persistor])
 
   const reload = useCallback(() => {
     window.location.reload()

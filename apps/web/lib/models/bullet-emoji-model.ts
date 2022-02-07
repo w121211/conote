@@ -1,7 +1,7 @@
 import { BulletEmoji, BulletEmojiCount, BulletEmojiLike, LikeChoice } from '@prisma/client'
 import { EmojiCode } from 'graphql-let/__generated__/__types__'
 import prisma from '../prisma'
-import { EmojiLike } from './emoji-like'
+import { EmojiLike } from './emoji-like-model'
 
 export const BulletEmojiModel = {
   async create({ bulletId, code, userId }: { bulletId: string; code: EmojiCode; userId: string }): Promise<{
@@ -71,11 +71,11 @@ export const BulletEmojiModel = {
           },
         })
 
-    const { dUp, dDown } = EmojiLike.compare(nextLike, curLike ?? undefined)
+    const { dUp } = EmojiLike.compareOld(nextLike, curLike ?? undefined)
     const nextCount = await prisma.bulletEmojiCount.update({
       data: {
         nUps: curCount.nUps + dUp,
-        nDowns: curCount.nDowns + dDown,
+        // nDowns: curCount.nDowns + dDown,
       },
       where: { id: curCount.id },
     })

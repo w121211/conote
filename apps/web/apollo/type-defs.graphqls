@@ -4,7 +4,7 @@ scalar DateTime
 scalar JSON
 
 type Query {
-  # 以 ID 或 name 查找 (若兩者皆給以 ID 查找)，若無返回 null
+  # search by id or name, if not found return null
   author(id: ID, name: String): Author
 
   bullet(id: ID!): Bullet
@@ -12,33 +12,39 @@ type Query {
   # all emojis of a bullet
   bulletEmojis(bulletId: ID!): [BulletEmoji!]!
 
-  # 以 id, sym, or url 查找，若無返回 null，以 url 查找時，若無會自動創一個 card
+  # search by id, symbol, or url, if id or symbol not found return nulll, if url not found will try to fetch and create a new card
   card(id: ID, symbol: String, url: String): Card
 
-  # 查無返回 null
+  # if not found return null
   cardState(id: ID!): CardState
 
-  # all emojis of a card
   cardEmojis(cardId: ID!): [CardEmoji!]!
 
-  # 若查無返回 null
-  # cardMeta(symbol: String!): CardMeta
+  # latest card digests
+  cardDigests(afterCommitId: String): [CardDigest!]!
 
-  # latestCommits(afterId: String): [Commit!]!
-  latestCardDigests(afterCommitId: String): [CardDigest!]!
+  # cardMeta(symbol: String!): CardMeta  # if not found return null
 
-  # latestBullets(afterId: String): [Commit!]!
+  discuss(id: ID!): Discuss
+
+  discussEmojis(discussId: ID!): [DiscussEmoji!]!
+
+  discussPosts(discussId: ID!): [DiscussPost!]!
+
+  discussPostEmojis(discussPostId: ID!): [DiscussPostEmoji!]!
 
   link(id: ID, url: String): Link
 
   me: User!
 
-  # 若沒有 like 過會返回 null
   myBulletEmojiLike(bulletEmojiId: ID!): BulletEmojiLike
 
   myCardEmojiLike(cardEmojiId: ID!): CardEmojiLike
 
-  # 可重複 rate
+  myDiscussEmojiLike(discussEmojiId: ID!): DiscussEmojiLike
+
+  myDiscussPostEmojiLike(discussPostEmojiId: ID!): DiscussPostEmojiLike
+
   myRates(symId: ID!): [Rate!]!
 
   # 因為目前可重複投票，所以同一個 poll 可能會有多個 votes
@@ -52,6 +58,9 @@ type Query {
   searchTicker(term: String!): [String!]!
 
   searchTopic(term: String!): [String!]!
+
+  # fuzzy search discuss title by given term
+  searchDiscuss(term: String!): [String!]!
 
   rate(id: ID!): Rate
 
@@ -134,19 +143,33 @@ type Query {
 }
 
 type Mutation {
-  # 若 emoji 已經創，返回該 emoji 並 like
+  # if emoji has existed, like the emoji and return
   createBulletEmoji(bulletId: ID!, code: EmojiCode!): CreateBulletEmojiResponse!
-  upsertBulletEmojiLike(bulletEmojiId: ID!, data: LikeInput!): UpsertBulletEmojiLikeResponse!
 
-  # createBoard(cardId: ID!, bulletId: ID!, data: BoardInput!): CreateBoardResponse!
+  # create or update an emoji-up
+  upsertBulletEmojiLike(bulletEmojiId: ID!, data: LikeInput!): UpsertBulletEmojiLikeResponse!
 
   createCardEmoji(cardId: ID!, code: EmojiCode!): CreateCardEmojiResponse!
   upsertCardEmojiLike(cardEmojiId: ID!, data: LikeInput!): UpsertCardEmojiLikeResponse!
 
-  updateCardMeta(cardId: ID!, data: CardMetaInput!): CardMeta!
+  # updateCardMeta(cardId: ID!, data: CardMetaInput!): CardMeta!
 
   # @throw validation error
   createCommit(data: CommitInput!): Commit!
+
+  createDiscuss(cardId: ID!, data: DiscussInput!): Discuss!
+  updateDiscuss(id: ID!, data: DiscussInput!): Discuss!
+
+  connectDiscussToCard(discussId: ID!, cardId: ID!, disconnect: Boolean): Boolean!
+
+  createDiscussEmoji(discussId: ID!, code: EmojiCode!): CreateDiscussEmojiResponse!
+  upsertDiscussEmojiLike(discussEmojiId: ID!, liked: Boolean!): UpsertDiscussEmojiLikeResponse!
+
+  createDiscussPost(discussId: ID!, data: DiscussPostInput!): DiscussPost!
+  updateDiscussPost(id: ID!, data: DiscussPostInput!): DiscussPost!
+
+  createDiscussPostEmoji(discussPostId: ID!, code: EmojiCode!): CreateDiscussPostEmojiResponse!
+  upsertDiscussPostEmojiLike(discussPostEmojiId: ID!, liked: Boolean!): UpsertDiscussPostEmojiLikeResponse!
 
   createPoll(data: PollInput!): Poll!
 
@@ -346,19 +369,71 @@ type Commit {
   stateIdToCidDictEntryArray: [DictEntryArray!]! # for client to match committed docs
 }
 
-type CreateBulletEmojiResponse {
-  emoji: BulletEmoji!
-  like: BulletEmojiLike! # 創 emoji 會同時創 emoji-like，表示 user 點讚此 emoji
-}
-
-type CreateCardEmojiResponse {
-  emoji: CardEmoji!
-  like: CardEmojiLike! # 創 emoji 會同時創 emoji-like，表示 user 點讚此 emoji
-}
-
 type DictEntryArray {
   k: String!
   v: String!
+}
+
+type Discuss {
+  id: ID!
+  userId: String!
+  status: DiscussStatus!
+  meta: JSON!
+  title: String!
+  content: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  count: DiscussCount!
+}
+
+type DiscussCount {
+  id: ID!
+  nPosts: Int!
+}
+
+type DiscussEmoji {
+  id: ID!
+  code: EmojiCode!
+  count: DiscussEmojiCount!
+}
+
+type DiscussEmojiCount {
+  id: ID!
+  nUps: Int!
+}
+
+type DiscussEmojiLike {
+  id: ID!
+  discussEmojiId: Int!
+  liked: Boolean!
+  updatedAt: DateTime!
+}
+
+type DiscussPost {
+  id: String!
+  userId: String!
+  status: DiscussPostStatus!
+  content: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DiscussPostEmoji {
+  id: ID!
+  code: EmojiCode!
+  count: DiscussPostEmojiCount!
+}
+
+type DiscussPostEmojiCount {
+  id: ID!
+  nUps: Int!
+}
+
+type DiscussPostEmojiLike {
+  id: ID!
+  discussPostEmojiId: Int!
+  liked: Boolean!
+  updatedAt: DateTime!
 }
 
 type Link {
@@ -435,16 +510,6 @@ type PollCount {
   # failedMsg: String
 }
 
-type UpsertBulletEmojiLikeResponse {
-  like: BulletEmojiLike!
-  count: BulletEmojiCount!
-}
-
-type UpsertCardEmojiLikeResponse {
-  like: CardEmojiLike!
-  count: CardEmojiCount!
-}
-
 type User {
   id: ID!
   email: String!
@@ -459,6 +524,46 @@ type Vote {
   # reward: Float
   # createdAt: DateTime!
   # updatedAt: DateTime!
+}
+
+type CreateBulletEmojiResponse {
+  emoji: BulletEmoji!
+  like: BulletEmojiLike!
+}
+
+type UpsertBulletEmojiLikeResponse {
+  like: BulletEmojiLike!
+  count: BulletEmojiCount!
+}
+
+type CreateCardEmojiResponse {
+  emoji: CardEmoji!
+  like: CardEmojiLike!
+}
+
+type UpsertCardEmojiLikeResponse {
+  like: CardEmojiLike!
+  count: CardEmojiCount!
+}
+
+type CreateDiscussEmojiResponse {
+  emoji: DiscussEmoji!
+  like: DiscussEmojiLike!
+}
+
+type UpsertDiscussEmojiLikeResponse {
+  like: DiscussEmojiLike!
+  count: DiscussEmojiCount!
+}
+
+type CreateDiscussPostEmojiResponse {
+  emoji: DiscussPostEmoji!
+  like: DiscussPostEmojiLike!
+}
+
+type UpsertDiscussPostEmojiLikeResponse {
+  like: DiscussPostEmojiLike!
+  count: DiscussPostEmojiCount!
 }
 
 # type PollMeta {
@@ -576,6 +681,16 @@ input CommitInput {
   cardStateInputs: [CardStateInput!]!
 }
 
+input DiscussInput {
+  meta: JSON
+  title: String!
+  content: String
+}
+
+input DiscussPostInput {
+  content: String!
+}
+
 input LikeInput {
   choice: LikeChoice!
 }
@@ -667,19 +782,28 @@ input VoteInput {
 #   followed: Boolean!
 # }
 
-enum SourceType {
-  VIDEO
-  POST
-  AUTHOR
-  OTHER
-}
-
 enum CardStatus {
   ACTIVE
   ARCHIVE
   REDIRECT
   REPORTED
   DUPLICATED
+}
+
+enum DiscussStatus {
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
+}
+
+enum DiscussPostStatus {
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
 }
 
 enum EmojiCode {
@@ -691,7 +815,7 @@ enum EmojiCode {
 
 enum LikeChoice {
   UP
-  DOWN
+  # DOWN
   NEUTRAL
 }
 
@@ -720,6 +844,13 @@ enum RateChoice {
   LONG
   SHORT
   HOLD
+}
+
+enum SourceType {
+  VIDEO
+  POST
+  AUTHOR
+  OTHER
 }
 
 enum SymType {

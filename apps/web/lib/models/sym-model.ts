@@ -21,6 +21,33 @@ const reTopic = /^\[\[[^\]]+\]\]$/
 const reUrl = /^@[a-zA-Z0-9:/.]+/
 
 export const SymModel = {
+  async getAll(): Promise<Sym[]> {
+    console.log('Retreiving all syms from database...')
+
+    let syms: Sym[] = []
+    let cursor: string | undefined = undefined
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // eslint-disable-next-line no-await-in-loop
+      const res: Sym[] = await prisma.sym.findMany({
+        where: {
+          OR: [{ type: SymType.TICKER }, { type: SymType.TOPIC }],
+        },
+        take: 100,
+        skip: cursor ? 1 : undefined, // skip cursor itself
+        orderBy: { id: 'asc' },
+        cursor: cursor ? { id: cursor } : undefined,
+      })
+      if (res.length === 0) {
+        break
+      }
+      syms = syms.concat(res)
+      cursor = res[res.length - 1].id
+    }
+    return syms
+  },
+
   async getOrCreate(symbol: string): Promise<Sym> {
     const parsed = this.parse(symbol)
     return prisma.sym.upsert({

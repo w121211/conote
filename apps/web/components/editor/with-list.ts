@@ -179,7 +179,7 @@ export function unindent(editor: Editor, entry: NodeEntry<LiElement>): void {
   Transforms.setNodes<LcElement>(editor, { change: 'change-parent' }, { at: lcPath(grandparentPath) })
 }
 
-export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
+export const onKeyDown = (event: React.KeyboardEvent, editor: Editor): void => {
   const { selection } = editor
 
   // if (event.key === 'Shift') {
@@ -278,20 +278,21 @@ export function onKeyDown(event: React.KeyboardEvent, editor: Editor): void {
   }
 }
 
-export function withList(editor: Editor): Editor {
-  const { deleteBackward, deleteForward, insertBreak, insertData, insertText, normalizeNode } = editor
+export const withList = (editor: Editor): Editor => {
+  const { deleteBackward, deleteForward, insertBreak, insertData, normalizeNode } = editor
 
   /**
-   * - 此行freeze，不動作
-   * - cursor在行首
-   *   - 有同階層前行
-   *     - 前行有子層，不動作
-   *     - 前行沒子層
-   *       - 此行有子層，與前行合併，並將子層移至前行子層
-   *       - 此行沒子層，與前行合併
-   *   - 沒有同階層前行，前行是父層
-   *     - 此行有子層，不動作
-   *     - 此行沒有子層，與前行合併，delete backward
+   * Delete backward rules:
+   * - cursor at line-start
+   *   - previous line is a neighbor
+   *     - previous line has children -> no action
+   *     - previous line has no children
+   *       - this line has children -> merge with previous line, and move this line's children to previous
+   *       - this line has no children -> merge with previous line
+   *   - previous line is a parent
+   *     - this line has children -> no action
+   *     - this line has no children -> merge with previous line
+   *
    * - 此行為空，同cursor在行首
    * - cursor在行中、行尾，delete backward
    */
@@ -309,23 +310,11 @@ export function withList(editor: Editor): Editor {
         // const input = Editor.string(editor, path)
         const point = Editor.point(editor, selection)
 
-        // 此行 freeze，不動作
-        // if (lc.freeze) return
-
-        // TODO: 需要考慮op
-
         if (Editor.isStart(editor, point, lcPath(liPath))) {
-          // cursor 在 lc 行首
+          // cursor at line-start
 
-          // if (lc.root) {
-          //   // li root，刪除ul & li
-          //   removePrevRootLi(editor, path)
-          //   return
-          // }
           const prevLiEntry = Editor.previous<LiElement>(editor, { at: liPath })
-
           if (prevLiEntry) {
-            // 有同階層的前行
             const [prevLi, prevLiPath] = prevLiEntry
 
             if (prevLi.children[1]) {
@@ -359,12 +348,17 @@ export function withList(editor: Editor): Editor {
   }
 
   /**
-   * cases:
-   * - this line is empty, next line have inlines -> remove this li
-   * - others -> default
+   * Delete forward rules:
+   * - cursor at line-end
+   *   - this line has no children -> next line is a neighbor
+   *     - next line (child) has no children => merge with this line
+   *     - next line (child) has children => no action
+   *   - this line has children -> next line is a child
+   *     - next line has no children => merge with this line
+   *     - next line has children => no action
    */
   editor.deleteForward = (...args) => {
-    const [unit] = args
+    // const [unit] = args
     const { selection } = editor
 
     if (selection && Range.isCollapsed(selection)) {
@@ -372,10 +366,43 @@ export function withList(editor: Editor): Editor {
 
       if (liEntry) {
         const [li, liPath] = liEntry
-        const input = Editor.string(editor, liPath)
-        if (input.length === 0) {
-          // if next li has inlines
-          // TODO
+        const [, ul] = li.children
+        const point = Editor.point(editor, selection)
+
+        if (Editor.isEnd(editor, point, lcPath(liPath))) {
+          // cursor at line-end
+
+          if (ul) {
+            // this line has children
+            const nextChildLi = ul.children[0]
+            const nextChildLiPath = [...ulPath(liPath), 0]
+            if (nextChildLi && nextChildLi.children[1] === undefined) {
+              const nextChildLiLcPath = lcPath(nextChildLiPath)
+              Transforms.unwrapNodes(editor, {
+                at: nextChildLiLcPath,
+                match: (n, p) => Element.isElement(n) && Path.isChild(p, nextChildLiLcPath),
+              })
+              deleteForward(...args) // next line (child) has no children => merge with this line
+              return
+            }
+            return // next line (child) has children => no action
+          }
+
+          const nextLiEntry = Editor.next<LiElement>(editor, { at: liPath })
+          if (nextLiEntry) {
+            const [nextLi, nextLiPath] = nextLiEntry
+            if (nextLi.children[1]) {
+              return // next line has children => no action
+            } else {
+              const nextLiLcPath = lcPath(nextLiPath)
+              Transforms.unwrapNodes(editor, {
+                at: nextLiLcPath,
+                match: (n, p) => Element.isElement(n) && Path.isChild(p, nextLiLcPath),
+              })
+              deleteForward(...args) // next line has no children => merge with this line
+              return
+            }
+          }
         }
       }
     }
@@ -540,8 +567,7 @@ export function withList(editor: Editor): Editor {
       // 檢查 li 只能有 lc, ul
       assert(node.children.length <= 2, 'node.children.length <= 2')
       const [lc, ul] = node.children
-
-      console.log(node.children)
+      // console.log(node.children)
 
       assert(isLc(lc), 'isLc(lc)')
       if (ul) {

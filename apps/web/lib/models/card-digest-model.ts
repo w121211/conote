@@ -3,9 +3,9 @@ import { CardDigest as GQLCardDigest } from 'graphql-let/__generated__/__types__
 import { NodeBody, NodeChange, TreeNode, TreeService } from '@conote/docdiff'
 import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
-import { CardMeta, CardModel } from './card'
-import { CardStateModel } from './card-state'
-import { RowCardState, RowCommit } from './commit'
+import { CardMeta, CardModel } from './card-model'
+import { CardStateModel } from './card-state-model'
+import { RowCardState, RowCommit } from './commit-model'
 
 type CardDigest = {
   cardId: string

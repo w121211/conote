@@ -95,7 +95,6 @@ fragment cardEmojiCount on CardEmojiCount {
   __typename
   id
   nUps
-  nDowns
 }
 
 fragment cardEmojiLike on CardEmojiLike {
@@ -147,6 +146,83 @@ fragment commit on Commit {
     k
     v
   }
+}
+
+fragment discuss on Discuss {
+  __typename
+  id
+  userId
+  status
+  meta
+  title
+  content
+  createdAt
+  updatedAt
+  count {
+    nPosts
+  }
+}
+
+# fragment discussCount on DiscussCount {
+#   __typename
+#   id
+#   nPosts
+# }
+
+fragment discussEmoji on DiscussEmoji {
+  __typename
+  id
+  code
+  count {
+    ...discussEmojiCount
+  }
+}
+
+fragment discussEmojiCount on DiscussEmojiCount {
+  __typename
+  id
+  nUps
+}
+
+fragment discussEmojiLike on DiscussEmojiLike {
+  __typename
+  id
+  discussEmojiId
+  liked
+  updatedAt
+}
+
+fragment discussPost on DiscussPost {
+  __typename
+  id
+  userId
+  status
+  content
+  createdAt
+  updatedAt
+}
+
+fragment discussPostEmoji on DiscussPostEmoji {
+  __typename
+  id
+  code
+  count {
+    ...discussPostEmojiCount
+  }
+}
+
+fragment discussPostEmojiCount on DiscussPostEmojiCount {
+  __typename
+  id
+  nUps
+}
+
+fragment discussPostEmojiLike on DiscussPostEmojiLike {
+  __typename
+  id
+  discussPostEmojiId
+  liked
+  updatedAt
 }
 
 fragment link on Link {
@@ -331,9 +407,33 @@ query CardEmojis($cardId: ID!) {
 #   }
 # }
 
-query LatestCardDigests($afterCommitId: String) {
-  latestCardDigests(afterCommitId: $afterCommitId) {
+query CardDigests($afterCommitId: String) {
+  cardDigests(afterCommitId: $afterCommitId) {
     ...cardDigest
+  }
+}
+
+query Discuss($id: ID!) {
+  discuss(id: $id) {
+    ...discuss
+  }
+}
+
+query DiscussEmojis($discussId: ID!) {
+  discussEmojis(discussId: $discussId) {
+    ...discussEmoji
+  }
+}
+
+query DiscussPosts($discussId: ID!) {
+  discussPosts(discussId: $discussId) {
+    ...discussPost
+  }
+}
+
+query DiscussPostEmojis($discussPostId: ID!) {
+  discussPostEmojis(discussPostId: $discussPostId) {
+    ...discussPostEmoji
   }
 }
 
@@ -370,6 +470,18 @@ query MyBulletEmojiLike($bulletEmojiId: ID!) {
 query MyCardEmojiLike($cardEmojiId: ID!) {
   myCardEmojiLike(cardEmojiId: $cardEmojiId) {
     ...cardEmojiLike
+  }
+}
+
+query MyDiscussEmojiLike($discussEmojiId: ID!) {
+  myDiscussEmojiLike(discussEmojiId: $discussEmojiId) {
+    ...discussEmojiLike
+  }
+}
+
+query MyDiscussPostEmojiLike($discussPostEmojiId: ID!) {
+  myDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId) {
+    ...discussPostEmojiLike
   }
 }
 
@@ -475,15 +587,87 @@ mutation UpsertCardEmojiLike($cardEmojiId: ID!, $data: LikeInput!) {
   }
 }
 
-mutation UpdateCardMeta($cardId: ID!, $data: CardMetaInput!) {
-  updateCardMeta(cardId: $cardId, data: $data) {
-    ...cardMeta
-  }
-}
+# mutation UpdateCardMeta($cardId: ID!, $data: CardMetaInput!) {
+#   updateCardMeta(cardId: $cardId, data: $data) {
+#     ...cardMeta
+#   }
+# }
 
 mutation CreateCommit($data: CommitInput!) {
   createCommit(data: $data) {
     ...commit
+  }
+}
+
+mutation CreateDiscuss($cardId: ID!, $data: DiscussInput!) {
+  createDiscuss(cardId: $cardId, data: $data) {
+    ...discuss
+  }
+}
+
+mutation UpdateDiscuss($id: ID!, $data: DiscussInput!) {
+  updateDiscuss(id: $id, data: $data) {
+    ...discuss
+  }
+}
+
+mutation ConnectDiscussToCard($discussId: ID!, $cardId: ID!, $disconnect: Boolean) {
+  connectDiscussToCard(discussId: $discussId, cardId: $cardId, disconnect: $disconnect)
+}
+
+mutation CreateDiscussEmoji($discussId: ID!, $code: EmojiCode!) {
+  createDiscussEmoji(discussId: $discussId, code: $code) {
+    emoji {
+      ...discussEmoji
+    }
+    like {
+      ...discussEmojiLike
+    }
+  }
+}
+
+mutation UpsertDiscussEmojiLike($discussEmojiId: ID!, $liked: Boolean!) {
+  upsertDiscussEmojiLike(discussEmojiId: $discussEmojiId, liked: $liked) {
+    like {
+      ...discussEmojiLike
+    }
+    count {
+      ...discussEmojiCount
+    }
+  }
+}
+
+mutation CreateDiscussPost($discussId: ID!, $data: DiscussPostInput!) {
+  createDiscussPost(discussId: $discussId, data: $data) {
+    ...discussPost
+  }
+}
+
+mutation UpdateDiscussPost($id: ID!, $data: DiscussPostInput!) {
+  updateDiscussPost(id: $id, data: $data) {
+    ...discussPost
+  }
+}
+
+mutation CreateDiscussPostEmoji($discussPostId: ID!, $code: EmojiCode!) {
+  createDiscussPostEmoji(discussPostId: $discussPostId, code: $code) {
+    emoji {
+      ...discussPostEmoji
+    }
+    like {
+      ...discussPostEmojiLike
+    }
+  }
+}
+
+mutation UpsertDiscussPostEmojiLike($discussPostEmojiId: ID!, $liked: Boolean!) {
+  upsertDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId, liked: $liked) {
+    like {
+      ...discussPostEmojiLike
+    }
+    count {
+      ...discussPostEmojiCount
+    }
   }
 }
 

@@ -1,5 +1,5 @@
 {
-  "name": "@conote/app-weblab",
+  "name": "@conote/weblab",
   "version": "0.1.0",
   "dependencies": {
     "@conote/docdiff": "^0.1.0",
