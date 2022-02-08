@@ -39,7 +39,7 @@ const grammar: Grammar = {
   topic: { pattern: reTopic },
   ticker: { pattern: reTicker },
 
-  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()\u4E00-\u9FFF]+(?=\s|$)/ },
+  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()\u4E00-\u9FFF]+#(?=\s|$)/ },
 
   url: { pattern: reURL },
 
@@ -94,7 +94,7 @@ const decorateGrammar: Grammar = {
   },
   ticker: { pattern: reTicker },
 
-  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()\u4E00-\u9FFF]+(?=\s|$)/ },
+  filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()\u4E00-\u9FFF]+#(?=\s|$)/ },
 
   url: { pattern: reURL },
 

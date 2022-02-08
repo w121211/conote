@@ -7,6 +7,7 @@ export interface Tooltip {
   width?: number
   top?: number
   className?: string
+  direction?: 'top' | 'bottom' | 'left' | 'right'
 }
 
 const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
@@ -15,6 +16,7 @@ const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
   onClose,
   top,
   className,
+  direction,
 }) => {
   // const [visibleState, setVisibleState] = useState(visible)
   const myRef = useRef<HTMLDivElement>(null)
@@ -86,7 +88,7 @@ const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
       ${visible ? 'visible opacity-100 scale-100' : 'invisible opacity-0 scale-75'}
      ${
        myRef.current
-         ? myRef.current.getBoundingClientRect().top > window.innerHeight / 2
+         ? myRef.current.getBoundingClientRect().top > window.innerHeight / 2 || direction === 'top'
            ? 'bottom-full'
            : 'top-full'
          : ''

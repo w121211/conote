@@ -96,7 +96,10 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
                 rateId={element.id}
                 initialInput={{
                   author: element.params.find(e => e.startsWith('@')) ?? '',
-                  target: element.params.find(e => e.startsWith('$')) ?? '',
+                  target: {
+                    value: element.params.find(e => e.startsWith('$'))?.substring(1) ?? '',
+                    label: element.params.find(e => e.startsWith('$'))?.substring(1) ?? '',
+                  },
                   choice: (element.params.find(e => e.startsWith('#'))?.substring(1) as RateChoice) ?? 'LONG',
                   link: '',
                 }}
@@ -105,8 +108,14 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
             ) : (
               <CreateRateForm
                 initialInput={{
-                  author: element.params.find(e => e.startsWith('@')) ?? '',
-                  target: element.params.find(e => e.startsWith('$')) ?? '',
+                  author: {
+                    value: element.params.find(e => e.startsWith('@')) ?? '',
+                    label: element.params.find(e => e.startsWith('@')) ?? '',
+                  },
+                  target: {
+                    value: element.params.find(e => e.startsWith('$'))?.substring(1) ?? '',
+                    label: element.params.find(e => e.startsWith('$'))?.substring(1) ?? '',
+                  },
                   choice: (element.params.find(e => e.startsWith('#'))?.substring(1) as RateChoice) ?? 'LONG',
                   link: '',
                 }}

@@ -56,7 +56,7 @@ const EmojiIcon = ({
           } ${className ?? ''}`}
         >
           <span
-            className={` ${liked ? 'material-icons text-blue-600' : 'material-icons-outlined text-inherit'} text-lg ${
+            className={` ${liked ? 'material-icons text-blue-600' : 'material-icons-outlined '} text-lg ${
               upDownClassName ? upDownClassName : ''
             } `}
           >
@@ -74,7 +74,7 @@ const EmojiIcon = ({
           } ${className ?? ''}`}
         >
           <span
-            className={` ${liked ? 'material-icons text-blue-600' : 'material-icons-outlined text-inherit'} text-lg ${
+            className={` ${liked ? 'material-icons text-blue-600' : 'material-icons-outlined '} text-lg ${
               upDownClassName ? upDownClassName : ''
             }`}
           >

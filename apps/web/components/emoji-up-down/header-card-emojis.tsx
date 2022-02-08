@@ -44,8 +44,8 @@ const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null =>
       {emojis.map((e, i) => {
         const foundData = emojiData?.cardEmojis.find(el => el.code === e)
         return foundData !== undefined && foundData.count.nUps > 0 ? (
-          <div className="flex items-center">
-            <CardEmojiBtn key={i} cardEmoji={foundData} />
+          <div key={i} className="flex items-center">
+            <CardEmojiBtn cardEmoji={foundData} />
             <span className={`min-w-[10px] ml-1 text-gray-500 text-sm font-['Red Hat Mono'] `}>
               {foundData.count.nUps}
             </span>

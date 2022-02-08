@@ -1,7 +1,7 @@
 /**
  * @see https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
 import MeHeaderItem from '../components/profile/me-header-item'

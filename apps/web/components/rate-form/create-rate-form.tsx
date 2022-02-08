@@ -12,7 +12,7 @@ import {
   useForm,
   useFormContext,
 } from 'react-hook-form'
-import { components, ControlProps, GroupBase, InputProps, OptionsOrGroups } from 'react-select'
+import { components, ControlProps, GroupBase, InputProps, OptionsOrGroups, StylesConfig } from 'react-select'
 import AsyncCreatableSelect from 'react-select/async-creatable'
 import Creatable from 'react-select/creatable'
 import {
@@ -44,6 +44,28 @@ export interface FormInput {
   choice: RateChoice
   target: Option
   link?: string
+}
+
+const customStyle: StylesConfig<Option, false, GroupBase<Option>> = {
+  container: base => ({ ...base, width: '100%', fontSize: '14px' }),
+  control: (base, state) => ({
+    ...base,
+    minHeight: '36px',
+    border: 'none',
+    boxShadow: 'none',
+    background: state.isFocused ? '#f5f5f5' : 'transparent',
+    ':hover': { background: '#f5f5f5' },
+  }),
+  menu: base => ({
+    ...base,
+    maxHeight: '100px',
+    boxShadow: '0 0 0 1px hsl(0deg 0% 0% / 8%), 0 4px 11px hsl(0deg 0% 0% / 10%)',
+  }),
+  menuList: base => ({ ...base, maxHeight: '100px' }),
+  singleValue: base => ({ ...base, fontSize: '14px' }),
+  option: base => ({ ...base, paddingTop: '6px', paddingBottom: '6px' }),
+
+  // input: base => ({ ...base, fontSize: '14px' }),
 }
 
 const AsyncAuthorConsumer = ({ name }: { name: string }) => {
@@ -88,7 +110,7 @@ const AsyncAuthorConsumer = ({ name }: { name: string }) => {
             }}
             components={{ DropdownIndicator: undefined }}
             placeholder=""
-            styles={{ container: base => ({ ...base, width: '100%' }) }}
+            styles={customStyle}
             ref={null}
           />
         )}
@@ -123,6 +145,8 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
   const [showModal, setShowModal] = useState(false)
   const [selectValue, setSelectValue] = useState('')
   const [searchSymbol, { data }] = useSearchAllLazyQuery()
+  const [queryCard, { data: cardData }] = useCardLazyQuery()
+
   useEffect(() => {
     if (data && data.searchAll) {
       setOptions(data.searchAll.map(e => ({ value: e, label: e })))
@@ -169,6 +193,14 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
     setShowModal(true)
   }
 
+  const onChange = (e: Option | null) => {
+    if (e) {
+      // queryCard({ variables: { symbol: e?.label } })
+      return { value: e.value.substring(1), label: e?.label.substring(1) }
+    }
+    return e
+  }
+
   return (
     <>
       <Controller
@@ -177,13 +209,10 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
         render={({ field }) => (
           <Creatable
             value={field.value}
-            onChange={e =>
-              field.onChange(() => {
-                return { value: e?.value.substring(1), label: e?.label.substring(1) }
-              })
-            }
+            onChange={e => field.onChange(onChange(e))}
             onCreateOption={onCreateOption}
             onKeyDown={onKeyDown}
+            // menuIsOpen={true}
             menuIsOpen={openMenu}
             createOptionPosition="first"
             onInputChange={onInputChange}
@@ -197,9 +226,7 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
             placeholder=""
             formatCreateLabel={handleCreateLabel}
             styles={{
-              container: base => ({ ...base, width: '100%' }),
-              menu: base => ({ ...base, maxHeight: '100px' }),
-              menuList: base => ({ ...base, maxHeight: '100px' }),
+              ...customStyle,
               valueContainer: base => ({ ...base, paddingLeft: 0 }),
               input: base => ({ ...base, textTransform: 'uppercase' }),
             }}
