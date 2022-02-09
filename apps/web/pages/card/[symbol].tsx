@@ -10,7 +10,7 @@ import Modal from '../../components/modal/modal'
 import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
-import DiscussModal from '../../components/discuss-modal'
+import DiscussModal from '../../components/discuss/discuss-modal'
 
 const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data, error, loading } = useCardQuery({ variables: { symbol } })
@@ -42,7 +42,7 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
         <BulletEditor doc={mainDoc.doc} />
       </div>
       {mainDoc.doc.cardCopy && (
-        <div className="">
+        <div className="z-50">
           <HeaderCardEmojis cardId={mainDoc.doc.cardCopy.id} />
         </div>
       )}

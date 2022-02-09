@@ -71,6 +71,16 @@ function changeTitle({ symbol, title }: DocIndex) {
       </>
     )
   }
+  if (symbol.startsWith('[[')) {
+    return (
+      <>
+        <span className="text-gray-400/70">[[</span>
+        {symbol.substring(2, symbol.length - 2)}
+
+        <span className="text-gray-400/70">]]</span>
+      </>
+    )
+  }
   return symbol
 }
 

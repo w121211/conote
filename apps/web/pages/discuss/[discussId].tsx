@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import React from 'react'
-import DiscussFullPage from '../../components/discuss-full-page'
+import DiscussFullPage from '../../components/discuss/discuss-full-page'
 import Layout from '../../components/layout'
 
 const DiscussPage = () => {

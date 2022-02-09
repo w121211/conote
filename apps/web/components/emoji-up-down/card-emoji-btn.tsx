@@ -81,15 +81,9 @@ const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Elem
           className={cardEmoji.code === 'PIN' ? 'text-red-400' : 'text-gray-400'}
           code={cardEmoji.code}
           liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
+          upDownClassName="group-hover:text-blue-600"
         />
       </button>
-      <span
-        className={`min-w-[10px] text-gray-500 text-sm font-['Red Hat Mono'] ${
-          cardEmoji.code === 'PIN' ? 'hidden' : ''
-        }`}
-      >
-        {cardEmoji.count.nUps}
-      </span>
     </div>
   )
 }

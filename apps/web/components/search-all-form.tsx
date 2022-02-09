@@ -3,7 +3,8 @@ import router, { useRouter } from 'next/router'
 import Creatable from 'react-select/creatable'
 // import { toUrlParams } from '../lib/helper'
 import { useSearchAllLazyQuery } from '../apollo/query.graphql'
-import { ActionMeta, GroupBase, StylesConfig } from 'react-select'
+import { ActionMeta, GroupBase, Options, OptionsOrGroups, StylesConfig } from 'react-select'
+import { Accessors } from 'react-select/dist/declarations/src/useCreatable'
 
 type Option = {
   label: string
@@ -70,23 +71,41 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
       setOpenMenu(false)
     }
   }
+  const handleShowCreate = (
+    inputValue: string,
+    value: Options<Option>,
+    options: OptionsOrGroups<Option, GroupBase<Option>>,
+    acc: Accessors<Option>,
+  ) => {
+    // console.log(inputValue, value, options, accor)
+    if (options.find(e => e.label === `[[${inputValue}]]`)) {
+      return false
+    }
+    return true
+  }
+  // const filterOption = (option, inputValue) => {
+  //   const { value, label } = option
+  //   console.log(option)
+
+  //   return inputValue===
+  // }
 
   // const customStyles: Partial<Styles<Option, false, GroupTypeBase<Option>>> = {
   const customStyles: StylesConfig<Option, false, GroupBase<Option>> = {
     container: (provided: any, state: any) => ({
       ...provided,
-      maxWidth: '36rem',
-      flex: '1',
-      padding: small ? '0 1rem' : '0',
+      // maxWidth: '36rem',
+      // flex: '1',
+      // padding: small ? '0 1rem' : '0',
     }),
     menu: (provided: any, state: any) => ({
       ...provided,
-      width: '100%',
-      minHeight: '30px',
+      // width: '100%',
+      // minHeight: '30px',
       // height: height + 'px' ?? 'initial',
       // marginTop: '1em',
       border: 'none',
-      borderRadius: '10px',
+      borderRadius: '4px',
       boxShadow: '0 1px 6px 0 #17171730',
     }),
     // singleValue: (provided: any) => ({
@@ -99,7 +118,7 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
     }),
     control: (provided, { isFocused }) => ({
       ...provided,
-      width: '100%',
+      // width: '100%',
 
       whiteSpace: 'nowrap',
       borderRadius: '4px',
@@ -115,7 +134,7 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
     }),
     valueContainer: (provided, state) => ({
       ...provided,
-      padding: '0 8px',
+      // padding: '0 8px',
     }),
     input: (provided, state) => ({
       ...provided,
@@ -129,7 +148,7 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
       instanceId="search-all-form"
       components={components}
       styles={customStyles}
-      isClearable
+      isValidNewOption={handleShowCreate}
       options={options}
       inputValue={inputValue}
       onInputChange={handleInput}
@@ -138,7 +157,13 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
       onCreateOption={handleCreate}
       menuIsOpen={openMenu}
       placeholder="搜尋 or 新增"
-      formatCreateLabel={inputValue => <>創建:{inputValue}</>}
+      formatCreateLabel={inputValue => {
+        if (!inputValue.startsWith('@') && !inputValue.startsWith('$') && !inputValue.startsWith('http')) {
+          return <>創建:[[{inputValue}]]</>
+        }
+        return <>創建:{inputValue}</>
+      }}
+      // filterOption={filterOption}
       // onClick={() => {
       //   setOpenMenu(prev => !prev)
       // }}
