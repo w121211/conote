@@ -1,4 +1,4 @@
-# Custom scalar，需要同步修改./apollo/schema.ts @see https://www.graphql-scalars.dev/docs/quick-start
+# Custom scalars, also need to modify ./apollo/schema.ts @see https://www.graphql-scalars.dev/docs/quick-start
 scalar BigInt
 scalar DateTime
 scalar JSON
@@ -47,12 +47,12 @@ type Query {
 
   myRates(symId: ID!): [Rate!]!
 
-  # 因為目前可重複投票，所以同一個 poll 可能會有多個 votes
+  # allow vote multiple times on the same poll
   myVotes(pollId: ID!): [Vote!]!
 
   poll(id: ID!): Poll
 
-  # 搜尋 ticker, topics，近似搜尋 TODO:ElasticSearch？
+  # search all symbols (exclude url)
   searchAll(term: String!): [String!]!
 
   searchTicker(term: String!): [String!]!

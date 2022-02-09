@@ -495,6 +495,14 @@ query SearchAll($term: String!) {
   searchAll(term: $term)
 }
 
+query SearchTicker($term: String!) {
+  searchTicker(term: $term)
+}
+
+query SearchTopic($term: String!) {
+  searchTopic(term: $term)
+}
+
 query Rate($id: ID!) {
   rate(id: $id) {
     ...rate

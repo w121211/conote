@@ -1,4 +1,6 @@
 # Config for arm64, @see https://github.com/EugenMayer/docker-sync/issues/767
+#
+# Run
 # ```
 # $ docker-sync start --config=docker-sync.arm64.yml
 # ```

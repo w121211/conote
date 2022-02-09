@@ -14,12 +14,12 @@ import { Author, Card, CardState, Link, PrismaClient, Rate, RateChoice, Sym } fr
 import { TreeService } from '@conote/docdiff'
 import { Editor as MKEditor, Markerline, splitByUrl } from '@conote/editor'
 import { InlineItemService } from '../../components/inline/inline-item-service'
-import { FetchClient } from '../../lib/fetcher/fetcher'
-import { CardMeta, CardModel } from '../../lib/models/card'
 import { TestDataHelper, TESTUSERS } from '../../test/test-helpers'
-import { RateBody, RateModel } from '../../lib/models/rate'
-import { CommitModel } from '../../lib/models/commit'
-import { CardStateBody, CardStateParsed } from '../../lib/models/card-state'
+import { FetchClient } from '../../lib/fetcher/fetcher'
+import { CardMeta, CardModel } from '../../lib/models/card-model'
+import { RateBody, RateModel } from '../../lib/models/rate-model'
+import { CommitModel } from '../../lib/models/commit-model'
+import { CardStateBody, CardStateParsed } from '../../lib/models/card-state-model'
 import { MKDoc } from './mk-doc'
 // import { Doc, DocProps } from '../../components/workspace/workspace'
 // import { getBotId } from '../../lib/models/user'
@@ -62,12 +62,12 @@ async function getNeatReply({
   }
 > {
   if (!neatReply.neatReply) throw new Error('非neatReply')
-  if (!neatReply.src) throw new Error('缺src，無法創neat-reply')
-  if (!neatReply.stampId) throw new Error('缺stampId，無法創neat-reply')
-  if (!neatReply.pollChoices) throw new Error('缺pollChoices，無法創neat-reply')
-  if (neatReply.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1，無法創neat-reply')
-  if (!neatReply.nestedCard) throw new Error('缺nestedCard，無法創neat-reply')
-  if (!neatReply.oauthor) throw new Error('缺oauthor，無法創neat-reply')
+  if (!neatReply.src) throw new Error('缺src, 無法創neat-reply')
+  if (!neatReply.stampId) throw new Error('缺stampId, 無法創neat-reply')
+  if (!neatReply.pollChoices) throw new Error('缺pollChoices, 無法創neat-reply')
+  if (neatReply.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1, 無法創neat-reply')
+  if (!neatReply.nestedCard) throw new Error('缺nestedCard, 無法創neat-reply')
+  if (!neatReply.oauthor) throw new Error('缺oauthor, 無法創neat-reply')
 
   // 取得並檢查choice-index
   const choice = neatReply.pollChoices[0]
