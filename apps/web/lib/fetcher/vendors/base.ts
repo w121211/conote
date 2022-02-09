@@ -1,4 +1,4 @@
-import got from 'got'
+import got, { HTTPError } from 'got'
 // import createMetascraper from 'metascraper'
 // import metascraperAuthor from 'metascraper-author'
 // import metascraperDate from 'metascraper-date'
@@ -10,8 +10,6 @@ import { createScraper } from '@conote/scraper'
 import yfinancePack from '@conote/scraper/dist/packs/yfinance'
 import keywordsPack from '@conote/scraper/dist/packs/keywords'
 import tickersPack from '@conote/scraper/dist/packs/tickers'
-// import keywordsPack from '@conote/scraper/src/packs/keywords'
-// import tickersPack from '@conote/scraper/src/packs/tickers'
 import { DomainFetchFunction } from './index'
 
 // const metascraper = createMetascraper([
@@ -50,27 +48,39 @@ export function parseUrl(url: string): ParseUrlResult {
   }
 }
 
-export const base: DomainFetchFunction = async function (url) {
-  const { body: html, url: finalUrl } = await got(url)
-  const { url: scrapedUrl, author, date, description, lang, title } = await metascraper({ html, url: finalUrl })
-  // const {ke}
-  const { keywords, tickers } = await extraScraper({ html, url: finalUrl })
+export const base: DomainFetchFunction = async url => {
+  try {
+    const { body: html, url: finalUrl } = await got(url)
+    const { url: scrapedUrl, author, date, description, lang, title } = await metascraper({ html, url: finalUrl })
+    const { keywords, tickers } = await extraScraper({ html, url: finalUrl })
+    const { domain } = parseUrl(finalUrl)
+    // if (domain === undefined) {
+    //   throw new Error(`Fetch error: ${url} ${finalUrl}`)
+    // }
 
-  const { domain } = parseUrl(finalUrl)
-  // if (domain === undefined) {
-  //   throw new Error(`Fetch error: ${url} ${finalUrl}`)
-  // }
-
-  return {
-    domain,
-    finalUrl: scrapedUrl,
-    srcType: 'OTHER',
-    authorName: author,
-    date,
-    description,
-    lang,
-    title,
-    keywords,
-    tickers,
+    return {
+      domain,
+      finalUrl: scrapedUrl,
+      srcType: 'OTHER',
+      authorName: author,
+      date,
+      description,
+      lang,
+      title,
+      keywords,
+      tickers,
+    }
+  } catch (err) {
+    if (err instanceof HTTPError) {
+      const { domain } = parseUrl(url)
+      return {
+        domain,
+        finalUrl: url,
+        srcType: 'OTHER',
+        error: err.message,
+      }
+    } else {
+      throw err
+    }
   }
 }

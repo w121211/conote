@@ -7,7 +7,6 @@ import {
   CreateCommitMutation,
   CreateCommitMutationVariables,
 } from '../../apollo/query.graphql'
-import { Bullet } from '../bullet/bullet'
 import { Doc } from './doc'
 import { DocIndex, DocIndexService } from './doc-index'
 import { LocalDatabaseService } from './local-database'
@@ -177,7 +176,7 @@ class Workspace {
    * Save to local IndexedDB
    */
   async save(doc: Doc): Promise<void> {
-    console.log('Saving...')
+    // console.log('Saving...')
     this.status$.next('saving')
     try {
       await doc.save()
@@ -193,11 +192,11 @@ class Workspace {
   }
 
   async updateEditingDocIndicies(newDoc?: Doc): Promise<void> {
-    const cur = this.editingDocIndicies$.getValue()
-    if (cur && newDoc) {
-      const [indicies, { merged }] = DocIndexService.mergeDoc(cur, newDoc)
-      if (merged) {
-        this.editingDocIndicies$.next(indicies)
+    const rootChildren = this.editingDocIndicies$.getValue()
+    if (rootChildren && newDoc) {
+      const [children, { appended }] = DocIndexService.appendDoc(rootChildren, newDoc)
+      if (appended) {
+        this.editingDocIndicies$.next(children)
       }
       return
     }

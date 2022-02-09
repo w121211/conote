@@ -1,4 +1,4 @@
-import got from 'got'
+import got, { HTTPError } from 'got'
 import { createScraper } from '../../scraper'
 import keywordsPack from '../keywords'
 import tickersPack from '../tickers'
@@ -21,4 +21,10 @@ it.each(testUrls)('tickers %s', async url => {
   const { body: html, url: finalUrl } = await got(url)
   const { tickers } = await scraper({ url: finalUrl, html })
   expect(tickers).toMatchSnapshot()
+})
+
+it('throw error on fail urls', async () => {
+  await expect(got('https://www.fantom.foundation/')).rejects.toThrow(
+    'Response code 503 (Service Temporarily Unavailable)',
+  )
 })

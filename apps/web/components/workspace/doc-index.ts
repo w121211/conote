@@ -15,7 +15,7 @@ export type DocIndex = {
 }
 
 export const DocIndexService = {
-  fromDoc(doc: Doc): DocIndex {
+  _toDocIndex(doc: Doc): DocIndex {
     const { cid, fromDocCid, cardCopy, createdAt, updatedAt } = doc
     return {
       cid,
@@ -29,7 +29,7 @@ export const DocIndexService = {
   },
 
   _toDocIndexNode(doc: Doc): NodeBody<DocIndex> {
-    const idx = this.fromDoc(doc)
+    const idx = this._toDocIndex(doc)
     return {
       cid: idx.cid,
       parentCid: idx.parentCid,
@@ -44,15 +44,33 @@ export const DocIndexService = {
     return nodes
   },
 
-  mergeDoc(cur: TreeNode<DocIndex>[], doc: Doc, force?: true): [TreeNode<DocIndex>[], { merged: boolean }] {
+  /**
+   * Flatten tree depth = 2
+   */
+  flattenDepth(rootChildren: TreeNode<DocIndex>[]): TreeNode<DocIndex>[] {
+    for (const node of rootChildren) {
+      const flattenChildren = TreeService.toList<DocIndex>(node.children)
+      for (const e of flattenChildren) {
+        e.parentCid = node.cid
+      }
+    }
+    const nodes = TreeService.toList<DocIndex>(rootChildren)
+    return TreeService.fromList<DocIndex>(nodes)
+  },
+
+  /**
+   * Given current DocIndexNodes and the doc to be appended, return appended DocIndexNodes
+   */
+  appendDoc(cur: TreeNode<DocIndex>[], doc: Doc, force?: true): [TreeNode<DocIndex>[], { appended: boolean }] {
     const found = TreeService.find(cur, node => node.cid === doc.cid)
     if (found.length === 0 || force) {
       // doc is not in current tree, append it
       const nodes = TreeService.toList<DocIndex>(cur)
-      const merged = TreeService.fromList<DocIndex>([...nodes, this._toDocIndexNode(doc)])
-      return [merged, { merged: true }]
+      const appended = TreeService.fromList<DocIndex>([...nodes, this._toDocIndexNode(doc)])
+      const flattened = this.flattenDepth(appended)
+      return [flattened, { appended: true }]
     } else {
-      return [cur, { merged: false }]
+      return [cur, { appended: false }]
     }
   },
 }

@@ -169,26 +169,6 @@ Troubleshoots:
   ```
   https://github.com/bitnami/charts/issues/2061
 
-# Hints
-
-```sh
-# 當修改了 editor 時，需要先 build、更新 package 才能導入（只有 frontend/web 需要，backend 可同步編譯）
-# Build lib
-cd src/lib/editor
-yarn run build
-
-# Update lib
-cd src/frontend/web
-yarn upgrade @conote/editor
-```
-
-# NLP Todos
-
-v0.1.0
-
-- [v] greedy rate samples from cnyes news
-- training on greedy samples
-
 # Todos
 
 v-next
@@ -199,6 +179,8 @@ v-next
 - give & take
   - share cards
 - credit
+- (?) add [[topic:heading]], eg [[人身保險:比較]]
+- (?) #OOO# + ENTER, jumps out cursor, eg 純純寫作
 
 v0.2
 
@@ -215,11 +197,12 @@ v0.2
   - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
   - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
   - (?) root li without bullet icon?
+  - (req) a save button
 - inline-discuss `#a discussion topic here#`
   - ref
     - https://github.com/prisma/prisma/discussions
     - https://github.com/discourse/discourse/tree/main/app/models
-  - editor parser, inline element
+  - [working] editor parser, inline element
   - (ui) modal
   - [v] (bk) prisma model, graphql api, resolvers
 - inline-comment `- some input # here is a comment, ignores using '...' when exceeding one line`
@@ -228,13 +211,13 @@ v0.2
 - /rate
   - rate form with annotate
 -
-
 - browser
   - add inline-rate
 - add card emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
-- (?) add [[topic:heading]], eg [[人身保險:比較]]
-
+-
 - nlp
+  - [v] greedy rate samples from cnyes news
+  - training on greedy samples
   - train ner -> entities, subj/obj
   - train classifier -> rate (long, short, hold)
 
@@ -246,7 +229,7 @@ v0.1.1
   - [v] (bug) keywords broken
   - [v] (req) card-meta-form field should not memorize value
 - doc-index
-  - (bug) doc-index tree fail when removing parent docs
+  - [working] (bug) doc-index tree fail when removing parent docs
   - [v] (bug) child doc-index-panel hidden delete not show
   - [v] (ui) doc-index title/symbol display
     - Webpage -> symbol, title
@@ -257,6 +240,7 @@ v0.1.1
   - (ui) fit differnt window width
 - /card?url
   - (req) a better error message and report
+  - [v] (req) if url is not reachable (eg 503), still create a card, eg https://www.fantom.foundation/
 - card-head
   - [v] (ui) card-emojis horizontal display
   - [v] (ui) card-emoji pin should not display count
@@ -265,17 +249,21 @@ v0.1.1
   - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [x] (ui) modal editor scroll bar
   - [v] (bug) 'delete-key' error at the end of string followed by 1. inlines, 2. nested, cases: 1. -a --b 2. -a -$X
-  - [pending] (bug) require cmd+z twice to redo
+  - [v] (bug) require cmd+z twice to redo
   - [v] (ui) min width -> left/right margin
   - [v] (ui) line space
   - (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
   - [v] (ui) :pin emoji should not have count
   - (ui) :pin emoji color -> gray (unclick)
   - (ui) conote -> konote & when on-hover button add some feedback
--
-
 - [v] (req) domain name
 - (req) browser extension
-- search box
-  - (bug) 'home', 'end' key has no effect
-- (?) testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves
+- search
+  - [pending] search box: (bug) 'home', 'end' key has no effect
+  - [working] newly added symbol should be searchable
+  - [working] graphql add search author, ticker
+- naming
+  - 'card' to 'note'
+- testing
+  - assign leader
+  - testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves

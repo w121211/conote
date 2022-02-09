@@ -7,7 +7,7 @@ type GlobalThisWithFetchClient = typeof globalThis & {
   [fetchClientPropertyName]: FetchClient
 }
 
-function getFetchClient(): FetchClient {
+const getFetchClient = (): FetchClient => {
   if (process.env.NODE_ENV === `production`) {
     return new FetchClient()
   } else {

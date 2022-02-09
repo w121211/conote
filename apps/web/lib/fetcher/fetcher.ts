@@ -20,6 +20,7 @@ export type FetchResult = {
   // ./packages/scraper
   keywords?: string[]
   tickers?: string[]
+  error?: string
 }
 
 export class FetchClient {
