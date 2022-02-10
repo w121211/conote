@@ -1,6 +1,6 @@
 import { google } from 'googleapis'
 import { DomainFetchFunction, DomainNotFitError } from './index'
-import { FetchResult } from '../fetcher'
+import { FetchResult } from '../fetch-client'
 
 const patterns = {
   video_id: [

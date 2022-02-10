@@ -1,8 +1,8 @@
 import React, { useState, useEffect, CSSProperties } from 'react'
-import router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import Creatable from 'react-select/creatable'
 // import { toUrlParams } from '../lib/helper'
-import { useSearchAllLazyQuery } from '../apollo/query.graphql'
+import { useSearchSymbolLazyQuery } from '../apollo/query.graphql'
 import { ActionMeta, GroupBase, Options, OptionsOrGroups, StylesConfig } from 'react-select'
 import { Accessors } from 'react-select/dist/declarations/src/useCreatable'
 
@@ -13,7 +13,7 @@ type Option = {
 
 export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
   const router = useRouter()
-  const [searchAll, { loading, data }] = useSearchAllLazyQuery()
+  const [searchSymbol, { loading, data }] = useSearchSymbolLazyQuery()
   const [options, setOptions] = useState<Option[]>([])
   const [value, setValue] = useState<Option | null>()
   const [inputValue, setInputValue] = useState('')
@@ -29,8 +29,8 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
 
   // console.log(data?.searchAll)
   useEffect(() => {
-    if (data && data.searchAll) {
-      setOptions(data.searchAll.map(e => ({ label: e, value: e })))
+    if (data && data.searchSymbol) {
+      setOptions(data.searchSymbol.map(e => ({ label: e, value: e })))
     }
   }, [data])
 
@@ -65,7 +65,7 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
     setInputValue(value)
     if (value) {
       setOpenMenu(true)
-      searchAll({ variables: { term: value } })
+      searchSymbol({ variables: { term: value } })
     }
     if (!value) {
       setOpenMenu(false)

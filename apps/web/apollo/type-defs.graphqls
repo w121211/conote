@@ -52,15 +52,13 @@ type Query {
 
   poll(id: ID!): Poll
 
-  # search all symbols (exclude url)
-  searchAll(term: String!): [String!]!
-
-  searchTicker(term: String!): [String!]!
-
-  searchTopic(term: String!): [String!]!
+  searchAuthor(term: String!): [String!]!
 
   # fuzzy search discuss title by given term
   searchDiscuss(term: String!): [String!]!
+
+  # fuzzy search symbol name, if 'type' not given, search both ticker & topic
+  searchSymbol(term: String!, type: SymType): [String!]!
 
   rate(id: ID!): Rate
 

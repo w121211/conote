@@ -28,9 +28,8 @@ import {
   useCreateRateMutation,
   useLinkLazyQuery,
   useMeQuery,
-  useSearchAllLazyQuery,
+  useSearchSymbolLazyQuery,
 } from '../../apollo/query.graphql'
-import { searchAllSymbols } from '../../lib/search/fuzzy'
 import Modal from '../modal/modal'
 import CreateSymbolForm from './create-symbol-form'
 
@@ -144,12 +143,12 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
   const [options, setOptions] = useState<Option[]>([])
   const [showModal, setShowModal] = useState(false)
   const [selectValue, setSelectValue] = useState('')
-  const [searchSymbol, { data }] = useSearchAllLazyQuery()
+  const [searchSymbol, { data }] = useSearchSymbolLazyQuery()
   const [queryCard, { data: cardData }] = useCardLazyQuery()
 
   useEffect(() => {
-    if (data && data.searchAll) {
-      setOptions(data.searchAll.map(e => ({ value: e, label: e })))
+    if (data && data.searchSymbol) {
+      setOptions(data.searchSymbol.map(e => ({ value: e, label: e })))
     }
   }, [data])
   const onInputChange = (inputValue: string) => {

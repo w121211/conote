@@ -1,5 +1,5 @@
 import { Card, Link, Sym, SymType } from '@prisma/client'
-import { FetchClient } from '../fetcher/fetcher'
+import { FetchClient } from '../fetcher/fetch-client'
 import prisma from '../prisma'
 import { CardStateModel, CardStateParsed } from './card-state-model'
 import { LinkService } from './link-model'

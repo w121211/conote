@@ -1,54 +1,24 @@
-import { LocalCache } from './local-cache'
-import { tryFetch } from './vendors/index'
+import { resolve } from 'path'
+import { FetchClient } from './fetch-client'
 
-export type SrcType = 'VIDEO' | 'POST' | 'AUTHOR' | 'OTHER'
+const fetchClientPropertyName = `__prevent-name-collision__fetcher`
 
-export type FetchResult = {
-  domain: string
-  finalUrl: string
-  srcId?: string
-  srcType: SrcType
-
-  // metascraper
-  authorId?: string
-  authorName?: string
-  date?: string
-  description?: string
-  lang?: string
-  title?: string
-
-  // ./packages/scraper
-  keywords?: string[]
-  tickers?: string[]
-  error?: string
+type GlobalThisWithFetchClient = typeof globalThis & {
+  [fetchClientPropertyName]: FetchClient
 }
 
-export class FetchClient {
-  // 有cache支援
-  private cache: LocalCache | null = null
-
-  constructor(localCachePath: string | null = null) {
-    if (localCachePath) {
-      this.cache = new LocalCache(localCachePath)
+const getFetchClient = (): FetchClient => {
+  if (process.env.NODE_ENV === `production`) {
+    return new FetchClient()
+  } else {
+    const newGlobalThis = globalThis as GlobalThisWithFetchClient
+    if (!newGlobalThis[fetchClientPropertyName]) {
+      newGlobalThis[fetchClientPropertyName] = new FetchClient(resolve(process.cwd(), '.fetcher_local_cache.dump.json'))
     }
-  }
-
-  public async fetch(url: string): Promise<FetchResult & { fromCache?: true }> {
-    if (this.cache) {
-      try {
-        return { ...this.cache.get(url), fromCache: true }
-      } catch {
-        const res = await tryFetch(url)
-        this.cache.set(url, res)
-        return res
-      }
-    }
-    return await tryFetch(url)
-  }
-
-  public dump(): void {
-    if (this.cache) {
-      this.cache.dump()
-    }
+    return newGlobalThis[fetchClientPropertyName]
   }
 }
+
+const fetcher = getFetchClient()
+
+export default fetcher

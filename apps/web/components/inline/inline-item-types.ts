@@ -1,10 +1,3 @@
-/**
- * Bullet operation flow:
- * - Create: draft: BulletDraft {op: 'CREATE', ....}  -> next: Bullet {op: 'CREATE', draft, id, ....}
- * - Update: current: Bullet {id, ....} -> draft: BulletDraft {id, draft, op: 'UPDATE', ....}  -> next: Bullet {id, op: 'UPDATE', ....}
- * - Non-op: current: Bullet {id, op, ....} -> draft: BulletDraft {id, op, ....}  -> next: Bullet {id, op, ....} (會和 current 值相同)
- */
-
 import { RateChoice } from 'graphql-let/__generated__/__types__'
 import { PollFragment, RateFragment } from '../../apollo/query.graphql'
 
@@ -19,13 +12,19 @@ export type InlineText = {
 //   authorName: string
 // }
 
+export type InlineDiscuss = {
+  type: 'inline-discuss'
+  str: string
+  id?: string
+}
+
 export type InlineFiltertag = {
-  type: 'filtertag'
+  type: 'inline-filtertag'
   str: string
 }
 
 export type InlineMirror = {
-  type: 'mirror'
+  type: 'inline-mirror'
   str: string
   // symbolType: SymbolType
   mirrorSymbol: string
@@ -45,7 +44,7 @@ export type InlineMirror = {
 // }
 
 export type InlinePoll = {
-  type: 'poll'
+  type: 'inline-poll'
   str: string
   id?: string
   choices: string[]
@@ -54,7 +53,7 @@ export type InlinePoll = {
 }
 
 export type InlineRate = {
-  type: 'rate'
+  type: 'inline-rate'
   str: string
   id?: string
   params: string[]
@@ -66,7 +65,7 @@ export type InlineRate = {
 }
 
 export type InlineSymbol = {
-  type: 'symbol'
+  type: 'inline-symbol'
   str: string
   // symbolType: SymbolType
   symbol: string
@@ -75,6 +74,7 @@ export type InlineSymbol = {
 export type InlineItem =
   | InlineText
   // | InlineAuthor
+  | InlineDiscuss
   | InlineFiltertag
   | InlineMirror
   // | InlineHashtag
@@ -83,10 +83,10 @@ export type InlineItem =
   | InlineRate
   | InlineSymbol
 
-function isInlinePoll(item: InlineItem): item is InlinePoll {
-  return item.type === 'poll'
+const isInlinePoll = (item: InlineItem): item is InlinePoll => {
+  return item.type === 'inline-poll'
 }
 
-function isInlineRate(item: InlineItem): item is InlineRate {
-  return item.type === 'rate'
+const isInlineRate = (item: InlineItem): item is InlineRate => {
+  return item.type === 'inline-rate'
 }

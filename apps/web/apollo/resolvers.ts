@@ -14,7 +14,7 @@ import {
 } from '@prisma/client'
 import { QueryResolvers, MutationResolvers } from 'graphql-let/__generated__/__types__'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
-import fetcher from '../lib/fetcher'
+import fetcher from '../lib/fetcher/fetcher'
 import { hasCount, toStringId } from '../lib/helpers'
 import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
 import { CardMeta, CardModel } from '../lib/models/card-model'
@@ -32,6 +32,7 @@ import prisma from '../lib/prisma'
 import { SearchDiscussService } from '../lib/search/search-discuss-service'
 import { SearchSymbolService } from '../lib/search/search-symbol-service'
 import { ResolverContext } from './apollo-client'
+import { SearchAuthorService } from '../lib/search/search-author-service'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -336,21 +337,16 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return null
   },
 
-  searchAll(_parent, { term }, _context, _info) {
-    return SearchSymbolService.search(term)
-  },
-
-  searchTicker(_parent, { term }, _context, _info) {
-    return SearchSymbolService.search(term, 'TICKER')
-  },
-
-  searchTopic(_parent, { term }, _context, _info) {
-    return SearchSymbolService.search(term, 'TOPIC')
+  searchAuthor(_parent, { term }, _context, _info) {
+    return SearchAuthorService.search(term)
   },
 
   searchDiscuss(_parent, { term }, _context, _info) {
-    // throw 'Not implemented yet.'
     return SearchDiscussService.search(term)
+  },
+
+  searchSymbol(_parent, { term, type }, _context, _info) {
+    return SearchSymbolService.search(term, type ?? undefined)
   },
 
   async rate(_parent, { id }, _context, _info) {
