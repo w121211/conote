@@ -192,7 +192,7 @@ v0.2
   - [v] announcement
   - SSR
 - /author
-  - [working] gql create/update author
+  - [v] gql create/update author
 - card-meta
   - support author and its company, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
 - card-digest
