@@ -561,6 +561,18 @@ query RatesByAuthor($authorId: ID!, $symId: ID!) {
 #   }
 # }
 
+mutation CreateAuthor($data: AuthorInput!) {
+  createAuthor(data: $data) {
+    ...author
+  }
+}
+
+mutation UpdateAuthor($id: ID!, $data: AuthorInput!) {
+  updateAuthor(id: $id, data: $data) {
+    ...author
+  }
+}
+
 mutation CreateBulletEmoji($bulletId: ID!, $code: EmojiCode!) {
   createBulletEmoji(bulletId: $bulletId, code: $code) {
     emoji {
@@ -617,7 +629,7 @@ mutation CreateCommit($data: CommitInput!) {
   }
 }
 
-mutation CreateDiscuss($cardId: ID!, $data: DiscussInput!) {
+mutation CreateDiscuss($cardId: ID, $data: DiscussInput!) {
   createDiscuss(cardId: $cardId, data: $data) {
     ...discuss
   }

@@ -141,8 +141,8 @@ type Query {
 }
 
 type Mutation {
-  createAuthor(data: AuthInput!): Author!
-  updateDiscuss(id: ID!, data: AuthInput!): Author!
+  createAuthor(data: AuthorInput!): Author!
+  updateAuthor(id: ID!, data: AuthorInput!): Author!
 
   # if emoji has existed, like the emoji and return
   createBulletEmoji(bulletId: ID!, code: EmojiCode!): CreateBulletEmojiResponse!
@@ -158,7 +158,8 @@ type Mutation {
   # @throw validation error
   createCommit(data: CommitInput!): Commit!
 
-  createDiscuss(cardId: ID!, data: DiscussInput!): Discuss!
+  # optional cardId for connecting discuss with note
+  createDiscuss(cardId: ID, data: DiscussInput!): Discuss!
   updateDiscuss(id: ID!, data: DiscussInput!): Discuss!
 
   connectDiscussToCard(discussId: ID!, cardId: ID!, disconnect: Boolean): Boolean!

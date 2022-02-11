@@ -33,6 +33,7 @@ import { SearchDiscussService } from '../lib/search/search-discuss-service'
 import { SearchSymbolService } from '../lib/search/search-symbol-service'
 import { ResolverContext } from './apollo-client'
 import { SearchAuthorService } from '../lib/search/search-author-service'
+import { AuthorModel } from '../lib/models/author-model'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -607,6 +608,20 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 }
 
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
+  async createAuthor(_parent, { data }, { req }, _info) {
+    await isAuthenticated(req)
+    const { name } = data
+    const author = await AuthorModel.getOrCreate(name)
+    return author
+  },
+
+  async updateAuthor(_parent, { id, data }, { req }, _info) {
+    await isAuthenticated(req)
+    const { name } = data
+    const author = await AuthorModel.update(id, name)
+    return author
+  },
+
   async createBulletEmoji(_parent, { bulletId, code }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { emoji, like } = await BulletEmojiModel.create({ bulletId, code, userId })
@@ -675,7 +690,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const discuss = await prisma.discuss.create({
       data: {
         user: { connect: { id: userId } },
-        cards: { connect: [{ id: cardId }] },
+        cards: cardId ? { connect: [{ id: cardId }] } : undefined,
         meta: {},
         title,
         content,

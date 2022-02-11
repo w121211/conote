@@ -184,6 +184,7 @@ v-next
 - handle doc conflict -> git mechanism
 - show doc diff
 - inline filtertag
+- note redirect, eg $BA -> [[Boeing]]
 
 v0.2
 

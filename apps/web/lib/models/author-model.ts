@@ -50,4 +50,8 @@ export const AuthorModel = {
       update: {},
     })
   },
+
+  async update(id: string, name: string): Promise<Author> {
+    return prisma.author.update({ data: { name }, where: { id } })
+  },
 }
