@@ -30,9 +30,9 @@ class SearchAuthorServiceClass {
     return this.fuse
   }
 
-  async search(term: string): Promise<string[]> {
+  async search(term: string): Promise<Author[]> {
     const fuse = this.fuse ?? (await this.init())
-    return fuse.search(term).map(e => e.item.name)
+    return fuse.search(term).map(e => e.item)
   }
 }
 

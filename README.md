@@ -183,6 +183,7 @@ v-next
 - (?) #OOO# + ENTER, jumps out cursor, eg 純純寫作
 - handle doc conflict -> git mechanism
 - show doc diff
+- inline filtertag
 
 v0.2
 
@@ -236,8 +237,8 @@ v0.1.1
   - [v] (bug) child doc-index-panel hidden delete not show
   - [v] (ui) doc-index title/symbol display
     - [%] Webpage -> symbol, title
-    - Ticker -> symbol + title, eg $BA 波音
-    - Topic -> symbol only
+    - [%] Ticker -> symbol + title, eg $BA 波音
+    - [%] Topic -> symbol only
 - /index
   - [v] (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - (ui) fit differnt window width
@@ -260,11 +261,11 @@ v0.1.1
   - (ui) :pin emoji color -> gray (unclick)
   - (ui) conote -> konote & when on-hover button add some feedback
 - [v] (req) domain name
-- (req) browser extension
+- [working] (req) browser extension
 - search
   - [pending] search box: (bug) 'home', 'end' key has no effect
   - [working] newly added symbol should be searchable
-  - [working] graphql add search author, ticker with id
+  - [v] graphql add search author, ticker with id
 - naming
   - 'card' to 'note'
 - testing

@@ -337,16 +337,19 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return null
   },
 
-  searchAuthor(_parent, { term }, _context, _info) {
-    return SearchAuthorService.search(term)
+  async searchAuthor(_parent, { term }, _context, _info) {
+    const hits = await SearchAuthorService.search(term)
+    return hits.map(e => ({ id: e.id, str: e.name }))
   },
 
-  searchDiscuss(_parent, { term }, _context, _info) {
-    return SearchDiscussService.search(term)
+  async searchDiscuss(_parent, { term }, _context, _info) {
+    const hits = await SearchDiscussService.search(term)
+    return hits.map(e => ({ id: e.id, str: e.title }))
   },
 
-  searchSymbol(_parent, { term, type }, _context, _info) {
-    return SearchSymbolService.search(term, type ?? undefined)
+  async searchSymbol(_parent, { term, type }, _context, _info) {
+    const hits = await SearchSymbolService.search(term, type ?? undefined)
+    return hits.map(e => ({ id: e.id, str: e.symbol }))
   },
 
   async rate(_parent, { id }, _context, _info) {
@@ -681,6 +684,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       },
       include: { count: true },
     })
+    // SearchDiscussService.
     if (hasCount(discuss)) {
       return {
         ...discuss,

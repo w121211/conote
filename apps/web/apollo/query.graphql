@@ -265,6 +265,11 @@ fragment rateBody on RateBody {
   quote
 }
 
+fragment searchHit on SearchHit {
+  id
+  str
+}
+
 fragment sym on Sym {
   __typename
   id
@@ -490,13 +495,22 @@ query Poll($id: ID!) {
     ...poll
   }
 }
-
-query SearchSymbol($term: String!, $type: SymType) {
-  searchSymbol(term: $term, type: $type)
+query SearchAuthor($term: String!) {
+  searchAuthor(term: $term) {
+    ...searchHit
+  }
 }
 
-query SearchAuthor($term: String!) {
-  searchAuthor(term: $term)
+query SearchDiscuss($term: String!) {
+  searchDiscuss(term: $term) {
+    ...searchHit
+  }
+}
+
+query SearchSymbol($term: String!, $type: SymType) {
+  searchSymbol(term: $term, type: $type) {
+    ...searchHit
+  }
 }
 
 query Rate($id: ID!) {

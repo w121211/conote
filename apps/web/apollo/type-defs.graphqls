@@ -52,13 +52,13 @@ type Query {
 
   poll(id: ID!): Poll
 
-  searchAuthor(term: String!): [String!]!
+  searchAuthor(term: String!): [SearchHit!]!
 
   # fuzzy search discuss title by given term
-  searchDiscuss(term: String!): [String!]!
+  searchDiscuss(term: String!): [SearchHit!]!
 
   # fuzzy search symbol name, if 'type' not given, search both ticker & topic
-  searchSymbol(term: String!, type: SymType): [String!]!
+  searchSymbol(term: String!, type: SymType): [SearchHit!]!
 
   rate(id: ID!): Rate
 
@@ -141,6 +141,9 @@ type Query {
 }
 
 type Mutation {
+  createAuthor(data: AuthInput!): Author!
+  updateDiscuss(id: ID!, data: AuthInput!): Author!
+
   # if emoji has existed, like the emoji and return
   createBulletEmoji(bulletId: ID!, code: EmojiCode!): CreateBulletEmojiResponse!
 
@@ -508,6 +511,11 @@ type PollCount {
   # failedMsg: String
 }
 
+type SearchHit {
+  id: String!
+  str: String!
+}
+
 type User {
   id: ID!
   email: String!
@@ -642,6 +650,16 @@ type UpsertDiscussPostEmojiLikeResponse {
 
 # ------ Inputs ------
 
+input AuthorInput {
+  name: String!
+}
+
+input CardInput {
+  symbol: String!
+  # templateProps: CardTemplatePropsInput
+  meta: CardMetaInput
+}
+
 input CardMetaInput {
   redirects: [String!]
   duplicates: [String!]
@@ -651,18 +669,6 @@ input CardMetaInput {
   description: String
   keywords: [String!]
   title: String
-}
-
-# input CardTemplatePropsInput {
-#   template: String!
-#   title: String!
-#   ticker: String
-# }
-
-input CardInput {
-  symbol: String!
-  # templateProps: CardTemplatePropsInput
-  meta: CardMetaInput
 }
 
 input CardStateInput {
@@ -700,9 +706,9 @@ input PollInput {
 
 input RateInput {
   choice: RateChoice!
-  targetId: ID! # Target card id
-  authorId: ID # Create author rate required
-  linkId: ID # Create author rate required
+  targetId: ID! # target card id
+  authorId: ID # create author rate required
+  linkId: ID # create author rate required
 }
 
 input VoteInput {

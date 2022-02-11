@@ -13,31 +13,31 @@ import { SymModel } from '../models/sym-model'
 // })
 
 type FuseDict = {
-  all: Fuse<string>
-  ticker: Fuse<string>
-  topic: Fuse<string>
+  all: Fuse<Sym>
+  ticker: Fuse<Sym>
+  topic: Fuse<Sym>
 }
 
 class SearchSymbolServiceClass {
-  // TODO: store in redis instead
-
-  private syms: Sym[] | null = null
-  private fuseDict: FuseDict | null = null
+  private fuseDict: FuseDict | null = null // TODO: store in redis instead
 
   async initFuse(): Promise<FuseDict> {
-    if (this.syms === null || this.fuseDict === null) {
+    if (this.fuseDict === null) {
       const syms = await SymModel.getAll()
-
-      // const fuse = new Fuse(syms, {
-      //   includeScore: true,
-      //   keys: ['symbol'],
-      // })
       const fuseDict: FuseDict = {
-        all: new Fuse(syms.filter(e => ['TICKER', 'TOPIC'].includes(e.type)).map(e => e.symbol)),
-        ticker: new Fuse(syms.filter(e => e.type === 'TICKER').map(e => e.symbol)),
-        topic: new Fuse(syms.filter(e => e.type === 'TOPIC').map(e => e.symbol)),
+        all: new Fuse(
+          syms.filter(e => ['TICKER', 'TOPIC'].includes(e.type)),
+          { keys: ['symbol'] },
+        ),
+        ticker: new Fuse(
+          syms.filter(e => e.type === 'TICKER'),
+          { keys: ['symbol'] },
+        ),
+        topic: new Fuse(
+          syms.filter(e => e.type === 'TOPIC'),
+          { keys: ['symbol'] },
+        ),
       }
-      this.syms = syms
       this.fuseDict = fuseDict
       return fuseDict
     }
@@ -47,9 +47,9 @@ class SearchSymbolServiceClass {
   // async insertSymbol(sym: Sym) {
   // }
 
-  async search(term: string, type?: SymType): Promise<string[]> {
+  async search(term: string, type?: SymType): Promise<Sym[]> {
     const fuseDict = this.fuseDict ?? (await this.initFuse())
-    let fuse: Fuse<string>
+    let fuse: Fuse<Sym>
     if (type === 'TICKER') {
       fuse = fuseDict['ticker']
     } else if (type === 'TOPIC') {
@@ -61,5 +61,4 @@ class SearchSymbolServiceClass {
   }
 }
 
-// export for global use
-export const SearchSymbolService = new SearchSymbolServiceClass()
+export const SearchSymbolService = new SearchSymbolServiceClass() // export for global use

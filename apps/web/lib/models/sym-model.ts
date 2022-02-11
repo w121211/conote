@@ -4,7 +4,7 @@ import prisma from '../prisma'
 /**
  * Symbol types:
  * - Ticker: $AB, $A01
- * - Topic: [[what ever]], [[包括unicode]]
+ * - Topic: [[what ever]], [[中文範例]]
  * - URL: @https://github.com/typescript-eslint
  */
 

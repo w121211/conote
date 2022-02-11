@@ -1,6 +1,20 @@
 import { Author } from '@prisma/client'
 import prisma from '../prisma'
 
+type Job = {
+  name: string
+  org: string
+  startedAt?: Date
+  endedAt?: Date
+}
+
+type AuthorMeta = {
+  type: 'PERSON' | 'ORG'
+  job?: string // eg youtuber, analylist
+  org?: string
+  sites: [string, string] // [site_name, site_url]
+}
+
 export const AuthorModel = {
   async getAll(): Promise<Author[]> {
     console.log('Retreiving all authors from database...')
@@ -26,12 +40,14 @@ export const AuthorModel = {
     return authors
   },
 
-  // async getOrCreate(symbol: string): Promise<Sym> {
-  //   const parsed = this.parse(symbol)
-  //   return prisma.sym.upsert({
-  //     create: { symbol: parsed.symbol, type: parsed.type },
-  //     where: { symbol: parsed.symbol },
-  //     update: {},
-  //   })
-  // },
+  async getOrCreate(name: string): Promise<Author> {
+    return prisma.author.upsert({
+      create: {
+        name,
+        // meta,
+      },
+      where: { name },
+      update: {},
+    })
+  },
 }
