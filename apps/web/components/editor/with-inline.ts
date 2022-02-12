@@ -15,7 +15,14 @@ const toInlineElement = (item: InlineItem): CustomInlineElement | CustomText => 
 }
 
 export const isInlineElement = (element: CustomElement): element is CustomInlineElement => {
-  const inlineTypes = ['mirror', 'poll', 'filtertag', 'symbol', 'rate']
+  const inlineTypes = [
+    'inline-discuss',
+    'inline-filtertag',
+    'inline-mirror',
+    'inline-poll',
+    'inline-rate',
+    'inline-symbol',
+  ]
   return inlineTypes.includes(element.type)
 }
 
@@ -37,23 +44,25 @@ export const wrapToInlines = ({
   lcEntry: NodeEntry<LcElement>
 }): void => {
   if (lcNode.children.find(e => e.type !== undefined)) {
-    return // at least one inline element existed in lc, no need to wrap again
+    // at least one inline element existed in lc, no need to wrap again
+    return
   }
 
   const str = Node.string(lcNode)
   const { inlines } = BulletParser.parseBulletHead({ str })
   if (inlines.filter(e => e.type !== 'text').length === 0) {
-    return // all inlines are text, no need to replace
+    // all inlines are text, no need to replace
+    return
   }
-  const headInlines = inlines.map(e => toInlineElement(e))
 
+  const inlineNodes = inlines.map(e => toInlineElement(e))
   Editor.withoutNormalizing(editor, () => {
     Transforms.removeNodes(editor, {
       at: lcPath,
       match: (n, p) => Path.isChild(p, lcPath),
     }) // remove lc children & insert inlines
     // Transforms.insertFragment(editor, inlines, { at: [...path, 0] })
-    Transforms.insertNodes(editor, headInlines, { at: [...lcPath, 0] })
+    Transforms.insertNodes(editor, inlineNodes, { at: [...lcPath, 0] })
   })
 }
 

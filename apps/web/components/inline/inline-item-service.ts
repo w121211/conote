@@ -46,7 +46,7 @@ export const InlineItemService = {
   toInlinePoll({ id, choices }: { id: string | number; choices: string[] }): InlinePoll {
     const _id = typeof id === 'number' ? id.toString() : id
     return {
-      type: 'poll',
+      type: 'inline-poll',
       str: `!((poll:${_id}))(${choices.join(' ')})`,
       id: _id,
       choices: choices,

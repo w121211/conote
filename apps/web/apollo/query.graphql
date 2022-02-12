@@ -265,6 +265,11 @@ fragment rateBody on RateBody {
   quote
 }
 
+fragment searchHit on SearchHit {
+  id
+  str
+}
+
 fragment sym on Sym {
   __typename
   id
@@ -490,17 +495,22 @@ query Poll($id: ID!) {
     ...poll
   }
 }
-
-query SearchAll($term: String!) {
-  searchAll(term: $term)
+query SearchAuthor($term: String!) {
+  searchAuthor(term: $term) {
+    ...searchHit
+  }
 }
 
-query SearchTicker($term: String!) {
-  searchTicker(term: $term)
+query SearchDiscuss($term: String!) {
+  searchDiscuss(term: $term) {
+    ...searchHit
+  }
 }
 
-query SearchTopic($term: String!) {
-  searchTopic(term: $term)
+query SearchSymbol($term: String!, $type: SymType) {
+  searchSymbol(term: $term, type: $type) {
+    ...searchHit
+  }
 }
 
 query Rate($id: ID!) {
@@ -550,6 +560,18 @@ query RatesByAuthor($authorId: ID!, $symId: ID!) {
 #     ...boardLike
 #   }
 # }
+
+mutation CreateAuthor($data: AuthorInput!) {
+  createAuthor(data: $data) {
+    ...author
+  }
+}
+
+mutation UpdateAuthor($id: ID!, $data: AuthorInput!) {
+  updateAuthor(id: $id, data: $data) {
+    ...author
+  }
+}
 
 mutation CreateBulletEmoji($bulletId: ID!, $code: EmojiCode!) {
   createBulletEmoji(bulletId: $bulletId, code: $code) {
@@ -607,7 +629,7 @@ mutation CreateCommit($data: CommitInput!) {
   }
 }
 
-mutation CreateDiscuss($cardId: ID!, $data: DiscussInput!) {
+mutation CreateDiscuss($cardId: ID, $data: DiscussInput!) {
   createDiscuss(cardId: $cardId, data: $data) {
     ...discuss
   }

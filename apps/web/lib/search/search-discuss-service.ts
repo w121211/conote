@@ -20,9 +20,9 @@ class SearchDiscussServiceClass {
     return this.fuse
   }
 
-  async search(term: string): Promise<string[]> {
+  async search(term: string): Promise<Discuss[]> {
     const fuse = this.fuse ?? (await this.initFuse())
-    return fuse.search(term).map(e => e.item.title)
+    return fuse.search(term).map(e => e.item)
   }
 }
 

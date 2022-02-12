@@ -14,7 +14,7 @@ import {
 } from '@prisma/client'
 import { QueryResolvers, MutationResolvers } from 'graphql-let/__generated__/__types__'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
-import fetcher from '../lib/fetcher'
+import fetcher from '../lib/fetcher/fetcher'
 import { hasCount, toStringId } from '../lib/helpers'
 import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
 import { CardMeta, CardModel } from '../lib/models/card-model'
@@ -32,6 +32,8 @@ import prisma from '../lib/prisma'
 import { SearchDiscussService } from '../lib/search/search-discuss-service'
 import { SearchSymbolService } from '../lib/search/search-symbol-service'
 import { ResolverContext } from './apollo-client'
+import { SearchAuthorService } from '../lib/search/search-author-service'
+import { AuthorModel } from '../lib/models/author-model'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -336,21 +338,19 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return null
   },
 
-  searchAll(_parent, { term }, _context, _info) {
-    return SearchSymbolService.search(term)
+  async searchAuthor(_parent, { term }, _context, _info) {
+    const hits = await SearchAuthorService.search(term)
+    return hits.map(e => ({ id: e.id, str: e.name }))
   },
 
-  searchTicker(_parent, { term }, _context, _info) {
-    return SearchSymbolService.search(term, 'TICKER')
+  async searchDiscuss(_parent, { term }, _context, _info) {
+    const hits = await SearchDiscussService.search(term)
+    return hits.map(e => ({ id: e.id, str: e.title }))
   },
 
-  searchTopic(_parent, { term }, _context, _info) {
-    return SearchSymbolService.search(term, 'TOPIC')
-  },
-
-  searchDiscuss(_parent, { term }, _context, _info) {
-    // throw 'Not implemented yet.'
-    return SearchDiscussService.search(term)
+  async searchSymbol(_parent, { term, type }, _context, _info) {
+    const hits = await SearchSymbolService.search(term, type ?? undefined)
+    return hits.map(e => ({ id: e.id, str: e.symbol }))
   },
 
   async rate(_parent, { id }, _context, _info) {
@@ -608,6 +608,20 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 }
 
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
+  async createAuthor(_parent, { data }, { req }, _info) {
+    await isAuthenticated(req)
+    const { name } = data
+    const author = await AuthorModel.getOrCreate(name)
+    return author
+  },
+
+  async updateAuthor(_parent, { id, data }, { req }, _info) {
+    await isAuthenticated(req)
+    const { name } = data
+    const author = await AuthorModel.update(id, name)
+    return author
+  },
+
   async createBulletEmoji(_parent, { bulletId, code }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { emoji, like } = await BulletEmojiModel.create({ bulletId, code, userId })
@@ -676,7 +690,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const discuss = await prisma.discuss.create({
       data: {
         user: { connect: { id: userId } },
-        cards: { connect: [{ id: cardId }] },
+        cards: cardId ? { connect: [{ id: cardId }] } : undefined,
         meta: {},
         title,
         content,
@@ -685,6 +699,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       },
       include: { count: true },
     })
+    // SearchDiscussService.
     if (hasCount(discuss)) {
       return {
         ...discuss,

@@ -1,5 +1,5 @@
 import { Author, Card, Link, Sym } from '@prisma/client'
-import { FetchClient, FetchResult } from '../fetcher/fetcher'
+import { FetchClient, FetchResult } from '../fetcher/fetch-client'
 import { tryFetch } from '../fetcher/vendors'
 import prisma from '../prisma'
 

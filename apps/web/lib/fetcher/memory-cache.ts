@@ -1,11 +1,10 @@
 /**
- * 一個簡易的cache，用於開發時避免重複call同樣的url
+ * A simple memory cache, mainly use for avoiding repeatly calls on the same urls during development
  */
 import { readFileSync, writeFileSync } from 'fs'
-import { resolve } from 'path'
-import { FetchResult } from './fetcher'
+import { FetchResult } from './fetch-client'
 
-export class LocalCache {
+export class MemoryCache {
   private filepath: string
   private cache: Record<string, FetchResult> = {}
 

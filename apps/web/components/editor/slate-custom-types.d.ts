@@ -3,7 +3,14 @@ import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
 import { ChangeType } from '@conote/docdiff'
 import { Bullet } from '../bullet/bullet'
-import { InlineFiltertag, InlineMirror, InlinePoll, InlineRate, InlineSymbol } from '../inline/inline-item-types'
+import {
+  InlineDiscuss,
+  InlineFiltertag,
+  InlineMirror,
+  InlinePoll,
+  InlineRate,
+  InlineSymbol,
+} from '../inline/inline-item-types'
 
 export type EmptyText = {
   text: string
@@ -17,6 +24,10 @@ export type CustomText = {
   type?: string // stream type
   tokenType?: string
   // placeholder?: boolean
+}
+
+export type InlineDiscussElement = InlineDiscuss & {
+  children: CustomText[]
 }
 
 export type InlineFiltertagElement = InlineFiltertag & {
@@ -70,6 +81,7 @@ export type UlElement = {
 }
 
 export type CustomInlineElement =
+  | InlineDiscussElement
   | InlineFiltertagElement
   | InlineMirrorElement
   | InlinePollElement

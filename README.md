@@ -181,6 +181,10 @@ v-next
 - credit
 - (?) add [[topic:heading]], eg [[人身保險:比較]]
 - (?) #OOO# + ENTER, jumps out cursor, eg 純純寫作
+- handle doc conflict -> git mechanism
+- show doc diff
+- inline filtertag
+- note redirect, eg $BA -> [[Boeing]]
 
 v0.2
 
@@ -188,6 +192,7 @@ v0.2
   - [v] announcement
   - SSR
 - /author
+  - [v] gql create/update author
 - card-meta
   - support author and its company, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
 - card-digest
@@ -202,7 +207,7 @@ v0.2
   - ref
     - https://github.com/prisma/prisma/discussions
     - https://github.com/discourse/discourse/tree/main/app/models
-  - [working] editor parser, inline element
+  - [v] editor parser, inline element
   - (ui) modal
   - [v] (bk) prisma model, graphql api, resolvers
 - inline-comment `- some input # here is a comment, ignores using '...' when exceeding one line`
@@ -232,9 +237,9 @@ v0.1.1
   - [working] (bug) doc-index tree fail when removing parent docs
   - [v] (bug) child doc-index-panel hidden delete not show
   - [v] (ui) doc-index title/symbol display
-    - Webpage -> symbol, title
-    - Ticker -> symbol + title, eg $BA 波音
-    - Topic -> symbol only
+    - [%] Webpage -> symbol, title
+    - [%] Ticker -> symbol + title, eg $BA 波音
+    - [%] Topic -> symbol only
 - /index
   - [v] (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [v] (ui) fit differnt window width
@@ -257,11 +262,11 @@ v0.1.1
   - (ui) :pin emoji color -> gray (unclick)
   - (ui) conote -> konote & when on-hover button add some feedback
 - [v] (req) domain name
-- (req) browser extension
+- [working] (req) browser extension
 - search
   - [pending] search box: (bug) 'home', 'end' key has no effect
   - [working] newly added symbol should be searchable
-  - [working] graphql add search author, ticker
+  - [v] graphql add search author, ticker with id
 - naming
   - 'card' to 'note'
 - testing

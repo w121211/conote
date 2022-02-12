@@ -4,7 +4,7 @@
  */
 import { NodeEntry, Text } from 'slate'
 import { TokenHelper } from '../../common/token-helper'
-import { tokenizeBulletStringWithDecorate } from '../bullet/bullet-parser'
+import { tokenizeBulletString } from '../bullet/bullet-parser'
 import { CustomRange } from './slate-custom-types'
 
 export const decorate = ([node, path]: NodeEntry): CustomRange[] => {
@@ -13,7 +13,7 @@ export const decorate = ([node, path]: NodeEntry): CustomRange[] => {
     return ranges
   }
 
-  const tokens = tokenizeBulletStringWithDecorate(node.text)
+  const tokens = tokenizeBulletString(node.text)
   const flatTokens = TokenHelper.flatten(tokens)
 
   let start = 0

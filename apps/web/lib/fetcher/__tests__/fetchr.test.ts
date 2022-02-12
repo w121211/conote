@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, unlinkSync } from 'fs'
 import { resolve } from 'path'
-import { FetchClient } from '../fetcher'
+import { FetchClient } from '../fetch-client'
 import { tryFetch } from '../vendors/index'
 
 describe('function tryFetch', () => {

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { useCardLazyQuery, useSearchAllLazyQuery } from '../../apollo/query.graphql'
+import { useCardLazyQuery } from '../../apollo/query.graphql'
 import { AsyncTickerConsumer } from './create-rate-form'
 
 interface Option {

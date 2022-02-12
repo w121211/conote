@@ -19,7 +19,7 @@ const outDist = isDevelopment ? 'devdist' : 'dist'
 module.exports = {
   mode: isDevelopment ? 'development' : 'production',
   // devtool: 'cheap-module-source-map',
-  devtool: 'inline-source-map', // ts-loader, chrome-extension需要這個才不會報錯
+  devtool: 'inline-source-map', // ts-loader, chrome-extension requires this
   context: __dirname,
   entry: {
     'background-script': path.resolve(__dirname, 'src/scripts/background-script.ts'),
@@ -40,8 +40,7 @@ module.exports = {
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
-        // 改用babel-lodaer，ts-loader的type-checking會報錯，但單純跑`tsc`卻沒問題，尚未找到解決辦法
-        loader: 'babel-loader',
+        loader: 'babel-loader', // use babel-lodaer instead, ts-loader encounter type-checking error (while tsc run successfully, unknwon reason)
       },
       {
         test: /\.css$/i,
@@ -115,8 +114,7 @@ module.exports = {
   //   writeToDisk: true,
   // },
   plugins: [
-    // 注意不能將機密資料放入.env!!! @see https://github.com/mrsteele/dotenv-webpack
-    new Dotenv({ path: './.env' }),
+    new Dotenv({ path: './.env' }), // warnning! no secerts should store in .env file @see https://github.com/mrsteele/dotenv-webpack
     // isDevelopment && new ReactRefreshPlugin(),
     new ForkTsCheckerWebpackPlugin({
       typescript: {

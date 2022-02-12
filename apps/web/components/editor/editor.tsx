@@ -30,6 +30,7 @@ import { Doc } from '../workspace/doc'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 import { isLiArray, isUl, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
 import { withAutoComplete } from './with-auto-complete'
+import InlineDiscuss from '../inline/inline-discuss'
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, leaf, children } = props
@@ -83,12 +84,13 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   //   }
   // }
   switch (leaf.tokenType) {
+    case 'author':
+    case 'discuss':
     case 'mirror-ticker':
     case 'mirror-topic':
     case 'rate':
     case 'topic':
-    case 'ticker':
-    case 'author': {
+    case 'ticker': {
       className = 'text-blue-500'
       break
     }
@@ -315,16 +317,18 @@ const CustomElement = ({
   card,
 }: RenderElementProps & { card: CardFragment | null }): JSX.Element => {
   switch (element.type) {
-    case 'symbol':
-      return <InlineSymbol {...{ attributes, children, element }} />
-    case 'mirror':
-      return <InlineMirror {...{ attributes, children, element, sourceCardId: card?.id }} />
-    case 'filtertag':
+    case 'inline-discuss':
+      return <InlineDiscuss {...{ attributes, children, element }} />
+    case 'inline-filtertag':
       return <InlineFiltertag {...{ attributes, children, element }} />
-    case 'poll':
+    case 'inline-mirror':
+      return <InlineMirror {...{ attributes, children, element, sourceCardId: card?.id }} />
+    case 'inline-poll':
       return <InlinePoll {...{ attributes, children, element }} />
-    case 'rate':
+    case 'inline-rate':
       return <InlineRate {...{ attributes, children, element }} />
+    case 'inline-symbol':
+      return <InlineSymbol {...{ attributes, children, element }} />
     case 'lc':
       return <Lc {...{ attributes, children, element, curCardId: card?.id }} />
     case 'li':
