@@ -1,4 +1,4 @@
-import { CardState, Commit, PrismaPromise } from '@prisma/client'
+import { CardState, Commit, PrismaPromise, Sym } from '@prisma/client'
 import cuid from 'cuid'
 import {
   CardInput as GQLCardInput,
@@ -51,6 +51,11 @@ export type CommitParsed = Commit & { cardStates: CardStateParsed[] }
 export type RowCardState = CardState & { card: RowCard }
 
 export type RowCommit = Commit & { cardStates: RowCardState[] }
+
+/**
+ * cid: client-id
+ * gid: generated-id
+ */
 
 export const CommitModel = {
   _checkCardInput(cardInput: GQLCardInput): void {
@@ -189,6 +194,7 @@ export const CommitModel = {
   ): Promise<{
     commit: CommitParsed
     stateGidToCid: Record<string, string>
+    symsCommitted: Sym[] // syms committed
   }> {
     // console.log(inspect(cardStateInputs, { depth: null }))
     if (cardStateInputs.length === 0) {
@@ -295,6 +301,7 @@ export const CommitModel = {
         cardStates: cardStates.map(e => CardStateModel.parse(e)),
       },
       stateGidToCid,
+      symsCommitted: cardStates.map(e => e.card.sym),
     }
   },
 }

@@ -10,7 +10,7 @@ const client = new ApolloClient({
   credentials: 'omit', // avoid CORS, @see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
 })
 
-async function getLink(url: string): Promise<LinkQuery> {
+const getLink = async (url: string): Promise<LinkQuery> => {
   const { data } = await client.query<LinkQuery, LinkQueryVariables>({
     query: LinkDocument,
     variables: { url },
@@ -19,9 +19,11 @@ async function getLink(url: string): Promise<LinkQuery> {
 }
 
 /**
- * change icon's badge when url changed, new tab opened
+ * when browser's url changed or new tab opened,
+ * query conote server and get url specified note,
+ * then change extension badge
  */
-async function onTabActivated(tab: Tabs.Tab): Promise<void> {
+const onTabActivated = async (tab: Tabs.Tab): Promise<void> => {
   if (tab.url) {
     const link = await getLink(tab.url)
     if (link.link) {
@@ -52,7 +54,8 @@ browser.tabs.onActivated.addListener(async info => {
 // })
 
 /**
- * user click icon: get current tab's url, title and open a new window to navigate to conote's site
+ * when user click extension-icon,
+ * get current tab's url, title and open a new window to navigate to conote's site
  */
 browser.browserAction.onClicked.addListener(async tab => {
   console.log(tab)
@@ -74,13 +77,13 @@ browser.browserAction.onClicked.addListener(async tab => {
     left: 100,
   })
 
-  console.log('The normal window has been created')
+  console.log('popup window created')
 })
 
 // console.log(process.env.APP_BASE_URL)
 
 /**
- * 相互溝通 Listen for messages sent from other parts of the extension
+ * Listen for messages sent from other parts of the extension
  */
 // browser.runtime.onMessage.addListener((request: { popupMounted: boolean }) => {
 //   // Log statement if request.popupMounted is true
@@ -133,7 +136,7 @@ browser.menus.create(
 )
 
 /**
- * user click menu, get user's selection
+ * when user click menu, get user's selection
  */
 browser.menus.onClicked.addListener(async (info, tab) => {
   console.log(info, tab)

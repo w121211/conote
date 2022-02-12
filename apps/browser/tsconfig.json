@@ -1,12 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [
-    { "path": "../packages/editor" },
-    { "path": "../packages/fetcher" },
-    { "path": "../web/tsconfig.build-types.json" }
-  ],
   "compilerOptions": {
-    // "target": "es5", // 設為es5時會有error，與gql有關
+    // "target": "es5", // set `es5` will jump error, possibly caused by graphql
     "module": "esnext",
     // "rootDir": ".",
     "rootDir": "src",
@@ -25,17 +20,5 @@
     // "jsx": "preserve"
   },
   "include": ["src"],
-  "exclude": ["**/__deprecated__", "**/__tests__", "node_modules", ".cache"]
-  // "exclude": [
-  //   "**/__tests__",
-  //   "**/__deprecated__",
-  //   "out",
-  //   "node_modules",
-  //   "code-intel-extensions",
-  //   "../../node_modules",
-  //   "./build/**/*",
-  //   "coverage",
-  //   "stories",
-  //   "src/end-to-end"
-  // ]
+  "exclude": ["**/__deprecated__", "**/__tests__", "node_modules", ".cache", "devdist", "dist"]
 }

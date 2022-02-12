@@ -2,7 +2,7 @@ import Fuse from 'fuse.js'
 import { Author } from '@prisma/client'
 import { AuthorModel } from '../models/author-model'
 
-class SearchAuthorServiceClass {
+export class SearchAuthorServiceClass {
   private authors: Author[] | null = null // TODO: store in redis instead
   private fuse: Fuse<Author> | null = null
 
@@ -36,4 +36,4 @@ class SearchAuthorServiceClass {
   }
 }
 
-export const SearchAuthorService = new SearchAuthorServiceClass() // export for global use
+// export const SearchAuthorService = new SearchAuthorServiceClass() // export for global use

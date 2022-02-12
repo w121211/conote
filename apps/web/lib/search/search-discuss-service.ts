@@ -2,7 +2,7 @@ import Fuse from 'fuse.js'
 import { Discuss } from '@prisma/client'
 import { DiscussModel } from '../models/discuss-model'
 
-class SearchDiscussServiceClass {
+export class SearchDiscussServiceClass {
   private discusses: Discuss[] | null = null
   private fuse: Fuse<Discuss> | null = null
 
@@ -26,4 +26,4 @@ class SearchDiscussServiceClass {
   }
 }
 
-export const SearchDiscussService = new SearchDiscussServiceClass() // export for global use
+// export const SearchDiscussService = new SearchDiscussServiceClass() // export for global use

@@ -2,7 +2,7 @@
  * yarn run test-lib search.test
  */
 /* eslint-disable no-await-in-loop */
-import { SearchSymbolService } from '../../lib/search/search-symbol-service'
+import { SearchSymbolServiceClass } from '../../lib/search/search'
 
 it('SearchSymbolService.search()', async () => {
   expect(await SearchSymbolService.search('AI')).toMatchSnapshot()

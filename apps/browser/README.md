@@ -28,12 +28,3 @@ https://github.com/vuquangit/react-typescript-apollo-client
 Annotate:
 
 - https://github.com/apache/incubator-annotator
-
-# Todos
-
-- annotate 網頁中的文字
-- 自動識別網頁中的 shots
-- 將網頁中的一段文字加入 shot
-  - 圈選文字
-  - 按右鍵開啟選單，加入 shot
-  - 開啟 shot form
