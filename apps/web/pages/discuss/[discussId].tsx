@@ -5,10 +5,11 @@ import Layout from '../../components/layout'
 
 const DiscussPage = () => {
   const router = useRouter()
+
   return (
     <Layout>
-      {router.query.discussId && typeof router.query.discussId === 'string' && (
-        <DiscussFullPage title={router.query.discussId} />
+      {router.query.discuss && typeof router.query.discuss === 'string' && (
+        <DiscussFullPage id={router.query.discuss} />
       )}
     </Layout>
   )

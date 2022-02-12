@@ -32,7 +32,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
           setShowModal(false)
         }}
       >
-        <h2 className="mb-6 text-2xl font-bold text-gray-800">卡片資訊</h2>
+        <h2 className="text-lg mb-4 sm:mb-6 sm:text-2xl font-bold text-gray-800">卡片資訊</h2>
         <CardMetaForm
           metaInput={metaInput}
           onSubmit={input => {

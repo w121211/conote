@@ -181,9 +181,9 @@ const CardMetaForm = ({
 
   return (
     <FormProvider {...methods}>
-      <div className="w-[90vw] mx-auto sm:w-[50vw]">
+      <div className="w-full mx-auto sm:w-[50vw]">
         <form
-          className="flex flex-col gap-4"
+          className="grid grid-cols-[max-content_auto] auto-rows-min items-center justify-end gap-y-4"
           onSubmit={handleSubmit(input => {
             onSubmit(toCardMetaInput(input))
           })}
@@ -197,8 +197,14 @@ const CardMetaForm = ({
             // ['redirects', '重新導向', '請使用 "空格" 分隔'],
           ].map(([name, title, placeholder], i) => {
             return (
-              <label key={name} className="flex items-center">
-                <h5 className="flex-shrink-0 w-20 text-gray-700 font-normal">{title}</h5>
+              <React.Fragment key={name}>
+                <label className="mr-4 text-right text-gray-700 text-sm">
+                  {/* <span className="flex-shrink-0 min-w-fit  mr-4 sm:w-20">
+                  <h5 className=" text-right text-gray-700 font-normal"> */}
+                  {title}
+                  {/* </h5>
+                </span> */}
+                </label>
                 {name === 'keywords' ? (
                   <Controller
                     control={control}
@@ -227,12 +233,12 @@ const CardMetaForm = ({
                     placeholder={placeholder}
                   />
                 )}
-              </label>
+              </React.Fragment>
             )
           })}
-          <div className="text-center">
+          <div className=" text-center col-span-2">
             <button
-              className="btn-primary h-10 w-24 mt-4"
+              className="btn-primary mt-6 sm:h-10 sm:w-24 sm:mt-4"
               type="submit"
               disabled={!isDirty || isSubmitSuccessful || isSubmitted}
             >

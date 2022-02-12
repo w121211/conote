@@ -29,6 +29,7 @@ import {
   useLinkLazyQuery,
   useMeQuery,
   useSearchAllLazyQuery,
+  useSearchTickerLazyQuery,
 } from '../../apollo/query.graphql'
 import { searchAllSymbols } from '../../lib/search/fuzzy'
 import Modal from '../modal/modal'
@@ -71,6 +72,7 @@ const customStyle: StylesConfig<Option, false, GroupBase<Option>> = {
 const AsyncAuthorConsumer = ({ name }: { name: string }) => {
   const client = useApolloClient()
   const { data: meData } = useMeQuery()
+
   const defaultOptions = [{ value: meData?.me.id ?? '', label: '我' }]
   const { register, control } = useFormContext()
   const [onInputChange, setOnInputChange] = useState('')
@@ -144,12 +146,12 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
   const [options, setOptions] = useState<Option[]>([])
   const [showModal, setShowModal] = useState(false)
   const [selectValue, setSelectValue] = useState('')
-  const [searchSymbol, { data }] = useSearchAllLazyQuery()
+  const [searchSymbol, { data }] = useSearchTickerLazyQuery()
   const [queryCard, { data: cardData }] = useCardLazyQuery()
 
   useEffect(() => {
-    if (data && data.searchAll) {
-      setOptions(data.searchAll.map(e => ({ value: e, label: e })))
+    if (data && data.searchTicker) {
+      setOptions(data.searchTicker.map(e => ({ value: e, label: e })))
     }
   }, [data])
   const onInputChange = (inputValue: string) => {

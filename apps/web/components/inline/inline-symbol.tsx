@@ -12,8 +12,8 @@ const InlineSymbol = ({
   const router = useRouter()
   return (
     <span {...attributes} contentEditable={false}>
-      <button
-        className="btn-reset-style text-blue-500 hover:cursor-pointer hover:underline hover:underline-offset-2"
+      <a
+        className="btn-reset-style inline text-left text-blue-500 hover:cursor-pointer hover:underline hover:underline-offset-2"
         onClick={e => {
           // e.preventDefault()
           // e.stopPropagation()
@@ -28,7 +28,7 @@ const InlineSymbol = ({
         }}
       >
         {children}
-      </button>
+      </a>
     </span>
   )
 }

@@ -24,7 +24,7 @@ const Popover = ({ children, hideBoard, subTitle, mask, buttons, topRightBtn }: 
       ></div>
 
       <div className="relative  flex flex-col w-[90vw] h-fit max-h-[90vh] sm:w-fit sm:min-w-[20vw] sm:max-w-[60vw] sm:max-h-[90vh] mt-[5vh] px-4 py-2  rounded bg-white shadow-2xl">
-        <div className="flex items-center justify-between w-full h-8 bg-white">
+        <div className="flex items-center justify-between w-full h-6 sm:h-8 bg-white">
           <div>
             {/* <span
               className="material-icons-outlined hover:cursor-pointer hover:text-gray-600"
@@ -42,7 +42,7 @@ const Popover = ({ children, hideBoard, subTitle, mask, buttons, topRightBtn }: 
           </div>
           {topRightBtn}
         </div>
-        <div className="overflow-y-auto px-8 mb-8">{children}</div>
+        <div className="overflow-y-auto mb-4 sm:px-8 sm:mb-8">{children}</div>
         {buttons && <div className="flex items-center justify-center mb-4">{buttons}</div>}
       </div>
     </div>

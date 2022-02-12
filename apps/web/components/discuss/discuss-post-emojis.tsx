@@ -1,15 +1,14 @@
 import { EmojiCode, LikeChoice } from '@prisma/client'
 import React, { useState } from 'react'
-import { useDiscussEmojisQuery } from '../../apollo/query.graphql'
+import { useDiscussPostEmojisQuery } from '../../apollo/query.graphql'
 import EmojiIcon from '../emoji-up-down/emoji-icon'
 import Tooltip from '../tooltip/tooltip'
-import CreateDiscussEmojis from './discuss-create-emoji'
+import CreateDiscussPostEmojis from './discuss-post-create-emoji'
+import UpdateDiscussPostEmojis from './discuss-post-update-emoji'
 
-import UpdateDiscussEmojis from './discuss-update-emoji'
-
-const DiscussEmojis = ({ discussId }: { discussId: string }): JSX.Element | null => {
+const DiscussPostEmojis = ({ discussPostId }: { discussPostId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)
-  const { data: emojisData } = useDiscussEmojisQuery({ variables: { discussId } })
+  const { data: emojisData } = useDiscussPostEmojisQuery({ variables: { discussPostId } })
   const emojis: EmojiCode[] = ['UP', 'DOWN']
   // const pinEmojiData = emojiData?.cardEmojis.find(e => e.code === 'PIN')
 
@@ -31,11 +30,11 @@ const DiscussEmojis = ({ discussId }: { discussId: string }): JSX.Element | null
         onClose={() => setShowTooltip(false)}
       >
         {emojis.map((e, i) => {
-          const emojiData = emojisData?.discussEmojis.find(el => el.code === e)
+          const emojiData = emojisData?.discussPostEmojis.find(el => el.code === e)
           if (emojiData) {
-            return <UpdateDiscussEmojis discussEmoji={emojiData} />
+            return <UpdateDiscussPostEmojis discussPostEmoji={emojiData} />
           }
-          return <CreateDiscussEmojis key={i} discussId={discussId} emojiCode={e} />
+          return <CreateDiscussPostEmojis key={i} discussPostId={discussPostId} emojiCode={e} />
         })}
       </Tooltip>
 
@@ -59,4 +58,4 @@ const DiscussEmojis = ({ discussId }: { discussId: string }): JSX.Element | null
   )
 }
 
-export default DiscussEmojis
+export default DiscussPostEmojis
