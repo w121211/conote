@@ -243,6 +243,19 @@ type Mutation {
 type Author {
   id: ID!
   name: String!
+  meta: AuthorMeta!
+}
+
+type AuthorMeta {
+  type: AuthorType!
+  job: String
+  org: String
+  sites: [AuthorMetaSite!]!
+}
+
+type AuthorMetaSite {
+  name: String!
+  url: String!
 }
 
 type Bullet {
@@ -653,6 +666,15 @@ type UpsertDiscussPostEmojiLikeResponse {
 
 input AuthorInput {
   name: String!
+  type: AuthorType!
+  job: String
+  org: String
+  sites: [AuthorMetaSiteInput!]!
+}
+
+input AuthorMetaSiteInput {
+  name: String!
+  url: String!
 }
 
 input CardInput {
@@ -786,6 +808,11 @@ input VoteInput {
 #   symbolId: ID!
 #   followed: Boolean!
 # }
+
+enum AuthorType {
+  ORG
+  PERSON
+}
 
 enum CardStatus {
   ACTIVE

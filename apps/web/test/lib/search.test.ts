@@ -2,12 +2,23 @@
  * yarn run test-lib search.test
  */
 /* eslint-disable no-await-in-loop */
-import { SearchSymbolService } from '../../lib/search/search-symbol-service'
+import { SearchAuthorService, SearchSymService } from '../../lib/search/search'
 
-it('SearchSymbolService.search()', async () => {
-  expect(await SearchSymbolService.search('AI')).toMatchSnapshot()
-  expect(await SearchSymbolService.search('ai', 'TICKER')).toMatchSnapshot()
-  expect(await SearchSymbolService.search('ai', 'TOPIC')).toMatchSnapshot()
-  expect(await SearchSymbolService.search('半', 'TOPIC')).toMatchSnapshot()
-  expect(await SearchSymbolService.search('半導體', 'TOPIC')).toMatchSnapshot()
+it('SearchSymService.search() all', async () => {
+  expect((await SearchSymService.search('AI')).map(e => e.symbol)).toMatchSnapshot()
+  expect((await SearchSymService.search('半導體')).map(e => e.symbol)).toMatchSnapshot()
+})
+
+it('SearchSymService.search() ticker only', async () => {
+  expect((await SearchSymService.search('ai', 'TICKER')).map(e => e.symbol)).toMatchSnapshot()
+})
+
+it('SearchSymService.search() topic only', async () => {
+  expect((await SearchSymService.search('半導體', 'TOPIC')).map(e => e.symbol)).toMatchSnapshot()
+})
+
+it('SearchAuthorService.search()', async () => {
+  expect((await SearchAuthorService.search('NaNa')).map(e => e.name)).toMatchSnapshot()
+  expect((await SearchAuthorService.search('美股')).map(e => e.name)).toMatchSnapshot()
+  // expect(await SearchSymbolService.search('半導體', 'TOPIC')).toMatchSnapshot()
 })

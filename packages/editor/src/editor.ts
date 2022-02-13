@@ -18,7 +18,7 @@
  * Get: stamp-text + linemetas
  * Show: tokenized sections -> for each section for each token, render token (其中value-token的顯示需要搭配stamp)
  * Edit: tokenized sections -> for each section, for each token, render token (實時)
- * Upsert: tokenized sections -> update stamp & linemetas -> (server)依linemetas建立stamps & 更新linemetas -> (server)儲存text
+ * Upsert: tokenized sections -> update stamp & linemetas -> (server)依linemetas建立stamps & 更新linemetas -> (server)儲存text
  *
  * Nested-card: (server) for each linemetas, if linemeta has nested card, 同步於nested card更新text (through marker), linemetas
  *

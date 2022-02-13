@@ -105,7 +105,7 @@
     "clean-types": "rm -rf dist && rm -rf reports",
     "codegen": "graphql-let",
     "dbpush": "dotenv -e .env.local -- yarn run prisma db push",
-    "dev": "yarn codegen && NODE_OPTIONS=--max_old_space_size=4096 next dev",
+    "dev": "NODE_OPTIONS='--inspect --trace-warnings' next dev",
     "format": "prettier --write .",
     "lint": "next lint",
     "migrate": "dotenv -e .env.local -- yarn run prisma migrate dev",

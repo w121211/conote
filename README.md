@@ -183,8 +183,13 @@ v-next
 - (?) #OOO# + ENTER, jumps out cursor, eg 純純寫作
 - handle doc conflict -> git mechanism
 - show doc diff
-- inline filtertag
+- inline filtertag `#filter-tag`
+- inline-comment `- some input # here is a comment, ignores using '...' when exceeding one line`
 - note redirect, eg $BA -> [[Boeing]]
+- /editor
+  - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
+- loading -> static icon
+- editor search-panel
 
 v0.2
 
@@ -193,6 +198,10 @@ v0.2
   - SSR
 - /author
   - [v] gql create/update author
+  - edit author meta (ie intro)
+  - (ui) add @ mark on author
+  - author rates <- gql rates(author)
+  - author articles <- gql notes(author)
 - card-meta
   - support author and its company, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
 - card-digest
@@ -200,31 +209,30 @@ v0.2
 - /editor
   - parse url, eg https://arxiv.org/abs/2112.00114
   - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
-  - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
   - (?) root li without bullet icon?
   - (req) a save button
-- inline-discuss `#a discussion topic here#`
-  - ref
-    - https://github.com/prisma/prisma/discussions
-    - https://github.com/discourse/discourse/tree/main/app/models
+- inline-discuss `#a discussion topic here#` @eg https://github.com/prisma/prisma/discussions https://github.com/discourse/discourse/tree/main/app/models
   - [v] editor parser, inline element
   - (ui) modal
   - [v] (bk) prisma model, graphql api, resolvers
-- inline-comment `- some input # here is a comment, ignores using '...' when exceeding one line`
 - inline-rate
   - user can also rate
 - /rate
   - rate form with annotate
--
-- browser
+- browser extension
+  - detect page's keywords & hints/auto-fill note
   - add inline-rate
 - add card emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
--
 - nlp
   - [v] greedy rate samples from cnyes news
   - training on greedy samples
   - train ner -> entities, subj/obj
   - train classifier -> rate (long, short, hold)
+- naming
+  - 'card' to 'note'
+- testing
+  - assign leader
+  - testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves
 
 v0.1.1
 
@@ -261,14 +269,10 @@ v0.1.1
   - [v] (ui) :pin emoji should not have count
   - (ui) :pin emoji color -> gray (unclick)
   - (ui) conote -> konote & when on-hover button add some feedback
+  - (bug) 在未 login 的情況下，直接創卡後不做滑鼠點擊可以打字
 - [v] (req) domain name
-- [working] (req) browser extension
+- [v] browser extension window popup
 - search
   - [pending] search box: (bug) 'home', 'end' key has no effect
-  - [working] newly added symbol should be searchable
+  - [v] newly added symbol should be searchable
   - [v] graphql add search author, ticker with id
-- naming
-  - 'card' to 'note'
-- testing
-  - assign leader
-  - testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves

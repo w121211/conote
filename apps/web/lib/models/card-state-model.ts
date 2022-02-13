@@ -1,5 +1,5 @@
 import { CardState } from '@prisma/client'
-import { NodeBody, NodeChange, TreeNode, TreeService } from '@conote/docdiff'
+import { NodeChange, TreeNode } from '@conote/docdiff'
 import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
 
@@ -40,6 +40,7 @@ export const CardStateModel = {
   },
 
   parse(state: CardState): CardStateParsed {
+    // TODO: validation require
     return {
       ...state,
       body: state.body as unknown as CardStateBody,

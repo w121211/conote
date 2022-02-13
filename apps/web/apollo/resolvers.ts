@@ -29,10 +29,8 @@ import { createVote } from '../lib/models/vote-model'
 import { DiscussEmojiModel } from '../lib/models/discuss-emoji-model'
 import { DiscussPostEmojiModel } from '../lib/models/discuss-post-emoji-model'
 import prisma from '../lib/prisma'
-import { SearchDiscussService } from '../lib/search/search-discuss-service'
-import { SearchSymbolService } from '../lib/search/search-symbol-service'
+import { SearchAuthorService, SearchDiscussService, SearchSymbolService } from '../lib/search/search'
 import { ResolverContext } from './apollo-client'
-import { SearchAuthorService } from '../lib/search/search-author-service'
 import { AuthorModel } from '../lib/models/author-model'
 
 // function _deleteNull<T>(obj: T) {
@@ -75,17 +73,7 @@ import { AuthorModel } from '../lib/models/author-model'
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
   async author(_parent, { id, name }, _context, _info) {
-    if (id) {
-      return await prisma.author.findUnique({
-        where: { id },
-      })
-    }
-    if (name) {
-      return await prisma.author.findUnique({
-        where: { name },
-      })
-    }
-    throw 'Parameter input error'
+    return await AuthorModel.get(id ?? undefined, name ?? undefined)
   },
 
   async bullet(_parent, { id }, _context, _info) {
@@ -610,16 +598,12 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
   async createAuthor(_parent, { data }, { req }, _info) {
     await isAuthenticated(req)
-    const { name } = data
-    const author = await AuthorModel.getOrCreate(name)
-    return author
+    return AuthorModel.create(data)
   },
 
   async updateAuthor(_parent, { id, data }, { req }, _info) {
     await isAuthenticated(req)
-    const { name } = data
-    const author = await AuthorModel.update(id, name)
-    return author
+    return AuthorModel.update(id, data)
   },
 
   async createBulletEmoji(_parent, { bulletId, code }, { req }, _info) {
@@ -839,7 +823,13 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   async createCommit(_parent, { data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    const { commit, stateGidToCid } = await CommitModel.create(data, userId)
+    const { commit, stateGidToCid, symsCommitted } = await CommitModel.create(data, userId)
+
+    // add newly created symbols to search (if any)
+    for (const e of symsCommitted) {
+      console.log(e)
+      SearchSymbolService.add(e)
+    }
     return {
       ...commit,
       stateIdToCidDictEntryArray: Object.entries(stateGidToCid).map<{ k: string; v: string }>(([k, v]) => ({ k, v })),

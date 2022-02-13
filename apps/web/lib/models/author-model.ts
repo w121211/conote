@@ -1,21 +1,45 @@
 import { Author } from '@prisma/client'
+import {
+  Author as GQLAuthor,
+  AuthorMeta as GQLAuthorMeta,
+  AuthorInput as GQLAuthorInput,
+} from 'graphql-let/__generated__/__types__'
 import prisma from '../prisma'
 
-type Job = {
-  name: string
-  org: string
-  startedAt?: Date
-  endedAt?: Date
-}
+// type Job = {
+//   name: string
+//   org: string
+//   startedAt?: Date
+//   endedAt?: Date
+// }
 
 type AuthorMeta = {
-  type: 'PERSON' | 'ORG'
+  type: 'ORG' | 'PERSON'
   job?: string // eg youtuber, analylist
   org?: string
-  sites: [string, string] // [site_name, site_url]
+  sites: [string, string][] // [site_url, site_name]
 }
 
 export const AuthorModel = {
+  async get(id?: string, name?: string): Promise<GQLAuthor | null> {
+    let author: Author | null
+    if (id) {
+      author = await prisma.author.findUnique({
+        where: { id },
+      })
+    } else if (name) {
+      author = await prisma.author.findUnique({
+        where: { name },
+      })
+    } else {
+      throw 'Need either id or name to get author'
+    }
+    if (author) {
+      return this.toGQLAuthor(author)
+    }
+    return null
+  },
+
   async getAll(): Promise<Author[]> {
     console.log('Retreiving all authors from database...')
 
@@ -40,18 +64,56 @@ export const AuthorModel = {
     return authors
   },
 
-  async getOrCreate(name: string): Promise<Author> {
-    return prisma.author.upsert({
-      create: {
+  async create(input: GQLAuthorInput): Promise<GQLAuthor> {
+    const { name, type, job, org, sites } = input
+    const meta: AuthorMeta = {
+      type,
+      job: job ?? undefined,
+      org: org ?? undefined,
+      sites: sites.map(e => [e.url, e.name]),
+    }
+    const author = await prisma.author.create({
+      data: {
         name,
-        // meta,
+        meta,
       },
-      where: { name },
-      update: {},
     })
+    return this.toGQLAuthor(author)
   },
 
-  async update(id: string, name: string): Promise<Author> {
-    return prisma.author.update({ data: { name }, where: { id } })
+  toGQLAuthor(author: Author): GQLAuthor {
+    const { meta } = author
+    return {
+      ...author,
+      meta: this.toGQLAuthorMeta(meta as unknown as AuthorMeta),
+    }
+  },
+
+  toGQLAuthorMeta(meta: AuthorMeta): GQLAuthorMeta {
+    const { sites } = meta
+    return {
+      ...meta,
+      sites: sites.map(([url, name]) => {
+        return { url, name }
+      }),
+    }
+  },
+
+  async update(id: string, input: GQLAuthorInput): Promise<GQLAuthor> {
+    const { name, type, job, org, sites } = input
+    const meta: AuthorMeta = {
+      type,
+      job: job ?? undefined,
+      org: org ?? undefined,
+      sites: sites.map(e => [e.url, e.name]),
+    }
+    const author = await prisma.author.update({
+      data: {
+        name,
+        meta,
+      },
+      where: { id },
+    })
+    return this.toGQLAuthor(author)
   },
 }
