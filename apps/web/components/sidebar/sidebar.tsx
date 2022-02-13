@@ -25,7 +25,7 @@ const SideBar = ({
   // const committedDocIndicies = useObservable(() => workspace.committedDocIndicies$)
   useEffect(() => {
     window.addEventListener('resize', () => {
-      if (window && window.innerWidth < 640) {
+      if (window && window.innerWidth < 768) {
         pinMenuHandler(false)
         showMenuHandler(false)
       }
@@ -66,7 +66,7 @@ const SideBar = ({
             Konote
           </a>
           <span
-            className={`hidden sm:block ${
+            className={`hidden md:block ${
               isPined ? 'material-icons' : 'material-icons-outlined'
             } text-gray-500 opacity-0 rounded-full bg-transparent hover:text-gray-600 
             cursor-pointer group-hover:opacity-100 rotate-45 select-none`}
@@ -77,7 +77,7 @@ const SideBar = ({
             push_pin
           </span>
           <span
-            className={`material-icons sm:hidden text-gray-6  00 rounded-full bg-transparent
+            className={`material-icons md:hidden text-gray-6  00 rounded-full bg-transparent
             cursor-pointer select-none`}
             onClick={() => {
               showMenuHandler(false)

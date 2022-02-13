@@ -28,9 +28,11 @@ import {
   useCreateRateMutation,
   useLinkLazyQuery,
   useMeQuery,
+  useSearchAuthorLazyQuery,
   useSearchSymbolLazyQuery,
 } from '../../apollo/query.graphql'
 import Modal from '../modal/modal'
+import CreateAuthorForm from './create-author-form'
 import CreateSymbolForm from './create-symbol-form'
 
 interface Option {
@@ -54,6 +56,7 @@ const customStyle: StylesConfig<Option, false, GroupBase<Option>> = {
     boxShadow: 'none',
     background: state.isFocused ? '#f5f5f5' : 'transparent',
     ':hover': { background: '#f5f5f5' },
+    cursor: 'text',
   }),
   menu: base => ({
     ...base,
@@ -67,26 +70,66 @@ const customStyle: StylesConfig<Option, false, GroupBase<Option>> = {
   // input: base => ({ ...base, fontSize: '14px' }),
 }
 
+const AuthorControl = ({ children, ...props }: ControlProps<Option, false>) => {
+  return (
+    <components.Control {...props}>
+      <span className="pl-2">@</span>
+      {children}
+    </components.Control>
+  )
+}
+
 const AsyncAuthorConsumer = ({ name }: { name: string }) => {
-  const client = useApolloClient()
+  const [searchAuthor, { data }] = useSearchAuthorLazyQuery()
   const { data: meData } = useMeQuery()
 
   const defaultOptions = [{ value: meData?.me.id ?? '', label: '我' }]
   const { register, control } = useFormContext()
-  const [onInputChange, setOnInputChange] = useState('')
-  const [options, setOptions] = useState<null | AuthorQuery['author']>()
+  const [openMenu, setOpenMenu] = useState(false)
+  const [options, setOptions] = useState<Option[]>([])
+  const [selectValue, setSelectValue] = useState('')
+  const [showModal, setShowModal] = useState(false)
 
-  const promiseOptions = async (inputValue: string) => {
-    const res = await client.query({
-      query: AuthorDocument,
-      variables: { name: inputValue },
-    })
-    if (res.data && res.data.author) {
-      defaultOptions.unshift({ value: res.data.author.id, label: res.data.author.name })
-      return defaultOptions
-    } else {
-      return defaultOptions
+  useEffect(() => {
+    if (data?.searchAuthor) {
+      setOptions(defaultOptions.concat(data.searchAuthor.map(({ id, str }) => ({ value: id, label: str }))))
     }
+  }, [data])
+
+  const onInputChange = (inputValue: string) => {
+    if (inputValue.length > 0) {
+      searchAuthor({ variables: { term: inputValue } })
+      setOpenMenu(true)
+    } else {
+      setOpenMenu(false)
+    }
+  }
+
+  const onShowCreate = (inputValue: string, _: any, options: OptionsOrGroups<Option, GroupBase<Option>>) => {
+    if (options.find(e => e.label === inputValue)) {
+      return false
+    }
+    return true
+  }
+
+  const handleCreateLabel = (inputValue: string) => {
+    if (inputValue.startsWith('@')) {
+      return <>新增: {inputValue}</>
+    }
+    return <>新增: @{inputValue}</>
+  }
+
+  const onCreateOption = (inputValue: string) => {
+    setSelectValue(inputValue)
+    setShowModal(true)
+  }
+
+  const onChange = (e: Option | null) => {
+    if (e) {
+      // queryCard({ variables: { symbol: e?.label } })
+      return { value: e.value, label: e?.label }
+    }
+    return e
   }
 
   return (
@@ -98,23 +141,40 @@ const AsyncAuthorConsumer = ({ name }: { name: string }) => {
         name={name}
         control={control}
         render={({ field }) => (
-          <AsyncCreatableSelect
-            {...field}
-            isClearable
+          <Creatable
+            value={field.value}
+            onChange={e => field.onChange(onChange(e))}
+            onCreateOption={onCreateOption}
+            // onKeyDown={onKeyDown}
+            // menuIsOpen={true}
+            menuIsOpen={openMenu}
             createOptionPosition="first"
-            cacheOptions
-            defaultOptions={defaultOptions}
-            loadOptions={promiseOptions}
-            onInputChange={(inputValue, act) => {
-              setOnInputChange(inputValue)
+            onInputChange={onInputChange}
+            isValidNewOption={onShowCreate} //是否顯示 新增
+            options={options}
+            components={{
+              DropdownIndicator: undefined,
+              Control: AuthorControl,
             }}
-            components={{ DropdownIndicator: undefined }}
             placeholder=""
-            styles={customStyle}
+            formatCreateLabel={handleCreateLabel}
+            styles={{
+              ...customStyle,
+              valueContainer: base => ({ ...base, paddingLeft: 0 }),
+              input: base => ({ ...base, textTransform: 'uppercase' }),
+            }}
             ref={null}
           />
         )}
       />
+      <Modal visible={showModal} onClose={() => setShowModal(false)}>
+        <CreateAuthorForm
+          defaultValues={{ target: selectValue.toUpperCase(), description: '' }}
+          onSubmitted={() => {
+            setShowModal(false)
+          }}
+        />
+      </Modal>
     </>
   )
 }
@@ -149,18 +209,18 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
 
   useEffect(() => {
     if (data && data.searchSymbol) {
-      setOptions(data.searchSymbol.map(e => ({ value: e, label: e })))
+      setOptions(data.searchSymbol.map(({ id, str }) => ({ value: id, label: str })))
     }
   }, [data])
   const onInputChange = (inputValue: string) => {
     //if menu should open
     if (inputValue.length > 0) {
+      searchSymbol({ variables: { term: `$${inputValue}` } })
       setOpenMenu(true)
     } else {
       setOpenMenu(false)
     }
     //query symbol
-    searchSymbol({ variables: { term: `$${inputValue}` } })
   }
   const onShowCreate = (inputValue: string, _: any, options: OptionsOrGroups<Option, GroupBase<Option>>) => {
     if (
@@ -188,7 +248,7 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
   }
 
   const onCreateOption = (inputValue: string) => {
-    setValue(name, { value: inputValue.toUpperCase(), label: inputValue.toUpperCase() })
+    // setValue(name, { value: inputValue.toUpperCase(), label: inputValue.toUpperCase() })
     setSelectValue(inputValue)
     setShowModal(true)
   }
@@ -196,7 +256,7 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
   const onChange = (e: Option | null) => {
     if (e) {
       // queryCard({ variables: { symbol: e?.label } })
-      return { value: e.value.substring(1), label: e?.label.substring(1) }
+      return { value: e.value, label: e?.label.substring(1) }
     }
     return e
   }
@@ -237,7 +297,9 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
       <Modal visible={showModal} onClose={() => setShowModal(false)}>
         <CreateSymbolForm
           defaultValues={{ target: selectValue.toUpperCase(), description: '' }}
-          onSubmitted={() => setShowModal(false)}
+          onSubmitted={() => {
+            setShowModal(false)
+          }}
         />
       </Modal>
     </>
