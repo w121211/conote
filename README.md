@@ -274,5 +274,5 @@ v0.1.1
 - [v] browser extension window popup
 - search
   - [pending] search box: (bug) 'home', 'end' key has no effect
-  - [working] newly added symbol should be searchable
+  - [v] newly added symbol should be searchable
   - [v] graphql add search author, ticker with id

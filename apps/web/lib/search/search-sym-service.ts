@@ -8,7 +8,7 @@ type FuseDict = {
   topic: Fuse<Sym>
 }
 
-export class SearchSymbolServiceClass {
+export class SearchSymServiceClass {
   private fuseDict: FuseDict | null = null // TODO: store in redis instead
 
   private _add(sym: Sym, fuse: Fuse<Sym>): void {
@@ -38,7 +38,7 @@ export class SearchSymbolServiceClass {
   }
 
   async initFuse(): Promise<FuseDict> {
-    console.log('init fuse...')
+    console.log('init fuse dict...')
     if (this.fuseDict === null) {
       const syms = await SymModel.getAll()
       const fuseDict: FuseDict = {
