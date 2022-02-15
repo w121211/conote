@@ -188,11 +188,16 @@ v-next
 - note redirect, eg $BA -> [[Boeing]]
 - /editor
   - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
+  - search-panel
+  - labels @eg #new-note #fisrt-commit
 - loading -> static icon
-- editor search-panel
+- /user
+  - user's contribution, credit (rates), field, anonymous (?)
 
 v0.2
 
+- naming
+  - 'card' to 'note'
 - /index
   - [v] announcement
   - SSR
@@ -202,34 +207,35 @@ v0.2
   - (ui) add @ mark on author
   - author rates <- gql rates(author)
   - author articles <- gql notes(author)
-- card-meta
-  - support author and its company, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
-- card-digest
-  - [pending] add card emojis
 - /editor
   - parse url, eg https://arxiv.org/abs/2112.00114
   - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
   - (?) root li without bullet icon?
   - (req) a save button
-- inline-discuss `#a discussion topic here#` @eg https://github.com/prisma/prisma/discussions https://github.com/discourse/discourse/tree/main/app/models
-  - [v] editor parser, inline element
-  - (ui) modal
-  - [v] (bk) prisma model, graphql api, resolvers
-- inline-rate
-  - user can also rate
+  - [working] (req) webpage-note with keyword hints
 - /rate
   - rate form with annotate
+- card-meta
+  - support author and its ogranization, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
+- card-digest
+  - [pending] add card emojis
+- inline-discuss `#a discussion topic here#` @eg https://github.com/prisma/prisma/discussions https://github.com/discourse/discourse/tree/main/app/models
+  - [v] editor parser, inline element
+  - [v] (bk) prisma model, graphql api, resolvers
+  - (ui) modal
+- inline-rate
+  - user can also rate
 - browser extension
+  - (ui) remove scss
   - detect page's keywords & hints/auto-fill note
   - add inline-rate
+  - deploy to chrome/firefox store
 - add card emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
 - nlp
   - [v] greedy rate samples from cnyes news
   - training on greedy samples
   - train ner -> entities, subj/obj
   - train classifier -> rate (long, short, hold)
-- naming
-  - 'card' to 'note'
 - testing
   - assign leader
   - testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves
@@ -273,6 +279,6 @@ v0.1.1
 - [v] (req) domain name
 - [v] browser extension window popup
 - search
-  - [pending] search box: (bug) 'home', 'end' key has no effect
+  - [pending] (bug) search box: 'home', 'end' key has no effect
   - [v] newly added symbol should be searchable
   - [v] graphql add search author, ticker with id

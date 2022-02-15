@@ -75,8 +75,10 @@ export const CardModel = {
   },
 
   /**
-   * Get or create a webpage-card by URL, if the URL not found in database, will try to scrape and then store
-   * Newly created webpage-card will not have card-state and remains null.
+   * Get or create a webpage-card by URL
+   * If the given URL not found in database, try to scrape and then store.
+   * Newly created webpage-card does not have card-state.
+   *
    */
   async getOrCreateByUrl({
     scraper,
