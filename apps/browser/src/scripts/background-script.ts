@@ -23,7 +23,7 @@ const RateMenu = {
      * when user click menu, get user's selection
      *
      */
-    browser.menus.onClicked.addListener(async (info, tab) => {
+    browser.contextMenus.onClicked.addListener(async (info, tab) => {
       console.log(info, tab)
       if (info.menuItemId === 'conote-rate') {
         console.log(info, tab)
@@ -70,7 +70,7 @@ const SearchMenu = {
       // },
     )
 
-    browser.menus.onClicked.addListener(async (info, tab) => {
+    browser.contextMenus.onClicked.addListener(async (info, tab) => {
       // console.log(info, tab)
       // if (info.menuItemId === this.id) {
       //   console.log(info, tab)

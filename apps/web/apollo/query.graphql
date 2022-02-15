@@ -6,7 +6,10 @@ fragment author on Author {
     type
     job
     org
-    sites
+    sites {
+      name
+      url
+    }
   }
 }
 
