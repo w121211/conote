@@ -93,7 +93,7 @@ export default function Layout({
   }
 
   return (
-    <div className="flex w-screen h-screen overflow-y-scroll scroll-smooth ">
+    <div className="flex w-screen h-screen   ">
       <SideBar
         showMenuHandler={triggerMenuHandler}
         pinMenuHandler={pinMenuHandler}
@@ -101,7 +101,9 @@ export default function Layout({
         isPined={pinMenu}
       />
       <div
-        className={` pt-11 pb-[20vh] px-[20px]  ${pinMenu ? ' lg:px-[6%]' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'}  `}
+        className={`flex-grow pt-11 pb-[20vh] px-[20px]  ${
+          pinMenu ? ' lg:px-[6%] ' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
+        }  overflow-y-scroll  scroll-smooth sm:pl-[calc(100vw_-_100%)] scrollbar`}
       >
         {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
         <div className="">

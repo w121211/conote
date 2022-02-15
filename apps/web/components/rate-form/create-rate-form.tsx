@@ -47,17 +47,19 @@ export interface FormInput {
   link?: string
 }
 
-const customStyle: StylesConfig<Option, false, GroupBase<Option>> = {
+export const reactSelectControlStyle = {
+  minHeight: '36px',
+  border: 'none',
+  boxShadow: 'none',
+  background: 'transparent',
+  ':focus': { background: '#f5f5f5' },
+  ':hover': { background: '#f5f5f5' },
+  cursor: 'text',
+}
+
+export const customStyle: StylesConfig<Option, false, GroupBase<Option>> = {
   container: base => ({ ...base, width: '100%', fontSize: '14px' }),
-  control: (base, state) => ({
-    ...base,
-    minHeight: '36px',
-    border: 'none',
-    boxShadow: 'none',
-    background: state.isFocused ? '#f5f5f5' : 'transparent',
-    ':hover': { background: '#f5f5f5' },
-    cursor: 'text',
-  }),
+  control: (base, state) => ({ ...base, ...reactSelectControlStyle }),
   menu: base => ({
     ...base,
     maxHeight: '100px',
@@ -167,9 +169,19 @@ const AsyncAuthorConsumer = ({ name }: { name: string }) => {
           />
         )}
       />
-      <Modal visible={showModal} onClose={() => setShowModal(false)}>
+      <Modal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        buttons={
+          <button form="create-author-form" className="btn-primary h-10 w-24 " type="submit">
+            提交
+          </button>
+        }
+        mask={false}
+      >
+        <h2 className="mb-6 text-2xl font-bold text-gray-800">新增作者</h2>
         <CreateAuthorForm
-          defaultValues={{ target: selectValue.toUpperCase(), description: '' }}
+          defaultValues={{ name: selectValue, type: { value: 'PERSON', label: '人' }, sites: [{ name: '', url: '' }] }}
           onSubmitted={() => {
             setShowModal(false)
           }}

@@ -373,7 +373,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
   // }, [searchAllResult])
 
   return (
-    <div className=" text-gray-800">
+    <div className="text-gray-800">
       <Slate
         editor={editor}
         value={value}

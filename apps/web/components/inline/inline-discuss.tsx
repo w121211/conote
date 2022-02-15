@@ -2,19 +2,26 @@ import React, { useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, RenderElementProps, useSelected, useSlateStatic } from 'slate-react'
 import { RateChoice } from '@prisma/client'
-import { RateFragment } from '../../apollo/query.graphql'
+import { DiscussFragment, RateFragment } from '../../apollo/query.graphql'
 import { InlineDiscussElement } from '../editor/slate-custom-types'
 import Modal from '../modal/modal'
 // import RateButton from '../rate-form/rate-button'
 // import CreateRateForm from '../rate-form/create-rate-form'
 // import UpdateRateForm from '../rate-form/update-rate-form'
 import { InlineItemService } from './inline-item-service'
+import { useRouter } from 'next/router'
+import CreateDiscussForm from '../discuss/create-discuss'
+import { workspace } from '../workspace/workspace'
+import { useObservable } from 'rxjs-hooks'
 
 const InlineDiscuss = (props: RenderElementProps & { element: InlineDiscussElement }): JSX.Element => {
   const { children, attributes, element } = props
+  const router = useRouter()
+  const mainDoc = useObservable(() => workspace.mainDoc$)
   const editor = useSlateStatic()
   const selected = useSelected()
-  const [showPopover, setShowPopover] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+
   // const [shotId, setShotId] = useState(element.id)
   // const [shotData, setShotData] = useState<ShotFragment | undefined>()
   // const { data: targetData } = useCardQuery({ variables: { id: shotId } })
@@ -31,6 +38,11 @@ const InlineDiscuss = (props: RenderElementProps & { element: InlineDiscussEleme
   //   Transforms.setNodes<InlineRateElement>(editor, { id: rate.id }, { at: path })
   //   Transforms.insertText(editor, inlineRate, { at: path })
   // }
+  const onDiscussCreated = (data: DiscussFragment) => {
+    const path = ReactEditor.findPath(editor, element)
+    Transforms.setNodes<InlineDiscussElement>(editor, { id: data.id }, { at: path })
+    Transforms.insertText(editor, data.id, { at: path })
+  }
 
   // useEffect(() => {
   //   // if (showPopover && !pollId) {
@@ -50,77 +62,42 @@ const InlineDiscuss = (props: RenderElementProps & { element: InlineDiscussEleme
   // }, [showPopover, shotData, shotId])
 
   return (
-    <span {...attributes}>
-      {/* {!selected && ( */}
-      {/* <button
-            className={classes.shotBtn}
-            contentEditable={false}
-            onClick={e => {
-              e.stopPropagation()
-              setShowPopover(true)
-            }}
-          >
-            {element.params.map((e, i) => {
-              return (
-                <span
-                  className={
-                    e.startsWith('@')
-                      ? classes.shotAuthor
-                      : e.startsWith('$') || e.startsWith('[[')
-                      ? classes.shotTarget
-                      : e.startsWith('#')
-                      ? classes.shotChoice
-                      : ''
-                  }
-                  data-choice={e.startsWith('#') ? e : ''}
-                  key={i}
-                >
-                  {e.startsWith('$') ? '  ' + e + '  ' : e.startsWith('#') ? e.substr(1) : e}
-                </span>
-              )
-            })}
-          </button> */}
-      <span contentEditable={false}>
-        <button>{element.str}</button>
-
-        {/* {showPopover && (
-          <Modal visible={showPopover} onClose={() => setShowPopover(false)}>
-            {element.id ? (
-              <UpdateRateForm
-                rateId={element.id}
-                initialInput={{
-                  author: element.params.find(e => e.startsWith('@')) ?? '',
-                  target: {
-                    value: element.params.find(e => e.startsWith('$'))?.substring(1) ?? '',
-                    label: element.params.find(e => e.startsWith('$'))?.substring(1) ?? '',
-                  },
-                  choice: (element.params.find(e => e.startsWith('#'))?.substring(1) as RateChoice) ?? 'LONG',
-                  link: '',
-                }}
-                onRateCreated={onRateCreated}
-              />
-            ) : (
-              <CreateRateForm
-                initialInput={{
-                  author: {
-                    value: element.params.find(e => e.startsWith('@')) ?? '',
-                    label: element.params.find(e => e.startsWith('@')) ?? '',
-                  },
-                  target: {
-                    value: element.params.find(e => e.startsWith('$'))?.substring(1) ?? '',
-                    label: element.params.find(e => e.startsWith('$'))?.substring(1) ?? '',
-                  },
-                  choice: (element.params.find(e => e.startsWith('#'))?.substring(1) as RateChoice) ?? 'LONG',
-                  link: '',
-                }}
-                onRateCreated={onRateCreated}
-              />
-            )}
-          </Modal>
-        )} */}
-      </span>
-      <span className={'text-[0px]'}>{children}</span>
-      {/* <span>{children}</span> */}
+    <span {...attributes} contentEditable={false}>
+      <a
+        className="text-blue-500 cursor-pointer hover:underline-offset-2 hover:underline"
+        onClick={() => {
+          // setShowModal(true)
+          if (element.id) {
+            router.push(
+              // { pathname: '/discuss/[discussId]', query: { discussId: element.str } },
+              { pathname: router.pathname, query: { symbol: router.query.symbol, discuss: element.id } },
+              `/discuss/${encodeURIComponent(element.id)}`,
+              {
+                shallow: true,
+              },
+            )
+          } else {
+            setShowModal(true)
+          }
+        }}
+      >
+        {children}
+      </a>
+      <Modal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        buttons={
+          <button form="create-discuss-form" className="btn-primary h-10 w-24 " type="submit">
+            提交
+          </button>
+        }
+      >
+        {mainDoc && mainDoc.doc ? (
+          <CreateDiscussForm cardId={mainDoc.doc.cid} title={element.str} onCreated={onDiscussCreated} />
+        ) : (
+          <span>Error</span>
+        )}
+      </Modal>
     </span>
   )
 }
