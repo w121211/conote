@@ -6,7 +6,7 @@ import browser from 'webextension-polyfill'
 // import { SiderApp } from '../sider/sider'
 import { App } from '../popup/app'
 
-function injectExtensionMarker(): void {
+const injectExtensionMarker = (): void => {
   const el = document.createElement('div')
   el.id = 'conote-extension-root'
   // const extensionMarker = document.createElement('div')
@@ -26,7 +26,7 @@ function injectExtensionMarker(): void {
   render(React.createElement(App, null, null), el)
 }
 
-async function main(): Promise<void> {
+const main = async (): Promise<void> => {
   injectExtensionMarker()
   browser.runtime.onMessage.addListener(injectExtensionMarker)
 }

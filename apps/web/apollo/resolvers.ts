@@ -29,7 +29,7 @@ import { createVote } from '../lib/models/vote-model'
 import { DiscussEmojiModel } from '../lib/models/discuss-emoji-model'
 import { DiscussPostEmojiModel } from '../lib/models/discuss-post-emoji-model'
 import prisma from '../lib/prisma'
-import { SearchAuthorService, SearchDiscussService, SearchSymbolService } from '../lib/search/search'
+import { SearchAuthorService, SearchDiscussService, SearchSymService } from '../lib/search/search'
 import { ResolverContext } from './apollo-client'
 import { AuthorModel } from '../lib/models/author-model'
 
@@ -337,7 +337,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async searchSymbol(_parent, { term, type }, _context, _info) {
-    const hits = await SearchSymbolService.search(term, type ?? undefined)
+    const hits = await SearchSymService.search(term, type ?? undefined)
     return hits.map(e => ({ id: e.id, str: e.symbol }))
   },
 
@@ -827,8 +827,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
     // add newly created symbols to search (if any)
     for (const e of symsCommitted) {
-      console.log(e)
-      SearchSymbolService.add(e)
+      SearchSymService.add(e)
     }
     return {
       ...commit,

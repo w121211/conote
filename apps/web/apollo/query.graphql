@@ -2,6 +2,15 @@ fragment author on Author {
   __typename
   id
   name
+  meta {
+    type
+    job
+    org
+    sites {
+      name
+      url
+    }
+  }
 }
 
 fragment bullet on Bullet {
