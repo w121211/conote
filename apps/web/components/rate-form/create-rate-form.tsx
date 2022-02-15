@@ -82,11 +82,11 @@ const AuthorControl = ({ children, ...props }: ControlProps<Option, false>) => {
 }
 
 const AsyncAuthorConsumer = ({ name }: { name: string }) => {
-  const [searchAuthor, { data }] = useSearchAuthorLazyQuery()
+  const [searchAuthor, { data, refetch }] = useSearchAuthorLazyQuery()
   const { data: meData } = useMeQuery()
 
   const defaultOptions = [{ value: meData?.me.id ?? '', label: '我' }]
-  const { register, control } = useFormContext()
+  const { control, setValue } = useFormContext()
   const [openMenu, setOpenMenu] = useState(false)
   const [options, setOptions] = useState<Option[]>([])
   const [selectValue, setSelectValue] = useState('')
@@ -182,7 +182,9 @@ const AsyncAuthorConsumer = ({ name }: { name: string }) => {
         <h2 className="mb-6 text-2xl font-bold text-gray-800">新增作者</h2>
         <CreateAuthorForm
           defaultValues={{ name: selectValue, type: { value: 'PERSON', label: '人' }, sites: [{ name: '', url: '' }] }}
-          onSubmitted={() => {
+          onCreated={createdData => {
+            refetch()
+            setValue(name, { value: createdData.id, label: createdData.name })
             setShowModal(false)
           }}
         />

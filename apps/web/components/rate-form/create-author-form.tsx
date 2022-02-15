@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { useCardLazyQuery, useCreateAuthorMutation } from '../../apollo/query.graphql'
+import { AuthorFragment, useCardLazyQuery, useCreateAuthorMutation } from '../../apollo/query.graphql'
 import { AuthorType, AuthorInput, Author } from 'graphql-let/__generated__/__types__'
 import Select from 'react-select'
 import { customStyle, reactSelectControlStyle } from './create-rate-form'
@@ -26,17 +26,17 @@ const typeOptions = [
 
 const CreateAuthorForm = ({
   defaultValues,
-  onSubmitted,
+  onCreated,
 }: {
   defaultValues: FormInput
-  onSubmitted: (authorData: Author) => void
+  onCreated: (authorData: AuthorFragment) => void
 }) => {
   const { register, handleSubmit, control, watch } = useForm<FormInput>({ defaultValues })
   const { fields, append, remove } = useFieldArray({ name: 'sites', control })
   const [createAuthoer] = useCreateAuthorMutation({
     onCompleted(data) {
       if (data.createAuthor) {
-        onSubmitted(data.createAuthor)
+        onCreated(data.createAuthor)
       }
     },
   })

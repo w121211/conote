@@ -10,7 +10,7 @@ import Modal from '../modal/modal'
 // import UpdateRateForm from '../rate-form/update-rate-form'
 import { InlineItemService } from './inline-item-service'
 import { useRouter } from 'next/router'
-import CreateDiscussForm from '../discuss/create-discuss'
+import CreateDiscussForm from '../discuss/create-discuss-form'
 import { workspace } from '../workspace/workspace'
 import { useObservable } from 'rxjs-hooks'
 

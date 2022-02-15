@@ -47,7 +47,7 @@
   }
   .scrollbar::-webkit-scrollbar-track {
     /* display: none; */
-    @apply bg-gray-100 rounded-sm;
+    @apply bg-transparent rounded-sm;
   }
   .scrollbar::-webkit-scrollbar-thumb {
     @apply bg-gray-200 rounded-sm hover:bg-gray-300

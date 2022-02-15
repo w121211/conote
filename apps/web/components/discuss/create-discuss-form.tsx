@@ -35,12 +35,14 @@ const CreateDiscussForm = ({
     }
   }
   const onSubmit = (v: FormInput) => {
+    console.log(v, cardId)
     createDiscuss({
       variables: {
         cardId,
         data: {
           title: v.title,
-          content: v.content,
+          content: v.content ?? '',
+          //   meta: undefined,
         },
       },
     })
