@@ -30,7 +30,7 @@ const CreateSymbolForm = ({ defaultValues, onSubmitted }: { defaultValues: FormI
           <div className='flex-grow relative before:absolute before:content-["$"] before:left-1 before:top-1/2 before:-translate-y-1/2 before:text-sm'>
             <input
               {...register('target')}
-              className="input w-full pl-4 uppercase"
+              className="input w-full pl-4"
               type="text"
               // placeholder="例如:https://www.youtube.com/xxx..."
             />

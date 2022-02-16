@@ -16,22 +16,40 @@ export default function Layout({
   const layoutRef = useRef<HTMLDivElement>(null)
 
   // const childrenWithCallback = useCallback(() => children, [children])
+  useEffect(() => {
+    if (window) {
+      if (window.innerWidth < 768) {
+        setShowMenu(false)
+        setPinMenu(false)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const storageMenu = localStorage.getItem('showMenu')
     const storagePin = localStorage.getItem('pinMenu')
-    if (storageMenu !== null && storagePin !== null) {
-      setShowMenu(storageMenu === 'true' ? true : false)
-      setPinMenu(storagePin === 'true' ? true : false)
+    if (window.innerWidth < 768) {
+      if (storageMenu !== null && storagePin !== null) {
+        setShowMenu(false)
+        setPinMenu(false)
+      } else {
+        localStorage.setItem('showMenu', 'false')
+        localStorage.setItem('pinMenu', 'false')
+      }
     } else {
-      localStorage.setItem('showMenu', 'true')
-      localStorage.setItem('pinMenu', 'true')
+      if (storageMenu !== null && storagePin !== null) {
+        setShowMenu(storageMenu === 'true' ? true : false)
+        setPinMenu(storagePin === 'true' ? true : false)
+      } else {
+        console.log('bigger', showMenu)
+        localStorage.setItem('showMenu', 'true')
+        localStorage.setItem('pinMenu', 'true')
+      }
     }
   }, [])
 
   useEffect(() => {
     localStorage.setItem('showMenu', `${showMenu}`)
-    console.log(showMenu)
   }, [showMenu])
 
   useEffect(() => {
@@ -75,15 +93,20 @@ export default function Layout({
   }
 
   return (
-    <div className="flex h-screen ">
+    <div className="flex w-screen h-screen   ">
       <SideBar
         showMenuHandler={triggerMenuHandler}
         pinMenuHandler={pinMenuHandler}
         showMenu={showMenu}
         isPined={pinMenu}
       />
-      <div className={`flex-grow min-w-0 overflow-y-auto mt-11 px-4 pb-[20vh] scroll-smooth  `}>
-        <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto scroll-smooth">
+      <div
+        className={`flex-grow pt-11 pb-[20vh] pl-2  ${
+          pinMenu ? ' lg:px-[6%] ' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
+        }  overflow-y-scroll  scroll-smooth sm:pl-[calc(100vw_-_100%)] scrollbar`}
+      >
+        {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
+        <div className="">
           {/* {children} */}
           <LoginModal>{children}</LoginModal>
         </div>

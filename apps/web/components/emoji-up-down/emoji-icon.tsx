@@ -41,7 +41,7 @@ const EmojiIcon = ({
             isColumn ? 'flex-col' : 'flex-row'
           } ${className ?? ''}`}
         >
-          <span className={`material-icons text-lg text-rose-600 ${liked ? 'text-rose-600' : 'text-gray-700'}`}>
+          <span className={`material-icons text-lg  ${liked ? 'favorite text-rose-600' : 'favorite_border  '} `}>
             {liked ? 'favorite' : 'favorite_border'}
           </span>
           {nUps}

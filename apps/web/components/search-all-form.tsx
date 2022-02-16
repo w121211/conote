@@ -5,6 +5,7 @@ import Creatable from 'react-select/creatable'
 import { useSearchSymbolLazyQuery } from '../apollo/query.graphql'
 import { ActionMeta, GroupBase, Options, OptionsOrGroups, StylesConfig } from 'react-select'
 import { Accessors } from 'react-select/dist/declarations/src/useCreatable'
+import { cloneDeep } from 'lodash'
 
 type Option = {
   label: string
@@ -30,7 +31,8 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
   // console.log(data?.searchAll)
   useEffect(() => {
     if (data && data.searchSymbol) {
-      setOptions(data.searchSymbol.map(e => ({ label: e, value: e })))
+      const colon = cloneDeep(data.searchSymbol)
+      setOptions(colon.map(e => ({ label: e.str, value: e.id })))
     }
   }, [data])
 
@@ -62,12 +64,15 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
   }
 
   const handleInput = (value: string, action: any) => {
-    setInputValue(value)
-    if (value) {
+    const newValue = value
+      .replace(/[\uff01-\uff5e]/g, fullwidthChar => String.fromCharCode(fullwidthChar.charCodeAt(0) - 0xfee0))
+      .replace(/\u3000/g, '\u0020')
+    setInputValue(newValue)
+    if (newValue) {
       setOpenMenu(true)
-      searchSymbol({ variables: { term: value } })
+      searchSymbol({ variables: { term: newValue } })
     }
-    if (!value) {
+    if (!newValue) {
       setOpenMenu(false)
     }
   }

@@ -16,8 +16,8 @@ const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.El
     subSyms,
   } = digest
   return (
-    <div className="overflow-hidden mt-6 mb-4 pb-4">
-      <div className="flex mb-2 items-center text-sm">
+    <div className="overflow-hidden py-5 border-b border-gray-200">
+      <div className="flex  items-center text-sm">
         {author && (
           <Link href={`/author/${author}`}>
             <a className="text-gray-500 overflow-hidden whitespace-nowrap text-ellipsis hover:underline hover:underline-offset-2">
@@ -40,10 +40,21 @@ const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.El
       </div>
       <Link href={{ pathname: '/card/[symbol]', query: { symbol: sym.symbol } }}>
         <a className="overflow-hidden whitespace-nowrap text-ellipsis text-gray-700 hover:underline hover:underline-offset-2 ">
-          <h3 className="m-0 truncate  text-xl">{title ?? sym.symbol}</h3>
+          <h3 className="m-0 truncate  text-xl">
+            {title ??
+              (sym.symbol.startsWith('[[') && sym.symbol.endsWith(']]') ? (
+                <>
+                  <span className="text-gray-400 font-normal">[[</span>
+                  {sym.symbol.substring(2, sym.symbol.length - 2)}
+                  <span className="text-gray-400 font-normal">]]</span>
+                </>
+              ) : (
+                sym.symbol
+              ))}
+          </h3>
         </a>
       </Link>
-      {picks.length > 0 && (
+      {/* {picks.length > 0 && (
         <div className="mb-2 line-clamp-2 text-ellipsis text-sm text-gray-500">
           {picks.map((e, i) => {
             return (
@@ -58,7 +69,7 @@ const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.El
             )
           })}
         </div>
-      )}
+      )} */}
       {/* {hashtags && source && <span className="mx-2 border-r border-gray-300"></span>} */}
       <div className="flex">
         {subSyms.map((e, i) => (

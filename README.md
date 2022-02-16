@@ -274,7 +274,7 @@ v0.1.1
     - [%] Topic -> symbol only
 - /index
   - [v] (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
-  - (ui) fit differnt window width
+  - [v] (ui) fit differnt window width
 - /card?url
   - (req) a better error message and report
   - [v] (req) if url is not reachable (eg 503), still create a card, eg https://www.fantom.foundation/

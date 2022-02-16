@@ -78,7 +78,7 @@ const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Elem
         }}
       >
         <EmojiIcon
-          className={cardEmoji.code === 'PIN' ? 'text-red-400' : 'text-gray-400'}
+          className={'text-gray-400'}
           code={cardEmoji.code}
           liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
           upDownClassName="group-hover:text-blue-600"

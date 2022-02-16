@@ -21,11 +21,7 @@ const CreateCardEmojiBtn = ({ cardId, emojiCode }: { cardId: string; emojiCode: 
           handleLike()
         }}
       >
-        <EmojiIcon
-          className={emojiCode === 'PIN' ? 'text-red-400' : 'text-gray-400'}
-          code={emojiCode}
-          upDownClassName="group-hover:text-blue-600"
-        />
+        <EmojiIcon className={'text-gray-400'} code={emojiCode} upDownClassName="group-hover:text-blue-600" />
       </button>
       {/* <span
         className={`min-w-[10px] text-gray-500 text-sm font-['Red Hat Mono'] ${emojiCode === 'PIN' ? 'hidden' : ''}`}

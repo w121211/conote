@@ -39,3 +39,18 @@
     @apply border border-gray-300 text-gray-600 bg-white hover:bg-gray-100;
   }
 }
+
+@layer utilities {
+  .scrollbar::-webkit-scrollbar {
+    width: 10px;
+    /* height: 20px; */
+  }
+  .scrollbar::-webkit-scrollbar-track {
+    /* display: none; */
+    @apply bg-transparent rounded-sm;
+  }
+  .scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-sm hover:bg-gray-300
+    /* border: 3px solid #f6f7ed; ; */;
+  }
+}

@@ -238,7 +238,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   const hasUl = ul !== undefined
 
   return (
-    <div {...attributes} className="relative break-all flex items-start w-full ">
+    <div {...attributes} className="relative break-words flex items-start w-full ">
       {/* <div contentEditable={false}></div> */}
       <div className="group inline-flex items-center h-8 select-none" contentEditable={false}>
         <span
@@ -373,7 +373,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
   // }, [searchAllResult])
 
   return (
-    <div className=" text-gray-800">
+    <div className="text-gray-800">
       <Slate
         editor={editor}
         value={value}
