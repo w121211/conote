@@ -64,7 +64,7 @@ export const AuthorModel = {
     return authors
   },
 
-  async create(input: GQLAuthorInput): Promise<GQLAuthor> {
+  async create(input: GQLAuthorInput): Promise<Author> {
     const { name, type, job, org, sites } = input
     const meta: AuthorMeta = {
       type,
@@ -72,13 +72,12 @@ export const AuthorModel = {
       org: org ?? undefined,
       sites: sites.map(e => [e.url, e.name]),
     }
-    const author = await prisma.author.create({
+    return prisma.author.create({
       data: {
         name,
         meta,
       },
     })
-    return this.toGQLAuthor(author)
   },
 
   toGQLAuthor(author: Author): GQLAuthor {
@@ -99,7 +98,7 @@ export const AuthorModel = {
     }
   },
 
-  async update(id: string, input: GQLAuthorInput): Promise<GQLAuthor> {
+  async update(id: string, input: GQLAuthorInput): Promise<Author> {
     const { name, type, job, org, sites } = input
     const meta: AuthorMeta = {
       type,
@@ -107,13 +106,12 @@ export const AuthorModel = {
       org: org ?? undefined,
       sites: sites.map(e => [e.url, e.name]),
     }
-    const author = await prisma.author.update({
+    return prisma.author.update({
       data: {
         name,
         meta,
       },
       where: { id },
     })
-    return this.toGQLAuthor(author)
   },
 }

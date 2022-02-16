@@ -598,12 +598,16 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
   async createAuthor(_parent, { data }, { req }, _info) {
     await isAuthenticated(req)
-    return AuthorModel.create(data)
+    const author = await AuthorModel.create(data)
+    await SearchAuthorService.add(author)
+    return AuthorModel.toGQLAuthor(author)
   },
 
   async updateAuthor(_parent, { id, data }, { req }, _info) {
     await isAuthenticated(req)
-    return AuthorModel.update(id, data)
+    const author = await AuthorModel.update(id, data)
+    await SearchAuthorService.add(author)
+    return AuthorModel.toGQLAuthor(author)
   },
 
   async createBulletEmoji(_parent, { bulletId, code }, { req }, _info) {
