@@ -2,7 +2,7 @@ import Link from 'next/link'
 import React, { ReactNode } from 'react'
 import { useMeQuery } from '../apollo/query.graphql'
 
-const Navbar = ({ rbtn, onClickMenu }: { rbtn: ReactNode; onClickMenu: (boo: boolean) => void }) => {
+const Navbar = ({ rbtn, onClickMenu }: { rbtn?: ReactNode; onClickMenu: (boo: boolean) => void }) => {
   const { data: meData, error, loading } = useMeQuery()
   return (
     <nav className="fixed top-0 flex items-center justify-start w-screen h-11 bg-white z-40">
@@ -23,7 +23,7 @@ const Navbar = ({ rbtn, onClickMenu }: { rbtn: ReactNode; onClickMenu: (boo: boo
         {/* {navPath} */}
         <div className="mr-4">
           {rbtn}
-          {meData ? (
+          {/* {meData ? (
             <button className="btn-secondary">
               <a href="/login">Logout</a>
             </button>
@@ -31,7 +31,7 @@ const Navbar = ({ rbtn, onClickMenu }: { rbtn: ReactNode; onClickMenu: (boo: boo
             <button className="btn-primary">
               <a href="/login">Login</a>
             </button>
-          )}
+          )} */}
         </div>
       </div>
     </nav>
