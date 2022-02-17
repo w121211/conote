@@ -173,26 +173,41 @@ Troubleshoots:
 
 v-next
 
-- inline-poll
-- optimize react
+- optimize
   - avoid rerender if possible
+  - SSR
 - give & take
   - share cards
-- credit
-- (?) add [[topic:heading]], eg [[人身保險:比較]]
-- (?) #OOO# + ENTER, jumps out cursor, eg 純純寫作
+  - credit
 - handle doc conflict -> git mechanism
-- show doc diff
+- inline-poll
 - inline filtertag `#filter-tag`
-- inline-comment `- some input # here is a comment, ignores using '...' when exceeding one line`
+- inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
 - note redirect, eg $BA -> [[Boeing]]
 - /editor
   - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
-  - search-panel
   - labels @eg #new-note #fisrt-commit
 - loading -> static icon
 - /user
   - user's contribution, credit (rates), field, anonymous (?)
+- link
+  - try to exclude url search-params by comparing html page
+- editor
+  - (req) show doc diff
+  - (?) add [[topic:heading]], eg [[人身保險:比較]]
+  - (req) report, eg private page, @eg https://domains.google.com/registrar/konote.one/dns?_ga=2.252326218.217399875.1644890899-434669085.1641528541&ci=1
+  - (req) easy to reference sourc url
+  - (req) modify note symbol
+  - (req) subdomain/channel, eg [[dev/Browser Extension]]
+  - (req) show keyword as hints (optional disable by setting)
+  - (req) function panel, eg '/'
+  - (req) '##' -> cursor jumps to middle, #OOO# + ENTER, jumps out cursor, eg 純純寫作
+- note-digest
+  - (ui) able to show full title, eg hover
+  - (ui) clear distinguish between webpage
+  - (ui) emphasize wenpage domain
+- DNS
+  - redirect konote.one to www.konote.one
 
 v0.2
 
@@ -212,6 +227,7 @@ v0.2
   - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
   - (?) root li without bullet icon?
   - (req) a save button
+  - [working] search panel, including ticker, topic, discuss
   - [working] (req) webpage-note with keyword hints
 - /rate
   - rate form with annotate
@@ -225,6 +241,8 @@ v0.2
   - (ui) modal
 - inline-rate
   - user can also rate
+- ticker
+  - [working] create ticker & ticker form
 - browser extension
   - (ui) remove scss
   - detect page's keywords & hints/auto-fill note
@@ -282,3 +300,7 @@ v0.1.1
   - [pending] (bug) search box: 'home', 'end' key has no effect
   - [v] newly added symbol should be searchable
   - [v] graphql add search author, ticker with id
+- login
+  - [working] (bug) unable to logout
+- [v] (bug) create discuss
+- [v] (bug) author
