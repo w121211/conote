@@ -3,8 +3,11 @@ import React from 'react'
 import { useMeQuery } from '../../apollo/query.graphql'
 
 const MeHeaderItem = ({ className }: { className?: string }) => {
-  const { data, loading, error } = useMeQuery()
-  if (!data || loading || error) {
+  const { data, loading, error } = useMeQuery({ fetchPolicy: 'network-only' })
+  if (loading) {
+    return null
+  }
+  if (!data || error) {
     return (
       <Link href="/login">
         <a>

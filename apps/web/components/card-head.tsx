@@ -32,19 +32,21 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
           setShowModal(false)
         }}
       >
-        <h2 className="text-lg mb-4 sm:mb-6 sm:text-2xl font-bold text-gray-800">卡片資訊</h2>
-        <CardMetaForm
-          metaInput={metaInput}
-          onSubmit={input => {
-            const { isUpdated } = doc.updateCardMetaInput(input)
-            if (isUpdated) {
-              doc.save()
-              setShowModal(false)
-            } else {
-              console.warn('card meta input not updated, skip saving')
-            }
-          }}
-        />
+        <div className="px-2 md:px-4">
+          <h2 className="text-lg mb-4 sm:mb-6 sm:text-2xl font-bold text-gray-800">卡片資訊</h2>
+          <CardMetaForm
+            metaInput={metaInput}
+            onSubmit={input => {
+              const { isUpdated } = doc.updateCardMetaInput(input)
+              if (isUpdated) {
+                doc.save()
+                setShowModal(false)
+              } else {
+                console.warn('card meta input not updated, skip saving')
+              }
+            }}
+          />
+        </div>
       </Modal>
 
       <div className="mb-4">

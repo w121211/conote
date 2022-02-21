@@ -16,7 +16,7 @@ const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.El
     subSyms,
   } = digest
   return (
-    <div className="overflow-hidden px-4 py-2 border-x border-b first:border-t border-gray-200 rounded">
+    <div className="overflow-hidden px-4 py-2 border-x border-b first:border-t border-gray-200 first:rounded-t last:rounded-b">
       <div className="flex  items-center text-sm">
         {author && (
           <Link href={`/author/${author}`}>
@@ -39,8 +39,8 @@ const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.El
         {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
       </div>
       <Link href={{ pathname: '/card/[symbol]', query: { symbol: sym.symbol } }}>
-        <a className=" truncate text-gray-700 hover:underline hover:underline-offset-2 ">
-          <h3 className=" my-2 truncate text-xl">
+        <a className="  text-gray-700 hover:underline hover:underline-offset-2 ">
+          <h3 className="truncate my-2 text-xl">
             {title ??
               (sym.symbol.startsWith('[[') && sym.symbol.endsWith(']]') ? (
                 <>

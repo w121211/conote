@@ -101,7 +101,7 @@ export default function Layout({
         isPined={pinMenu}
       />
       <div
-        className={`flex-grow pt-11 pb-[20vh] pl-2  ${
+        className={`flex-grow pt-11 pb-[20vh] px-4  ${
           pinMenu ? 'xl:px-[10%] lg:px-[4%] ' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
         }  overflow-y-scroll  scroll-smooth  scrollbar`}
       >

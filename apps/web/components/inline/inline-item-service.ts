@@ -52,6 +52,9 @@ export const InlineItemService = {
       choices: choices,
     }
   },
+  toInlineDiscussString({ id, title }: { id: string; title: string }): string {
+    return `#${title}(${id})#`
+  },
 }
 
 // export function toInlineHashtag(hashtag: GQLHashtag | Hashtag): InlineHashtag {

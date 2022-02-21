@@ -23,18 +23,22 @@ const Popover = ({ children, hideBoard, subTitle, mask, buttons, topRightBtn }: 
         }}
       ></div>
 
-      <div className="relative  flex flex-col w-[90vw] h-fit max-h-[90vh] sm:w-fit sm:min-w-[20vw] sm:max-w-[60vw] sm:max-h-[90vh] mt-[5vh]  py-2  rounded bg-white shadow-2xl">
+      <div
+        className="relative  flex flex-col h-fit py-2 rounded bg-white shadow-2xl 
+        w-[90vw] max-h-[90vh] sm:min-w-[20vw] sm:max-w-[80vw] sm:max-h-[90vh] mt-[5vh] 
+      md:max-w-[65vw] lg:max-w-[55vw]"
+      >
         <div className="flex items-center justify-between w-full h-6 px-4 sm:h-8 bg-white">
-          <div>
-            {/* <span
-              className="material-icons-outlined hover:cursor-pointer hover:text-gray-600"
+          <div className="flex items-center">
+            <span
+              className="sm:hidden material-icons-outlined hover:cursor-pointer text-gray-500 hover:text-gray-700 leading-none"
               onClick={(e: any) => {
                 e.stopPropagation()
                 hideBoard()
               }}
             >
               close
-            </span> */}
+            </span>
 
             {subTitle && (
               <span className="ml-5 overflow-hidden whitespace-nowrap text-ellipsis text-gray-600">{subTitle}</span>
@@ -42,7 +46,9 @@ const Popover = ({ children, hideBoard, subTitle, mask, buttons, topRightBtn }: 
           </div>
           {topRightBtn}
         </div>
-        <div className="scrollbar overflow-y-scroll mb-4 sm:pl-[calc(3rem_+_10px)] sm:pr-12 sm:mb-8">{children}</div>
+        <div className="scrollbar flex overflow-y-scroll mb-4 pl-4 pr-2 4md:px-9 lg:pl-[calc(3rem_+_10px)] lg:pr-12 sm:mb-8">
+          <div className="flex-1 min-w-0">{children}</div>
+        </div>
         {buttons && <div className="flex items-center justify-center mb-4">{buttons}</div>}
       </div>
     </div>

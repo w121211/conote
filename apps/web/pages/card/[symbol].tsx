@@ -10,7 +10,7 @@ import Modal from '../../components/modal/modal'
 import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
-import DiscussModal from '../../components/discuss/discuss-modal'
+import DiscussModal from '../../components/discuss/modal-page/discuss-modal'
 
 const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data: meData } = useMeQuery()
@@ -77,7 +77,7 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
     return null
   }
   return (
-    <div className="min-w-[90vw] h-[90vh] sm:min-w-[50vw]">
+    <div className="flex-1 w-[90vw] h-[90vh] sm:w-[50vw]">
       <CardHead doc={modalDoc.doc} />
       <BulletEditor doc={modalDoc.doc} />
     </div>

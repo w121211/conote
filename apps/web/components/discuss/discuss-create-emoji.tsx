@@ -1,10 +1,17 @@
 import { EmojiCode, LikeChoice } from '@prisma/client'
 import React from 'react'
-import { useCreateDiscussEmojiMutation } from '../../apollo/query.graphql'
+import {
+  DiscussEmojisDocument,
+  MyDiscussEmojiLikeDocument,
+  useCreateDiscussEmojiMutation,
+} from '../../apollo/query.graphql'
 import EmojiIcon from '../emoji-up-down/emoji-icon'
 
-const CreateDiscussEmojis = ({ discussId, emojiCode }: { discussId: string; emojiCode: EmojiCode }) => {
-  const [createEmoji, { error }] = useCreateDiscussEmojiMutation({ variables: { discussId, code: emojiCode } })
+const CreateDiscussEmoji = ({ discussId, emojiCode }: { discussId: string; emojiCode: EmojiCode }) => {
+  const [createEmoji, { error }] = useCreateDiscussEmojiMutation({
+    variables: { discussId, code: emojiCode },
+    refetchQueries: [{ query: DiscussEmojisDocument, variables: { discussId } }],
+  })
   const onClick = () => {
     createEmoji()
   }
@@ -30,4 +37,4 @@ const CreateDiscussEmojis = ({ discussId, emojiCode }: { discussId: string; emoj
   )
 }
 
-export default CreateDiscussEmojis
+export default CreateDiscussEmoji

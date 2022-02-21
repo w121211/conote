@@ -9,6 +9,7 @@ import { DocIndex } from '../workspace/doc-index'
 import { Doc } from '../workspace/doc'
 import { useApolloClient } from '@apollo/client'
 import { useMeQuery } from '../../apollo/query.graphql'
+import { useRouter } from 'next/router'
 
 const SideBar = ({
   showMenuHandler,
@@ -22,6 +23,7 @@ const SideBar = ({
   showMenu: boolean
 }): JSX.Element | null => {
   const { data: meData } = useMeQuery()
+  const router = useRouter()
   const editingdDocIndicies = useObservable(() => workspace.editingDocIndicies$)
   const ref = useRef<HTMLDivElement>(null)
   // const committedDocIndicies = useObservable(() => workspace.committedDocIndicies$)
@@ -97,12 +99,22 @@ const SideBar = ({
         <DocIndexSection title="暫存區" docIndicies={editingdDocIndicies} />
         <div className="p-4 border-gray-200/80  mix-blend-multiply">
           {meData?.me ? (
-            <button className="btn-secondary w-full">
-              <a href="/login">Logout</a>
+            <button
+              className="btn-secondary w-full"
+              onClick={() => {
+                router.push('/login')
+              }}
+            >
+              Logout
             </button>
           ) : (
-            <button className="btn-primary w-full">
-              <a href="/login">Login</a>
+            <button
+              className="btn-primary w-full"
+              onClick={() => {
+                router.push('/login')
+              }}
+            >
+              Login
             </button>
           )}
         </div>

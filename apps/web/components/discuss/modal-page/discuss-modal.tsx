@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-import Discuss from './discuss'
-import Modal from '../modal/modal'
+import DiscussModalPage from './modal-page'
+import Modal from '../../modal/modal'
 
 const DiscussModal = () => {
   const router = useRouter()
@@ -23,7 +23,7 @@ const DiscussModal = () => {
           </Link>
         }
       >
-        <Discuss id={router.query.discuss} title={router.query.discuss as string} />
+        <DiscussModalPage id={router.query.discuss} title={router.query.discuss as string} />
       </Modal>
     )
   }

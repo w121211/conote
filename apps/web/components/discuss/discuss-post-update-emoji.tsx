@@ -2,14 +2,37 @@ import { EmojiCode, LikeChoice } from '@prisma/client'
 import React from 'react'
 import {
   DiscussPostEmojiFragment,
+  MyDiscussPostEmojiLikeDocument,
+  MyDiscussPostEmojiLikeQuery,
+  MyDiscussPostEmojiLikeQueryVariables,
   useMyDiscussPostEmojiLikeQuery,
   useUpsertDiscussPostEmojiLikeMutation,
 } from '../../apollo/query.graphql'
 import { DiscussPostEmoji } from 'graphql-let/__generated__/__types__'
 import EmojiIcon from '../emoji-up-down/emoji-icon'
 
-const UpdateDiscussPostEmojis = ({ discussPostEmoji }: { discussPostEmoji: DiscussPostEmojiFragment }) => {
-  const [upsertEmoji] = useUpsertDiscussPostEmojiLikeMutation()
+const UpdateDiscussPostEmoji = ({
+  discussPostEmoji,
+  type,
+}: {
+  discussPostEmoji: DiscussPostEmojiFragment
+  type: 'panel' | 'normal'
+}) => {
+  const [upsertEmoji] = useUpsertDiscussPostEmojiLikeMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<MyDiscussPostEmojiLikeQuery>({
+        query: MyDiscussPostEmojiLikeDocument,
+      })
+      // TODO: 這裡忽略了更新 count
+      if (res && data?.upsertDiscussPostEmojiLike) {
+        cache.writeQuery<MyDiscussPostEmojiLikeQuery, MyDiscussPostEmojiLikeQueryVariables>({
+          query: MyDiscussPostEmojiLikeDocument,
+          variables: { discussPostEmojiId: data.upsertDiscussPostEmojiLike.like.id },
+          data: { myDiscussPostEmojiLike: data.upsertDiscussPostEmojiLike.like },
+        })
+      }
+    },
+  })
   const { data } = useMyDiscussPostEmojiLikeQuery({ variables: { discussPostEmojiId: discussPostEmoji.id } })
   const onClick = () => {
     if (data?.myDiscussPostEmojiLike) {
@@ -17,22 +40,34 @@ const UpdateDiscussPostEmojis = ({ discussPostEmoji }: { discussPostEmoji: Discu
     }
   }
 
-  return (
-    <div className="flex items-center">
-      <button
-        className={`btn-reset-style group w-6 h-6 rounded-full
+  if (type === 'panel') {
+    return (
+      <div className="flex items-center">
+        <button
+          className={`btn-reset-style group w-6 h-6 rounded-full
                          hover:bg-blue-100
                         `}
-        onClick={onClick}
-      >
-        <EmojiIcon
-          code={discussPostEmoji.code}
-          liked={data?.myDiscussPostEmojiLike?.liked}
-          upDownClassName="!text-sm group-hover:text-blue-600"
-        />
-      </button>
-    </div>
+          onClick={onClick}
+        >
+          <EmojiIcon
+            code={discussPostEmoji.code}
+            liked={data?.myDiscussPostEmojiLike?.liked}
+            upDownClassName="!text-sm group-hover:text-blue-600"
+          />
+        </button>
+      </div>
+    )
+  }
+  return (
+    <button className="btn-reset-style flex items-center mr-2 gap-1" onClick={onClick}>
+      <EmojiIcon
+        upDownClassName="!text-base !leading-none"
+        code={discussPostEmoji.code}
+        liked={data?.myDiscussPostEmojiLike?.liked}
+      />
+      <span className="text-xs text-gray-500">{discussPostEmoji.count.nUps}</span>
+    </button>
   )
 }
 
-export default UpdateDiscussPostEmojis
+export default UpdateDiscussPostEmoji

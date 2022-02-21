@@ -22,8 +22,12 @@ const LoginPanel = (): JSX.Element | null => {
   const [user, loadingFirebaseUser, queryFirebaseUserError] = useAuthState(getAuth(firebaseClient))
   // const { data, loading: loadingMe, error: queryMeError } = useMeQuery()
 
-  const [sessionLogin, { loading: loadingSessionLogin }] = useSessionLoginMutation()
-  const [sessionLogout, { loading: loadingSessionLogout }] = useSessionLogoutMutation()
+  const [sessionLogin, { data: sessionLoginData, loading: loadingSessionLogin }] = useSessionLoginMutation()
+  const [sessionLogout, { data: sessionLogoutData, loading: loadingSessionLogout }] = useSessionLogoutMutation({
+    onCompleted(_) {
+      // router.back()
+    },
+  })
 
   const firebaseAuth = getAuth(firebaseClient)
 
@@ -133,7 +137,11 @@ const LoginPanel = (): JSX.Element | null => {
   // sessionLogout()
   // }
   if (user) {
-    // console.log(user)
+    console.log(sessionLoginData, sessionLogoutData, user)
+    // if (sessionLoginData?.sessionLogin) {
+    //   sessionLogout()
+    // }
+    // return null
     // console.log(router.query)
     // if (router.query.mode === 'signIn') {
     //   if (getCookie('session') === null) {

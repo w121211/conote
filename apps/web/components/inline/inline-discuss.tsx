@@ -40,8 +40,10 @@ const InlineDiscuss = (props: RenderElementProps & { element: InlineDiscussEleme
   // }
   const onDiscussCreated = (data: DiscussFragment) => {
     const path = ReactEditor.findPath(editor, element)
+    const inlineDiscuss = InlineItemService.toInlineDiscussString({ id: data.id, title: data.title })
     Transforms.setNodes<InlineDiscussElement>(editor, { id: data.id }, { at: path })
-    Transforms.insertText(editor, data.id, { at: path })
+    Transforms.insertText(editor, inlineDiscuss, { at: path })
+    setShowModal(false)
   }
 
   // useEffect(() => {
@@ -92,8 +94,12 @@ const InlineDiscuss = (props: RenderElementProps & { element: InlineDiscussEleme
           </button>
         }
       >
-        {mainDoc && mainDoc.doc ? (
-          <CreateDiscussForm cardId={mainDoc.doc.cid} title={element.str} onCreated={onDiscussCreated} />
+        {mainDoc && mainDoc.doc && mainDoc.doc.cardCopy?.id ? (
+          <CreateDiscussForm
+            cardId={mainDoc.doc.cardCopy?.id}
+            title={element.str.substring(1, element.str.length - 1)}
+            onCreated={onDiscussCreated}
+          />
         ) : (
           <span>Error</span>
         )}
