@@ -1,14 +1,14 @@
 import { cloneDeep } from 'lodash'
 import { Editor, Range, Transforms } from 'slate'
 
-const DEFINED_COMPLETES: Record<string, string> = {
+const DEFAULT_COMPLETES: Record<string, string> = {
   '[': '[]',
   '(': '()',
-  '#': '##',
+  // '#': '##',
 }
 
 // { [trigger]: [term, replacer] }
-const DEFINED_REPLACERS: Record<string, [string, string]> = {
+const DEFAULT_REPLACERS: Record<string, [string, string]> = {
   '>': ['->', '→'],
   '-': ['<-', '←'],
 }
@@ -20,16 +20,16 @@ export const withAutoComplete = (editor: Editor): Editor => {
     const { selection } = editor
 
     if (selection && Range.isCollapsed(selection)) {
-      if (DEFINED_COMPLETES[text]) {
-        const replacer = DEFINED_COMPLETES[text]
+      if (DEFAULT_COMPLETES[text]) {
+        const replacer = DEFAULT_COMPLETES[text]
         Transforms.insertText(editor, replacer)
         Transforms.move(editor, { reverse: true })
         return
       }
 
-      if (DEFINED_REPLACERS[text]) {
+      if (DEFAULT_REPLACERS[text]) {
         const { anchor, focus } = selection
-        const [term, replacer] = DEFINED_REPLACERS[text]
+        const [term, replacer] = DEFAULT_REPLACERS[text]
         const tempSelection = { anchor: { ...anchor, offset: anchor.offset - term.length + 1 }, focus }
         const tempStr = Editor.string(editor, tempSelection) + text
 

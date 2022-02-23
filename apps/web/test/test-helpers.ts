@@ -13,6 +13,12 @@ const fid = () => {
   return i.toString()
 }
 
+const TEST_DISCUSSES = [
+  { title: 'test discuss 0', userId: 'testuser0' },
+  { title: 'test discuss 1', userId: 'testuser1' },
+  { title: 'test discuss 2', userId: 'testuser2' },
+]
+
 export const BOT = { id: 'bot', email: getBotEmail() }
 
 export const TESTUSERS = [
@@ -56,6 +62,16 @@ export const bt = (cid: number, children: TreeNode<Bullet>[] = []): TreeNode<Bul
 // ]
 
 export const TestDataHelper = {
+  createDiscusses: async (prisma: PrismaClient): Promise<void> => {
+    await prisma.$transaction(
+      TEST_DISCUSSES.map(e =>
+        prisma.discuss.create({
+          data: { userId: e.userId, title: e.title },
+        }),
+      ),
+    )
+  },
+
   createUsers: async (prisma: PrismaClient): Promise<void> => {
     await prisma.user.create({
       // data: { id: BOT.id, email: BOT.email, password: await hash(BOT.password, 10) },
@@ -149,13 +165,14 @@ export const TestDataHelper = {
 // }
 
 /**
- * Source: https://github.com/lodash/lodash/issues/723
  * Recursively remove keys from an object
+ * Source: https://github.com/lodash/lodash/issues/723
+ *
  * @param {object} input
  * @param {Array<number | string>>} excludes
  * @return {object}
  */
-export function omitDeep(input: Record<string, unknown>, excludes: Array<number | string>): Record<string, unknown> {
+export const omitDeep = (input: Record<string, unknown>, excludes: Array<number | string>): Record<string, unknown> => {
   return Object.entries(input).reduce<Record<string, unknown>>((acc, [key, value]) => {
     const shouldExclude = excludes.includes(key)
     if (shouldExclude) return acc
@@ -181,7 +198,7 @@ export function omitDeep(input: Record<string, unknown>, excludes: Array<number 
   }, {})
 }
 
-function omitUndefined<T>(obj: T): T {
+const omitUndefined = <T>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj))
 }
 

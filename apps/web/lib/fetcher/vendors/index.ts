@@ -11,10 +11,10 @@ export class DomainNotFitError extends Error {
   }
 }
 
-// fallback 依序嘗試執行，若失敗則嘗試下一個
+// fallbacks, execute sequentially
 const fetchers: DomainFetchFunction[] = [youtube, base]
 
-export async function tryFetch(url: string): Promise<FetchResult> {
+export const tryFetch = async (url: string): Promise<FetchResult> => {
   for (const fetcher of fetchers) {
     try {
       // eslint-disable-next-line no-await-in-loop

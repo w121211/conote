@@ -2,7 +2,7 @@ import { google } from 'googleapis'
 import { DomainFetchFunction, DomainNotFitError } from './index'
 import { FetchResult } from '../fetch-client'
 
-const patterns = {
+const reYoutube = {
   video_id: [
     /(?:http[s]?:\/\/)?(?:\w+\.)?youtube.com\/watch\?v=([\w_-]+)(?:&.*)?/i,
     /(?:http[s]?:\/\/)?youtu.be\/([\w_-]+)(?:\?.*)?/i,
@@ -21,18 +21,18 @@ const youtubeApi = google.youtube({
   auth: process.env.YOUTUBE_API_KEY,
 })
 
-function parseUrl(url: string): { vid: string } {
-  for (const e of patterns.video_id) {
+const parseUrl = (url: string): { vid: string } => {
+  for (const e of reYoutube.video_id) {
     const result = e.exec(url)
     if (result) {
       return { vid: result[1] }
     }
   }
-  throw new DomainNotFitError(`找不到 video_id: ${url}`)
+  throw new DomainNotFitError(`not found youtube video id: ${url}`)
 }
 
-export const youtube: DomainFetchFunction = async function (url) {
-  const { vid } = parseUrl(url) // 測試 domain
+export const youtube: DomainFetchFunction = async url => {
+  const { vid } = parseUrl(url) // include test domain
 
   const resp = await youtubeApi.videos.list({
     part: ['snippet'],
@@ -42,7 +42,7 @@ export const youtube: DomainFetchFunction = async function (url) {
     const e = resp.data.items[0]
     const res: FetchResult = {
       domain: 'youtube.com',
-      finalUrl: url, // TODO: Bug 可能會有redirect, short-url, mobile-url
+      finalUrl: url, // TODO: (bug) possibly be redirect, short-url, mobile-url
       srcType: 'VIDEO',
       srcId: vid,
       authorId: e.snippet?.channelId ?? undefined,

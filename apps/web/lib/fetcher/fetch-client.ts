@@ -35,7 +35,10 @@ export class FetchClient {
   public async fetch(url: string): Promise<FetchResult & { fromCache?: true }> {
     if (this.cache) {
       try {
-        return { ...this.cache.get(url), fromCache: true }
+        return {
+          ...this.cache.get(url),
+          fromCache: true,
+        }
       } catch {
         const res = await tryFetch(url)
         this.cache.set(url, res)

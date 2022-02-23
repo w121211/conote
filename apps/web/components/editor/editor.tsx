@@ -28,9 +28,12 @@ import BulletSvg from '../bullet-svg'
 import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
 import { Doc } from '../workspace/doc'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
-import { isLiArray, isUl, onKeyDown as withListOnKeyDown, ulPath, withList } from './with-list'
+import { isLiArray, isUl, onKeyDown as onKeyDownWithList, ulPath, withList } from './with-list'
 import { withAutoComplete } from './with-auto-complete'
 import InlineDiscuss from '../inline/inline-discuss'
+import { useSearchPanel } from './use-search-panel'
+import { useApolloClient } from '@apollo/client'
+import { useSearchDiscussModal } from './use-search-discuss-modal'
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, leaf, children } = props
@@ -342,6 +345,7 @@ const CustomElement = ({
 
 export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
   const editor = useMemo(() => withInline(withList(withAutoComplete(withHistory(withReact(createEditor()))))), [])
+  const client = useApolloClient()
   const renderElement = useCallback(
     (props: RenderElementProps) => <CustomElement {...{ ...props, card: doc.cardCopy }} />,
     [doc],
@@ -363,7 +367,8 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
     }
   }, [])
 
-  // const [searchPanel, onValueChange] = useSearch(editor)
+  const { searchPanel, onValueChange: onValueChangeWithSearchPanel } = useSearchPanel(editor, client)
+  const { searchDiscussSelectModal, onKeyUp: onKeyUpWithSearchDiscuss } = useSearchDiscussModal(editor)
   // useEffect(() => {
   //   if (searchAllResult.data) {
   //     setSuggestions(searchAllResult.data.searchAll)
@@ -381,11 +386,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
           if (isLiArray(value)) {
             setValue(value)
             doc.editorValue = value // point to the new value
-
-            // TODO: 每字都執行一遍儲存會有效能問題
-            // if (onValueChange) {
-            //   onValueChange(value)
-            // }
+            onValueChangeWithSearchPanel(editor)
           } else {
             throw 'value needs to be li array'
           }
@@ -401,23 +402,16 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
           renderLeaf={renderLeaf}
           spellCheck={false}
           onKeyDown={event => {
-            withListOnKeyDown(event, editor)
+            onKeyDownWithList(event, editor)
+          }}
+          onKeyUp={event => {
+            onKeyUpWithSearchDiscuss(event, editor)
           }}
         />
-        {/* {searchPanel} */}
-        {/* {search && (
-          <Portal>
-            <SuggestionPanel
-              corner={corner}
-              suggestions={suggestions}
-              selectedIdx={selectedIdx}
-              setSelectedIdx={setSelectedIdx}
-              onSelected={onSelected}
-            />
-          </Portal>
-        )} */}
         {/* <CommentPanel /> */}
       </Slate>
+      {searchDiscussSelectModal}
+      {searchPanel}
     </div>
   )
 }

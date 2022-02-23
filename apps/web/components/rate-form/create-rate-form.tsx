@@ -211,7 +211,6 @@ const TickerInput = ({ children, ...props }: InputProps<Option, false>) => {
 }
 
 export const AsyncTickerConsumer = ({ name }: { name: string }) => {
-  // const client = useApolloClient()
   const { register, control, setValue } = useFormContext()
   // const [onInputChange, setOnInputChange] = useState('')
   const [openMenu, setOpenMenu] = useState(false)

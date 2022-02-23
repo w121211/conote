@@ -15,7 +15,7 @@ import { TreeService } from '@conote/docdiff'
 import { Editor as MKEditor, Markerline, splitByUrl } from '@conote/editor'
 import { InlineItemService } from '../../components/inline/inline-item-service'
 import { TestDataHelper, TESTUSERS } from '../../test/test-helpers'
-import { FetchClient } from '../../lib/fetcher/fetcher'
+import { FetchClient } from '../../lib/fetcher/fetch-client'
 import { CardMeta, CardModel } from '../../lib/models/card-model'
 import { RateBody, RateModel } from '../../lib/models/rate-model'
 import { CommitModel } from '../../lib/models/commit-model'
@@ -119,10 +119,13 @@ async function getNeatReply({
 
 const main = async () => {
   console.log('Truncating databse...')
-  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Link", "Poll", "Rate", "Sym", "User" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Discuss", "Link", "Poll", "Rate", "Sym", "User" CASCADE;`
 
   console.log('Creating test users...')
   await TestDataHelper.createUsers(prisma)
+
+  console.log('Creating test discusses...')
+  await TestDataHelper.createDiscusses(prisma)
 
   for (const filename of readdirSync(seedDirPath).sort()) {
     if (filename.startsWith(IGNORE_FILE_STARTS_WITH)) {
