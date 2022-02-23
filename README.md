@@ -323,7 +323,7 @@ v0.1.1
   - (ui) conote -> konote & when on-hover button add some feedback
   - [v] (bug) while not logged in can still typing in the editor
 - workspace
-  - [working] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved
+  - [v] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved
   - [working] (bug) delete note will not work if that note is opening in the editor
 - link
   - [pending] (bug) URL failed: https://www.mobile01.com/topicdetail.php?f=803&t=6541514 -> fail only on server, possibly caused by cloudflare guard
