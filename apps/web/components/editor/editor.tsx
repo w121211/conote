@@ -384,9 +384,9 @@ export const BulletEditor = ({ doc, readOnly }: { doc: Doc; readOnly?: boolean }
         value={value}
         onChange={value => {
           if (isLiArray(value)) {
-            setValue(value)
-            doc.editorValue = value // point to the new value
+            doc.setEditorValue(value)
             onValueChangeWithSearchPanel(editor)
+            setValue(value)
           } else {
             throw 'value needs to be li array'
           }

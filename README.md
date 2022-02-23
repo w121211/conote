@@ -265,8 +265,8 @@ v0.2
 - /editor
   - parse url, eg https://arxiv.org/abs/2112.00114
   - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
-  - (req) a save button
-  - [working] (req) search panel, including ticker, topic, discuss
+  - [prior] (req) a save button, setting button
+  - [v] (req) search panel, including ticker, topic, discuss
   - [prior] (req) web-note with keyword hints -> auto fill notes
   - [prior] (req) auto fill template (optional)
 - inline-discuss `#a discussion topic here#` @eg https://github.com/prisma/prisma/discussions https://github.com/discourse/discourse/tree/main/app/models

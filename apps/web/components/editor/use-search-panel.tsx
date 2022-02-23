@@ -1,12 +1,11 @@
 import { ApolloClient } from '@apollo/client'
-import { match } from 'assert'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Editor, Transforms, Range, BasePoint } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { SearchSymbolDocument, SearchSymbolQuery, SearchSymbolQueryVariables } from '../../apollo/query.graphql'
 
-type SearchCategory = 'topic' | 'ticker' | 'author' | 'discuss'
+// type SearchCategory = 'topic' | 'ticker' | 'author' | 'discuss'
 
 type Search = {
   trigger: '@' | '[[' | '$'
@@ -18,7 +17,8 @@ const SUGGESTS = {
   '@': ['@作者', '@me'],
 }
 
-const reTriggerBefore = /(@|\[\[|\$)([\p{Letter}\d]*)/u
+const reTriggerNoSpace = /(@|\$)([\p{Letter}\d]*)$/u // first group is the trigger
+const reTriggerAllowSpace = /(\[\[)([\p{Letter}\d\s]*)$/u
 
 // function useSelect(): [
 //   number | undefined,
@@ -239,7 +239,51 @@ export const useSearchPanel = (
       const bedore = Editor.before(editor, cur, { unit: 'block' })
       const beforeRange = bedore && Editor.range(editor, bedore, cur)
       const beforeText = beforeRange && Editor.string(editor, beforeRange)
-      const beforeMatch = beforeText && beforeText.split('\n').pop()?.match(reTriggerBefore)
+      const text = beforeText && beforeText.split('\n').pop()
+
+      if (text) {
+        let match = text.match(reTriggerNoSpace)
+        if (match && match.index !== undefined) {
+          const beforePoint: BasePoint = { path: cur.path, offset: match.index }
+
+          if (['$', '@'].includes(match[1])) {
+            // const before = Editor.before(editor, cur, {
+            //   distance: beforeMatch[0].length,
+            //   unit: 'offset',
+            // })
+            // const searchRange = before && Editor.range(editor, before, cur)
+            const searchRange = Editor.range(editor, beforePoint, cur)
+            setSearch({
+              trigger: match[1] as '$' | '@',
+              term: match[2],
+              range: searchRange,
+            })
+          }
+          return
+        }
+
+        match = text.match(reTriggerAllowSpace)
+        if (match && match.index !== undefined) {
+          const beforePoint: BasePoint = { path: cur.path, offset: match.index }
+
+          if (match[1] === '[[') {
+            const after = Editor.after(editor, cur, { unit: 'block' })
+            const afterRange = after && Editor.range(editor, cur, after)
+            const afterText = afterRange && Editor.string(editor, afterRange)
+            const searchRange =
+              afterText && afterText.startsWith(']]')
+                ? Editor.range(editor, beforePoint, { path: cur.path, offset: cur.offset + 2 }) // include ']]' as search range
+                : Editor.range(editor, beforePoint, cur)
+            setSearch({
+              trigger: match[1] as '[[',
+              term: match[2],
+              range: searchRange,
+            })
+          }
+          return
+        }
+      }
+
       // const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
 
       // 若是在句中插入的情況，需要找break-point
@@ -253,39 +297,7 @@ export const useSearchPanel = (
       // console.log(after, afterRange, afterText)
       // console.log(beforeMatch, afterMatch)
 
-      if (beforeMatch && beforeMatch.index) {
-        const beforePoint: BasePoint = { path: cur.path, offset: beforeMatch.index }
-
-        if (['$', '@'].includes(beforeMatch[1])) {
-          // const before = Editor.before(editor, cur, {
-          //   distance: beforeMatch[0].length,
-          //   unit: 'offset',
-          // })
-          // const searchRange = before && Editor.range(editor, before, cur)
-          const searchRange = Editor.range(editor, beforePoint, cur)
-          setSearch({
-            trigger: beforeMatch[1] as '$' | '[[' | '@',
-            term: beforeMatch[2],
-            range: searchRange,
-          })
-          return
-        }
-        if (beforeMatch[1] === '[[') {
-          const after = Editor.after(editor, cur, { unit: 'block' })
-          const afterRange = after && Editor.range(editor, cur, after)
-          const afterText = afterRange && Editor.string(editor, afterRange)
-          const searchRange =
-            afterText && afterText.startsWith(']]')
-              ? Editor.range(editor, beforePoint, { path: cur.path, offset: cur.offset + 2 }) // include ']]' as search range
-              : Editor.range(editor, beforePoint, cur)
-          setSearch({
-            trigger: beforeMatch[1] as '$' | '[[' | '@',
-            term: beforeMatch[2],
-            range: searchRange,
-          })
-          return
-        }
-      }
+      // console.log(beforeMatch)
     }
     setHits(null)
     setSearch(null)

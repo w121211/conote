@@ -30,7 +30,8 @@ export class Doc {
   readonly cid: string
   readonly fromDocCid: string | null
   readonly cardCopy: CardFragment | null // keep the previous state, TODO: sync to the latest card state if remote updated
-  private cardInput: CardInput | null // required if card is null
+
+  cardInput: CardInput | null // required if card is null
   editorValue: LiElement[]
   // value: TreeNode<Bullet>[]
   // changes: NodeChange<Bullet>[] = []
@@ -38,6 +39,9 @@ export class Doc {
   updatedAt: number
   committedAt: number | null = null
   committedState: CardStateFragment | null = null
+
+  editorValueLastSaved: LiElement[]
+  isEditorValueChangedSinceSave = false
 
   constructor({
     cid,
@@ -58,6 +62,7 @@ export class Doc {
     this.cardCopy = cardCopy
     this.cardInput = cardInput
     this.editorValue = editorValue
+    this.editorValueLastSaved = editorValue
     this.createdAt = createdAt ?? Date.now()
     this.updatedAt = updatedAt ?? Date.now()
     this.committedAt = committedAt ?? null
@@ -214,6 +219,8 @@ export class Doc {
     this.updatedAt = Date.now()
     try {
       await LocalDatabaseService.docTable.setItem(this.cid, this.toJSON())
+      this.editorValueLastSaved = this.editorValue
+      this.isEditorValueChangedSinceSave = true
       // this.updateChanges()
       // this.getChanges()
     } catch (err) {
@@ -221,6 +228,9 @@ export class Doc {
     }
   }
 
+  /**
+   * Save just committed doc to committed-table
+   */
   async saveCommittedDoc(): Promise<void> {
     const { committedAt, committedState } = this
     if (committedAt && committedState) {
@@ -232,6 +242,16 @@ export class Doc {
       return
     }
     throw 'Save to committed-table require committedState & committedAt'
+  }
+
+  setEditorValue(value: LiElement[]): void {
+    this.editorValue = value
+
+    if (!this.isEditorValueChangedSinceSave) {
+      // check is changed, do comparison only if value not changed yet
+      this.isEditorValueChangedSinceSave = JSON.stringify(value) !== JSON.stringify(this.editorValueLastSaved)
+    }
+    // console.log(this.isEditorValueChangedSinceSave)
   }
 
   toJSON(): Required<DocProps> {
