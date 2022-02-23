@@ -93,9 +93,11 @@ export const LatestCards = (): JSX.Element | null => {
         ]}
         author={'鉅亨網編譯羅昀玫'}
       /> */}
-      {data.cardDigests.map((e, i) => (
-        <CardDigestComponent key={i} digest={e} />
-      ))}
+      <div>
+        {data.cardDigests.map((e, i) => (
+          <CardDigestComponent key={i} digest={e} />
+        ))}
+      </div>
       {hasMore ? (
         <div>
           {loading ? (
@@ -181,7 +183,7 @@ function HomePage(): JSX.Element {
         </div>
         <>
           <div className=" flex pb-[9vh]">
-            <div className="flex flex-col items-center md:items-start md:flex-row ms:justify-between  md:w-3/4 md:ml-[calc(4rem+90px)] gap-16">
+            <div className="flex flex-col items-center md:items-start md:flex-row ms:justify-between  md:w-3/4 md:ml-[calc(4rem+96px)] gap-16">
               <NewHotList />
               <div className=" flex-shrink-0 flex-grow w-screen sm:w-1/3 h-fit px-4 rounded border border-gray-300">
                 <h3>自選股</h3>

@@ -7,7 +7,7 @@ const NewHotList = () => {
   const [activeList, setActiveList] = useState(0)
   const listContainer = useRef<HTMLDivElement>(null)
   return (
-    <div className="w-screen px-4 md:w-2/3 flex-grow flex-shrink min-w-0">
+    <div className="w-screen  md:w-2/3 flex-grow flex-shrink min-w-0">
       <div className="flex justify-between gap-3 mb-6 border-gray-200">
         {['最新', '熱門'].map((tab, i) => (
           <h4

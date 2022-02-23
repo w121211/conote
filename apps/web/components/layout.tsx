@@ -28,7 +28,7 @@ export default function Layout({
   useEffect(() => {
     const storageMenu = localStorage.getItem('showMenu')
     const storagePin = localStorage.getItem('pinMenu')
-    if (window.innerWidth < 768) {
+    if (window.innerWidth < 769) {
       if (storageMenu !== null && storagePin !== null) {
         setShowMenu(false)
         setPinMenu(false)
@@ -101,9 +101,9 @@ export default function Layout({
         isPined={pinMenu}
       />
       <div
-        className={`flex-grow pt-11 pb-[20vh] pl-2  ${
-          pinMenu ? ' lg:px-[6%] ' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
-        }  overflow-y-scroll  scroll-smooth sm:pl-[calc(100vw_-_100%)] scrollbar`}
+        className={`flex-grow pt-11 pb-[20vh] px-4  ${
+          pinMenu ? 'xl:px-[10%] lg:px-[4%] ' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
+        }  overflow-y-scroll  scroll-smooth  scrollbar`}
       >
         {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
         <div className="">

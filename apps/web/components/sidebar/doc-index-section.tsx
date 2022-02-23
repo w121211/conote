@@ -6,7 +6,7 @@ import DocIndexComponent from './doc-index-component'
 const DocIndexSection = ({ docIndicies, title }: { docIndicies: TreeNode<DocIndex>[]; title: string }): JSX.Element => {
   const [folded, setFolded] = useState(false)
   return (
-    <div className="flex flex-col min-h-0 overflow-hidden">
+    <div className="flex-grow flex flex-col min-h-0 overflow-hidden">
       <div className="flex flex-col min-h-0 overflow-hidden">
         <div
           className={`group flex justify-between items-center px-2 text-sm text-gray-700 

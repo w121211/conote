@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useObservable } from 'rxjs-hooks'
-import { useCardQuery } from '../../apollo/query.graphql'
+import { useCardQuery, useMeQuery } from '../../apollo/query.graphql'
 import CardHead from '../../components/card-head'
 import { BulletEditor } from '../../components/editor/editor'
 import Layout from '../../components/layout'
@@ -10,9 +10,10 @@ import Modal from '../../components/modal/modal'
 import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
-import DiscussModal from '../../components/discuss/discuss-modal'
+import DiscussModal from '../../components/discuss/modal-page/discuss-modal'
 
 const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
+  const { data: meData } = useMeQuery()
   const { data, error, loading } = useCardQuery({ variables: { symbol } })
   const mainDoc = useObservable(() => workspace.mainDoc$)
 
@@ -39,7 +40,7 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
     <div className="grid grid-cols-[auto_max-content] gap-2 ">
       <div className="flex-1 min-w-0 ">
         <CardHead doc={mainDoc.doc} />
-        <BulletEditor doc={mainDoc.doc} />
+        <BulletEditor doc={mainDoc.doc} readOnly={meData?.me === undefined} />
       </div>
       {mainDoc.doc.cardCopy && (
         <div className="z-20">
@@ -76,7 +77,7 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
     return null
   }
   return (
-    <div className="min-w-[90vw] h-[90vh] sm:min-w-[50vw]">
+    <div className="flex-1 w-[90vw] h-[90vh] sm:w-[50vw]">
       <CardHead doc={modalDoc.doc} />
       <BulletEditor doc={modalDoc.doc} />
     </div>

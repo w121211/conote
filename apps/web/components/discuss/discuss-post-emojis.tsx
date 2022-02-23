@@ -1,59 +1,47 @@
 import { EmojiCode, LikeChoice } from '@prisma/client'
 import React, { useState } from 'react'
-import { useDiscussPostEmojisQuery } from '../../apollo/query.graphql'
-import EmojiIcon from '../emoji-up-down/emoji-icon'
+import { DiscussPostEmojiFragment, useDiscussPostEmojisQuery } from '../../apollo/query.graphql'
 import Tooltip from '../tooltip/tooltip'
+import CreateDiscussPostEmoji from './discuss-post-create-emoji'
 import CreateDiscussPostEmojis from './discuss-post-create-emoji'
+import UpdateDiscussPostEmoji from './discuss-post-update-emoji'
 import UpdateDiscussPostEmojis from './discuss-post-update-emoji'
+import EmojisSwitch from './emojis-switch'
 
 const DiscussPostEmojis = ({ discussPostId }: { discussPostId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)
   const { data: emojisData } = useDiscussPostEmojisQuery({ variables: { discussPostId } })
   const emojis: EmojiCode[] = ['UP', 'DOWN']
-  // const pinEmojiData = emojiData?.cardEmojis.find(e => e.code === 'PIN')
 
+  const shouldShowEmojiIcons = (data: DiscussPostEmojiFragment[] | undefined) => {
+    return data && data.length > 0 && data.some(e => e.count.nUps > 0)
+  }
   return (
-    <div className="relative w-fit ">
-      <span
-        className="material-icons-outlined rounded-full  cursor-pointer select-none leading-none text-xl text-gray-400 mix-blend-multiply hover:bg-gray-200/70"
-        onClick={e => {
-          e.stopPropagation()
-          setShowTooltip(!showTooltip)
-        }}
-      >
-        sentiment_satisfied_alt
-      </span>
-      <Tooltip
-        className="left-0 mb-1 px-1 py-1"
-        direction="top"
-        visible={showTooltip}
-        onClose={() => setShowTooltip(false)}
-      >
-        {emojis.map((e, i) => {
-          const emojiData = emojisData?.discussPostEmojis.find(el => el.code === e)
-          if (emojiData) {
-            return <UpdateDiscussPostEmojis discussPostEmoji={emojiData} />
+    <div className="flex items-center">
+      {shouldShowEmojiIcons(emojisData?.discussPostEmojis) &&
+        emojis.map((code, i) => {
+          const data = emojisData?.discussPostEmojis.find(e => e.code === code)
+          if (data?.count.nUps === 0 || !data) {
+            return null
           }
-          return <CreateDiscussPostEmojis key={i} discussPostId={discussPostId} emojiCode={e} />
+          return <UpdateDiscussPostEmoji key={i} discussPostEmoji={data} type="normal" />
         })}
-      </Tooltip>
-
-      {/* {emojis.map((e, i) => {
-        return (
-          <div key={i} className="flex items-center gap-1">
-            <button
-              className={`btn-reset-style group w-8 h-8 rounded-full
-            hover:bg-blue-100
-           `}
-              onClick={() => {
-                // handleLike('UP')
-              }}
-            >
-              <EmojiIcon code={e} upDownClassName="group-hover:text-blue-600" />
-            </button>
-          </div>
-        )
-      })} */}
+      <EmojisSwitch showTooltip={showTooltip} onShowTooltip={() => setShowTooltip(!showTooltip)}>
+        <Tooltip
+          className="px-1 py-1 left-full -translate-x-full"
+          direction="bottom"
+          visible={showTooltip}
+          onClose={() => setShowTooltip(false)}
+        >
+          {emojis.map((code, i) => {
+            const data = emojisData?.discussPostEmojis.find(el => el.code === code)
+            if (data) {
+              return <UpdateDiscussPostEmoji key={i} discussPostEmoji={data} type="panel" />
+            }
+            return <CreateDiscussPostEmoji key={i} discussPostId={discussPostId} emojiCode={code} />
+          })}
+        </Tooltip>
+      </EmojisSwitch>
     </div>
   )
 }

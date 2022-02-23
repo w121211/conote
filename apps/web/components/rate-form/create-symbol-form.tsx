@@ -13,12 +13,20 @@ interface FormInput {
   description: string
 }
 
-const CreateSymbolForm = ({ defaultValues, onSubmitted }: { defaultValues: FormInput; onSubmitted: () => void }) => {
-  const { register, handleSubmit } = useForm<FormInput>({ defaultValues })
+const CreateSymbolForm = ({
+  defaultValues,
+  onSubmitted,
+}: {
+  defaultValues: FormInput
+  onSubmitted: (value: Option) => void
+}) => {
+  const { register, handleSubmit, watch } = useForm<FormInput>({ defaultValues })
+  const watchTarget = watch('target')
   const [queryCard, { data }] = useCardLazyQuery()
+
   const onSubmit = (v: FormInput) => {
     // queryCard({ variables: { symbol: '$' + v.target } })
-    onSubmitted()
+    onSubmitted({ label: v.target.trim(), value: v.target.trim() })
   }
 
   return (
@@ -27,10 +35,10 @@ const CreateSymbolForm = ({ defaultValues, onSubmitted }: { defaultValues: FormI
       <form className="flex flex-col gap-4 w-[40vw]" onSubmit={handleSubmit(onSubmit)}>
         <label className="flex-shrink-0 flex items-center">
           <h5 className="w-20 text-gray-700 font-normal ">標的</h5>
-          <div className='flex-grow relative before:absolute before:content-["$"] before:left-1 before:top-1/2 before:-translate-y-1/2 before:text-sm'>
+          <div className="flex-grow relative ">
             <input
               {...register('target')}
-              className="input w-full pl-4"
+              className={`input w-full ${watchTarget.startsWith('$') ? 'uppercase' : 'normal-case'}`}
               type="text"
               // placeholder="例如:https://www.youtube.com/xxx..."
             />

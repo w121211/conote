@@ -53,12 +53,14 @@ const CreateDiscussForm = ({
       className="grid auto-rows-min min-w-[40vw] gap-4"
       onSubmit={handleSubmit(onSubmit)}
       autoComplete="off"
+      spellCheck="false"
     >
       <input
         {...register('title', { required: true })}
         className="text-2xl font-bold focus:outline-none"
         type="text"
         placeholder="標題"
+        autoFocus
       />
       <div
         contentEditable={true}

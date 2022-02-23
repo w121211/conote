@@ -343,7 +343,7 @@ const CustomElement = ({
   }
 }
 
-export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
+export const BulletEditor = ({ doc, readOnly }: { doc: Doc; readOnly?: boolean }): JSX.Element => {
   const editor = useMemo(() => withInline(withList(withAutoComplete(withHistory(withReact(createEditor()))))), [])
   const client = useApolloClient()
   const renderElement = useCallback(
@@ -397,7 +397,7 @@ export const BulletEditor = ({ doc }: { doc: Doc }): JSX.Element => {
           autoCorrect="false"
           autoFocus={true}
           decorate={decorateMemo}
-          // readOnly={readOnly}
+          readOnly={readOnly}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           spellCheck={false}
