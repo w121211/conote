@@ -1,5 +1,5 @@
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
-import browser from 'webextension-polyfill'
+// import browser from 'webextension-polyfill'
 import { LinkDocument, LinkQuery, LinkQueryVariables } from '../../../web/apollo/query.graphql'
 import apolloClient from '../apollo-client'
 
@@ -7,7 +7,7 @@ const RateMenu = {
   id: 'conote-menu-rate',
 
   setup(): void {
-    browser.contextMenus.create(
+    chrome.contextMenus.create(
       {
         id: this.id,
         // title: browser.i18n.getMessage('menuItemRemoveMe'),
@@ -23,7 +23,7 @@ const RateMenu = {
      * when user click menu, get user's selection
      *
      */
-    browser.contextMenus.onClicked.addListener(async (info, tab) => {
+    chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       console.log(info, tab)
       if (info.menuItemId === 'conote-rate') {
         console.log(info, tab)
@@ -36,7 +36,7 @@ const RateMenu = {
       })
       // const tabUrl = encodeURIComponent(tab.url ?? '')
 
-      const window = await browser.windows.create({
+      const window = await chrome.windows.create({
         // type: 'popup',
         // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
         // url: 'http://localhost:3000/card/' + encodeUri,
@@ -59,18 +59,18 @@ const SearchMenu = {
   id: 'conote-menu-search',
 
   setup(): void {
-    browser.contextMenus.create(
+    chrome.contextMenus.create(
       {
         id: this.id,
         title: 'Search [[%s]]',
         contexts: ['selection'], // show only if selection exist
       },
-      // () => {
-      //   console.log('menu created')
-      // },
+      () => {
+        console.log('menu created')
+      },
     )
 
-    browser.contextMenus.onClicked.addListener(async (info, tab) => {
+    chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       // console.log(info, tab)
       // if (info.menuItemId === this.id) {
       //   console.log(info, tab)
@@ -83,10 +83,10 @@ const SearchMenu = {
         //   text: info.selectionText ?? '',
         // })
         // const tabUrl = encodeURIComponent(tab.url ?? '')
-        const window = await browser.windows.create({
+        const window = await chrome.windows.create({
           // type: 'popup',
-          // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
-          url: encodeURIComponent(`${process.env.APP_BASE_URL}/card/[[${info.selectionText}]]`),
+          // url: encodeURIComponent(`${process.env.APP_BASE_URL}/card/[[${info.selectionText}]]`),
+          url: `${process.env.APP_BASE_URL}/card/[[${info.selectionText}]]`,
           width: 500,
           height: 900,
           left: 100,
@@ -143,14 +143,14 @@ const setupBadge = (client: ApolloClient<NormalizedCacheObject>): void => {
    * then change extension badge
    *
    */
-  browser.tabs.onActivated.addListener(async info => {
+  chrome.tabs.onActivated.addListener(async info => {
     // console.log('Tab ' + info.tabId + ' was activated')
     // browser.tabs.query({ currentWindow: true, active: true }).then(tabs => {
     //   const tab = tabs[0] // Safe to assume there will only be one result
     //   console.log(tab.url)
     //   onTabActivated(tab)
     // }, console.error)
-    const tabs = await browser.tabs.query({ currentWindow: true, active: true })
+    const tabs = await chrome.tabs.query({ currentWindow: true, active: true })
     const tab = tabs[0] // Safe to assume there will only be one result
     // await onTabActivated(tab)
 
@@ -161,9 +161,9 @@ const setupBadge = (client: ApolloClient<NormalizedCacheObject>): void => {
         variables: { url: tab.url },
       })
       if (data.link) {
-        browser.action.setBadgeText({ text: '1' })
+        chrome.action.setBadgeText({ text: '1' })
       } else {
-        browser.action.setBadgeText({ text: '0' })
+        chrome.action.setBadgeText({ text: '0' })
       }
     }
     // else {
@@ -183,7 +183,7 @@ const setupBrowserActions = (): void => {
    * when user click extension-icon,
    * get current tab's url, title and open a new window to navigate to conote's site
    */
-  browser.action.onClicked.addListener(async tab => {
+  chrome.action.onClicked.addListener(async tab => {
     console.log(tab)
 
     const params = new URLSearchParams({
@@ -192,7 +192,7 @@ const setupBrowserActions = (): void => {
     })
     // const tabUrl = encodeURIComponent(tab.url ?? '')
 
-    const window = await browser.windows.create({
+    const window = await chrome.windows.create({
       // type: 'popup',
       // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
       // url: 'http://localhost:3000/card/' + encodeUri,
@@ -218,7 +218,7 @@ const setupBrowserActions = (): void => {
 // })
 
 const setup = (): void => {
-  setupBadge(apolloClient)
+  // setupBadge(apolloClient)
   setupBrowserActions()
   SearchMenu.setup()
 }

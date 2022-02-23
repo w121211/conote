@@ -28,7 +28,7 @@ const getApolloClient = (): ApolloClient<NormalizedCacheObject> => {
    */
   const client = new ApolloClient({
     cache: cache,
-    uri: 'http://localhost:3000/api/graphql',
+    uri: `${process.env.APP_BASE_URL}/api/graphql`,
     credentials: 'omit', // avoid CORS, @see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
   })
 

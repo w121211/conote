@@ -6,11 +6,20 @@ cd .../conote/src/web
 yarn run buid:types
 
 # start api server
-yarn run dev
+# yarn run dev
 
-# output ./dist, use it to load from chrome (manually)
+# output ./devdist, load this folder from chrome/firefox extension panel 'manually'
 cd .../conote/src/browser
 yarn run dev
+```
+
+# Build & Deploy
+
+```sh
+yarn run build
+
+# zip dist folder
+zip -r -j dist.zip dist/*
 ```
 
 # References
