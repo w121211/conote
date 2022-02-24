@@ -140,6 +140,23 @@ const CardSymbolPage = (): JSX.Element | null => {
     }
   }, [router])
 
+  const onUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault()
+    if (mainDoc?.doc) {
+      // workspace.save(mainDoc.doc)
+      console.log('save')
+      workspace.save(mainDoc.doc)
+      // return (e.returnValue = 'save')
+      // return 'save'
+    }
+
+    // return 'leave?'
+  }
+  useEffect(() => {
+    window.addEventListener('beforeunload', onUnload)
+    return () => window.removeEventListener('beforeunload', onUnload)
+  }, [onUnload])
+
   return (
     <>
       <Modal
@@ -168,7 +185,23 @@ const CardSymbolPage = (): JSX.Element | null => {
       >
         {modalCardComponent}
       </Modal>
-      <Layout>{mainCardComponent}</Layout>
+      <Layout
+        buttonRight={
+          <>
+            <button
+              onClick={() => {
+                if (mainDoc?.doc) {
+                  workspace.save(mainDoc.doc)
+                }
+              }}
+            >
+              save
+            </button>
+          </>
+        }
+      >
+        {mainCardComponent}
+      </Layout>
       <DiscussModal />
     </>
   )
