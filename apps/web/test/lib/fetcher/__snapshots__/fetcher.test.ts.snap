@@ -1,17 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`function tryFetch fetch general 1`] = `
+exports[`tryFetch() failUrl https://www.mobile01.com/topicdetail.php?f=803&t=6541514 1`] = `
 Object {
-  "domain": "test.com",
-  "resolvedUrl": "https://test.com",
+  "authorName": "Evelyn Tsai",
+  "date": "2022-02-17T09:33:55.000Z",
+  "description": "傳言甚囂塵上已久，現如今LINE Pay與一卡通正式分家，LINE Pay App在這一個星期二（2022年2月15日）的時候更新版本，正式切割一卡通電子支付，約有高達四百五十五萬一卡通電子支付的用戶未來將會無法再透過LINE Pay App使用服務。LINE Pay自從西元2015...(行動支付 第1頁)",
+  "domain": "www.mobile01.com",
+  "finalUrl": "https://www.mobile01.com/topicdetail.php?f=803&t=6541514",
+  "keywords": Array [
+    "行動支付",
+    "理財",
+  ],
+  "lang": "zh",
   "srcType": "OTHER",
+  "tickers": Array [
+    "LINE",
+    "APP",
+  ],
+  "title": "LINE Pay鐵了心正式切割一卡通！455萬用戶會淪為電支棄兒嗎？ - Mobile01",
 }
 `;
 
-exports[`function tryFetch fetch youtube 1`] = `
+exports[`tryFetch() fetch youtube 1`] = `
 Object {
   "authorId": "UCACB9uLz5-62dEfpd8c5m7A",
   "authorName": "YumYum얌얌",
+  "date": "2021-05-19T03:00:03.000Z",
   "description": "#한식 #몰아보기
 💗
 00:00 대구 마을불고기 돼지불백 정식
@@ -39,12 +53,8 @@ https://goo.gl/maps/1B4XRuCfyaWcDhkt6
 
 Copyright 2020. Yum Yum All Videos Cannot Be Copied Without Permission",
   "domain": "youtube.com",
-  "resolvedUrl": "https://www.youtube.com/watch?v=CKljNQ5xe2w",
-  "srcId": "CKljNQ5xe2w",
-  "srcPublishDate": "2021-05-19T03:00:03.000Z",
-  "srcTitle": "이런게 바로 한식 ! 돼지 불백, 닭볶음탕, 순대국밥, 칼국수, 쭈꾸미 | A collection of various Korean foods | Korean Street food",
-  "srcType": "VIDEO",
-  "tags": Array [
+  "finalUrl": "https://www.youtube.com/watch?v=CKljNQ5xe2w",
+  "keywords": Array [
     "한국음식",
     "길거리음식",
     "Korean street food",
@@ -95,5 +105,8 @@ Copyright 2020. Yum Yum All Videos Cannot Be Copied Without Permission",
     "sundae",
     "chicken",
   ],
+  "srcId": "CKljNQ5xe2w",
+  "srcType": "VIDEO",
+  "title": "이런게 바로 한식 ! 돼지 불백, 닭볶음탕, 순대국밥, 칼국수, 쭈꾸미 | A collection of various Korean foods | Korean Street food",
 }
 `;

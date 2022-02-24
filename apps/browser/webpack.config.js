@@ -11,9 +11,14 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 // const TransformRuntimePlugin = require('@babel/plugin-transform-runtime')
 const Dotenv = require('dotenv-webpack')
+const JSONC = require('jsonc-parser')
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
+const isManifestV3 = process.env.USE_MANIFEST_V3 !== 'true'
 
+const manifestPath = isManifestV3
+  ? path.resolve(__dirname, 'src/manifest.v3.jsonc')
+  : path.resolve(__dirname, 'src/manifest.v2.jsonc')
 const outDist = isDevelopment ? 'devdist' : 'dist'
 
 module.exports = {
@@ -22,11 +27,14 @@ module.exports = {
   devtool: 'inline-source-map', // ts-loader, chrome-extension requires this
   context: __dirname,
   entry: {
-    'background-script': path.resolve(__dirname, 'src/scripts/background-script.ts'),
+    // 'background-script': isManifestV3
+    //   ? path.resolve(__dirname, 'src/chrome/background.ts')
+    //   : path.resolve(__dirname, 'src/scripts/background-script.ts'),
+    'background-script': path.resolve(__dirname, 'src/chrome/background.ts'),
     // 'content-script': path.resolve(__dirname, 'src/scripts/content-script.ts'),
     // 'content-script': path.resolve(__dirname, 'src/annotate/content-script.ts'),
     'content-script-menu': path.resolve(__dirname, 'src/scripts/content-script-menu.ts'),
-    popup: path.resolve(__dirname, 'src/popup/index.tsx'),
+    // popup: path.resolve(__dirname, 'src/popup/index.tsx'),
     // main: path.resolve(__dirname, 'src/index.tsx'),
   },
   resolve: {
@@ -91,12 +99,12 @@ module.exports = {
           {
             loader: 'css-loader', // Translates CSS into CommonJS
           },
-          {
-            loader: 'sass-loader', // Compiles Sass to CSS
-            options: {
-              additionalData: `@import "../web/style/variables.scss";`,
-            },
-          },
+          // {
+          //   loader: 'sass-loader', // Compiles Sass to CSS
+          //   options: {
+          //     additionalData: `@import "../web/style/variables.scss";`,
+          //   },
+          // },
         ],
       },
       {
@@ -128,10 +136,10 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        {
-          from: path.resolve(__dirname, 'public', '*.json'),
-          to: path.resolve(__dirname, outDist, '[name].json'),
-        },
+        // {
+        //   from: path.resolve(__dirname, 'public', '*.json'),
+        //   to: path.resolve(__dirname, outDist, '[name].json'),
+        // },
         {
           from: path.resolve(__dirname, 'public', '*.png'),
           to: path.resolve(__dirname, outDist, '[name].png'),
@@ -139,6 +147,16 @@ module.exports = {
         {
           from: path.resolve(__dirname, 'public', '*.html'),
           to: path.resolve(__dirname, outDist, '[name].html'),
+        },
+        {
+          from: manifestPath,
+          to: path.resolve(__dirname, outDist, 'manifest.json'),
+          transform(content, path) {
+            const manifest = JSONC.parse(content.toString()) // use jsonc parser, https://github.com/microsoft/node-jsonc-parser
+            // var manifest = JSON.parse(content.toString()) // copy-webpack-plugin passes a buffer
+            // manifest.version = package.version // make any modifications you like, such as
+            return JSON.stringify(manifest, null, 2) // pretty print to JSON with two spaces
+          },
         },
       ],
     }),

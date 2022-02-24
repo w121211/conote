@@ -185,8 +185,9 @@ const LoginPanel = (): JSX.Element | null => {
           Return
         </button>
         <button
-          onClick={() => {
-            sessionLogout()
+          onClick={async () => {
+            await firebaseAuth.signOut() // client-side signout
+            await sessionLogout() // server-side signout
           }}
         >
           Logout

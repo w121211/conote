@@ -32,13 +32,11 @@
     "open_in_tab": true
     // "browser_style": true
   },
-  
-  // add api url for CORS, @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/permissions#host_permissions
   "permissions": [
     "contextMenus",
     "storage", 
     "tabs", 
     "http://localhost:3000/*",
-    "https://*/"
+    "https://www.konote.one/*" // allow fetch api (avoid CORS), @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/permissions#host_permissions
   ]  
 }

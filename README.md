@@ -162,7 +162,7 @@ docker exec -i ${container_id} sh -c "PGPASSWORD=postgrespassword pg_dump -U pos
 
 Troubleshoots:
 
-- postgres 密碼錯誤，無法登入？ 若重裝 postgres chart，需要另外刪除 pvc
+- if reinstall postgres chart, also require delete pvc, otherwise will not able to login to the postgresql
   ```sh
   kubectl get pvc
   kubectl delete pvc ...
@@ -171,28 +171,34 @@ Troubleshoots:
 
 # Todos
 
+v-discuss
+
+- (?) 同一事件在不同新聞網頁報導時，如何統整筆記？@eg $RBLX - #$RBLX 暴跌 25%# -> suggest similar pages
+
 v-next
 
 - optimize
   - avoid rerender if possible
-  - SSR
-- give & take
-  - share cards
-  - credit
-- handle doc conflict -> git mechanism
+  - use SSR if possible
+- auth
+  - (req) invite code
+- /user
+  - [prior] (req) user-page, include user's contributions, rates, interested fields
+  - (?) anonymous user
 - inline-poll
 - inline filtertag `#filter-tag`
 - inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
 - note redirect, eg $BA -> [[Boeing]]
-- /editor
+- loading -> static icon
+- link
+  - try to exclude url search-params by comparing html page @ref
+    https://stackoverflow.com/questions/49582276/php-compare-urls-is-shown-page-the-same
+    https://stackoverflow.com/questions/456302/how-to-determine-if-two-web-pages-are-the-same
+- editor
+
+  - (?) root li without bullet icon?
   - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
   - labels @eg #new-note #fisrt-commit
-- loading -> static icon
-- /user
-  - user's contribution, credit (rates), field, anonymous (?)
-- link
-  - try to exclude url search-params by comparing html page
-- editor
   - (req) show doc diff
   - (?) add [[topic:heading]], eg [[人身保險:比較]]
   - (req) report, eg private page, @eg https://domains.google.com/registrar/konote.one/dns?_ga=2.252326218.217399875.1644890899-434669085.1641528541&ci=1
@@ -202,12 +208,46 @@ v-next
   - (req) show keyword as hints (optional disable by setting)
   - (req) function panel, eg '/'
   - (req) '##' -> cursor jumps to middle, #OOO# + ENTER, jumps out cursor, eg 純純寫作
+
+  - get is doc modified
+  - add template
+  - if not saved, jump warning before leaving
+  - edit source directly (for fixing bugs)
+  - (req) start with template or blank
+
 - note-digest
+  - (?) discuss first?
+  - (?) new topics/urls
   - (ui) able to show full title, eg hover
   - (ui) clear distinguish between webpage
   - (ui) emphasize wenpage domain
+- note settings
+  - enable/disable auto fill keywords for webpage-note
+- /rate
+  - [prior] gql create ticker
+  - (ui) create ticker form
+  - rate form with annotate
+  - user can also rate
+- fetcher
+  - rewrite fetcher
 - DNS
+  - http redirect to https
   - redirect konote.one to www.konote.one
+- nlp
+
+  - [v] greedy rate samples from cnyes news
+  - training on greedy samples
+  - train ner -> entities, subj/obj
+  - train classifier -> rate (long, short, hold)
+
+- give & take
+  - share cards
+  - credit
+- handle doc conflict -> git mechanism
+
+- testing
+  - assign leader
+  - testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves
 
 v0.2
 
@@ -225,38 +265,26 @@ v0.2
 - /editor
   - parse url, eg https://arxiv.org/abs/2112.00114
   - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
-  - (?) root li without bullet icon?
-  - (req) a save button
-  - [working] search panel, including ticker, topic, discuss
-  - [working] (req) webpage-note with keyword hints
-- /rate
-  - rate form with annotate
-- card-meta
-  - support author and its ogranization, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
-- card-digest
-  - [pending] add card emojis
+  - [prior] (req) a save button, setting button
+  - [v] (req) search panel, including ticker, topic, discuss
+  - [prior] (req) web-note with keyword hints -> auto fill notes
+  - [prior] (req) auto fill template (optional)
 - inline-discuss `#a discussion topic here#` @eg https://github.com/prisma/prisma/discussions https://github.com/discourse/discourse/tree/main/app/models
   - [v] editor parser, inline element
   - [v] (bk) prisma model, graphql api, resolvers
   - (ui) modal
-- inline-rate
-  - user can also rate
-- ticker
-  - [working] create ticker & ticker form
+- note
+  - support author and its ogranization, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
+  - add note emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
+- note-digest
+  - [pending] add card emojis
 - browser extension
   - (ui) remove scss
-  - detect page's keywords & hints/auto-fill note
+  - detect page's keywords -> auto fill
   - add inline-rate
-  - deploy to chrome/firefox store
-- add card emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
-- nlp
-  - [v] greedy rate samples from cnyes news
-  - training on greedy samples
-  - train ner -> entities, subj/obj
-  - train classifier -> rate (long, short, hold)
-- testing
-  - assign leader
-  - testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves
+  - [working] deploy to chrome/firefox store
+- database
+  - migrate table
 
 v0.1.1
 
@@ -281,7 +309,7 @@ v0.1.1
 - card-head
   - [v] (ui) card-emojis horizontal display
   - [v] (ui) card-emoji pin should not display count
-  - [investigating] (req) change card symbol name
+  - [prior]] (req) change card symbol name
 - editor
   - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [x] (ui) modal editor scroll bar
@@ -289,11 +317,16 @@ v0.1.1
   - [v] (bug) require cmd+z twice to redo
   - [v] (ui) min width -> left/right margin
   - [v] (ui) line space
-  - (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
+  - [pending] (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
   - [v] (ui) :pin emoji should not have count
   - (ui) :pin emoji color -> gray (unclick)
   - (ui) conote -> konote & when on-hover button add some feedback
-  - (bug) 在未 login 的情況下，直接創卡後不做滑鼠點擊可以打字
+  - [v] (bug) while not logged in can still typing in the editor
+- workspace
+  - [v] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved
+  - [working] (bug) delete note will not work if that note is opening in the editor
+- link
+  - [pending] (bug) URL failed: https://www.mobile01.com/topicdetail.php?f=803&t=6541514 -> fail only on server, possibly caused by cloudflare guard
 - [v] (req) domain name
 - [v] browser extension window popup
 - search
@@ -301,6 +334,4 @@ v0.1.1
   - [v] newly added symbol should be searchable
   - [v] graphql add search author, ticker with id
 - login
-  - [working] (bug) unable to logout
-- [v] (bug) create discuss
-- [v] (bug) author
+  - [v] (bug) unable to logout, possbily caused by client-side token not deleted -> add client-side logout

@@ -1,15 +1,23 @@
-import { existsSync, readFileSync, unlinkSync } from 'fs'
+import { readFileSync, unlinkSync } from 'fs'
 import { resolve } from 'path'
-import { FetchClient } from '../fetch-client'
-import { tryFetch } from '../vendors/index'
+import { FetchClient } from '../../../lib/fetcher/fetch-client'
+import { tryFetch } from '../../../lib/fetcher/vendors/index'
 
-describe('function tryFetch', () => {
+const failUrls = [
+  'https://www.mobile01.com/topicdetail.php?f=803&t=6541514', // fail only on server, possibly caused by cloudflare guard
+]
+
+describe('tryFetch()', () => {
   it('fetch youtube', async () => {
     expect(await tryFetch('https://www.youtube.com/watch?v=CKljNQ5xe2w')).toMatchSnapshot()
   })
 
   it('fetch general', async () => {
     expect(await tryFetch('https://test.com')).toMatchSnapshot()
+  })
+
+  it.each(failUrls)('failUrl %s', async url => {
+    expect(await tryFetch(url)).toMatchSnapshot()
   })
 })
 

@@ -106,38 +106,48 @@ const CardSymbolPage = (): JSX.Element | null => {
   }, [modalSymbol])
 
   useEffect(() => {
-    const { pathname } = router
-    const { symbol, pop } = router.query
+    const runAsync = async () => {
+      const { pathname } = router
+      const { symbol, pop } = router.query
 
-    if (typeof symbol !== 'string') {
-      return
-    }
-    if (symbol !== mainSymbol) {
-      if (mainDoc?.doc && mainDoc.doc.getChanges().length > 0) {
-        workspace.save(mainDoc.doc) // save previous main-doc before switch to another
-      }
-      workspace.closeDoc({}) // close doc to prevent component rerender
-      setMainSymbol(symbol)
-    }
-    if (typeof pop === 'string') {
-      if (pop === symbol) {
-        router.push({ pathname, query: { symbol } }) // /$A?pop=$A -> /$A
+      if (typeof symbol !== 'string') {
         return
       }
-      if (pop === modalSymbol) {
-        return // /$A?pop=$B -> /$A?pop=$B
+
+      if (symbol !== mainSymbol) {
+        if (mainDoc?.doc && mainDoc.doc.getChanges().length > 0) {
+          await workspace.save(mainDoc.doc) // save previous main-doc before switch to another
+        }
+        workspace.closeDoc({}) // close doc to prevent component rerender
+        setMainSymbol(symbol)
       }
-      if (mainDoc?.doc && mainDoc.doc.getChanges().length > 0) {
-        workspace.save(mainDoc.doc) // save current main-doc before open modal
+
+      if (typeof pop === 'string') {
+        if (pop === symbol) {
+          router.push({ pathname, query: { symbol } }) // /$A?pop=$A -> /$A
+          return
+        }
+        if (pop === modalSymbol) {
+          // /$A?pop=$B -> /$A?pop=$B
+          return
+        }
+        if (mainDoc?.doc && mainDoc.doc.getChanges().length > 0) {
+          workspace.save(mainDoc.doc) // save current main-doc before open modal
+        }
+        if (modalDoc?.doc && modalDoc.doc.getChanges().length > 0) {
+          workspace.save(modalDoc.doc) // save current modal-doc before open another modal
+        }
+        workspace.closeDoc({ isModal: true })
+        setModalSymbol(pop)
+        // console.log(`setModalSymbol ${pop}`)
+      } else {
+        workspace.closeDoc({ isModal: true })
+        setModalSymbol(null)
+        // console.log(`setModalSymbol null`)
       }
-      workspace.closeDoc({ isModal: true }) // close doc to prevent component rerender
-      setModalSymbol(pop)
-      // console.log(`setModalSymbol ${pop}`)
-    } else {
-      workspace.closeDoc({ isModal: true }) // close doc to prevent component rerender
-      setModalSymbol(null)
-      // console.log(`setModalSymbol null`)
     }
+
+    runAsync().catch(console.error)
   }, [router])
 
   const onUnload = (e: BeforeUnloadEvent) => {

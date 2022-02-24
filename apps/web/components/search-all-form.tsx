@@ -1,11 +1,11 @@
+import { cloneDeep } from 'lodash'
 import React, { useState, useEffect, CSSProperties } from 'react'
 import { useRouter } from 'next/router'
+import { ActionMeta, GroupBase, Options, OptionsOrGroups, StylesConfig } from 'react-select'
 import Creatable from 'react-select/creatable'
+import { Accessors } from 'react-select/dist/declarations/src/useCreatable'
 // import { toUrlParams } from '../lib/helper'
 import { useSearchSymbolLazyQuery } from '../apollo/query.graphql'
-import { ActionMeta, GroupBase, Options, OptionsOrGroups, StylesConfig } from 'react-select'
-import { Accessors } from 'react-select/dist/declarations/src/useCreatable'
-import { cloneDeep } from 'lodash'
 
 type Option = {
   label: string
