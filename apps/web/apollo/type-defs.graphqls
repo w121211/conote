@@ -153,7 +153,9 @@ type Mutation {
   createCardEmoji(cardId: ID!, code: EmojiCode!): CreateCardEmojiResponse!
   upsertCardEmojiLike(cardEmojiId: ID!, data: LikeInput!): UpsertCardEmojiLikeResponse!
 
-  # updateCardMeta(cardId: ID!, data: CardMetaInput!): CardMeta!
+  # will also try to update card symbol if given symbol in meta changed
+  # @throw validation error
+  updateCardMeta(cardId: ID!, data: CardMetaInput!): Card!
 
   # @throw validation error
   createCommit(data: CommitInput!): Commit!
@@ -344,15 +346,18 @@ type CardDigest {
 }
 
 type CardMeta {
-  template: String
-  redirects: [String!]
-  duplicates: [String!]
-  url: String
   author: String
-  publishedAt: String
-  description: String
+  # // description?: string
+  duplicates: [String!]
   keywords: [String!]
+  # // lang?: string
+  publishedAt: String
+  redirect: String
+  symbol: String!
+  # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
+  tickers: [String!]
   title: String
+  url: String
 }
 
 type CardState {
@@ -684,14 +689,18 @@ input CardInput {
 }
 
 input CardMetaInput {
-  redirects: [String!]
-  duplicates: [String!]
-  url: String
   author: String
-  date: String
-  description: String
+  # // description?: string
+  duplicates: [String!]
   keywords: [String!]
+  # // lang?: string
+  publishedAt: String
+  redirect: String
+  symbol: String!
+  # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
+  tickers: [String!]
   title: String
+  # url: String
 }
 
 input CardStateInput {

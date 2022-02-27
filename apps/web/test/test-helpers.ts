@@ -1,5 +1,5 @@
 // import { hash, hashSync } from 'bcryptjs'
-import { isEqual } from 'lodash'
+import { create, isEqual } from 'lodash'
 import { PrismaClient } from '@prisma/client'
 import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
 import { Bullet } from '../components/bullet/bullet'
@@ -17,6 +17,12 @@ const TEST_DISCUSSES = [
   { title: 'test discuss 0', userId: 'testuser0' },
   { title: 'test discuss 1', userId: 'testuser1' },
   { title: 'test discuss 2', userId: 'testuser2' },
+]
+
+const TEST_POSTS = [
+  { userId: 'testuser0', content: 'test post 0' },
+  { userId: 'testuser1', content: 'test post 1' },
+  { userId: 'testuser2', content: 'test post 2' },
 ]
 
 export const BOT = { id: 'bot', email: getBotEmail() }
@@ -66,7 +72,12 @@ export const TestDataHelper = {
     await prisma.$transaction(
       TEST_DISCUSSES.map(e =>
         prisma.discuss.create({
-          data: { userId: e.userId, title: e.title },
+          data: {
+            userId: e.userId,
+            title: e.title,
+            count: { create: {} },
+            posts: { createMany: { data: TEST_POSTS } },
+          },
         }),
       ),
     )

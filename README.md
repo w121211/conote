@@ -180,6 +180,7 @@ v-next
 - optimize
   - avoid rerender if possible
   - use SSR if possible
+  - consider switch to https://typegraphql.com/
 - auth
   - (req) invite code
 - /user
@@ -208,12 +209,13 @@ v-next
   - (req) show keyword as hints (optional disable by setting)
   - (req) function panel, eg '/'
   - (req) '##' -> cursor jumps to middle, #OOO# + ENTER, jumps out cursor, eg 純純寫作
-
   - get is doc modified
   - add template
   - if not saved, jump warning before leaving
   - edit source directly (for fixing bugs)
   - (req) start with template or blank
+  - (req) auto complete support selection, eg selection 'twitter' + key '[' => [twitter]
+  - (req) suggest similar topics for newly created note, eg [[twitter]] (new), suggest [[Twitter]]
 
 - note-digest
   - (?) discuss first?
@@ -276,13 +278,18 @@ v0.2
 - note
   - support author and its ogranization, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
   - add note emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
+  - mentions in notes
 - note-digest
   - [pending] add card emojis
+- note search panel
+  - [v] newly added symbol should be searchable
+  - [v] graphql add search author, ticker with id
+  - [working] switch search discuss select to panel
 - browser extension
   - (ui) remove scss
   - detect page's keywords -> auto fill
   - add inline-rate
-  - [working] deploy to chrome/firefox store
+  - [pending] deploy to chrome/firefox store -> require to fill tons of info
 - database
   - migrate table
 
@@ -293,6 +300,12 @@ v0.1.1
   - [v] (ui) field width align -> keywords
   - [v] (bug) keywords broken
   - [v] (req) card-meta-form field should not memorize value
+  - fields
+    - title -> 1. [[title]], 2. HTML title
+    - redirect
+    - url, cannot modify
+    - keywords
+    - if note got id, able to update note meta instantly without commit
 - doc-index
   - [working] (bug) doc-index tree fail when removing parent docs
   - [v] (bug) child doc-index-panel hidden delete not show
@@ -303,13 +316,15 @@ v0.1.1
 - /index
   - [v] (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [v] (ui) fit differnt window width
+  - [pending] (bug) search box: 'home', 'end' key has no effect
 - /card?url
   - (req) a better error message and report
   - [v] (req) if url is not reachable (eg 503), still create a card, eg https://www.fantom.foundation/
 - card-head
   - [v] (ui) card-emojis horizontal display
   - [v] (ui) card-emoji pin should not display count
-  - [prior]] (req) change card symbol name
+  - [v] (req) change card symbol name
+  - [pending] change card symbol name -> note's reverse-link will fail
 - editor
   - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [x] (ui) modal editor scroll bar
@@ -324,14 +339,10 @@ v0.1.1
   - [v] (bug) while not logged in can still typing in the editor
 - workspace
   - [v] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved
-  - [working] (bug) delete note will not work if that note is opening in the editor
+  - [prior] (bug) delete note will not work if that note is opening in the editor
 - link
   - [pending] (bug) URL failed: https://www.mobile01.com/topicdetail.php?f=803&t=6541514 -> fail only on server, possibly caused by cloudflare guard
 - [v] (req) domain name
 - [v] browser extension window popup
-- search
-  - [pending] (bug) search box: 'home', 'end' key has no effect
-  - [v] newly added symbol should be searchable
-  - [v] graphql add search author, ticker with id
 - login
   - [v] (bug) unable to logout, possbily caused by client-side token not deleted -> add client-side logout

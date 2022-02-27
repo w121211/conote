@@ -5,7 +5,7 @@ import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
 import { CardMeta, CardModel } from './card-model'
 import { CardStateModel } from './card-state-model'
-import { RowCardState, RowCommit } from './commit-model'
+import { PrismaCardState, PrismaCommit } from './commit-model'
 
 type CardDigest = {
   cardId: string
@@ -35,7 +35,7 @@ export const CardDigestModel = {
   //   }
   // },
 
-  fromCardState(state: RowCardState): Omit<CardDigest, 'children'> {
+  fromCardState(state: PrismaCardState): Omit<CardDigest, 'children'> {
     const { meta: cardMeta, sym } = CardModel.parse(state.card)
     const { body, cardId, commitId, createdAt, updatedAt } = CardStateModel.parse(state)
     return {
@@ -51,7 +51,7 @@ export const CardDigestModel = {
     }
   },
 
-  fromCommit(commit: RowCommit): TreeNode<CardDigest>[] {
+  fromCommit(commit: PrismaCommit): TreeNode<CardDigest>[] {
     const nodes = TreeService.fromList(commit.cardStates.map(e => this.toNodeBody(this.fromCardState(e))))
     return nodes
   },

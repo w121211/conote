@@ -10,7 +10,7 @@ import { inspect } from 'util'
 import { NodeChange, TreeNode, TreeService } from '@conote/docdiff'
 import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
-import { RowCard } from './card-model'
+import { PrismaCard } from './card-model'
 import { CardStateBody, CardStateModel, CardStateParsed } from './card-state-model'
 import { SymbolParsed, SymModel } from './sym-model'
 
@@ -48,9 +48,9 @@ type CardStateInsert = {
 
 export type CommitParsed = Commit & { cardStates: CardStateParsed[] }
 
-export type RowCardState = CardState & { card: RowCard }
+export type PrismaCardState = CardState & { card: PrismaCard }
 
-export type RowCommit = Commit & { cardStates: RowCardState[] }
+export type PrismaCommit = Commit & { cardStates: PrismaCardState[] }
 
 /**
  * cid: client-id

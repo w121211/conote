@@ -1,9 +1,26 @@
 import { Card, Link, Sym, SymType } from '@prisma/client'
+import { CardMetaInput as GQLCardMetaInput } from 'graphql-let/__generated__/__types__'
 import { FetchClient } from '../fetcher/fetch-client'
 import prisma from '../prisma'
 import { CardStateModel, CardStateParsed } from './card-state-model'
 import { LinkService } from './link-model'
 import { SymModel } from './sym-model'
+
+export type CardMeta = {
+  author?: string
+  // description?: string
+  duplicates?: string[]
+  keywords?: string[]
+  // lang?: string
+  publishedAt?: string
+  // redirects?: string[]
+  redirect?: string
+  symbol: string // card symbol
+  // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
+  tickers?: string[]
+  title?: string
+  url?: string
+}
 
 export type CardPrarsed = Omit<Card, 'meta'> & {
   meta: CardMeta
@@ -12,21 +29,10 @@ export type CardPrarsed = Omit<Card, 'meta'> & {
   link: Link | null
 }
 
-export type CardMeta = {
-  template?: 'webpage' | 'ticker' | 'topic' | 'vs'
-  redirects?: string[]
-  duplicates?: string[]
-  url?: string
-  author?: string
-  publishedAt?: string
-  description?: string
-  keywords?: string[]
-  // lang?: string
-  title?: string
-  tickers?: string[]
+export type PrismaCard = Card & {
+  sym: Sym
+  link: Link | null
 }
-
-export type RowCard = Card & { sym: Sym; link: Link | null }
 
 export const CardModel = {
   async get(id: string): Promise<null | CardPrarsed> {
@@ -99,15 +105,17 @@ export const CardModel = {
     }
 
     // Card not found, create one
+    const symbol = LinkService.toSymbol(link)
     const meta: CardMeta = {
-      template: 'webpage',
-      url: link.url,
       author: fetchResult?.authorName,
-      publishedAt: fetchResult?.date,
-      description: fetchResult?.description,
+      // description: fetchResult?.description,
       keywords: fetchResult?.keywords,
-      title: fetchResult?.title,
+      publishedAt: fetchResult?.date,
+      symbol,
+      // template: 'webpage',
       tickers: fetchResult?.tickers,
+      title: fetchResult?.title,
+      url: link.url,
     }
     const card = await prisma.card.create({
       data: {
@@ -116,7 +124,7 @@ export const CardModel = {
         sym: {
           create: {
             type: SymType.URL,
-            symbol: LinkService.toSymbol(link),
+            symbol,
           },
         },
       },
@@ -130,7 +138,7 @@ export const CardModel = {
     }
   },
 
-  parse(card: RowCard, cardState: CardStateParsed | null = null): CardPrarsed {
+  parse(card: PrismaCard, cardState: CardStateParsed | null = null): CardPrarsed {
     const { link, sym } = card
     return {
       ...card,
@@ -139,5 +147,34 @@ export const CardModel = {
       sym,
       link,
     }
+  },
+
+  async udpateCardSymbol(id: string, newSymbol: string): Promise<CardPrarsed> {
+    const card = await this.get(id)
+    if (card === null) {
+      throw 'card not found'
+    }
+    if (card.sym.symbol === newSymbol) {
+      return card
+    }
+    const sym = await SymModel.update(card.symId, newSymbol)
+    return {
+      ...card,
+      sym,
+    }
+  },
+
+  async udpateCardMeta(id: string, newCardMeta: GQLCardMetaInput): Promise<CardPrarsed> {
+    await this.udpateCardSymbol(id, newCardMeta.symbol)
+    const newCard = await prisma.card.update({
+      data: { meta: newCardMeta },
+      include: {
+        link: true,
+        sym: true,
+      },
+      where: { id },
+    })
+
+    return this.parse(newCard)
   },
 }
