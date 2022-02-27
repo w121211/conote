@@ -696,7 +696,7 @@ input CardMetaInput {
   # // lang?: string
   publishedAt: String
   redirect: String
-  symbol: String!
+  symbol: String
   # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
   tickers: [String!]
   title: String

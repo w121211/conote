@@ -324,7 +324,7 @@ v0.1.1
   - [v] (ui) card-emojis horizontal display
   - [v] (ui) card-emoji pin should not display count
   - [v] (req) change card symbol name
-  - [pending] change card symbol name -> note's reverse-link will fail
+  - [pending] change card symbol name -> note's reverse-link will fail -> store sym-id in the card-state
 - editor
   - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [x] (ui) modal editor scroll bar

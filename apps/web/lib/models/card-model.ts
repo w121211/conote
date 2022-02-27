@@ -165,7 +165,9 @@ export const CardModel = {
   },
 
   async udpateCardMeta(id: string, newCardMeta: GQLCardMetaInput): Promise<CardPrarsed> {
-    await this.udpateCardSymbol(id, newCardMeta.symbol)
+    if (newCardMeta.symbol) {
+      await this.udpateCardSymbol(id, newCardMeta.symbol)
+    }
     const newCard = await prisma.card.update({
       data: { meta: newCardMeta },
       include: {
