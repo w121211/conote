@@ -121,7 +121,6 @@ fragment cardMeta on CardMeta {
   keywords
   publishedAt
   redirect
-  symbol
   tickers
   title
   url
@@ -626,8 +625,8 @@ mutation UpsertCardEmojiLike($cardEmojiId: ID!, $data: LikeInput!) {
   }
 }
 
-mutation UpdateCardMeta($cardId: ID!, $data: CardMetaInput!) {
-  updateCardMeta(cardId: $cardId, data: $data) {
+mutation UpdateCardMeta($cardId: ID!, $data: CardMetaInput!, $newSymbol: String) {
+  updateCardMeta(cardId: $cardId, data: $data, newSymbol: $newSymbol) {
     ...card
   }
 }

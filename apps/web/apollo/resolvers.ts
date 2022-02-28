@@ -659,8 +659,11 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async updateCardMeta(_parent, { cardId, data }, { req }, _info) {
+  async updateCardMeta(_parent, { cardId, data, newSymbol }, { req }, _info) {
     await isAuthenticated(req)
+    if (newSymbol) {
+      await CardModel.udpateCardSymbol(cardId, newSymbol)
+    }
     const card = await CardModel.udpateCardMeta(cardId, data)
     return card
   },

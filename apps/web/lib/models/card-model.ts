@@ -15,7 +15,6 @@ export type CardMeta = {
   publishedAt?: string
   // redirects?: string[]
   redirect?: string
-  symbol: string // card symbol
   // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
   tickers?: string[]
   title?: string
@@ -111,7 +110,6 @@ export const CardModel = {
       // description: fetchResult?.description,
       keywords: fetchResult?.keywords,
       publishedAt: fetchResult?.date,
-      symbol,
       // template: 'webpage',
       tickers: fetchResult?.tickers,
       title: fetchResult?.title,
@@ -165,9 +163,6 @@ export const CardModel = {
   },
 
   async udpateCardMeta(id: string, newCardMeta: GQLCardMetaInput): Promise<CardPrarsed> {
-    if (newCardMeta.symbol) {
-      await this.udpateCardSymbol(id, newCardMeta.symbol)
-    }
     const newCard = await prisma.card.update({
       data: { meta: newCardMeta },
       include: {
