@@ -1,24 +1,81 @@
 import { ApolloClient } from '@apollo/client'
+import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Editor, Transforms, Range, BasePoint } from 'slate'
 import { ReactEditor } from 'slate-react'
-import { SearchSymbolDocument, SearchSymbolQuery, SearchSymbolQueryVariables } from '../../apollo/query.graphql'
-
-// type SearchCategory = 'topic' | 'ticker' | 'author' | 'discuss'
+import {
+  SearchDiscussDocument,
+  SearchDiscussQuery,
+  SearchDiscussQueryVariables,
+  SearchSymbolDocument,
+  SearchSymbolQuery,
+  SearchSymbolQueryVariables,
+} from '../../apollo/query.graphql'
+import { TokenHelper } from '../../common/token-helper'
+import { reAuthor, reFiltertag, reTopic } from '../bullet/bullet-parser'
+// import { LcElement } from './slate-custom-types'
+// import { wrapToInlines } from './with-inline'
+// import { isLc } from './with-list'
 
 type Search = {
-  trigger: '@' | '[[' | '$'
-  term: string
-  range: Range
+  target: 'topic' | 'ticker' | 'author' | 'discuss'
+  term: string // search term without trigger
+  range: Range // include trigger & closer, eg '[[search term]]'
 }
+
+const searchTargets = ['author', 'discuss', 'ticker', 'topic']
 
 const SUGGESTS = {
   '@': ['@作者', '@me'],
 }
 
-const reTriggerNoSpace = /(@|\$)([\p{Letter}\d]*)$/u // first group is the trigger
-const reTriggerAllowSpace = /(\[\[)([\p{Letter}\d\s]*)$/u
+const reTicker = /\$[\w-=]+/ // allow lower case to be searchable
+
+const grammar: Grammar = {
+  discuss: { pattern: /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+#(?=\s|$)/u },
+  topic: { pattern: reTopic },
+  ticker: { pattern: reTicker },
+  filtertag: { pattern: reFiltertag },
+  author: { pattern: reAuthor },
+}
+
+// const decorateGrammar: Grammar = {
+//   // order matters, mirror -> ticker
+//   'mirror-ticker': {
+//     pattern: reMirrorTicker,
+//     inside: {
+//       'mirror-head': /^:{2}/,
+//     },
+//   },
+//   'mirror-topic': {
+//     pattern: reMirrorTopic,
+//     inside: {
+//       'mirror-topic-bracket-head': /^:{2}\[\[/,
+//       'topic-bracket-tail': /]]$/,
+//     },
+//   },
+//   // poll: { pattern: rePoll },
+//   // 'new-poll': { pattern: reNewPoll },
+
+//   // rate: { pattern: reRate },
+//   // 'new-rate': { pattern: reNewRate },
+
+//   // ticker: { pattern: reTicker },
+//   // topic: {
+//   //   pattern: reTopic,
+//   //   inside: {
+//   //     'topic-bracket-head': /^\[\[/,
+//   //     'topic-bracket-tail': /]]$/,
+//   //   },
+//   // },
+
+//   // filtertag: { pattern: /(?<=\s|^)#[a-zA-Z0-9()\u4E00-\u9FFF]+#(?=\s|$)/ },
+
+//   // url: { pattern: reURL },
+
+//   // author: { pattern: reAuthor },
+// }
 
 // function useSelect(): [
 //   number | undefined,
@@ -155,9 +212,60 @@ const SearchPanel = ({
   )
 }
 
+const matchSearch = (editor: Editor): Search | null => {
+  const { selection } = editor
+
+  if (selection && Range.isCollapsed(selection)) {
+    const [cursor] = Range.edges(selection)
+    const text = Editor.string(editor, cursor.path)
+    const tokens = prismTokenize(text, grammar)
+
+    let token // the token which cursor currently sitting in
+    let tokenStart = 0
+    for (const e of tokens) {
+      const tokenEnd = tokenStart + e.length
+      if (tokenStart < cursor.offset && cursor.offset <= tokenEnd) {
+        token = e
+        break
+      }
+      tokenStart = tokenEnd
+    }
+
+    if (token && typeof token !== 'string' && searchTargets.includes(token.type)) {
+      const tokenStartPoint: BasePoint = { path: cursor.path, offset: tokenStart }
+      const tokenEndPoint: BasePoint = { path: cursor.path, offset: tokenStart + token.length }
+      const tokenRange = Editor.range(editor, tokenStartPoint, tokenEndPoint)
+      const tokenStr = TokenHelper.toString(token.content)
+      const tokenStartToCursorStr = tokenStr.substring(0, cursor.offset - tokenStart)
+
+      let search: Search | null = null
+      switch (token.type) {
+        case 'author':
+        case 'discuss':
+        case 'ticker':
+          search = {
+            target: token.type,
+            term: tokenStartToCursorStr.substring(1), // remove trigger
+            range: tokenRange,
+          }
+          break
+        case 'topic':
+          search = {
+            target: token.type,
+            term: tokenStartToCursorStr.substring(2),
+            range: tokenRange,
+          }
+          break
+      }
+      return search
+    }
+  }
+  return null
+}
+
 const insertSearchHit = (editor: Editor, search: Search, hit: string): void => {
-  if (['$', '@'].includes(search.trigger)) {
-    hit = hit + ' ' // add space after the hit to split item
+  if (search.target === 'author' || search.target === 'ticker') {
+    hit = hit + ' ' // add space after the hit to split
   }
   Transforms.select(editor, search.range) // select current text
   Transforms.insertText(editor, hit) // replace by hit
@@ -168,7 +276,7 @@ export const useSearchPanel = (
   client: ApolloClient<object>,
 ): {
   searchPanel: JSX.Element | null
-  onValueChange: (editor: Editor) => void
+  onKeyUp: (event: React.KeyboardEvent, editor: Editor) => void
 } => {
   const [search, setSearch] = useState<Search | null>(null) // null for deactivate search-panel
   const [hits, setHits] = useState<string[] | null>(null)
@@ -177,20 +285,6 @@ export const useSearchPanel = (
 
   useEffect(() => {
     const searchAsync = async () => {
-      const _searchSymbol = async (term: string, type: 'TOPIC' | 'TICKER') => {
-        if (term.length === 0) {
-          setHits(null)
-        } else {
-          const { data } = await client.query<SearchSymbolQuery, SearchSymbolQueryVariables>({
-            query: SearchSymbolDocument,
-            variables: { term, type },
-          })
-          if (data) {
-            setHits(data.searchSymbol.map(e => e.str))
-          }
-        }
-      }
-
       if (search) {
         const domRange = ReactEditor.toDOMRange(editor, search.range)
         const rect = domRange.getBoundingClientRect()
@@ -198,17 +292,51 @@ export const useSearchPanel = (
           top: `${rect.top + window.pageYOffset + 24}px`,
           left: `${rect.left + window.pageXOffset}px`,
         })
-        switch (search.trigger) {
-          case '@':
+
+        if (search.term.length === 0) {
+          setHits(null)
+          return
+        }
+
+        switch (search.target) {
+          case 'author': {
             setHits(SUGGESTS['@'])
             break
-          case '$':
-            _searchSymbol(search.term, 'TICKER')
+          }
+          case 'ticker':
+          case 'topic': {
+            const _map: { [k: string]: 'TICKER' | 'TOPIC' } = {
+              ticker: 'TICKER',
+              topic: 'TOPIC',
+            }
+            const { data } = await client.query<SearchSymbolQuery, SearchSymbolQueryVariables>({
+              query: SearchSymbolDocument,
+              variables: { term: search.term, type: _map[search.target] },
+            })
+            if (data) {
+              setHits(data.searchSymbol.map(e => e.str))
+            }
             break
-          case '[[':
-            _searchSymbol(search.term, 'TOPIC')
+          }
+          case 'discuss': {
+            const { data } = await client.query<SearchDiscussQuery, SearchDiscussQueryVariables>({
+              query: SearchDiscussDocument,
+              variables: { term: search.term },
+            })
+            if (data) {
+              setHits(data.searchDiscuss.map(e => e.str))
+            }
             break
+          }
         }
+
+        // const { data } = await client.query<SearchSymbolQuery, SearchSymbolQueryVariables>({
+        //   query: SearchSymbolDocument,
+        //   variables: { term, type },
+        // })
+        // if (data) {
+        //   setHits(data.searchSymbol.map(e => e.str))
+        // }
       }
     }
 
@@ -228,79 +356,23 @@ export const useSearchPanel = (
     [search],
   )
 
-  const onValueChange = (editor: Editor) => {
-    const { selection } = editor
-
-    if (selection && Range.isCollapsed(selection)) {
-      const [cur] = Range.edges(selection)
-      // cur.path
-
-      // get text between word block and cursr in current line
-      const bedore = Editor.before(editor, cur, { unit: 'block' })
-      const beforeRange = bedore && Editor.range(editor, bedore, cur)
-      const beforeText = beforeRange && Editor.string(editor, beforeRange)
-      const text = beforeText && beforeText.split('\n').pop()
-
-      if (text) {
-        let match = text.match(reTriggerNoSpace)
-        if (match && match.index !== undefined) {
-          const beforePoint: BasePoint = { path: cur.path, offset: match.index }
-
-          if (['$', '@'].includes(match[1])) {
-            // const before = Editor.before(editor, cur, {
-            //   distance: beforeMatch[0].length,
-            //   unit: 'offset',
-            // })
-            // const searchRange = before && Editor.range(editor, before, cur)
-            const searchRange = Editor.range(editor, beforePoint, cur)
-            setSearch({
-              trigger: match[1] as '$' | '@',
-              term: match[2],
-              range: searchRange,
-            })
-          }
-          return
-        }
-
-        match = text.match(reTriggerAllowSpace)
-        if (match && match.index !== undefined) {
-          const beforePoint: BasePoint = { path: cur.path, offset: match.index }
-
-          if (match[1] === '[[') {
-            const after = Editor.after(editor, cur, { unit: 'block' })
-            const afterRange = after && Editor.range(editor, cur, after)
-            const afterText = afterRange && Editor.string(editor, afterRange)
-            const searchRange =
-              afterText && afterText.startsWith(']]')
-                ? Editor.range(editor, beforePoint, { path: cur.path, offset: cur.offset + 2 }) // include ']]' as search range
-                : Editor.range(editor, beforePoint, cur)
-            setSearch({
-              trigger: match[1] as '[[',
-              term: match[2],
-              range: searchRange,
-            })
-          }
-          return
-        }
+  const onKeyUp = (event: React.KeyboardEvent, editor: Editor) => {
+    // console.log(event.key)
+    if (event.key.length === 1 || event.key === 'Enter' || event.key === 'Backspace') {
+      const search = matchSearch(editor)
+      // console.log(search)
+      if (search === null) {
+        setHits(null)
+        setSearch(null)
+        return
       }
-
-      // const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/)
-
-      // 若是在句中插入的情況，需要找break-point
-      // const after = Editor.after(editor, start)
-      // const afterRange = Editor.range(editor, start, after)
-      // const afterText = Editor.string(editor, afterRange)
-      // const afterMatch = afterText.match(/^(\s|$)/)
-
-      // console.log('-------')
-      // console.log(before, beforeRange, beforeText, beforeMatch)
-      // console.log(after, afterRange, afterText)
-      // console.log(beforeMatch, afterMatch)
-
-      // console.log(beforeMatch)
+      setSearch(search)
+      return
     }
-    setHits(null)
-    setSearch(null)
+    if (event.key === 'Escape') {
+      setHits(null)
+      setSearch(null)
+    }
   }
 
   const searchPanel =
@@ -322,5 +394,5 @@ export const useSearchPanel = (
     ) : null
 
   // return [search, selectedIdx, searchPanel, onValueChange, onSearchChange]
-  return { searchPanel, onValueChange }
+  return { searchPanel, onKeyUp }
 }

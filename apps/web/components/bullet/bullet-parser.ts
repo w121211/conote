@@ -9,11 +9,13 @@ import { TokenHelper } from '../../common/token-helper'
  * - url @see https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
  * - hashtag @see https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
  */
-const reAuthor = /\B@[\p{L}\d_]+\b/u
-const reTicker = /\$[A-Z-=]+/
-const reTopic = /\[\[[^\]\n]+\]\]/u
-const reDiscuss = /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}]+#(?=\s|$)/u
-const reFiltertag = /(?<=\s|^)#[\d\p{Letter}]+(?=\s|$)/
+export const reAuthor = /\B@[\p{L}\d_]+\b/u
+export const reTicker = /\$[A-Z-=]+/
+export const reTopic = /\[\[[^\]\n]+\]\]/u
+const reDiscuss = /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+-(c[a-z0-9]{24,29})#(?=\s|$)/u
+const reDiscussNew =
+  /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+[\d\p{Letter}\p{Terminal_Punctuation}]#(?=\s|$)/u
+export const reFiltertag = /(?<=\s|^)#[\d\p{Letter}]+(?=\s|$)/
 // const reMirrorTicker = /^(::\$[A-Z-=]+)\b(?:\s@([\p{Letter}\d_]+))?/u
 // const reMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),$%-]+\]\])\B(?:\s@([\p{Letter}\d_]+))?/u
 const rePoll = /\B!\(\(poll:(c[a-z0-9]{24,29})\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
@@ -41,6 +43,7 @@ const grammar: Grammar = {
   rate: { pattern: reRate },
   'rate-new': { pattern: reRateNew },
   discuss: { pattern: reDiscuss },
+  'discuss-new': { pattern: reDiscuss },
   // topic: { pattern: reTopic },
   topic: {
     pattern: reTopic,

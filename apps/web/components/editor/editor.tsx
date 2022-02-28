@@ -367,8 +367,7 @@ export const BulletEditor = ({ doc, readOnly }: { doc: Doc; readOnly?: boolean }
     }
   }, [])
 
-  const { searchPanel, onValueChange: onValueChangeWithSearchPanel } = useSearchPanel(editor, client)
-  const { searchDiscussSelectModal, onKeyUp: onKeyUpWithSearchDiscuss } = useSearchDiscussModal(editor)
+  const { searchPanel, onKeyUp: onKeyUpBindSearchPanel } = useSearchPanel(editor, client)
   // useEffect(() => {
   //   if (searchAllResult.data) {
   //     setSuggestions(searchAllResult.data.searchAll)
@@ -385,7 +384,7 @@ export const BulletEditor = ({ doc, readOnly }: { doc: Doc; readOnly?: boolean }
         onChange={value => {
           if (isLiArray(value)) {
             doc.setEditorValue(value)
-            onValueChangeWithSearchPanel(editor)
+            // onValueChangeWithSearchPanel(editor)
             setValue(value)
           } else {
             throw 'value needs to be li array'
@@ -405,12 +404,11 @@ export const BulletEditor = ({ doc, readOnly }: { doc: Doc; readOnly?: boolean }
             onKeyDownWithList(event, editor)
           }}
           onKeyUp={event => {
-            onKeyUpWithSearchDiscuss(event, editor)
+            onKeyUpBindSearchPanel(event, editor)
           }}
         />
         {/* <CommentPanel /> */}
       </Slate>
-      {searchDiscussSelectModal}
       {searchPanel}
     </div>
   )

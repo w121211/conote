@@ -19,6 +19,9 @@ const dummyData = [
 const DiscussFullPage = ({ id }: { id: string }) => {
   const { data } = useDiscussQuery({ variables: { id } })
 
+  console.log(id)
+  console.log(data)
+
   if (!data?.discuss) {
     return null
   }
@@ -26,7 +29,6 @@ const DiscussFullPage = ({ id }: { id: string }) => {
     <div className="flex flex-col gap-3 w-full">
       <DiscussHeader data={data.discuss} />
       <DiscussBody discussId={data.discuss.id} />
-
       <CreatePostForm discussId={data.discuss.id} type="page" />
     </div>
   )
