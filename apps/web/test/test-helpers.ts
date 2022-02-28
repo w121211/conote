@@ -1,5 +1,6 @@
 // import { hash, hashSync } from 'bcryptjs'
 import { create, isEqual } from 'lodash'
+import { faker } from '@faker-js/faker'
 import { PrismaClient } from '@prisma/client'
 import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
 import { Bullet } from '../components/bullet/bullet'
@@ -14,15 +15,14 @@ const fid = () => {
 }
 
 const TEST_DISCUSSES = [
-  { title: 'test discuss 0', userId: 'testuser0' },
-  { title: 'test discuss 1', userId: 'testuser1' },
-  { title: 'test discuss 2', userId: 'testuser2' },
+  { id: 'testdiscuss0', title: faker.lorem.lines(1), content: faker.lorem.paragraph(), userId: 'testuser0' },
+  { id: 'testdiscuss1', title: faker.lorem.lines(1), userId: 'testuser1' },
 ]
 
 const TEST_POSTS = [
-  { userId: 'testuser0', content: 'test post 0' },
-  { userId: 'testuser1', content: 'test post 1' },
-  { userId: 'testuser2', content: 'test post 2' },
+  { userId: 'testuser0', content: faker.lorem.paragraph() },
+  { userId: 'testuser1', content: faker.lorem.paragraph() },
+  { userId: 'testuser2', content: faker.lorem.paragraph() },
 ]
 
 export const BOT = { id: 'bot', email: getBotEmail() }
@@ -73,8 +73,10 @@ export const TestDataHelper = {
       TEST_DISCUSSES.map(e =>
         prisma.discuss.create({
           data: {
+            id: e.id,
             userId: e.userId,
             title: e.title,
+            content: e.content,
             count: { create: {} },
             posts: { createMany: { data: TEST_POSTS } },
           },

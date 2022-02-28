@@ -51,7 +51,7 @@ export const SYMBOL_GRAMMAR = {
 export const URL_GRAMMAR = {
   'sect-url-begin-line': {
     alias: 'sect-url',
-    pattern: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi,
+    pattern: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gi,
   },
   'sect-url': {
     alias: 'sect-url',
