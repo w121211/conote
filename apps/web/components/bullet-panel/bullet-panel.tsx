@@ -7,32 +7,16 @@ import MyTooltip from '../tooltip/tooltip'
 const BULLET_PANEL_EMOJIS: EmojiCode[] = ['PIN', 'UP', 'DOWN']
 
 const BulletPanel = ({
-  authorName,
   bulletId,
-  className,
-  sourceUrl,
   visible,
   onClose,
 }: {
-  authorName?: string
   bulletId?: string
-  className?: string
-  sourceUrl?: string
-  emoji?: BulletEmojiFragment[]
   visible: boolean
   onClose: () => void
-  // onEmojiCreated: (emoji: BulletEmojiFragment, myEmojiLike: BulletEmojiLikeFragment) => void
 }): JSX.Element => {
-  // const [showPanel, setShowPanel] = useState<boolean>(false)
-
   return (
-    // <div className={`absolute h-full -left-full ${className ? className : ''}`} >
-    <MyTooltip
-      className={`py-2 px-0`}
-      visible={visible}
-      onClose={onClose}
-      // handleVisibleState={handleShowPanel}
-    >
+    <MyTooltip className={`py-2 px-0 -translate-x-1/2 left-1/2`} visible={visible} onClose={onClose}>
       <div className="flex flex-col items-start">
         {bulletId &&
           BULLET_PANEL_EMOJIS.map((e, i) => (
@@ -45,7 +29,6 @@ const BulletPanel = ({
           ))}
       </div>
     </MyTooltip>
-    // </div>
   )
 }
 export default BulletPanel

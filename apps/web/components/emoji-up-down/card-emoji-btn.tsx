@@ -10,7 +10,13 @@ import {
 } from '../../apollo/query.graphql'
 import EmojiIcon from './emoji-icon'
 
-const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Element => {
+const CardEmojiBtn = ({
+  cardEmoji,
+  showCounts,
+}: {
+  cardEmoji: CardEmojiFragment
+  showCounts?: boolean
+}): JSX.Element => {
   const [upsertEmojiLike] = useUpsertCardEmojiLikeMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyCardEmojiLikeQuery>({
@@ -68,23 +74,31 @@ const CardEmojiBtn = ({ cardEmoji }: { cardEmoji: CardEmojiFragment }): JSX.Elem
     // upsertEmojiLike({variables:{hashtagId:foundEmoji.id,data:{choice:}}})
   }
   return (
-    <div className="flex items-center gap-1">
-      <button
-        className={`btn-reset-style group w-8 h-8 rounded-full ${
-          cardEmoji.code === 'PIN' ? 'hover:bg-red-100' : 'hover:bg-blue-100'
-        }`}
-        onClick={() => {
-          handleLike('UP')
-        }}
-      >
-        <EmojiIcon
-          className={'text-gray-400'}
-          code={cardEmoji.code}
-          liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
-          upDownClassName="group-hover:text-blue-600"
-        />
-      </button>
-    </div>
+    <button
+      className={`btn-reset-style group p-1 rounded ${
+        cardEmoji.code === 'PIN' ? 'hover:bg-red-50' : 'hover:bg-blue-50'
+      }`}
+      onClick={() => {
+        handleLike('UP')
+      }}
+    >
+      <EmojiIcon
+        className={'text-gray-500'}
+        code={cardEmoji.code}
+        liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
+        upDownClassName="!text-lg !leading-none group-hover:text-blue-600"
+        pinClassName="!text-xl !leading-none group-hover:text-red-600"
+      />
+      {showCounts && (
+        <span
+          className={`ml-[2px] text-sm  ${
+            myEmojiLikeData?.myCardEmojiLike?.choice === 'UP' ? 'text-blue-600' : 'text-gray-500'
+          }`}
+        >
+          {cardEmoji.count.nUps}
+        </span>
+      )}
+    </button>
   )
 }
 export default CardEmojiBtn

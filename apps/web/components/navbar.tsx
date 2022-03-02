@@ -21,7 +21,7 @@ const Navbar = ({ rbtn, onClickMenu }: { rbtn?: ReactNode; onClickMenu: (boo: bo
           <a>Konote</a>
         </Link>
         {/* {navPath} */}
-        <div className="mr-4">
+        <div className="flex items-center mr-4">
           {rbtn}
           {/* {meData ? (
             <button className="btn-secondary">

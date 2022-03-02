@@ -44,28 +44,30 @@ const UpdateDiscussEmoji = ({
     return (
       <div className="flex items-center">
         <button
-          className={`btn-reset-style group w-6 h-6 rounded-full
-                         hover:bg-blue-100
+          className={`btn-reset-style group p-1 rounded
+                         hover:bg-blue-50
                         `}
           onClick={onClick}
         >
           <EmojiIcon
             code={discussEmoji.code}
             liked={data?.myDiscussEmojiLike?.liked}
-            upDownClassName="!text-sm group-hover:text-blue-600"
+            upDownClassName="!text-sm !leading-none group-hover:text-blue-600"
           />
         </button>
       </div>
     )
   }
   return (
-    <button className="btn-reset-style flex items-center mr-2 gap-1" onClick={onClick}>
+    <button className="btn-reset-style flex items-center  p-1 rounded hover:bg-blue-50" onClick={onClick}>
       <EmojiIcon
-        upDownClassName="!text-base !leading-none"
+        upDownClassName="!text-base !leading-none group-hover:text-blue-600"
         code={discussEmoji.code}
         liked={data?.myDiscussEmojiLike?.liked}
       />
-      <span className="text-xs text-gray-500">{discussEmoji.count.nUps}</span>
+      <span className={`text-xs ${data?.myDiscussEmojiLike?.liked ? 'text-blue-600' : 'text-gray-500'}`}>
+        {discussEmoji.count.nUps}
+      </span>
     </button>
   )
 }

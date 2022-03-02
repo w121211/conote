@@ -23,6 +23,7 @@ const EmojiIcon = ({
   className,
   isColumn,
   upDownClassName,
+  pinClassName,
 }: {
   code: EmojiCode
   nUps?: number
@@ -31,6 +32,7 @@ const EmojiIcon = ({
   className?: string
   isColumn?: boolean
   upDownClassName?: string
+  pinClassName?: string
 }): JSX.Element => {
   const text = emojiToChinese(code)
   switch (code) {
@@ -42,7 +44,9 @@ const EmojiIcon = ({
           } ${className ?? ''}`}
         >
           <span
-            className={`material-icons text-lg  leading-none${liked ? 'favorite text-rose-600' : 'favorite_border  '} `}
+            className={`material-icons text-lg leading-none ${liked ? 'favorite text-rose-600' : 'favorite_border  '} ${
+              pinClassName ?? ''
+            }`}
           >
             {liked ? 'favorite' : 'favorite_border'}
           </span>

@@ -1,16 +1,21 @@
 import { EmojiCode, LikeChoice } from '@prisma/client'
 import React, { useState } from 'react'
-import { DiscussPostEmojiFragment, useDiscussPostEmojisQuery } from '../../apollo/query.graphql'
+import {
+  DiscussPostEmojiFragment,
+  useDiscussPostEmojisQuery,
+  useMyDiscussPostEmojiLikeLazyQuery,
+  useMyDiscussPostEmojiLikeQuery,
+} from '../../apollo/query.graphql'
 import Tooltip from '../tooltip/tooltip'
 import CreateDiscussPostEmoji from './discuss-post-create-emoji'
-import CreateDiscussPostEmojis from './discuss-post-create-emoji'
 import UpdateDiscussPostEmoji from './discuss-post-update-emoji'
-import UpdateDiscussPostEmojis from './discuss-post-update-emoji'
 import EmojisSwitch from './emojis-switch'
 
 const DiscussPostEmojis = ({ discussPostId }: { discussPostId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)
+  const [liked, setLiked] = useState('')
   const { data: emojisData } = useDiscussPostEmojisQuery({ variables: { discussPostId } })
+  const [queryMyEmoji, { data: myEmojiLikeData }] = useMyDiscussPostEmojiLikeLazyQuery()
   const emojis: EmojiCode[] = ['UP', 'DOWN']
 
   const shouldShowEmojiIcons = (data: DiscussPostEmojiFragment[] | undefined) => {

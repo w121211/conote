@@ -22,15 +22,15 @@ const CreateDiscussEmoji = ({ discussId, emojiCode }: { discussId: string; emoji
   return (
     <div className="flex items-center">
       <button
-        className={`btn-reset-style group w-6 h-6 rounded-full
-                         hover:bg-blue-100
+        className={`btn-reset-style group p-1 rounded
+                         hover:bg-blue-50
                         `}
         onClick={onClick}
       >
         <EmojiIcon
           code={emojiCode}
           // liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
-          upDownClassName="!text-sm group-hover:text-blue-600"
+          upDownClassName="!text-sm !leading-none group-hover:text-blue-600"
         />
       </button>
     </div>

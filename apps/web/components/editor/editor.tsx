@@ -243,9 +243,9 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   return (
     <div {...attributes} className="relative break-words flex items-start w-full ">
       {/* <div contentEditable={false}></div> */}
-      <div className="group inline-flex items-center h-8 select-none" contentEditable={false}>
+      <div className="group h-8 inline-flex items-center select-none" contentEditable={false}>
         <span
-          className={`flex-shrink-0 flex-grow-0 invisible group-hover:visible  ${
+          className={`flex-shrink-0 flex-grow-0 flex items-center invisible group-hover:visible  ${
             hasUl ? 'opacity-100 group-hover:cursor-pointer' : 'opacity-0 '
           }`}
           onClick={event => {
@@ -264,23 +264,17 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
             }
           }}
         >
-          <span className={`material-icons w-4 text-lg `}>
+          <span className={`material-icons w-4 text-lg leading-none`}>
             {ulFolded === undefined ? 'arrow_drop_down' : 'arrow_right'}
           </span>
-          {/* <ArrowUpIcon
-            className={` w-2 h-2 fill-current text-gray-500 `}
-            style={{ transform: ulFolded === undefined ? 'rotate(180deg)' : 'rotate(90deg)' }}
-          /> */}
         </span>
         <span
-          className={`relative flex items-center justify-center w-5 h-full ${
-            lc.bulletCopy?.id ? 'cursor-pointer' : 'cursor-default'
-          }`}
+          className={`relative flex-grow px-1 ${lc.bulletCopy?.id ? 'cursor-pointer' : 'cursor-default'}`}
           onMouseEnter={() => setShowPanel(true)}
           onMouseLeave={() => setShowPanel(false)}
         >
           <span
-            className={`material-icons relative text-xs scale-[.65] text-gray-600 
+            className={`material-icons text-xs scale-[.65] text-gray-600 
             before:content-['']  before:w-5 before:h-5 before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:absolute before:rounded-full before:-z-10 
             ${ulFolded === undefined ? 'before:bg-transparent' : 'before:bg-gray-300'}`}
           >
@@ -288,12 +282,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           </span>
 
           {lc.bulletCopy?.id && (
-            <BulletPanel
-              // tooltipClassName={classes.bulletPanelTooltip}
-              bulletId={lc.bulletCopy.id}
-              visible={showPanel}
-              onClose={() => setShowPanel(false)}
-            />
+            <BulletPanel bulletId={lc.bulletCopy.id} visible={showPanel} onClose={() => setShowPanel(false)} />
           )}
         </span>
 

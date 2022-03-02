@@ -17,18 +17,20 @@ const EmojisWrapper = ({
           : ''
       } `}
     >
-      <span
-        className={`material-icons-outlined rounded-full cursor-pointer select-none leading-none 
-  text-xl text-gray-400 mix-blend-multiply hover:bg-gray-200/70 z-100
-
-`}
+      <button
+        className="btn-reset-style p-1 hover:bg-gray-100 z-100 rounded"
         onClick={e => {
           e.stopPropagation()
           onShowTooltip()
         }}
       >
-        sentiment_satisfied_alt
-      </span>
+        <span
+          className={`material-icons-outlined select-none leading-none 
+  text-base text-gray-400 mix-blend-multiply `}
+        >
+          sentiment_satisfied_alt
+        </span>
+      </button>
       {children}
     </div>
   )
