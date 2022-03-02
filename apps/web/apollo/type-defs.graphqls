@@ -23,8 +23,6 @@ type Query {
   # latest card digests
   cardDigests(afterCommitId: String): [CardDigest!]!
 
-  # cardMeta(symbol: String!): CardMeta  # if not found return null
-
   discuss(id: ID!): Discuss
 
   discussEmojis(discussId: ID!): [DiscussEmoji!]!
@@ -153,7 +151,9 @@ type Mutation {
   createCardEmoji(cardId: ID!, code: EmojiCode!): CreateCardEmojiResponse!
   upsertCardEmojiLike(cardEmojiId: ID!, data: LikeInput!): UpsertCardEmojiLikeResponse!
 
-  # updateCardMeta(cardId: ID!, data: CardMetaInput!): CardMeta!
+  # if newSymbol is given, will also update card symbol
+  # @throw validation error
+  updateCardMeta(cardId: ID!, data: CardMetaInput!, newSymbol: String): Card!
 
   # @throw validation error
   createCommit(data: CommitInput!): Commit!
@@ -344,15 +344,17 @@ type CardDigest {
 }
 
 type CardMeta {
-  template: String
-  redirects: [String!]
-  duplicates: [String!]
-  url: String
   author: String
-  publishedAt: String
-  description: String
+  # // description?: string
+  duplicates: [String!]
   keywords: [String!]
+  # // lang?: string
+  publishedAt: String
+  redirect: String
+  # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
+  tickers: [String!]
   title: String
+  url: String
 }
 
 type CardState {
@@ -684,14 +686,17 @@ input CardInput {
 }
 
 input CardMetaInput {
-  redirects: [String!]
-  duplicates: [String!]
-  url: String
   author: String
-  date: String
-  description: String
+  # // description?: string
+  duplicates: [String!]
   keywords: [String!]
+  # // lang?: string
+  publishedAt: String
+  redirect: String
+  # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
+  tickers: [String!]
   title: String
+  # url: String
 }
 
 input CardStateInput {

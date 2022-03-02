@@ -116,15 +116,14 @@ fragment cardEmojiLike on CardEmojiLike {
 
 fragment cardMeta on CardMeta {
   __typename
-  template
-  redirects
-  duplicates
-  url
   author
-  publishedAt
-  description
+  duplicates
   keywords
+  publishedAt
+  redirect
+  tickers
   title
+  url
 }
 
 fragment cardState on CardState {
@@ -626,11 +625,11 @@ mutation UpsertCardEmojiLike($cardEmojiId: ID!, $data: LikeInput!) {
   }
 }
 
-# mutation UpdateCardMeta($cardId: ID!, $data: CardMetaInput!) {
-#   updateCardMeta(cardId: $cardId, data: $data) {
-#     ...cardMeta
-#   }
-# }
+mutation UpdateCardMeta($cardId: ID!, $data: CardMetaInput!, $newSymbol: String) {
+  updateCardMeta(cardId: $cardId, data: $data, newSymbol: $newSymbol) {
+    ...card
+  }
+}
 
 mutation CreateCommit($data: CommitInput!) {
   createCommit(data: $data) {

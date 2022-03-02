@@ -82,6 +82,32 @@ export const SymModel = {
       type,
     }
   },
+
+  async update(id: string, newSymbol: string): Promise<Sym> {
+    const sym = await prisma.sym.findUnique({
+      where: { id },
+    })
+    if (sym === null) {
+      throw 'Sym not found'
+    }
+
+    const parsedOld = this.parse(sym.symbol)
+    const parsedNew = this.parse(newSymbol)
+
+    if (parsedOld.type === 'URL') {
+      throw 'Not support update URL symbol'
+    }
+    if (parsedOld.type !== parsedNew.type) {
+      throw 'Not support update symbol to different type'
+    }
+
+    return await prisma.sym.update({
+      data: {
+        symbol: newSymbol,
+      },
+      where: { id },
+    })
+  },
 }
 
 // export function urlToSymbol(url: string): string | null {

@@ -137,7 +137,7 @@ const LoginPanel = (): JSX.Element | null => {
   // sessionLogout()
   // }
   if (user) {
-    console.log(sessionLoginData, sessionLogoutData, user)
+    // console.log(sessionLoginData, sessionLogoutData, user)
     // if (sessionLoginData?.sessionLogin) {
     //   sessionLogout()
     // }

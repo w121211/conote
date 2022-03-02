@@ -1,4 +1,3 @@
-import { inspect } from 'util'
 import { AuthenticationError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
 // import { getSession } from '@auth0/nextjs-auth0'
@@ -17,7 +16,7 @@ import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import fetcher from '../lib/fetcher/fetcher'
 import { hasCount, toStringId } from '../lib/helpers'
 import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
-import { CardMeta, CardModel } from '../lib/models/card-model'
+import { CardModel } from '../lib/models/card-model'
 import { CardDigestModel } from '../lib/models/card-digest-model'
 import { CardEmojiModel } from '../lib/models/card-emoji-model'
 import { CardStateModel } from '../lib/models/card-state-model'
@@ -660,17 +659,14 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  // async updateCardMeta(_parent, { cardId, data }, { req }, _info) {
-  //   await isAuthenticated(req)
-  //   const card = await prisma.card.update({
-  //     where: { id: cardId },
-  //     data: {
-  //       meta: data, // TODO 需要檢查 input
-  //     },
-  //   })
-  //   const meta = card.meta as unknown as CardMeta
-  //   return meta
-  // },
+  async updateCardMeta(_parent, { cardId, data, newSymbol }, { req }, _info) {
+    await isAuthenticated(req)
+    if (newSymbol) {
+      await CardModel.udpateCardSymbol(cardId, newSymbol)
+    }
+    const card = await CardModel.udpateCardMeta(cardId, data)
+    return card
+  },
 
   async createDiscuss(_parent, { cardId, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)

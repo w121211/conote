@@ -174,57 +174,61 @@ Troubleshoots:
 v-discuss
 
 - (?) 同一事件在不同新聞網頁報導時，如何統整筆記？@eg $RBLX - #$RBLX 暴跌 25%# -> suggest similar pages
+- (?) note without bulletin
 
 v-next
 
+- naming
+  - 'card' to 'note'
 - optimize
   - avoid rerender if possible
   - use SSR if possible
+  - consider switch to https://typegraphql.com/
+- loading -> static icon
 - auth
-  - (req) invite code
-- /user
+  - improve login, logout stablility
+- user
   - [prior] (req) user-page, include user's contributions, rates, interested fields
   - (?) anonymous user
-- inline-poll
-- inline filtertag `#filter-tag`
-- inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
-- note redirect, eg $BA -> [[Boeing]]
-- loading -> static icon
 - link
   - try to exclude url search-params by comparing html page @ref
     https://stackoverflow.com/questions/49582276/php-compare-urls-is-shown-page-the-same
     https://stackoverflow.com/questions/456302/how-to-determine-if-two-web-pages-are-the-same
 - editor
-
+  - inline-poll
+  - inline filtertag `#filter-tag`
+  - [prior] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
   - (?) root li without bullet icon?
   - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
   - labels @eg #new-note #fisrt-commit
   - (req) show doc diff
   - (?) add [[topic:heading]], eg [[人身保險:比較]]
-  - (req) report, eg private page, @eg https://domains.google.com/registrar/konote.one/dns?_ga=2.252326218.217399875.1644890899-434669085.1641528541&ci=1
-  - (req) easy to reference sourc url
-  - (req) modify note symbol
-  - (req) subdomain/channel, eg [[dev/Browser Extension]]
+  - (req) easy to reference sourc url -> eg copy url button, @url
   - (req) show keyword as hints (optional disable by setting)
   - (req) function panel, eg '/'
   - (req) '##' -> cursor jumps to middle, #OOO# + ENTER, jumps out cursor, eg 純純寫作
-
   - get is doc modified
-  - add template
   - if not saved, jump warning before leaving
   - edit source directly (for fixing bugs)
-  - (req) start with template or blank
-
-- note-digest
+  - [v] (req) auto complete support selection, eg selection 'twitter' + key '[' => [twitter]
+  - (req) suggest similar topics for newly created note, eg [[twitter]] (new), suggest [[Twitter]]
+- author
+  - support author and its ogranization, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
+- note
+  - (req) report, eg private page, @eg https://domains.google.com/registrar/konote.one/dns?_ga=2.252326218.217399875.1644890899-434669085.1641528541&ci=1
+  - mentions in notes
+  - redirect, eg $BA -> [[Boeing]]
+- digest
   - (?) discuss first?
   - (?) new topics/urls
   - (ui) able to show full title, eg hover
   - (ui) clear distinguish between webpage
   - (ui) emphasize wenpage domain
-- note settings
+- settings
   - enable/disable auto fill keywords for webpage-note
 - /rate
   - [prior] gql create ticker
+  - [prior] ticker & [[topic]] should bind together
   - (ui) create ticker form
   - rate form with annotate
   - user can also rate
@@ -234,25 +238,31 @@ v-next
   - http redirect to https
   - redirect konote.one to www.konote.one
 - nlp
-
   - [v] greedy rate samples from cnyes news
   - training on greedy samples
   - train ner -> entities, subj/obj
   - train classifier -> rate (long, short, hold)
-
 - give & take
   - share cards
   - credit
 - handle doc conflict -> git mechanism
-
 - testing
   - assign leader
   - testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves
+- prisma
+  - add a short id and not use cuid in front-end
+- doc
+  - check note-copy is in sync with the latest note
+    - update note-meta should first check is the latest card
+- note-meta
+  - should keep user update record -> (?) allow update card-meta without commit note?
+- channel
+  - (req) subdomain/channel, eg [[dev/Browser Extension]]
+  - design channel database schema
+  - switch commit to channel base, @eg @user/some_topic -> @all/some_topic
 
 v0.2
 
-- naming
-  - 'card' to 'note'
 - /index
   - [v] announcement
   - SSR
@@ -265,24 +275,29 @@ v0.2
 - /editor
   - parse url, eg https://arxiv.org/abs/2112.00114
   - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
-  - [prior] (req) a save button, setting button
+  - [v] (req) a save button
+  - [pending] (req) a setting button
   - [v] (req) search panel, including ticker, topic, discuss
-  - [prior] (req) web-note with keyword hints -> auto fill notes
-  - [prior] (req) auto fill template (optional)
-- inline-discuss `#a discussion topic here#` @eg https://github.com/prisma/prisma/discussions https://github.com/discourse/discourse/tree/main/app/models
+  - [prior] (req) web-note with keyword hints -> auto fill the note (optional)
+  - [prior@lisa] (req) auto fill template (optional)
+- discuss `#a discussion topic here#` @eg https://github.com/prisma/prisma/discussions https://github.com/discourse/discourse/tree/main/app/models
   - [v] editor parser, inline element
   - [v] (bk) prisma model, graphql api, resolvers
   - (ui) modal
 - note
-  - support author and its ogranization, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
-  - add note emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
+  - [prior@lisa] add note emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
 - note-digest
   - [pending] add card emojis
+- note search panel
+  - [v] newly added symbol should be searchable
+  - [v] graphql add search author, ticker with id
+  - [v] switch search discuss select to panel
+  - search panel with keyboard support
 - browser extension
-  - (ui) remove scss
+  - [prior@lisa] (ui) remove scss
   - detect page's keywords -> auto fill
   - add inline-rate
-  - [working] deploy to chrome/firefox store
+  - [pending] deploy to chrome/firefox store -> require to fill tons of info
 - database
   - migrate table
 
@@ -293,23 +308,28 @@ v0.1.1
   - [v] (ui) field width align -> keywords
   - [v] (bug) keywords broken
   - [v] (req) card-meta-form field should not memorize value
+  - fields
+    - title -> 1. [[title]], 2. HTML title
+    - redirect
+    - url, cannot modify
+    - keywords
+  - if card is existed (ie got id), able to update note meta instantly without commit
 - doc-index
   - [working] (bug) doc-index tree fail when removing parent docs
   - [v] (bug) child doc-index-panel hidden delete not show
-  - [v] (ui) doc-index title/symbol display
-    - [%] Webpage -> symbol, title
-    - [%] Ticker -> symbol + title, eg $BA 波音
-    - [%] Topic -> symbol only
+  - [v] (ui) doc-index title/symbol display, Webpage -> symbol, title, Ticker -> symbol + title, eg $BA 波音, Topic -> symbol only
 - /index
   - [v] (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [v] (ui) fit differnt window width
+  - [pending] (bug) search box: 'home', 'end' key has no effect
 - /card?url
   - (req) a better error message and report
   - [v] (req) if url is not reachable (eg 503), still create a card, eg https://www.fantom.foundation/
 - card-head
   - [v] (ui) card-emojis horizontal display
   - [v] (ui) card-emoji pin should not display count
-  - [prior]] (req) change card symbol name
+  - [v] (req) change card symbol name
+  - [pending] change card symbol name -> note's reverse-link will fail -> store sym-id in the card-state
 - editor
   - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [x] (ui) modal editor scroll bar
@@ -324,14 +344,10 @@ v0.1.1
   - [v] (bug) while not logged in can still typing in the editor
 - workspace
   - [v] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved
-  - [working] (bug) delete note will not work if that note is opening in the editor
+  - [prior@lisa] (bug) delete note will not work if that note is opening in the editor -> raise warning to prevent deletion
 - link
   - [pending] (bug) URL failed: https://www.mobile01.com/topicdetail.php?f=803&t=6541514 -> fail only on server, possibly caused by cloudflare guard
 - [v] (req) domain name
 - [v] browser extension window popup
-- search
-  - [pending] (bug) search box: 'home', 'end' key has no effect
-  - [v] newly added symbol should be searchable
-  - [v] graphql add search author, ticker with id
 - login
   - [v] (bug) unable to logout, possbily caused by client-side token not deleted -> add client-side logout
