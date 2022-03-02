@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useCardLazyQuery } from '../../apollo/query.graphql'
+import { useNoteLazyQuery } from '../../apollo/query.graphql'
 
-export function CardIndexPage(): JSX.Element | null {
+export function NoteIndexPage(): JSX.Element | null {
   const router = useRouter()
   const [url, setUrl] = useState<string | null>()
-  const [queryCard, { data, loading, error }] = useCardLazyQuery()
+  const [queryNote, { data, loading, error }] = useNoteLazyQuery()
 
   useEffect(() => {
     const { query, isReady } = router
@@ -13,7 +13,7 @@ export function CardIndexPage(): JSX.Element | null {
       const { url } = query
       if (url && typeof url === 'string') {
         setUrl(url)
-        queryCard({
+        queryNote({
           variables: { url },
         })
       } else {
@@ -23,16 +23,16 @@ export function CardIndexPage(): JSX.Element | null {
   }, [router])
 
   if (url === null) {
-    return <div>Give a url or symbol to query a card</div>
+    return <div>Give a url or symbol to query a note</div>
   }
   if (loading) {
     return null
   }
-  if (data && data.card) {
-    // router.push(`/card/${encodeURIComponent(data.card.sym.symbol)}`)
+  if (data && data.note) {
+    // router.push(`/note/${encodeURIComponent(data.note.sym.symbol)}`)
     router.push({
-      pathname: '/card/[symbol]',
-      query: { symbol: data.card.sym.symbol },
+      pathname: '/note/[symbol]',
+      query: { symbol: data.note.sym.symbol },
     })
     return null
   }
@@ -43,4 +43,4 @@ export function CardIndexPage(): JSX.Element | null {
   return null
 }
 
-export default CardIndexPage
+export default NoteIndexPage

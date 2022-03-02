@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import CardEmojis from './emoji-up-down/card-emojis-display'
+import CardEmojis from './emoji-up-down/note-emojis-display'
 
 const HotListItme = ({
   href,

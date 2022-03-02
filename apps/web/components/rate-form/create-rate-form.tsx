@@ -24,8 +24,8 @@ import {
   RateFragment,
   RateQuery,
   useAuthorLazyQuery,
-  useCardLazyQuery,
-  useCardQuery,
+  useNoteLazyQuery,
+  useNoteQuery,
   useCreateRateMutation,
   useLinkLazyQuery,
   useMeQuery,
@@ -129,7 +129,7 @@ const AsyncAuthorConsumer = ({ name }: { name: string }) => {
 
   const onChange = (e: Option | null) => {
     if (e) {
-      // queryCard({ variables: { symbol: e?.label } })
+      // queryNote({ variables: { symbol: e?.label } })
       return { value: e.value, label: e?.label }
     }
     return e
@@ -226,7 +226,7 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
   const [showModal, setShowModal] = useState(false)
   const [selectValue, setSelectValue] = useState('')
   const [searchSymbol, { data }] = useSearchSymbolLazyQuery()
-  const [queryCard, { data: cardData }] = useCardLazyQuery()
+  const [queryNote, { data: cardData }] = useNoteLazyQuery()
 
   useEffect(() => {
     if (data && data.searchSymbol) {
@@ -278,7 +278,7 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
 
   const onChange = (e: Option | null) => {
     if (e) {
-      // queryCard({ variables: { symbol: e?.label } })
+      // queryNote({ variables: { symbol: e?.label } })
       return { value: e.value, label: e?.label.substring(1) }
     }
     return e
@@ -352,7 +352,7 @@ const CreateRateForm = ({
 }): JSX.Element => {
   // const router = useRouter()
   const [showPopup, setShowPopup] = useState(false)
-  const [skipCardQuery, setSkipCardQuery] = useState(true)
+  const [skipNoteQuery, setSkipNoteQuery] = useState(true)
   const { author, choice, target, link } = initialInput
   // const [targetId, setTargetId] = useState<string | undefined>()
   const client = useApolloClient()
@@ -366,10 +366,10 @@ const CreateRateForm = ({
   let linkId: string
   let authorId: string
   let targetId: string
-  // const { data: targetCardData } = useCardLazyQuery({
+  // const { data: targetNoteData } = useNoteLazyQuery({
   //   fetchPolicy: 'cache-first',
   //   variables: { symbol: target },
-  //   // skip: skipCardQuery,
+  //   // skip: skipNoteQuery,
   // })
   const [queryLink] = useLinkLazyQuery({
     variables: { url: link },
@@ -387,10 +387,10 @@ const CreateRateForm = ({
     },
   })
   // useEffect(() => {
-  //   if (targetCardData?.card) {
-  //     setTargetId(targetCardData.card.id)
+  //   if (targetNoteData?.card) {
+  //     setTargetId(targetNoteData.card.id)
   //   }
-  // }, [targetCardData])
+  // }, [targetNoteData])
 
   const watchChoice = methods.watch('choice')
   // const watchAuthor = watch('author')
@@ -413,9 +413,9 @@ const CreateRateForm = ({
       }
     },
     onCompleted(data) {
-      // console.log(data.createRate, targetCardData)
-      // if (data.createRate && targetCardData && targetCardData.card) {
-      //   onRateCreated(data.createRate, targetCardData.card.sym.symbol)
+      // console.log(data.createRate, targetNoteData)
+      // if (data.createRate && targetNoteData && targetNoteData.card) {
+      //   onRateCreated(data.createRate, targetNoteData.card.sym.symbol)
       // } else {
       //   throw 'Create shot error'
       // }

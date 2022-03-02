@@ -1,15 +1,15 @@
 import React from 'react'
 import { EmojiCode } from 'graphql-let/__generated__/__types__'
-import { CardEmojisDocument, useCreateCardEmojiMutation } from '../../apollo/query.graphql'
+import { NoteEmojisDocument, useCreateNoteEmojiMutation } from '../../apollo/query.graphql'
 import EmojiIcon from './emoji-icon'
 
-const CreateCardEmojiBtn = ({ cardId, emojiCode }: { cardId: string; emojiCode: EmojiCode }): JSX.Element => {
-  const [createCardEmoji] = useCreateCardEmojiMutation({
-    refetchQueries: [{ query: CardEmojisDocument, variables: { cardId } }],
+const CreateNoteEmojiBtn = ({ noteId, emojiCode }: { noteId: string; emojiCode: EmojiCode }): JSX.Element => {
+  const [createNoteEmoji] = useCreateNoteEmojiMutation({
+    refetchQueries: [{ query: NoteEmojisDocument, variables: { noteId } }],
   })
 
   const handleLike = () => {
-    createCardEmoji({ variables: { cardId, code: emojiCode } })
+    createNoteEmoji({ variables: { noteId, code: emojiCode } })
   }
   return (
     // <div className="flex items-center gap-1">
@@ -34,4 +34,4 @@ const CreateCardEmojiBtn = ({ cardId, emojiCode }: { cardId: string; emojiCode: 
     // </div>
   )
 }
-export default CreateCardEmojiBtn
+export default CreateNoteEmojiBtn

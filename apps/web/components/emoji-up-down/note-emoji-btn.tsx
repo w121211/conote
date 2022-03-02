@@ -1,33 +1,33 @@
 import React from 'react'
 import { LikeChoice } from 'graphql-let/__generated__/__types__'
 import {
-  CardEmojiFragment,
-  MyCardEmojiLikeDocument,
-  MyCardEmojiLikeQuery,
-  MyCardEmojiLikeQueryVariables,
-  useMyCardEmojiLikeQuery,
-  useUpsertCardEmojiLikeMutation,
+  NoteEmojiFragment,
+  MyNoteEmojiLikeDocument,
+  MyNoteEmojiLikeQuery,
+  MyNoteEmojiLikeQueryVariables,
+  useMyNoteEmojiLikeQuery,
+  useUpsertNoteEmojiLikeMutation,
 } from '../../apollo/query.graphql'
 import EmojiIcon from './emoji-icon'
 
-const CardEmojiBtn = ({
-  cardEmoji,
+const NoteEmojiBtn = ({
+  noteEmoji,
   showCounts,
 }: {
-  cardEmoji: CardEmojiFragment
+  noteEmoji: NoteEmojiFragment
   showCounts?: boolean
 }): JSX.Element => {
-  const [upsertEmojiLike] = useUpsertCardEmojiLikeMutation({
+  const [upsertEmojiLike] = useUpsertNoteEmojiLikeMutation({
     update(cache, { data }) {
-      const res = cache.readQuery<MyCardEmojiLikeQuery>({
-        query: MyCardEmojiLikeDocument,
+      const res = cache.readQuery<MyNoteEmojiLikeQuery>({
+        query: MyNoteEmojiLikeDocument,
       })
       // TODO: 這裡忽略了更新 count
-      if (res && data?.upsertCardEmojiLike) {
-        cache.writeQuery<MyCardEmojiLikeQuery, MyCardEmojiLikeQueryVariables>({
-          query: MyCardEmojiLikeDocument,
-          variables: { cardEmojiId: data.upsertCardEmojiLike.like.id },
-          data: { myCardEmojiLike: data.upsertCardEmojiLike.like },
+      if (res && data?.upsertNoteEmojiLike) {
+        cache.writeQuery<MyNoteEmojiLikeQuery, MyNoteEmojiLikeQueryVariables>({
+          query: MyNoteEmojiLikeDocument,
+          variables: { noteEmojiId: data.upsertNoteEmojiLike.like.id },
+          data: { myNoteEmojiLike: data.upsertNoteEmojiLike.like },
         })
       }
     },
@@ -40,17 +40,17 @@ const CardEmojiBtn = ({
     data: myEmojiLikeData,
     loading,
     error,
-  } = useMyCardEmojiLikeQuery({
-    variables: { cardEmojiId: cardEmoji.id },
+  } = useMyNoteEmojiLikeQuery({
+    variables: { noteEmojiId: noteEmoji.id },
   })
 
   const handleLike = (choice: LikeChoice = 'UP') => {
-    const myLike = myEmojiLikeData?.myCardEmojiLike
+    const myLike = myEmojiLikeData?.myNoteEmojiLike
 
     if (myLike && myLike.choice === choice) {
       upsertEmojiLike({
         variables: {
-          cardEmojiId: cardEmoji.id,
+          noteEmojiId: noteEmoji.id,
           data: { choice: 'NEUTRAL' },
         },
       })
@@ -58,7 +58,7 @@ const CardEmojiBtn = ({
     if (myLike && myLike.choice !== choice) {
       upsertEmojiLike({
         variables: {
-          cardEmojiId: cardEmoji.id,
+          noteEmojiId: noteEmoji.id,
           data: { choice },
         },
       })
@@ -66,7 +66,7 @@ const CardEmojiBtn = ({
     if (myLike === null) {
       upsertEmojiLike({
         variables: {
-          cardEmojiId: cardEmoji.id,
+          noteEmojiId: noteEmoji.id,
           data: { choice },
         },
       })
@@ -76,7 +76,7 @@ const CardEmojiBtn = ({
   return (
     <button
       className={`btn-reset-style group p-1 rounded ${
-        cardEmoji.code === 'PIN' ? 'hover:bg-red-50' : 'hover:bg-blue-50'
+        noteEmoji.code === 'PIN' ? 'hover:bg-red-50' : 'hover:bg-blue-50'
       }`}
       onClick={() => {
         handleLike('UP')
@@ -84,21 +84,21 @@ const CardEmojiBtn = ({
     >
       <EmojiIcon
         className={'text-gray-500'}
-        code={cardEmoji.code}
-        liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
+        code={noteEmoji.code}
+        liked={myEmojiLikeData?.myNoteEmojiLike?.choice === 'UP'}
         upDownClassName="!text-lg !leading-none group-hover:text-blue-600"
         pinClassName="!text-xl !leading-none group-hover:text-red-600"
       />
       {showCounts && (
         <span
           className={`ml-[2px] text-sm  ${
-            myEmojiLikeData?.myCardEmojiLike?.choice === 'UP' ? 'text-blue-600' : 'text-gray-500'
+            myEmojiLikeData?.myNoteEmojiLike?.choice === 'UP' ? 'text-blue-600' : 'text-gray-500'
           }`}
         >
-          {cardEmoji.count.nUps}
+          {noteEmoji.count.nUps}
         </span>
       )}
     </button>
   )
 }
-export default CardEmojiBtn
+export default NoteEmojiBtn

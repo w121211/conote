@@ -9,11 +9,11 @@ interface FormInput {
 }
 
 const CreateDiscussForm = ({
-  cardId,
+  noteId,
   title,
   onCreated,
 }: {
-  cardId: string
+  noteId: string
   title: string
   onCreated: (data: DiscussFragment) => void
 }) => {
@@ -35,10 +35,10 @@ const CreateDiscussForm = ({
     }
   }
   const onSubmit = (v: FormInput) => {
-    console.log(v, cardId)
+    console.log(v, noteId)
     createDiscuss({
       variables: {
-        cardId,
+        noteId,
         data: {
           title: v.title,
           content: v.content ?? '',

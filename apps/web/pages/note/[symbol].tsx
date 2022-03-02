@@ -2,27 +2,27 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useObservable } from 'rxjs-hooks'
-import { useCardQuery, useMeQuery } from '../../apollo/query.graphql'
-import CardHead from '../../components/card-head'
+import { useNoteQuery, useMeQuery } from '../../apollo/query.graphql'
+import NoteHead from '../../components/note-head'
 import { BulletEditor } from '../../components/editor/editor'
 import Layout from '../../components/layout'
 import Modal from '../../components/modal/modal'
 import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
-import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
+import HeaderNoteEmojis from '../../components/emoji-up-down/header-note-emojis'
 import DiscussModal from '../../components/discuss/modal-page/discuss-modal'
 import TemplatePage from '../../components/template'
 
-const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
+const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data: meData } = useMeQuery()
-  const { data, error, loading } = useCardQuery({ variables: { symbol } })
+  const { data, error, loading } = useNoteQuery({ variables: { symbol } })
   const mainDoc = useObservable(() => workspace.mainDoc$)
   const [hasSym, setHasSym] = useState(false)
 
   useEffect(() => {
     // console.log(mainDoc?.doc)
     if (data) {
-      workspace.openDoc({ symbol, card: data.card ?? null })
+      workspace.openDoc({ symbol, note: data.note ?? null })
     }
     Doc.find({ symbol }).then(resolve => {
       if (resolve) {
@@ -49,9 +49,9 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
   return (
     <div className=" ">
       {/* <div className="flex-1 min-w-0 "> */}
-      <CardHead doc={mainDoc.doc} />
-      {/* {mainDoc?.doc?.cardCopy ? ( */}
-      {!data.card && !hasSym ? (
+      <NoteHead doc={mainDoc.doc} />
+      {/* {mainDoc?.doc?.noteCopy ? ( */}
+      {!data.note && !hasSym ? (
         <TemplatePage doc={mainDoc.doc} />
       ) : (
         <BulletEditor doc={mainDoc.doc} readOnly={meData?.me === undefined} />
@@ -61,17 +61,17 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
         <div>template</div>
       )} */}
       {/* </div> */}
-      {/* {mainDoc.doc.cardCopy && (
+      {/* {mainDoc.doc.noteCopy && (
         <div className="z-20">
-          <HeaderCardEmojis cardId={mainDoc.doc.cardCopy.id} />
+          <HeaderNoteEmojis noteId={mainDoc.doc.noteCopy.id} />
         </div>
       )} */}
     </div>
   )
 }
 
-const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
-  const { data, error, loading } = useCardQuery({ variables: { symbol } })
+const ModalNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
+  const { data, error, loading } = useNoteQuery({ variables: { symbol } })
   const mainDoc = useObservable(() => workspace.mainDoc$)
   const modalDoc = useObservable(() => workspace.modalDoc$)
   const [hasSym, setHasSym] = useState(false)
@@ -79,7 +79,7 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   useEffect(() => {
     if (data && mainDoc?.doc) {
       // ensure main-doc is existed before open modal-doc
-      workspace.openDoc({ symbol, card: data.card ?? null, isModal: true })
+      workspace.openDoc({ symbol, note: data.note ?? null, isModal: true })
     }
     Doc.find({ symbol }).then(resolve => {
       if (resolve) {
@@ -105,13 +105,13 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   }
   return (
     <div className="flex-1 h-[90vh] ">
-      <CardHead doc={modalDoc.doc} />
-      {!data.card && !hasSym ? <TemplatePage doc={modalDoc.doc} /> : <BulletEditor doc={modalDoc.doc} />}
+      <NoteHead doc={modalDoc.doc} />
+      {!data.note && !hasSym ? <TemplatePage doc={modalDoc.doc} /> : <BulletEditor doc={modalDoc.doc} />}
     </div>
   )
 }
 
-const CardSymbolPage = (): JSX.Element | null => {
+const NoteSymbolPage = (): JSX.Element | null => {
   const router = useRouter()
 
   const [mainSymbol, setMainSymbol] = useState<string>()
@@ -119,15 +119,15 @@ const CardSymbolPage = (): JSX.Element | null => {
   const mainDoc = useObservable(() => workspace.mainDoc$)
   const modalDoc = useObservable(() => workspace.modalDoc$)
 
-  const mainCardComponent = useMemo<JSX.Element | null>(() => {
+  const mainNoteComponent = useMemo<JSX.Element | null>(() => {
     if (mainSymbol) {
-      return <MainCardComponent symbol={mainSymbol} />
+      return <MainNoteComponent symbol={mainSymbol} />
     }
     return null
   }, [mainSymbol])
-  const modalCardComponent = useMemo<JSX.Element | null>(() => {
+  const modalNoteComponent = useMemo<JSX.Element | null>(() => {
     if (modalSymbol) {
-      return <ModalCardComponent symbol={modalSymbol} />
+      return <ModalNoteComponent symbol={modalSymbol} />
     }
     return null
   }, [modalSymbol])
@@ -198,7 +198,7 @@ const CardSymbolPage = (): JSX.Element | null => {
     <>
       <Modal
         topRightBtn={
-          <Link href={{ pathname: '/card/[symbol]', query: { symbol: modalSymbol } }}>
+          <Link href={{ pathname: '/note/[symbol]', query: { symbol: modalSymbol } }}>
             <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
               <span className="material-icons text-lg text-gray-500 hover:text-gray-700">open_in_full</span>
             </a>
@@ -220,14 +220,14 @@ const CardSymbolPage = (): JSX.Element | null => {
           router.push({ pathname: router.pathname, query: { symbol: router.query.symbol } })
         }}
       >
-        {modalCardComponent}
+        {modalNoteComponent}
       </Modal>
       <Layout
         buttonRight={
           <>
-            {mainDoc?.doc?.cardCopy && (
+            {mainDoc?.doc?.noteCopy && (
               <div className="inline-block z-20">
-                <HeaderCardEmojis cardId={mainDoc.doc.cardCopy.id} />
+                <HeaderNoteEmojis noteId={mainDoc.doc.noteCopy.id} />
               </div>
             )}
             <button
@@ -243,11 +243,11 @@ const CardSymbolPage = (): JSX.Element | null => {
           </>
         }
       >
-        {mainCardComponent}
+        {mainNoteComponent}
       </Layout>
       <DiscussModal />
     </>
   )
 }
 
-export default CardSymbolPage
+export default NoteSymbolPage

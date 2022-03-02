@@ -1,8 +1,8 @@
 import React from 'react'
-import { CardMetaInput } from 'graphql-let/__generated__/__types__'
-import { customComponents, toCardMetaInput } from '../card-meta-form'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
+import { NoteMetaInput } from 'graphql-let/__generated__/__types__'
 import CreatableSelect from 'react-select/creatable'
+import { customComponents, toNoteMetaInput } from '../note-meta-form'
 
 type FormInputs = {
   title: string
@@ -15,18 +15,18 @@ type FormInputs = {
   description: string
 }
 
-const TopicMetaForm = ({
+const SymbolMetaForm = ({
   metaInput,
   onSubmit,
 }: {
-  metaInput?: CardMetaInput
-  onSubmit: (input: CardMetaInput) => void
+  metaInput?: NoteMetaInput
+  onSubmit: (input: NoteMetaInput) => void
 }) => {
   const methods = useForm<FormInputs>({
     defaultValues: {
       //   author: metaInput?.author ?? '',
       title: metaInput?.title ?? '',
-      url: metaInput?.url ?? '',
+      //   url: metaInput?.url ?? '',
       keywords:
         metaInput?.keywords?.map(e => {
           return { label: e, value: e }
@@ -49,18 +49,17 @@ const TopicMetaForm = ({
 
   return (
     <FormProvider {...methods}>
+      {/* <div className=" w-[90vw]  "> */}
       <form
         className="grid grid-cols-1 auto-rows-auto sm:grid-cols-[max-content_auto] items-center sm:gap-4 
              "
         onSubmit={handleSubmit(input => {
-          onSubmit(toCardMetaInput(input))
+          onSubmit(toNoteMetaInput(input))
         })}
         autoComplete="off"
       >
         {[
-          ['title', '標題', ''],
-          //   ['author', '來源作者', '例如:@巴菲特'],
-          // ['url', '來源網址', '例如:http://www.youtube.com/xxx...'],
+          ['title', '公司全稱', ''],
           ['keywords', '關鍵字', ''],
           // ['redirects', '重新導向', '請使用 "空格" 分隔'],
         ].map(([name, title, placeholder], i) => {
@@ -114,8 +113,9 @@ const TopicMetaForm = ({
           </button>
         </div>
       </form>
+      {/* </div> */}
     </FormProvider>
   )
 }
 
-export default TopicMetaForm
+export default SymbolMetaForm

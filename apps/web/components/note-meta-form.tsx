@@ -10,11 +10,11 @@ import {
   StylesConfig,
 } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
-import { CardMetaInput } from 'graphql-let/__generated__/__types__'
+import { NoteMetaInput } from 'graphql-let/__generated__/__types__'
 import { SymType } from '@prisma/client'
-import SymbolMetaForm from './card-meta-form/symbol-meta-form'
-import TopicMetaForm from './card-meta-form/topic-meta-form'
-import WebMetaForm from './card-meta-form/web-meta-topic'
+import SymbolMetaForm from './note-meta-form/symbol-meta-form'
+import TopicMetaForm from './note-meta-form/topic-meta-form'
+import WebMetaForm from './note-meta-form/web-meta-topic'
 
 type Option = {
   label: string
@@ -62,7 +62,7 @@ const changeInputwidth = (name: string) => {
   }
 }
 
-export const toCardMetaInput = (input: FormInputs): CardMetaInput => {
+export const toNoteMetaInput = (input: FormInputs): NoteMetaInput => {
   const { title, author, url, keywords, redirects, duplicates, date, description } = input
   const stringOrUndefined = (str: string) => (str === '' ? undefined : str)
   const stringArrayOrUndefined = (str: string, splitter: string) =>
@@ -79,13 +79,13 @@ export const toCardMetaInput = (input: FormInputs): CardMetaInput => {
   }
 }
 
-const CardMetaForm = ({
+const NoteMetaForm = ({
   metaInput,
   onSubmit,
   type,
 }: {
-  metaInput?: CardMetaInput
-  onSubmit: (input: CardMetaInput) => void
+  metaInput?: NoteMetaInput
+  onSubmit: (input: NoteMetaInput) => void
   type: SymType | string
 }): JSX.Element => {
   const methods = useForm<FormInputs>({
@@ -113,28 +113,28 @@ const CardMetaForm = ({
     formState: { isDirty, isSubmitSuccessful, isSubmitted },
   } = methods
 
-  // const [updateCardMeta] = useUpdateCardMetaMutation({
+  // const [updateNoteMeta] = useUpdateNoteMetaMutation({
   //   update(cache, { data }) {
-  //     const res = cache.readQuery<CardQuery>({ query: CardDocument })
-  //     if (data?.updateCardMeta && res?.card?.meta) {
+  //     const res = cache.readQuery<NoteQuery>({ query: NoteDocument })
+  //     if (data?.updateNoteMeta && res?.note?.meta) {
   //       cache.writeQuery({
-  //         query: CardDocument,
+  //         query: NoteDocument,
   //         data: {
-  //           ...res.card.meta,
-  //           title: data.updateCardMeta.title,
-  //           author: data.updateCardMeta.author,
-  //           keywords: data.updateCardMeta.keywords,
-  //           duplicates: data.updateCardMeta.duplicates,
-  //           redirects: data.updateCardMeta.redirects,
-  //           url: data.updateCardMeta.url,
+  //           ...res.note.meta,
+  //           title: data.updateNoteMeta.title,
+  //           author: data.updateNoteMeta.author,
+  //           keywords: data.updateNoteMeta.keywords,
+  //           duplicates: data.updateNoteMeta.duplicates,
+  //           redirects: data.updateNoteMeta.redirects,
+  //           url: data.updateNoteMeta.url,
   //         },
   //       })
   //     }
   //   },
   //   onCompleted(data) {
-  //     // console.log(data.updateCardMeta)
-  //     if (data.updateCardMeta) {
-  //       const newData = data.updateCardMeta
+  //     // console.log(data.updateNoteMeta)
+  //     if (data.updateNoteMeta) {
+  //       const newData = data.updateNoteMeta
   //       // setValue('title', newData.title ?? '', { shouldDirty: false })
   //       // setValue('author', newData.author ?? '', { shouldDirty: false })
   //       // setValue('url', newData.url ?? '', { shouldDirty: false })
@@ -155,10 +155,10 @@ const CardMetaForm = ({
   //         },
   //         { keepIsSubmitted: true },
   //       )
-  //       onSubmitted(data.updateCardMeta)
+  //       onSubmitted(data.updateNoteMeta)
   //     }
   //   },
-  //   // refetchQueries: [{ query: CardDocument, variables: { symbol } }],
+  //   // refetchQueries: [{ query: NoteDocument, variables: { symbol } }],
   // })
 
   // const onSubmit = (d: FormInputs) => {
@@ -169,9 +169,9 @@ const CardMetaForm = ({
   //         keywordArr.push(e.value)
   //       })
   //     }
-  //     // updateCardMeta({
+  //     // updateNoteMeta({
   //     //   variables: {
-  //     //     cardId,
+  //     //     noteId,
   //     //     data: {
   //     //       author: d.author,
   //     //       title: d.title,
@@ -195,4 +195,4 @@ const CardMetaForm = ({
   return <WebMetaForm metaInput={metaInput} onSubmit={onSubmit} />
 }
 
-export default CardMetaForm
+export default NoteMetaForm

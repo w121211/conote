@@ -24,7 +24,7 @@ const InlineDiscuss = (props: RenderElementProps & { element: InlineDiscussEleme
 
   // const [shotId, setShotId] = useState(element.id)
   // const [shotData, setShotData] = useState<ShotFragment | undefined>()
-  // const { data: targetData } = useCardQuery({ variables: { id: shotId } })
+  // const { data: targetData } = useNoteQuery({ variables: { id: shotId } })
 
   // const onRateCreated = (rate: RateFragment, targetSymbol: string) => {
   //   // const editor = useSlateStatic()

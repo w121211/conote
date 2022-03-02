@@ -1,17 +1,17 @@
 import React from 'react'
 import Link from 'next/link'
-import { CardDigestFragment } from '../apollo/query.graphql'
+import { NoteDigestFragment } from '../apollo/query.graphql'
 import { SymbolHelper } from '../common/symbol-helper'
-import CardEmojis from './emoji-up-down/card-emojis-display'
+import NoteEmojis from './emoji-up-down/note-emojis-display'
 
-const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.Element => {
+const NoteDigestComponent = ({ digest }: { digest: NoteDigestFragment }): JSX.Element => {
   const {
     // commitId,
-    cardId,
-    // fromCardId,
+    noteId,
+    // fromNoteId,
     picks,
     // updatedAt,
-    cardMeta: { author, keywords, title, url },
+    noteMeta: { author, keywords, title, url },
     sym,
     subSyms,
   } = digest
@@ -38,7 +38,7 @@ const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.El
         )}
         {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
       </div>
-      <Link href={{ pathname: '/card/[symbol]', query: { symbol: sym.symbol } }}>
+      <Link href={{ pathname: '/note/[symbol]', query: { symbol: sym.symbol } }}>
         <a className="  text-gray-700 hover:underline hover:underline-offset-2 ">
           <h3 className="truncate my-2 text-xl">
             {title ??
@@ -75,8 +75,8 @@ const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.El
         {subSyms.map((e, i) => (
           <Link
             key={i}
-            href={{ pathname: '/card/[symbol]', query: { symbol: e.symbol } }}
-            // href={`/card/${encodeURIComponent(!e.startsWith('$') && !e.startsWith('#') ? `[[${e}]]` : e)}`}
+            href={{ pathname: '/note/[symbol]', query: { symbol: e.symbol } }}
+            // href={`/note/${encodeURIComponent(!e.startsWith('$') && !e.startsWith('#') ? `[[${e}]]` : e)}`}
           >
             <a
               className={`my-0 last:mr-0 rounded text-sm text-blue-500 cursor-pointer hover:underline hover:underline-offset-2`}
@@ -87,9 +87,9 @@ const CardDigestComponent = ({ digest }: { digest: CardDigestFragment }): JSX.El
           </Link>
         ))}
       </div>
-      <CardEmojis cardId={cardId} />
+      <NoteEmojis noteId={noteId} />
     </div>
   )
 }
 
-export default CardDigestComponent
+export default NoteDigestComponent

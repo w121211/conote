@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { useCardLazyQuery } from '../../apollo/query.graphql'
+import { useNoteLazyQuery } from '../../apollo/query.graphql'
 import { AsyncTickerConsumer } from './create-rate-form'
 
 interface Option {
@@ -22,10 +22,10 @@ const CreateSymbolForm = ({
 }) => {
   const { register, handleSubmit, watch } = useForm<FormInput>({ defaultValues })
   const watchTarget = watch('target')
-  const [queryCard, { data }] = useCardLazyQuery()
+  const [queryNote, { data }] = useNoteLazyQuery()
 
   const onSubmit = (v: FormInput) => {
-    // queryCard({ variables: { symbol: '$' + v.target } })
+    // queryNote({ variables: { symbol: '$' + v.target } })
     onSubmitted({ label: v.target.trim(), value: v.target.trim() })
   }
 

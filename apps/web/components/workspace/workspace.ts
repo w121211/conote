@@ -2,10 +2,10 @@ import { ApolloClient } from '@apollo/client'
 import { BehaviorSubject } from 'rxjs'
 import { NodeChange, TreeNode, TreeService } from '@conote/docdiff'
 import {
-  CardFragment,
   CreateCommitDocument,
   CreateCommitMutation,
   CreateCommitMutationVariables,
+  NoteFragment,
 } from '../../apollo/query.graphql'
 import { Doc } from './doc'
 import { DocIndex, DocIndexService } from './doc-index'
@@ -70,10 +70,10 @@ class Workspace {
       return found
     })
     const docs = await Promise.all<Doc>(promises)
-    const cardStateInputs = docs.map(e => e.toCardStateInput())
+    const noteStateInputs = docs.map(e => e.toNoteStateInput())
     // .filter(e => (e.changes as NodeChange<Bullet>[]).length > 0)
 
-    // if (cardStateInputs.length === 0) {
+    // if (noteStateInputs.length === 0) {
     //   console.warn(`Doc(s) not changed, return`)
     //   return
     // }
@@ -81,7 +81,7 @@ class Workspace {
     const { data, errors } = await client.mutate<CreateCommitMutation, CreateCommitMutationVariables>({
       mutation: CreateCommitDocument,
       variables: {
-        data: { cardStateInputs },
+        data: { noteStateInputs },
       },
     })
     if (errors) {
@@ -94,10 +94,10 @@ class Workspace {
     }
     if (data) {
       console.log('CreateCommitMutation', data)
-      const { cardStates, stateIdToCidDictEntryArray } = data.createCommit
+      const { noteStates, stateIdToCidDictEntryArray } = data.createCommit
       const stateIdToCid = Object.fromEntries(stateIdToCidDictEntryArray.map(e => [e.k, e.v]))
 
-      for (const state of cardStates) {
+      for (const state of noteStates) {
         const cid = stateIdToCid[state.id]
         if (cid === undefined) {
           throw 'Commit return state error: cid === undefined'
@@ -138,11 +138,11 @@ class Workspace {
 
   async openDoc({
     symbol,
-    card,
+    note,
     isModal,
   }: {
     symbol: string
-    card: CardFragment | null
+    note: NoteFragment | null
     isModal?: true
   }): Promise<void> {
     const _doc$ = isModal ? this.modalDoc$ : this.mainDoc$
@@ -153,7 +153,7 @@ class Workspace {
 
     const found = await Doc.find({ symbol })
     if (found) {
-      // TODO: check with remote has card-state updated?
+      // TODO: check with remote has note-state updated?
       _doc$.next({ doc: found })
       this.status$.next(null)
       return
@@ -168,7 +168,7 @@ class Workspace {
       }
       fromDocCid = mainDoc.cid
     }
-    _doc$.next({ doc: Doc.createDoc({ symbol, card, fromDocCid }) })
+    _doc$.next({ doc: Doc.createDoc({ symbol, note, fromDocCid }) })
     this.status$.next(null)
   }
 

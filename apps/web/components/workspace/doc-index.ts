@@ -5,9 +5,9 @@ export type DocIndex = {
   cid: string // client side temporary id
   symbol: string
   // symbolType: SymType
-  title?: string // webpage-card use title instead of symbol
-  cardId?: string // 'undefined' refers to a new card
-  // sourceCardId?: string
+  title?: string // webpage-note use title instead of symbol
+  noteId?: string // 'undefined' refers to a new note
+  // sourceNoteId?: string
   commitId?: string
   createdAt: number // doc created time, for sorting
   updatedAt: number // doc updated time
@@ -16,12 +16,12 @@ export type DocIndex = {
 
 export const DocIndexService = {
   _toDocIndex(doc: Doc): DocIndex {
-    const { cid, fromDocCid, cardCopy, createdAt, updatedAt } = doc
+    const { cid, fromDocCid, noteCopy, createdAt, updatedAt } = doc
     return {
       cid,
       symbol: doc.getSymbol(),
-      title: doc.getCardMetaInput().title ?? undefined,
-      cardId: cardCopy?.id,
+      title: doc.getNoteMetaInput().title ?? undefined,
+      noteId: noteCopy?.id,
       createdAt,
       updatedAt,
       parentCid: fromDocCid ?? TreeService.tempRootCid,

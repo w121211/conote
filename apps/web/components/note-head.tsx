@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react'
 import Link from 'next/link'
-import CardMetaForm from './card-meta-form'
-import HeaderCardEmojis from './emoji-up-down/header-card-emojis'
+import NoteMetaForm from './note-meta-form'
+import HeaderNoteEmojis from './emoji-up-down/header-note-emojis'
 import Modal from './modal/modal'
 import { Doc } from './workspace/doc'
 
-const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
+const NoteHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   const [showModal, setShowModal] = useState(false)
   const [showHiddenDiv, setShowHiddenDiv] = useState(false)
   const hiddenDivRef = useRef<HTMLDivElement>(null)
@@ -20,7 +20,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   const onMouseOut = () => {
     setShowHiddenDiv(false)
   }
-  const metaInput = doc.getCardMetaInput()
+  const metaInput = doc.getNoteMetaInput()
   const title = metaInput.title ?? null
   const symbol = doc.getSymbol()
 
@@ -34,16 +34,16 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
       >
         <div className="px-2 md:px-4">
           <h2 className="text-lg mb-4 sm:mb-6 sm:text-2xl font-bold text-gray-800">卡片資訊</h2>
-          <CardMetaForm
-            type={doc.cardCopy?.sym.type || symbol}
+          <NoteMetaForm
+            type={doc.noteCopy?.sym.type || symbol}
             metaInput={metaInput}
             onSubmit={input => {
-              const { isUpdated } = doc.updateCardMetaInput(input)
+              const { isUpdated } = doc.updateNoteMetaInput(input)
               if (isUpdated) {
                 doc.save()
                 setShowModal(false)
               } else {
-                console.warn('card meta input not updated, skip saving')
+                console.warn('note meta input not updated, skip saving')
               }
             }}
           />
@@ -63,31 +63,31 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
               <span className="whitespace-nowrap text-sm">編輯卡片資訊</span>
             </button>
           </div>
-          {(metaInput.title || metaInput.author || doc.cardCopy?.link) && (
+          {(metaInput.title || metaInput.author || doc.noteCopy?.link) && (
             <div className="flex gap-4 pt-2 text-gray-500">
-              {(doc.cardCopy?.sym.type === 'TICKER' || (doc.cardCopy === null && doc.getSymbol().startsWith('$'))) &&
+              {(doc.noteCopy?.sym.type === 'TICKER' || (doc.noteCopy === null && doc.getSymbol().startsWith('$'))) &&
                 metaInput.title && <span className="text-sm ">{metaInput.title}</span>}
               {metaInput.author && (
                 <Link href={{ pathname: '/author/[author]', query: { author: metaInput.author } }}>
                   <a className="flex-shrink-0 text-sm  hover:underline hover:underline-offset-2">@{metaInput.author}</a>
                 </Link>
               )}
-              {doc.cardCopy?.link && (
+              {doc.noteCopy?.link && (
                 <a
                   className="flex-shrink min-w-0 truncate text-sm  hover:underline hover:underline-offset-2"
-                  href={doc.cardCopy.link.url}
+                  href={doc.noteCopy.link.url}
                   target="_blank"
                   rel="noreferrer"
                 >
                   {/* <span className="material-icons text-base">open_in_new</span> */}
-                  <span className="truncate">{doc.cardCopy.link.url}</span>
+                  <span className="truncate">{doc.noteCopy.link.url}</span>
                 </a>
               )}
             </div>
           )}
 
           <h1 className="line-clamp-2 break-words text-gray-800">
-            {doc.cardCopy?.sym.type === 'TICKER' || (doc.cardCopy === null && doc.getSymbol().startsWith('$'))
+            {doc.noteCopy?.sym.type === 'TICKER' || (doc.noteCopy === null && doc.getSymbol().startsWith('$'))
               ? symbol
               : title ||
                 (symbol.startsWith('[[') && symbol.endsWith(']]') ? (
@@ -102,11 +102,11 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
           </h1>
         </div>
 
-        {/* {doc.cardCopy && <HeaderCardEmojis cardId={doc.cardCopy.id} />} */}
+        {/* {doc.noteCopy && <HeaderNoteEmojis noteId={doc.noteCopy.id} />} */}
 
-        {/* {cardMetaData?.cardMeta.keywords && (
+        {/* {noteMetaData?.noteMeta.keywords && (
         <div className={classes.headerKw}>
-          {cardMetaData?.cardMeta.keywords.map((e, i) => {
+          {noteMetaData?.noteMeta.keywords.map((e, i) => {
             if (i < 5) {
               return (
                 <span className={classes.headerKwEl} key={i}>
@@ -116,7 +116,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
             }
             return null
           })}
-          {cardMetaData.cardMeta.keywords.length > 5 && (
+          {noteMetaData.noteMeta.keywords.length > 5 && (
             <span
               className={classes.headerKwElHidden}
               onClick={e => {
@@ -124,7 +124,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
                 setShowKwTooltip(true)
               }}
             >
-              ...+{cardMetaData.cardMeta.keywords.length - 5}項
+              ...+{noteMetaData.noteMeta.keywords.length - 5}項
               <MyTooltip
                 className={classes.headerKwElTooltip}
                 visible={showKwTooltip}
@@ -132,7 +132,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
                   setShowKwTooltip(false)
                 }}
               >
-                {cardMetaData?.cardMeta.keywords.map((e, i) => {
+                {noteMetaData?.noteMeta.keywords.map((e, i) => {
                   if (i >= 5) {
                     return (
                       <span className={classes.headerKwEl} key={i}>
@@ -152,4 +152,4 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   )
 }
 
-export default CardHead
+export default NoteHead

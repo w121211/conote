@@ -5,7 +5,7 @@ export type DocPath = {
   symbol: string
   fromSymbol?: string // for docs tree, local use only, TODO: cope if symbol name changed
   // url?: string
-  // sourceCardId?: string // indicate current symbol is a mirror
+  // sourceNoteId?: string // indicate current symbol is a mirror
   // editorValuePath?: number[] // open-li
 }
 
@@ -30,7 +30,7 @@ export const DocPathService = {
       return {
         symbol,
         // url,
-        // sourceCardId: typeof src === 'string' ? src : undefined,
+        // sourceNoteId: typeof src === 'string' ? src : undefined,
         // path: typeof path === 'string' ? path.split('.').map(e => parseInt(e)) : [],
         // mirror: typeof mirror === 'string' ? mirror : undefined,
         // mirrorSymbol: typeof mirror === 'string' ? mirror : undefined,
@@ -40,8 +40,8 @@ export const DocPathService = {
     throw 'Router not found symbol in url'
   },
 
-  toURL(symbol: string, sourceCardId?: string, joinLiPath?: number[]): UrlObject {
-    // const { symbol, sourceCardId, editorValuePath } = path
+  toURL(symbol: string, sourceNoteId?: string, joinLiPath?: number[]): UrlObject {
+    // const { symbol, sourceNoteId, editorValuePath } = path
     // const query: Record<string, string> = {}
     // if (mirror) {
     //   query['m'] = mirror
@@ -58,9 +58,9 @@ export const DocPathService = {
     //   query['p'] = path.join('.')
     // }
     const query: Record<string, string> = { symbol }
-    if (sourceCardId) {
-      query['src'] = sourceCardId
+    if (sourceNoteId) {
+      query['src'] = sourceNoteId
     }
-    return { pathname: '/card/[symbol]', query }
+    return { pathname: '/note/[symbol]', query }
   },
 }

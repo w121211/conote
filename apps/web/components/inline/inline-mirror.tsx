@@ -8,8 +8,8 @@ const InlineMirror = ({
   attributes,
   children,
   element,
-  sourceCardId,
-}: RenderElementProps & { element: InlineMirrorElement; sourceCardId?: string }): JSX.Element => {
+  sourceNoteId,
+}: RenderElementProps & { element: InlineMirrorElement; sourceNoteId?: string }): JSX.Element => {
   const router = useRouter()
   return (
     <span {...attributes} className="hover:cursor-pointer">
@@ -18,7 +18,7 @@ const InlineMirror = ({
         onClick={e => {
           // e.preventDefault()
           // e.stopPropagation()
-          router.push(DocPathService.toURL(element.mirrorSymbol.substring(2), sourceCardId))
+          router.push(DocPathService.toURL(element.mirrorSymbol.substring(2), sourceNoteId))
         }}
       >
         {children}
@@ -31,10 +31,10 @@ export default InlineMirror
 
 // const FilterMirror = ({
 //   mirrors,
-//   sourceCardId,
+//   sourceNoteId,
 // }: {
 //   mirrors: InlineMirrorElement[]
-//   sourceCardId?: string
+//   sourceNoteId?: string
 // }): JSX.Element | null => {
 //   const [filteredBullet, setFilteredBullet] = useState<BulletDraft | null | undefined>()
 //   const client = useApolloClient()
@@ -46,7 +46,7 @@ export default InlineMirror
 //         const rootBulletDraft = Serializer.toRootBulletDraft(rootLi)
 //         const filtered = BulletNode.filter({
 //           node: rootBulletDraft,
-//           match: ({ node }) => node.sourceCardId === sourceCardId,
+//           match: ({ node }) => node.sourceNoteId === sourceNoteId,
 //         })
 //         setFilteredBullet(filtered)
 //       }

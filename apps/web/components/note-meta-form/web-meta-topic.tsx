@@ -1,6 +1,6 @@
 import React from 'react'
-import { CardMetaInput } from 'graphql-let/__generated__/__types__'
-import { customComponents, toCardMetaInput } from '../card-meta-form'
+import { NoteMetaInput } from 'graphql-let/__generated__/__types__'
+import { customComponents, toNoteMetaInput } from '../note-meta-form'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import CreatableSelect from 'react-select/creatable'
 
@@ -19,8 +19,8 @@ const WebMetaForm = ({
   metaInput,
   onSubmit,
 }: {
-  metaInput?: CardMetaInput
-  onSubmit: (input: CardMetaInput) => void
+  metaInput?: NoteMetaInput
+  onSubmit: (input: NoteMetaInput) => void
 }) => {
   const methods = useForm<FormInputs>({
     defaultValues: {
@@ -53,7 +53,7 @@ const WebMetaForm = ({
         className="grid grid-cols-1 auto-rows-auto sm:grid-cols-[max-content_auto] items-center sm:gap-4 
              "
         onSubmit={handleSubmit(input => {
-          onSubmit(toCardMetaInput(input))
+          onSubmit(toNoteMetaInput(input))
         })}
         autoComplete="off"
       >
