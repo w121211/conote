@@ -37,6 +37,7 @@ export const useSearchDiscussModal = (
   const searchDiscussSelectModal = (
     <Modal
       visible={showModal}
+      mask={false}
       onClose={() => {
         ReactEditor.focus(editor)
         setShowModal(false)

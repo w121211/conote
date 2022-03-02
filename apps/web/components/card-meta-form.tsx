@@ -11,6 +11,10 @@ import {
 } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import { CardMetaInput } from 'graphql-let/__generated__/__types__'
+import { SymType } from '@prisma/client'
+import SymbolMetaForm from './card-meta-form/symbol-meta-form'
+import TopicMetaForm from './card-meta-form/topic-meta-form'
+import WebMetaForm from './card-meta-form/web-meta-topic'
 
 type Option = {
   label: string
@@ -28,7 +32,7 @@ type FormInputs = {
   description: string
 }
 
-const Control = (props: ControlProps<Option[], true>) => {
+export const Control = (props: ControlProps<Option[], true>) => {
   const { children, ...rest } = props
   return (
     <components.Control
@@ -40,7 +44,7 @@ const Control = (props: ControlProps<Option[], true>) => {
   )
 }
 
-const customComponents = {
+export const customComponents = {
   DropdownIndicator: undefined,
   ClearIndicator: undefined,
   Control,
@@ -58,7 +62,7 @@ const changeInputwidth = (name: string) => {
   }
 }
 
-const toCardMetaInput = (input: FormInputs): CardMetaInput => {
+export const toCardMetaInput = (input: FormInputs): CardMetaInput => {
   const { title, author, url, keywords, redirects, duplicates, date, description } = input
   const stringOrUndefined = (str: string) => (str === '' ? undefined : str)
   const stringArrayOrUndefined = (str: string, splitter: string) =>
@@ -78,9 +82,11 @@ const toCardMetaInput = (input: FormInputs): CardMetaInput => {
 const CardMetaForm = ({
   metaInput,
   onSubmit,
+  type,
 }: {
   metaInput?: CardMetaInput
   onSubmit: (input: CardMetaInput) => void
+  type: SymType | string
 }): JSX.Element => {
   const methods = useForm<FormInputs>({
     defaultValues: {
@@ -179,77 +185,14 @@ const CardMetaForm = ({
   //   }
   // }
 
-  return (
-    <FormProvider {...methods}>
-      {/* <div className=" w-[90vw]  "> */}
-      <form
-        className="grid grid-cols-1 auto-rows-auto sm:grid-cols-[max-content_auto]  items-center  sm:gap-4 
-         "
-        onSubmit={handleSubmit(input => {
-          onSubmit(toCardMetaInput(input))
-        })}
-        autoComplete="off"
-      >
-        {[
-          ['title', '標題', ''],
-          ['author', '來源作者', '例如:@巴菲特'],
-          // ['url', '來源網址', '例如:http://www.youtube.com/xxx...'],
-          ['keywords', '關鍵字', ''],
-          // ['redirects', '重新導向', '請使用 "空格" 分隔'],
-        ].map(([name, title, placeholder], i) => {
-          return (
-            <React.Fragment key={name}>
-              <label className="mr-4 mt-2 first:mt-0 sm:m-0 sm:text-right text-gray-700 text-sm">
-                {/* <span className="flex-shrink-0 min-w-fit  mr-4 sm:w-20">
-                  <h5 className=" text-right text-gray-700 font-normal"> */}
-                {title}
-                {/* </h5>
-                </span> */}
-              </label>
-              {name === 'keywords' ? (
-                <Controller
-                  control={control}
-                  name="keywords"
-                  render={({ field: { onChange, value, ref } }) => (
-                    <CreatableSelect
-                      instanceId="1"
-                      isMulti
-                      styles={{
-                        control: () => ({}),
-                        container: () => ({ position: 'relative', width: '100%', cursor: 'text' }),
-                      }}
-                      value={value}
-                      components={customComponents}
-                      noOptionsMessage={() => null}
-                      placeholder={placeholder}
-                      onChange={onChange}
-                    />
-                  )}
-                />
-              ) : (
-                <input
-                  {...register(name as keyof FormInputs)}
-                  type="text"
-                  className={`input flex-grow`}
-                  placeholder={placeholder}
-                />
-              )}
-            </React.Fragment>
-          )
-        })}
-        <div className=" text-center sm:col-span-2">
-          <button
-            className="btn-primary mt-6 sm:h-10 sm:w-24 sm:mt-4"
-            type="submit"
-            disabled={!isDirty || isSubmitSuccessful || isSubmitted}
-          >
-            {isSubmitted ? (isDirty ? '送出' : '已送出') : '送出'}
-          </button>
-        </div>
-      </form>
-      {/* </div> */}
-    </FormProvider>
-  )
+  if (type === 'TICKER' || type.startsWith('$')) {
+    return <SymbolMetaForm metaInput={metaInput} onSubmit={onSubmit} />
+  }
+  if (type === 'TOPIC' || type.startsWith('[[')) {
+    return <TopicMetaForm metaInput={metaInput} onSubmit={onSubmit} />
+  }
+
+  return <WebMetaForm metaInput={metaInput} onSubmit={onSubmit} />
 }
 
 export default CardMetaForm

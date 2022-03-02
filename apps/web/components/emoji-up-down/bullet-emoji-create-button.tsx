@@ -78,7 +78,7 @@ const BulletEmojiCreateButton = ({
           createBulletEmoji()
         }}
       >
-        <EmojiIcon code={emojiCode} showText />
+        <EmojiIcon code={emojiCode} showText upDownClassName="py-1" pinClassName="py-1" />
       </button>
     </>
   )

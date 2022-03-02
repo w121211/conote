@@ -26,6 +26,7 @@ const customStyles: StylesConfig<Option, false, GroupBase<Option>> = {
     border: 'none',
     borderRadius: '4px',
     boxShadow: '0 1px 6px 0 #17171730',
+    zIndex: '100',
   }),
   // singleValue: (provided: any) => ({
   //   ...provided,
@@ -136,7 +137,8 @@ export const SearchDiscussSelect = ({
       formatCreateLabel={formatCreateLabel}
       inputValue={inputValue}
       isValidNewOption={isValidNewOption}
-      menuIsOpen={openMenu}
+      // menuIsOpen={openMenu}
+      menuIsOpen={true}
       menuPortalTarget={document.body}
       onChange={onChange}
       onCreateOption={onCreateOption}

@@ -11,16 +11,26 @@ import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
 import HeaderCardEmojis from '../../components/emoji-up-down/header-card-emojis'
 import DiscussModal from '../../components/discuss/modal-page/discuss-modal'
+import TemplatePage from '../../components/template'
 
 const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data: meData } = useMeQuery()
   const { data, error, loading } = useCardQuery({ variables: { symbol } })
   const mainDoc = useObservable(() => workspace.mainDoc$)
+  const [hasSym, setHasSym] = useState(false)
 
   useEffect(() => {
+    // console.log(mainDoc?.doc)
     if (data) {
       workspace.openDoc({ symbol, card: data.card ?? null })
     }
+    Doc.find({ symbol }).then(resolve => {
+      if (resolve) {
+        setHasSym(true)
+      } else {
+        return
+      }
+    })
   }, [data])
 
   if (loading) {
@@ -37,16 +47,25 @@ const MainCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
     return null
   }
   return (
-    <div className="grid grid-cols-[auto_max-content] gap-2 ">
-      <div className="flex-1 min-w-0 ">
-        <CardHead doc={mainDoc.doc} />
+    <div className=" ">
+      {/* <div className="flex-1 min-w-0 "> */}
+      <CardHead doc={mainDoc.doc} />
+      {/* {mainDoc?.doc?.cardCopy ? ( */}
+      {!data.card && !hasSym ? (
+        <TemplatePage doc={mainDoc.doc} />
+      ) : (
         <BulletEditor doc={mainDoc.doc} readOnly={meData?.me === undefined} />
-      </div>
-      {mainDoc.doc.cardCopy && (
+      )}
+
+      {/* ) : (
+        <div>template</div>
+      )} */}
+      {/* </div> */}
+      {/* {mainDoc.doc.cardCopy && (
         <div className="z-20">
           <HeaderCardEmojis cardId={mainDoc.doc.cardCopy.id} />
         </div>
-      )}
+      )} */}
     </div>
   )
 }
@@ -55,12 +74,20 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   const { data, error, loading } = useCardQuery({ variables: { symbol } })
   const mainDoc = useObservable(() => workspace.mainDoc$)
   const modalDoc = useObservable(() => workspace.modalDoc$)
+  const [hasSym, setHasSym] = useState(false)
 
   useEffect(() => {
     if (data && mainDoc?.doc) {
       // ensure main-doc is existed before open modal-doc
       workspace.openDoc({ symbol, card: data.card ?? null, isModal: true })
     }
+    Doc.find({ symbol }).then(resolve => {
+      if (resolve) {
+        setHasSym(true)
+      } else {
+        return
+      }
+    })
   }, [data, mainDoc])
 
   if (loading) {
@@ -77,9 +104,9 @@ const ModalCardComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
     return null
   }
   return (
-    <div className="flex-1 w-[90vw] h-[90vh] sm:w-[50vw]">
+    <div className="flex-1 h-[90vh] ">
       <CardHead doc={modalDoc.doc} />
-      <BulletEditor doc={modalDoc.doc} />
+      {!data.card && !hasSym ? <TemplatePage doc={modalDoc.doc} /> : <BulletEditor doc={modalDoc.doc} />}
     </div>
   )
 }
@@ -150,6 +177,23 @@ const CardSymbolPage = (): JSX.Element | null => {
     runAsync().catch(console.error)
   }, [router])
 
+  const onUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault()
+    // if (mainDoc?.doc) {
+    //   // workspace.save(mainDoc.doc)
+    //   console.log('save')
+    //   workspace.save(mainDoc.doc)
+    //   // return 'save'
+    // }
+
+    e.returnValue = 'leave'
+    return 'leave'
+  }
+  useEffect(() => {
+    window.addEventListener('beforeunload', onUnload)
+    return () => window.removeEventListener('beforeunload', onUnload)
+  }, [onUnload])
+
   return (
     <>
       <Modal
@@ -178,7 +222,29 @@ const CardSymbolPage = (): JSX.Element | null => {
       >
         {modalCardComponent}
       </Modal>
-      <Layout>{mainCardComponent}</Layout>
+      <Layout
+        buttonRight={
+          <>
+            {mainDoc?.doc?.cardCopy && (
+              <div className="inline-block z-20">
+                <HeaderCardEmojis cardId={mainDoc.doc.cardCopy.id} />
+              </div>
+            )}
+            <button
+              className="btn-reset-style p-1 hover:bg-gray-100 rounded"
+              onClick={() => {
+                if (mainDoc?.doc) {
+                  workspace.save(mainDoc.doc)
+                }
+              }}
+            >
+              <span className="material-icons-outlined text-xl leading-none text-gray-500">save</span>
+            </button>
+          </>
+        }
+      >
+        {mainCardComponent}
+      </Layout>
       <DiscussModal />
     </>
   )

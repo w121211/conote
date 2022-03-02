@@ -1,7 +1,7 @@
 import moment from 'moment'
 import React, { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
-import { useDiscussPostsQuery } from '../../apollo/query.graphql'
+import { useDiscussPostsQuery, useMeQuery } from '../../apollo/query.graphql'
 import DiscussPostEmojis from './discuss-post-emojis'
 
 const dummyData = [
@@ -13,6 +13,7 @@ const dummyData = [
 ]
 
 const DiscussBody = ({ discussId }: { discussId: string }) => {
+  const { data: meData } = useMeQuery()
   const { data, loading } = useDiscussPostsQuery({ variables: { discussId } })
 
   if (loading) {
@@ -30,16 +31,18 @@ const DiscussBody = ({ discussId }: { discussId: string }) => {
           >
             <span className="material-icons mr-2 text-xl sm:text-3xl leading-none text-gray-300">account_circle</span>
             <div className="flex-grow">
-              <div className=" flex items-center justify-between ">
+              <div className=" flex justify-between ">
                 <div className="flex-shrink min-w-0 inline-flex flex-col truncate">
                   <span className="inline-block min-w-0  text-gray-800 font-medium truncate">{post.userId}</span>
                   <span className="inline-block   text-gray-400 text-xs">
                     {moment(post.createdAt).subtract(10, 'days').calendar()}
                   </span>
                 </div>
-                <span className=" inline-block right-0">
-                  <DiscussPostEmojis discussPostId={post.id} />
-                </span>
+                {meData?.me.id !== post.userId && (
+                  <span className=" inline-block right-0">
+                    <DiscussPostEmojis discussPostId={post.id} />
+                  </span>
+                )}
               </div>
               <div className=" pr-2 py-2 whitespace-pre-wrap [word-break:break-word] text-gray-800">{post.content}</div>
             </div>
