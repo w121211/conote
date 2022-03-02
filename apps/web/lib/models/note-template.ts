@@ -1,4 +1,4 @@
-export type CardTemplateProps = {
+export type NoteTemplateProps = {
   symbol: string
   template: string
   title: string

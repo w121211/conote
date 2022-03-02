@@ -1,21 +1,21 @@
-import { CardState } from '@prisma/client'
+import { NoteState } from '@prisma/client'
 import { NodeChange, TreeNode } from '@conote/docdiff'
 import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
 
-export type CardStateBody = {
+export type NoteStateBody = {
   prevStateId: string | null // initial state
   changes: NodeChange<Bullet>[]
   value: TreeNode<Bullet>[]
   // sourceCardId: string | null
-  fromCardId?: string // doc is created from which during editing, not strong binding
+  fromNoteId?: string // doc is created from which during editing, not strong binding
 }
 
-export type CardStateParsed = Omit<CardState, 'body'> & {
-  body: CardStateBody
+export type NoteStateParsed = Omit<NoteState, 'body'> & {
+  body: NoteStateBody
 }
 
-export const CardStateModel = {
+export const NoteStateModel = {
   _encodeBody() {
     throw 'Not implemented'
   },
@@ -24,26 +24,26 @@ export const CardStateModel = {
     throw 'Not implemented'
   },
 
-  async get(id: string): Promise<CardStateParsed | null> {
-    const state = await prisma.cardState.findFirst({
+  async get(id: string): Promise<NoteStateParsed | null> {
+    const state = await prisma.noteState.findFirst({
       where: { id },
     })
     return state ? this.parse(state) : null
   },
 
-  async getLastCardState(cardId: string): Promise<CardStateParsed | null> {
-    const state = await prisma.cardState.findFirst({
-      where: { cardId },
+  async getLastNoteState(noteId: string): Promise<NoteStateParsed | null> {
+    const state = await prisma.noteState.findFirst({
+      where: { noteId },
       orderBy: { createdAt: 'desc' },
     })
     return state ? this.parse(state) : null
   },
 
-  parse(state: CardState): CardStateParsed {
+  parse(state: NoteState): NoteStateParsed {
     // TODO: validation require
     return {
       ...state,
-      body: state.body as unknown as CardStateBody,
+      body: state.body as unknown as NoteStateBody,
     }
   },
 }

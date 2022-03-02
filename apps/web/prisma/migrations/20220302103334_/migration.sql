@@ -14,7 +14,7 @@ CREATE TYPE "PollStatus" AS ENUM ('OPEN', 'JUDGE', 'CLOSE_SUCCESS', 'CLOSE_FAIL'
 CREATE TYPE "PollType" AS ENUM ('FIXED', 'ADD', 'ADD_BY_POST');
 
 -- CreateEnum
-CREATE TYPE "ShotChoice" AS ENUM ('LONG', 'SHORT', 'HOLD');
+CREATE TYPE "RateChoice" AS ENUM ('LONG', 'SHORT', 'HOLD');
 
 -- CreateEnum
 CREATE TYPE "SymType" AS ENUM ('TICKER', 'TOPIC', 'URL');
@@ -23,7 +23,7 @@ CREATE TYPE "SymType" AS ENUM ('TICKER', 'TOPIC', 'URL');
 CREATE TABLE "Author" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "meta" JSONB NOT NULL DEFAULT E'{}',
+    "meta" JSONB NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -81,7 +81,7 @@ CREATE TABLE "Card" (
     "id" TEXT NOT NULL,
     "symId" TEXT NOT NULL,
     "linkId" TEXT,
-    "meta" JSONB NOT NULL DEFAULT E'{}',
+    "meta" JSONB NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -153,7 +153,7 @@ CREATE TABLE "Link" (
     "id" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "domain" TEXT NOT NULL,
-    "scraped" JSONB NOT NULL DEFAULT E'{}',
+    "scraped" JSONB NOT NULL DEFAULT '{}',
     "authorId" TEXT,
 
     CONSTRAINT "Link_pkey" PRIMARY KEY ("id")
@@ -165,7 +165,7 @@ CREATE TABLE "Poll" (
     "userId" TEXT NOT NULL,
     "type" "PollType" NOT NULL DEFAULT E'FIXED',
     "status" "PollStatus" NOT NULL DEFAULT E'OPEN',
-    "meta" JSONB NOT NULL DEFAULT E'{}',
+    "meta" JSONB NOT NULL DEFAULT '{}',
     "choices" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -186,18 +186,18 @@ CREATE TABLE "PollCount" (
 );
 
 -- CreateTable
-CREATE TABLE "Shot" (
+CREATE TABLE "Rate" (
     "id" TEXT NOT NULL,
     "linkId" TEXT,
     "userId" TEXT NOT NULL,
     "authorId" TEXT,
     "symId" TEXT NOT NULL,
-    "choice" "ShotChoice" NOT NULL,
-    "body" JSONB NOT NULL DEFAULT E'{}',
+    "choice" "RateChoice" NOT NULL,
+    "body" JSONB NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Shot_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Rate_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -283,16 +283,16 @@ ALTER TABLE "BulletEmoji" ADD CONSTRAINT "BulletEmoji_bulletId_fkey" FOREIGN KEY
 ALTER TABLE "BulletEmojiCount" ADD CONSTRAINT "BulletEmojiCount_bulletEmojiId_fkey" FOREIGN KEY ("bulletEmojiId") REFERENCES "BulletEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BulletEmojiLike" ADD CONSTRAINT "BulletEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "BulletEmojiLike" ADD CONSTRAINT "BulletEmojiLike_bulletEmojiId_fkey" FOREIGN KEY ("bulletEmojiId") REFERENCES "BulletEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Card" ADD CONSTRAINT "Card_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BulletEmojiLike" ADD CONSTRAINT "BulletEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Card" ADD CONSTRAINT "Card_linkId_fkey" FOREIGN KEY ("linkId") REFERENCES "Link"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Card" ADD CONSTRAINT "Card_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CardEmoji" ADD CONSTRAINT "CardEmoji_cardId_fkey" FOREIGN KEY ("cardId") REFERENCES "Card"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -301,22 +301,22 @@ ALTER TABLE "CardEmoji" ADD CONSTRAINT "CardEmoji_cardId_fkey" FOREIGN KEY ("car
 ALTER TABLE "CardEmojiCount" ADD CONSTRAINT "CardEmojiCount_cardEmojiId_fkey" FOREIGN KEY ("cardEmojiId") REFERENCES "CardEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CardEmojiLike" ADD CONSTRAINT "CardEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "CardEmojiLike" ADD CONSTRAINT "CardEmojiLike_cardEmojiId_fkey" FOREIGN KEY ("cardEmojiId") REFERENCES "CardEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "CardEmojiLike" ADD CONSTRAINT "CardEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "CardState" ADD CONSTRAINT "CardState_cardId_fkey" FOREIGN KEY ("cardId") REFERENCES "Card"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CardState" ADD CONSTRAINT "CardState_prevId_fkey" FOREIGN KEY ("prevId") REFERENCES "CardState"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CardState" ADD CONSTRAINT "CardState_commitId_fkey" FOREIGN KEY ("commitId") REFERENCES "Commit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CardState" ADD CONSTRAINT "CardState_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "CardState" ADD CONSTRAINT "CardState_prevId_fkey" FOREIGN KEY ("prevId") REFERENCES "CardState"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Commit" ADD CONSTRAINT "Commit_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -331,19 +331,19 @@ ALTER TABLE "Poll" ADD CONSTRAINT "Poll_userId_fkey" FOREIGN KEY ("userId") REFE
 ALTER TABLE "PollCount" ADD CONSTRAINT "PollCount_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Shot" ADD CONSTRAINT "Shot_linkId_fkey" FOREIGN KEY ("linkId") REFERENCES "Link"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Rate" ADD CONSTRAINT "Rate_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Author"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Shot" ADD CONSTRAINT "Shot_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Rate" ADD CONSTRAINT "Rate_linkId_fkey" FOREIGN KEY ("linkId") REFERENCES "Link"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Shot" ADD CONSTRAINT "Shot_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Author"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Rate" ADD CONSTRAINT "Rate_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Shot" ADD CONSTRAINT "Shot_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Vote" ADD CONSTRAINT "Vote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Rate" ADD CONSTRAINT "Rate_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Vote" ADD CONSTRAINT "Vote_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Vote" ADD CONSTRAINT "Vote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

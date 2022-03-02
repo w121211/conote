@@ -12,16 +12,18 @@ type Query {
   # all emojis of a bullet
   bulletEmojis(bulletId: ID!): [BulletEmoji!]!
 
-  # search by id, symbol, or url, if id or symbol not found return nulll, if url not found will try to fetch and create a new card
-  card(id: ID, symbol: String, url: String): Card
+  # search by id, symbol, or url, if id or symbol not found return nulll, if url not found will try to fetch and create a new note
+  note(id: ID, symbol: String, url: String): Note
+
+  # notesByAuthor(authorId: ID!): [Note!]!
 
   # if not found return null
-  cardState(id: ID!): CardState
+  noteState(id: ID!): NoteState
 
-  cardEmojis(cardId: ID!): [CardEmoji!]!
+  noteEmojis(noteId: ID!): [NoteEmoji!]!
 
-  # latest card digests
-  cardDigests(afterCommitId: String): [CardDigest!]!
+  # latest note digests
+  noteDigests(afterCommitId: String): [NoteDigest!]!
 
   discuss(id: ID!): Discuss
 
@@ -37,7 +39,7 @@ type Query {
 
   myBulletEmojiLike(bulletEmojiId: ID!): BulletEmojiLike
 
-  myCardEmojiLike(cardEmojiId: ID!): CardEmojiLike
+  myNoteEmojiLike(noteEmojiId: ID!): NoteEmojiLike
 
   myDiscussEmojiLike(discussEmojiId: ID!): DiscussEmojiLike
 
@@ -60,11 +62,13 @@ type Query {
 
   rate(id: ID!): Rate
 
+  # rates(authorId: ID!): [Rate!]!
+
   ratesByAuthor(authorId: ID!, symId: ID!): [Rate!]!
 
   ratesBySource(linkId: ID!): [Rate!]!
 
-  # 以 card symbol 找該 card 所有的 active hashtags
+  # 以 note symbol 找該 note 所有的 active hashtags
   # hashtags(symbol: String!): [Hashtag!]
 
   # myVotes(after: String): [Vote!]!
@@ -74,15 +78,15 @@ type Query {
   # board(id: ID!): Board!
   # comments(boardId: ID!, afterId: ID): [Comment!]!
 
-  # 以下card目前暫不考慮
-  # selfcard(id: ID!): Selfcard
-  # mycard(symbolName: String!): Selfcard
+  # 以下note目前暫不考慮
+  # selfnote(id: ID!): Selfnote
+  # mynote(symbolName: String!): Selfnote
 
   # 專用於顯示
   # topComments(blockId: ID!, afterId: ID): [CommentWithReplies!]!
 
   # 所有的comments（含spot），幫助cache，僅含spotReplies
-  # comments(cardId: ID!, afterId: ID): [Comment!]!
+  # comments(noteId: ID!, afterId: ID): [Comment!]!
 
   # 用於filter comments的情形（例如：/q, /stage, ...)
   # commentsBySymbol(pageTitle: String!, symbol: String!, afterId: ID): [Comment!]!
@@ -148,21 +152,21 @@ type Mutation {
   # create or update an emoji-up
   upsertBulletEmojiLike(bulletEmojiId: ID!, data: LikeInput!): UpsertBulletEmojiLikeResponse!
 
-  createCardEmoji(cardId: ID!, code: EmojiCode!): CreateCardEmojiResponse!
-  upsertCardEmojiLike(cardEmojiId: ID!, data: LikeInput!): UpsertCardEmojiLikeResponse!
+  createNoteEmoji(noteId: ID!, code: EmojiCode!): CreateNoteEmojiResponse!
+  upsertNoteEmojiLike(noteEmojiId: ID!, data: LikeInput!): UpsertNoteEmojiLikeResponse!
 
-  # if newSymbol is given, will also update card symbol
+  # if newSymbol is given, will also update note symbol
   # @throw validation error
-  updateCardMeta(cardId: ID!, data: CardMetaInput!, newSymbol: String): Card!
+  updateNoteMeta(noteId: ID!, data: NoteMetaInput!, newSymbol: String): Note!
 
   # @throw validation error
   createCommit(data: CommitInput!): Commit!
 
-  # optional cardId for connecting discuss with note
-  createDiscuss(cardId: ID, data: DiscussInput!): Discuss!
+  # optional noteId for connecting discuss with note
+  createDiscuss(noteId: ID, data: DiscussInput!): Discuss!
   updateDiscuss(id: ID!, data: DiscussInput!): Discuss!
 
-  connectDiscussToCard(discussId: ID!, cardId: ID!, disconnect: Boolean): Boolean!
+  connectDiscussToNote(discussId: ID!, noteId: ID!, disconnect: Boolean): Boolean!
 
   createDiscussEmoji(discussId: ID!, code: EmojiCode!): CreateDiscussEmojiResponse!
   upsertDiscussEmojiLike(discussEmojiId: ID!, liked: Boolean!): UpsertDiscussEmojiLikeResponse!
@@ -260,7 +264,7 @@ type AuthorMetaSite {
 
 type Bullet {
   id: ID!
-  # cardId: String!
+  # noteId: String!
   # createdAt: DateTime!
   # updatedAt: DateTime!
 }
@@ -302,39 +306,39 @@ type BulletEmojiLike {
 #   children: BulletTreeNode
 # }
 
-type Card {
+type Note {
   id: ID!
-  meta: CardMeta!
+  meta: NoteMeta!
   sym: Sym!
   link: Link
-  state: CardState # 可能為 null
+  state: NoteState # 可能為 null
   updatedAt: DateTime!
 }
 
-type CardEmoji {
+type NoteEmoji {
   id: ID!
   code: EmojiCode!
-  count: CardEmojiCount!
+  count: NoteEmojiCount!
 }
 
-type CardEmojiCount {
+type NoteEmojiCount {
   id: ID!
   nUps: Int!
   nDowns: Int!
 }
 
-type CardEmojiLike {
+type NoteEmojiLike {
   id: ID!
-  cardEmojiId: String!
+  noteEmojiId: String!
   choice: LikeChoice!
   updatedAt: DateTime!
 }
 
-type CardDigest {
+type NoteDigest {
   commitId: String!
-  cardId: String!
-  cardMeta: CardMeta! # includes title
-  fromCardId: String
+  noteId: String!
+  noteMeta: NoteMeta! # includes title
+  fromNoteId: String
   sym: Sym!
   subSyms: [Sym!]!
   # title: String!
@@ -343,7 +347,7 @@ type CardDigest {
   updatedAt: DateTime!
 }
 
-type CardMeta {
+type NoteMeta {
   author: String
   # // description?: string
   duplicates: [String!]
@@ -357,31 +361,31 @@ type CardMeta {
   url: String
 }
 
-type CardState {
+type NoteState {
   id: ID!
-  cardId: String!
+  noteId: String!
   userId: String!
   commitId: String!
   prevId: String
-  body: CardStateBody!
+  body: NoteStateBody!
   updatedAt: DateTime!
 }
 
-type CardStateBody {
+type NoteStateBody {
   prevStateId: String
-  sourceCardId: String
+  sourceNoteId: String
   # changes: [BulletNodeChange!]!
   # value: [BulletTreeNode!]!
   changes: JSON!
   value: JSON!
-  # symbolToCardId: JSON!
-  # a symbol-cardId map, so later the cahnge of symbol name won't affect
+  # symbolToNoteId: JSON!
+  # a symbol-noteId map, so later the cahnge of symbol name won't affect
 }
 
 type Commit {
   id: String!
   userId: String!
-  cardStates: [CardState!]!
+  noteStates: [NoteState!]!
   updatedAt: DateTime!
   stateIdToCidDictEntryArray: [DictEntryArray!]! # for client to match committed docs
 }
@@ -558,14 +562,14 @@ type UpsertBulletEmojiLikeResponse {
   count: BulletEmojiCount!
 }
 
-type CreateCardEmojiResponse {
-  emoji: CardEmoji!
-  like: CardEmojiLike!
+type CreateNoteEmojiResponse {
+  emoji: NoteEmoji!
+  like: NoteEmojiLike!
 }
 
-type UpsertCardEmojiLikeResponse {
-  like: CardEmojiLike!
-  count: CardEmojiCount!
+type UpsertNoteEmojiLikeResponse {
+  like: NoteEmojiLike!
+  count: NoteEmojiCount!
 }
 
 type CreateDiscussEmojiResponse {
@@ -653,7 +657,7 @@ type UpsertDiscussPostEmojiLikeResponse {
 #  id: ID!
 #  userId: String!
 #  bulletId: Int
-#  cardId: Int
+#  noteId: Int
 #  status: BoardStatus!
 #  hashtag: String!
 #  meta: String! # json
@@ -679,13 +683,13 @@ input AuthorMetaSiteInput {
   url: String!
 }
 
-input CardInput {
+input NoteInput {
   symbol: String!
-  # templateProps: CardTemplatePropsInput
-  meta: CardMetaInput
+  # templateProps: NoteTemplatePropsInput
+  meta: NoteMetaInput
 }
 
-input CardMetaInput {
+input NoteMetaInput {
   author: String
   # // description?: string
   duplicates: [String!]
@@ -699,18 +703,18 @@ input CardMetaInput {
   # url: String
 }
 
-input CardStateInput {
+input NoteStateInput {
   cid: String!
   fromDocCid: String # for doc-index tree
-  cardInput: CardInput # for creating card or update card-meta
-  cardId: String
+  noteInput: NoteInput # for creating note or update note-meta
+  noteId: String
   prevStateId: String
   changes: JSON!
   value: JSON! # for comparing changes
 }
 
 input CommitInput {
-  cardStateInputs: [CardStateInput!]!
+  noteStateInputs: [NoteStateInput!]!
 }
 
 input DiscussInput {
@@ -734,7 +738,7 @@ input PollInput {
 
 input RateInput {
   choice: RateChoice!
-  targetId: ID! # target card id
+  targetId: ID! # target note id
   authorId: ID # create author rate required
   linkId: ID # create author rate required
 }
@@ -819,7 +823,7 @@ enum AuthorType {
   PERSON
 }
 
-enum CardStatus {
+enum NoteStatus {
   ACTIVE
   ARCHIVE
   REDIRECT

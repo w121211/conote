@@ -1,7 +1,19 @@
 /*
   Warnings:
 
-  - The values [DOWN] on the enum `LikeChoice` will be removed. If these variants are still used in the database, this will fail.
+  - You are about to drop the column `cardStateId` on the `Bullet` table. All the data in the column will be lost.
+  - You are about to drop the column `cardId` on the `NoteEmoji` table. All the data in the column will be lost.
+  - You are about to drop the column `cardEmojiId` on the `NoteEmojiCount` table. All the data in the column will be lost.
+  - You are about to drop the column `cardEmojiId` on the `NoteEmojiLike` table. All the data in the column will be lost.
+  - You are about to drop the column `cardId` on the `NoteState` table. All the data in the column will be lost.
+  - A unique constraint covering the columns `[noteId,code]` on the table `NoteEmoji` will be added. If there are existing duplicate values, this will fail.
+  - A unique constraint covering the columns `[noteEmojiId]` on the table `NoteEmojiCount` will be added. If there are existing duplicate values, this will fail.
+  - A unique constraint covering the columns `[userId,noteEmojiId]` on the table `NoteEmojiLike` will be added. If there are existing duplicate values, this will fail.
+  - Added the required column `noteStateId` to the `Bullet` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `noteId` to the `NoteEmoji` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `noteEmojiId` to the `NoteEmojiCount` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `noteEmojiId` to the `NoteEmojiLike` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `noteId` to the `NoteState` table without a default value. This is not possible if the table is not empty.
 
 */
 -- CreateEnum
@@ -10,15 +22,49 @@ CREATE TYPE "DiscussStatus" AS ENUM ('ACTIVE', 'LOCK', 'DELETE', 'ARCHIVE', 'REP
 -- CreateEnum
 CREATE TYPE "DiscussPostStatus" AS ENUM ('ACTIVE', 'LOCK', 'DELETE', 'ARCHIVE', 'REPORTED');
 
--- AlterEnum
-BEGIN;
-CREATE TYPE "LikeChoice_new" AS ENUM ('UP', 'NEUTRAL');
-ALTER TABLE "BulletEmojiLike" ALTER COLUMN "choice" TYPE "LikeChoice_new" USING ("choice"::text::"LikeChoice_new");
-ALTER TABLE "CardEmojiLike" ALTER COLUMN "choice" TYPE "LikeChoice_new" USING ("choice"::text::"LikeChoice_new");
-ALTER TYPE "LikeChoice" RENAME TO "LikeChoice_old";
-ALTER TYPE "LikeChoice_new" RENAME TO "LikeChoice";
-DROP TYPE "LikeChoice_old";
-COMMIT;
+-- DropForeignKey
+ALTER TABLE "Bullet" DROP CONSTRAINT "Bullet_cardStateId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "NoteEmoji" DROP CONSTRAINT "NoteEmoji_cardId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "NoteEmojiCount" DROP CONSTRAINT "NoteEmojiCount_cardEmojiId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "NoteEmojiLike" DROP CONSTRAINT "NoteEmojiLike_cardEmojiId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "NoteState" DROP CONSTRAINT "NoteState_cardId_fkey";
+
+-- DropIndex
+DROP INDEX "NoteEmoji_cardId_code_key";
+
+-- DropIndex
+DROP INDEX "NoteEmojiCount_cardEmojiId_key";
+
+-- DropIndex
+DROP INDEX "NoteEmojiLike_userId_cardEmojiId_key";
+
+-- AlterTable
+ALTER TABLE "Bullet" DROP COLUMN "cardStateId",
+ADD COLUMN     "noteStateId" TEXT NOT NULL;
+
+-- AlterTable
+ALTER TABLE "NoteEmoji" DROP COLUMN "cardId",
+ADD COLUMN     "noteId" TEXT NOT NULL;
+
+-- AlterTable
+ALTER TABLE "NoteEmojiCount" DROP COLUMN "cardEmojiId",
+ADD COLUMN     "noteEmojiId" TEXT NOT NULL;
+
+-- AlterTable
+ALTER TABLE "NoteEmojiLike" DROP COLUMN "cardEmojiId",
+ADD COLUMN     "noteEmojiId" TEXT NOT NULL;
+
+-- AlterTable
+ALTER TABLE "NoteState" DROP COLUMN "cardId",
+ADD COLUMN     "noteId" TEXT NOT NULL;
 
 -- CreateTable
 CREATE TABLE "Discuss" (
@@ -50,7 +96,7 @@ CREATE TABLE "DiscussEmoji" (
     "id" SERIAL NOT NULL,
     "discussId" TEXT NOT NULL,
     "code" "EmojiCode" NOT NULL,
-    "nLikes" INTEGER NOT NULL DEFAULT 0,
+    "nUps" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -98,7 +144,7 @@ CREATE TABLE "DiscussPostEmoji" (
     "id" SERIAL NOT NULL,
     "discussPostId" INTEGER NOT NULL,
     "code" "EmojiCode" NOT NULL,
-    "nLikes" INTEGER NOT NULL DEFAULT 0,
+    "nUps" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -129,7 +175,7 @@ CREATE TABLE "DiscussPostEmojiLike" (
 );
 
 -- CreateTable
-CREATE TABLE "_CardToDiscuss" (
+CREATE TABLE "_DiscussToNote" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
 );
@@ -162,10 +208,22 @@ CREATE UNIQUE INDEX "DiscussPostEmojiLike_discussPostEmojiId_key" ON "DiscussPos
 CREATE UNIQUE INDEX "DiscussPostEmojiLike_userId_discussPostEmojiId_key" ON "DiscussPostEmojiLike"("userId", "discussPostEmojiId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_CardToDiscuss_AB_unique" ON "_CardToDiscuss"("A", "B");
+CREATE UNIQUE INDEX "_DiscussToNote_AB_unique" ON "_DiscussToNote"("A", "B");
 
 -- CreateIndex
-CREATE INDEX "_CardToDiscuss_B_index" ON "_CardToDiscuss"("B");
+CREATE INDEX "_DiscussToNote_B_index" ON "_DiscussToNote"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "NoteEmoji_noteId_code_key" ON "NoteEmoji"("noteId", "code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "NoteEmojiCount_noteEmojiId_key" ON "NoteEmojiCount"("noteEmojiId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "NoteEmojiLike_userId_noteEmojiId_key" ON "NoteEmojiLike"("userId", "noteEmojiId");
+
+-- AddForeignKey
+ALTER TABLE "Bullet" ADD CONSTRAINT "Bullet_noteStateId_fkey" FOREIGN KEY ("noteStateId") REFERENCES "NoteState"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Discuss" ADD CONSTRAINT "Discuss_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -180,16 +238,16 @@ ALTER TABLE "DiscussEmoji" ADD CONSTRAINT "DiscussEmoji_discussId_fkey" FOREIGN 
 ALTER TABLE "DiscussEmojiCount" ADD CONSTRAINT "DiscussEmojiCount_discussEmojiId_fkey" FOREIGN KEY ("discussEmojiId") REFERENCES "DiscussEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DiscussEmojiLike" ADD CONSTRAINT "DiscussEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "DiscussEmojiLike" ADD CONSTRAINT "DiscussEmojiLike_discussEmojiId_fkey" FOREIGN KEY ("discussEmojiId") REFERENCES "DiscussEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DiscussPost" ADD CONSTRAINT "DiscussPost_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "DiscussEmojiLike" ADD CONSTRAINT "DiscussEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "DiscussPost" ADD CONSTRAINT "DiscussPost_discussId_fkey" FOREIGN KEY ("discussId") REFERENCES "Discuss"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DiscussPost" ADD CONSTRAINT "DiscussPost_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "DiscussPostEmoji" ADD CONSTRAINT "DiscussPostEmoji_discussPostId_fkey" FOREIGN KEY ("discussPostId") REFERENCES "DiscussPost"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -198,13 +256,25 @@ ALTER TABLE "DiscussPostEmoji" ADD CONSTRAINT "DiscussPostEmoji_discussPostId_fk
 ALTER TABLE "DiscussPostEmojiCount" ADD CONSTRAINT "DiscussPostEmojiCount_discussPostEmojiId_fkey" FOREIGN KEY ("discussPostEmojiId") REFERENCES "DiscussPostEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DiscussPostEmojiLike" ADD CONSTRAINT "DiscussPostEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "DiscussPostEmojiLike" ADD CONSTRAINT "DiscussPostEmojiLike_discussPostEmojiId_fkey" FOREIGN KEY ("discussPostEmojiId") REFERENCES "DiscussPostEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_CardToDiscuss" ADD FOREIGN KEY ("A") REFERENCES "Card"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DiscussPostEmojiLike" ADD CONSTRAINT "DiscussPostEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_CardToDiscuss" ADD FOREIGN KEY ("B") REFERENCES "Discuss"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "NoteEmoji" ADD CONSTRAINT "NoteEmoji_noteId_fkey" FOREIGN KEY ("noteId") REFERENCES "Note"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "NoteEmojiCount" ADD CONSTRAINT "NoteEmojiCount_noteEmojiId_fkey" FOREIGN KEY ("noteEmojiId") REFERENCES "NoteEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "NoteEmojiLike" ADD CONSTRAINT "NoteEmojiLike_noteEmojiId_fkey" FOREIGN KEY ("noteEmojiId") REFERENCES "NoteEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "NoteState" ADD CONSTRAINT "NoteState_noteId_fkey" FOREIGN KEY ("noteId") REFERENCES "Note"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_DiscussToNote" ADD FOREIGN KEY ("A") REFERENCES "Discuss"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_DiscussToNote" ADD FOREIGN KEY ("B") REFERENCES "Note"("id") ON DELETE CASCADE ON UPDATE CASCADE;

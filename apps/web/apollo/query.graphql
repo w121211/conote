@@ -15,7 +15,7 @@ fragment author on Author {
 
 fragment bullet on Bullet {
   id
-  # cardStateId
+  # noteStateId
   # createdAt
   # updatedAt
 }
@@ -55,17 +55,17 @@ fragment bulletEmojiLike on BulletEmojiLike {
 #   }
 # }
 
-fragment card on Card {
+fragment note on Note {
   __typename
   id
   link {
     ...link
   }
   meta {
-    ...cardMeta
+    ...noteMeta
   }
   state {
-    ...cardState
+    ...noteState
   }
   sym {
     ...sym
@@ -73,14 +73,14 @@ fragment card on Card {
   updatedAt
 }
 
-fragment cardDigest on CardDigest {
+fragment noteDigest on NoteDigest {
   __typename
   commitId
-  cardId
-  cardMeta {
-    ...cardMeta
+  noteId
+  noteMeta {
+    ...noteMeta
   }
-  fromCardId
+  fromNoteId
   sym {
     ...sym
   }
@@ -91,30 +91,30 @@ fragment cardDigest on CardDigest {
   updatedAt
 }
 
-fragment cardEmoji on CardEmoji {
+fragment noteEmoji on NoteEmoji {
   __typename
   id
   code
   count {
-    ...cardEmojiCount
+    ...noteEmojiCount
   }
 }
 
-fragment cardEmojiCount on CardEmojiCount {
+fragment noteEmojiCount on NoteEmojiCount {
   __typename
   id
   nUps
 }
 
-fragment cardEmojiLike on CardEmojiLike {
+fragment noteEmojiLike on NoteEmojiLike {
   __typename
   id
-  cardEmojiId
+  noteEmojiId
   choice
   updatedAt
 }
 
-fragment cardMeta on CardMeta {
+fragment noteMeta on NoteMeta {
   __typename
   author
   duplicates
@@ -126,16 +126,16 @@ fragment cardMeta on CardMeta {
   url
 }
 
-fragment cardState on CardState {
+fragment noteState on NoteState {
   __typename
   id
-  cardId
+  noteId
   userId
   commitId
   prevId
   body {
     prevStateId
-    sourceCardId
+    sourceNoteId
     changes
     value
   }
@@ -147,8 +147,8 @@ fragment commit on Commit {
   id
   userId
   updatedAt
-  cardStates {
-    ...cardState
+  noteStates {
+    ...noteState
   }
   stateIdToCidDictEntryArray {
     k
@@ -351,7 +351,7 @@ fragment vote on Vote {
 #   id
 #   userId
 #   bulletId
-#   cardId
+#   noteId
 #   status
 #   hashtag
 #   meta
@@ -366,7 +366,7 @@ fragment vote on Vote {
 #   updatedAt
 # }
 
-# fragment cardHead on CardHead {
+# fragment noteHead on NoteHead {
 #   __typename
 #   id
 #   userId
@@ -375,7 +375,7 @@ fragment vote on Vote {
 #   prevId
 # }
 
-# fragment cardBody on CardBody {
+# fragment noteBody on NoteBody {
 #   __typename
 #   id
 #   userId
@@ -402,27 +402,27 @@ query BulletEmojis($bulletId: ID!) {
   }
 }
 
-query Card($id: ID, $symbol: String, $url: String) {
-  card(id: $id, symbol: $symbol, url: $url) {
-    ...card
+query Note($id: ID, $symbol: String, $url: String) {
+  note(id: $id, symbol: $symbol, url: $url) {
+    ...note
   }
 }
 
-query CardEmojis($cardId: ID!) {
-  cardEmojis(cardId: $cardId) {
-    ...cardEmoji
+query NoteEmojis($noteId: ID!) {
+  noteEmojis(noteId: $noteId) {
+    ...noteEmoji
   }
 }
 
-# query CardMeta($symbol: String!) {
-#   cardMeta(symbol: $symbol) {
-#     ...cardMeta
+# query NoteMeta($symbol: String!) {
+#   noteMeta(symbol: $symbol) {
+#     ...noteMeta
 #   }
 # }
 
-query CardDigests($afterCommitId: String) {
-  cardDigests(afterCommitId: $afterCommitId) {
-    ...cardDigest
+query NoteDigests($afterCommitId: String) {
+  noteDigests(afterCommitId: $afterCommitId) {
+    ...noteDigest
   }
 }
 
@@ -480,9 +480,9 @@ query MyBulletEmojiLike($bulletEmojiId: ID!) {
   }
 }
 
-query MyCardEmojiLike($cardEmojiId: ID!) {
-  myCardEmojiLike(cardEmojiId: $cardEmojiId) {
-    ...cardEmojiLike
+query MyNoteEmojiLike($noteEmojiId: ID!) {
+  myNoteEmojiLike(noteEmojiId: $noteEmojiId) {
+    ...noteEmojiLike
   }
 }
 
@@ -603,31 +603,31 @@ mutation UpsertBulletEmojiLike($bulletEmojiId: ID!, $data: LikeInput!) {
   }
 }
 
-mutation CreateCardEmoji($cardId: ID!, $code: EmojiCode!) {
-  createCardEmoji(cardId: $cardId, code: $code) {
+mutation CreateNoteEmoji($noteId: ID!, $code: EmojiCode!) {
+  createNoteEmoji(noteId: $noteId, code: $code) {
     emoji {
-      ...cardEmoji
+      ...noteEmoji
     }
     like {
-      ...cardEmojiLike
+      ...noteEmojiLike
     }
   }
 }
 
-mutation UpsertCardEmojiLike($cardEmojiId: ID!, $data: LikeInput!) {
-  upsertCardEmojiLike(cardEmojiId: $cardEmojiId, data: $data) {
+mutation UpsertNoteEmojiLike($noteEmojiId: ID!, $data: LikeInput!) {
+  upsertNoteEmojiLike(noteEmojiId: $noteEmojiId, data: $data) {
     like {
-      ...cardEmojiLike
+      ...noteEmojiLike
     }
     count {
-      ...cardEmojiCount
+      ...noteEmojiCount
     }
   }
 }
 
-mutation UpdateCardMeta($cardId: ID!, $data: CardMetaInput!, $newSymbol: String) {
-  updateCardMeta(cardId: $cardId, data: $data, newSymbol: $newSymbol) {
-    ...card
+mutation UpdateNoteMeta($noteId: ID!, $data: NoteMetaInput!, $newSymbol: String) {
+  updateNoteMeta(noteId: $noteId, data: $data, newSymbol: $newSymbol) {
+    ...note
   }
 }
 
@@ -637,8 +637,8 @@ mutation CreateCommit($data: CommitInput!) {
   }
 }
 
-mutation CreateDiscuss($cardId: ID, $data: DiscussInput!) {
-  createDiscuss(cardId: $cardId, data: $data) {
+mutation CreateDiscuss($noteId: ID, $data: DiscussInput!) {
+  createDiscuss(noteId: $noteId, data: $data) {
     ...discuss
   }
 }
@@ -649,8 +649,8 @@ mutation UpdateDiscuss($id: ID!, $data: DiscussInput!) {
   }
 }
 
-mutation ConnectDiscussToCard($discussId: ID!, $cardId: ID!, $disconnect: Boolean) {
-  connectDiscussToCard(discussId: $discussId, cardId: $cardId, disconnect: $disconnect)
+mutation ConnectDiscussToNote($discussId: ID!, $noteId: ID!, $disconnect: Boolean) {
+  connectDiscussToNote(discussId: $discussId, noteId: $noteId, disconnect: $disconnect)
 }
 
 mutation CreateDiscussEmoji($discussId: ID!, $code: EmojiCode!) {
@@ -825,8 +825,8 @@ mutation SessionLogout {
 #   signOut
 # }
 
-# mutation CreateCardBody($cardSymbol: String!, $data: CardBodyInput!) {
-#   createCardBody(cardSymbol: $cardSymbol, data: $data) {
-#     ...cardBody
+# mutation CreateNoteBody($noteSymbol: String!, $data: NoteBodyInput!) {
+#   createNoteBody(noteSymbol: $noteSymbol, data: $data) {
+#     ...noteBody
 #   }
 # }

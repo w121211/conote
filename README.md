@@ -146,6 +146,8 @@ docker exec -i 8ac632cf6317 sh -c "PGPASSWORD=postgrespassword pg_dump -U postgr
 kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > gke_conote_prisma_dump-$(date +%Y%m%d).tar
 ```
 
+Dump to CSV, JSON? Use dump & restore, then access pgadmin and export to csv, json.
+
 #### Restore
 
 ```sh
@@ -157,7 +159,9 @@ $(psql) CREATE DATABASE prisma;  # DROP DATABASE prisma;
 kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft --clean --if-exists < gke_conote_prisma_dump-$(date +%Y%m%d).tar
 
 # restore to local docker
-docker exec -i ${container_id} sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > gke_conote_prisma_dump-${date}.tar
+# - '-d postgres' means connect to database 'postgres' (otherwise will throw connection fail),
+#   the 'prisma' database will be created during running the restore-script
+docker exec -i ${container_id} sh -c "PGPASSWORD=postgrespassword pg_restore -C -d postgres -v -p 5432 -U postgresuser -Ft" < gke_conote_prisma_dump-${date}.tar
 ```
 
 Troubleshoots:
@@ -188,7 +192,7 @@ v-next
 - auth
   - improve login, logout stablility
 - user
-  - [prior] (req) user-page, include user's contributions, rates, interested fields
+  - [prior] (req) user-page, include user's notes, rates, interested fields
   - (?) anonymous user
 - link
   - try to exclude url search-params by comparing html page @ref
@@ -197,12 +201,11 @@ v-next
 - editor
   - inline-poll
   - inline filtertag `#filter-tag`
-  - [prior] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
+  - [prior@lisa] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
   - (?) root li without bullet icon?
-  - 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
+  - [working] 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
   - labels @eg #new-note #fisrt-commit
   - (req) show doc diff
-  - (?) add [[topic:heading]], eg [[人身保險:比較]]
   - (req) easy to reference sourc url -> eg copy url button, @url
   - (req) show keyword as hints (optional disable by setting)
   - (req) function panel, eg '/'
@@ -215,6 +218,7 @@ v-next
 - author
   - support author and its ogranization, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
 - note
+  - (?) add [[topic:heading]], eg [[人身保險:比較]]
   - (req) report, eg private page, @eg https://domains.google.com/registrar/konote.one/dns?_ga=2.252326218.217399875.1644890899-434669085.1641528541&ci=1
   - mentions in notes
   - redirect, eg $BA -> [[Boeing]]
@@ -237,11 +241,11 @@ v-next
 - DNS
   - http redirect to https
   - redirect konote.one to www.konote.one
-- nlp
+- [@hsuan] nlp
   - [v] greedy rate samples from cnyes news
   - training on greedy samples
-  - train ner -> entities, subj/obj
-  - train classifier -> rate (long, short, hold)
+    - train ner -> entities, subj/obj
+    - train classifier -> rate (long, short, hold)
 - give & take
   - share cards
   - credit
@@ -258,8 +262,11 @@ v-next
   - should keep user update record -> (?) allow update card-meta without commit note?
 - channel
   - (req) subdomain/channel, eg [[dev/Browser Extension]]
-  - design channel database schema
+  - [@hsuan] design channel database schema
   - switch commit to channel base, @eg @user/some_topic -> @all/some_topic
+- discuss
+  - action button for delete, edit, report
+- [@hsuan] invite code
 
 v0.2
 
@@ -270,8 +277,8 @@ v0.2
   - [v] gql create/update author
   - edit author meta (ie intro)
   - (ui) add @ mark on author
-  - author rates <- gql rates(author)
-  - author articles <- gql notes(author)
+  - [working] author rates <- gql rates by author
+  - [pending] author articles <- gql links by author <- similar to rates
 - /editor
   - parse url, eg https://arxiv.org/abs/2112.00114
   - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
@@ -283,7 +290,7 @@ v0.2
 - discuss `#a discussion topic here#` @eg https://github.com/prisma/prisma/discussions https://github.com/discourse/discourse/tree/main/app/models
   - [v] editor parser, inline element
   - [v] (bk) prisma model, graphql api, resolvers
-  - (ui) modal
+  - [v] (ui) modal
 - note
   - [prior@lisa] add note emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
 - note-digest
@@ -294,12 +301,12 @@ v0.2
   - [v] switch search discuss select to panel
   - search panel with keyboard support
 - browser extension
-  - [prior@lisa] (ui) remove scss
-  - detect page's keywords -> auto fill
+  - [v] (ui) remove scss
   - add inline-rate
   - [pending] deploy to chrome/firefox store -> require to fill tons of info
 - database
   - migrate table
+  - [working] script for couting words/notes of an user
 
 v0.1.1
 

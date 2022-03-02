@@ -1,26 +1,26 @@
 import { AuthenticationError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
-// import { getSession } from '@auth0/nextjs-auth0'
 import {
   BulletEmoji,
   BulletEmojiCount,
-  CardEmoji,
-  CardEmojiCount,
   DiscussEmoji,
   DiscussEmojiCount,
   DiscussPostEmoji,
   DiscussPostEmojiCount,
+  NoteEmoji,
+  NoteEmojiCount,
 } from '@prisma/client'
 import { QueryResolvers, MutationResolvers } from 'graphql-let/__generated__/__types__'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import fetcher from '../lib/fetcher/fetcher'
 import { hasCount, toStringId } from '../lib/helpers'
+import { AuthorModel } from '../lib/models/author-model'
 import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
-import { CardModel } from '../lib/models/card-model'
-import { CardDigestModel } from '../lib/models/card-digest-model'
-import { CardEmojiModel } from '../lib/models/card-emoji-model'
-import { CardStateModel } from '../lib/models/card-state-model'
 import { CommitModel } from '../lib/models/commit-model'
+import { NoteModel } from '../lib/models/note-model'
+import { NoteDigestModel } from '../lib/models/note-digest-model'
+import { NoteEmojiModel } from '../lib/models/note-emoji-model'
+import { NoteStateModel } from '../lib/models/note-state-model'
 import { PollMeta } from '../lib/models/poll-model'
 import { RateModel } from '../lib/models/rate-model'
 import { getOrCreateUser } from '../lib/models/user-model'
@@ -30,7 +30,6 @@ import { DiscussPostEmojiModel } from '../lib/models/discuss-post-emoji-model'
 import prisma from '../lib/prisma'
 import { SearchAuthorService, SearchDiscussService, SearchSymService } from '../lib/search/search'
 import { ResolverContext } from './apollo-client'
-import { AuthorModel } from '../lib/models/author-model'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -84,7 +83,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   async bulletEmojis(_parent, { bulletId }, _context, _info) {
     const emojis = (
       await prisma.bulletEmoji.findMany({
-        // where: { AND: [{ card: { symbol } }, { status: HashtagStatus.ACTIVE }] },
+        // where: { AND: [{ note: { symbol } }, { status: HashtagStatus.ACTIVE }] },
         where: { bulletId },
         include: { count: true },
       })
@@ -103,34 +102,34 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     })
   },
 
-  async card(_parent, { id, symbol, url }, _context, _info) {
+  async note(_parent, { id, symbol, url }, _context, _info) {
     if (id && symbol === undefined && url === undefined) {
-      return await CardModel.get(id)
+      return await NoteModel.get(id)
     }
     if (symbol && id === undefined && url === undefined) {
-      return await CardModel.getBySymbol(symbol)
+      return await NoteModel.getBySymbol(symbol)
     }
     if (url && id === undefined && symbol === undefined) {
-      return await CardModel.getOrCreateByUrl({ scraper: fetcher, url })
+      return await NoteModel.getOrCreateByUrl({ scraper: fetcher, url })
     }
     throw 'Param requires to be either id, symbol or url'
   },
 
-  async cardState(_parent, { id }, _context, _info) {
-    return await CardStateModel.get(id)
+  async noteState(_parent, { id }, _context, _info) {
+    return await NoteStateModel.get(id)
   },
 
-  async cardEmojis(_parent, { cardId }, _context, _info) {
+  async noteEmojis(_parent, { noteId }, _context, _info) {
     const emojis = (
-      await prisma.cardEmoji.findMany({
-        where: { cardId },
+      await prisma.noteEmoji.findMany({
+        where: { noteId },
         include: { count: true },
       })
     ).filter(
       (
         e,
-      ): e is CardEmoji & {
-        count: CardEmojiCount
+      ): e is NoteEmoji & {
+        count: NoteEmojiCount
       } => e.count !== null,
     )
     return emojis.map(e => {
@@ -141,21 +140,21 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     })
   },
 
-  // async cardMeta(_parent, { symbol }, _context, _info) {
-  //   const card = await prisma.card.findUnique({
+  // async noteMeta(_parent, { symbol }, _context, _info) {
+  //   const note = await prisma.note.findUnique({
   //     where: { symbol },
   //     include: { link: true },
   //   })
-  //   if (card === null) {
-  //     throw `Card ${symbol} not found`
+  //   if (note === null) {
+  //     throw `Note ${symbol} not found`
   //   }
-  //   return card.meta as unknown as CardMeta
-  //   // const meta: CardMeta = card.meta ? card.meta : {}
+  //   return note.meta as unknown as NoteMeta
+  //   // const meta: NoteMeta = note.meta ? note.meta : {}
   //   // return meta
   // },
 
-  async cardDigests(_parent, { afterCommitId }, _context, _info) {
-    return await CardDigestModel.getLatest(afterCommitId ?? undefined)
+  async noteDigests(_parent, { afterCommitId }, _context, _info) {
+    return await NoteDigestModel.getLatest(afterCommitId ?? undefined)
   },
 
   async discuss(_parent, { id }, _context, _info) {
@@ -259,11 +258,11 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return like ? toStringId(like) : null
   },
 
-  async myCardEmojiLike(_parent, { cardEmojiId }, { req }, _info) {
+  async myNoteEmojiLike(_parent, { noteEmojiId }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    const like = await prisma.cardEmojiLike.findUnique({
+    const like = await prisma.noteEmojiLike.findUnique({
       where: {
-        userId_cardEmojiId: { cardEmojiId, userId },
+        userId_noteEmojiId: { noteEmojiId, userId },
       },
     })
     return like ? toStringId(like) : null
@@ -634,9 +633,9 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async createCardEmoji(_parent, { cardId, code }, { req }, _info) {
+  async createNoteEmoji(_parent, { noteId, code }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    const { emoji, like } = await CardEmojiModel.create({ cardId, code, userId })
+    const { emoji, like } = await NoteEmojiModel.create({ noteId, code, userId })
     return {
       emoji: {
         ...emoji,
@@ -646,11 +645,11 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async upsertCardEmojiLike(_parent, { cardEmojiId, data }, { req }, _info) {
+  async upsertNoteEmojiLike(_parent, { noteEmojiId, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    const { like, count } = await CardEmojiModel.upsertLike({
+    const { like, count } = await NoteEmojiModel.upsertLike({
       choice: data.choice,
-      cardEmojiId,
+      noteEmojiId,
       userId,
     })
     return {
@@ -659,22 +658,22 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async updateCardMeta(_parent, { cardId, data, newSymbol }, { req }, _info) {
+  async updateNoteMeta(_parent, { noteId, data, newSymbol }, { req }, _info) {
     await isAuthenticated(req)
     if (newSymbol) {
-      await CardModel.udpateCardSymbol(cardId, newSymbol)
+      await NoteModel.udpateNoteSymbol(noteId, newSymbol)
     }
-    const card = await CardModel.udpateCardMeta(cardId, data)
-    return card
+    const note = await NoteModel.udpateNoteMeta(noteId, data)
+    return note
   },
 
-  async createDiscuss(_parent, { cardId, data }, { req }, _info) {
+  async createDiscuss(_parent, { noteId, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { title, content } = data
     const discuss = await prisma.discuss.create({
       data: {
         user: { connect: { id: userId } },
-        cards: cardId ? { connect: [{ id: cardId }] } : undefined,
+        notes: noteId ? { connect: [{ id: noteId }] } : undefined,
         meta: {},
         title,
         content,
@@ -721,19 +720,19 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     throw 'Not authorized, only author is allowed to update discuss'
   },
 
-  async connectDiscussToCard(_parent, { discussId, cardId, disconnect }, { req }, _info) {
+  async connectDiscussToNote(_parent, { discussId, noteId, disconnect }, { req }, _info) {
     await isAuthenticated(req)
     const discuss = disconnect
       ? await prisma.discuss.update({
           where: { id: discussId },
           data: {
-            cards: { disconnect: [{ id: cardId }] },
+            notes: { disconnect: [{ id: noteId }] },
           },
         })
       : await prisma.discuss.update({
           where: { id: discussId },
           data: {
-            cards: { connect: [{ id: cardId }] },
+            notes: { connect: [{ id: noteId }] },
           },
         })
     if (discuss) {
@@ -858,14 +857,14 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req)
     const { choice, targetId, authorId, linkId } = data
 
-    const card = await prisma.card.findUnique({
+    const note = await prisma.note.findUnique({
       where: { id: targetId },
       include: { sym: true },
     })
-    if (card === null) {
-      throw 'Target card not found'
+    if (note === null) {
+      throw 'Target note not found'
     }
-    return await RateModel.create({ choice, symbol: card.sym.symbol, userId, authorId, linkId })
+    return await RateModel.create({ choice, symbol: note.sym.symbol, userId, authorId, linkId })
   },
 
   async updateRate(_parent, { id, data }, { req }, _info) {
