@@ -11,6 +11,7 @@ const Modal = ({
   buttons,
   topRightBtn,
   mask,
+  topLeftBtn,
 }: {
   children: ReactNode
   visible: boolean
@@ -20,7 +21,14 @@ const Modal = ({
   const modalRoot = useContext(ModalContext)
   if (modalRoot && visible) {
     return createPortal(
-      <Popover hideBoard={onClose} subTitle={subTitle} buttons={buttons} topRightBtn={topRightBtn} mask={mask}>
+      <Popover
+        hideBoard={onClose}
+        subTitle={subTitle}
+        buttons={buttons}
+        topRightBtn={topRightBtn}
+        mask={mask}
+        topLeftBtn={topLeftBtn}
+      >
         {children}
       </Popover>,
       modalRoot,

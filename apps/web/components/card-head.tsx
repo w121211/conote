@@ -50,7 +50,7 @@ const CardHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         </div>
       </Modal>
 
-      <div className="mb-4">
+      <div className="mb-2">
         <div onMouseOver={onMouseOver} onMouseOut={onMouseOut} ref={hiddenDivRef}>
           <div className={`flex items-center gap-4 ${showHiddenDiv ? 'opacity-100' : 'opacity-0'}`}>
             <button

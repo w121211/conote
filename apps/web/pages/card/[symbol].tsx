@@ -197,12 +197,28 @@ const CardSymbolPage = (): JSX.Element | null => {
   return (
     <>
       <Modal
-        topRightBtn={
+        topLeftBtn={
           <Link href={{ pathname: '/card/[symbol]', query: { symbol: modalSymbol } }}>
-            <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
-              <span className="material-icons text-lg text-gray-500 hover:text-gray-700">open_in_full</span>
+            <a className="flex items-center">
+              <span className="material-icons text-lg leading-none text-gray-500 hover:text-gray-700">
+                open_in_full
+              </span>
             </a>
           </Link>
+        }
+        topRightBtn={
+          <div className="flex gap-1">
+            <button className="btn-reset-style">
+              <span className="material-icons-outlined text-lg leading-none text-gray-500 hover:text-gray-700">
+                category
+              </span>
+            </button>
+            <button className="btn-reset-style">
+              <span className="material-icons-round text-lg leading-none text-gray-500 hover:text-gray-700">
+                more_horiz
+              </span>
+            </button>
+          </div>
         }
         visible={modalSymbol !== null}
         onClose={async () => {

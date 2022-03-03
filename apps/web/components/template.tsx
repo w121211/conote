@@ -33,9 +33,19 @@ const TemplatePage = ({ doc }: { doc: Doc }) => {
   console.log(doc.editorValue)
 
   return (
-    <div>
-      <button onClick={() => setTemplate(true)}>使用模版頁面</button>
-      <button onClick={() => setTemplate(false)}>使用空白頁面</button>
+    <div className="inline-flex flex-col ml-9 gap-4">
+      <button
+        className="btn-reset-style px-3 py-2 rounded bg-gray-100  text-gray-500 hover:text-gray-800 hover:bg-gray-200"
+        onClick={() => setTemplate(true)}
+      >
+        使用模版頁面
+      </button>
+      <button
+        className="btn-reset-style px-3 py-2 rounded bg-gray-100  text-gray-500 hover:text-gray-800 hover:bg-gray-200"
+        onClick={() => setTemplate(false)}
+      >
+        使用空白頁面
+      </button>
     </div>
   )
 }
