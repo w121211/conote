@@ -25,7 +25,7 @@ export type Bullet = {
   // sourceCardId?: string
   // sourceLinkId?: string
 
-  symbols?: { cardId: string; str: string }[] // 在此 bullet 中所提到的 symbols，當 symbol 改名時，仍可以靠 id 修正成新名字
+  symbols?: { noteId: string; str: string }[] // 在此 bullet 中所提到的 symbols，當 symbol 改名時，仍可以靠 id 修正成新名字
 
   // placeholder?: string
   // freeze?: true // 無法變動
@@ -65,12 +65,12 @@ export type Bullet = {
 //   // emojis?: GQLHashtag[] // injected existing hashtags
 //   draft?: true // 表示此 bullet 有被修改，搭配 op 做更新，用於區隔沒有修改的 bullet（因為即便是未修改的 bullet，type 仍然是 BulletDraft)
 //   error?: string
-//   createCard?: true // 為新創的card
+//   createCard?: true // 為新創的note
 // }
 
 // type RootBulletBase = {
 //   root: true
-//   symbol: string // 記錄此 card symbol
+//   symbol: string // 記錄此 note symbol
 // }
 
 // export type RootBullet = RootBulletBase & Bullet

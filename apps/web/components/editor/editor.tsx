@@ -14,7 +14,7 @@ import {
   withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
-import { CardFragment } from '../../apollo/query.graphql'
+import { NoteFragment } from '../../apollo/query.graphql'
 import { withInline, wrapToInlines } from './with-inline'
 import InlineSymbol from '../inline/inline-symbol'
 import InlineMirror from '../inline/inline-mirror'
@@ -198,7 +198,7 @@ const Lc = ({
       {children}
       {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />}
 
-      {/* {sourceCardId && ( 
+      {/* {sourceNoteId && ( 
        <span contentEditable={false}>
         {author === element.author && element.author}
           {sourceUrl === element.sourceUrl && sourceUrl} 
@@ -306,15 +306,15 @@ const CustomElement = ({
   attributes,
   children,
   element,
-  card,
-}: RenderElementProps & { card: CardFragment | null }): JSX.Element => {
+  note,
+}: RenderElementProps & { note: NoteFragment | null }): JSX.Element => {
   switch (element.type) {
     case 'inline-discuss':
       return <InlineDiscuss {...{ attributes, children, element }} />
     case 'inline-filtertag':
       return <InlineFiltertag {...{ attributes, children, element }} />
     case 'inline-mirror':
-      return <InlineMirror {...{ attributes, children, element, sourceCardId: card?.id }} />
+      return <InlineMirror {...{ attributes, children, element, sourceNoteId: note?.id }} />
     case 'inline-poll':
       return <InlinePoll {...{ attributes, children, element }} />
     case 'inline-rate':
@@ -322,7 +322,7 @@ const CustomElement = ({
     case 'inline-symbol':
       return <InlineSymbol {...{ attributes, children, element }} />
     case 'lc':
-      return <Lc {...{ attributes, children, element, curCardId: card?.id }} />
+      return <Lc {...{ attributes, children, element, curNoteId: note?.id }} />
     case 'li':
       return <Li {...{ attributes, children, element }} />
     case 'ul':
@@ -336,7 +336,7 @@ export const BulletEditor = ({ doc, readOnly }: { doc: Doc; readOnly?: boolean }
   const editor = useMemo(() => withInline(withList(withAutoComplete(withHistory(withReact(createEditor()))))), [])
   const client = useApolloClient()
   const renderElement = useCallback(
-    (props: RenderElementProps) => <CustomElement {...{ ...props, card: doc.cardCopy }} />,
+    (props: RenderElementProps) => <CustomElement {...{ ...props, note: doc.noteCopy }} />,
     [doc],
   )
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])

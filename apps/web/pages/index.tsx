@@ -2,42 +2,42 @@
  * @see https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
  */
 import { useEffect, useState } from 'react'
-import { useCardDigestsQuery, useMeQuery } from '../apollo/query.graphql'
+import { useNoteDigestsQuery, useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
 import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/new-hot-list'
-import CardDigestComponent from '../components/card-digest-component'
+import NoteDigestComponent from '../components/note-digest-component'
 
-export const LatestCards = (): JSX.Element | null => {
-  const { data, loading, error, fetchMore } = useCardDigestsQuery() // { fetchPolicy: 'cache-and-network' }
+export const LatestNotes = (): JSX.Element | null => {
+  const { data, loading, error, fetchMore } = useNoteDigestsQuery() // { fetchPolicy: 'cache-and-network' }
   const [hasMore, setHasMore] = useState<boolean>(true)
 
   if (loading) {
     return null
   }
-  if (!data || data.cardDigests === undefined) {
+  if (!data || data.noteDigests === undefined) {
     return null
   }
   if (error) {
     return <p>Something goes wrong...</p>
   }
-  if (data.cardDigests.length === 0) {
-    return <p>No cards</p>
+  if (data.noteDigests.length === 0) {
+    return <p>No notes</p>
   }
 
-  const afterCommitId = data.cardDigests[data.cardDigests.length - 1].commitId
+  const afterCommitId = data.noteDigests[data.noteDigests.length - 1].commitId
 
   // async function onClickMore() {
   //   const result = await fetchMore({ variables: { afterId } })
-  //   if (result.data.latestCards.length === 0) {
+  //   if (result.data.latestNotes.length === 0) {
   //     setHasMore(false)
   //   }
   // }
-  // console.log(data.latestCardDigests)
+  // console.log(data.latestNoteDigests)
   return (
     <>
       {/* <NewListItem
-        cardId={'cardId'}
+        noteId={'noteId'}
         title={'水力發電短缺 冰島減供工業用電 拒與新的比特幣礦工簽約'}
         href={'https://news.cnyes.com/news/id/4782741?exp=a'}
         sourceUrl={'https://news.cnyes.com/news/id/4782741?exp=a'}
@@ -53,7 +53,7 @@ export const LatestCards = (): JSX.Element | null => {
       />
 
       <NewListItem
-        cardId={'cardId'}
+        noteId={'noteId'}
         title={'日本央行副總裁：沒有必要調整超寬鬆貨幣政策'}
         href={'https://news.cnyes.com/news/id/4782649?exp=a'}
         sourceUrl={'https://news.cnyes.com/news/id/4782649?exp=a'}
@@ -69,7 +69,7 @@ export const LatestCards = (): JSX.Element | null => {
       />
 
       <NewListItem
-        cardId={'cardId'}
+        noteId={'noteId'}
         title={'玉晶光11月營收19.25億元創同期新高 年增6.49%'}
         href={'https://news.cnyes.com/news/id/4782820?exp=a'}
         sourceUrl={'https://news.cnyes.com/news/id/4782820?exp=a'}
@@ -83,7 +83,7 @@ export const LatestCards = (): JSX.Element | null => {
       />
 
       <NewListItem
-        cardId={'cardId'}
+        noteId={'noteId'}
         title={'晶片荒惡化費半大跌 交期拉長至逾20周'}
         href={'https://news.cnyes.com/news/id/4700195'}
         sourceUrl={'https://news.cnyes.com/news/id/4700195'}
@@ -94,8 +94,8 @@ export const LatestCards = (): JSX.Element | null => {
         author={'鉅亨網編譯羅昀玫'}
       /> */}
       <div>
-        {data.cardDigests.map((e, i) => (
-          <CardDigestComponent key={i} digest={e} />
+        {data.noteDigests.map((e, i) => (
+          <NoteDigestComponent key={i} digest={e} />
         ))}
       </div>
       {hasMore ? (
@@ -107,7 +107,7 @@ export const LatestCards = (): JSX.Element | null => {
               className={`btn-primary w-full text-center`}
               onClick={async () => {
                 const result = await fetchMore({ variables: { afterCommitId } })
-                if (result.data.cardDigests.length === 0) {
+                if (result.data.noteDigests.length === 0) {
                   setHasMore(false)
                 }
               }}

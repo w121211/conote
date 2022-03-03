@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-// import { Nav } from '../../pages/card/[symbol]'
+// import { Nav } from '../../pages/note/[symbol]'
 import MyTooltip from '../tooltip/tooltip'
 import RightArrow from '../../assets/svg/right-arrow.svg'
 import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
 import { UrlObject } from 'url'
 import Link from 'next/link'
-import { useCardQuery } from '../../apollo/query.graphql'
+import { useNoteQuery } from '../../apollo/query.graphql'
 import { DocIndex } from '../workspace/doc-index'
 
 function getTextWidth(text: string, font?: any) {
@@ -38,7 +38,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
   const router = useRouter()
 
   const pathRef = useRef<HTMLUListElement>(null)
-  const { data } = useCardQuery({
+  const { data } = useNoteQuery({
     fetchPolicy: 'cache-first',
     variables: { symbol: router.query.symbol as string },
   })
@@ -125,7 +125,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
       {mirrorHomeUrl && (
         <li>
           <Link href={mirrorHomeUrl}>
-            <a>{data?.card && data?.card.meta.title}</a>
+            <a>{data?.note && data?.note.meta.title}</a>
           </Link>
           <div className="flex items-center flex-shrink-0 mx-2">/{/* <RightArrow /> */}</div>
         </li>
@@ -156,12 +156,12 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
                   <Link href={locationToUrl({ ...location, openedLiPath: e.path })}>
                     <a>
                       {mirrorHomeUrl && e.subEntries.length === 0 && '::'}
-                      {!mirrorHomeUrl && i === 0 &&data?.card? data.card.meta.title || e.title : e.text}
+                      {!mirrorHomeUrl && i === 0 &&data?.note? data.note.meta.title || e.title : e.text}
                     </a>
                   </Link>
                 )} */}
                 {/* {typeof e !== 'string' && e.path.length === 0 && (
-                  <Link href={`/card/${encodeURIComponent(e.text)}`}>
+                  <Link href={`/note/${encodeURIComponent(e.text)}`}>
                     <a className="ui">{e.text}</a>
                   </Link>
                 )}
@@ -185,7 +185,7 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
                         >
                           {typeof el !== 'string' && (
                             <Link
-                              href={`/card/${encodeURIComponent(router.query.symbol as string)}${
+                              href={`/note/${encodeURIComponent(router.query.symbol as string)}${
                                 el.path.length > 0 ? '?p=' + el.path.join('.') : ''
                               }`}
                             >

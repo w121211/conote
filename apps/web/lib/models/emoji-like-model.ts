@@ -1,6 +1,6 @@
-import { BulletEmojiLike, CardEmojiLike, DiscussEmojiLike, DiscussPostEmojiLike, LikeChoice } from '@prisma/client'
+import { BulletEmojiLike, NoteEmojiLike, DiscussEmojiLike, DiscussPostEmojiLike, LikeChoice } from '@prisma/client'
 
-// type IEmojiLike = BulletEmojiLike | CardEmojiLike | DiscussEmojiLike | DiscussPostEmojiLike
+// type IEmojiLike = BulletEmojiLike | NoteEmojiLike | DiscussEmojiLike | DiscussPostEmojiLike
 
 export const EmojiLike = {
   /**
@@ -22,7 +22,7 @@ export const EmojiLike = {
   /**
    * Get change of up, down
    */
-  compareOld<T extends BulletEmojiLike | CardEmojiLike>(like: T, prevLike?: T): { dDown: number; dUp: number } {
+  compareOld<T extends BulletEmojiLike | NoteEmojiLike>(like: T, prevLike?: T): { dDown: number; dUp: number } {
     let dUp = 0
     const dDown = 0
     if (prevLike) {

@@ -2,7 +2,7 @@
 import { Bullet } from '../../../components/bullet/bullet'
 import prisma from '../../../lib/prisma'
 import { clean, TestDataHelper, TESTUSERS } from '../../test-helpers'
-import { CardDigestModel } from '../../../lib/models/card-digest-model'
+import { NoteDigestModel } from '../../../lib/models/note-digest-model'
 
 // let fetcher: FetchClient
 
@@ -15,16 +15,16 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Link", "Poll", "Shot", "Sym", "User" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Note", "NoteState", "NoteEmoji", "Link", "Poll", "Shot", "Sym", "User" CASCADE;`
 
   // Bug: comment out to prevent rerun loop  @see https://github.com/facebook/jest/issues/2516
   // fetcher.dump()
   await prisma.$disconnect()
 })
 
-it('CardDigestModel.getLatest()', async () => {
+it('NoteDigestModel.getLatest()', async () => {
   await TestDataHelper.createCommits()
 
-  const digests = await CardDigestModel.getLatest()
+  const digests = await NoteDigestModel.getLatest()
   expect(digests.map(e => clean(e))).toMatchSnapshot()
 })

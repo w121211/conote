@@ -5,7 +5,7 @@ import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
 import { CommitInput as GQLCommitInput } from 'graphql-let/__generated__/__types__'
 import { Bullet } from '../../../components/bullet/bullet'
 import prisma from '../../../lib/prisma'
-import { CardModel } from '../../../lib/models/card-model'
+import { NoteModel } from '../../../lib/models/note-model'
 import { CommitModel } from '../../../lib/models/commit-model'
 import { bt, clean, TestDataHelper, TESTUSERS } from '../../test-helpers'
 
@@ -32,7 +32,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Link", "Poll", "Shot", "Sym", "User" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Note", "NoteState", "NoteEmoji", "Link", "Poll", "Shot", "Sym", "User" CASCADE;`
 
   // Bug: comment out to avoid rerun loop  @see https://github.com/facebook/jest/issues/2516
   // fetcher.dump()
@@ -41,14 +41,14 @@ afterAll(async () => {
   jest.spyOn(global.Math, 'random').mockRestore()
 })
 
-it('create commit: card-state has card-input', async () => {
+it('create commit: note-state has note-input', async () => {
   const commit0 = await CommitModel.create(
     {
-      cardStateInputs: [
+      noteStateInputs: [
         {
           cid: '$AA',
           prevStateId: null,
-          cardInput: { symbol: '$AA' },
+          noteInput: { symbol: '$AA' },
           changes: [],
           value: nanoValue,
         },
@@ -58,14 +58,14 @@ it('create commit: card-state has card-input', async () => {
   )
   expect(clean(commit0)).toMatchSnapshot()
 
-  const state0 = commit0.cardStates[0]
+  const state0 = commit0.noteStates[0]
   const commit1 = await CommitModel.create(
     {
-      cardStateInputs: [
+      noteStateInputs: [
         {
           cid: '$AA',
           prevStateId: state0.id,
-          cardId: state0.cardId,
+          noteId: state0.noteId,
           changes: [],
           value: nanoValue,
         },
@@ -75,31 +75,31 @@ it('create commit: card-state has card-input', async () => {
   )
   expect(clean(commit1)).toMatchSnapshot()
 
-  expect(commit1.cardStates[0]).toBeDefined()
-  expect(commit1.cardStates[0].prevId).toEqual(state0.id)
+  expect(commit1.noteStates[0]).toBeDefined()
+  expect(commit1.noteStates[0].prevId).toEqual(state0.id)
 })
 
-it('create commit: multi card-state', async () => {
-  const card = await CardModel.getBySymbol('$AA')
-  expect(card).not.toBeNull()
-  expect(card).toBeDefined()
+it('create commit: multi note-state', async () => {
+  const note = await NoteModel.getBySymbol('$AA')
+  expect(note).not.toBeNull()
+  expect(note).toBeDefined()
 
-  if (card) {
+  if (note) {
     const commitInput: GQLCommitInput = {
-      cardStateInputs: [
+      noteStateInputs: [
         {
           cid: '$BB',
           prevStateId: null,
-          sourceCardId: card.id,
-          cardInput: { symbol: '$BB' },
+          sourceNoteId: note.id,
+          noteInput: { symbol: '$BB' },
           changes: [],
           value: nanoValue,
         },
         {
           cid: '$CC',
           prevStateId: null,
-          sourceCardId: card.id,
-          cardInput: { symbol: '$CC' },
+          sourceNoteId: note.id,
+          noteInput: { symbol: '$CC' },
           changes: [],
           value: nanoValue,
         },
@@ -119,7 +119,7 @@ it('create commit: multi card-state', async () => {
 
 // test('runBulletInputOp()', async () => {
 //   const root0 = await runBulletInputOp({
-//     cardId: card.id,
+//     noteId: note.id,
 //     input: input0,
 //     // prevDict,
 //     timestamp: 111111111,
@@ -128,8 +128,8 @@ it('create commit: multi card-state', async () => {
 //   expect(clean(root0)).toMatchSnapshot()
 // })
 
-// test('createCardBody()', async () => {
-//   const body0 = await createCardBody({ cardId: card.id, bulletInputRoot: input0 }, TESTUSERS[0].id)
+// test('createNoteBody()', async () => {
+//   const body0 = await createNoteBody({ noteId: note.id, bulletInputRoot: input0 }, TESTUSERS[0].id)
 //   expect(clean({ ...body0, content: omitDeep(JSON.parse(body0.content), ['timestamp']) })).toMatchSnapshot()
 
 //   const input1: BulletInput = {
@@ -149,13 +149,13 @@ it('create commit: multi card-state', async () => {
 //     ],
 //   }
 
-//   const body1 = await createCardBody({ cardId: card.id, bulletInputRoot: input1 }, TESTUSERS[1].id)
+//   const body1 = await createNoteBody({ noteId: note.id, bulletInputRoot: input1 }, TESTUSERS[1].id)
 //   console.log(body1)
 //   expect(clean({ ...body1, content: omitDeep(JSON.parse(body1.content), ['timestamp']) })).toMatchSnapshot()
 // })
 
-// test('createCard()', async () => {
-//   const { card, body } = await createCard({ name: '$BBB', template: templateTicker, title: 'BBB Company' })
-//   expect(clean(card)).toMatchSnapshot()
+// test('createNote()', async () => {
+//   const { note, body } = await createNote({ name: '$BBB', template: templateTicker, title: 'BBB Company' })
+//   expect(clean(note)).toMatchSnapshot()
 //   expect(clean({ ...body, content: omitDeep(JSON.parse(body.content), ['timestamp']) })).toMatchSnapshot()
 // })

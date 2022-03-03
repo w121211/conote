@@ -1,30 +1,30 @@
 import React, { useState } from 'react'
-import { useCardEmojisQuery } from '../../apollo/query.graphql'
-import CreateCardEmojiBtn from './create-card-emoji-btn'
-import CardEmojiBtn from './card-emoji-btn'
+import { useNoteEmojisQuery } from '../../apollo/query.graphql'
+import CreateNoteEmojiBtn from './create-note-emoji-btn'
+import NoteEmojiBtn from './note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
 import Tooltip from '../tooltip/tooltip'
 
-const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null => {
+const HeaderNoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)
-  const { data: emojiData } = useCardEmojisQuery({ variables: { cardId } })
+  const { data: emojiData } = useNoteEmojisQuery({ variables: { noteId } })
   const emojis: EmojiCode[] = ['UP', 'DOWN']
-  const pinEmojiData = emojiData?.cardEmojis.find(e => e.code === 'PIN')
+  const pinEmojiData = emojiData?.noteEmojis.find(e => e.code === 'PIN')
 
   return (
     <div className="flex  ">
       {emojis.map((e, i) => {
-        const foundData = emojiData?.cardEmojis.find(el => el.code === e)
+        const foundData = emojiData?.noteEmojis.find(el => el.code === e)
         return foundData !== undefined && foundData.count.nUps > 0 ? (
           <div key={i} className="flex items-center">
-            <CardEmojiBtn cardEmoji={foundData} showCounts />
+            <NoteEmojiBtn noteEmoji={foundData} showCounts />
           </div>
         ) : null
       })}
       {pinEmojiData ? (
-        <CardEmojiBtn cardEmoji={pinEmojiData} />
+        <NoteEmojiBtn noteEmoji={pinEmojiData} />
       ) : (
-        <CreateCardEmojiBtn cardId={cardId} emojiCode="PIN" />
+        <CreateNoteEmojiBtn noteId={noteId} emojiCode="PIN" />
       )}
       <div
         className="relative"
@@ -45,11 +45,11 @@ const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null =>
           onClose={() => setShowTooltip(false)}
         >
           {emojis.map((e, i) => {
-            const foundData = emojiData?.cardEmojis.find(el => el.code === e)
+            const foundData = emojiData?.noteEmojis.find(el => el.code === e)
             return foundData !== undefined ? (
-              <CardEmojiBtn key={i} cardEmoji={foundData} />
+              <NoteEmojiBtn key={i} noteEmoji={foundData} />
             ) : (
-              <CreateCardEmojiBtn key={i} cardId={cardId} emojiCode={e} />
+              <CreateNoteEmojiBtn key={i} noteId={noteId} emojiCode={e} />
             )
           })}
         </Tooltip>
@@ -57,4 +57,4 @@ const HeaderCardEmojis = ({ cardId }: { cardId: string }): JSX.Element | null =>
     </div>
   )
 }
-export default HeaderCardEmojis
+export default HeaderNoteEmojis

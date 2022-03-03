@@ -1,8 +1,8 @@
 import { isEqual } from 'lodash'
 import { nanoid } from 'nanoid'
-import { CardInput, CardMetaInput, CardStateInput } from 'graphql-let/__generated__/__types__'
+import { NoteInput, NoteMetaInput, NoteStateInput } from 'graphql-let/__generated__/__types__'
 import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
-import { CardFragment, CardStateFragment } from '../../apollo/query.graphql'
+import { NoteFragment, NoteStateFragment } from '../../apollo/query.graphql'
 import { Bullet } from '../bullet/bullet'
 import { LiElement } from '../editor/slate-custom-types'
 import { EditorSerializer } from '../editor/serializer'
@@ -11,15 +11,15 @@ import { LocalDatabaseService } from './local-database'
 export type DocProps = {
   cid?: string
   fromDocCid: string | null // null for roots, TODO: handle if remote symbol name changed
-  cardInput: CardInput | null
-  cardCopy: CardFragment | null
+  noteInput: NoteInput | null
+  noteCopy: NoteFragment | null
   editorValue: LiElement[]
   // value: TreeNode<Bullet>[]
   // changes: NodeChange<Bullet>[]
   createdAt?: number
   updatedAt?: number
   committedAt?: number | null
-  committedState?: CardStateFragment | null
+  committedState?: NoteStateFragment | null
 }
 
 const isBulletEqual = (a: Bullet, b: Bullet) => {
@@ -29,16 +29,16 @@ const isBulletEqual = (a: Bullet, b: Bullet) => {
 export class Doc {
   readonly cid: string
   readonly fromDocCid: string | null
-  readonly cardCopy: CardFragment | null // keep the previous state, TODO: sync to the latest card state if remote updated
+  readonly noteCopy: NoteFragment | null // keep the previous state, TODO: sync to the latest note state if remote updated
 
-  cardInput: CardInput | null // required if card is null
+  noteInput: NoteInput | null // required if note is null
   editorValue: LiElement[]
   // value: TreeNode<Bullet>[]
   // changes: NodeChange<Bullet>[] = []
   createdAt: number
   updatedAt: number
   committedAt: number | null = null
-  committedState: CardStateFragment | null = null
+  committedState: NoteStateFragment | null = null
 
   editorValueLastSaved: LiElement[]
   isEditorValueChangedSinceSave = false
@@ -46,21 +46,21 @@ export class Doc {
   constructor({
     cid,
     fromDocCid,
-    cardCopy,
-    cardInput,
+    noteCopy,
+    noteInput,
     editorValue,
     createdAt,
     updatedAt,
     committedAt,
     committedState,
   }: DocProps) {
-    if (cardCopy === null && cardInput === null) {
-      throw 'cardCopy === null && cardInput === null'
+    if (noteCopy === null && noteInput === null) {
+      throw 'noteCopy === null && noteInput === null'
     }
     this.cid = cid ?? nanoid()
     this.fromDocCid = fromDocCid
-    this.cardCopy = cardCopy
-    this.cardInput = cardInput
+    this.noteCopy = noteCopy
+    this.noteInput = noteInput
     this.editorValue = editorValue
     this.editorValueLastSaved = editorValue
     this.createdAt = createdAt ?? Date.now()
@@ -71,52 +71,52 @@ export class Doc {
 
   static createDoc({
     symbol,
-    card,
+    note,
     fromDocCid,
   }: {
-    symbol: string // required if card is null
-    card: CardFragment | null
+    symbol: string // required if note is null
+    note: NoteFragment | null
     fromDocCid: string | null
   }): Doc {
-    if (card) {
-      if (card.state) {
-        const value = card.state.body.value as unknown as TreeNode<Bullet>[]
+    if (note) {
+      if (note.state) {
+        const value = note.state.body.value as unknown as TreeNode<Bullet>[]
         return new Doc({
           fromDocCid,
-          cardCopy: card,
-          cardInput: null,
+          noteCopy: note,
+          noteInput: null,
           editorValue: EditorSerializer.toLiArray(value),
         })
       } else {
-        // Has card but no card-state -> ie a new webpage-card, use webpage-template
-        if (card.link === undefined) {
-          throw 'card.link === undefined'
+        // Has note but no note-state -> ie a new webpage-note, use webpage-template
+        if (note.link === undefined) {
+          throw 'note.link === undefined'
         }
         return new Doc({
           fromDocCid,
-          cardCopy: card,
-          cardInput: null,
+          noteCopy: note,
+          noteInput: null,
           editorValue: [
             {
               type: 'li',
               children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }],
-              // children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new webpage-card ${symbol}` }] }],
+              // children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new webpage-note ${symbol}` }] }],
             },
           ],
         })
       }
     }
-    // No card -> a new symbol-card
+    // No note -> a new symbol-note
     // TODO: check symbol format is valid
     return new Doc({
       fromDocCid,
-      cardCopy: null,
-      cardInput: { symbol, meta: {} },
+      noteCopy: null,
+      noteInput: { symbol, meta: {} },
       editorValue: [
         {
           type: 'li',
           children: [{ type: 'lc', cid: nanoid(), children: [{ text: '' }] }],
-          // children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new symbol-card ${symbol}` }] }],
+          // children: [{ type: 'lc', cid: nanoid(), children: [{ text: `a new symbol-note ${symbol}` }] }],
         },
       ],
     })
@@ -206,7 +206,7 @@ export class Doc {
     throw 'Not implemented'
     // check subdocs
     // check prev-doc is current head
-    // if (cardDoc?.id && cardDoc.id !== doc.prevDocId) {
+    // if (noteDoc?.id && noteDoc.id !== doc.prevDocId) {
     //   curDoc = { doc, warn: 'prev_doc_behind' }
     // }
   }
@@ -258,9 +258,9 @@ export class Doc {
     const {
       cid,
       fromDocCid,
-      cardInput,
-      cardCopy,
-      // sourceCardCopy,
+      noteInput,
+      noteCopy,
+      // sourceNoteCopy,
       editorValue,
       createdAt,
       updatedAt,
@@ -270,9 +270,9 @@ export class Doc {
     return {
       cid,
       fromDocCid,
-      cardInput,
-      cardCopy,
-      // sourceCardCopy,
+      noteInput,
+      noteCopy,
+      // sourceNoteCopy,
       editorValue,
       createdAt,
       updatedAt,
@@ -281,62 +281,62 @@ export class Doc {
     }
   }
 
-  toCardStateInput(): CardStateInput {
-    const { cid, fromDocCid, cardInput, cardCopy, editorValue } = this
+  toNoteStateInput(): NoteStateInput {
+    const { cid, fromDocCid, noteInput, noteCopy, editorValue } = this
     // const changes = this.updateChanges()
     return {
       cid,
       fromDocCid,
-      cardInput,
-      cardId: cardCopy?.id,
-      prevStateId: cardCopy?.state?.id,
+      noteInput,
+      noteId: noteCopy?.id,
+      prevStateId: noteCopy?.state?.id,
       changes: this.getChanges(), // TODO: flatten
       value: EditorSerializer.toTreeNodes(editorValue), // TODO: flatten
     }
   }
 
-  getCardMetaInput(): CardMetaInput {
-    if (this.cardInput?.meta) {
-      return this.cardInput.meta
+  getNoteMetaInput(): NoteMetaInput {
+    if (this.noteInput?.meta) {
+      return this.noteInput.meta
     }
-    if (this.cardCopy?.meta) {
-      return this.cardCopy.meta
+    if (this.noteCopy?.meta) {
+      return this.noteCopy.meta
     }
     return {}
   }
 
   getChanges(): NodeChange<Bullet>[] {
-    const startValue = this.cardCopy?.state?.body.value
-      ? (this.cardCopy.state.body.value as unknown as TreeNode<Bullet>[])
+    const startValue = this.noteCopy?.state?.body.value
+      ? (this.noteCopy.state.body.value as unknown as TreeNode<Bullet>[])
       : []
     const changes = TreeChangeService.getChnages(this.getValue(), startValue, isBulletEqual)
     // console.log(this.editorValue)
-    // console.log(this.cardCopy?.state?.body.value, this.getValue(), changes)
+    // console.log(this.noteCopy?.state?.body.value, this.getValue(), changes)
     return changes
   }
 
   getSymbol(): string {
-    if (this.cardCopy) {
-      return this.cardCopy.sym.symbol
+    if (this.noteCopy) {
+      return this.noteCopy.sym.symbol
     }
-    if (this.cardInput) {
-      return this.cardInput.symbol
+    if (this.noteInput) {
+      return this.noteInput.symbol
     }
-    throw 'doc cardCopy & cardInput are both null'
+    throw 'doc noteCopy & noteInput are both null'
   }
 
   getValue(): TreeNode<Bullet>[] {
     return EditorSerializer.toTreeNodes(this.editorValue)
   }
 
-  updateCardMetaInput(metaInput: CardMetaInput): { isUpdated: boolean } {
-    if (this.cardInput?.meta && isEqual(metaInput, this.cardInput.meta)) {
+  updateNoteMetaInput(metaInput: NoteMetaInput): { isUpdated: boolean } {
+    if (this.noteInput?.meta && isEqual(metaInput, this.noteInput.meta)) {
       return { isUpdated: false }
     }
-    if (this.cardInput) {
-      this.cardInput.meta = metaInput
+    if (this.noteInput) {
+      this.noteInput.meta = metaInput
     } else {
-      this.cardInput = {
+      this.noteInput = {
         symbol: this.getSymbol(),
         meta: metaInput,
       }
@@ -344,16 +344,16 @@ export class Doc {
     return { isUpdated: true }
   }
 
-  updateCardSymbol(newSymbol: string): void {
-    if (this.cardCopy) {
-      console.warn('Rename created card symbol is not supported yet.')
+  updateNoteSymbol(newSymbol: string): void {
+    if (this.noteCopy) {
+      console.warn('Rename created note symbol is not supported yet.')
       return
     }
     if (this.getSymbol() === newSymbol) {
       return // no need to change
     }
-    if (this.cardInput) {
-      this.cardInput.symbol = newSymbol
+    if (this.noteInput) {
+      this.noteInput.symbol = newSymbol
     }
   }
 }

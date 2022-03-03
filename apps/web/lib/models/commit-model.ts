@@ -1,56 +1,56 @@
-import { CardState, Commit, PrismaPromise, Sym } from '@prisma/client'
+import { Commit, NoteState, PrismaPromise, Sym } from '@prisma/client'
 import cuid from 'cuid'
 import {
-  CardInput as GQLCardInput,
-  CardMetaInput as GQLCardMetaInput,
-  CardStateInput as GQLCardStateInput,
+  NoteInput as GQLNoteInput,
+  NoteMetaInput as GQLNoteMetaInput,
+  NoteStateInput as GQLNoteStateInput,
   CommitInput as GQLCommitInput,
 } from 'graphql-let/__generated__/__types__'
 import { inspect } from 'util'
 import { NodeChange, TreeNode, TreeService } from '@conote/docdiff'
 import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
-import { PrismaCard } from './card-model'
-import { CardStateBody, CardStateModel, CardStateParsed } from './card-state-model'
+import { PrismaNote } from './note-model'
+import { NoteStateBody, NoteStateModel, NoteStateParsed } from './note-state-model'
 import { SymbolParsed, SymModel } from './sym-model'
 
 type BulletInsert = {
   gid: string // pre-generated bullet id
 }
 
-type CardInsert = {
+type NoteInsert = {
   gid: string
   symbolParsed: SymbolParsed
-  meta?: GQLCardMetaInput
+  meta?: GQLNoteMetaInput
 }
 
-type CardUpdate = {
+type NoteUpdate = {
   // symbol: string
-  meta: GQLCardMetaInput
+  meta: GQLNoteMetaInput
 }
 
-type CardStateInsert = {
-  gid: string // pre-generated card-state id
-  body: CardStateBody // store in json
+type NoteStateInsert = {
+  gid: string // pre-generated note-state id
+  body: NoteStateBody // store in json
   bulletInserts: BulletInsert[]
-  cardId?: string // existed card
-  cardInsert?: CardInsert // create a new card
-  cardUpdate?: CardUpdate // update card-meta
+  noteId?: string // existed note
+  noteInsert?: NoteInsert // create a new note
+  noteUpdate?: NoteUpdate // update note-meta
 }
 
-// export type CardState = {
+// export type NoteState = {
 //   main: {
-//     cardId: string
-//     state?: RowCardState
+//     noteId: string
+//     state?: RowNoteState
 //   }
-//   subs: RowCardState[]
+//   subs: RowNoteState[]
 // }
 
-export type CommitParsed = Commit & { cardStates: CardStateParsed[] }
+export type CommitParsed = Commit & { noteStates: NoteStateParsed[] }
 
-export type PrismaCardState = CardState & { card: PrismaCard }
+export type PrismaNoteState = NoteState & { note: PrismaNote }
 
-export type PrismaCommit = Commit & { cardStates: PrismaCardState[] }
+export type PrismaCommit = Commit & { noteStates: PrismaNoteState[] }
 
 /**
  * cid: client-id
@@ -58,18 +58,18 @@ export type PrismaCommit = Commit & { cardStates: PrismaCardState[] }
  */
 
 export const CommitModel = {
-  _checkCardInput(cardInput: GQLCardInput): void {
-    // Card should not be existed
-    // Card should be symbol-card, not webpage
+  _checkNoteInput(noteInput: GQLNoteInput): void {
+    // Note should not be existed
+    // Note should be symbol-note, not webpage
   },
 
   // async _checkDocInput(doc: DBDocInput): Promise<void> {
-  //   // prev-doc 是 card 當前的 head
-  //   const card = await prisma.card.findUnique({ where: { symbol: doc.symbol } })
-  //   if (card) {
-  //     assert(card.headDocId === doc.prevDocId, 'Prev-doc not match to head-doc of card')
+  //   // prev-doc 是 note 當前的 head
+  //   const note = await prisma.note.findUnique({ where: { symbol: doc.symbol } })
+  //   if (note) {
+  //     assert(note.headDocId === doc.prevDocId, 'Prev-doc not match to head-doc of note')
   //   } else {
-  //     assert(doc.cardInput !== undefined, 'Doc should get card input')
+  //     assert(doc.noteInput !== undefined, 'Doc should get note input')
   //   }
   //   // check sub-symbols
   //   // const mirrors = getMirrors(applied)
@@ -89,27 +89,27 @@ export const CommitModel = {
   //   for (const e of docs) {
   //     // checkSymbol(e.symbol)
   //     this._checkDocInput(e)
-  //     if (e.cardInput) {
-  //       assert(e.cardInput.symbol === e.symbol, 'Symbol should equal')
-  //       this._checkCardInput(e.cardInput)
+  //     if (e.noteInput) {
+  //       assert(e.noteInput.symbol === e.symbol, 'Symbol should equal')
+  //       this._checkNoteInput(e.noteInput)
   //     }
   //   }
-  //   for (const [symbol, cardInput, doc] of zip(cardInputs, docs)) {
+  //   for (const [symbol, noteInput, doc] of zip(noteInputs, docs)) {
   //     if (doc === undefined) {
   //       throw '創卡需要搭配 doc'
   //     }
-  //     if (cardInput) {
+  //     if (noteInput) {
   //       checkSymbol(symbol)
-  //       checkCardInput(cardInput)
+  //       checkNoteInput(noteInput)
   //     }
   //     checkDoc(doc, allDocsDict)
   //   }
   // },
 
-  _toInserts(inputs: GQLCardStateInput[]): [
-    CardStateInsert[],
+  _toInserts(inputs: GQLNoteStateInput[]): [
+    NoteStateInsert[],
     {
-      cidToCardIdOrGid: Record<string, string>
+      cidToNoteIdOrGid: Record<string, string>
       cidToStateGid: Record<string, string>
       stateGidToCid: Record<string, string>
     },
@@ -119,24 +119,24 @@ export const CommitModel = {
     if (cids.length !== inputs.length) {
       throw 'cids.length !== inputs.length, input cids have duplicates'
     }
-    const cidToCardIdOrGid: Record<string, string> = {}
+    const cidToNoteIdOrGid: Record<string, string> = {}
     const cidToStateGid: Record<string, string> = {}
     for (const e of inputs) {
-      const { cid, cardId, cardInput } = e
-      if (cardId) {
-        cidToCardIdOrGid[cid] = cardId
-      } else if (cardInput) {
-        cidToCardIdOrGid[cid] = cuid()
+      const { cid, noteId, noteInput } = e
+      if (noteId) {
+        cidToNoteIdOrGid[cid] = noteId
+      } else if (noteInput) {
+        cidToNoteIdOrGid[cid] = cuid()
       } else {
-        throw 'cardId === null && cardInput === null'
+        throw 'noteId === null && noteInput === null'
       }
       cidToStateGid[cid] = cuid()
     }
     const stateGidToCid = Object.fromEntries(Object.entries(cidToStateGid).map(([k, v]) => [v, k]))
 
-    const inserts = inputs.map<CardStateInsert>(input => {
-      const { cid, fromDocCid, cardInput, cardId, prevStateId, changes, value } = input
-      // console.log({ cid, prevStateId, cardId, sourceCardId, cardInput, changes, value })
+    const inserts = inputs.map<NoteStateInsert>(input => {
+      const { cid, fromDocCid, noteInput, noteId, prevStateId, changes, value } = input
+      // console.log({ cid, prevStateId, noteId, sourceNoteId, noteInput, changes, value })
 
       // 直接置換 value 中每個 bullet 的 id (硬幹) -> TODO: 要用 doc update
       const bulletInserts: BulletInsert[] = []
@@ -154,67 +154,67 @@ export const CommitModel = {
 
       const finalValue = TreeService.fromList(nodes)
 
-      let cardInsert: CardInsert | undefined
-      let cardUpdate: CardUpdate | undefined
-      if (cardId) {
-        if (cardInput?.meta) {
-          cardUpdate = {
-            meta: cardInput.meta,
+      let noteInsert: NoteInsert | undefined
+      let noteUpdate: NoteUpdate | undefined
+      if (noteId) {
+        if (noteInput?.meta) {
+          noteUpdate = {
+            meta: noteInput.meta,
           }
         }
-      } else if (cardInput) {
-        cardInsert = {
-          gid: cidToCardIdOrGid[cid],
-          symbolParsed: SymModel.parse(cardInput.symbol),
-          meta: cardInput.meta ?? undefined,
+      } else if (noteInput) {
+        noteInsert = {
+          gid: cidToNoteIdOrGid[cid],
+          symbolParsed: SymModel.parse(noteInput.symbol),
+          meta: noteInput.meta ?? undefined,
         }
       }
 
-      const insert: CardStateInsert = {
+      const insert: NoteStateInsert = {
         gid: cidToStateGid[cid],
         body: {
           prevStateId: prevStateId ?? null,
           changes: changes as unknown as NodeChange<Bullet>[],
           value: finalValue,
-          fromCardId: fromDocCid ? cidToCardIdOrGid[fromDocCid] : undefined,
+          fromNoteId: fromDocCid ? cidToNoteIdOrGid[fromDocCid] : undefined,
         },
         bulletInserts,
-        cardId: cardId ?? undefined,
-        cardInsert,
-        cardUpdate,
+        noteId: noteId ?? undefined,
+        noteInsert,
+        noteUpdate,
       }
       return insert
     })
-    return [inserts, { cidToCardIdOrGid, cidToStateGid, stateGidToCid }]
+    return [inserts, { cidToNoteIdOrGid, cidToStateGid, stateGidToCid }]
   },
 
   async create(
-    { cardStateInputs }: GQLCommitInput,
+    { noteStateInputs }: GQLCommitInput,
     userId: string,
   ): Promise<{
     commit: CommitParsed
     stateGidToCid: Record<string, string>
     symsCommitted: Sym[] // syms committed
   }> {
-    // console.log(inspect(cardStateInputs, { depth: null }))
-    if (cardStateInputs.length === 0) {
-      throw 'Commit requires at least 1 card-state'
+    // console.log(inspect(noteStateInputs, { depth: null }))
+    if (noteStateInputs.length === 0) {
+      throw 'Commit requires at least 1 note-state'
     }
     // const checked = this.check(this._generateIds(input))
-    const [inserts, { stateGidToCid }] = this._toInserts(cardStateInputs)
+    const [inserts, { stateGidToCid }] = this._toInserts(noteStateInputs)
     // console.log(inspect(inserts, { depth: null }))
 
     const commitId = cuid()
     const promises: PrismaPromise<any>[] = []
     for (const e of inserts) {
-      const { gid, body, cardId, cardInsert, cardUpdate, bulletInserts } = e
-      if ((cardId && cardInsert) || (cardInsert && cardUpdate)) {
-        throw '(cardId && cardInsert) || (cardInsert && cardUpdate), card-id existed not allow to insert a new card, use card-update instead'
+      const { gid, body, noteId, noteInsert, noteUpdate, bulletInserts } = e
+      if ((noteId && noteInsert) || (noteInsert && noteUpdate)) {
+        throw '(noteId && noteInsert) || (noteInsert && noteUpdate), note-id existed not allow to insert a new note, use note-update instead'
       }
-      if (cardInsert) {
-        const { symbolParsed } = cardInsert
+      if (noteInsert) {
+        const { symbolParsed } = noteInsert
         promises.push(
-          prisma.cardState.create({
+          prisma.noteState.create({
             data: {
               id: gid,
               bullets: {
@@ -223,16 +223,16 @@ export const CommitModel = {
                 },
               },
               body,
-              card: {
+              note: {
                 create: {
-                  id: cardInsert.gid,
+                  id: noteInsert.gid,
                   sym: {
                     connectOrCreate: {
                       create: { symbol: symbolParsed.symbol, type: symbolParsed.type },
                       where: { symbol: symbolParsed.symbol },
                     },
                   },
-                  meta: cardInsert.meta,
+                  meta: noteInsert.meta,
                 },
               },
               commit: { connect: { id: commitId } },
@@ -243,17 +243,17 @@ export const CommitModel = {
         )
         continue
       }
-      if (cardId) {
-        if (cardUpdate) {
+      if (noteId) {
+        if (noteUpdate) {
           promises.push(
-            prisma.card.update({
-              data: { meta: cardUpdate.meta },
-              where: { id: cardId },
+            prisma.note.update({
+              data: { meta: noteUpdate.meta },
+              where: { id: noteId },
             }),
           )
         }
         promises.push(
-          prisma.cardState.create({
+          prisma.noteState.create({
             data: {
               id: gid,
               bullets: {
@@ -262,7 +262,7 @@ export const CommitModel = {
                 },
               },
               body,
-              card: { connect: { id: cardId } },
+              note: { connect: { id: noteId } },
               commit: { connect: { id: commitId } },
               prev: e.body.prevStateId ? { connect: { id: e.body.prevStateId } } : undefined,
               user: { connect: { id: userId } },
@@ -272,7 +272,7 @@ export const CommitModel = {
         continue
       }
       console.error(inspect(e, { depth: null }))
-      throw 'Require either cardInsert or cardId'
+      throw 'Require either noteInsert or noteId'
     }
 
     const [commitInserted] = await prisma.$transaction([
@@ -287,21 +287,21 @@ export const CommitModel = {
 
     const commit = await prisma.commit.findUnique({
       where: { id: commitInserted.id },
-      include: { cardStates: { include: { card: { include: { sym: true } } } } },
+      include: { noteStates: { include: { note: { include: { sym: true } } } } },
     })
     if (commit === null) {
       throw 'commit === null, unexpected database error'
     }
 
-    const { cardStates, ...rest } = commit
+    const { noteStates, ...rest } = commit
 
     return {
       commit: {
         ...rest,
-        cardStates: cardStates.map(e => CardStateModel.parse(e)),
+        noteStates: noteStates.map(e => NoteStateModel.parse(e)),
       },
       stateGidToCid,
-      symsCommitted: cardStates.map(e => e.card.sym),
+      symsCommitted: noteStates.map(e => e.note.sym),
     }
   },
 }

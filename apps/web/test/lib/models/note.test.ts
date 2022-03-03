@@ -1,20 +1,20 @@
 /**
- * yarn run test-lib card.test
+ * yarn run test-lib note.test
  */
 /* eslint-disable no-await-in-loop */
 // import _ from 'lodash'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
-import { Card, PrismaClient } from '@prisma/client'
-// import { getOrCreateCardBySymbol, getOrCreateCardByLink, CardMeta } from '../card'
+import { Note, PrismaClient } from '@prisma/client'
+// import { getOrCreateNoteBySymbol, getOrCreateNoteByLink, NoteMeta } from '../note'
 import { FetchClient } from '../../../lib/fetcher/fetch-client'
-import { CardModel } from '../../../lib/models/card-model'
+import { NoteModel } from '../../../lib/models/note-model'
 import prisma from '../../../lib/prisma'
 import { clean } from '../../test-helpers'
 
 const sampleFilepath = resolve(__dirname, '__samples__', 'common.txt')
 
-// const params: CardTemplateParams = {
+// const params: NoteTemplateParams = {
 //   name: '$AAA',
 //   template: templateTicker.name,
 //   title: 'AAA Company',
@@ -39,22 +39,22 @@ const sampleFilepath = resolve(__dirname, '__samples__', 'common.txt')
 // }
 
 let fetcher: FetchClient
-let card: Card
+let note: Note
 
 // beforeAll(async () => {
 //   console.log('Writing required data into database')
 //   const _prisma = new PrismaClient()
 //   await createTestUsers(_prisma)
-//   card = await _prisma.card.create({
+//   note = await _prisma.note.create({
 //     data: {
 //       meta?: JsonNullValueInput | InputJsonValue
 //     createdAt?: Date | string
 //     updatedAt?: Date | string
-//     sym: SymCreateNestedOneWithoutCardInput
-//     link?: LinkCreateNestedOneWithoutCardInput
-//     states?: CardStateCreateNestedManyWithoutCardInput
-//     emojis?: CardEmojiCreateNestedManyWithoutCardInput
-//       type: CardTy.TICKER,
+//     sym: SymCreateNestedOneWithoutNoteInput
+//     link?: LinkCreateNestedOneWithoutNoteInput
+//     states?: NoteStateCreateNestedManyWithoutNoteInput
+//     emojis?: NoteEmojiCreateNestedManyWithoutNoteInput
+//       type: NoteTy.TICKER,
 //       name: params.name,
 //       link: {
 //         create: {
@@ -81,7 +81,7 @@ afterAll(async () => {
 
 // test('runBulletInputOp()', async () => {
 //   const root0 = await runBulletInputOp({
-//     cardId: card.id,
+//     noteId: note.id,
 //     input: input0,
 //     // prevDict,
 //     timestamp: 111111111,
@@ -90,8 +90,8 @@ afterAll(async () => {
 //   expect(clean(root0)).toMatchSnapshot()
 // })
 
-// test('createCardBody()', async () => {
-//   const body0 = await createCardBody({ cardId: card.id, bulletInputRoot: input0 }, TESTUSERS[0].id)
+// test('createNoteBody()', async () => {
+//   const body0 = await createNoteBody({ noteId: note.id, bulletInputRoot: input0 }, TESTUSERS[0].id)
 //   expect(clean({ ...body0, content: omitDeep(JSON.parse(body0.content), ['timestamp']) })).toMatchSnapshot()
 
 //   const input1: BulletInput = {
@@ -111,87 +111,87 @@ afterAll(async () => {
 //     ],
 //   }
 
-//   const body1 = await createCardBody({ cardId: card.id, bulletInputRoot: input1 }, TESTUSERS[1].id)
+//   const body1 = await createNoteBody({ noteId: note.id, bulletInputRoot: input1 }, TESTUSERS[1].id)
 //   console.log(body1)
 //   expect(clean({ ...body1, content: omitDeep(JSON.parse(body1.content), ['timestamp']) })).toMatchSnapshot()
 // })
 
-// test('createCard()', async () => {
-//   const { card, body } = await createCard({ name: '$BBB', template: templateTicker, title: 'BBB Company' })
-//   expect(clean(card)).toMatchSnapshot()
+// test('createNote()', async () => {
+//   const { note, body } = await createNote({ name: '$BBB', template: templateTicker, title: 'BBB Company' })
+//   expect(clean(note)).toMatchSnapshot()
 //   expect(clean({ ...body, content: omitDeep(JSON.parse(body.content), ['timestamp']) })).toMatchSnapshot()
 // })
 
 it.each(['https://zhuanlan.zhihu.com/p/75120221', 'https://www.mobile01.com/topicdetail.php?f=793&t=6520838'])(
   'getOrCreateByUrl()',
   async url => {
-    const card = await CardModel.getOrCreateByUrl({ url: url })
-    expect(clean(card)).toMatchSnapshot()
+    const note = await NoteModel.getOrCreateByUrl({ url: url })
+    expect(clean(note)).toMatchSnapshot()
   },
 )
 
-// test('create a symbol card', async () => {
-//   const card = await createCard('$AA')
+// test('create a symbol note', async () => {
+//   const note = await createNote('$AA')
 //   // const discussBoard = await prisma.comment.findUnique({
-//   //   where: { id: (card.meta as unknown as CardMeta).commentId },
+//   //   where: { id: (note.meta as unknown as NoteMeta).commentId },
 //   // })
-//   expect(clean(card)).toMatchSnapshot()
+//   expect(clean(note)).toMatchSnapshot()
 //   // expect(clean(discussBoard)).toMatchSnapshot()
 //   // expect(_clean(editor.getMarkerlines())).toMatchSnapshot()
 // })
 
-// test('create a symbol card body', async () => {
-//   const card = await getOrCreateCardBySymbol('$AA')
-//   const editor = new Editor(card.body.text)
+// test('create a symbol note body', async () => {
+//   const note = await getOrCreateNoteBySymbol('$AA')
+//   const editor = new Editor(note.body.text)
 //   editor.setText(`[?] <BUY> @30
 // [+]
 // 111 111
 // 222 222`)
 //   editor.flush()
 
-//   await createCardBody(card, editor, TESTUSERS[0].id)
-//   const temp = await prisma.cocard.findUnique({
-//     where: { id: card.id },
+//   await createNoteBody(note, editor, TESTUSERS[0].id)
+//   const temp = await prisma.conote.findUnique({
+//     where: { id: note.id },
 //     include: { body: true },
 //   })
 //   expect(clean(temp)).toMatchSnapshot()
 //   // expect(_clean(editor.getMarkerlines())).toMatchSnapshot()
 // })
 
-// test('create a blank web card', async () => {
+// test('create a blank web note', async () => {
 //   const [link] = await getOrCreateLink('http://test1.com')
-//   const card = await getOrCreateCardByLink(link)
-//   expect(clean(card)).toMatchSnapshot()
+//   const note = await getOrCreateNoteByLink(link)
+//   expect(clean(note)).toMatchSnapshot()
 // })
 
-// test('edit a web card', async () => {
-//   const card = await prisma.cocard.findUnique({
+// test('edit a web note', async () => {
+//   const note = await prisma.conote.findUnique({
 //     where: { linkUrl: 'http://test1.com' },
 //     include: { body: true },
 //   })
-//   if (card === null) throw new Error()
+//   if (note === null) throw new Error()
 
-//   const editor = new Editor(card.body.text)
+//   const editor = new Editor(note.body.text)
 //   editor.setText(`[*]
 // 2021年會有進一步財政刺激
 // 歷年有1月效應，1月份呈現反彈，但不認為`)
 //   editor.flush()
 
-//   await createCardBody(card, editor, TESTUSERS[0].id)
-//   const temp = await prisma.cocard.findUnique({
-//     where: { id: card.id },
+//   await createNoteBody(note, editor, TESTUSERS[0].id)
+//   const temp = await prisma.conote.findUnique({
+//     where: { id: note.id },
 //     include: { body: true },
 //   })
 //   expect(clean(temp)).toMatchSnapshot()
 // })
 
-// test('create a nested web-card', async () => {
+// test('create a nested web-note', async () => {
 //   const [link, { fetchResult }] = await getOrCreateLink('http://test2.com')
-//   const card = await getOrCreateCardByLink(link)
+//   const note = await getOrCreateNoteByLink(link)
 
 //   const editor = new Editor(
-//     card.body.text,
-//     card.body.meta as unknown as Markerline[],
+//     note.body.text,
+//     note.body.meta as unknown as Markerline[],
 //     'http://test2.com',
 //     TESTOAUTHORS[0].name,
 //   )
@@ -205,11 +205,11 @@ it.each(['https://zhuanlan.zhihu.com/p/75120221', 'https://www.mobile01.com/topi
 // [?] <SELL> @30`)
 //   editor.flush()
 
-//   for (const [cardlabel, markerlines] of editor.getNestedMarkerlines()) {
-//     const nestedCard = await getOrCreateCardBySymbol(cardlabel.symbol)
+//   for (const [notelabel, markerlines] of editor.getNestedMarkerlines()) {
+//     const nestedNote = await getOrCreateNoteBySymbol(notelabel.symbol)
 //     const nestedEditor = new Editor(
-//       nestedCard.body.text,
-//       nestedCard.body.meta as unknown as Markerline[],
+//       nestedNote.body.text,
+//       nestedNote.body.meta as unknown as Markerline[],
 //       link.url,
 //       TESTOAUTHORS[0].name,
 //     )
@@ -218,38 +218,38 @@ it.each(['https://zhuanlan.zhihu.com/p/75120221', 'https://www.mobile01.com/topi
 //     console.log(nestedEditor.getText())
 //     console.log(nestedEditor.getMarkerlines())
 
-//     await createCardBody(nestedCard, nestedEditor, TESTUSERS[1].id)
+//     await createNoteBody(nestedNote, nestedEditor, TESTUSERS[1].id)
 //   }
 
-//   await createCardBody(card, editor, TESTUSERS[1].id)
+//   await createNoteBody(note, editor, TESTUSERS[1].id)
 
-//   expect((await getOrCreateCardByLink(link)).body.text).toMatchSnapshot()
-//   expect(clean((await getOrCreateCardByLink(link)).body.meta as unknown as Record<string, unknown>)).toMatchSnapshot()
-//   expect((await getOrCreateCardBySymbol('$CC')).body.text).toMatchSnapshot()
+//   expect((await getOrCreateNoteByLink(link)).body.text).toMatchSnapshot()
+//   expect(clean((await getOrCreateNoteByLink(link)).body.meta as unknown as Record<string, unknown>)).toMatchSnapshot()
+//   expect((await getOrCreateNoteBySymbol('$CC')).body.text).toMatchSnapshot()
 //   expect(
-//     clean((await getOrCreateCardBySymbol('$CC')).body.meta as unknown as Record<string, unknown>),
+//     clean((await getOrCreateNoteBySymbol('$CC')).body.meta as unknown as Record<string, unknown>),
 //   ).toMatchSnapshot()
-//   expect((await getOrCreateCardBySymbol('$DD')).body.text).toMatchSnapshot()
+//   expect((await getOrCreateNoteBySymbol('$DD')).body.text).toMatchSnapshot()
 //   expect(
-//     clean((await getOrCreateCardBySymbol('$DD')).body.meta as unknown as Record<string, unknown>),
+//     clean((await getOrCreateNoteBySymbol('$DD')).body.meta as unknown as Record<string, unknown>),
 //   ).toMatchSnapshot()
 
-//   // await createCardBody(card, editor, TESTUSERS[1].id)
+//   // await createNoteBody(note, editor, TESTUSERS[1].id)
 
-//   // const rootCard = await prisma.cocard.findUnique({
-//   //   where: { id: card.id },
+//   // const rootNote = await prisma.conote.findUnique({
+//   //   where: { id: note.id },
 //   //   include: { body: true },
 //   // })
-//   // expect(omitDeep(rootCard ?? {}, ['createdAt', 'updatedAt'])).toMatchSnapshot()
+//   // expect(omitDeep(rootNote ?? {}, ['createdAt', 'updatedAt'])).toMatchSnapshot()
 
-//   // const nestedCard = await prisma.cocard.findUnique({
+//   // const nestedNote = await prisma.conote.findUnique({
 //   //   where: { linkUrl: '//$ABBV' },
 //   //   include: { body: true },
 //   // })
-//   // if (nestedCard === null) throw new Error()
-//   // expect(omitDeep(nestedCard ?? {}, ['createdAt', 'updatedAt'])).toMatchSnapshot()
+//   // if (nestedNote === null) throw new Error()
+//   // expect(omitDeep(nestedNote ?? {}, ['createdAt', 'updatedAt'])).toMatchSnapshot()
 
-//   // const markerlines = new TextEditor(nestedCard.body.text).getMarkerlines()
+//   // const markerlines = new TextEditor(nestedNote.body.text).getMarkerlines()
 //   // expect(markerlines).toMatchSnapshot()
 // })
 
@@ -257,11 +257,11 @@ it.each(['https://zhuanlan.zhihu.com/p/75120221', 'https://www.mobile01.com/topi
 //   splitByUrl(readFileSync(sampleFilepath, { encoding: 'utf8' }))
 //     .filter((e): e is [string, string] => e[0] !== undefined)
 //     .map(e => [e[0].trim(), e[1].trim()]),
-// )('Create web card from common.txt', async (url: string, body: string) => {
+// )('Create web note from common.txt', async (url: string, body: string) => {
 //   if (url === undefined) return
 
 //   const [link] = await getOrCreateLink(url, fetcher)
-//   const card = await getOrCreateCardByLink(link)
-//   expect((await createWebCardBody(card.id, body, TESTUSERS[0].id)).text).toMatchSnapshot()
-//   // expect((await createWebCardBody(card.id, body, TESTUSERS[0].id)).meta).toMatchSnapshot()
+//   const note = await getOrCreateNoteByLink(link)
+//   expect((await createWebNoteBody(note.id, body, TESTUSERS[0].id)).text).toMatchSnapshot()
+//   // expect((await createWebNoteBody(note.id, body, TESTUSERS[0].id)).meta).toMatchSnapshot()
 // })

@@ -1,4 +1,4 @@
-import { Author, Card, Link, Sym } from '@prisma/client'
+import { Author, Link, Note, Sym } from '@prisma/client'
 import { FetchClient, FetchResult } from '../fetcher/fetch-client'
 import { tryFetch } from '../fetcher/vendors'
 import prisma from '../prisma'
@@ -13,7 +13,7 @@ const toAuthorName = (domain: string, domainAuthorName: string) => {
 
 type LinkParsed = Omit<Link, 'scraped'> & {
   author: Author | null
-  card: (Card & { sym: Sym }) | null
+  note: (Note & { sym: Sym }) | null
   scraped: FetchResult
 }
 
@@ -24,7 +24,7 @@ export const LinkService = {
 
   async _find(url: string): Promise<LinkParsed | null> {
     const found = await prisma.link.findUnique({
-      include: { author: true, card: { include: { sym: true } } },
+      include: { author: true, note: { include: { sym: true } } },
       where: { url },
     })
     if (found) {
@@ -83,7 +83,7 @@ export const LinkService = {
         scraped: res as any,
         author: author ? { connect: { id: author.id } } : undefined,
       },
-      include: { card: { include: { sym: true } }, author: true },
+      include: { note: { include: { sym: true } }, author: true },
     })
     return [
       {

@@ -18,7 +18,7 @@ const InlineRate = (props: RenderElementProps & { element: InlineRateElement }):
   const [showPopover, setShowPopover] = useState(false)
   // const [shotId, setShotId] = useState(element.id)
   // const [shotData, setShotData] = useState<ShotFragment | undefined>()
-  // const { data: targetData } = useCardQuery({ variables: { id: shotId } })
+  // const { data: targetData } = useNoteQuery({ variables: { id: shotId } })
 
   const onRateCreated = (rate: RateFragment, targetSymbol: string) => {
     // const editor = useSlateStatic()

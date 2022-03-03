@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { AuthorFragment, useCardLazyQuery, useCreateAuthorMutation } from '../../apollo/query.graphql'
+import { AuthorFragment, useNoteLazyQuery, useCreateAuthorMutation } from '../../apollo/query.graphql'
 import { AuthorType, AuthorInput, Author } from 'graphql-let/__generated__/__types__'
 import Select from 'react-select'
 import { customStyle, reactSelectControlStyle } from './create-rate-form'

@@ -1,32 +1,32 @@
 import { Sym } from '@prisma/client'
-import { CardDigest as GQLCardDigest } from 'graphql-let/__generated__/__types__'
+import { NoteDigest as GQLNoteDigest } from 'graphql-let/__generated__/__types__'
 import { NodeBody, NodeChange, TreeNode, TreeService } from '@conote/docdiff'
 import { Bullet } from '../../components/bullet/bullet'
 import prisma from '../prisma'
-import { CardMeta, CardModel } from './card-model'
-import { CardStateModel } from './card-state-model'
-import { PrismaCardState, PrismaCommit } from './commit-model'
+import { NoteMeta, NoteModel } from './note-model'
+import { NoteStateModel } from './note-state-model'
+import { PrismaNoteState, PrismaCommit } from './commit-model'
 
-type CardDigest = {
-  cardId: string
-  cardMeta: CardMeta
+type NoteDigest = {
+  noteId: string
+  noteMeta: NoteMeta
   commitId: string
-  fromCardId?: string
+  fromNoteId?: string
   picks: string[]
   sym: Sym
   updatedAt: Date
 }
 
-export const CardDigestModel = {
-  // fromCard(card: CardPrarsed, subs: GQLCardDigest[]): GQLCardDigest {
+export const NoteDigestModel = {
+  // fromNote(note: NotePrarsed, subs: GQLNoteDigest[]): GQLNoteDigest {
   //   if (subs.length === 0) {
-  //     throw 'Require 1 or more sub-digests to create a null-state-card digest'
+  //     throw 'Require 1 or more sub-digests to create a null-state-note digest'
   //   }
-  //   const { id: cardId, sym, meta: cardMeta } = card
+  //   const { id: noteId, sym, meta: noteMeta } = note
   //   return {
   //     commitId: subs[0].commitId, // TODO: temp fill
-  //     cardId,
-  //     cardMeta,
+  //     noteId,
+  //     noteMeta,
   //     sym,
   //     title: sym.symbol,
   //     picks: [],
@@ -35,14 +35,14 @@ export const CardDigestModel = {
   //   }
   // },
 
-  fromCardState(state: PrismaCardState): Omit<CardDigest, 'children'> {
-    const { meta: cardMeta, sym } = CardModel.parse(state.card)
-    const { body, cardId, commitId, createdAt, updatedAt } = CardStateModel.parse(state)
+  fromNoteState(state: PrismaNoteState): Omit<NoteDigest, 'children'> {
+    const { meta: noteMeta, sym } = NoteModel.parse(state.note)
+    const { body, noteId, commitId, createdAt, updatedAt } = NoteStateModel.parse(state)
     return {
       commitId,
-      cardId,
-      cardMeta,
-      fromCardId: body.fromCardId,
+      noteId,
+      noteMeta,
+      fromNoteId: body.fromNoteId,
       sym,
       picks: body.changes
         .filter((e): e is NodeChange<Bullet> & { data: Bullet } => e.data !== undefined && e.type === 'insert')
@@ -51,12 +51,12 @@ export const CardDigestModel = {
     }
   },
 
-  fromCommit(commit: PrismaCommit): TreeNode<CardDigest>[] {
-    const nodes = TreeService.fromList(commit.cardStates.map(e => this.toNodeBody(this.fromCardState(e))))
+  fromCommit(commit: PrismaCommit): TreeNode<NoteDigest>[] {
+    const nodes = TreeService.fromList(commit.noteStates.map(e => this.toNodeBody(this.fromNoteState(e))))
     return nodes
   },
 
-  async _getLatest(afterCommitId?: string): Promise<TreeNode<CardDigest>[]> {
+  async _getLatest(afterCommitId?: string): Promise<TreeNode<NoteDigest>[]> {
     // const maxDate = dayjs().startOf('d').subtract(7, 'd')
     const commits = await prisma.commit.findMany({
       // where: { createdAt: { gte: maxDate.toDate() } },
@@ -64,7 +64,7 @@ export const CardDigestModel = {
       cursor: afterCommitId ? { id: afterCommitId } : undefined,
       take: 20,
       skip: afterCommitId ? 1 : 0,
-      include: { cardStates: { include: { card: { include: { sym: true, link: true } } } } },
+      include: { noteStates: { include: { note: { include: { sym: true, link: true } } } } },
     })
     const digests = commits
       .map(e => this.fromCommit(e))
@@ -75,12 +75,12 @@ export const CardDigestModel = {
     return digests
   },
 
-  async getLatest(afterCommitId?: string): Promise<GQLCardDigest[]> {
+  async getLatest(afterCommitId?: string): Promise<GQLNoteDigest[]> {
     const nodes = await this._getLatest(afterCommitId)
-    return nodes.map(e => this.toGQLCardDigest(e))
+    return nodes.map(e => this.toGQLNoteDigest(e))
   },
 
-  toGQLCardDigest(node: TreeNode<CardDigest>): GQLCardDigest {
+  toGQLNoteDigest(node: TreeNode<NoteDigest>): GQLNoteDigest {
     if (node.data === undefined) {
       throw 'node.data === undefined'
     }
@@ -91,12 +91,12 @@ export const CardDigestModel = {
     }
   },
 
-  toNodeBody(digest: CardDigest): NodeBody<CardDigest> {
-    const { cardId, fromCardId, updatedAt } = digest
+  toNodeBody(digest: NoteDigest): NodeBody<NoteDigest> {
+    const { noteId, fromNoteId, updatedAt } = digest
     return {
-      cid: cardId, // since parent-cid is bind with card-id
+      cid: noteId, // since parent-cid is bind with note-id
       data: digest,
-      parentCid: fromCardId ?? TreeService.tempRootCid,
+      parentCid: fromNoteId ?? TreeService.tempRootCid,
       index: updatedAt.getTime(),
     }
   },

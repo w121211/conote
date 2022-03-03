@@ -14,7 +14,7 @@ export type NavLocation = {
   mirrorSymbol?: string // 包括前綴符號，eg ::$XX, ::[[Hello World]]
   // author?: string // 包括前綴符號，eg @cnyes
   authorId?: string
-  sourceCardId?: string
+  sourceNoteId?: string
   sourceLinkId?: string
 }
 

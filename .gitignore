@@ -95,3 +95,5 @@ dist/
 __generated__
 .docker-sync
 src/web/prisma/seeds/_local-cache.dump.json
+
+gke_conote_prisma_dump-*
