@@ -50,7 +50,7 @@ export const bt = (cid: number, children: TreeNode<Bullet>[] = []): TreeNode<Bul
 // const isBulletEqual = (a: Bullet, b: Bullet) => {
 // }
 
-// const CARD_STATES: CardStateParsed[] = []
+// const CARD_STATES: NoteStateParsed[] = []
 
 // export const TEST_SYMBOLS = [
 //   { name: '$AAA', cat: SymbolCat.TICKER },
@@ -117,11 +117,11 @@ export const TestDataHelper = {
 
     const commit0 = await CommitModel.create(
       {
-        cardStateInputs: [
+        noteStateInputs: [
           {
             cid: '$AA',
             prevStateId: null,
-            cardInput: { symbol: '$AA' },
+            noteInput: { symbol: '$AA' },
             value: values[0][1],
             changes: values[0][2],
           },
@@ -129,34 +129,34 @@ export const TestDataHelper = {
       },
       TESTUSERS[0].id,
     )
-    const state0 = commit0.commit.cardStates[0]
+    const state0 = commit0.commit.noteStates[0]
     if (state0 === undefined) {
       throw 'createCommits(): state0 === undefined'
     }
 
     const commit1 = await CommitModel.create(
       {
-        cardStateInputs: [
+        noteStateInputs: [
           {
             cid: '$AA',
             prevStateId: state0.id,
-            cardId: state0.cardId,
+            noteId: state0.noteId,
             value: values[1][1],
             changes: values[1][2],
           },
           {
             cid: '$BB',
             prevStateId: null,
-            // sourceCardId: state0.cardId,
-            cardInput: { symbol: '$BB' },
+            // sourceNoteId: state0.noteId,
+            noteInput: { symbol: '$BB' },
             value: values[0][1],
             changes: values[0][2],
           },
           {
             cid: '$CC',
             prevStateId: null,
-            // sourceCardId: state0.cardId,
-            cardInput: { symbol: '$CC' },
+            // sourceNoteId: state0.noteId,
+            noteInput: { symbol: '$CC' },
             value: values[0][1],
             changes: values[0][2],
           },
@@ -216,5 +216,5 @@ const omitUndefined = <T>(obj: T): T => {
 }
 
 export const clean = (obj: Record<string, unknown> | null): Record<string, unknown> | null => {
-  return obj === null ? obj : omitUndefined(omitDeep(obj, ['createdAt', 'updatedAt', 'id', 'symId', 'cardId']))
+  return obj === null ? obj : omitUndefined(omitDeep(obj, ['createdAt', 'updatedAt', 'id', 'symId', 'noteId']))
 }

@@ -1,8 +1,8 @@
 import { nanoid } from 'nanoid'
 import {
-  Card as GQLCard,
-  CardInput as GQLCardInput,
-  CardStateInput as GQLCardStateInput,
+  Note as GQLCard,
+  NoteInput as GQLCardInput,
+  NoteStateInput as GQLCardStateInput,
 } from 'graphql-let/__generated__/__types__'
 import { NodeBody, TreeNode, TreeService } from '@conote/docdiff'
 import { Markerline } from '@conote/editor'
@@ -92,8 +92,8 @@ export class MKDoc {
     return {
       cid,
       fromDocCid,
-      cardInput,
-      cardId: cardCopy?.id,
+      noteInput: cardInput,
+      noteId: cardCopy?.id,
       prevStateId: cardCopy?.state?.id,
       changes: [], // TODO
       value,

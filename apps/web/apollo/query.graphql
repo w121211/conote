@@ -110,7 +110,7 @@ fragment noteEmojiLike on NoteEmojiLike {
   __typename
   id
   noteEmojiId
-  choice
+  liked
   updatedAt
 }
 
@@ -614,8 +614,8 @@ mutation CreateNoteEmoji($noteId: ID!, $code: EmojiCode!) {
   }
 }
 
-mutation UpsertNoteEmojiLike($noteEmojiId: ID!, $data: LikeInput!) {
-  upsertNoteEmojiLike(noteEmojiId: $noteEmojiId, data: $data) {
+mutation UpsertNoteEmojiLike($noteEmojiId: ID!, $liked: Boolean!) {
+  upsertNoteEmojiLike(noteEmojiId: $noteEmojiId, liked: $liked) {
     like {
       ...noteEmojiLike
     }

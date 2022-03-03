@@ -99,7 +99,7 @@ model DiscussEmoji {
   count     DiscussEmojiCount?
   likes     DiscussEmojiLike[]
 
-  @@unique([discussId, code])
+  @@unique([code, discussId])
 }
 
 model DiscussEmojiCount {
@@ -113,21 +113,21 @@ model DiscussEmojiCount {
 
 model DiscussEmojiLike {
   id             Int          @id @default(autoincrement())
-  userId         String
   discussEmojiId Int          @unique
+  userId         String
   liked          Boolean
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id])
   user           User         @relation(fields: [userId], references: [id])
 
-  @@unique([userId, discussEmojiId])
+  @@unique([discussEmojiId, userId])
 }
 
 model DiscussPost {
   id        Int                @id @default(autoincrement())
-  userId    String
   discussId String
+  userId    String
   status    DiscussPostStatus  @default(ACTIVE)
   content   String
   createdAt DateTime           @default(now())
@@ -148,7 +148,7 @@ model DiscussPostEmoji {
   count         DiscussPostEmojiCount?
   likes         DiscussPostEmojiLike[]
 
-  @@unique([discussPostId, code])
+  @@unique([code, discussPostId])
 }
 
 model DiscussPostEmojiCount {
@@ -162,8 +162,8 @@ model DiscussPostEmojiCount {
 
 model DiscussPostEmojiLike {
   id                 Int              @id @default(autoincrement())
-  userId             String
   discussPostEmojiId Int              @unique
+  userId             String
   liked              Boolean
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
@@ -188,7 +188,7 @@ model Note {
 }
 
 model NoteEmoji {
-  id        String          @id @default(cuid())
+  id        Int             @id @default(autoincrement())
   noteId    String
   code      EmojiCode
   createdAt DateTime        @default(now())
@@ -202,7 +202,7 @@ model NoteEmoji {
 
 model NoteEmojiCount {
   id          Int       @id @default(autoincrement())
-  noteEmojiId String    @unique
+  noteEmojiId Int       @unique
   nViews      Int       @default(0)
   nUps        Int       @default(0)
   nDowns      Int       @default(0)
@@ -212,16 +212,16 @@ model NoteEmojiCount {
 }
 
 model NoteEmojiLike {
-  id          Int        @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
+  noteEmojiId Int
   userId      String
-  noteEmojiId String
-  choice      LikeChoice
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  noteEmoji   NoteEmoji  @relation(fields: [noteEmojiId], references: [id])
-  user        User       @relation(fields: [userId], references: [id])
+  liked       Boolean
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  noteEmoji   NoteEmoji @relation(fields: [noteEmojiId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 
-  @@unique([userId, noteEmojiId])
+  @@unique([noteEmojiId, userId])
 }
 
 model NoteState {

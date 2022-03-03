@@ -173,6 +173,32 @@ Troubleshoots:
   ```
   https://github.com/bitnami/charts/issues/2061
 
+#### Migrate
+
+Migration flow:
+
+1. Dump cloud database to local machine
+2. Restore the database to local for testing
+3. (Optional) Delete `_prisma` table to ignore previous migrations and create `prisma.schema` from the exisiting database
+4. Use `prisma migrate dev` to write migrations, data may loss
+5. Restore the database to local again, use `prisma migrate deploy` to apply migrations
+6. Dump the local database which applied migrations
+7. Restore the after-migrate-database to cloud
+
+prisma migrate
+
+```sh
+# (optional) generate prisma.schema from exisiting database
+yarn dotenv -e .env.local prisma migrate db pull
+
+# alter sql first then apply
+yarn run migrate --create-only
+yarn dotenv -e .env.local prisma migrate dev
+
+# exclude initial script
+yarn dotenv -e .env.local prisma migrate resolve
+```
+
 # Todos
 
 v-discuss
@@ -182,15 +208,13 @@ v-discuss
 
 v-next
 
-- naming
-  - 'card' to 'note'
 - optimize
   - avoid rerender if possible
   - use SSR if possible
   - consider switch to https://typegraphql.com/
 - loading -> static icon
 - auth
-  - improve login, logout stablility
+  - [working] improve login, logout stablility
 - user
   - [prior] (req) user-page, include user's notes, rates, interested fields
   - (?) anonymous user
@@ -202,9 +226,9 @@ v-next
   - inline-poll
   - inline filtertag `#filter-tag`
   - [prior@lisa] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
-  - (?) root li without bullet icon?
-  - [working] 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
-  - labels @eg #new-note #fisrt-commit
+  - [?] root li without bullet icon?
+  - [pending] 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
+  - [prior@lisa] labels @eg #new-note #fisrt-commit
   - (req) show doc diff
   - (req) easy to reference sourc url -> eg copy url button, @url
   - (req) show keyword as hints (optional disable by setting)
@@ -249,7 +273,6 @@ v-next
 - give & take
   - share cards
   - credit
-- handle doc conflict -> git mechanism
 - testing
   - assign leader
   - testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves
@@ -258,26 +281,19 @@ v-next
 - doc
   - check note-copy is in sync with the latest note
     - update note-meta should first check is the latest card
-- note-meta
-  - should keep user update record -> (?) allow update card-meta without commit note?
-- channel
-  - (req) subdomain/channel, eg [[dev/Browser Extension]]
-  - [@hsuan] design channel database schema
-  - switch commit to channel base, @eg @user/some_topic -> @all/some_topic
-- discuss
-  - action button for delete, edit, report
 - [@hsuan] invite code
 
 v0.2
 
+- naming
+  - [v] 'card' to 'note'
 - /index
   - [v] announcement
-  - SSR
 - /author
   - [v] gql create/update author
-  - edit author meta (ie intro)
-  - (ui) add @ mark on author
-  - [working] author rates <- gql rates by author
+  - [prior@lisa] edit author meta (ie intro)
+  - [prior@lisa] (ui) add @ mark on author
+  - [v] author rates <- gql rates by author
   - [pending] author articles <- gql links by author <- similar to rates
 - /editor
   - parse url, eg https://arxiv.org/abs/2112.00114
@@ -291,10 +307,12 @@ v0.2
   - [v] editor parser, inline element
   - [v] (bk) prisma model, graphql api, resolvers
   - [v] (ui) modal
+  - [@lisa] action button for delete, edit, report
 - note
   - [prior@lisa] add note emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
+  - [working] note emoji :up, :down cannnot co-checked
 - note-digest
-  - [pending] add card emojis
+  - [pending] add note emojis
 - note search panel
   - [v] newly added symbol should be searchable
   - [v] graphql add search author, ticker with id
@@ -302,11 +320,18 @@ v0.2
   - search panel with keyboard support
 - browser extension
   - [v] (ui) remove scss
-  - add inline-rate
+  - [working] add inline-rate
   - [pending] deploy to chrome/firefox store -> require to fill tons of info
 - database
-  - migrate table
-  - [working] script for couting words/notes of an user
+  - [v] migrate table
+  - [pending] script for couting words/notes of an user -> use user instead
+- channel
+  - [prior@hsuan] design channel database schema
+  - (req) subdomain/channel, eg [[dev/Browser Extension]]
+  - switch commit to channel base, @eg @user/some_topic -> @all/some_topic
+  - handle doc conflict -> git mechanism
+- note-meta
+  - should keep user update record -> (?) allow update card-meta without commit note?
 
 v0.1.1
 
@@ -346,8 +371,8 @@ v0.1.1
   - [v] (ui) line space
   - [pending] (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
   - [v] (ui) :pin emoji should not have count
-  - (ui) :pin emoji color -> gray (unclick)
-  - (ui) conote -> konote & when on-hover button add some feedback
+  - [@lisa] (ui) :pin emoji color -> gray (unclick)
+  - [@lisa] (ui) conote -> konote & when on-hover button add some feedback
   - [v] (bug) while not logged in can still typing in the editor
 - workspace
   - [v] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved

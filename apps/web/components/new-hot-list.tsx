@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { LatestCards } from '../pages'
+import { LatestNotes } from '../pages'
 import HotDisplay from './hot-display/hot-display'
 import TabsWithSlider from './tabs-with-slider'
 
@@ -29,7 +29,7 @@ const NewHotList = () => {
         tabListWidth={listContainer.current?.getBoundingClientRect().width}
         handleActiveList={i => setActiveList(i)}
       /> */}
-      {activeList === 0 && <LatestCards />}
+      {activeList === 0 && <LatestNotes />}
       {activeList === 1 && <HotDisplay filtertags={['全部', '#討論', '#機會', '#Battle', '#事件']} />}
     </div>
   )
