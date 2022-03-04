@@ -15,7 +15,7 @@ import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import fetcher from '../lib/fetcher/fetcher'
 import { hasCount, toStringId } from '../lib/helpers'
 import { AuthorModel } from '../lib/models/author-model'
-import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
+// import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
 import { CommitModel } from '../lib/models/commit-model'
 import { NoteModel } from '../lib/models/note-model'
 import { NoteDigestModel } from '../lib/models/note-digest-model'
@@ -611,28 +611,30 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createBulletEmoji(_parent, { bulletId, code }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const { emoji, like } = await BulletEmojiModel.create({ bulletId, code, userId })
-    return {
-      emoji: {
-        ...emoji,
-        count: toStringId(emoji.count),
-      },
-      like: toStringId(like),
-    }
+    throw 'consider to drop'
+    // const { userId } = await isAuthenticated(req)
+    // const { emoji, like } = await BulletEmojiModel.create({ bulletId, code, userId })
+    // return {
+    //   emoji: {
+    //     ...emoji,
+    //     count: toStringId(emoji.count),
+    //   },
+    //   like: toStringId(like),
+    // }
   },
 
   async upsertBulletEmojiLike(_parent, { bulletEmojiId, data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const { like, count } = await BulletEmojiModel.upsertLike({
-      choice: data.choice,
-      bulletEmojiId,
-      userId,
-    })
-    return {
-      like: toStringId(like),
-      count: toStringId(count),
-    }
+    throw 'consider to drop'
+    // const { userId } = await isAuthenticated(req)
+    // const { like, count } = await BulletEmojiModel.upsertLike({
+    //   choice: data.choice,
+    //   bulletEmojiId,
+    //   userId,
+    // })
+    // return {
+    //   like: toStringId(like),
+    //   count: toStringId(count),
+    // }
   },
 
   async createCommit(_parent, { data }, { req }, _info) {

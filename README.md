@@ -225,6 +225,7 @@ v-next
 - editor
   - inline-poll
   - inline filtertag `#filter-tag`
+  - inline url, eg https://arxiv.org/abs/2112.00114
   - [prior@lisa] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
   - [?] root li without bullet icon?
   - [pending] 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
@@ -267,7 +268,7 @@ v-next
   - redirect konote.one to www.konote.one
 - [@hsuan] nlp
   - [v] greedy rate samples from cnyes news
-  - training on greedy samples
+  - [working@chi] training on greedy samples
     - train ner -> entities, subj/obj
     - train classifier -> rate (long, short, hold)
 - give & take
@@ -296,7 +297,6 @@ v0.2
   - [v] author rates <- gql rates by author
   - [pending] author articles <- gql links by author <- similar to rates
 - /editor
-  - parse url, eg https://arxiv.org/abs/2112.00114
   - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
   - [v] (req) a save button
   - [pending] (req) a setting button
@@ -310,7 +310,7 @@ v0.2
   - [@lisa] action button for delete, edit, report
 - note
   - [prior@lisa] add note emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
-  - [working] note emoji :up, :down cannnot co-checked
+  - [prior@lisa] note emoji :up, :down cannnot both be checked -> check at frontend, server will not check
 - note-digest
   - [pending] add note emojis
 - note search panel
@@ -320,7 +320,7 @@ v0.2
   - search panel with keyboard support
 - browser extension
   - [v] (ui) remove scss
-  - [working] add inline-rate
+  - [working@chi] add inline-rate
   - [pending] deploy to chrome/firefox store -> require to fill tons of info
 - database
   - [v] migrate table
@@ -347,7 +347,7 @@ v0.1.1
     - keywords
   - if card is existed (ie got id), able to update note meta instantly without commit
 - doc-index
-  - [working] (bug) doc-index tree fail when removing parent docs
+  - [working@chi] (bug) doc-index tree fail when removing parent docs
   - [v] (bug) child doc-index-panel hidden delete not show
   - [v] (ui) doc-index title/symbol display, Webpage -> symbol, title, Ticker -> symbol + title, eg $BA 波音, Topic -> symbol only
 - /index

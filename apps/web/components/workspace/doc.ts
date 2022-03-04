@@ -42,6 +42,7 @@ export class Doc {
 
   editorValueLastSaved: LiElement[]
   isEditorValueChangedSinceSave = false
+  isWebNote: boolean
 
   constructor({
     cid,
@@ -67,6 +68,7 @@ export class Doc {
     this.updatedAt = updatedAt ?? Date.now()
     this.committedAt = committedAt ?? null
     this.committedState = committedState ?? null
+    this.isWebNote = noteCopy?.link ? true : false
   }
 
   static createDoc({

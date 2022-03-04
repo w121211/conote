@@ -136,15 +136,10 @@ class Workspace {
     await this.updateEditingDocIndicies()
   }
 
-  async openDoc({
-    symbol,
-    note,
-    isModal,
-  }: {
-    symbol: string
-    note: NoteFragment | null
-    isModal?: true
-  }): Promise<void> {
+  async openDoc({ symbol, note, isModal }: { symbol: string; note: NoteFragment | null; isModal?: true }): Promise<{
+    doc: Doc
+    isFromSaved: boolean
+  }> {
     const _doc$ = isModal ? this.modalDoc$ : this.mainDoc$
     if (_doc$.getValue().doc !== null) {
       throw '_doc$.getValue().doc !== null, call closeDoc() first before open another'
@@ -156,7 +151,10 @@ class Workspace {
       // TODO: check with remote has note-state updated?
       _doc$.next({ doc: found })
       this.status$.next(null)
-      return
+      return {
+        doc: found,
+        isFromSaved: true,
+      }
     }
 
     // No local doc, create one
@@ -168,8 +166,13 @@ class Workspace {
       }
       fromDocCid = mainDoc.cid
     }
-    _doc$.next({ doc: Doc.createDoc({ symbol, note, fromDocCid }) })
+    const doc = Doc.createDoc({ symbol, note, fromDocCid })
+    _doc$.next({ doc })
     this.status$.next(null)
+    return {
+      doc,
+      isFromSaved: false,
+    }
   }
 
   /**

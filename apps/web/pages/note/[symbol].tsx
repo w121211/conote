@@ -4,33 +4,31 @@ import { useRouter } from 'next/router'
 import { useObservable } from 'rxjs-hooks'
 import { useNoteQuery, useMeQuery } from '../../apollo/query.graphql'
 import NoteHead from '../../components/note-head'
+import DiscussModal from '../../components/discuss/modal-page/discuss-modal'
 import { BulletEditor } from '../../components/editor/editor'
+import HeaderNoteEmojis from '../../components/emoji-up-down/header-note-emojis'
 import Layout from '../../components/layout'
 import Modal from '../../components/modal/modal'
+import NoteTemplate from '../../components/note-template'
 import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
-import HeaderNoteEmojis from '../../components/emoji-up-down/header-note-emojis'
-import DiscussModal from '../../components/discuss/modal-page/discuss-modal'
-import TemplatePage from '../../components/template'
 
 const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data: meData } = useMeQuery()
   const { data, error, loading } = useNoteQuery({ variables: { symbol } })
   const mainDoc = useObservable(() => workspace.mainDoc$)
-  const [hasSym, setHasSym] = useState(false)
+  const [showTemplate, setShowTemplate] = useState(false)
 
   useEffect(() => {
-    // console.log(mainDoc?.doc)
-    if (data) {
-      workspace.openDoc({ symbol, note: data.note ?? null })
-    }
-    Doc.find({ symbol }).then(resolve => {
-      if (resolve) {
-        setHasSym(true)
-      } else {
-        return
+    const runAsync = async () => {
+      if (data) {
+        const { doc, isFromSaved } = await workspace.openDoc({ symbol, note: data.note ?? null })
+        if (!isFromSaved && doc.noteCopy === null) {
+          setShowTemplate(true)
+        }
       }
-    })
+    }
+    runAsync()
   }, [data])
 
   if (loading) {
@@ -50,17 +48,13 @@ const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
     <div className=" ">
       {/* <div className="flex-1 min-w-0 "> */}
       <NoteHead doc={mainDoc.doc} />
-      {/* {mainDoc?.doc?.noteCopy ? ( */}
-      {!data.note && !hasSym ? (
-        <TemplatePage doc={mainDoc.doc} />
+
+      {showTemplate ? (
+        <NoteTemplate doc={mainDoc.doc} setShowTemplate={setShowTemplate} />
       ) : (
         <BulletEditor doc={mainDoc.doc} readOnly={meData?.me === undefined} />
       )}
 
-      {/* ) : (
-        <div>template</div>
-      )} */}
-      {/* </div> */}
       {/* {mainDoc.doc.noteCopy && (
         <div className="z-20">
           <HeaderNoteEmojis noteId={mainDoc.doc.noteCopy.id} />
@@ -177,22 +171,23 @@ const NoteSymbolPage = (): JSX.Element | null => {
     runAsync().catch(console.error)
   }, [router])
 
-  const onUnload = (e: BeforeUnloadEvent) => {
-    e.preventDefault()
-    // if (mainDoc?.doc) {
-    //   // workspace.save(mainDoc.doc)
-    //   console.log('save')
-    //   workspace.save(mainDoc.doc)
-    //   // return 'save'
-    // }
+  // const onUnload = (e: BeforeUnloadEvent) => {
+  //   e.preventDefault()
+  //   // if (mainDoc?.doc) {
+  //   //   // workspace.save(mainDoc.doc)
+  //   //   console.log('save')
+  //   //   workspace.save(mainDoc.doc)
+  //   //   // return 'save'
+  //   // }
 
-    e.returnValue = 'leave'
-    return 'leave'
-  }
-  useEffect(() => {
-    window.addEventListener('beforeunload', onUnload)
-    return () => window.removeEventListener('beforeunload', onUnload)
-  }, [onUnload])
+  //   e.returnValue = 'leave'
+  //   return 'leave'
+  // }
+
+  // useEffect(() => {
+  //   window.addEventListener('beforeunload', onUnload)
+  //   return () => window.removeEventListener('beforeunload', onUnload)
+  // }, [onUnload])
 
   return (
     <>
