@@ -117,11 +117,11 @@ export const TestDataHelper = {
 
     const commit0 = await CommitModel.create(
       {
-        cardStateInputs: [
+        noteStateInputs: [
           {
             cid: '$AA',
             prevStateId: null,
-            cardInput: { symbol: '$AA' },
+            noteInput: { symbol: '$AA' },
             value: values[0][1],
             changes: values[0][2],
           },
@@ -129,18 +129,18 @@ export const TestDataHelper = {
       },
       TESTUSERS[0].id,
     )
-    const state0 = commit0.commit.cardStates[0]
+    const state0 = commit0.commit.noteStates[0]
     if (state0 === undefined) {
       throw 'createCommits(): state0 === undefined'
     }
 
     const commit1 = await CommitModel.create(
       {
-        cardStateInputs: [
+        noteStateInputs: [
           {
             cid: '$AA',
             prevStateId: state0.id,
-            cardId: state0.cardId,
+            noteId: state0.noteId,
             value: values[1][1],
             changes: values[1][2],
           },
@@ -148,7 +148,7 @@ export const TestDataHelper = {
             cid: '$BB',
             prevStateId: null,
             // sourceCardId: state0.cardId,
-            cardInput: { symbol: '$BB' },
+            noteInput: { symbol: '$BB' },
             value: values[0][1],
             changes: values[0][2],
           },
@@ -156,7 +156,7 @@ export const TestDataHelper = {
             cid: '$CC',
             prevStateId: null,
             // sourceCardId: state0.cardId,
-            cardInput: { symbol: '$CC' },
+            noteInput: { symbol: '$CC' },
             value: values[0][1],
             changes: values[0][2],
           },

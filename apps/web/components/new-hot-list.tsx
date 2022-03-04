@@ -1,13 +1,12 @@
 import React, { useRef, useState } from 'react'
-import { LatestCards } from '../pages'
+import { LatestNotes } from '../pages'
 import HotDisplay from './hot-display/hot-display'
 import TabsWithSlider from './tabs-with-slider'
 
 const NewHotList = () => {
   const [activeList, setActiveList] = useState(0)
-  const listContainer = useRef<HTMLDivElement>(null)
   return (
-    <div className="w-screen  md:w-2/3 flex-grow flex-shrink min-w-0">
+    <div className="w-screen md:w-2/3 flex-grow flex-shrink min-w-0">
       <div className="flex justify-between gap-3 mb-6 border-gray-200">
         {['最新', '熱門'].map((tab, i) => (
           <h4
@@ -29,7 +28,7 @@ const NewHotList = () => {
         tabListWidth={listContainer.current?.getBoundingClientRect().width}
         handleActiveList={i => setActiveList(i)}
       /> */}
-      {activeList === 0 && <LatestCards />}
+      {activeList === 0 && <LatestNotes />}
       {activeList === 1 && <HotDisplay filtertags={['全部', '#討論', '#機會', '#Battle', '#事件']} />}
     </div>
   )

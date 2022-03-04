@@ -9,17 +9,17 @@
 import { inspect } from 'util'
 import { readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
-import { CardStateInput as GQLCardStateInput } from 'graphql-let/__generated__/__types__'
-import { Author, Card, CardState, Link, PrismaClient, Rate, RateChoice, Sym } from '@prisma/client'
+import { NoteStateInput as GQLNoteStateInput } from 'graphql-let/__generated__/__types__'
+import { Author, Note, NoteState, Link, PrismaClient, Rate, RateChoice, Sym } from '@prisma/client'
 import { TreeService } from '@conote/docdiff'
 import { Editor as MKEditor, Markerline, splitByUrl } from '@conote/editor'
 import { InlineItemService } from '../../components/inline/inline-item-service'
 import { TestDataHelper, TESTUSERS } from '../../test/test-helpers'
 import { FetchClient } from '../../lib/fetcher/fetch-client'
-import { CardMeta, CardModel } from '../../lib/models/card-model'
+import { NoteMeta, NoteModel } from '../../lib/models/note-model'
 import { RateBody, RateModel } from '../../lib/models/rate-model'
 import { CommitModel } from '../../lib/models/commit-model'
-import { CardStateBody, CardStateParsed } from '../../lib/models/card-state-model'
+import { NoteStateBody, NoteStateParsed } from '../../lib/models/note-state-model'
 import { MKDoc } from './mk-doc'
 // import { Doc, DocProps } from '../../components/workspace/workspace'
 // import { getBotId } from '../../lib/models/user'
@@ -119,7 +119,7 @@ async function getNeatReply({
 
 const main = async () => {
   console.log('Truncating databse...')
-  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Card", "CardState", "CardEmoji", "Discuss", "Link", "Poll", "Rate", "Sym", "User" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Note", "NoteState", "CardEmoji", "Discuss", "Link", "Poll", "Rate", "Sym", "User" CASCADE;`
 
   console.log('Creating test users...')
   await TestDataHelper.createUsers(prisma)
@@ -143,22 +143,22 @@ const main = async () => {
     for (const [url, text] of splitByUrl(readFileSync(filepath, { encoding: 'utf8' }))) {
       console.log(`Working on: ${url}`)
 
-      let webpageCard: Omit<Card, 'meta'> & {
+      let webpageCard: Omit<Note, 'meta'> & {
         link: Link
         sym: Sym
-        meta: CardMeta
-        state: CardStateParsed | null
+        meta: NoteMeta
+        state: NoteStateParsed | null
       }
       try {
-        webpageCard = await CardModel.getOrCreateByUrl({ scraper, url })
+        webpageCard = await NoteModel.getOrCreateByUrl({ scraper, url })
       } catch (err) {
         console.warn(err)
         continue
       }
 
       const doc = new MKDoc({
-        cardInput: null,
-        cardCopy: webpageCard,
+        noteInput: null,
+        noteCopy: webpageCard,
         fromDocCid: null,
         value: webpageCard.state ? webpageCard.state.body.value : [],
       })
@@ -170,17 +170,17 @@ const main = async () => {
 
       for (const [cardlabel, markerlines] of mkEditor.getNestedMarkerlines()) {
         const modalSymbol = cardlabel.symbol
-        const modalCard = await CardModel.getBySymbol(modalSymbol)
+        const modalCard = await NoteModel.getBySymbol(modalSymbol)
         const modalDoc = modalCard
           ? new MKDoc({
-              cardInput: null,
-              cardCopy: modalCard,
+              noteInput: null,
+              noteCopy: modalCard,
               fromDocCid: doc.cid,
               value: modalCard.state?.body.value ?? [],
             })
           : new MKDoc({
-              cardInput: { symbol: modalSymbol, meta: {} },
-              cardCopy: null,
+              noteInput: { symbol: modalSymbol, meta: {} },
+              noteCopy: null,
               fromDocCid: doc.cid,
               value: [],
             })
@@ -188,7 +188,7 @@ const main = async () => {
         subDocs.push(modalDoc)
 
         // if (mirrorCard) {
-        //   console.log(inspect((mirrorCard.state.body as unknown as CardStateBody).value, { depth: null }))
+        //   console.log(inspect((mirrorCard.state.body as unknown as NoteStateBody).value, { depth: null }))
         //   console.log(inspect(mirrorDoc.value, { depth: null }))
         // }
         // console.log(mirrorDoc)
@@ -223,7 +223,7 @@ const main = async () => {
       }
 
       const commit = await CommitModel.create(
-        { cardStateInputs: [doc, ...subDocs].map(e => e.toGQLCardStateInput()) },
+        { noteStateInputs: [doc, ...subDocs].map(e => e.toGQLCardStateInput()) },
         TESTUSERS[0].id,
       )
       // console.log(inspect(selfRootDraft, { depth: null }))

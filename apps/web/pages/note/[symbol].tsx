@@ -198,7 +198,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
     <>
       <Modal
         topLeftBtn={
-          <Link href={{ pathname: '/card/[symbol]', query: { symbol: modalSymbol } }}>
+          <Link href={{ pathname: '/note/[symbol]', query: { symbol: modalSymbol } }}>
             <a className="flex items-center">
               <span className="material-icons text-lg leading-none text-gray-500 hover:text-gray-700">
                 open_in_full

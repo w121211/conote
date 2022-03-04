@@ -11,6 +11,7 @@ import NoteDigestComponent from '../components/note-digest-component'
 export const LatestNotes = (): JSX.Element | null => {
   const { data, loading, error, fetchMore } = useNoteDigestsQuery() // { fetchPolicy: 'cache-and-network' }
   const [hasMore, setHasMore] = useState<boolean>(true)
+  // console.log(data?.noteDigests)
 
   if (loading) {
     return null
