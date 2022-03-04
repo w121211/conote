@@ -50,7 +50,7 @@ export const bt = (cid: number, children: TreeNode<Bullet>[] = []): TreeNode<Bul
 // const isBulletEqual = (a: Bullet, b: Bullet) => {
 // }
 
-// const CARD_STATES: CardStateParsed[] = []
+// const CARD_STATES: NoteStateParsed[] = []
 
 // export const TEST_SYMBOLS = [
 //   { name: '$AAA', cat: SymbolCat.TICKER },
@@ -147,7 +147,7 @@ export const TestDataHelper = {
           {
             cid: '$BB',
             prevStateId: null,
-            // sourceCardId: state0.cardId,
+            // sourceNoteId: state0.noteId,
             noteInput: { symbol: '$BB' },
             value: values[0][1],
             changes: values[0][2],
@@ -155,7 +155,7 @@ export const TestDataHelper = {
           {
             cid: '$CC',
             prevStateId: null,
-            // sourceCardId: state0.cardId,
+            // sourceNoteId: state0.noteId,
             noteInput: { symbol: '$CC' },
             value: values[0][1],
             changes: values[0][2],
@@ -216,5 +216,5 @@ const omitUndefined = <T>(obj: T): T => {
 }
 
 export const clean = (obj: Record<string, unknown> | null): Record<string, unknown> | null => {
-  return obj === null ? obj : omitUndefined(omitDeep(obj, ['createdAt', 'updatedAt', 'id', 'symId', 'cardId']))
+  return obj === null ? obj : omitUndefined(omitDeep(obj, ['createdAt', 'updatedAt', 'id', 'symId', 'noteId']))
 }

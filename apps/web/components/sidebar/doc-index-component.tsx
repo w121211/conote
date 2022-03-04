@@ -105,7 +105,7 @@ const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }): JSX.Element 
         <span className="material-icons text-lg text-[20px] text-gray-300 mix-blend-multiply">
           {node.data.symbol.startsWith('@') ? 'language' : 'insert_drive_file'}
         </span>
-        <Link href={{ pathname: '/card/[symbol]', query: { symbol: node.data.symbol } }}>
+        <Link href={{ pathname: '/note/[symbol]', query: { symbol: node.data.symbol } }}>
           <a className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">{changeTitle(node.data)}</a>
         </Link>
         <DocIndexPanel node={node} />
@@ -128,7 +128,7 @@ const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }): JSX.Element 
               >
                 <span className={`material-icons text-lg text-gray-300 mix-blend-multiply`}>insert_drive_file</span>
 
-                <Link href={{ pathname: '/card/[symbol]', query: { symbol: e.data.symbol } }}>
+                <Link href={{ pathname: '/note/[symbol]', query: { symbol: e.data.symbol } }}>
                   <a className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">{changeTitle(e.data)}</a>
                 </Link>
 

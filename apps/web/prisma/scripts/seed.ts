@@ -66,7 +66,7 @@ async function getNeatReply({
   if (!neatReply.stampId) throw new Error('缺stampId, 無法創neat-reply')
   if (!neatReply.pollChoices) throw new Error('缺pollChoices, 無法創neat-reply')
   if (neatReply.pollChoices.length !== 1) throw new Error('pollChoices的length不等於1, 無法創neat-reply')
-  if (!neatReply.nestedCard) throw new Error('缺nestedCard, 無法創neat-reply')
+  if (!neatReply.nestedCard) throw new Error('缺nestedNote, 無法創neat-reply')
   if (!neatReply.oauthor) throw new Error('缺oauthor, 無法創neat-reply')
 
   // 取得並檢查choice-index
@@ -119,7 +119,7 @@ async function getNeatReply({
 
 const main = async () => {
   console.log('Truncating databse...')
-  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Note", "NoteState", "CardEmoji", "Discuss", "Link", "Poll", "Rate", "Sym", "User" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Note", "NoteState", "NoteEmoji", "Discuss", "Link", "Poll", "Rate", "Sym", "User" CASCADE;`
 
   console.log('Creating test users...')
   await TestDataHelper.createUsers(prisma)
@@ -143,40 +143,40 @@ const main = async () => {
     for (const [url, text] of splitByUrl(readFileSync(filepath, { encoding: 'utf8' }))) {
       console.log(`Working on: ${url}`)
 
-      let webpageCard: Omit<Note, 'meta'> & {
+      let webpageNote: Omit<Note, 'meta'> & {
         link: Link
         sym: Sym
         meta: NoteMeta
         state: NoteStateParsed | null
       }
       try {
-        webpageCard = await NoteModel.getOrCreateByUrl({ scraper, url })
+        webpageNote = await NoteModel.getOrCreateByUrl({ scraper, url })
       } catch (err) {
         console.warn(err)
         continue
       }
 
       const doc = new MKDoc({
-        noteInput: null,
-        noteCopy: webpageCard,
+        cardInput: null,
+        cardCopy: webpageNote,
         fromDocCid: null,
-        value: webpageCard.state ? webpageCard.state.body.value : [],
+        value: webpageNote.state ? webpageNote.state.body.value : [],
       })
       const subDocs: MKDoc[] = []
 
-      const mkEditor = new MKEditor('', [], webpageCard.link.url, webpageCard.link.authorId ?? undefined)
+      const mkEditor = new MKEditor('', [], webpageNote.link.url, webpageNote.link.authorId ?? undefined)
       mkEditor.setText(text)
       mkEditor.flush()
 
-      for (const [cardlabel, markerlines] of mkEditor.getNestedMarkerlines()) {
-        const modalSymbol = cardlabel.symbol
-        const modalCard = await NoteModel.getBySymbol(modalSymbol)
-        const modalDoc = modalCard
+      for (const [notelabel, markerlines] of mkEditor.getNestedMarkerlines()) {
+        const modalSymbol = notelabel.symbol
+        const modalNote = await NoteModel.getBySymbol(modalSymbol)
+        const modalDoc = modalNote
           ? new MKDoc({
-              noteInput: null,
-              noteCopy: modalCard,
+              cardInput: null,
+              cardCopy: modalNote,
               fromDocCid: doc.cid,
-              value: modalCard.state?.body.value ?? [],
+              value: modalNote.state?.body.value ?? [],
             })
           : new MKDoc({
               noteInput: { symbol: modalSymbol, meta: {} },
@@ -187,8 +187,8 @@ const main = async () => {
         modalDoc.insertMarkerLines({ markerlines })
         subDocs.push(modalDoc)
 
-        // if (mirrorCard) {
-        //   console.log(inspect((mirrorCard.state.body as unknown as NoteStateBody).value, { depth: null }))
+        // if (mirrorNote) {
+        //   console.log(inspect((mirrorNote.state.body as unknown as NoteStateBody).value, { depth: null }))
         //   console.log(inspect(mirrorDoc.value, { depth: null }))
         // }
         // console.log(mirrorDoc)
@@ -199,11 +199,11 @@ const main = async () => {
           console.warn(inspect(neatReplies, { depth: null }))
           throw '[conote-seed] neatReplies.length > 1'
         } else if (neatReplies.length === 1) {
-          if (webpageCard.link.authorId && webpageCard.linkId) {
+          if (webpageNote.link.authorId && webpageNote.linkId) {
             const rate = await getNeatReply({
-              authorId: webpageCard.link.authorId,
+              authorId: webpageNote.link.authorId,
               neatReply: neatReplies[0],
-              linkId: webpageCard.linkId,
+              linkId: webpageNote.linkId,
               symbol: modalSymbol,
               userId: TESTUSERS[0].id,
             })

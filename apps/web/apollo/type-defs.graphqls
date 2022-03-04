@@ -152,13 +152,6 @@ type Mutation {
   # create or update an emoji-up
   upsertBulletEmojiLike(bulletEmojiId: ID!, data: LikeInput!): UpsertBulletEmojiLikeResponse!
 
-  createNoteEmoji(noteId: ID!, code: EmojiCode!): CreateNoteEmojiResponse!
-  upsertNoteEmojiLike(noteEmojiId: ID!, data: LikeInput!): UpsertNoteEmojiLikeResponse!
-
-  # if newSymbol is given, will also update note symbol
-  # @throw validation error
-  updateNoteMeta(noteId: ID!, data: NoteMetaInput!, newSymbol: String): Note!
-
   # @throw validation error
   createCommit(data: CommitInput!): Commit!
 
@@ -176,6 +169,13 @@ type Mutation {
 
   createDiscussPostEmoji(discussPostId: ID!, code: EmojiCode!): CreateDiscussPostEmojiResponse!
   upsertDiscussPostEmojiLike(discussPostEmojiId: ID!, liked: Boolean!): UpsertDiscussPostEmojiLikeResponse!
+
+  createNoteEmoji(noteId: ID!, code: EmojiCode!): CreateNoteEmojiResponse!
+  upsertNoteEmojiLike(noteEmojiId: ID!, liked: Boolean!): UpsertNoteEmojiLikeResponse!
+
+  # if newSymbol is given, will also update note symbol
+  # @throw validation error
+  updateNoteMeta(noteId: ID!, data: NoteMetaInput!, newSymbol: String): Note!
 
   createPoll(data: PollInput!): Poll!
 
@@ -306,6 +306,68 @@ type BulletEmojiLike {
 #   children: BulletTreeNode
 # }
 
+type Discuss {
+  id: ID!
+  userId: String!
+  status: DiscussStatus!
+  meta: JSON!
+  title: String!
+  content: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  count: DiscussCount!
+}
+
+type DiscussCount {
+  id: ID!
+  nPosts: Int!
+}
+
+type DiscussEmoji {
+  id: ID!
+  code: EmojiCode!
+  count: DiscussEmojiCount!
+}
+
+type DiscussEmojiCount {
+  id: ID!
+  nUps: Int!
+}
+
+type DiscussEmojiLike {
+  id: ID!
+  discussEmojiId: Int!
+  liked: Boolean!
+  updatedAt: DateTime!
+}
+
+type DiscussPost {
+  id: String!
+  userId: String!
+  status: DiscussPostStatus!
+  content: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DiscussPostEmoji {
+  id: ID!
+  code: EmojiCode!
+  count: DiscussPostEmojiCount!
+}
+
+type DiscussPostEmojiCount {
+  id: ID!
+  nUps: Int!
+}
+
+type DiscussPostEmojiLike {
+  id: ID!
+  discussPostEmojiId: Int!
+  liked: Boolean!
+  updatedAt: DateTime!
+}
+
 type Note {
   id: ID!
   meta: NoteMeta!
@@ -329,8 +391,8 @@ type NoteEmojiCount {
 
 type NoteEmojiLike {
   id: ID!
-  noteEmojiId: String!
-  choice: LikeChoice!
+  noteEmojiId: Int!
+  liked: Boolean!
   updatedAt: DateTime!
 }
 
@@ -393,68 +455,6 @@ type Commit {
 type DictEntryArray {
   k: String!
   v: String!
-}
-
-type Discuss {
-  id: ID!
-  userId: String!
-  status: DiscussStatus!
-  meta: JSON!
-  title: String!
-  content: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  count: DiscussCount!
-}
-
-type DiscussCount {
-  id: ID!
-  nPosts: Int!
-}
-
-type DiscussEmoji {
-  id: ID!
-  code: EmojiCode!
-  count: DiscussEmojiCount!
-}
-
-type DiscussEmojiCount {
-  id: ID!
-  nUps: Int!
-}
-
-type DiscussEmojiLike {
-  id: ID!
-  discussEmojiId: Int!
-  liked: Boolean!
-  updatedAt: DateTime!
-}
-
-type DiscussPost {
-  id: String!
-  userId: String!
-  status: DiscussPostStatus!
-  content: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type DiscussPostEmoji {
-  id: ID!
-  code: EmojiCode!
-  count: DiscussPostEmojiCount!
-}
-
-type DiscussPostEmojiCount {
-  id: ID!
-  nUps: Int!
-}
-
-type DiscussPostEmojiLike {
-  id: ID!
-  discussPostEmojiId: Int!
-  liked: Boolean!
-  updatedAt: DateTime!
 }
 
 type Link {
