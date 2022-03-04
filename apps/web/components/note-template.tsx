@@ -1,25 +1,27 @@
 import { nanoid } from 'nanoid'
 import { LiElement } from './editor/slate-custom-types'
-import { Doc } from './workspace/doc'
 
 const templateContent: LiElement[] = [
   { type: 'li', children: [{ type: 'lc', cid: nanoid(), children: [{ text: '22222' }] }] },
 ]
 
-const NoteTemplate = ({ doc, onTemplateSet }: { doc: Doc; onTemplateSet: () => void }): JSX.Element => {
+const NoteTemplate = ({
+  onTemplateChoose,
+}: {
+  onTemplateChoose: (templateValue: LiElement[] | null) => void
+}): JSX.Element => {
   return (
     <div>
       <button
         onClick={() => {
-          doc.setEditorValue(templateContent)
-          onTemplateSet()
+          onTemplateChoose(templateContent)
         }}
       >
         使用模版頁面
       </button>
       <button
         onClick={() => {
-          onTemplateSet()
+          onTemplateChoose(null)
         }}
       >
         使用空白頁面

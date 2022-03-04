@@ -12,9 +12,9 @@ type Option = {
   value: string
 }
 
-export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
+export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
   const router = useRouter()
-  const [searchSymbol, { loading, data }] = useSearchSymbolLazyQuery()
+  const [searchSymbol, { data }] = useSearchSymbolLazyQuery()
   const [options, setOptions] = useState<Option[]>([])
   const [value, setValue] = useState<Option | null>()
   const [inputValue, setInputValue] = useState('')
@@ -38,25 +38,25 @@ export function SearchAllForm({ small }: { small?: boolean }): JSX.Element {
 
   const handleChange = (value: Option | null, action: ActionMeta<Option>) => {
     if (action.action === 'select-option' && value) {
-      router.push(`/card/${encodeURIComponent(value.value)}`)
+      router.push(`/note/${encodeURIComponent(value.value)}`)
     }
     setValue(value)
   }
 
   const handleCreate = (inputValue: string) => {
-    const newOption = createOption(inputValue)
+    // const newOption = createOption(inputValue)
     if (inputValue.startsWith('http')) {
-      router.push(`/card?url=${encodeURIComponent(inputValue)}`)
+      router.push(`/note?url=${encodeURIComponent(inputValue)}`)
     } else if (
       !inputValue.startsWith('$') &&
       !inputValue.startsWith('@') &&
       !inputValue.startsWith('[[') &&
       !inputValue.startsWith('http')
     ) {
-      //未打任何記號且非 http
-      router.push(`/card/${encodeURIComponent('[[' + inputValue + ']]')}`)
+      // 未打任何記號且非 http
+      router.push(`/note/${encodeURIComponent('[[' + inputValue + ']]')}`)
     } else {
-      router.push(`/card/${encodeURIComponent(inputValue)}`)
+      router.push(`/note/${encodeURIComponent(inputValue)}`)
     }
 
     // setOptions([...options, newOption])

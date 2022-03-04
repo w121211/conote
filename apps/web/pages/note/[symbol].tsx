@@ -51,8 +51,10 @@ const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
 
       {showTemplate ? (
         <NoteTemplate
-          doc={mainDoc.doc}
-          onTemplateSet={() => {
+          onTemplateChoose={templateValue => {
+            if (templateValue) {
+              mainDoc.doc?.setEditorValue(templateValue)
+            }
             setShowTemplate(false)
           }}
         />
