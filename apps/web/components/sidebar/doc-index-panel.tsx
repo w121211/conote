@@ -37,8 +37,7 @@ const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> | NodeBody<DocIndex>
       <button
         className="btn-reset-style"
         onClick={async () => {
-          await Doc.removeDoc(node.cid)
-          await workspace.updateEditingDocIndicies()
+          await workspace.remove(node.cid)
         }}
       >
         <span className="material-icons-outlined text-xl text-gray-400 hover:text-gray-500 mix-blend-multiply">

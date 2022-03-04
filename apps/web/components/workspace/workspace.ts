@@ -11,19 +11,18 @@ import { Doc } from './doc'
 import { DocIndex, DocIndexService } from './doc-index'
 import { LocalDatabaseService } from './local-database'
 
+type DocSubject = {
+  doc: Doc | null
+  error?: string
+  // warn?: 'prev_doc_behind'
+}
+
 class Workspace {
-  readonly mainDoc$ = new BehaviorSubject<{
-    doc: Doc | null
-    error?: string
-    // warn?: 'prev_doc_behind'
-  }>({ doc: null })
-  readonly modalDoc$ = new BehaviorSubject<{
-    doc: Doc | null
-    error?: string
-    // warn?: 'prev_doc_behind'
-  }>({ doc: null })
+  readonly mainDoc$ = new BehaviorSubject<DocSubject>({ doc: null })
+  readonly modalDoc$ = new BehaviorSubject<DocSubject>({ doc: null })
   readonly committedDocIndicies$ = new BehaviorSubject<TreeNode<DocIndex>[] | null>(null)
   readonly editingDocIndicies$ = new BehaviorSubject<TreeNode<DocIndex>[] | null>(null) // docs in editing and not committed yet
+
   readonly status$ = new BehaviorSubject<'initiating' | 'loading' | 'saving' | 'pushing' | 'droped' | null>(
     'initiating',
   )
@@ -192,6 +191,27 @@ class Workspace {
 
   async sync(): Promise<void> {
     throw 'Not implemented'
+  }
+
+  /**
+   * Remove doc and all its children doc (use doc-index tree for identifying the children)
+   *
+   */
+  async remove(docCid: string): Promise<void> {
+    const rootChildren = this.editingDocIndicies$.getValue()
+    if (rootChildren) {
+      const nodes = DocIndexService.getDocIndexWithChildren(rootChildren, docCid)
+      if (nodes) {
+        for (const e of nodes) {
+          try {
+            await Doc.removeDoc(e.cid)
+          } catch (err) {
+            console.error(err)
+          }
+        }
+        await this.updateEditingDocIndicies()
+      }
+    }
   }
 
   async updateEditingDocIndicies(newDoc?: Doc): Promise<void> {

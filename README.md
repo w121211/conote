@@ -214,7 +214,7 @@ v-next
   - consider switch to https://typegraphql.com/
 - loading -> static icon
 - auth
-  - [working] improve login, logout stablility
+  - [prior@chi] improve login, logout stablility
 - user
   - [prior] (req) user-page, include user's notes, rates, interested fields
   - (?) anonymous user
@@ -347,7 +347,7 @@ v0.1.1
     - keywords
   - if card is existed (ie got id), able to update note meta instantly without commit
 - doc-index
-  - [working@chi] (bug) doc-index tree fail when removing parent docs
+  - [v] (bug) doc-index tree fail when removing parent docs -> remove parent doc also remove children
   - [v] (bug) child doc-index-panel hidden delete not show
   - [v] (ui) doc-index title/symbol display, Webpage -> symbol, title, Ticker -> symbol + title, eg $BA 波音, Topic -> symbol only
 - /index

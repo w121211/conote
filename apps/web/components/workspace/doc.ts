@@ -1,7 +1,7 @@
 import { isEqual } from 'lodash'
 import { nanoid } from 'nanoid'
 import { NoteInput, NoteMetaInput, NoteStateInput } from 'graphql-let/__generated__/__types__'
-import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
+import { NodeChange, TreeChangeService, TreeNode, TreeService } from '@conote/docdiff'
 import { NoteFragment, NoteStateFragment } from '../../apollo/query.graphql'
 import { Bullet } from '../bullet/bullet'
 import { LiElement } from '../editor/slate-custom-types'
@@ -188,6 +188,9 @@ export class Doc {
     return null
   }
 
+  /**
+   * Remove the doc by 'cid' from local
+   */
   static async removeDoc(cid: string): Promise<void> {
     try {
       await LocalDatabaseService.docTable.removeItem(cid)
@@ -211,6 +214,51 @@ export class Doc {
     // if (noteDoc?.id && noteDoc.id !== doc.prevDocId) {
     //   curDoc = { doc, warn: 'prev_doc_behind' }
     // }
+  }
+
+  getChanges(): NodeChange<Bullet>[] {
+    const startValue = this.noteCopy?.state?.body.value
+      ? (this.noteCopy.state.body.value as unknown as TreeNode<Bullet>[])
+      : []
+    const changes = TreeChangeService.getChnages(this.getValue(), startValue, isBulletEqual)
+    // console.log(this.editorValue)
+    // console.log(this.noteCopy?.state?.body.value, this.getValue(), changes)
+    return changes
+  }
+
+  async getChildren(): Promise<Doc[]> {
+    const docs = await Doc.getAllDocs()
+    const nodes = TreeService.fromList<Doc>(docs)
+
+    if (node) {
+      TreeService.toList([node])
+      return docs
+    }
+    throw 'doc node not found'
+  }
+
+  getNoteMetaInput(): NoteMetaInput {
+    if (this.noteInput?.meta) {
+      return this.noteInput.meta
+    }
+    if (this.noteCopy?.meta) {
+      return this.noteCopy.meta
+    }
+    return {}
+  }
+
+  getSymbol(): string {
+    if (this.noteCopy) {
+      return this.noteCopy.sym.symbol
+    }
+    if (this.noteInput) {
+      return this.noteInput.symbol
+    }
+    throw 'doc noteCopy & noteInput are both null'
+  }
+
+  getValue(): TreeNode<Bullet>[] {
+    return EditorSerializer.toTreeNodes(this.editorValue)
   }
 
   async remove(): Promise<void> {
@@ -295,40 +343,6 @@ export class Doc {
       changes: this.getChanges(), // TODO: flatten
       value: EditorSerializer.toTreeNodes(editorValue), // TODO: flatten
     }
-  }
-
-  getNoteMetaInput(): NoteMetaInput {
-    if (this.noteInput?.meta) {
-      return this.noteInput.meta
-    }
-    if (this.noteCopy?.meta) {
-      return this.noteCopy.meta
-    }
-    return {}
-  }
-
-  getChanges(): NodeChange<Bullet>[] {
-    const startValue = this.noteCopy?.state?.body.value
-      ? (this.noteCopy.state.body.value as unknown as TreeNode<Bullet>[])
-      : []
-    const changes = TreeChangeService.getChnages(this.getValue(), startValue, isBulletEqual)
-    // console.log(this.editorValue)
-    // console.log(this.noteCopy?.state?.body.value, this.getValue(), changes)
-    return changes
-  }
-
-  getSymbol(): string {
-    if (this.noteCopy) {
-      return this.noteCopy.sym.symbol
-    }
-    if (this.noteInput) {
-      return this.noteInput.symbol
-    }
-    throw 'doc noteCopy & noteInput are both null'
-  }
-
-  getValue(): TreeNode<Bullet>[] {
-    return EditorSerializer.toTreeNodes(this.editorValue)
   }
 
   updateNoteMetaInput(metaInput: NoteMetaInput): { isUpdated: boolean } {

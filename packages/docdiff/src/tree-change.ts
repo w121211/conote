@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash'
-import { NodeBody, TreeService, TreeNode } from './tree'
+import { NodeBody, TreeService, TreeNode } from './tree-service'
 
 export type ChangeType =
   | 'insert'
