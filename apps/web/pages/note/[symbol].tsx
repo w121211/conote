@@ -50,7 +50,12 @@ const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
       <NoteHead doc={mainDoc.doc} />
 
       {showTemplate ? (
-        <NoteTemplate doc={mainDoc.doc} setShowTemplate={setShowTemplate} />
+        <NoteTemplate
+          doc={mainDoc.doc}
+          onTemplateSet={() => {
+            setShowTemplate(false)
+          }}
+        />
       ) : (
         <BulletEditor doc={mainDoc.doc} readOnly={meData?.me === undefined} />
       )}
