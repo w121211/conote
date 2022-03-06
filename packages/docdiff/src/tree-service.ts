@@ -13,11 +13,11 @@ export type TreeNode<T> = NodeBody<T> & {
   children: TreeNode<T>[]
 }
 
+export type Match<T> = (node: NodeBody<T>) => boolean
+
 export const isTreeNode = <T>(node: TreeNode<T> | NodeBody<T>): node is TreeNode<T> => {
   return (node as TreeNode<T>).children !== undefined
 }
-
-export type Match<T> = (node: NodeBody<T>) => boolean
 
 export const TreeService = {
   tempRootCid: 'TEMP_ROOT_CID',
@@ -29,7 +29,7 @@ export const TreeService = {
   // }
   // },
 
-  find<T>(children: TreeNode<T>[], match: Match<T>): NodeBody<T>[] {
+  filter<T>(children: TreeNode<T>[], match: Match<T>): NodeBody<T>[] {
     const found: NodeBody<T>[] = []
     for (const e of this.toList(children)) {
       if (match(e)) {
@@ -61,7 +61,7 @@ export const TreeService = {
   },
 
   /**
-   * Use given parent-children dict to construct a tree.
+   * Use the given parent-children dict to construct a tree.
    * P.S. Node's index is followed by the given array, not by the node's index
    */
   fromParentChildrenDict<T>(dict: Record<string, NodeBody<T>[]>): TreeNode<T>[] {
@@ -136,6 +136,27 @@ export const TreeService = {
 
   isRoot<T>(node: TreeNode<T>): boolean {
     return node.parentCid === TreeService.tempRootCid
+  },
+
+  /**
+   * BFS search
+   *
+   */
+  searchBreadthFirst<T>(children: TreeNode<T>[], cid: string): TreeNode<T> | null {
+    const parents: TreeNode<T>[] = children
+    while (parents.length > 0) {
+      const p = parents.shift()
+      if (p === undefined) {
+        throw '[docdiff] unexpected error'
+      }
+      if (p.cid === cid) {
+        return p
+      }
+      p.children.forEach(e => {
+        parents.push(e)
+      })
+    }
+    return null
   },
 
   sortParentChildrenDict_<T>(dict: Record<string, NodeBody<T>[]>): void {

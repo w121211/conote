@@ -20,12 +20,12 @@ profiles:
       artifacts:
         - image: conote-webapp-image
           context: .
-          # kaniko:  # fail to build if using yarn workspace
+          # kaniko:  # fail with yarn workspace
           #   cache: {}
       googleCloudBuild:
         # diskSizeGb: 300
         # machineType: N1_HIGHCPU_32
-        projectId: conote-try
+        projectId: conote-web-project
         timeout: 4000s
   - name: minikube
     activation:

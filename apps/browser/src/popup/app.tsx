@@ -6,7 +6,7 @@ import { setContext } from '@apollo/client/link/context'
 // import { AppState, useAuth0 } from '@auth0/auth0-react'
 import { cache } from './cache'
 import { useMeQuery, MeQuery } from '../../../web/apollo/query.graphql'
-import { CardPage } from './card-page'
+import { NotePage } from './note-page'
 // import '../../../web/style/global.scss'
 // import './app.css'
 
@@ -164,7 +164,7 @@ export const App = (): JSX.Element => {
   return (
     <ApolloProvider client={client}>
       {/* <Protected> */}
-      <CardPage />
+      <NotePage />
       {/* </Protected> */}
     </ApolloProvider>
   )

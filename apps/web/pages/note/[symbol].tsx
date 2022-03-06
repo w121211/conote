@@ -310,7 +310,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
       >
         {mainNoteComponent}
       </Layout>
-      <DiscussModal />
+      {/* <DiscussModal /> */}
     </>
   )
 }

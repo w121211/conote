@@ -28,7 +28,7 @@ const NoteEmojiDisplay = ({ noteEmoji }: { noteEmoji: NoteEmojiFragment }): JSX.
         className="hover:text-gray-500"
         code={noteEmoji.code}
         nUps={noteEmoji.count.nUps}
-        liked={myEmojiLikeData?.myNoteEmojiLike?.choice === 'UP'}
+        liked={myEmojiLikeData?.myNoteEmojiLike?.liked}
       />
     </button>
   )

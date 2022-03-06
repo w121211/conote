@@ -106,7 +106,7 @@ const NoteEmojiBtn = ({
         handleLike('UP')
       }}
     >
-      <EmojiIcon
+      {/* <EmojiIcon
         className={'text-gray-500'}
         code={noteEmoji.code}
         liked={myEmojiLikeData?.myNoteEmojiLike?.liked}
@@ -119,7 +119,7 @@ const NoteEmojiBtn = ({
         >
           {noteEmoji.count.nUps}
         </span>
-      )}
+      )} */}
     </button>
   )
 }

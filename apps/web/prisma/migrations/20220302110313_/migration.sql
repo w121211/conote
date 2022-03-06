@@ -47,24 +47,34 @@ DROP INDEX "NoteEmojiCount_cardEmojiId_key";
 DROP INDEX "NoteEmojiLike_userId_cardEmojiId_key";
 
 -- AlterTable
-ALTER TABLE "Bullet" DROP COLUMN "cardStateId",
-ADD COLUMN     "noteStateId" TEXT NOT NULL;
+-- ALTER TABLE "Bullet" DROP COLUMN "cardStateId",
+-- ADD COLUMN     "noteStateId" TEXT NOT NULL;
+ALTER TABLE "Bullet"
+RENAME COLUMN "cardStateId" TO "noteStateId";
 
 -- AlterTable
-ALTER TABLE "NoteEmoji" DROP COLUMN "cardId",
-ADD COLUMN     "noteId" TEXT NOT NULL;
+-- ALTER TABLE "NoteEmoji" DROP COLUMN "cardId",
+-- ADD COLUMN     "noteId" TEXT NOT NULL;
+ALTER TABLE "NoteEmoji"
+RENAME COLUMN "cardId" TO "noteId";
 
 -- AlterTable
-ALTER TABLE "NoteEmojiCount" DROP COLUMN "cardEmojiId",
-ADD COLUMN     "noteEmojiId" TEXT NOT NULL;
+-- ALTER TABLE "NoteEmojiCount" DROP COLUMN "cardEmojiId",
+-- ADD COLUMN     "noteEmojiId" TEXT NOT NULL;
+ALTER TABLE "NoteEmojiCount"
+RENAME COLUMN "cardEmojiId" TO "noteEmojiId";
 
 -- AlterTable
-ALTER TABLE "NoteEmojiLike" DROP COLUMN "cardEmojiId",
-ADD COLUMN     "noteEmojiId" TEXT NOT NULL;
+-- ALTER TABLE "NoteEmojiLike" DROP COLUMN "cardEmojiId",
+-- ADD COLUMN     "noteEmojiId" TEXT NOT NULL;
+ALTER TABLE "NoteEmojiLike"
+RENAME COLUMN "cardEmojiId" TO "noteEmojiId";
 
 -- AlterTable
-ALTER TABLE "NoteState" DROP COLUMN "cardId",
-ADD COLUMN     "noteId" TEXT NOT NULL;
+-- ALTER TABLE "NoteState" DROP COLUMN "cardId",
+-- ADD COLUMN     "noteId" TEXT NOT NULL;
+ALTER TABLE "NoteState"
+RENAME COLUMN "cardId" TO "noteId";
 
 -- CreateTable
 CREATE TABLE "Discuss" (

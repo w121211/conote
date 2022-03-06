@@ -69,13 +69,13 @@ export const toNoteMetaInput = (input: FormInputs): NoteMetaInput => {
     str === '' ? undefined : duplicates.split(splitter)
   return {
     author: stringOrUndefined(author),
-    date: stringOrUndefined(date),
-    description: stringOrUndefined(description),
+    // date: stringOrUndefined(date),
+    // description: stringOrUndefined(description),
     duplicates: stringArrayOrUndefined(duplicates, ' '),
     keywords: keywords.map(e => e.value),
-    redirects: stringArrayOrUndefined(redirects, ' '),
+    // redirects: stringArrayOrUndefined(redirects, ' '),
     title: stringOrUndefined(title),
-    url: stringOrUndefined(url),
+    // url: stringOrUndefined(url),
   }
 }
 
@@ -92,15 +92,15 @@ const NoteMetaForm = ({
     defaultValues: {
       author: metaInput?.author ?? '',
       title: metaInput?.title ?? '',
-      url: metaInput?.url ?? '',
+      // url: metaInput?.url ?? '',
       keywords:
         metaInput?.keywords?.map(e => {
           return { label: e, value: e }
         }) ?? [],
-      redirects: metaInput?.redirects?.join(' ') ?? '',
+      // redirects: metaInput?.redirects?.join(' ') ?? '',
       duplicates: metaInput?.duplicates?.join(' ') ?? '',
-      description: metaInput?.description ?? '',
-      date: metaInput?.date ?? '',
+      // description: metaInput?.description ?? '',
+      // date: metaInput?.date ?? '',
     },
   })
   const {

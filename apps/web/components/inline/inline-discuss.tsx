@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, RenderElementProps, useSelected, useSlateStatic } from 'slate-react'
-import { RateChoice } from '@prisma/client'
-import { DiscussFragment, RateFragment } from '../../apollo/query.graphql'
+import { DiscussFragment } from '../../apollo/query.graphql'
 import { InlineDiscussElement } from '../editor/slate-custom-types'
 import Modal from '../modal/modal'
 // import RateButton from '../rate-form/rate-button'
@@ -14,8 +13,11 @@ import CreateDiscussForm from '../discuss/create-discuss-form'
 import { workspace } from '../workspace/workspace'
 import { useObservable } from 'rxjs-hooks'
 
-const InlineDiscuss = (props: RenderElementProps & { element: InlineDiscussElement }): JSX.Element => {
-  const { children, attributes, element } = props
+const InlineDiscuss = ({
+  children,
+  attributes,
+  element,
+}: RenderElementProps & { element: InlineDiscussElement }): JSX.Element => {
   const router = useRouter()
   const mainDoc = useObservable(() => workspace.mainDoc$)
   const editor = useSlateStatic()
@@ -40,7 +42,10 @@ const InlineDiscuss = (props: RenderElementProps & { element: InlineDiscussEleme
   // }
   const onDiscussCreated = (data: DiscussFragment) => {
     const path = ReactEditor.findPath(editor, element)
-    const inlineDiscuss = InlineItemService.toInlineDiscussString({ id: data.id, title: data.title })
+    const inlineDiscuss = InlineItemService.toInlineDiscussString({
+      id: data.id,
+      title: data.title,
+    })
     Transforms.setNodes<InlineDiscussElement>(editor, { id: data.id }, { at: path })
     Transforms.insertText(editor, inlineDiscuss, { at: path })
     setShowModal(false)
@@ -87,16 +92,18 @@ const InlineDiscuss = (props: RenderElementProps & { element: InlineDiscussEleme
       </a>
       <Modal
         visible={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false)
+        }}
         buttons={
           <button form="create-discuss-form" className="btn-primary h-10 w-24 " type="submit">
             提交
           </button>
         }
       >
-        {mainDoc && mainDoc.doc && mainDoc.doc.cardCopy?.id ? (
+        {mainDoc && mainDoc.doc && mainDoc.doc.noteCopy?.id ? (
           <CreateDiscussForm
-            cardId={mainDoc.doc.cardCopy?.id}
+            noteId={mainDoc.doc.noteCopy?.id}
             title={element.str.substring(1, element.str.length - 1)}
             onCreated={onDiscussCreated}
           />

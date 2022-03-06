@@ -12,8 +12,6 @@ import UpdateRateForm from '../rate-form/update-rate-form'
 
 const InlineRate = (props: RenderElementProps & { element: InlineRateElement }): JSX.Element => {
   const editor = useSlateStatic()
-  const selected = useSelected()
-
   const { children, attributes, element } = props
   const [showPopover, setShowPopover] = useState(false)
   // const [shotId, setShotId] = useState(element.id)

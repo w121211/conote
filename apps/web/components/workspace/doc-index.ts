@@ -15,6 +15,21 @@ export type DocIndex = {
 }
 
 export const DocIndexService = {
+  /**
+   * Flatten tree depth = 2
+   *
+   */
+  _flattenDepth(rootChildren: TreeNode<DocIndex>[]): TreeNode<DocIndex>[] {
+    for (const node of rootChildren) {
+      const flattenChildren = TreeService.toList<DocIndex>(node.children)
+      for (const e of flattenChildren) {
+        e.parentCid = node.cid
+      }
+    }
+    const nodes = TreeService.toList<DocIndex>(rootChildren)
+    return TreeService.fromList<DocIndex>(nodes)
+  },
+
   _toDocIndex(doc: Doc): DocIndex {
     const { cid, fromDocCid, noteCopy, createdAt, updatedAt } = doc
     return {
@@ -45,32 +60,34 @@ export const DocIndexService = {
   },
 
   /**
-   * Flatten tree depth = 2
-   */
-  flattenDepth(rootChildren: TreeNode<DocIndex>[]): TreeNode<DocIndex>[] {
-    for (const node of rootChildren) {
-      const flattenChildren = TreeService.toList<DocIndex>(node.children)
-      for (const e of flattenChildren) {
-        e.parentCid = node.cid
-      }
-    }
-    const nodes = TreeService.toList<DocIndex>(rootChildren)
-    return TreeService.fromList<DocIndex>(nodes)
-  },
-
-  /**
-   * Given current DocIndexNodes and the doc to be appended, return appended DocIndexNodes
+   * Give current DocIndexNodes and the doc to be appended
+   * @return updated DocIndexNodes
+   *
    */
   appendDoc(cur: TreeNode<DocIndex>[], doc: Doc, force?: true): [TreeNode<DocIndex>[], { appended: boolean }] {
-    const found = TreeService.find(cur, node => node.cid === doc.cid)
-    if (found.length === 0 || force) {
+    const filtered = TreeService.filter(cur, node => node.cid === doc.cid)
+    if (filtered.length === 0 || force) {
       // doc is not in current tree, append it
       const nodes = TreeService.toList<DocIndex>(cur)
       const appended = TreeService.fromList<DocIndex>([...nodes, this._toDocIndexNode(doc)])
-      const flattened = this.flattenDepth(appended)
+      const flattened = this._flattenDepth(appended)
       return [flattened, { appended: true }]
     } else {
       return [cur, { appended: false }]
     }
+  },
+
+  /**
+   * Given current DocIndexNodes and the doc-cid to be removed, remove the doc and all its children docs
+   * @return updated DocIndexNodes
+   *
+   */
+  getDocIndexWithChildren(cur: TreeNode<DocIndex>[], docCid: string): NodeBody<DocIndex>[] | null {
+    const found = TreeService.searchBreadthFirst(cur, docCid)
+    if (found) {
+      const nodes = TreeService.toList<DocIndex>([found])
+      return nodes
+    }
+    return null
   },
 }

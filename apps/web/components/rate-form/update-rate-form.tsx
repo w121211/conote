@@ -8,7 +8,6 @@ import {
   RateDocument,
   RateFragment,
   RateQuery,
-  useCardQuery,
   useLinkLazyQuery,
   useUpdateRateMutation,
 } from '../../apollo/query.graphql'
@@ -41,7 +40,7 @@ const UpdateRateForm = ({
 }): JSX.Element => {
   // const router = useRouter()
   const [showPopup, setShowPopup] = useState(false)
-  const [skipCardQuery, setSkipCardQuery] = useState(true)
+  const [skipNoteQuery, setSkipNoteQuery] = useState(true)
   const { author, choice, target, link } = initialInput
   const [targetId, setTargetId] = useState<string | undefined>()
   const client = useApolloClient()
@@ -51,10 +50,10 @@ const UpdateRateForm = ({
   const { register, handleSubmit, watch } = method
 
   let linkId: string
-  // const { data: targetCardData } = useCardQuery({
+  // const { data: targetNoteData } = useNoteQuery({
   //   fetchPolicy: 'cache-first',
   //   variables: { symbol: target },
-  //   // skip: skipCardQuery,
+  //   // skip: skipNoteQuery,
   // })
   const [queryLink] = useLinkLazyQuery({
     variables: { url: link },
@@ -65,10 +64,10 @@ const UpdateRateForm = ({
     },
   })
   // useEffect(() => {
-  //   if (targetCardData?.card) {
-  //     setTargetId(targetCardData.card.id)
+  //   if (targetNoteData?.note) {
+  //     setTargetId(targetNoteData.note.id)
   //   }
-  // }, [targetCardData])
+  // }, [targetNoteData])
 
   const watchChoice = watch('choice')
   const watchAuthor = watch('author')
@@ -91,7 +90,7 @@ const UpdateRateForm = ({
       }
     },
     onCompleted(data) {
-      // console.log(data.createRate, targetCardData)
+      // console.log(data.createRate, targetNoteData)
       if (data.updateRate) {
         onRateCreated(data.updateRate, data.updateRate.symId)
       } else {

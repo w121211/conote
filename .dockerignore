@@ -13,3 +13,4 @@ __deprecated__
 __generated__
 k8s/
 skaffold.yaml
+README.md

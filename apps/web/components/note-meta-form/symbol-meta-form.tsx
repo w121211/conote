@@ -31,10 +31,14 @@ const SymbolMetaForm = ({
         metaInput?.keywords?.map(e => {
           return { label: e, value: e }
         }) ?? [],
-      redirects: metaInput?.redirects?.join(' ') ?? '',
+      // redirects: metaInput?.redirects?.join(' ') ?? '',
+      // duplicates: metaInput?.duplicates?.join(' ') ?? '',
+      // description: metaInput?.description ?? '',
+      // date: metaInput?.date ?? '',
+      redirects: metaInput?.redirect ?? '',
       duplicates: metaInput?.duplicates?.join(' ') ?? '',
-      description: metaInput?.description ?? '',
-      date: metaInput?.date ?? '',
+      description: '',
+      date: '',
     },
   })
   const {

@@ -92,7 +92,7 @@ const HotDisplay = ({ filtertags }: { filtertags: string[] }) => {
           return (
             <HotListItem
               key={i}
-              cardId={''}
+              noteId={''}
               title={e.title}
               href={e.href}
               source={e.source}
