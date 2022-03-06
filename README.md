@@ -371,7 +371,7 @@ v0.1.1
   - [v] (ui) line space
   - [pending] (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
   - [v] (ui) :pin emoji should not have count
-  - [@lisa] (ui) :pin emoji color -> gray (unclick)
+  - [v] (ui) :pin emoji color -> gray (unclick)
   - [@lisa] (ui) conote -> konote & when on-hover button add some feedback
   - [v] (bug) while not logged in can still typing in the editor
 - workspace

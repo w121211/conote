@@ -87,18 +87,22 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   //   }
   // }
   switch (leaf.tokenType) {
+    case 'comment': {
+      className = 'text-gray-400'
+      break
+    }
+    // case 'mirror-ticker':
+    // case 'mirror-topic':
     case 'author':
     case 'discuss':
-    case 'mirror-ticker':
-    case 'mirror-topic':
     case 'rate':
     case 'topic':
     case 'ticker': {
       className = 'text-blue-500'
       break
     }
-    case 'mirror-topic-bracket-head':
-    case 'mirror-head':
+    // case 'mirror-topic-bracket-head':
+    // case 'mirror-head':
     case 'topic-bracket-head':
     case 'topic-bracket-tail': {
       className = 'text-gray-400 '
@@ -196,7 +200,7 @@ const Lc = ({
       }}
     >
       {children}
-      {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />}
+      {/* {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />} */}
 
       {/* {sourceNoteId && ( 
        <span contentEditable={false}>
@@ -269,9 +273,11 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           </span>
         </span>
         <span
-          className={`relative flex-grow px-1 ${lc.bulletCopy?.id ? 'cursor-pointer' : 'cursor-default'}`}
-          onMouseEnter={() => setShowPanel(true)}
-          onMouseLeave={() => setShowPanel(false)}
+          className={`relative flex-grow px-1 
+          `}
+          // ${lc.bulletCopy?.id ? 'cursor-pointer' : 'cursor-default'}
+          // onMouseEnter={() => setShowPanel(true)}
+          // onMouseLeave={() => setShowPanel(false)}
         >
           <span
             className={`material-icons text-xs scale-[.65] text-gray-600 
@@ -281,9 +287,9 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
             fiber_manual_record
           </span>
 
-          {lc.bulletCopy?.id && (
+          {/* {lc.bulletCopy?.id && (
             <BulletPanel bulletId={lc.bulletCopy.id} visible={showPanel} onClose={() => setShowPanel(false)} />
-          )}
+          )} */}
         </span>
 
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}

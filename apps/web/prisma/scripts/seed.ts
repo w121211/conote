@@ -157,8 +157,8 @@ const main = async () => {
       }
 
       const doc = new MKDoc({
-        cardInput: null,
-        cardCopy: webpageNote,
+        noteInput: null,
+        noteCopy: webpageNote,
         fromDocCid: null,
         value: webpageNote.state ? webpageNote.state.body.value : [],
       })
@@ -173,8 +173,8 @@ const main = async () => {
         const modalNote = await NoteModel.getBySymbol(modalSymbol)
         const modalDoc = modalNote
           ? new MKDoc({
-              cardInput: null,
-              cardCopy: modalNote,
+              noteInput: null,
+              noteCopy: modalNote,
               fromDocCid: doc.cid,
               value: modalNote.state?.body.value ?? [],
             })

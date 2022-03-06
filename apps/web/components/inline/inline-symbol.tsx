@@ -15,9 +15,6 @@ const InlineSymbol = ({
       <a
         className="btn-reset-style inline text-left text-blue-500 hover:cursor-pointer hover:underline hover:underline-offset-2"
         onClick={e => {
-          // e.preventDefault()
-          // e.stopPropagation()
-          // router.push(`/card/${encodeURIComponent(element.symbol)}`)
           router.push({
             pathname: router.pathname,
             query: {

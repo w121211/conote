@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { LikeChoice } from 'graphql-let/__generated__/__types__'
 import {
   NoteEmojiFragment,
@@ -13,9 +13,13 @@ import EmojiIcon from './emoji-icon'
 const NoteEmojiBtn = ({
   noteEmoji,
   showCounts,
+  onLiked,
+  likedChoice,
 }: {
   noteEmoji: NoteEmojiFragment
   showCounts?: boolean
+  onLiked: (code: 'UP' | 'DOWN') => void
+  likedChoice: 'UP' | 'DOWN' | null
 }): JSX.Element => {
   const [upsertEmojiLike] = useUpsertNoteEmojiLikeMutation({
     update(cache, { data }) {
@@ -34,6 +38,9 @@ const NoteEmojiBtn = ({
     onCompleted(data) {
       // console.log(data.upsertEmojiLike)
     },
+    onError(error) {
+      console.log(error.graphQLErrors)
+    },
   })
 
   const {
@@ -47,32 +54,49 @@ const NoteEmojiBtn = ({
   const handleLike = (choice: LikeChoice = 'UP') => {
     const myLike = myEmojiLikeData?.myNoteEmojiLike
 
-    if (myLike && myLike.choice === choice) {
+    if (myLike) {
       upsertEmojiLike({
         variables: {
           noteEmojiId: noteEmoji.id,
-          data: { choice: 'NEUTRAL' },
+          liked: !myLike.liked,
         },
       })
     }
-    if (myLike && myLike.choice !== choice) {
-      upsertEmojiLike({
-        variables: {
-          noteEmojiId: noteEmoji.id,
-          data: { choice },
-        },
-      })
-    }
+
     if (myLike === null) {
       upsertEmojiLike({
         variables: {
           noteEmojiId: noteEmoji.id,
-          data: { choice },
+          liked: true,
         },
       })
     }
     // upsertEmojiLike({variables:{hashtagId:foundEmoji.id,data:{choice:}}})
   }
+
+  useEffect(() => {
+    if (myEmojiLikeData?.myNoteEmojiLike?.liked && (noteEmoji.code === 'UP' || noteEmoji.code === 'DOWN')) {
+      onLiked(noteEmoji.code)
+    }
+  }, [myEmojiLikeData])
+
+  useEffect(() => {
+    const myLike = myEmojiLikeData?.myNoteEmojiLike
+    if (
+      (noteEmoji.code === 'UP' || noteEmoji.code === 'DOWN') &&
+      likedChoice &&
+      noteEmoji.code !== likedChoice &&
+      myLike?.liked
+    ) {
+      upsertEmojiLike({
+        variables: {
+          noteEmojiId: noteEmoji.id,
+          liked: !myLike.liked,
+        },
+      })
+    }
+  }, [likedChoice])
+
   return (
     <button
       className={`btn-reset-style group p-1 rounded ${
@@ -85,15 +109,13 @@ const NoteEmojiBtn = ({
       <EmojiIcon
         className={'text-gray-500'}
         code={noteEmoji.code}
-        liked={myEmojiLikeData?.myNoteEmojiLike?.choice === 'UP'}
+        liked={myEmojiLikeData?.myNoteEmojiLike?.liked}
         upDownClassName="!text-lg !leading-none group-hover:text-blue-600"
         pinClassName="!text-xl !leading-none group-hover:text-red-600"
       />
       {showCounts && (
         <span
-          className={`ml-[2px] text-sm  ${
-            myEmojiLikeData?.myNoteEmojiLike?.choice === 'UP' ? 'text-blue-600' : 'text-gray-500'
-          }`}
+          className={`ml-[2px] text-sm  ${myEmojiLikeData?.myNoteEmojiLike?.liked ? 'text-blue-600' : 'text-gray-500'}`}
         >
           {noteEmoji.count.nUps}
         </span>

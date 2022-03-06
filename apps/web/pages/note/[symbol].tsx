@@ -12,6 +12,8 @@ import Modal from '../../components/modal/modal'
 import NoteTemplate from '../../components/note-template'
 import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
+import TemplatePage from '../../components/template'
+import LoginModal from '../../components/login-modal'
 
 const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data: meData } = useMeQuery()
@@ -76,19 +78,29 @@ const ModalNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   const mainDoc = useObservable(() => workspace.mainDoc$)
   const modalDoc = useObservable(() => workspace.modalDoc$)
   const [hasSym, setHasSym] = useState(false)
+  const [showTemplate, setShowTemplate] = useState(false)
 
   useEffect(() => {
-    if (data && mainDoc?.doc) {
-      // ensure main-doc is existed before open modal-doc
-      workspace.openDoc({ symbol, note: data.note ?? null, isModal: true })
-    }
-    Doc.find({ symbol }).then(resolve => {
-      if (resolve) {
-        setHasSym(true)
-      } else {
-        return
+    const runAsync = async () => {
+      if (data) {
+        const { doc, isFromSaved } = await workspace.openDoc({ symbol, note: data.note ?? null, isModal: true })
+        if (!isFromSaved && doc.noteCopy === null) {
+          setShowTemplate(true)
+        }
       }
-    })
+    }
+    runAsync()
+    // if (data && mainDoc?.doc) {
+    //   // ensure main-doc is existed before open modal-doc
+    //   workspace.openDoc({ symbol, note: data.note ?? null, isModal: true })
+    // }
+    // Doc.find({ symbol }).then(resolve => {
+    //   if (resolve) {
+    //     setHasSym(true)
+    //   } else {
+    //     return
+    //   }
+    // })
   }, [data, mainDoc])
 
   if (loading) {
@@ -107,7 +119,18 @@ const ModalNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   return (
     <div className="flex-1 h-[90vh] ">
       <NoteHead doc={modalDoc.doc} />
-      {!data.note && !hasSym ? <TemplatePage doc={modalDoc.doc} /> : <BulletEditor doc={modalDoc.doc} />}
+      {showTemplate ? (
+        <TemplatePage
+          onTemplateChoose={templateValue => {
+            if (templateValue) {
+              modalDoc.doc?.setEditorValue(templateValue)
+            }
+            setShowTemplate(false)
+          }}
+        />
+      ) : (
+        <BulletEditor doc={modalDoc.doc} />
+      )}
     </div>
   )
 }
@@ -178,23 +201,47 @@ const NoteSymbolPage = (): JSX.Element | null => {
     runAsync().catch(console.error)
   }, [router])
 
-  // const onUnload = (e: BeforeUnloadEvent) => {
-  //   e.preventDefault()
-  //   // if (mainDoc?.doc) {
-  //   //   // workspace.save(mainDoc.doc)
-  //   //   console.log('save')
-  //   //   workspace.save(mainDoc.doc)
-  //   //   // return 'save'
-  //   // }
+  const onUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault()
+    // if (mainDoc?.doc) {
+    //   // workspace.save(mainDoc.doc)
+    //   console.log('save')
+    //   workspace.save(mainDoc.doc)
+    //   // return 'save'
+    // }
 
-  //   e.returnValue = 'leave'
-  //   return 'leave'
-  // }
+    console.log(router)
+    // if () {
+    //   // return null
+    // }
+    e.returnValue = 'leave'
+    return 'leave'
+    // return null
+  }
 
-  // useEffect(() => {
-  //   window.addEventListener('beforeunload', onUnload)
-  //   return () => window.removeEventListener('beforeunload', onUnload)
-  // }, [onUnload])
+  useEffect(() => {
+    window.addEventListener('beforeunload', onUnload)
+    return () => window.removeEventListener('beforeunload', onUnload)
+  }, [])
+
+  useEffect(() => {
+    sessionStorage.setItem('inTab', 'true')
+    // router.beforePopState(({ url, as, options }) => {
+    //   console.log('as:' + as, 'url:' + url)
+    //   if (as !== '/') {
+    //     sessionStorage.setItem('inTab', 'false')
+    //     return false
+    //   }
+    //   return false
+    // })
+    // window.addEventListener('popstate', e => {
+    //   alert(e.state)
+    // })
+    // return () =>
+    //   window.removeEventListener('popstate', e => {
+    //     // console.log(e.state)
+    //   })
+  }, [])
 
   return (
     <>
@@ -216,7 +263,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
               </span>
             </button>
             <button className="btn-reset-style">
-              <span className="material-icons-round text-lg leading-none text-gray-500 hover:text-gray-700">
+              <span className="material-icons-outlined text-lg leading-none text-gray-500 hover:text-gray-700">
                 more_horiz
               </span>
             </button>
@@ -242,7 +289,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
       </Modal>
       <Layout
         buttonRight={
-          <>
+          <LoginModal>
             {mainDoc?.doc?.noteCopy && (
               <div className="inline-block z-20">
                 <HeaderNoteEmojis noteId={mainDoc.doc.noteCopy.id} />
@@ -258,7 +305,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
             >
               <span className="material-icons-outlined text-xl leading-none text-gray-500">save</span>
             </button>
-          </>
+          </LoginModal>
         }
       >
         {mainNoteComponent}

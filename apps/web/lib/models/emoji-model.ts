@@ -37,11 +37,11 @@ interface PrismaEmoji<T extends Emoji, U extends EmojiCount, V extends EmojiLike
 const compareEmojiLike = <T extends EmojiLike>(like: T, prevLike?: T): { dUp: number } => {
   let dUp = 0
   if (prevLike) {
-    if (prevLike.liked) {
+    if (prevLike) {
       dUp -= 1
     }
   }
-  if (like.liked) {
+  if (like) {
     dUp += 1
   }
   return { dUp }
@@ -120,7 +120,7 @@ const DiscussPrismaEmoji: PrismaEmoji<DiscussEmoji, DiscussEmojiCount, DiscussEm
       throw "typeof subjId === 'number'"
     }
     return prisma.discussEmoji.findUnique({
-      where: { code_discussId: { code, discussId: subjId } },
+      where: { discussId_code: { code, discussId: subjId } },
     })
   },
   emojiCountFindUnique(emojiId) {
@@ -145,7 +145,7 @@ const DiscussPrismaEmoji: PrismaEmoji<DiscussEmoji, DiscussEmojiCount, DiscussEm
   },
   emojiLikeFindUnique(emojiId, userId) {
     return prisma.discussEmojiLike.findUnique({
-      where: { discussEmojiId_userId: { discussEmojiId: emojiId, userId } },
+      where: { userId_discussEmojiId: { discussEmojiId: emojiId, userId } },
     })
   },
   emojiLikeUpdate(emojiLikeId, liked) {
@@ -174,7 +174,7 @@ const DiscussPostPrismaEmoji: PrismaEmoji<DiscussPostEmoji, DiscussPostEmojiCoun
       throw "typeof subjId === 'string'"
     }
     return prisma.discussPostEmoji.findUnique({
-      where: { code_discussPostId: { code, discussPostId: subjId } },
+      where: { discussPostId_code: { code, discussPostId: subjId } },
     })
   },
   emojiCountFindUnique(emojiId) {
@@ -253,7 +253,7 @@ const NotePrismaEmoji: PrismaEmoji<NoteEmoji, NoteEmojiCount, NoteEmojiLike> = {
   },
   emojiLikeFindUnique(emojiId, userId) {
     return prisma.noteEmojiLike.findUnique({
-      where: { noteEmojiId_userId: { noteEmojiId: emojiId, userId } },
+      where: { userId_noteEmojiId: { noteEmojiId: emojiId, userId } },
     })
   },
   emojiLikeUpdate(emojiLikeId, liked) {

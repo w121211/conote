@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useNoteEmojisQuery } from '../../apollo/query.graphql'
+import React, { useEffect, useState } from 'react'
+import { useMeQuery, useNoteEmojisQuery } from '../../apollo/query.graphql'
 import CreateNoteEmojiBtn from './create-note-emoji-btn'
 import NoteEmojiBtn from './note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
@@ -7,22 +7,36 @@ import Tooltip from '../tooltip/tooltip'
 
 const HeaderNoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)
+  const [likedChoice, setLikedChoice] = useState<'UP' | 'DOWN' | null>(null)
   const { data: emojiData } = useNoteEmojisQuery({ variables: { noteId } })
   const emojis: EmojiCode[] = ['UP', 'DOWN']
   const pinEmojiData = emojiData?.noteEmojis.find(e => e.code === 'PIN')
 
   return (
-    <div className="flex  ">
+    <div className={`flex`}>
       {emojis.map((e, i) => {
         const foundData = emojiData?.noteEmojis.find(el => el.code === e)
         return foundData !== undefined && foundData.count.nUps > 0 ? (
           <div key={i} className="flex items-center">
-            <NoteEmojiBtn noteEmoji={foundData} showCounts />
+            <NoteEmojiBtn
+              noteEmoji={foundData}
+              showCounts
+              onLiked={code => {
+                setLikedChoice(code)
+              }}
+              likedChoice={likedChoice}
+            />
           </div>
         ) : null
       })}
       {pinEmojiData ? (
-        <NoteEmojiBtn noteEmoji={pinEmojiData} />
+        <NoteEmojiBtn
+          noteEmoji={pinEmojiData}
+          onLiked={code => {
+            setLikedChoice(code)
+          }}
+          likedChoice={likedChoice}
+        />
       ) : (
         <CreateNoteEmojiBtn noteId={noteId} emojiCode="PIN" />
       )}
@@ -47,7 +61,14 @@ const HeaderNoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null =>
           {emojis.map((e, i) => {
             const foundData = emojiData?.noteEmojis.find(el => el.code === e)
             return foundData !== undefined ? (
-              <NoteEmojiBtn key={i} noteEmoji={foundData} />
+              <NoteEmojiBtn
+                key={i}
+                noteEmoji={foundData}
+                onLiked={code => {
+                  setLikedChoice(code)
+                }}
+                likedChoice={likedChoice}
+              />
             ) : (
               <CreateNoteEmojiBtn key={i} noteId={noteId} emojiCode={e} />
             )
