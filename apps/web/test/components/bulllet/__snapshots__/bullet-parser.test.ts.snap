@@ -1,0 +1,179 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parse '#Hello world#' 1`] = `
+Object {
+  "inlines": Array [
+    Object {
+      "str": "#Hello world#",
+      "type": "inline-discuss",
+    },
+  ],
+}
+`;
+
+exports[`parse '#這是一個 discuss-c123456789101112345671239089#' 1`] = `
+Object {
+  "inlines": Array [
+    Object {
+      "id": "c123456789101112345671239089",
+      "str": "#這是一個 discuss-c123456789101112345671239089#",
+      "type": "inline-discuss",
+    },
+  ],
+}
+`;
+
+exports[`parse '// #Cc3 #Dd4' 1`] = `
+Object {
+  "inlines": Array [
+    Object {
+      "str": "// #Cc3 #Dd4",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`parse '::[[$PFE宣布研發中疫苗90%有效]]' 1`] = `
+Object {
+  "inlines": Array [
+    Object {
+      "str": "::",
+      "type": "text",
+    },
+    Object {
+      "str": "[[$PFE宣布研發中疫苗90%有效]]",
+      "symbol": "[[$PFE宣布研發中疫苗90%有效]]",
+      "type": "inline-symbol",
+    },
+  ],
+}
+`;
+
+exports[`parse 'Hello #world !!! !((poll))(#A1 #A2 #A3) some text ... !((poll:123))(#Bb1 #Bb2)' 1`] = `
+Object {
+  "inlines": Array [
+    Object {
+      "str": "Hello #world !!! ",
+      "type": "text",
+    },
+    Object {
+      "choices": Array [
+        "#A1",
+        "#A2",
+        "#A3",
+      ],
+      "str": "!((poll))(#A1 #A2 #A3)",
+      "type": "inline-poll",
+    },
+    Object {
+      "str": " some text ... !((poll:123))(#Bb1 #Bb2)",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`parse 'Hello #world !!! #Aa1 // #Bb2 // #Cc3 #Dd4' 1`] = `
+Object {
+  "inlines": Array [
+    Object {
+      "str": "Hello #world !!! #Aa1 // #Bb2 // #Cc3 #Dd4",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`tokenize '#Hello world#' 1`] = `
+Array [
+  Token {
+    "alias": undefined,
+    "content": "#Hello world#",
+    "length": 13,
+    "type": "discuss-new",
+  },
+]
+`;
+
+exports[`tokenize '#這是一個 discuss-c123456789101112345671239089#' 1`] = `
+Array [
+  Token {
+    "alias": undefined,
+    "content": Array [
+      Token {
+        "alias": undefined,
+        "content": "#",
+        "length": 1,
+        "type": "discuss-bracket-start",
+      },
+      "這是一個 discuss",
+      Token {
+        "alias": undefined,
+        "content": "-c123456789101112345671239089",
+        "length": 29,
+        "type": "discuss-id",
+      },
+      Token {
+        "alias": undefined,
+        "content": "#",
+        "length": 1,
+        "type": "discuss-bracket-end",
+      },
+    ],
+    "length": 43,
+    "type": "discuss",
+  },
+]
+`;
+
+exports[`tokenize '// #Cc3 #Dd4' 1`] = `
+Array [
+  "// #Cc3 #Dd4",
+]
+`;
+
+exports[`tokenize '::[[$PFE宣布研發中疫苗90%有效]]' 1`] = `
+Array [
+  "::",
+  Token {
+    "alias": undefined,
+    "content": Array [
+      Token {
+        "alias": undefined,
+        "content": "[[",
+        "length": 2,
+        "type": "topic-bracket-head",
+      },
+      "$PFE宣布研發中疫苗90%有效",
+      Token {
+        "alias": undefined,
+        "content": "]]",
+        "length": 2,
+        "type": "topic-bracket-tail",
+      },
+    ],
+    "length": 20,
+    "type": "topic",
+  },
+]
+`;
+
+exports[`tokenize 'Hello #world !!! !((poll))(#A1 #A2 #A3) some text ... !((poll:123))(#Bb1 #Bb2)' 1`] = `
+Array [
+  "Hello #world !!! ",
+  Token {
+    "alias": undefined,
+    "content": "!((poll))(#A1 #A2 #A3)",
+    "length": 22,
+    "type": "poll-new",
+  },
+  " some text ... !((poll:123))(#Bb1 #Bb2)",
+]
+`;
+
+exports[`tokenize 'Hello #world !!! #Aa1 // #Bb2 // #Cc3 #Dd4' 1`] = `
+Array [
+  "Hello #world !!! #Aa1 // #Bb2 // #Cc3 #Dd4",
+]
+`;

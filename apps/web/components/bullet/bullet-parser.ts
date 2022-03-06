@@ -12,7 +12,7 @@ import { TokenHelper } from '../../common/token-helper'
 export const reAuthor = /\B@[\p{L}\d_]+\b/u
 export const reTicker = /\$[A-Z-=]+/
 export const reTopic = /\[\[[^\]\n]+\]\]/u
-const reDiscuss = /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+-(c[a-z0-9]{24,29})#(?=\s|$)/u
+const reDiscuss = /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-(c[a-z0-9]{24,29})#(?=\s|$)/u
 const reDiscussNew =
   /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+[\d\p{Letter}\p{Terminal_Punctuation}]#(?=\s|$)/u
 export const reFiltertag = /(?<=\s|^)#[\d\p{Letter}]+(?=\s|$)/
@@ -42,8 +42,15 @@ const grammar: Grammar = {
   'poll-new': { pattern: rePollNew },
   rate: { pattern: reRate },
   'rate-new': { pattern: reRateNew },
-  discuss: { pattern: reDiscuss },
-  'discuss-new': { pattern: reDiscuss },
+  discuss: {
+    pattern: reDiscuss,
+    inside: {
+      'discuss-bracket-start': /^#/,
+      'discuss-bracket-end': /#$/,
+      'discuss-id': /-(c[a-z0-9]{24,29})$/,
+    },
+  },
+  'discuss-new': { pattern: reDiscussNew },
   // topic: { pattern: reTopic },
   topic: {
     pattern: reTopic,
@@ -110,10 +117,10 @@ export const inlinesToString = (inlines: InlineItem[]): string => {
 export const BulletParser = {
   /**
    * Parse a bullet head/body string to slate inline elements
-   *
    * @throws Parse error
+   *
    */
-  parseBulletHead({ str }: { str: string }): { inlines: InlineItem[] } {
+  parse(str: string): { inlines: InlineItem[] } {
     // TODO: validate
     const _tokenToInlineItem = (token: string | Token): InlineItem => {
       if (typeof token === 'string') {
@@ -123,7 +130,21 @@ export const BulletParser = {
       const str = TokenHelper.toString(token.content)
       switch (token.type) {
         case 'discuss': {
-          return { type: 'inline-discuss', str }
+          const match = reDiscuss.exec(str)
+          if (match) {
+            return {
+              type: 'inline-discuss',
+              str,
+              id: match[2],
+            }
+          }
+          throw 'parse error'
+        }
+        case 'discuss-new': {
+          return {
+            type: 'inline-discuss',
+            str,
+          }
         }
         case 'filtertag': {
           return { type: 'inline-filtertag', str }
@@ -171,7 +192,7 @@ export const BulletParser = {
         case 'rate': {
           const match = reRate.exec(str)
           if (match) {
-            console.log(match[2])
+            // console.log(match[2])
             const params = match[2].split(' ')
             const { authorName, targetSymbol, choice } = InlineItemService.parseInlineRateParams(params)
             return {

@@ -18,6 +18,7 @@ const UpdateDiscussEmoji = ({
   discussEmoji: DiscussEmojiFragment
   type: 'panel' | 'normal'
 }) => {
+  const { data } = useMyDiscussEmojiLikeQuery({ variables: { discussEmojiId: discussEmoji.id } })
   const [upsertEmoji] = useUpsertDiscussEmojiLikeMutation({
     update(cache, { data }) {
       const res = cache.readQuery<MyDiscussEmojiLikeQuery>({
@@ -33,10 +34,15 @@ const UpdateDiscussEmoji = ({
       }
     },
   })
-  const { data } = useMyDiscussEmojiLikeQuery({ variables: { discussEmojiId: discussEmoji.id } })
+
   const onClick = () => {
     if (data?.myDiscussEmojiLike) {
-      upsertEmoji({ variables: { discussEmojiId: discussEmoji.id, liked: !data.myDiscussEmojiLike.liked } })
+      upsertEmoji({
+        variables: {
+          discussEmojiId: discussEmoji.id,
+          liked: !data.myDiscussEmojiLike.liked,
+        },
+      })
     }
   }
 

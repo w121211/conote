@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router'
 import React, { useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useCreateDiscussMutation, DiscussFragment } from '../../apollo/query.graphql'

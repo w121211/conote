@@ -26,15 +26,15 @@ const WebMetaForm = ({
     defaultValues: {
       author: metaInput?.author ?? '',
       title: metaInput?.title ?? '',
-      url: metaInput?.url ?? '',
+      // url: metaInput?.url ?? '',
       keywords:
         metaInput?.keywords?.map(e => {
           return { label: e, value: e }
         }) ?? [],
-      redirects: metaInput?.redirects?.join(' ') ?? '',
-      duplicates: metaInput?.duplicates?.join(' ') ?? '',
-      description: metaInput?.description ?? '',
-      date: metaInput?.date ?? '',
+      // redirects: metaInput?.redirects?.join(' ') ?? '',
+      // duplicates: metaInput?.duplicates?.join(' ') ?? '',
+      // description: metaInput?.description ?? '',
+      // date: metaInput?.date ?? '',
     },
   })
   const {

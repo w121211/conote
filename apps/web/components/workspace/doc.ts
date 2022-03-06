@@ -226,17 +226,6 @@ export class Doc {
     return changes
   }
 
-  async getChildren(): Promise<Doc[]> {
-    const docs = await Doc.getAllDocs()
-    const nodes = TreeService.fromList<Doc>(docs)
-
-    if (node) {
-      TreeService.toList([node])
-      return docs
-    }
-    throw 'doc node not found'
-  }
-
   getNoteMetaInput(): NoteMetaInput {
     if (this.noteInput?.meta) {
       return this.noteInput.meta

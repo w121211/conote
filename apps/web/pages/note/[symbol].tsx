@@ -107,7 +107,8 @@ const ModalNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   return (
     <div className="flex-1 h-[90vh] ">
       <NoteHead doc={modalDoc.doc} />
-      {!data.note && !hasSym ? <TemplatePage doc={modalDoc.doc} /> : <BulletEditor doc={modalDoc.doc} />}
+      <BulletEditor doc={modalDoc.doc} />
+      {/* {!data.note && !hasSym ? <TemplatePage doc={modalDoc.doc} /> : <BulletEditor doc={modalDoc.doc} />} */}
     </div>
   )
 }
@@ -178,23 +179,25 @@ const NoteSymbolPage = (): JSX.Element | null => {
     runAsync().catch(console.error)
   }, [router])
 
-  // const onUnload = (e: BeforeUnloadEvent) => {
-  //   e.preventDefault()
-  //   // if (mainDoc?.doc) {
-  //   //   // workspace.save(mainDoc.doc)
-  //   //   console.log('save')
-  //   //   workspace.save(mainDoc.doc)
-  //   //   // return 'save'
-  //   // }
+  const onUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault()
+    // if (mainDoc?.doc) {
+    //   // workspace.save(mainDoc.doc)
+    //   console.log('save')
+    //   workspace.save(mainDoc.doc)
+    //   // return 'save'
+    // }
+    // if () {
+    // }
 
-  //   e.returnValue = 'leave'
-  //   return 'leave'
-  // }
+    e.returnValue = 'leave'
+    return 'leave'
+  }
 
-  // useEffect(() => {
-  //   window.addEventListener('beforeunload', onUnload)
-  //   return () => window.removeEventListener('beforeunload', onUnload)
-  // }, [onUnload])
+  useEffect(() => {
+    window.addEventListener('beforeunload', onUnload)
+    return () => window.removeEventListener('beforeunload', onUnload)
+  }, [])
 
   return (
     <>
@@ -247,7 +250,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
       >
         {mainNoteComponent}
       </Layout>
-      <DiscussModal />
+      {/* <DiscussModal /> */}
     </>
   )
 }

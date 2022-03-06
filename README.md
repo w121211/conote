@@ -2,29 +2,33 @@
 
 Adopt monorepo style through yarn workspace, see https://github.com/vercel/next.js/tree/canary/examples/with-yarn-workspaces
 
-```sh
-/           # root
-- /packages # packages used by apps, independent, not dependes on each other
-- /apps # web app and browser app, depends on packages
-- /k8s # deployment configs
-```
+- / --- root
+  - /packages --- packages used by apps, independent, not dependes on each other
+  - /apps --- web app and browser app, depends on packages
+  - /k8s --- deployment configs
 
 ```sh
 # from project-root, sync packages versions in order to share dependencies, @see https://github.com/JamieMason/syncpack/
 npx syncpack list-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
 npx syncpack fix-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
 
-yarn install  # install all packages
-yarn run build-packages  # compile & build side-packages so apps can import
+# install all packages
+yarn install
+
+# compile & build side-packages so apps can import
+yarn run build-packages
 ```
 
-# Use Docker
+# Dev with Docker
 
 Install [docker-sync](https://github.com/EugenMayer/docker-sync) for much better performance
 
 ```sh
 # from project-root
 docker-sync start
+
+# use arm64 config, eg Mac M1 chip
+docker-sync start --config=docker-sync.arm64.yml
 ```
 
 Run vscode devcontainer: Vscode remote-container extension, specify in `./.devcontainer`, cmd+shift+p > rebuild & open in container
@@ -33,7 +37,7 @@ Run vscode devcontainer: Vscode remote-container extension, specify in `./.devco
 sudo docker exec -it <container_app> zsh
 ```
 
-# K8s Dev & Deploy
+# Deploy with Kubernetes
 
 kubectl Cheat Sheet: https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 
@@ -46,7 +50,7 @@ brew install minikube, skaffold, helm...
 minikube start # start minikube cluster
 kubectl get pods -A
 
-# check is context in local
+# check is context in localk
 kubectl config get-contexts
 kubectl config use-context minikube
 
@@ -58,10 +62,10 @@ skaffold dev --profile=minikube --port-forward
 
 ### Debug ###
 
-# 確認 ingress 有沒有安裝，如果出現 <error: endpoints "default-http-backend" not found> 表示沒安裝
+# ensure ingress is installed, <error: endpoints "default-http-backend" not found> means not installed yet
 kubectl describe ingress
 
-# 用 helm 安裝ingress
+# use helm to install ingress
 helm install --namespace kube-system nginx ingress-nginx --repo https://kubernetes.github.io/ingress-nginx
 ```
 
@@ -75,9 +79,14 @@ GCP Samples
 
 Steps:
 
-- create a GKE cluster https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
+- create a GKE cluster, @see https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
+- enable google cloud build api, @see https://cloud.google.com/build/docs/build-push-docker-image https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run
+- create a google cloud artifact registry, eg 'conote-docker-repo', @see https://cloud.google.com/artifact-registry/docs/docker/quickstart
+- setup gke ingress with http, enable `HttpLoadBalancing`, @see https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress?hl=en#http-add-on
+- setup Google-managed SSL certificates, `external ip` @see https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs?hl=en
 - modiy .env.local url (corresponding GKE's external IP）
-- change URL on auth0 website
+
+- install postgresql on gke through helm
 
 ```sh
 # switch context to cloud cluster
@@ -85,12 +94,16 @@ kubectl config get-contexts
 kubectl config use-context ...
 
 # change repo name based on google cloud artifact registry https://cloud.google.com/artifact-registry/docs/docker/quickstart
-skaffold dev --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-try/conote-docker-repo' --port-forward
+skaffold dev --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --port-forward
 
-# deploy
-# skaffold run --default-repo=gcr.io/conote-try --tail
-skaffold run --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-try/conote-docker-repo' --tail
-skaffold delete # remove deploy
+# build & deploy
+skaffold run --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --tail
+
+# deploy only (no build)
+skaffold deploy --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --images='conote-webapp-image:latest'
+
+# remove deployment
+skaffold delete
 ```
 
 Setup external-ip
@@ -98,6 +111,16 @@ Setup external-ip
 - Google cloud VPC network
   - firewall -> open port
   - external ip
+
+#### GKE guide
+
+How to connect my domain to pod?
+
+How to setup https?
+
+How to resize gke boot disk?
+
+- TLDR, add another node pool (and set boot disk size) and delete the current
 
 ### Postgresql install, dump, restore
 
@@ -111,23 +134,35 @@ https://github.com/rinormaloku/postgre-backup-container
 #### Install postgres chart
 
 ```sh
-# 用 helm 裝 postgres chart https://bitnami.com/stack/postgresql/helm
+# use helm to install postgres chart, https://bitnami.com/stack/postgresql/helm
 helm repo add ...
 helm repo update
-helm install conote-release --set postgresqlUsername=postgresuser bitnami/postgresql
+helm install conote-release --set global.postgresql.auth.username=postgresuser bitnami/postgresql
 
-# 刪除 chart，需另外刪掉 PVC
+# delete chart, also needs to delete PVC
 helm list
 helm delete ...
 kubectl get pvc
 kubectl delete pvc ...
 
-export POSTGRES_ADMIN_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.postgresql-postgres-password}" | base64 --decode)
+# get the password for "postgres"
+export POSTGRES_ADMIN_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.postgres-password}" | base64 --decode)
 
-export POSTGRES_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+# get the password for "postgresuser"
+export POSTGRES_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.password}" | base64 --decode)
 
 # open a psql client called conote-release-postgresql-client, and keeps it alive for dump/restore
-kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.14.0-debian-10-r18 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
+kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --namespace default \
+  --image docker.io/bitnami/postgresql:14.2.0-debian-10-r14 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
+  --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
+
+# connect database from outside the cluster
+kubectl port-forward --namespace default svc/conote-release-postgresql 5432:5432 \
+  & PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgresuser -d postgres -p 5432
+
+# after finish dump/restore, delete the pod
+kubectl get pods -o wide
+kubectl delete pod conote-release-postgresql-client
 ```
 
 #### Dump
@@ -140,7 +175,7 @@ kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --n
 SELECT * FROM "User";
 
 # dump from local docker
-docker exec -i 8ac632cf6317 sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > prisma_dump.tar
+docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > local_prisma_dump-$(date +%Y%m%d).tar
 
 # dump from k8s
 kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > gke_conote_prisma_dump-$(date +%Y%m%d).tar
@@ -153,15 +188,18 @@ Dump to CSV, JSON? Use dump & restore, then access pgadmin and export to csv, js
 ```sh
 # Restore to k8s
 # create database if not exist in psql
-$(psql) CREATE DATABASE prisma;  # DROP DATABASE prisma;
+$(psql) CREATE DATABASE prisma;
+
+# For case require to drop database, !!! use carefully !!!
+$(psql) DROP DATABASE prisma;
 
 # restore to k8s
-kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft --clean --if-exists < gke_conote_prisma_dump-$(date +%Y%m%d).tar
+kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql -C -d postgres -v -p 5432 -U postgresuser -Ft < ${prisma_dump_file.tar}
 
 # restore to local docker
 # - '-d postgres' means connect to database 'postgres' (otherwise will throw connection fail),
 #   the 'prisma' database will be created during running the restore-script
-docker exec -i ${container_id} sh -c "PGPASSWORD=postgrespassword pg_restore -C -d postgres -v -p 5432 -U postgresuser -Ft" < gke_conote_prisma_dump-${date}.tar
+docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_restore -C -d postgres -v -p 5432 -U postgresuser -Ft" < ${prisma_dump_file.tar}
 ```
 
 Troubleshoots:
@@ -181,11 +219,13 @@ Migration flow:
 2. Restore the database to local for testing
 3. (Optional) Delete `_prisma` table to ignore previous migrations and create `prisma.schema` from the exisiting database
 4. Use `prisma migrate dev` to write migrations, data may loss
-5. Restore the database to local again, use `prisma migrate deploy` to apply migrations
+5. Restore the database to local again, use `prisma migrate resolve` and then `prisma migrate deploy` to apply migrations
 6. Dump the local database which applied migrations
 7. Restore the after-migrate-database to cloud
 
-prisma migrate
+See
+
+- https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate/add-prisma-migrate-to-a-project
 
 ```sh
 # (optional) generate prisma.schema from exisiting database
@@ -203,8 +243,9 @@ yarn dotenv -e .env.local prisma migrate resolve
 
 v-discuss
 
-- (?) 同一事件在不同新聞網頁報導時，如何統整筆記？@eg $RBLX - #$RBLX 暴跌 25%# -> suggest similar pages
-- (?) note without bulletin
+- [?] 同一事件在不同新聞網頁報導時，如何統整筆記？@eg $RBLX - #$RBLX 暴跌 25%# -> suggest similar pages
+- [?] note without bulletin
+- [?] remove bullet emoji -> easier & better for co-editing, note contribution calculated by counting words/lines
 
 v-next
 
@@ -214,7 +255,7 @@ v-next
   - consider switch to https://typegraphql.com/
 - loading -> static icon
 - auth
-  - [prior@chi] improve login, logout stablility
+  - [prior@chi] improve login, logout stablility -> require both server (useMe) & firebase to logged-in, if server-side not logged in, should also revoke client-side firebase token so client-side check not remained logged-in
 - user
   - [prior] (req) user-page, include user's notes, rates, interested fields
   - (?) anonymous user
@@ -286,10 +327,10 @@ v-next
 
 v0.2
 
-- naming
-  - [v] 'card' to 'note'
 - /index
   - [v] announcement
+- naming
+  - [v] 'card' to 'note'
 - /author
   - [v] gql create/update author
   - [prior@lisa] edit author meta (ie intro)
@@ -372,11 +413,11 @@ v0.1.1
   - [pending] (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
   - [v] (ui) :pin emoji should not have count
   - [@lisa] (ui) :pin emoji color -> gray (unclick)
-  - [@lisa] (ui) conote -> konote & when on-hover button add some feedback
+  - [pending@lisa] (ui) conote -> konote & when on-hover button add some feedback
   - [v] (bug) while not logged in can still typing in the editor
 - workspace
   - [v] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved
-  - [prior@lisa] (bug) delete note will not work if that note is opening in the editor -> raise warning to prevent deletion
+  - [v] (bug) delete note will not work if that note is opening in the editor -> use disabled (raise warning to prevent deletion)
 - link
   - [pending] (bug) URL failed: https://www.mobile01.com/topicdetail.php?f=803&t=6541514 -> fail only on server, possibly caused by cloudflare guard
 - [v] (req) domain name

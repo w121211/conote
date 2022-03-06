@@ -49,7 +49,7 @@ export const wrapToInlines = ({
   }
 
   const str = Node.string(lcNode)
-  const { inlines } = BulletParser.parseBulletHead({ str })
+  const { inlines } = BulletParser.parse(str)
   if (inlines.filter(e => e.type !== 'text').length === 0) {
     // all inlines are text, no need to replace
     return

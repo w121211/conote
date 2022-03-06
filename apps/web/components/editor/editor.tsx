@@ -1,5 +1,6 @@
+import { useApolloClient } from '@apollo/client'
 import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
-import { cloneDeep } from 'lodash'
+// import { cloneDeep } from 'lodash'
 import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element, Point } from 'slate'
 import {
   Editable,
@@ -22,9 +23,9 @@ import InlineFiltertag from '../inline/inline-filtertag'
 import InlinePoll from '../inline/inline-poll'
 import InlineRate from '../inline/inline-rate'
 import { decorate } from './decorate'
-import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
+// import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
-import BulletSvg from '../bullet-svg'
+// import BulletSvg from '../bullet-svg'
 import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
 import { Doc } from '../workspace/doc'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
@@ -32,8 +33,6 @@ import { isLiArray, isUl, onKeyDown as onKeyDownWithList, ulPath, withList } fro
 import { withAutoComplete } from './with-auto-complete'
 import InlineDiscuss from '../inline/inline-discuss'
 import { useSearchPanel } from './use-search-panel'
-import { useApolloClient } from '@apollo/client'
-import { useSearchDiscussModal } from './use-search-discuss-modal'
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, leaf, children } = props

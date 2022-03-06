@@ -47,30 +47,30 @@ const NoteEmojiBtn = ({
   const handleLike = (choice: LikeChoice = 'UP') => {
     const myLike = myEmojiLikeData?.myNoteEmojiLike
 
-    if (myLike && myLike.choice === choice) {
-      upsertEmojiLike({
-        variables: {
-          noteEmojiId: noteEmoji.id,
-          data: { choice: 'NEUTRAL' },
-        },
-      })
-    }
-    if (myLike && myLike.choice !== choice) {
-      upsertEmojiLike({
-        variables: {
-          noteEmojiId: noteEmoji.id,
-          data: { choice },
-        },
-      })
-    }
-    if (myLike === null) {
-      upsertEmojiLike({
-        variables: {
-          noteEmojiId: noteEmoji.id,
-          data: { choice },
-        },
-      })
-    }
+    // if (myLike && myLike.choice === choice) {
+    //   upsertEmojiLike({
+    //     variables: {
+    //       noteEmojiId: noteEmoji.id,
+    //       data: { choice: 'NEUTRAL' },
+    //     },
+    //   })
+    // }
+    // if (myLike && myLike.choice !== choice) {
+    //   upsertEmojiLike({
+    //     variables: {
+    //       noteEmojiId: noteEmoji.id,
+    //       data: { choice },
+    //     },
+    //   })
+    // }
+    // if (myLike === null) {
+    //   upsertEmojiLike({
+    //     variables: {
+    //       noteEmojiId: noteEmoji.id,
+    //       data: { choice },
+    //     },
+    //   })
+    // }
     // upsertEmojiLike({variables:{hashtagId:foundEmoji.id,data:{choice:}}})
   }
   return (
@@ -82,7 +82,7 @@ const NoteEmojiBtn = ({
         handleLike('UP')
       }}
     >
-      <EmojiIcon
+      {/* <EmojiIcon
         className={'text-gray-500'}
         code={noteEmoji.code}
         liked={myEmojiLikeData?.myNoteEmojiLike?.choice === 'UP'}
@@ -97,7 +97,7 @@ const NoteEmojiBtn = ({
         >
           {noteEmoji.count.nUps}
         </span>
-      )}
+      )} */}
     </button>
   )
 }

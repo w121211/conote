@@ -1,10 +1,10 @@
 import React, { createContext, useEffect, useState } from 'react'
-import { useMeQuery, useCardQuery } from '../apollo/query.graphql'
-// import { CardItem } from './card'
+import { useNoteQuery } from '../apollo/query.graphql'
+// import { NoteItem } from './note'
 
 export const SymbolContext = createContext({ symbol: '' })
 
-const CardPage = ({
+const NotePage = ({
   pathSymbol,
   handlePathPush,
 }: {
@@ -25,14 +25,14 @@ const CardPage = ({
     data,
     error,
     loading,
-    refetch: cardRefetch,
-  } = useCardQuery({
+    refetch: noteRefetch,
+  } = useNoteQuery({
     variables: { symbol: pathSymbol },
   })
   useEffect(() => {
-    cardRefetch()
+    noteRefetch()
   }, [pathSymbol])
-  // console.log(pathSymbol, data?.card)
+  // console.log(pathSymbol, data?.note)
   const handleSymbol = (symbol: string) => {
     handlePathPush(symbol)
     setSymbol(symbol)
@@ -85,11 +85,11 @@ const CardPage = ({
       >
         [[https://www.youtube.com/watch?v=F57gz9O0ABw]]
       </button> */}
-      {/* {console.log(data?.card)} */}
-      {/* {data && data.card && <CardItem card={data.card} handleSymbol={handleSymbol} />} */}
+      {/* {console.log(data?.note)} */}
+      {/* {data && data.note && <NoteItem note={data.note} handleSymbol={handleSymbol} />} */}
       {/* <BoardPage boardId={}/> */}
     </SymbolContext.Provider>
     // {/* </div> */}
   )
 }
-export default CardPage
+export default NotePage

@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import CardEmojis from './emoji-up-down/note-emojis-display'
+import NoteEmojis from './emoji-up-down/note-emojis-display'
 
 const HotListItme = ({
   href,
@@ -11,9 +11,9 @@ const HotListItme = ({
   author,
   shot,
   currentTab,
-  cardId,
+  noteId,
 }: {
-  cardId: string
+  noteId: string
   href: string
   title: string
   source?: string
@@ -56,7 +56,7 @@ const HotListItme = ({
 
         {/* {(author || hashtags || source) && <span className="h-4 mx-2 border-r border-gray-300"></span>} */}
         {source && (
-          <Link href={`/card/${source}`}>
+          <Link href={`/note/${source}`}>
             <a>
               <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-blue-500 hover:underline hover:underline-offset-2">
                 {source}
@@ -84,7 +84,7 @@ const HotListItme = ({
         </div>
       )}
 
-      <CardEmojis cardId={cardId} />
+      <NoteEmojis noteId={noteId} />
     </div>
   )
 }
