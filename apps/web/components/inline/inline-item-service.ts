@@ -53,7 +53,7 @@ export const InlineItemService = {
     }
   },
   toInlineDiscussString({ id, title }: { id: string; title: string }): string {
-    return `#${title}(${id})#`
+    return `#${title}-${id}#`
   },
 }
 

@@ -31,6 +31,7 @@ import { Doc } from '../workspace/doc'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
 import { isLiArray, isUl, onKeyDown as onKeyDownWithList, ulPath, withList } from './with-list'
 import { withAutoComplete } from './with-auto-complete'
+// import InlineDiscuss from '../inline/inline-discuss'
 import InlineDiscuss from '../inline/inline-discuss'
 import { useSearchPanel } from './use-search-panel'
 
@@ -42,52 +43,8 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   // let style: React.CSSProperties = {}
   let className = ''
 
-  // if (selected) {
-  // switch (leaf.tokenType) {
-  //   case 'mirror-ticker':
-  //   case 'mirror-topic':
-  //   case 'mirror-topic-bracket-head':
-  //   case 'mirror-head':
-  //   case 'topic-bracket-head':
-  //   case 'topic-bracket-tail': {
-  //     className = 'text-blue-500 '
-  //     break
-  //   }
-  //   case 'author': {
-  //     className = 'text-green-500'
-  //     break
-  //   }
-  //   case 'poll':
-  //   case 'new-poll': {
-  //     className = 'text-cyan-500'
-  //     break
-  //   }
-  //   case 'rate':
-  //   case 'new-rate': {
-  //     className = 'text-yellow-500'
-  //     break
-  //   }
-  //   case 'ticker':
-  //   case 'topic-bracket':
-  //   case 'topic': {
-  //     className = 'text-pink-500'
-  //     break
-  //   }
-  //   case 'filtertag': {
-  //     className = 'text-purple-500'
-  //     break
-  //   }
-  //   case 'url': {
-  //     className = 'text-sky-500'
-  //     break
-  //   }
-  //   default: {
-  //     className = 'text-gray-600'
-  //   }
-  // }
   switch (leaf.tokenType) {
     case 'author':
-    case 'discuss':
     case 'mirror-ticker':
     case 'mirror-topic':
     case 'rate':
@@ -96,6 +53,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       className = 'text-blue-500'
       break
     }
+    case 'discuss-id':
     case 'mirror-topic-bracket-head':
     case 'mirror-head':
     case 'topic-bracket-head':
@@ -103,12 +61,15 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
       className = 'text-gray-400 '
       break
     }
+    case 'discuss':
+    case 'discuss-bracket-start':
+    case 'discuss-bracket-end':
+    case 'discuss-new':
     case 'filtertag':
     case 'url': {
       className = 'text-green-600'
       break
     }
-
     default: {
       className = 'text-gray-600'
     }
@@ -309,7 +270,7 @@ const CustomElement = ({
 }: RenderElementProps & { note: NoteFragment | null }): JSX.Element => {
   switch (element.type) {
     case 'inline-discuss':
-      return <InlineDiscuss {...{ attributes, children, element }} />
+      return <InlineDiscuss {...{ attributes, children, element, noteId: note?.id }} />
     case 'inline-filtertag':
       return <InlineFiltertag {...{ attributes, children, element }} />
     case 'inline-mirror':

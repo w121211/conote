@@ -80,7 +80,7 @@ const ModalNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   useEffect(() => {
     if (data && mainDoc?.doc) {
       // ensure main-doc is existed before open modal-doc
-      workspace.openDoc({ symbol, note: data.note ?? null, isModal: true })
+      workspace.openDoc({ symbol, note: data.note ?? null, openInModal: true })
     }
     Doc.find({ symbol }).then(resolve => {
       if (resolve) {

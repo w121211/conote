@@ -1,116 +1,88 @@
 import React, { useState } from 'react'
 import { Transforms } from 'slate'
-import { ReactEditor, RenderElementProps, useSelected, useSlateStatic } from 'slate-react'
+import { ReactEditor, RenderElementProps, useSlateStatic } from 'slate-react'
 import { DiscussFragment } from '../../apollo/query.graphql'
 import { InlineDiscussElement } from '../editor/slate-custom-types'
 import Modal from '../modal/modal'
-// import RateButton from '../rate-form/rate-button'
-// import CreateRateForm from '../rate-form/create-rate-form'
-// import UpdateRateForm from '../rate-form/update-rate-form'
 import { InlineItemService } from './inline-item-service'
-import { useRouter } from 'next/router'
 import CreateDiscussForm from '../discuss/create-discuss-form'
-import { workspace } from '../workspace/workspace'
-import { useObservable } from 'rxjs-hooks'
+import Link from 'next/link'
+import DiscussModalPage from '../discuss/modal-page/modal-page'
 
 const InlineDiscuss = ({
   children,
   attributes,
   element,
-}: RenderElementProps & { element: InlineDiscussElement }): JSX.Element => {
-  const router = useRouter()
-  const mainDoc = useObservable(() => workspace.mainDoc$)
+  noteId,
+}: RenderElementProps & {
+  element: InlineDiscussElement
+  noteId?: string
+}): JSX.Element => {
   const editor = useSlateStatic()
-  const selected = useSelected()
   const [showModal, setShowModal] = useState(false)
 
-  // const [shotId, setShotId] = useState(element.id)
-  // const [shotData, setShotData] = useState<ShotFragment | undefined>()
-  // const { data: targetData } = useNoteQuery({ variables: { id: shotId } })
-
-  // const onRateCreated = (rate: RateFragment, targetSymbol: string) => {
-  //   // const editor = useSlateStatic()
-  //   const path = ReactEditor.findPath(editor, element)
-  //   const inlineRate = InlineItemService.toInlineRateString({
-  //     id: rate.id,
-  //     choice: rate.choice,
-  //     symbol: targetSymbol,
-  //     author: element.authorName ?? '',
-  //   })
-  //   Transforms.setNodes<InlineRateElement>(editor, { id: rate.id }, { at: path })
-  //   Transforms.insertText(editor, inlineRate, { at: path })
-  // }
-  const onDiscussCreated = (data: DiscussFragment) => {
+  const onCreate = (data: DiscussFragment) => {
     const path = ReactEditor.findPath(editor, element)
-    const inlineDiscuss = InlineItemService.toInlineDiscussString({
+    const inlineDiscussStr = InlineItemService.toInlineDiscussString({
       id: data.id,
       title: data.title,
     })
     Transforms.setNodes<InlineDiscussElement>(editor, { id: data.id }, { at: path })
-    Transforms.insertText(editor, inlineDiscuss, { at: path })
+    Transforms.insertText(editor, inlineDiscussStr, { at: path }) // replace existing text
     setShowModal(false)
   }
 
-  // useEffect(() => {
-  //   // if (showPopover && !pollId) {
-  //   //   handleCreatePoll()
-  //   // }
-  //   // console.log(shotData, shotId)
-  //   if (!showPopover && !element.id && shotId && shotData) {
-  //     // const queryPollData = async () => {
-  //     //   queryPoll({ variables: { id: pollId } })
-  //     // }
-  //     // queryPollData()
-  //     // queryShot({ variables: { id:shotId } })
-  //     if (shotData) {
-  //       onCreated(shotData)
-  //     }
-  //   }
-  // }, [showPopover, shotData, shotId])
+  const isDiscussCreated = element.id !== undefined
+  const modalButtons = !isDiscussCreated && (
+    <button form="create-discuss-form" className="btn-primary h-10 w-24 " type="submit">
+      提交
+    </button>
+  )
+  const modalTopRightBtn = isDiscussCreated && (
+    <Link href={{ pathname: '/discuss/[discussId]', query: { discussId: element.id } }}>
+      <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
+        <span className="material-icons text-lg text-gray-500 hover:text-gray-700">open_in_full</span>
+      </a>
+    </Link>
+  )
 
   return (
-    <span {...attributes} contentEditable={false}>
-      <a
-        className="text-blue-500 cursor-pointer hover:underline-offset-2 hover:underline"
-        onClick={() => {
-          // setShowModal(true)
-          if (element.id) {
-            router.push(
-              // { pathname: '/discuss/[discussId]', query: { discussId: element.str } },
-              { pathname: router.pathname, query: { symbol: router.query.symbol, discuss: element.id } },
-              `/discuss/${encodeURIComponent(element.id)}`,
-              {
-                shallow: true,
-              },
-            )
-          } else {
-            setShowModal(true)
-          }
-        }}
-      >
-        {children}
-      </a>
-      <Modal
-        visible={showModal}
-        onClose={() => {
-          setShowModal(false)
-        }}
-        buttons={
-          <button form="create-discuss-form" className="btn-primary h-10 w-24 " type="submit">
-            提交
+    <span {...attributes}>
+      <span contentEditable={false}>
+        {isDiscussCreated ? (
+          <button
+            onClick={() => {
+              setShowModal(true)
+            }}
+          >
+            {children}
           </button>
-        }
-      >
-        {mainDoc && mainDoc.doc && mainDoc.doc.noteCopy?.id ? (
-          <CreateDiscussForm
-            noteId={mainDoc.doc.noteCopy?.id}
-            title={element.str.substring(1, element.str.length - 1)}
-            onCreated={onDiscussCreated}
-          />
         ) : (
-          <span>Error</span>
+          <button
+            onClick={() => {
+              setShowModal(true)
+            }}
+          >
+            {children}
+            <span>(click to create)</span>
+          </button>
         )}
-      </Modal>
+        <Modal
+          visible={showModal}
+          onClose={() => {
+            setShowModal(false)
+          }}
+          topRightBtn={modalTopRightBtn}
+          buttons={modalButtons}
+        >
+          {element.id ? (
+            <DiscussModalPage id={element.id} title={element.title} />
+          ) : (
+            <CreateDiscussForm noteId={noteId} title={element.title} onCreate={onCreate} />
+          )}
+        </Modal>
+      </span>
+      <span className={'text-[0px]'}>{children}</span>
     </span>
   )
 }
