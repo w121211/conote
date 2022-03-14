@@ -197,8 +197,8 @@ $(psql) DROP DATABASE prisma;
 kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql -C -d postgres -v -p 5432 -U postgresuser -Ft < ${prisma_dump_file.tar}
 
 # restore to local docker
-# - '-d postgres' means connect to database 'postgres' (otherwise will throw connection fail),
-#   the 'prisma' database will be created during running the restore-script
+#  '-d postgres' means connect to database 'postgres' (otherwise will throw connection fail),
+#  the 'prisma' database will be created during running the restore-script
 docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_restore -C -d postgres -v -p 5432 -U postgresuser -Ft" < ${prisma_dump_file.tar}
 ```
 

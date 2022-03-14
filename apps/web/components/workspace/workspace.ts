@@ -20,8 +20,11 @@ type DocSubject = {
 class Workspace {
   readonly mainDoc$ = new BehaviorSubject<DocSubject>({ doc: null })
   readonly modalDoc$ = new BehaviorSubject<DocSubject>({ doc: null })
+
   readonly committedDocIndicies$ = new BehaviorSubject<TreeNode<DocIndex>[] | null>(null)
-  readonly editingDocIndicies$ = new BehaviorSubject<TreeNode<DocIndex>[] | null>(null) // docs in editing and not committed yet
+
+  // docs in editing and not committed yet
+  readonly editingDocIndicies$ = new BehaviorSubject<TreeNode<DocIndex>[] | null>(null)
 
   readonly status$ = new BehaviorSubject<'initiating' | 'loading' | 'saving' | 'pushing' | 'droped' | null>(
     'initiating',
@@ -32,21 +35,6 @@ class Workspace {
     // this.updateCommittedDocEntries()
   }
 
-  // _whichDoc(isModal?: true): BehaviorSubject<{
-  //   doc: Doc | null
-  //   error?: string
-  //   // warn?: 'prev_doc_behind'
-  // }> {
-  //   const doc$ = isModal ? this.modalDoc$ : this.mainDoc$
-  //   if (isModal) {
-  //     // check is allow to open in modal
-  //     if (this.mainDoc$.getValue().doc === null) {
-  //       throw 'main-doc is null, not able to open a modal-doc'
-  //     }
-  //   }
-  //   return doc$
-  // }
-
   closeDoc({ isModal }: { isModal?: true }): void {
     // const _doc$ = this._whichDoc(isModal)
     const doc$ = isModal ? this.modalDoc$ : this.mainDoc$
@@ -54,7 +42,9 @@ class Workspace {
   }
 
   /**
-   * Commit a doc and its children to remote, once completed mvoe to commited-doc of local-db
+   * Commit a doc and its children to remote,
+   * once completed mvoe to commited-doc of local database
+   *
    */
   // eslint-disable-next-line @typescript-eslint/ban-types
   async commit(rootDocIndex: TreeNode<DocIndex>, client: ApolloClient<object>): Promise<void> {
@@ -119,13 +109,15 @@ class Workspace {
 
   /**
    * Push all saved docs to remote
+   *
    */
   async commitAll(): Promise<void> {
     throw 'Not implemented'
   }
 
   /**
-   * Drop all tables
+   * Drop local database
+   *
    */
   async dropAll(): Promise<void> {
     console.log('Droping local database')
@@ -135,11 +127,23 @@ class Workspace {
     await this.updateEditingDocIndicies()
   }
 
-  async openDoc({ symbol, note, isModal }: { symbol: string; note: NoteFragment | null; isModal?: true }): Promise<{
+  /**
+   * Open a doc by symbol
+   *
+   */
+  async openDoc({
+    symbol,
+    note,
+    openInModal,
+  }: {
+    symbol: string
+    note: NoteFragment | null
+    openInModal?: true
+  }): Promise<{
     doc: Doc
     isFromSaved: boolean
   }> {
-    const _doc$ = isModal ? this.modalDoc$ : this.mainDoc$
+    const _doc$ = openInModal ? this.modalDoc$ : this.mainDoc$
     if (_doc$.getValue().doc !== null) {
       throw '_doc$.getValue().doc !== null, call closeDoc() first before open another'
     }
@@ -158,7 +162,7 @@ class Workspace {
 
     // No local doc, create one
     let fromDocCid: string | null = null
-    if (isModal) {
+    if (openInModal) {
       const { doc: mainDoc } = this.mainDoc$.getValue()
       if (mainDoc === null) {
         throw 'mainDoc === null: modal doc require main doc exist'
@@ -176,6 +180,7 @@ class Workspace {
 
   /**
    * Save to local IndexedDB
+   *
    */
   async save(doc: Doc): Promise<void> {
     // console.log('Saving...')

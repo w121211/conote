@@ -138,6 +138,7 @@ export const BulletParser = {
               type: 'inline-discuss',
               str,
               id: match[2],
+              title: match[1],
             }
           }
           throw 'parse error'
@@ -146,6 +147,7 @@ export const BulletParser = {
           return {
             type: 'inline-discuss',
             str,
+            title: str.substring(1, str.length - 1), // remove '#'
           }
         }
         case 'filtertag': {

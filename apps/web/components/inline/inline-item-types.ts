@@ -15,6 +15,7 @@ export type InlineText = {
 export type InlineDiscuss = {
   type: 'inline-discuss'
   str: string
+  title: string
   id?: string
 }
 

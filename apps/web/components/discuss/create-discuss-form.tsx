@@ -10,18 +10,18 @@ interface FormInput {
 const CreateDiscussForm = ({
   noteId,
   title,
-  onCreated,
+  onCreate,
 }: {
-  noteId: string
+  noteId?: string
   title: string
-  onCreated: (data: DiscussFragment) => void
+  onCreate: (data: DiscussFragment) => void
 }) => {
   const { handleSubmit, register, setValue } = useForm<FormInput>({ defaultValues: { title } })
   const contentRef = useRef<HTMLDivElement>(null)
   const [createDiscuss] = useCreateDiscussMutation({
     onCompleted(data) {
       if (data.createDiscuss) {
-        onCreated(data.createDiscuss)
+        onCreate(data.createDiscuss)
       }
     },
   })
@@ -34,7 +34,7 @@ const CreateDiscussForm = ({
     }
   }
   const onSubmit = (v: FormInput) => {
-    console.log(v, noteId)
+    // console.log(v, noteId)
     createDiscuss({
       variables: {
         noteId,
