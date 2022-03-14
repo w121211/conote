@@ -14,6 +14,7 @@ import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
 import TemplatePage from '../../components/template'
 import LoginModal from '../../components/login-modal'
+import NoteMetaModal from '../../components/note-meta-modal'
 
 const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data: meData } = useMeQuery()
@@ -210,7 +211,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
     //   // return 'save'
     // }
 
-    console.log(router)
+    // console.log(router)
     // if () {
     //   // return null
     // }
@@ -248,24 +249,22 @@ const NoteSymbolPage = (): JSX.Element | null => {
       <Modal
         topLeftBtn={
           <Link href={{ pathname: '/note/[symbol]', query: { symbol: modalSymbol } }}>
-            <a className="flex items-center">
-              <span className="material-icons text-lg leading-none text-gray-500 hover:text-gray-700">
-                open_in_full
-              </span>
+            <a className="flex items-center p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+              <span className="material-icons text-lg leading-none">open_in_full</span>
             </a>
           </Link>
         }
         topRightBtn={
-          <div className="flex gap-1">
-            <button className="btn-reset-style">
-              <span className="material-icons-outlined text-lg leading-none text-gray-500 hover:text-gray-700">
-                category
-              </span>
+          <div className="flex ">
+            {modalDoc?.doc && <NoteMetaModal doc={modalDoc.doc} modal />}
+            {/* <button className="btn-reset-style text-gray-500 hover:text-gray-700">
+              <span className="material-icons text-lg leading-none ">edit_note</span>
+            </button> */}
+            <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+              <span className="material-icons-outlined text-lg leading-none ">category</span>
             </button>
-            <button className="btn-reset-style">
-              <span className="material-icons-outlined text-lg leading-none text-gray-500 hover:text-gray-700">
-                more_horiz
-              </span>
+            <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+              <span className="material-icons-outlined text-lg leading-none ">more_horiz</span>
             </button>
           </div>
         }
@@ -290,20 +289,24 @@ const NoteSymbolPage = (): JSX.Element | null => {
       <Layout
         buttonRight={
           <LoginModal>
+            {mainDoc?.doc && <NoteMetaModal doc={mainDoc.doc} />}
             {mainDoc?.doc?.noteCopy && (
               <div className="inline-block z-20">
                 <HeaderNoteEmojis noteId={mainDoc.doc.noteCopy.id} />
               </div>
             )}
             <button
-              className="btn-reset-style p-1 hover:bg-gray-100 rounded"
+              className="btn-reset-style p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
               onClick={() => {
                 if (mainDoc?.doc) {
                   workspace.save(mainDoc.doc)
                 }
               }}
             >
-              <span className="material-icons-outlined text-xl leading-none text-gray-500">save</span>
+              <span className="material-icons-outlined text-xl leading-none ">save</span>
+            </button>
+            <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+              <span className="material-icons-outlined text-xl leading-none ">more_horiz</span>
             </button>
           </LoginModal>
         }

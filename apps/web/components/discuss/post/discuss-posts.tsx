@@ -1,8 +1,8 @@
 import moment from 'moment'
 import React, { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
-import { useDiscussPostsQuery, useMeQuery } from '../../apollo/query.graphql'
-import DiscussPostEmojis from './discuss-post-emojis'
+import { useDiscussPostsQuery, useMeQuery } from '../../../apollo/query.graphql'
+import DiscussPostEmojis from './post-emojis'
 
 const dummyData = [
   '測試測試大家好',
@@ -12,7 +12,7 @@ const dummyData = [
   '好尷尬唷嗚嗚嗚',
 ]
 
-const DiscussBody = ({ discussId }: { discussId: string }) => {
+const DiscussPosts = ({ discussId }: { discussId: string }) => {
   const { data: meData } = useMeQuery()
   const { data, loading } = useDiscussPostsQuery({ variables: { discussId } })
 
@@ -53,4 +53,4 @@ const DiscussBody = ({ discussId }: { discussId: string }) => {
   )
 }
 
-export default DiscussBody
+export default DiscussPosts

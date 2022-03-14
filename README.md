@@ -267,10 +267,10 @@ v-next
   - inline-poll
   - inline filtertag `#filter-tag`
   - inline url, eg https://arxiv.org/abs/2112.00114
-  - [prior@lisa] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
+  - [v] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
   - [?] root li without bullet icon?
   - [pending] 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
-  - [prior@lisa] labels @eg #new-note #fisrt-commit
+  - [v@lisa] labels @eg #new-note #fisrt-commit
   - (req) show doc diff
   - (req) easy to reference sourc url -> eg copy url button, @url
   - (req) show keyword as hints (optional disable by setting)
@@ -334,7 +334,7 @@ v0.2
 - /author
   - [v] gql create/update author
   - [prior@lisa] edit author meta (ie intro)
-  - [prior@lisa] (ui) add @ mark on author
+  - [v] (ui) add @ mark on author
   - [v] author rates <- gql rates by author
   - [pending] author articles <- gql links by author <- similar to rates
 - /editor
@@ -413,7 +413,7 @@ v0.1.1
   - [pending] (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
   - [v] (ui) :pin emoji should not have count
   - [v] (ui) :pin emoji color -> gray (unclick)
-  - [@lisa] (ui) conote -> konote & when on-hover button add some feedback
+  - [pending@lisa] (ui) conote -> konote & when on-hover button add some feedback
   - [v] (bug) while not logged in can still typing in the editor
 - workspace
   - [v] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved

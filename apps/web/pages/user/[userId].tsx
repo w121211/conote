@@ -41,20 +41,20 @@ const mockRateData: TableData[] = [
   },
 ]
 
-const AuthorPage = (): JSX.Element | null => {
+const UserPage = (): JSX.Element | null => {
   const [showMentionedPopup, setShowMentionedPopup] = useState(false)
-  const [queryAuthor, { data, loading, error }] = useAuthorLazyQuery()
+  const [queryAuthor, { data, loading, error }] = useUserLazyQuery()
   const router = useRouter()
 
-  useEffect(() => {
-    const { query, isReady } = router
-    if (isReady) {
-      const { author } = query
-      if (author && typeof author === 'string') {
-        queryAuthor({ variables: { name: 'firebase' } })
-      }
-    }
-  }, [router])
+  // useEffect(() => {
+  //   const { query, isReady } = router
+  //   if (isReady) {
+  //     const { author } = query
+  //     if (author && typeof author === 'string') {
+  //       queryAuthor({ variables: { name: 'firebase' } })
+  //     }
+  //   }
+  // }, [router])
 
   // if (!data === undefined || error || loading) {
   //   return null
@@ -63,9 +63,8 @@ const AuthorPage = (): JSX.Element | null => {
   return (
     <Layout buttonRight={data?.author && <AuthorMetaModal data={data.author} />}>
       <div className="flex flex-col gap-8">
-        <h1>@{router.query.author}</h1>
-        {data?.author?.meta}
-        <AuthorInfo />
+        <h1>@{router.query.userId}</h1>
+        {/* {data?.author?.meta} */}
         <AuthorRateTable data={mockRateData} />
 
         <div className="">
@@ -118,4 +117,4 @@ const AuthorPage = (): JSX.Element | null => {
   )
 }
 
-export default AuthorPage
+export default UserPage

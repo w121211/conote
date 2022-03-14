@@ -23,7 +23,7 @@ const rePollNew = /\B!\(\(poll\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const reRate = /\B!\(\(rate:(c[a-z0-9]{24,29})\)\)\(([^)]*)\)\B/
 const reRateNew = /\B!\(\(rate\)\)\(([^)]*)\)\B/
 const reURL = /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/
-const reComment = /\/\/ .+/g
+const reComment = /\/\/ .+$/m
 
 const grammar: Grammar = {
   //   'mirror-ticker': {
@@ -234,6 +234,9 @@ export const BulletParser = {
         case 'topic':
         case 'url': {
           return { type: 'inline-symbol', str, symbol: str }
+        }
+        case 'comment': {
+          return { type: 'inline-comment', str }
         }
       }
       // tokens not catched

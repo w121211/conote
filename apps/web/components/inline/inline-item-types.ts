@@ -71,6 +71,11 @@ export type InlineSymbol = {
   symbol: string
 }
 
+export type InlineComment = {
+  type: 'inline-comment'
+  str: string
+}
+
 export type InlineItem =
   | InlineText
   // | InlineAuthor
@@ -82,6 +87,7 @@ export type InlineItem =
   | InlinePoll
   | InlineRate
   | InlineSymbol
+  | InlineComment
 
 const isInlinePoll = (item: InlineItem): item is InlinePoll => {
   return item.type === 'inline-poll'

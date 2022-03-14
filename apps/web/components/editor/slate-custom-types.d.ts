@@ -4,6 +4,7 @@ import { HistoryEditor } from 'slate-history'
 import { ChangeType } from '@conote/docdiff'
 import { Bullet } from '../bullet/bullet'
 import {
+  InlineComment,
   InlineDiscuss,
   InlineFiltertag,
   InlineMirror,
@@ -51,6 +52,10 @@ export type InlineSymbolElement = InlineSymbol & {
   children: CustomText[]
 }
 
+export type InlineCommentElement = InlineComment & {
+  children: CustomText[]
+}
+
 export type LcElement = {
   type: 'lc'
   children: (CustomText | CustomInlineElement)[]
@@ -87,6 +92,7 @@ export type CustomInlineElement =
   | InlinePollElement
   | InlineRateElement
   | InlineSymbolElement
+  | InlineCommentElement
 
 type CustomElement = CustomInlineElement | LcElement | LiElement | UlElement
 

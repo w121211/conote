@@ -1,7 +1,7 @@
 import moment from 'moment'
 import React, { ReactEventHandler, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
-import { DiscussPostsDocument, useCreateDiscussPostMutation } from '../../apollo/query.graphql'
+import { DiscussPostsDocument, useCreateDiscussPostMutation } from '../../../apollo/query.graphql'
 
 interface FormInput {
   content: string

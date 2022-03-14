@@ -5,11 +5,11 @@ import {
   useDiscussPostEmojisQuery,
   useMyDiscussPostEmojiLikeLazyQuery,
   useMyDiscussPostEmojiLikeQuery,
-} from '../../apollo/query.graphql'
-import Tooltip from '../tooltip/tooltip'
-import CreateDiscussPostEmoji from './discuss-post-create-emoji'
-import UpdateDiscussPostEmoji from './discuss-post-update-emoji'
-import EmojisSwitch from './emojis-switch'
+} from '../../../apollo/query.graphql'
+import Tooltip from '../../tooltip/tooltip'
+import CreateDiscussPostEmoji from './post-create-emoji'
+import UpdateDiscussPostEmoji from './post-update-emoji'
+import EmojisSwitch from '../emojis-switch'
 
 const DiscussPostEmojis = ({ discussPostId }: { discussPostId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)

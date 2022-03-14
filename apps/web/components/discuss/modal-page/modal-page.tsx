@@ -2,10 +2,10 @@ import moment from 'moment'
 import React, { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDiscussQuery } from '../../../apollo/query.graphql'
-import DiscussBody from '../discuss-body'
+import DiscussBody from '../post/discuss-posts'
 import DiscussEmojis from '../discuss-emojis'
 import DiscussHeader from '../discuss-header'
-import ModalCreatePostForm from '../create-post-form'
+import ModalCreatePostForm from '../post/create-post-form'
 
 const dummyData = [
   '測試測試大家好',

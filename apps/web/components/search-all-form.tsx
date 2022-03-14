@@ -38,7 +38,7 @@ export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
 
   const handleChange = (value: Option | null, action: ActionMeta<Option>) => {
     if (action.action === 'select-option' && value) {
-      router.push(`/note/${encodeURIComponent(value.value)}`)
+      router.push(`/note/${encodeURIComponent(value.label)}`)
     }
     setValue(value)
   }

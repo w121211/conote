@@ -76,25 +76,26 @@ const NoteEmojiBtn = ({
 
   useEffect(() => {
     if (myEmojiLikeData?.myNoteEmojiLike?.liked && (noteEmoji.code === 'UP' || noteEmoji.code === 'DOWN')) {
-      onLiked(noteEmoji.code)
+      // onLiked(noteEmoji.code)
     }
   }, [myEmojiLikeData])
 
   useEffect(() => {
     const myLike = myEmojiLikeData?.myNoteEmojiLike
-    if (
-      (noteEmoji.code === 'UP' || noteEmoji.code === 'DOWN') &&
-      likedChoice &&
-      noteEmoji.code !== likedChoice &&
-      myLike?.liked
-    ) {
-      upsertEmojiLike({
-        variables: {
-          noteEmojiId: noteEmoji.id,
-          liked: !myLike.liked,
-        },
-      })
-    }
+    console.log(likedChoice)
+    // if (
+    //   (noteEmoji.code === 'UP' || noteEmoji.code === 'DOWN') &&
+    //   likedChoice &&
+    //   noteEmoji.code !== likedChoice &&
+    //   myLike?.liked
+    // ) {
+    //   upsertEmojiLike({
+    //     variables: {
+    //       noteEmojiId: noteEmoji.id,
+    //       liked: !myLike.liked,
+    //     },
+    //   })
+    // }
   }, [likedChoice])
 
   return (
@@ -106,7 +107,7 @@ const NoteEmojiBtn = ({
         handleLike('UP')
       }}
     >
-      {/* <EmojiIcon
+      <EmojiIcon
         className={'text-gray-500'}
         code={noteEmoji.code}
         liked={myEmojiLikeData?.myNoteEmojiLike?.liked}
@@ -119,7 +120,7 @@ const NoteEmojiBtn = ({
         >
           {noteEmoji.count.nUps}
         </span>
-      )} */}
+      )}
     </button>
   )
 }

@@ -33,6 +33,7 @@ import { isLiArray, isUl, onKeyDown as onKeyDownWithList, ulPath, withList } fro
 import { withAutoComplete } from './with-auto-complete'
 import InlineDiscuss from '../inline/inline-discuss'
 import { useSearchPanel } from './use-search-panel'
+import InlineComment from '../inline/inline-comment'
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, leaf, children } = props
@@ -294,7 +295,7 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>
 
-      <div className=" w-full">{children}</div>
+      <div className=" w-full align-top">{children}</div>
     </div>
   )
 }
@@ -326,6 +327,8 @@ const CustomElement = ({
       return <InlineRate {...{ attributes, children, element }} />
     case 'inline-symbol':
       return <InlineSymbol {...{ attributes, children, element }} />
+    case 'inline-comment':
+      return <InlineComment {...{ attributes, children, element }} />
     case 'lc':
       return <Lc {...{ attributes, children, element, curNoteId: note?.id }} />
     case 'li':
