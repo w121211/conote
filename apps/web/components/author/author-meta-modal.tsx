@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { AuthorFragment, useAuthorQuery } from '../apollo/query.graphql'
+import { AuthorFragment, useAuthorQuery } from '../../apollo/query.graphql'
 import AuthorMetaForm from './author-meta-form'
-import Modal from './modal/modal'
-import { Doc } from './workspace/doc'
+import Modal from '../modal/modal'
+import { Doc } from '../workspace/doc'
 
 const AuthorMetaModal = ({ data, modal }: { data: AuthorFragment; modal?: boolean }) => {
   const [showModal, setShowModal] = useState(false)

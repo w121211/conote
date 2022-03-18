@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { useMeQuery } from '../../apollo/query.graphql'
-import Tooltip from '../tooltip/tooltip'
+import Tooltip from '../../layout/tooltip/tooltip'
 
 const MeHeaderItem = ({ className }: { className?: string }) => {
   const [showToolTip, setShowToolTip] = useState(false)

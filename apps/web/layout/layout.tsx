@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import SideBar from './sidebar/sidebar'
-import LoginModal from './login-modal'
-import Navbar from './navbar'
+import SideBar from '../components/sidebar/sidebar'
+import LoginModal from '../components/login-modal'
+import Navbar from '../components/navbar'
 
 export default function Layout({
   children,
@@ -41,7 +41,7 @@ export default function Layout({
         setShowMenu(storageMenu === 'true' ? true : false)
         setPinMenu(storagePin === 'true' ? true : false)
       } else {
-        console.log('bigger', showMenu)
+        // console.log('bigger', showMenu)
         localStorage.setItem('showMenu', 'true')
         localStorage.setItem('pinMenu', 'true')
       }
@@ -103,7 +103,7 @@ export default function Layout({
       <div
         className={`flex-grow pt-11 pb-[20vh] px-4  ${
           pinMenu ? 'xl:px-[10%] lg:px-[4%] ' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
-        }  overflow-y-scroll  scroll-smooth  scrollbar`}
+        }  overflow-y-scroll scroll-smooth scrollbar`}
       >
         {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
         <div className="">

@@ -52,11 +52,10 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
     // case 'mirror-ticker':
     // case 'mirror-topic':
     case 'author':
-    case 'discuss':
     case 'rate':
     case 'topic':
     case 'ticker': {
-      className = 'text-blue-500'
+      className = 'text-blue-600'
       break
     }
     case 'discuss-id':

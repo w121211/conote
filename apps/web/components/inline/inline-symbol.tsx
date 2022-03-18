@@ -13,7 +13,7 @@ const InlineSymbol = ({
   return (
     <span {...attributes} contentEditable={false}>
       <a
-        className="btn-reset-style inline text-left text-blue-500 hover:cursor-pointer hover:underline hover:underline-offset-2"
+        className="btn-reset-style inline text-left text-blue-500 hover:cursor-pointer hover:bg-gray-100"
         onClick={e => {
           router.push({
             pathname: router.pathname,

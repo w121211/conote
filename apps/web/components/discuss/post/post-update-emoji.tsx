@@ -7,9 +7,9 @@ import {
   MyDiscussPostEmojiLikeQueryVariables,
   useMyDiscussPostEmojiLikeQuery,
   useUpsertDiscussPostEmojiLikeMutation,
-} from '../../apollo/query.graphql'
+} from '../../../apollo/query.graphql'
 import { DiscussPostEmoji } from 'graphql-let/__generated__/__types__'
-import EmojiIcon from '../emoji-up-down/emoji-icon'
+import EmojiIcon from '../../emoji-up-down/emoji-icon'
 
 const UpdateDiscussPostEmoji = ({
   discussPostEmoji,

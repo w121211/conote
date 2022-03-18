@@ -8,7 +8,17 @@ export interface Tooltip {
   top?: number
   className?: string
   direction?: 'top' | 'bottom' | 'left' | 'right'
+  size?: 'sm' | 'md'
+  darkMode?: boolean
 }
+
+//size
+const sm = `p-1 text-xs shadow-md`
+const md = `p-3 text-sm shadow-lg`
+
+//theme
+const dark = `border-gray-700 bg-gray-600 text-gray-50`
+const light = `border-gray-200 bg-white text-500`
 
 const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
   children,
@@ -16,6 +26,8 @@ const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
   onClose,
   className,
   direction,
+  size,
+  darkMode,
 }) => {
   const divRef = useRef<HTMLDivElement>(null)
   const [directionState, setDirectionState] = useState<string>('')
@@ -57,11 +69,11 @@ const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
     adjustDirection()
   })
 
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside)
+  // useEffect(() => {
+  //   document.addEventListener('click', handleClickOutside)
 
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [])
+  //   return () => document.removeEventListener('click', handleClickOutside)
+  // }, [])
 
   // useEffect(() => {
   //   if (window) {
@@ -76,9 +88,11 @@ const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
 
   return (
     <div
-      className={`absolute flex p-3 overflow-auto whitespace-nowrap 
-      border border-gray-200 rounded bg-white shadow-lg z-50 transition-all ease-[cubic-bezier(0.21,0.02,0.28,1.58)]
-      ${visible ? 'visible opacity-100 scale-100' : 'invisible opacity-0 scale-75'}
+      className={`absolute flex overflow-auto whitespace-nowrap 
+      border rounded z-50 transition-all ease-[cubic-bezier(0.21,0.02,0.28,1.58)]
+      ${size === 'sm' ? sm : md} ${darkMode ? dark : light} ${
+        visible ? 'visible opacity-100 scale-100' : 'invisible opacity-0 scale-75'
+      }
      ${directionState} ${className ? className : ''}`}
       ref={divRef}
     >

@@ -1,12 +1,11 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import Layout from '../../components/layout'
+import Layout from '../../layout/layout'
 import Popup from '../../components/popup/popup'
-import AuthorRateTable, { TableData } from '../../components/list-row/author-rate-table'
-import AuthorArticleList from '../../components/list-row/author-article-list'
-import AuthorInfo from '../../components/author-info'
-import { useAuthorLazyQuery } from '../../apollo/query.graphql'
-import AuthorMetaModal from '../../components/author-meta-modal'
+import AuthorArticleList from '../../components/author/author-article-list'
+import AuthorMetaModal from '../../components/author/author-meta-modal'
+import UserRateTable, { TableData } from '../../components/user/user-rate-table'
+import UserNoteTable from '../../components/user/user-note-table'
 
 const mockRateData: TableData[] = [
   {
@@ -43,7 +42,7 @@ const mockRateData: TableData[] = [
 
 const UserPage = (): JSX.Element | null => {
   const [showMentionedPopup, setShowMentionedPopup] = useState(false)
-  const [queryAuthor, { data, loading, error }] = useUserLazyQuery()
+  // const [queryUser, { data, loading, error }] = useUserLazyQuery()
   const router = useRouter()
 
   // useEffect(() => {
@@ -51,7 +50,7 @@ const UserPage = (): JSX.Element | null => {
   //   if (isReady) {
   //     const { author } = query
   //     if (author && typeof author === 'string') {
-  //       queryAuthor({ variables: { name: 'firebase' } })
+  //       queryUser({ variables: { name: 'firebase' } })
   //     }
   //   }
   // }, [router])
@@ -61,34 +60,74 @@ const UserPage = (): JSX.Element | null => {
   // }
 
   return (
-    <Layout buttonRight={data?.author && <AuthorMetaModal data={data.author} />}>
+    <Layout>
       <div className="flex flex-col gap-8">
-        <h1>@{router.query.userId}</h1>
+        <div className="flex">
+          <span className="material-icons mr-2 text-[120px] leading-none text-gray-300 mix-blend-multiply">
+            account_circle
+          </span>
+          <div className="">
+            <h1 className="mb-2 font-medium">@{router.query.userId}</h1>
+            <div className="mb-2 text-lg text-gray-500">建築師</div>
+            {/* <div> */}
+            <p className="flex text-sm text-gray-500">
+              <span className="material-icons text-base leading-none">cake</span>10年會員
+            </p>
+            {/* </div> */}
+          </div>
+        </div>
+        <div>
+          <h2 className="mb-2 text-lg font-medium">關於我</h2>
+          <p className="text-sm text-gray-600">
+            日本鳥取縣出身的男性聲優，於2019年4月1日加入由好友立花慎之介及福山潤所創立的BLACK SHIP，以前是AIR
+            AGENCY所屬。身高173cm，體重65kg，血型是A型。
+          </p>
+        </div>
+
         {/* {data?.author?.meta} */}
-        <AuthorRateTable data={mockRateData} />
+        <div className="flex gap-6">
+          <div className="w-1/2">
+            <UserNoteTable data={mockRateData} />
+          </div>
+          <div className="w-1/2">
+            <UserRateTable data={mockRateData} />
+          </div>
+        </div>
 
         <div className="">
-          <h2 className="my-5  text-lg text-gray-800 ">文章</h2>
+          <h2 className="mb-2 text-lg font-medium text-gray-700 ">討論</h2>
           <AuthorArticleList
             href="#"
             title="晶片荒惡化費半大跌 交期拉長至逾20周"
-            summary=".............. (author: @cnyes)"
+            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？ fja;lskdj;lfkj aj;sldkjf;kja;sjkd fja;lskjd;lfja;lsj;dlkjffja;skdj;flja; ja;lskjd;flkj; ljj"
           />
-          <AuthorArticleList href="#" title="哈哈晶片荒惡化費" summary=".............. (author: @cnyes)" />
+          <AuthorArticleList
+            href="#"
+            title="哈哈晶片荒惡化費"
+            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
+          />
           <AuthorArticleList
             href="#"
             title="晶片荒惡化費半大跌 交期拉長至逾20周"
-            summary=".............. (author: @cnyes)"
+            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
           />
-          <AuthorArticleList href="#" title="哈哈晶片荒惡化費" summary=".............. (author: @cnyes)" />
+          <AuthorArticleList
+            href="#"
+            title="哈哈晶片荒惡化費"
+            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
+          />
           <AuthorArticleList
             href="#"
             title="晶片荒惡化費半大跌 交期拉長至逾20周"
-            summary=".............. (author: @cnyes)"
+            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
           />
-          <AuthorArticleList href="#" title="哈哈晶片荒惡化費" summary=".............. (author: @cnyes)" />
+          <AuthorArticleList
+            href="#"
+            title="哈哈晶片荒惡化費"
+            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
+          />
         </div>
-        <h2>Mention in</h2>
+        {/* <h2>Mention in</h2>
         <ul>
           <li
             className="relative block"
@@ -100,7 +139,7 @@ const UserPage = (): JSX.Element | null => {
             @ARK OOOOOOO
           </li>
           <li>xxxxxxx @ARK OOOOOOO</li>
-        </ul>
+        </ul> */}
       </div>
       {showMentionedPopup && (
         <Popup

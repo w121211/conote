@@ -2,9 +2,9 @@ import React, { useEffect, useRef } from 'react'
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form'
 
 import { AuthorType, AuthorInput, Author } from 'graphql-let/__generated__/__types__'
-import { AuthorFragment, useUpdateAuthorMutation } from '../apollo/query.graphql'
+import { AuthorFragment, useUpdateAuthorMutation } from '../../apollo/query.graphql'
 import Select from 'react-select'
-import { customStyle, reactSelectControlStyle } from './rate-form/create-rate-form'
+import { customStyle, reactSelectControlStyle } from '../rate-form/create-rate-form'
 // import { customStyle, reactSelectControlStyle } from './create-rate-form'
 
 interface Option {

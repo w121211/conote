@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDiscussPostsQuery, useMeQuery } from '../../../apollo/query.graphql'
 import DiscussPostEmojis from './post-emojis'
+import PostOptionsMenu from './post-options-menu'
 
 const dummyData = [
   '測試測試大家好',
@@ -21,7 +22,7 @@ const DiscussPosts = ({ discussId }: { discussId: string }) => {
   }
   return (
     <div className="flex-shrink min-w-0">
-      <h3 className=" my-2 font-medium">共{data?.discussPosts.length}則留言</h3>
+      <h3 className=" mt-4 mb-1 text-base font-medium text-gray-700">共{data?.discussPosts.length}則留言</h3>
       {data?.discussPosts.map((post, i) => {
         return (
           <div
@@ -38,10 +39,14 @@ const DiscussPosts = ({ discussId }: { discussId: string }) => {
                     {moment(post.createdAt).subtract(10, 'days').calendar()}
                   </span>
                 </div>
-                {meData?.me.id !== post.userId && (
-                  <span className=" inline-block right-0">
-                    <DiscussPostEmojis discussPostId={post.id} />
-                  </span>
+
+                {meData && (
+                  <div className="flex">
+                    <span className=" right-0">
+                      <DiscussPostEmojis discussPostId={post.id} disable={meData && meData.me.id === post.userId} />
+                    </span>
+                    <PostOptionsMenu myPost={meData.me.id === post.userId} />
+                  </div>
                 )}
               </div>
               <div className=" pr-2 py-2 whitespace-pre-wrap [word-break:break-word] text-gray-800">{post.content}</div>

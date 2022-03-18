@@ -3,15 +3,23 @@ import React, { useState } from 'react'
 import {
   DiscussPostEmojiFragment,
   useDiscussPostEmojisQuery,
+  useMeQuery,
   useMyDiscussPostEmojiLikeLazyQuery,
   useMyDiscussPostEmojiLikeQuery,
 } from '../../../apollo/query.graphql'
-import Tooltip from '../../tooltip/tooltip'
+import Tooltip from '../../../layout/tooltip/tooltip'
 import CreateDiscussPostEmoji from './post-create-emoji'
 import UpdateDiscussPostEmoji from './post-update-emoji'
 import EmojisSwitch from '../emojis-switch'
+import ToggleMenu from '../../../layout/toggle-menu'
 
-const DiscussPostEmojis = ({ discussPostId }: { discussPostId: string }): JSX.Element | null => {
+const DiscussPostEmojis = ({
+  discussPostId,
+  disable,
+}: {
+  discussPostId: string
+  disable?: boolean
+}): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)
   const [liked, setLiked] = useState('')
   const { data: emojisData } = useDiscussPostEmojisQuery({ variables: { discussPostId } })
@@ -31,22 +39,33 @@ const DiscussPostEmojis = ({ discussPostId }: { discussPostId: string }): JSX.El
           }
           return <UpdateDiscussPostEmoji key={i} discussPostEmoji={data} type="normal" />
         })}
-      <EmojisSwitch showTooltip={showTooltip} onShowTooltip={() => setShowTooltip(!showTooltip)}>
-        <Tooltip
+      <ToggleMenu
+        className="flex left-full -translate-x-full p-1"
+        summary={
+          <EmojisSwitch
+            showTooltip={showTooltip}
+            onShowTooltip={() => setShowTooltip(!showTooltip)}
+            disable={disable}
+          />
+        }
+        disabled={disable}
+      >
+        {emojis.map((code, i) => {
+          const data = emojisData?.discussPostEmojis.find(el => el.code === code)
+          if (data) {
+            return <UpdateDiscussPostEmoji key={i} discussPostEmoji={data} type="panel" />
+          }
+          return <CreateDiscussPostEmoji key={i} discussPostId={discussPostId} emojiCode={code} />
+        })}
+      </ToggleMenu>
+
+      {/* <Tooltip
           className="px-1 py-1 left-full -translate-x-full"
           direction="bottom"
           visible={showTooltip}
           onClose={() => setShowTooltip(false)}
         >
-          {emojis.map((code, i) => {
-            const data = emojisData?.discussPostEmojis.find(el => el.code === code)
-            if (data) {
-              return <UpdateDiscussPostEmoji key={i} discussPostEmoji={data} type="panel" />
-            }
-            return <CreateDiscussPostEmoji key={i} discussPostId={discussPostId} emojiCode={code} />
-          })}
-        </Tooltip>
-      </EmojisSwitch>
+        </Tooltip> */}
     </div>
   )
 }

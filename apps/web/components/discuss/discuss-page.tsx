@@ -19,8 +19,8 @@ const dummyData = [
 const DiscussFullPage = ({ id }: { id: string }) => {
   const { data } = useDiscussQuery({ variables: { id } })
 
-  console.log(id)
-  console.log(data)
+  // console.log(id)
+  // console.log(data)
 
   if (!data?.discuss) {
     return null

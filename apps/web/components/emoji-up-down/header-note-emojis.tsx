@@ -3,7 +3,7 @@ import { useMeQuery, useNoteEmojisQuery } from '../../apollo/query.graphql'
 import CreateNoteEmojiBtn from './create-note-emoji-btn'
 import NoteEmojiBtn from './note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
-import Tooltip from '../tooltip/tooltip'
+import Tooltip from '../../layout/tooltip/tooltip'
 
 const HeaderNoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)

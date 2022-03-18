@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import React from 'react'
 import DiscussFullPage from '../../components/discuss/discuss-page'
-import Layout from '../../components/layout'
+import Layout from '../../layout/layout'
 
 const DiscussPage = () => {
   const router = useRouter()

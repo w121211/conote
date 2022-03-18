@@ -7,7 +7,7 @@ import NoteHead from '../../components/note-head'
 import DiscussModal from '../../components/discuss/modal-page/discuss-modal'
 import { BulletEditor } from '../../components/editor/editor'
 import HeaderNoteEmojis from '../../components/emoji-up-down/header-note-emojis'
-import Layout from '../../components/layout'
+import Layout from '../../layout/layout'
 import Modal from '../../components/modal/modal'
 import NoteTemplate from '../../components/note-template'
 import { Doc } from '../../components/workspace/doc'
@@ -84,7 +84,7 @@ const ModalNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   useEffect(() => {
     const runAsync = async () => {
       if (data) {
-        const { doc, isFromSaved } = await workspace.openDoc({ symbol, note: data.note ?? null, isModal: true })
+        const { doc, isFromSaved } = await workspace.openDoc({ symbol, note: data.note ?? null, openInModal: true })
         if (!isFromSaved && doc.noteCopy === null) {
           setShowTemplate(true)
         }

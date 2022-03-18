@@ -1,12 +1,12 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import Layout from '../../components/layout'
+import Layout from '../../layout/layout'
 import Popup from '../../components/popup/popup'
-import AuthorRateTable, { TableData } from '../../components/list-row/author-rate-table'
-import AuthorArticleList from '../../components/list-row/author-article-list'
-import AuthorInfo from '../../components/author-info'
+import AuthorRateTable, { TableData } from '../../components/author/author-rate-table'
+import AuthorArticleList from '../../components/author/author-article-list'
 import { useAuthorLazyQuery } from '../../apollo/query.graphql'
-import AuthorMetaModal from '../../components/author-meta-modal'
+import AuthorMetaModal from '../../components/author/author-meta-modal'
+import AuthorInfo from '../../components/author/author-info'
 
 const mockRateData: TableData[] = [
   {
