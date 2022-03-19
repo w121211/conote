@@ -10,8 +10,8 @@ export default function Layout({
   children: React.ReactNode
   buttonRight?: React.ReactNode
 }): JSX.Element {
-  const [showMenu, setShowMenu] = useState(true)
-  const [pinMenu, setPinMenu] = useState(true)
+  const [showSider, setShowSider] = useState(true)
+  const [pinSider, setPinMenu] = useState(true)
   // const [scroll, setScroll] = useState(0)
   const layoutRef = useRef<HTMLDivElement>(null)
 
@@ -19,53 +19,53 @@ export default function Layout({
   useEffect(() => {
     if (window) {
       if (window.innerWidth < 768) {
-        setShowMenu(false)
+        setShowSider(false)
         setPinMenu(false)
       }
     }
   }, [])
 
   useEffect(() => {
-    const storageMenu = localStorage.getItem('showMenu')
-    const storagePin = localStorage.getItem('pinMenu')
+    const storageMenu = localStorage.getItem('showSider')
+    const storagePin = localStorage.getItem('pinSider')
     if (window.innerWidth < 769) {
       if (storageMenu !== null && storagePin !== null) {
-        setShowMenu(false)
+        setShowSider(false)
         setPinMenu(false)
       } else {
-        localStorage.setItem('showMenu', 'false')
-        localStorage.setItem('pinMenu', 'false')
+        localStorage.setItem('showSider', 'false')
+        localStorage.setItem('pinSider', 'false')
       }
     } else {
       if (storageMenu !== null && storagePin !== null) {
-        setShowMenu(storageMenu === 'true' ? true : false)
+        setShowSider(storageMenu === 'true' ? true : false)
         setPinMenu(storagePin === 'true' ? true : false)
       } else {
-        // console.log('bigger', showMenu)
-        localStorage.setItem('showMenu', 'true')
-        localStorage.setItem('pinMenu', 'true')
+        // console.log('bigger', showSider)
+        localStorage.setItem('showSider', 'true')
+        localStorage.setItem('pinSider', 'true')
       }
     }
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('showMenu', `${showMenu}`)
-  }, [showMenu])
+    localStorage.setItem('showSider', `${showSider}`)
+  }, [showSider])
 
   useEffect(() => {
-    localStorage.setItem('pinMenu', `${pinMenu}`)
-  }, [pinMenu])
+    localStorage.setItem('pinSider', `${pinSider}`)
+  }, [pinSider])
 
   const triggerMenuHandler = (boo?: boolean) => {
     if (boo === undefined) {
-      setShowMenu(!showMenu)
+      setShowSider(!showSider)
     } else {
-      setShowMenu(boo)
+      setShowSider(boo)
     }
   }
   const pinMenuHandler = (boo?: boolean) => {
     if (boo === undefined) {
-      setPinMenu(!pinMenu)
+      setPinMenu(!pinSider)
     } else {
       setPinMenu(boo)
     }
@@ -93,16 +93,10 @@ export default function Layout({
   }
 
   return (
-    <div className="flex w-screen h-screen   ">
-      <SideBar
-        showMenuHandler={triggerMenuHandler}
-        pinMenuHandler={pinMenuHandler}
-        showMenu={showMenu}
-        isPined={pinMenu}
-      />
+    <div className="flex flex-row-reverse w-screen h-screen  ">
       <div
         className={`flex-grow pt-11 pb-[20vh] px-4  ${
-          pinMenu ? 'xl:px-[10%] lg:px-[4%] ' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
+          pinSider ? 'xl:px-[10%] lg:px-[4%] ' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
         }  overflow-y-scroll scroll-smooth scrollbar`}
       >
         {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
@@ -111,7 +105,13 @@ export default function Layout({
           <LoginModal>{children}</LoginModal>
         </div>
       </div>
-      <Navbar rbtn={buttonRight} onClickMenu={triggerMenuHandler} />
+      <SideBar
+        showMenuHandler={triggerMenuHandler}
+        pinMenuHandler={pinMenuHandler}
+        showSider={showSider}
+        isPined={pinSider}
+      />
+      <Navbar pinedSider={pinSider} rbtn={buttonRight} onClickMenu={triggerMenuHandler} />
     </div>
   )
 }

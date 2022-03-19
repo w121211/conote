@@ -16,12 +16,12 @@ const SideBar = ({
   showMenuHandler,
   pinMenuHandler,
   isPined,
-  showMenu,
+  showSider,
 }: {
   showMenuHandler: (boo?: boolean) => void
   pinMenuHandler: (boo?: boolean) => void
   isPined: boolean
-  showMenu: boolean
+  showSider: boolean
 }): JSX.Element | null => {
   const editingdDocIndicies = useObservable(() => workspace.editingDocIndicies$)
   const ref = useRef<HTMLDivElement>(null)
@@ -36,7 +36,7 @@ const SideBar = ({
     window.addEventListener(
       'touchstart',
       e => {
-        if (showMenu && !ref.current?.contains(e.target as HTMLElement)) {
+        if (showSider && !ref.current?.contains(e.target as HTMLElement)) {
           showMenuHandler(false)
         }
       },
@@ -49,10 +49,10 @@ const SideBar = ({
   return (
     <>
       <div
-        className={`absolute w-72 h-screen pt-0  border-gray-200 flex flex-col flex-shrink-0 z-50 transition-all 
-      ${showMenu ? 'transform-gpu translate-x-0 translate-y-0' : 'transform-gpu -translate-x-full translate-y-0 '} ${
-          isPined ? 'sm:relative bg-gray-100' : 'absolute bg-white'
-        } ${isPined || !showMenu ? 'shadow-none' : 'shadow-l2xl'}
+        className={`absolute left-0 w-72 h-screen pt-0  border-gray-200 flex flex-col flex-shrink-0  transition-all shadow-l2xl
+      ${showSider ? ' translate-x-0 translate-y-0 ' : '-translate-x-full translate-y-0 '} ${
+          isPined ? 'sm:relative bg-gray-100' : 'z-50 bg-white'
+        } ${isPined || !showSider ? 'shadow-transparent' : ''}
       `}
         onMouseLeave={() => {
           if (isPined) {
