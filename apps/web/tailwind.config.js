@@ -14,10 +14,10 @@ module.exports = {
         3: '3 3 0%',
       },
       flexGrow: {
-        3: 3,
+        3: ' 3',
       },
       colors: {
-        gray: colors.neutral,
+        gray: colors.gray,
         red: colors.rose,
         cyan: colors.cyan,
         sky: colors.sky,

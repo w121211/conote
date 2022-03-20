@@ -87,7 +87,7 @@ const HotDisplay = ({ filtertags }: { filtertags: string[] }) => {
           )
         })} */}
       </div>
-      <div className="mt-4">
+      <div>
         {listData.map((e, i) => {
           return (
             <HotListItem

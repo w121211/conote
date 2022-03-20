@@ -1,10 +1,9 @@
 import { cloneDeep } from 'lodash'
 import React, { useState, useEffect, CSSProperties } from 'react'
 import { useRouter } from 'next/router'
-import { ActionMeta, GroupBase, Options, OptionsOrGroups, StylesConfig } from 'react-select'
+import { ActionMeta, components, ControlProps, GroupBase, Options, OptionsOrGroups, StylesConfig } from 'react-select'
 import Creatable from 'react-select/creatable'
 import { Accessors } from 'react-select/dist/declarations/src/useCreatable'
-// import { toUrlParams } from '../lib/helper'
 import { useSearchSymbolLazyQuery } from '../apollo/query.graphql'
 
 type Option = {
@@ -12,6 +11,20 @@ type Option = {
   value: string
 }
 
+const Control = ({ children, ...props }: ControlProps<Option, false, GroupBase<Option>>) => (
+  <components.Control
+    {...props}
+    className="!border-gray-200 hover:!border-transparent focus-within:!border-transparent"
+  >
+    <span className="material-icons-outlined ml-2 text-gray-400 ">search</span>
+    {children}
+  </components.Control>
+)
+
+const customComponents = {
+  DropdownIndicator: null,
+  Control,
+}
 export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
   const router = useRouter()
   const [searchSymbol, { data }] = useSearchSymbolLazyQuery()
@@ -20,9 +33,6 @@ export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
   const [inputValue, setInputValue] = useState('')
   const [openMenu, setOpenMenu] = useState(false)
 
-  const components = {
-    DropdownIndicator: null,
-  }
   const createOption = (label: string) => ({
     label,
     value: label.toUpperCase().replace(/\W/g, ''),
@@ -124,34 +134,41 @@ export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
     control: (provided, { isFocused }) => ({
       ...provided,
       // width: '100%',
-
+      // border: 'none',
+      // backgroundColor: isFocused ? 'white' : '#f3f4f6',
+      // mixBlendMode: 'multiply',
       whiteSpace: 'nowrap',
       borderRadius: '4px',
       minHeight: '40px',
       lineHeight: small ? '1' : 'inherit',
       ':hover': {
-        borderColor: '#fff',
+        // backgroundColor: 'white',
+        // borderColor: '#fff',
         boxShadow: '0 1px 6px 0 #17171730',
         cursor: 'text',
       },
-      borderColor: isFocused ? '#fff' : 'hsl(0, 0%, 80%)',
+      // borderColor: isFocused ? '#fff' : '#f3f4f6',
       boxShadow: isFocused ? '0 1px 6px 0 #17171730' : 'none',
     }),
-    valueContainer: (provided, state) => ({
+    // valueContainer: (provided, state) => ({
+    //   ...provided,
+    //   // padding: '0 8px',
+    // }),
+    // input: (provided, state) => ({
+    //   ...provided,
+    //   // display: 'flex',
+    //   // alignItems: 'center',
+    // }),
+    placeholder: provided => ({
       ...provided,
-      // padding: '0 8px',
-    }),
-    input: (provided, state) => ({
-      ...provided,
-      // display: 'flex',
-      // alignItems: 'center',
+      color: 'rgb(156 163 175)',
     }),
   }
 
   return (
     <Creatable
       instanceId="search-all-form"
-      components={components}
+      components={customComponents}
       styles={customStyles}
       isValidNewOption={handleShowCreate}
       options={options}

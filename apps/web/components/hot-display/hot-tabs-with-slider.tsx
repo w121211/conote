@@ -41,12 +41,12 @@ const HotTabsWithSlider = ({
   }, [activeTabIdx])
 
   return (
-    <div id="listContainer" className="relative w-full py-1 border-b border-gray-200" ref={tabList}>
+    <div id="listContainer" className="relative w-full border-b border-gray-200" ref={tabList}>
       <div
         className="absolute bottom-0 left-0 right-0 origin-center-left border-t-2 border-blue-600 transition-all"
         ref={tabSlider}
       ></div>
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         {tabs.map((tab, i) => {
           return (
             <h4
@@ -57,8 +57,8 @@ const HotTabsWithSlider = ({
                 }
                 return el
               }}
-              className={`mt-0 px-4 py-1 rounded font-normal hover:cursor-pointer ${
-                currentTab === tab ? 'text-blue-600 ' : ' text-gray-700'
+              className={`mt-0 px-2 pb-4 rounded tracking-widest font-normal hover:cursor-pointer ${
+                currentTab === tab ? 'text-blue-600 ' : ' text-gray-500'
               }`}
               onClick={e => {
                 handleClickTab(tab)

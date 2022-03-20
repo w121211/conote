@@ -24,7 +24,7 @@ const ToggleMenu = ({
       // }}
     >
       <summary
-        className={`inline-block h-fit w-fit rounded list-none leading-none
+        className={`inline-block h-fit   w-fit rounded list-none leading-none
          before:content-[''] ${
            open ? 'before:fixed' : 'before:hidden'
          } before:block  before:top-0 before:left-0 before:right-0 before:bottom-0 before:z-10 before:bg-transparent before:cursor-default`}

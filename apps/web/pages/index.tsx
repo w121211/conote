@@ -7,6 +7,8 @@ import { SearchAllForm } from '../components/search-all-form'
 import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/new-hot-list'
 import NoteDigestComponent from '../components/note-digest-component'
+import UserRateTable from '../components/user/user-rate-table'
+import { mockRateData } from './user/[userId]'
 
 export const LatestNotes = (): JSX.Element | null => {
   const { data, loading, error, fetchMore } = useNoteDigestsQuery() // { fetchPolicy: 'cache-and-network' }
@@ -156,7 +158,7 @@ function HomePage(): JSX.Element {
   return (
     <div className="flex flex-col w-screen h-screen overflow-auto">
       {showAnnounce && (
-        <div className="flex items-center justify-between  p-1  capitalize text-sm text-gray-900 bg-yellow-400/80 text-center">
+        <div className="sticky top-0 w-screen z-10 flex items-center justify-between p-1 capitalize text-sm text-gray-900 bg-yellow-400 text-center">
           <div className="flex-grow flex items-center justify-center  gap-2 ">
             <span className="material-icons">campaign</span>
             <span className=" truncate">new announcement!</span>
@@ -173,7 +175,7 @@ function HomePage(): JSX.Element {
         </div>
       )}
       <div className="flex flex-col">
-        <div className="flex items-center justify-between mx-4 md:mx-10 mt-8 mb-10">
+        <div className="flex items-center justify-between mb-6  border-slate-200 px-4 md:px-10 pt-6 pb-6 bg-gray-100">
           <div className="flex-3 flex items-center max-w-2xl">
             <h3 className="mr-4 md:mr-10 text-2xl">Konote</h3>
             <div className="w-5/6">
@@ -186,7 +188,8 @@ function HomePage(): JSX.Element {
           <div className=" flex pb-[9vh]">
             <div className="flex flex-col items-center md:items-start md:flex-row ms:justify-between  md:w-3/4 md:ml-[calc(4rem+96px)] gap-16">
               <NewHotList />
-              <div className=" flex-shrink-0 flex-grow w-screen sm:w-1/3 h-fit px-4 rounded border border-gray-300">
+              <UserRateTable data={mockRateData} />
+              {/* <div className=" flex-shrink-0 flex-grow w-screen sm:w-1/3 h-fit px-4 rounded border border-gray-300">
                 <h3>自選股</h3>
                 <div>
                   <div className="flex mb-3 pb-3 border-b border-gray-300 text-gray-700">
@@ -196,7 +199,7 @@ function HomePage(): JSX.Element {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </>

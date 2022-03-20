@@ -16,10 +16,10 @@
     @apply text-3xl font-bold text-gray-800;
   }
   h3 {
-    @apply font-bold;
+    @apply font-medium;
   }
   h4 {
-    @apply font-bold;
+    @apply font-medium;
   }
   h5 {
     @apply text-sm font-bold text-gray-700;

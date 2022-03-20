@@ -24,7 +24,7 @@ const HotListItme = ({
   currentTab: string
 }): JSX.Element => {
   return (
-    <div className="overflow-hidden p-4 border-b  border-gray-200 first:rounded-t last:rounded-b">
+    <div className="overflow-hidden px-2 py-4 border-b  border-gray-200 first:rounded-t last:rounded-b">
       <div className="items-center text-sm">
         {hashtags && (
           <span className="">
@@ -56,7 +56,7 @@ const HotListItme = ({
 
         {/* {(author || hashtags || source) && <span className="h-4 mx-2 border-r border-gray-300"></span>} */}
         {source && (
-          <Link href={`/note/${source}`}>
+          <Link href={{ pathname: `/note/[symbol]`, query: { symbol: source } }}>
             <a>
               <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-blue-500 hover:underline hover:underline-offset-2">
                 {source}

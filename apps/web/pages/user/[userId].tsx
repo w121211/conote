@@ -7,7 +7,7 @@ import AuthorMetaModal from '../../components/author/author-meta-modal'
 import UserRateTable, { TableData } from '../../components/user/user-rate-table'
 import UserNoteTable from '../../components/user/user-note-table'
 
-const mockRateData: TableData[] = [
+export const mockRateData: TableData[] = [
   {
     ticker: '$TSLA',
     title: 'Tesla Inc.',
@@ -77,8 +77,8 @@ const UserPage = (): JSX.Element | null => {
           </div>
         </div>
         <div>
-          <h2 className="mb-2 text-lg font-medium">關於我</h2>
-          <p className="text-sm text-gray-600">
+          <h2 className="mb-2 text-sm text-gray-500 font-medium tracking-widest">關於我</h2>
+          <p className="text-sm text-gray-800">
             日本鳥取縣出身的男性聲優，於2019年4月1日加入由好友立花慎之介及福山潤所創立的BLACK SHIP，以前是AIR
             AGENCY所屬。身高173cm，體重65kg，血型是A型。
           </p>
@@ -141,7 +141,7 @@ const UserPage = (): JSX.Element | null => {
           <li>xxxxxxx @ARK OOOOOOO</li>
         </ul> */}
       </div>
-      {showMentionedPopup && (
+      {/* {showMentionedPopup && (
         <Popup
           visible={showMentionedPopup}
           hideBoard={() => {
@@ -151,7 +151,7 @@ const UserPage = (): JSX.Element | null => {
         >
           文章peek
         </Popup>
-      )}
+      )} */}
     </Layout>
   )
 }

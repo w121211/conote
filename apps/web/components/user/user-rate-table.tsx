@@ -13,14 +13,15 @@ export type TableData = {
 const UserRateTable = ({ data }: { data: TableData[] }): JSX.Element => {
   return (
     <div className="flex-1">
-      <h2 className="mb-2 text-lg font-medium text-gray-700">預測</h2>
+      <h2 className=" py-2 text-sm font-medium tracking-widest text-gray-500">預測</h2>
       <div className="w-full overflow-hidden border border-gray-200 rounded text-sm">
         <table className="w-full ">
+          <thead></thead>
           <tbody>
             {data.map(({ ticker, title, rate, srcSym }, i) => {
               return (
                 <tr key={i} className="border-b border-gray-200 last:border-none ">
-                  <td className="px-4 py-3 text-gray-900 font-medium ">
+                  <td className="px-4 py-3 text-gray-700  ">
                     <Link href={{ pathname: '/card/[symbol]', query: { symbol: ticker } }}>
                       <a className="inline-flex flex-col underline-offset-2 hover:underline cursor-pointer">
                         {ticker}
@@ -38,7 +39,7 @@ const UserRateTable = ({ data }: { data: TableData[] }): JSX.Element => {
                           ? 'text-green-700 bg-green-100'
                           : rate === 'SHORT'
                           ? 'text-red-700 bg-red-100'
-                          : 'text-blue-700 bg-blue-100'
+                          : 'text-gray-700 bg-gray-100'
                       }`}
                     >
                       {rate === 'LONG' ? '看多' : rate === 'SHORT' ? '看空' : '觀望'}
