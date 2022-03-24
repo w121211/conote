@@ -69,7 +69,7 @@ export class MKDoc {
         const { key, value } = e.marker
         const valueNode = this.createBullet({ head: value })
 
-        const found = TreeService.find(this.value, node => node.data?.head.includes(key) ?? false)
+        const found = TreeService.filter(this.value, node => node.data?.head.includes(key) ?? false)
         if (found.length > 0) {
           this.value = TreeService.insert(this.value, valueNode, found[0].cid, -1)
         } else {
