@@ -19,7 +19,7 @@
     "incremental": true,
     "downlevelIteration": true
   },
-  "exclude": ["node_modules", ".next", ".cache", "dist", "prisma", "__deprecated__", "stories"],
+  "exclude": ["node_modules", ".next", ".cache", "dist", "prisma", "__deprecated__"],
   "include": [
     "next-env.d.ts",
     "jestsetup.d.ts",

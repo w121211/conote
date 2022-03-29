@@ -3,7 +3,7 @@ import SideBar from '../components/sidebar/sidebar'
 import LoginModal from '../components/login-modal'
 import Navbar from '../components/navbar'
 
-export default function Layout({
+export function Layout({
   children,
   buttonRight,
 }: {
@@ -101,8 +101,8 @@ export default function Layout({
       >
         {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
         <div className="">
-          {/* {children} */}
-          <LoginModal>{children}</LoginModal>
+          {children}
+          {/* <LoginModal>{children}</LoginModal> */}
         </div>
       </div>
       <SideBar

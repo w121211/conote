@@ -1,11 +1,13 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import Layout from '../../layout/layout'
+import { Layout } from '../../layout/layout'
 import Popup from '../../components/popup/popup'
 import AuthorArticleList from '../../components/author/author-article-list'
 import AuthorMetaModal from '../../components/author/author-meta-modal'
 import UserRateTable, { TableData } from '../../components/user/user-rate-table'
 import UserNoteTable from '../../components/user/user-note-table'
+import { List, ListElement } from '../../layout/list'
+import { NoteData } from '../../layout/note-list'
 
 export const mockRateData: TableData[] = [
   {
@@ -40,7 +42,76 @@ export const mockRateData: TableData[] = [
   },
 ]
 
-const UserPage = (): JSX.Element | null => {
+const mockList: ListElement[] = [
+  { title: '原油 vs 天然氣，哪個比較適合投資？', href: '#', source: '[[原油]]', hashtags: ['#討論'] },
+  {
+    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    href: '#',
+    source: '[[原油]]',
+    hashtags: ['#討論', '#機會'],
+  },
+  {
+    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    href: '#',
+    source: '[[原油]]',
+    hashtags: ['#Battle'],
+  },
+  {
+    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    href: '#',
+    source: '[[原油]]',
+    hashtags: ['#Battle', '#事件'],
+  },
+  { title: '原油 vs 天然氣，哪個比較適合投資？', href: '#', source: '[[原油]]', hashtags: ['#討論'] },
+  {
+    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    href: '#',
+    source: '[[原油]]',
+    hashtags: ['#討論', '#機會'],
+  },
+  {
+    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    href: '#',
+    source: '[[原油]]',
+    hashtags: ['#Battle'],
+  },
+  {
+    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    href: '#',
+    source: '[[原油]]',
+    hashtags: ['#Battle', '#事件'],
+  },
+]
+
+const mockNoteList: NoteData[] = [
+  {
+    title: '',
+    symbol: '[[保險]]',
+    updatedAt: Date.now(),
+  },
+  {
+    title: '',
+    symbol: '[[Awesome Tailwind CSS]]',
+    updatedAt: Date.now(),
+  },
+  {
+    title: '',
+    symbol: '$NDVA',
+    updatedAt: Date.now(),
+  },
+  {
+    title: '',
+    symbol: '$NDVA',
+    updatedAt: Date.now(),
+  },
+  {
+    title: '園藝公司被奧客拖欠工程款，最後怒把對方的花園整個砸爛',
+    symbol: '@園藝公司被奧客拖欠工程款，最後怒把對方的花園整個砸爛',
+    updatedAt: Date.now(),
+  },
+]
+
+export const UserPage = (): JSX.Element | null => {
   const [showMentionedPopup, setShowMentionedPopup] = useState(false)
   // const [queryUser, { data, loading, error }] = useUserLazyQuery()
   const router = useRouter()
@@ -87,7 +158,7 @@ const UserPage = (): JSX.Element | null => {
         {/* {data?.author?.meta} */}
         <div className="flex gap-6">
           <div className="w-1/2">
-            <UserNoteTable data={mockRateData} />
+            <UserNoteTable data={mockNoteList} />
           </div>
           <div className="w-1/2">
             <UserRateTable data={mockRateData} />
@@ -96,36 +167,7 @@ const UserPage = (): JSX.Element | null => {
 
         <div className="">
           <h2 className="mb-2 text-lg font-medium text-gray-700 ">討論</h2>
-          <AuthorArticleList
-            href="#"
-            title="晶片荒惡化費半大跌 交期拉長至逾20周"
-            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？ fja;lskdj;lfkj aj;sldkjf;kja;sjkd fja;lskjd;lfja;lsj;dlkjffja;skdj;flja; ja;lskjd;flkj; ljj"
-          />
-          <AuthorArticleList
-            href="#"
-            title="哈哈晶片荒惡化費"
-            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
-          />
-          <AuthorArticleList
-            href="#"
-            title="晶片荒惡化費半大跌 交期拉長至逾20周"
-            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
-          />
-          <AuthorArticleList
-            href="#"
-            title="哈哈晶片荒惡化費"
-            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
-          />
-          <AuthorArticleList
-            href="#"
-            title="晶片荒惡化費半大跌 交期拉長至逾20周"
-            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
-          />
-          <AuthorArticleList
-            href="#"
-            title="哈哈晶片荒惡化費"
-            summary="我是內容，我寫了一些東西在這裡，哈哈哈＝＝，效果如何？"
-          />
+          <List listData={mockList} />
         </div>
         {/* <h2>Mention in</h2>
         <ul>

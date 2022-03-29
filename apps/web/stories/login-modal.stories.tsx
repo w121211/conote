@@ -6,7 +6,7 @@ import { MeDocument } from '../apollo/query.graphql'
 import gql from 'graphql-tag'
 
 export default {
-  title: 'LoginModal',
+  title: 'component/Login Modal',
   component: LoginModal,
 } as ComponentMeta<typeof LoginModal>
 
@@ -34,11 +34,11 @@ const mocks = [
 ]
 
 const Template: ComponentStory<typeof LoginModal> = args => (
-  <MockedProvider mocks={mocks} addTypename={false}>
-    <LoginModal {...args}>
-      <div>ff</div>
-    </LoginModal>
-  </MockedProvider>
+  // <MockedProvider mocks={mocks} addTypename={false}>
+  <LoginModal {...args}>
+    <div>ff</div>
+  </LoginModal>
+  // </MockedProvider>
 )
 
 export const Default = Template.bind({})

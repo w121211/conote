@@ -20,9 +20,24 @@ module.exports = {
   stories: ['../stories/**/*.stories.tsx'],
   addons: [
     '@storybook/addon-links',
-    '@storybook/addon-essentials',
+    '@storybook/addon-viewport',
+    {
+      name: '@storybook/addon-docs',
+      options: {
+        configureJSX: true,
+        babelOptions: {},
+        sourceLoaderOptions: null,
+        transcludeMarkdown: true,
+      },
+    },
+    '@storybook/addon-controls',
+    '@storybook/addon-backgrounds',
+    '@storybook/addon-toolbars',
+    '@storybook/addon-measure',
+    '@storybook/addon-outline',
+    '@storybook/addon-actions',
     'storybook-addon-apollo-client',
-    // '@storybook/addon-actions',
+    'storybook-addon-next-router',
     {
       /**
        * Fix Storybook issue with PostCSS@8
@@ -42,17 +57,26 @@ module.exports = {
     },
   ],
   framework: '@storybook/react',
-  include: path.resolve(__dirname, 'assets/svg'),
-  typescript: {
-    tsconfigPath: 'tsconfig.build.json',
-  },
+  // include: path.resolve(__dirname, 'assets/svg'),
+  // typescript: {
+  //   tsconfigPath: 'tsconfig.build.json',
+  // },
 
   webpackFinal: async config => {
-    config.module.rules.push({
-      test: /\.graphql$/,
-      exclude: /node_modules/,
-      loader: 'graphql-tag/loader',
-    })
+    config.module.rules.push(
+      {
+        test: /\.(tsx|graphql)$/,
+        use: [
+          { loader: 'babel-loader', options: { presets: ['@babel/preset-typescript', '@babel/preset-react'] } },
+          { loader: 'graphql-let/loader' },
+        ],
+      },
+      //   {
+      //   test: /\.graphql$/,
+      //   exclude: /node_modules/,
+      //   loader: 'graphql-tag/loader',
+      // }
+    )
     // add SCSS support for CSS Modules
     // config.module.rules.push({
     //   test: /\.scss$/,

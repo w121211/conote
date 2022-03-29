@@ -15,7 +15,7 @@ const ToggleMenu = ({
 
   return (
     <details
-      className="group relative h-fit cursor-pointer select-none "
+      className="group relative h-fit cursor-pointer select-none leading-none"
       open={false}
       // onClick={e => {
       //   if (disabled) {

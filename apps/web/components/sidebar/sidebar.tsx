@@ -11,6 +11,8 @@ import { useApolloClient } from '@apollo/client'
 import { useMeQuery } from '../../apollo/query.graphql'
 import { useRouter } from 'next/router'
 import AuthItem from './auth-Item'
+import Select from 'react-select'
+import ChannelSelect from '../channel/channel-select'
 
 const SideBar = ({
   showMenuHandler,
@@ -66,9 +68,12 @@ const SideBar = ({
       >
         <div className="group flex-shrink-0 px-4">
           <div className="flex items-center justify-between h-11">
-            <a href="/" className="py-1  rounded mix-blend-multiply ">
-              Konote
-            </a>
+            <div className="flex items-center gap-1">
+              <a href="/" className="py-1  rounded mix-blend-multiply ">
+                Konote
+              </a>
+              <ChannelSelect />
+            </div>
             <span
               className={`hidden md:block ${
                 isPined ? 'material-icons' : 'material-icons-outlined'
@@ -91,13 +96,11 @@ const SideBar = ({
             </span>
           </div>
         </div>
-        <div className="mt-2 mb-5 mx-4">
+        <div className="mt-2 mb-3 mx-4">
           <SearchAllForm small />
         </div>
         {/* <DocIndexSection title="最近同步的筆記" indexArray={committedDocIndicies} /> */}
         <DocIndexSection title="暫存區" docIndicies={editingdDocIndicies} />
-
-        <AuthItem />
       </div>
     </>
   )
