@@ -7,7 +7,7 @@ import NoteHead from '../../components/note-head'
 import DiscussModal from '../../components/discuss/modal-page/discuss-modal'
 import { BulletEditor } from '../../components/editor/editor'
 import HeaderNoteEmojis from '../../components/emoji-up-down/header-note-emojis'
-import Layout from '../../layout/layout'
+import { Layout } from '../../layout/layout'
 import Modal from '../../components/modal/modal'
 import NoteTemplate from '../../components/note-template'
 import { Doc } from '../../components/workspace/doc'
@@ -15,6 +15,7 @@ import { workspace } from '../../components/workspace/workspace'
 import TemplatePage from '../../components/template'
 import LoginModal from '../../components/login-modal'
 import NoteMetaModal from '../../components/note-meta-modal'
+import AuthItem from '../../components/sidebar/auth-Item'
 
 const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data: meData } = useMeQuery()
@@ -288,7 +289,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
       </Modal>
       <Layout
         buttonRight={
-          <LoginModal>
+          <>
             {mainDoc?.doc && <NoteMetaModal doc={mainDoc.doc} />}
             {mainDoc?.doc?.noteCopy && (
               <div className="inline-block z-20">
@@ -308,7 +309,8 @@ const NoteSymbolPage = (): JSX.Element | null => {
             <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
               <span className="material-icons-outlined text-xl leading-none ">more_horiz</span>
             </button>
-          </LoginModal>
+            <AuthItem />
+          </>
         }
       >
         {mainNoteComponent}

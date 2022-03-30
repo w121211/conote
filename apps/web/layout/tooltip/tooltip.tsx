@@ -89,7 +89,7 @@ const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> = ({
   return (
     <div
       className={`absolute flex overflow-auto whitespace-nowrap 
-      border rounded z-50 transition-all ease-[cubic-bezier(0.21,0.02,0.28,1.58)]
+      border rounded z-50 transition-all ease-[cubic-bezier(0.21,0.02,0.28,1.58)] pointer-events-none
       ${size === 'sm' ? sm : md} ${darkMode ? dark : light} ${
         visible ? 'visible opacity-100 scale-100' : 'invisible opacity-0 scale-75'
       }

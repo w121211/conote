@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react'
-import { LatestNotes } from '../pages'
+// import { LatestNotes } from '../pages'
 import HotDisplay from './hot-display/hot-display'
-import TabsWithSlider from './tabs-with-slider'
+// import TabsWithSlider from './tabs-with-slider'
 
 const NewHotList = () => {
   const [activeList, setActiveList] = useState(0)
@@ -23,7 +23,7 @@ const NewHotList = () => {
           </h4>
         ))}
       </div> */}
-      <div className="flex justify-between gap-3 mb-4 border-gray-200">
+      {/* <div className="flex justify-between gap-3 mb-4 border-gray-200">
         {['熱門'].map((tab, i) => (
           <h2
             className={`flex-grow flex items-center gap-1 text-xl font-medium text-gray-800`}
@@ -32,18 +32,18 @@ const NewHotList = () => {
             }}
             key={tab}
           >
-            {/* <span className="material-icons text-lg">{i === 0 ? 'auto_awesome' : 'whatshot'}</span> */}
+            <span className="material-icons text-lg">{i === 0 ? 'auto_awesome' : 'whatshot'}</span>
             {tab}
           </h2>
         ))}
-      </div>
+      </div> */}
       {/* <TabsWithSlider
         tabs={['最新', '熱門']}
         tabListWidth={listContainer.current?.getBoundingClientRect().width}
         handleActiveList={i => setActiveList(i)}
       /> */}
       {/* {activeList === 0 && <LatestNotes />} */}
-      {activeList === 0 && <HotDisplay filtertags={['全部', '#討論', '#機會', '#Battle', '#事件']} />}
+      {activeList === 0 && <HotDisplay />}
     </div>
   )
 }

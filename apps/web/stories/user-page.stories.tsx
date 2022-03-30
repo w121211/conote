@@ -1,16 +1,28 @@
 import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import UserPage from '../pages/user/[userId]'
+import { UserPage } from '../pages/user/[userId]'
 import { MeDocument } from '../apollo/query.graphql'
 
-// export default {
-//   title: 'UserPage',
-//   component: UserPage,
-// } as ComponentMeta<typeof UserPage>
+export default {
+  title: 'pages/User Page',
+  component: UserPage,
+} as ComponentMeta<typeof UserPage>
 
-// export const Template: ComponentStory<typeof UserPage> = args => <UserPage {...args} />
+const Template: ComponentStory<typeof UserPage> = () => <UserPage />
 
-// export const Default = Template.bind({})
+export const Default = Template.bind({})
+
+Default.story = {
+  parameters: {
+    nextRouter: {
+      // path: "/profile/[id]",
+      // asPath: "/profile/lifeiscontent",
+      query: {
+        userId: 'fieowjelcij123',
+      },
+    },
+  },
+}
 // LoggedIn.args = {
 //   ...UserPage.args,
 // };

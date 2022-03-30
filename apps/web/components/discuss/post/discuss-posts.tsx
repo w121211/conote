@@ -45,7 +45,7 @@ const DiscussPosts = ({ discussId }: { discussId: string }) => {
                     <span className=" right-0">
                       <DiscussPostEmojis discussPostId={post.id} disable={meData && meData.me.id === post.userId} />
                     </span>
-                    <PostOptionsMenu myPost={meData.me.id === post.userId} />
+                    <PostOptionsMenu isMyPost={meData.me.id === post.userId} />
                   </div>
                 )}
               </div>

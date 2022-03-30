@@ -84,7 +84,7 @@ const HotListItme = ({
         </div>
       )}
 
-      <NoteEmojis noteId={noteId} />
+      {/* <NoteEmojis noteId={noteId} /> */}
     </div>
   )
 }
