@@ -20,16 +20,8 @@ const DiscussEmojis = ({ discussId, disable }: { discussId: string; disable?: bo
 
   return (
     <div className="flex items-center">
-      {shouldShowEmojiIcons(emojisData?.discussEmojis) &&
-        emojis.map((code, i) => {
-          const data = emojisData?.discussEmojis.find(e => e.code === code)
-          if (data?.count.nUps === 0 || !data) {
-            return null
-          }
-          return <UpdateDiscussEmoji key={i} discussEmoji={data} type="normal" />
-        })}
       <ToggleMenu
-        className="flex left-full -translate-x-full p-1"
+        className="flex p-1"
         summary={
           <EmojisSwitch
             showTooltip={showTooltip}
@@ -47,6 +39,14 @@ const DiscussEmojis = ({ discussId, disable }: { discussId: string; disable?: bo
           return <CreateDiscussEmoji key={i} discussId={discussId} emojiCode={e} />
         })}
       </ToggleMenu>
+      {shouldShowEmojiIcons(emojisData?.discussEmojis) &&
+        emojis.map((code, i) => {
+          const data = emojisData?.discussEmojis.find(e => e.code === code)
+          if (data?.count.nUps === 0 || !data) {
+            return null
+          }
+          return <UpdateDiscussEmoji key={i} discussEmoji={data} type="normal" />
+        })}
       {/* <EmojisSwitch showTooltip={showTooltip} onShowTooltip={() => setShowTooltip(!showTooltip)}> */}
       {/* <Tooltip
           className="px-1 py-1 left-full -translate-x-full"

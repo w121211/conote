@@ -36,7 +36,7 @@ export default {
 
 const Template: ComponentStory<typeof PostTile> = args => <PostTile {...args} />
 
-export const Default = Template.bind({})
-Default.args = {
+export const Origin = Template.bind({})
+Origin.args = {
   post: mockPost,
 }
