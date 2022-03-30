@@ -79,7 +79,7 @@ model Discuss {
   count     DiscussCount? // 1-to-1
   emojis    DiscussEmoji[]
   posts     DiscussPost[]
-  branchSym BranchSym[]
+  notes     Note[]
   drafts    Draft[]
 }
 
@@ -177,20 +177,6 @@ model DiscussPostEmojiLike {
   @@unique([userId, discussPostEmojiId])
 }
 
-// model Note {
-//   id        String      @id @default(cuid())
-//   symId     String      @unique
-//   linkId    String?     @unique
-//   meta      Json        @default("{}")
-//   createdAt DateTime    @default(now())
-//   updatedAt DateTime    @updatedAt
-//   link      Link?       @relation(fields: [linkId], references: [id])
-//   sym       Sym         @relation(fields: [symId], references: [id])
-//   discusses Discuss[]
-//   emojis    NoteEmoji[]
-//   states    NoteState[]
-// }
-
 model NoteEmoji {
   id        Int             @id @default(autoincrement())
   branchId  String
@@ -200,10 +186,8 @@ model NoteEmoji {
   updatedAt DateTime        @updatedAt
   count     NoteEmojiCount?
   likes     NoteEmojiLike[]
-  branchSym BranchSym       @relation(fields: [branchId, symId], references: [branchId, symId])
+  note      Note            @relation(fields: [branchId, symId], references: [branchId, symId])
 
-  doc   Doc?    @relation(fields: [docId], references: [id])
-  docId String?
   @@unique([branchId, symId, code])
 }
 
@@ -235,28 +219,28 @@ model Draft {
   id          String      @id @default(cuid())
   branchId    String
   symId       String?
-  userId      String
+  creatorId   String
   fromDocId   String?
+  domain      String
   symName     String
   body        Json
   meta        Json        @default("{}")
   draftStatus DraftStatus @default(EDIT)
-  user        User        @relation(fields: [userId], references: [id])
+  creator     User        @relation(fields: [creatorId], references: [id])
   fromDoc     Doc?        @relation(fields: [fromDocId], references: [id])
   branch      Branch      @relation(fields: [branchId], references: [id])
-  branchSym   BranchSym?  @relation(fields: [branchId, symId], references: [branchId, symId])
+  note        Note?       @relation(fields: [branchId, symId], references: [branchId, symId])
   sym         Sym?        @relation(fields: [symId], references: [id])
   commit      Commit?     @relation(fields: [commitId], references: [id])
   commitId    String?
   discusses   Discuss[]
 }
 
-model BranchSym {
+model Note {
   id        String      @id @default(cuid())
   symId     String
   branchId  String
   linkId    String?     @unique
-  // meta      Json        @default("{}")
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   link      Link?       @relation(fields: [linkId], references: [id])
@@ -271,38 +255,32 @@ model BranchSym {
 }
 
 model Branch {
-  id        String      @id @default(cuid())
-  name      String
-  syms      Sym[]
-  branchSym BranchSym[]
-  drafts    Draft[]
+  id     String  @id @default(cuid())
+  name   String
+  syms   Sym[]
+  notes  Note[]
+  drafts Draft[]
 }
 
 model Doc {
-  id        String      @id @default(cuid())
+  id        String    @id @default(cuid())
   branchId  String
   symId     String
   commitId  String
-  userId    String
+  creatorId String
   domain    String
-  docStatus DocStatus   @default(CANDIDATE)
-  meta      Json        @default("{}")
-  parentId  String?     @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  commit    Commit      @relation(fields: [commitId], references: [id])
-  parent    Doc?        @relation("NoteHistory", fields: [parentId], references: [id])
-  user      User        @relation(fields: [userId], references: [id])
-  branchSym BranchSym   @relation(fields: [branchId, symId], references: [branchId, symId])
+  docStatus DocStatus @default(CANDIDATE)
+  meta      Json      @default("{}")
+  parentId  String?   @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  commit    Commit    @relation(fields: [commitId], references: [id])
+  parent    Doc?      @relation("NoteHistory", fields: [parentId], references: [id])
+  creator   User      @relation(fields: [creatorId], references: [id])
+  note      Note      @relation(fields: [branchId, symId], references: [branchId, symId])
   bullets   Bullet[]
-  next      Doc?        @relation("NoteHistory")
-  // discuss    Discuss?    @relation(fields: [discussId], references: [id])
-  // discussId  String?
-  noteEmoji NoteEmoji[]
-  link      Link[]
+  next      Doc?      @relation("NoteHistory")
   drafts    Draft[]
-  // Discuss    Discuss?    @relation(fields: [discussId], references: [id])
-  // discussId  String?
 }
 
 // This model need to be modified since the definition is changed in Note and Draft model
@@ -313,21 +291,18 @@ model Commit {
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id])
   drafts    Draft[]
-  doc       Doc[]
+  docs      Doc[]
 }
 
 model Link {
-  id          String      @id @default(cuid())
-  url         String      @unique
-  domain      String
-  scraped     Json        @default("{}")
-  authorId    String?
-  author      Author?     @relation(fields: [authorId], references: [id])
-  doc         Doc?        @relation(fields: [docId], references: [id])
-  rates       Rate[]
-  branchSym   BranchSym[]
-  docId       String?
-  branchSymId String
+  id       String  @id @default(cuid())
+  url      String  @unique
+  domain   String
+  scraped  Json    @default("{}")
+  authorId String?
+  author   Author? @relation(fields: [authorId], references: [id])
+  rates    Rate[]
+  notes    Note[]
 }
 
 model Poll {
@@ -371,16 +346,15 @@ model Rate {
 }
 
 model Sym {
-  id        String      @id @default(cuid())
+  id        String   @id @default(cuid())
   type      SymType
-  symbol    String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  // note      Doc?
+  symbol    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   rates     Rate[]
   branch    Branch[]
-  draft     Draft[]
-  branchSym BranchSym[]
+  drafts    Draft[]
+  notes     Note[]
 }
 
 model Vote {

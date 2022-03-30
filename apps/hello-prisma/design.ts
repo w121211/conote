@@ -1,31 +1,32 @@
 /**
  *
- * case: get my drafts from profile (v)
+ * case: get my drafts from profile (d)
  * - allDrafts()
  *
- * case: get all notes from homepage
+ * case: get all notes from homepage (d)
  * - allNotes()
  * - order by descending
  * - latest docs and candidate docs
  *
- * case: get the note by id (via click)
+ * case: get the note by id (via click) (d)
  * - note(id)
  * - order by dsc
  *
- * case: search notes with symbol and note title
+ * case: search notes with symbol and note title (d)
  * - search notes in symbol and tile simultaneously
  * - searchNotes(sym?, name?)
  * - order by accuracy
  * - symbol -> searchSymbol
  * - name -> fuzzy search
  *
- * case: search by domain (search or filter)
+ * case: search by domain (search or filter) (d)
  * - searchByDomain(domain)
  * - order by descending
  *
- * case: search notes by author (search or filter)
- * - searchByAuthor(userId)
+ * case: search notes by author (search or filter) (d)
+ * - searchByAuthor(authorName)
  * - order by dsc
+ * - fuzzy search
  *
  * case: get candidate notes of one user or all candidate notes
  * - profile and for a section of candidate note or search candidate notes on homepage (?)
@@ -37,21 +38,25 @@
  * - rejectedNotes(id?)
  * - order by date dsc
  *
- * case: get all notes from profile or from note pr records
- * - notes(id?)
+ * case: get all docs from note pr records (d)
+ * - docs(noteId)
+ *
+ * case: get all notes from profile (d)
+ * - myNotes(): [Doc]!
  * - order by date dsc
  *
- * case: create draft from not-yet-existed-symbol
+ *
+ * case: create draft from not-yet-existed-symbol (d)
  * - search for the symbol -> find nothing -> search for the draft -> no draft -> createDraft(sym, userId, domain)
  *
- * case: create draft from the latest doc of branch-sym
+ * case: create draft from the latest doc of branch-sym (d)
  * - search for the draft -> no draft -> createDraft(userId, domain, fromDoc, other meta)
  *
- * case: create draft from a url
+ * case: create draft from a url (d)
  * - search for the symbol(url) -> find nothing -> search for the draft -> no draft -> createDraft(userId, domain, url)
  *                              -> find one -> direct to the note
  *
- * case: create draft from a doc (where previous draft exist) --> must search for a draft before every creating
+ * case: create draft from a doc (where previous draft exist) --> must search for a draft before every creating (d)
  * - create draft [[AA]] (#1) ---commit--> create doc [[AA]], draft#1 = {status='committed', docId=create-doc}
  *   -> has draft on [[AA]] ? -> find draft where (userId, status='edit', symbol=AA) -> no
  *   -> create new draft [[AA]] (#2)
@@ -59,22 +64,22 @@
  * case: edit draft-with-new-symbol & new commit (not merged yet) (x)
  * - not possible since there is a auto-merge for a newly created note
  *
- * case: edit draft-from-latest-doc & new commit (not merged yet)
- * - click the draft -> compare the latest docId with fromDoc -> not consistent, a candidate -> prompt reminder and open the draft
+ * case: edit draft-from-latest-doc & new commit (not merged yet) (d)
+ * - click the draft draft(id) -> compare the latest docId with fromDoc -> not consistent, a candidate -> prompt reminder and open the draft
  *
- * case: edit draft-with-new-symbol & symbol just created (new merge)
- * - click the draft -> search for existence of the note with this symbol (searchSymbol) -> yes, there's an auto-merged commit
+ * case: edit draft-with-new-symbol & symbol just created (new merge) (d)
+ * - click the draft draft(id) -> search for existence of the note with this symbol (searchSymbol) -> yes, there's an auto-merged commit
  * -> prompt reminder and open the draft
  *
- * case: edit draft-from-latest-doc & latest-doc changed (new merge) / behind
- * - click the draft -> compare the latest docId with fromDoc -> not consistent, a merged -> prompt reminder to merge and open the draft
+ * case: edit draft-from-latest-doc & latest-doc changed (new merge) / behind (d)
+ * - click the draft draft(id) -> compare the latest docId with fromDoc -> not consistent, a merged -> prompt reminder to merge and open the draft
  *
  * case: edit draft & referenced symbols got name changed
  * - @eg draft content: '.... [[symbo-a]] ...' -> [[symbo-a]] rename to [[symbol-a]]
  * - add a new pair of key and value in the meta
  * - use searchSymbol to find the referenced note
  *
- * case: drop draft
+ * case: drop draft (d)
  * - create draft [[AA]] (#1) ---drop--> update draft#1 (status='drop')
  *   -> has draft on [[AA]] ? -> find draft where (userId, status='edit', symbol='AA') -> no
  *   -> create new draft [[AA]] (#2)
@@ -174,7 +179,7 @@
  * - branch
  * - symId?
  * - symName
- * - meta: doc.meta JSON { symNames, duplicates, alias, ..., symDict }
+ * - meta: doc.meta JSON { containSymNames, duplicates, alias, ..., symDict }
  * - status: 'edit' | 'drop'
  * - creator
  * - from-doc?
