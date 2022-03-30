@@ -13,15 +13,15 @@ type Query {
   bulletEmojis(bulletId: ID!): [BulletEmoji!]!
 
   # search by id, symbol, or url, if id or symbol not found return nulll, if url not found will try to fetch and create a new note
-  branchSym(branchId: ID, symbol: String, url: String): Note
+  notes(branchId: ID, symbol: String, url: String): Note
 
   # notesByAuthor(authorId: ID!): [Note!]!
 
   # if not found return null
-  note(id: ID!): Note
+  note(branchId, symbol, url, ): Note
 
-  # find draft
-  myDraft(id: ID!): Draft
+  # get login user's drafts
+  myDrafts(): [Draft!]!
 
   # need to modify the input (confirm the prisma)
   noteEmojis(noteId: ID!): [NoteEmoji!]!

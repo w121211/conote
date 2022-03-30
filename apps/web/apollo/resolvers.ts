@@ -255,7 +255,13 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return votes.map(e => ({ ...toStringId(e) }))
   },
 
-  async branchSym(_parent, { id, branch, symbol, url }, _context, _info) {
+  async Branch(_parent, { id }, _context, _info) {
+    return await prisma.branch.findMany({
+      where: { id }
+    })
+  }
+
+  async Note(_parent, { branch, symbol, url }, _context, _info) {
     if (branch && symbol === undefined && url === undefined) {
       return await NoteModel.get(branch)
     }
@@ -294,11 +300,33 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     })
   },
 
+  async myNote(_parent, { noteStatus }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const notes = await prisma.note.findMany({
+      where: {
+        AND: {
+          id: userId,
+          noteStatus: { equals: noteStatus,} 
+        }
+      }
+    })
+    if (userId === null) {
+      throw 'Unexpected error'
+    }
+    return notes
+  }
+
   // access all the drafts of the login user
   async myDraft(_parent, _args, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const drafts = await prisma.draft.findMany({
-      where: {id: userId },
+      where: {
+        AND: {
+          id: userId,
+          draftStatus: { equals: 'EDIT', } 
+        }
+      },
+
     })
     if (userId === null) {
       throw 'Unexpected error'
@@ -323,9 +351,9 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   //   // return meta
   // },
 
-  // async noteDigests(_parent, { afterCommitId }, _context, _info) {
-  //   return await NoteDigestModel.getLatest(afterCommitId ?? undefined)
-  // },
+  async noteDigests(_parent, { afterCommitId }, _context, _info) {
+    return await NoteDigestModel.getLatest(afterCommitId ?? undefined)
+  },
 
   async poll(_parent, { id }, _context, _info) {
     const poll = await prisma.poll.findUnique({
