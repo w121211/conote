@@ -3,7 +3,6 @@ import { useMeQuery, useNoteEmojisQuery } from '../../apollo/query.graphql'
 import CreateNoteEmojiBtn from './create-note-emoji-btn'
 import NoteEmojiBtn from './note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
-import Tooltip from '../../layout/tooltip/tooltip'
 import ToggleMenu from '../../layout/toggle-menu'
 
 const HeaderNoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {

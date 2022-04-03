@@ -5,7 +5,7 @@ import HeaderNoteEmojis from './emoji-up-down/header-note-emojis'
 import Modal from './modal/modal'
 import { Doc } from './workspace/doc'
 import Select from 'react-select'
-import { styleSymbol } from '../layout/styleSymbol'
+import { styleSymbol } from '../layout/style-symbol'
 
 const NoteHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   // const [showModal, setShowModal] = useState(false)

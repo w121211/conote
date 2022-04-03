@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { useMeQuery } from '../../apollo/query.graphql'
+import ToggleMenu from '../../layout/toggle-menu'
 import Tooltip from '../../layout/tooltip/tooltip'
 
 const MeHeaderItem = ({ className }: { className?: string }) => {
@@ -36,19 +37,30 @@ const MeHeaderItem = ({ className }: { className?: string }) => {
           e.stopPropagation()
         }}
       >
-        <span className="material-icons-outlined  leading-none text-gray-400 group-hover:text-gray-600">
-          arrow_drop_down
-        </span>
-        <Tooltip
+        <ToggleMenu
+          className="-translate-x-full left-full py-1"
+          summary={
+            <span className="material-icons-outlined  leading-none text-gray-400 group-hover:text-gray-600">
+              arrow_drop_down
+            </span>
+          }
+        >
+          <Link href="/login">
+            <a className="block whitespace-nowrap px-4 text-sm py-1 text-gray-500 hover:text-white hover:bg-blue-500">
+              登出
+            </a>
+          </Link>
+        </ToggleMenu>
+        {/* <Tooltip
           className="mt-1 px-0 py-1"
           visible={showToolTip}
           onClose={() => setShowToolTip(false)}
           direction="bottom"
         >
-          <Link href="/login">
+          <Link href="/logout">
             <a className="px-4 text-sm py-1 text-gray-500 hover:bg-gray-100">登出</a>
           </Link>
-        </Tooltip>
+        </Tooltip> */}
       </button>
     </div>
   )

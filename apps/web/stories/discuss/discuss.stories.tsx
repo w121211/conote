@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { DiscussFragment } from '../apollo/query.graphql'
-import { DiscussTile } from '../layout/discuss-tile'
+import { DiscussFragment } from '../../apollo/query.graphql'
+import { DiscussTile } from '../../components/discuss/layout-components/discuss-tile'
 import { Default } from './post-tile-list.stories'
 // import {De} from './discss.tile.stories';
 
@@ -11,7 +11,7 @@ const mockData: DiscussFragment = {
   __typename: 'Discuss',
   id: 'fjalsjoijfef',
   userId: '',
-  status: {},
+  status: 'ACTIVE',
   meta: {},
   title: '標題哈哈 測試',
   content: `測試一下，寫一些東西，這個東西為啥呢? 不能斷航?
@@ -25,7 +25,7 @@ const mockData: DiscussFragment = {
 }
 
 export default {
-  title: 'component/Discuss',
+  // title: 'component/Discuss',
   component: DiscussTile,
   decorators: [
     Story => (

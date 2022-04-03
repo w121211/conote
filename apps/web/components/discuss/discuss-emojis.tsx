@@ -1,8 +1,6 @@
-import { EmojiCode, LikeChoice } from '@prisma/client'
+import { EmojiCode } from '@prisma/client'
 import React, { useState } from 'react'
 import { DiscussEmojiFragment, useDiscussEmojisQuery, useMyDiscussEmojiLikeQuery } from '../../apollo/query.graphql'
-import EmojiIcon from '../emoji-up-down/emoji-icon'
-import Tooltip from '../../layout/tooltip/tooltip'
 import CreateDiscussEmoji from './discuss-create-emoji'
 
 import UpdateDiscussEmoji from './discuss-update-emoji'
@@ -10,7 +8,6 @@ import EmojisSwitch from './emojis-switch'
 import ToggleMenu from '../../layout/toggle-menu'
 
 const DiscussEmojis = ({ discussId, disable }: { discussId: string; disable?: boolean }): JSX.Element | null => {
-  const [showTooltip, setShowTooltip] = useState(false)
   const { data: emojisData } = useDiscussEmojisQuery({ variables: { discussId } })
   const emojis: EmojiCode[] = ['UP', 'DOWN']
   // const pinEmojiData = emojiData?.cardEmojis.find(e => e.code === 'PIN')
@@ -20,17 +17,7 @@ const DiscussEmojis = ({ discussId, disable }: { discussId: string; disable?: bo
 
   return (
     <div className="flex items-center">
-      <ToggleMenu
-        className="flex p-1"
-        summary={
-          <EmojisSwitch
-            showTooltip={showTooltip}
-            onShowTooltip={() => setShowTooltip(!showTooltip)}
-            disable={disable}
-          />
-        }
-        disabled={disable}
-      >
+      <ToggleMenu className="flex p-1" summary={<EmojisSwitch disable={disable} />} disabled={disable}>
         {emojis.map((e, i) => {
           const data = emojisData?.discussEmojis.find(el => el.code === e)
           if (data) {

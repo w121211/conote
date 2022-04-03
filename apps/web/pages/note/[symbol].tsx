@@ -9,13 +9,13 @@ import { BulletEditor } from '../../components/editor/editor'
 import HeaderNoteEmojis from '../../components/emoji-up-down/header-note-emojis'
 import { Layout } from '../../layout/layout'
 import Modal from '../../components/modal/modal'
-import NoteTemplate from '../../components/note-template'
+
 import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
-import TemplatePage from '../../components/template'
 import LoginModal from '../../components/login-modal'
 import NoteMetaModal from '../../components/note-meta-modal'
 import AuthItem from '../../components/sidebar/auth-Item'
+import { NoteTemplate } from '../../components/note-template'
 
 const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
   const { data: meData } = useMeQuery()
@@ -122,7 +122,7 @@ const ModalNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
     <div className="flex-1 h-[90vh] ">
       <NoteHead doc={modalDoc.doc} />
       {showTemplate ? (
-        <TemplatePage
+        <NoteTemplate
           onTemplateChoose={templateValue => {
             if (templateValue) {
               modalDoc.doc?.setEditorValue(templateValue)

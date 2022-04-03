@@ -1,9 +1,9 @@
 import moment from 'moment'
 import React from 'react'
-import { DiscussFragment, useMeQuery } from '../apollo/query.graphql'
-import DiscussEmojis from '../components/discuss/discuss-emojis'
-import PostOptionsMenu from '../components/discuss/post/post-options-menu'
-import { Tile } from './tile'
+import { DiscussFragment, useMeQuery } from '../../../apollo/query.graphql'
+import DiscussEmojis from '../discuss-emojis'
+import PostOptionsMenu from '../post/post-options-menu'
+import { Tile } from '../../../layout/tile'
 
 const hashtags = ['時間旅行', 'Vtuber']
 
@@ -32,7 +32,7 @@ export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
           )
         })}
       </div>
-      <h2 className="mt-2 tracking-wider text-gray-600 text-xl font-medium">
+      <h2 className="mt-4 mb-2 tracking-wider text-gray-800 text-xl font-medium">
         <span className="text-gray-300">#</span>
         {data.title}
         <span className="text-gray-300">#</span>

@@ -15,7 +15,7 @@ type FormInputs = {
   description: string
 }
 
-const TopicMetaForm = ({
+export const TopicMetaForm = ({
   metaInput,
   onSubmit,
 }: {
@@ -117,5 +117,3 @@ const TopicMetaForm = ({
     </FormProvider>
   )
 }
-
-export default TopicMetaForm

@@ -1,7 +1,7 @@
 import moment from 'moment'
 import Link from 'next/link'
 import React from 'react'
-import { styleSymbol } from './styleSymbol'
+import { styleSymbol } from './style-symbol'
 import { Tile } from './tile'
 
 type Hashtags = '#討論' | '#機會' | '#Battle' | '#事件'

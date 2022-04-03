@@ -15,7 +15,7 @@ type FormInputs = {
   description: string
 }
 
-const WebMetaForm = ({
+export const WebMetaForm = ({
   metaInput,
   onSubmit,
 }: {
@@ -117,5 +117,3 @@ const WebMetaForm = ({
     </FormProvider>
   )
 }
-
-export default WebMetaForm

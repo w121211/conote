@@ -1,7 +1,8 @@
 import { EmojiCode, LikeChoice } from '@prisma/client'
 import React from 'react'
 import { DiscussPostEmojisDocument, useCreateDiscussPostEmojiMutation } from '../../../apollo/query.graphql'
-import EmojiIcon from '../../emoji-up-down/emoji-icon'
+import { EmojiIcon } from '../../emoji-up-down/emoji-icon'
+import { EmojiBtn } from '../layout-components/emoji-btn'
 
 const CreateDiscussPostEmoji = ({ discussPostId, emojiCode }: { discussPostId: string; emojiCode: EmojiCode }) => {
   const [createEmoji, { error }] = useCreateDiscussPostEmojiMutation({
@@ -15,17 +16,7 @@ const CreateDiscussPostEmoji = ({ discussPostId, emojiCode }: { discussPostId: s
     console.log(error.message)
   }
 
-  return (
-    <div className="flex items-center">
-      <button className={`btn-reset-style group p-1 rounded hover:bg-blue-50`} onClick={onClick}>
-        <EmojiIcon
-          code={emojiCode}
-          // liked={myEmojiLikeData?.myCardEmojiLike?.choice === 'UP'}
-          upDownClassName="!text-sm !leading-none group-hover:text-blue-600"
-        />
-      </button>
-    </div>
-  )
+  return <EmojiBtn onClick={onClick} emojiCode={emojiCode} />
 }
 
 export default CreateDiscussPostEmoji

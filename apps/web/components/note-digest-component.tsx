@@ -2,7 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { NoteDigestFragment } from '../apollo/query.graphql'
 import { SymbolHelper } from '../common/symbol-helper'
-import NoteEmojis from './emoji-up-down/note-emojis-display'
+import NoteEmojis from './emoji-up-down/_note-emojis-display'
 
 const NoteDigestComponent = ({ digest }: { digest: NoteDigestFragment }): JSX.Element => {
   const {

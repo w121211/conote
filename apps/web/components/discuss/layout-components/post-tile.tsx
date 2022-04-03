@@ -1,10 +1,10 @@
 import moment from 'moment'
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
-import { DiscussPostFragment } from '../apollo/query.graphql'
-import DiscussPostEmojis from '../components/discuss/post/post-emojis'
-import PostOptionsMenu from '../components/discuss/post/post-options-menu'
-import { Tile } from './tile'
+import { DiscussPostFragment } from '../../../apollo/query.graphql'
+import DiscussPostEmojis from '../post/post-emojis'
+import PostOptionsMenu from '../post/post-options-menu'
+import { Tile } from '../../../layout/tile'
 
 export const PostTile = ({ post, userId }: { post: DiscussPostFragment; userId: string }) => {
   return (
