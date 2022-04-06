@@ -456,29 +456,40 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   // body: NoteDocBody!
   async noteDraft(_parent, { id, symbol, url }, {req}, _info) {
     const {userId} = await isAuthenticated(req)
-    let getDraft = () => {
-      if (id) {
-        return await prisma.noteDraft.findUnique({
-          where: { id },
-          include: { note: true },
-        })
-      }
-      if (symbol) {
-        return await prisma.noteDraft.findFirst({
-          where: { userId, symbol, status: 'EDIT' },
-          include: { note: true },
-        })
-      }
-      if (url) {
-        return await prisma.noteDraft.findFirst({
-          where: { userId, symbol: url, status: 'EDIT' },
-          include: { note: true },
-        })
-      }
-      return null
-    }
+    // let getDraft = () => {
+    //   if (id) {
+    //     return await prisma.noteDraft.findUnique({
+    //       where: { id },
+    //       include: { note: true },
+    //     })
+    //   }
+    //   if (symbol) {
+    //     return await prisma.noteDraft.findFirst({
+    //       where: { userId, symbol, status: 'EDIT' },
+    //       include: { note: true },
+    //     })
+    //   }
+    //   if (url) {
+    //     return await prisma.noteDraft.findFirst({
+    //       where: { userId, symbol: url, status: 'EDIT' },
+    //       include: { note: true },
+    //     })
+    //   }
+    //   return null
+    // }
 
-    const draft = getDraft()
+    // const draft = getDraft()
+
+    const draft = id?  await prisma.noteDraft.findUnique({
+      where: { id },
+      include: { note: true },
+    }): symbol? await prisma.noteDraft.findFirst({
+      where: { userId, symbol, status: 'EDIT' },
+      include: { note: true },
+    }): url? await prisma.noteDraft.findFirst({
+      where: { userId, symbol: url, status: 'EDIT' },
+      include: { note: true },
+    }): null
     
     if (draft) {
       return {
