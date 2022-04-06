@@ -13,16 +13,17 @@ type Query {
   bulletEmojis(bulletId: ID!): [BulletEmoji!]!
 
   # search by id, symbol, or url, if id or symbol not found return nulll, if url not found will try to fetch and create a new note
-  # notes(branchId: ID, symbol: String, url: String): Note
+  note(id: ID, symbol: String, url: String): Note
 
   # notesByAuthor(authorId: ID!): [Note!]!
 
-  
-  # need to modify the input (confirm the prisma)
+  # if not found return null
+  noteState(id: ID!): NoteState
+
   noteEmojis(noteId: ID!): [NoteEmoji!]!
 
-  # latest note digests (what does this mean??)
-  # noteDigests(afterCommitId: String): [NoteDigest!]!
+  # latest note digests
+  noteDigests(afterCommitId: String): [NoteDigest!]!
 
   discuss(id: ID!): Discuss
 
@@ -66,34 +67,6 @@ type Query {
   ratesByAuthor(authorId: ID!, symId: ID!): [Rate!]!
 
   ratesBySource(linkId: ID!): [Rate!]!
-
-  #-----New-----
-
-  # get all notes for homepage
-  allNotes(): [Note]!
-
-  # if not found return null
-  note(id: ID!): Note
-
-  docs(id: ID!): [Doc!]!
-
-  draft(id: ID!): Draft
-
-  myNotes(): [Doc]!
-
-  # search note by sym or title
-  searchNote(symbol: String, title: String): Note
-
-  searchByDomain(domain: String): Note
-
-  searchByAuthor(name: String): Note
-
-  # get login user's drafts
-  myDrafts(): [Draft!]!
-
-  # get all candidate docs for verdict
-  docsToVerdict(): [Doc]!
-
 
   # 以 note symbol 找該 note 所有的 active hashtags
   # hashtags(symbol: String!): [Hashtag!]
@@ -214,21 +187,6 @@ type Mutation {
   # csrf token not support yet
   sessionLogin(idToken: String!, csrfToken: String): User!
   sessionLogout: Boolean!
-
-  #-------- New -------------
-  # not sure about the type of meta, which is for creating from existing note
-  createDraft(userId: ID!, domain: String, url: String, symbol: String, fromDoc: ID, meta: NoteStateInput): Draft
-  
-  # input not yet decided
-  updateDraft(data: DraftInput): Draft!
-
-  dropDraft(id: ID!): Draft
-  
-  merge(draftId: ID!): Doc!
-  
-  # include accept and reject
-  verdictMerge(docId: ID!): Doc!
-
 
   # createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
   # createAuthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
@@ -410,14 +368,14 @@ type DiscussPostEmojiLike {
   updatedAt: DateTime!
 }
 
-# type Note {
-# id: ID!
-# meta: NoteMeta!
-# sym: Sym!
-# link: Link
-# state: NoteState # 可能為 null
-# updatedAt: DateTime!
-# }
+type Note {
+  id: ID!
+  meta: NoteMeta!
+  sym: Sym!
+  link: Link
+  state: NoteState # 可能為 null
+  updatedAt: DateTime!
+}
 
 type NoteEmoji {
   id: ID!
@@ -443,7 +401,6 @@ type NoteDigest {
   noteId: String!
   noteMeta: NoteMeta! # includes title
   fromNoteId: String
-  branch: Branch!
   sym: Sym!
   subSyms: [Sym!]!
   # title: String!
@@ -466,24 +423,23 @@ type NoteMeta {
   url: String
 }
 
-# type NoteState {
-#   id: ID!
-#   noteId: String!
-#   userId: String!
-#   commitId: String!
-#   prevId: String
-#   body: NoteStateBody!
-#   updatedAt: DateTime!
-# }
+type NoteState {
+  id: ID!
+  noteId: String!
+  userId: String!
+  commitId: String!
+  prevId: String
+  body: NoteStateBody!
+  updatedAt: DateTime!
+}
 
-# What is this? why store duplicate preStateId??
 type NoteStateBody {
   prevStateId: String
   sourceNoteId: String
   # changes: [BulletNodeChange!]!
   # value: [BulletTreeNode!]!
   changes: JSON!
-  value: JSON! # what is this???
+  value: JSON!
   # symbolToNoteId: JSON!
   # a symbol-noteId map, so later the cahnge of symbol name won't affect
 }
@@ -634,52 +590,6 @@ type CreateDiscussPostEmojiResponse {
 type UpsertDiscussPostEmojiLikeResponse {
   like: DiscussPostEmojiLike!
   count: DiscussPostEmojiCount!
-}
-
-#-------New-------
-
-type Note {
-  id: ID!
-  meta: NoteMeta!
-  sym: Sym!
-  branch: Branch!
-  link: Link
-  state: Doc # 可能為 null (what does this mean?? the newest commit note??)
-  updatedAt: DateTime!
-}
-
-type Draft {
-  id: ID!
-  branchSymId: String!
-  userId: String!
-  commitId: String!
-  fromNoteId: String
-  body: DraftBody!
-  updatedAt: DateTime!
-  state: DraftStatus!
-}
-
-# similar design as NoteStateBody
-type DraftBody {
-  body: JSON!
-}
-
-type Doc {
-  id: ID!
-  branchSymId: String!
-  userId: String!
-  commitId: String!
-  parentId: String
-  body: NoteStateBody!
-  updatedAt: DateTime!
-}
-
-type Branch {
-  id: ID!
-  name: String!
-  syms: [Sym]!
-  drafts: [Draft]!
-  branchSym: [BranchSym]!
 }
 
 # type PollMeta {
@@ -835,12 +745,6 @@ input RateInput {
 
 input VoteInput {
   choiceIdx: Int!
-}
-
-#------New-------
-input DraftInput {
-  # meta: 
-  body: JSON!
 }
 
 # input CommentInput {
@@ -1011,17 +915,3 @@ enum SymType {
 #   ARCHIVE
 #   REPORTED
 # }
-
-
-#-------New-------
-enum DraftStatus {
-  EDIT
-  COMMIT
-  DROP
-}
-
-enum DocStatus {
-  CANDIDATE
-  Merge
-  REJECT
-}

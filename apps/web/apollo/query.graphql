@@ -13,820 +13,814 @@ fragment author on Author {
   }
 }
 
-fragment bullet on Bullet {
-  id
-  # noteStateId
-  # createdAt
-  # updatedAt
-}
+# fragment bullet on Bullet {
+#   id
+#   # noteStateId
+#   # createdAt
+#   # updatedAt
+# }
 
-fragment bulletEmoji on BulletEmoji {
-  __typename
-  id
-  code
-  count {
-    ...bulletEmojiCount
-  }
-}
-
-fragment bulletEmojiCount on BulletEmojiCount {
-  __typename
-  id
-  nUps
-  nDowns
-}
-
-fragment bulletEmojiLike on BulletEmojiLike {
-  __typename
-  id
-  bulletEmojiId
-  choice
-  updatedAt
-}
-
-# fragment bulletNodeChange on BulletNodeChange {
+# fragment bulletEmoji on BulletEmoji {
 #   __typename
+#   id
+#   code
+#   count {
+#     ...bulletEmojiCount
+#   }
+# }
+
+# fragment bulletEmojiCount on BulletEmojiCount {
+#   __typename
+#   id
+#   nUps
+#   nDowns
+# }
+
+# fragment bulletEmojiLike on BulletEmojiLike {
+#   __typename
+#   id
+#   bulletEmojiId
+#   choice
+#   updatedAt
+# }
+
+# # fragment bulletNodeChange on BulletNodeChange {
+# #   __typename
+# #   type
+# #   cid
+# #   toParentCid
+# #   toIndex
+# #   data {
+# #     ...bullet
+# #   }
+# # }
+
+# fragment note on Note {
+#   __typename
+#   id
+#   link {
+#     ...link
+#   }
+#   meta {
+#     ...noteMeta
+#   }
+#   sym {
+#     ...sym
+#   }
+#   updatedAt
+# }
+
+# fragment noteDigest on NoteDigest {
+#   __typename
+#   commitId
+#   noteId
+#   noteMeta {
+#     ...noteMeta
+#   }
+#   fromNoteId
+#   sym {
+#     ...sym
+#   }
+#   subSyms {
+#     ...sym
+#   }
+#   picks
+#   updatedAt
+# }
+
+# fragment noteEmoji on NoteEmoji {
+#   __typename
+#   id
+#   code
+#   count {
+#     ...noteEmojiCount
+#   }
+# }
+
+# fragment noteEmojiCount on NoteEmojiCount {
+#   __typename
+#   id
+#   nUps
+# }
+
+# fragment noteEmojiLike on NoteEmojiLike {
+#   __typename
+#   id
+#   noteEmojiId
+#   liked
+#   updatedAt
+# }
+
+# fragment noteMeta on NoteMeta {
+#   __typename
+#   author
+#   duplicates
+#   keywords
+#   publishedAt
+#   redirect
+#   tickers
+#   title
+#   url
+# }
+
+# # fragment noteState on NoteState {
+# #   __typename
+# #   id
+# #   noteId
+# #   userId
+# #   commitId
+# #   prevId
+# #   body {
+# #     prevStateId
+# #     sourceNoteId
+# #     changes
+# #     value
+# #   }
+# #   updatedAt
+# # }
+
+# fragment commit on Commit {
+#   __typename
+#   id
+#   userId
+#   updatedAt
+#   stateIdToCidDictEntryArray {
+#     k
+#     v
+#   }
+# }
+
+# fragment discuss on Discuss {
+#   __typename
+#   id
+#   userId
+#   status
+#   meta
+#   title
+#   content
+#   createdAt
+#   updatedAt
+#   count {
+#     nPosts
+#   }
+# }
+
+# # fragment discussCount on DiscussCount {
+# #   __typename
+# #   id
+# #   nPosts
+# # }
+
+# fragment discussEmoji on DiscussEmoji {
+#   __typename
+#   id
+#   code
+#   count {
+#     ...discussEmojiCount
+#   }
+# }
+
+# fragment discussEmojiCount on DiscussEmojiCount {
+#   __typename
+#   id
+#   nUps
+# }
+
+# fragment discussEmojiLike on DiscussEmojiLike {
+#   __typename
+#   id
+#   discussEmojiId
+#   liked
+#   updatedAt
+# }
+
+# fragment discussPost on DiscussPost {
+#   __typename
+#   id
+#   userId
+#   status
+#   content
+#   createdAt
+#   updatedAt
+# }
+
+# fragment discussPostEmoji on DiscussPostEmoji {
+#   __typename
+#   id
+#   code
+#   count {
+#     ...discussPostEmojiCount
+#   }
+# }
+
+# fragment discussPostEmojiCount on DiscussPostEmojiCount {
+#   __typename
+#   id
+#   nUps
+# }
+
+# fragment discussPostEmojiLike on DiscussPostEmojiLike {
+#   __typename
+#   id
+#   discussPostEmojiId
+#   liked
+#   updatedAt
+# }
+
+# fragment link on Link {
+#   __typename
+#   id
+#   url
+#   authorId
+# }
+
+# fragment poll on Poll {
+#   __typename
+#   id
+#   userId
+#   choices
+#   count {
+#     id
+#     nVotes
+#   }
+#   createdAt
+#   updatedAt
+# }
+
+# fragment rate on Rate {
+#   __typename
+#   id
+#   userId
+#   authorId
+#   linkId
+#   symId
+#   choice
+#   # body {
+#   #   ...shotBody
+#   # }
+#   createdAt
+#   updatedAt
+# }
+
+# fragment rateBody on RateBody {
+#   comment
+#   quote
+# }
+
+# fragment searchHit on SearchHit {
+#   id
+#   str
+# }
+
+# fragment sym on Sym {
+#   __typename
+#   id
 #   type
-#   cid
-#   toParentCid
-#   toIndex
-#   data {
+#   symbol
+# }
+
+# fragment user on User {
+#   __typename
+#   id
+# }
+
+# fragment vote on Vote {
+#   __typename
+#   id
+#   pollId
+#   choiceIdx
+# }
+
+# # fragment commentCount on CommentCount {
+# #   __typename
+# #   id
+# #   nViews
+# #   nUps
+# #   nDowns
+# # }
+
+# # fragment commentLike on CommentLike {
+# #   __typename
+# #   id
+# #   commentId
+# #   choice
+# #   updatedAt
+# # }
+
+# # fragment comment on Comment {
+# #   __typename
+# #   id
+# #   userId
+# #   oauthorName
+# #   status
+# #   content
+# #   vote {
+# #     ...vote
+# #   }
+# #   count {
+# #     ...commentCount
+# #   }
+# #   createdAt
+# #   updatedAt
+# # }
+
+# # fragment boardLike on BoardLike {
+# #   __typename
+# #   id
+# #   boardId
+# #   choice
+# #   updatedAt
+# # }
+
+# # fragment boardCount on BoardCount {
+# #   __typename
+# #   id
+# #   nViews
+# #   nUps
+# #   nDowns
+# # }
+
+# # fragment board on Board {
+# #   __typename
+# #   id
+# #   userId
+# #   bulletId
+# #   noteId
+# #   status
+# #   hashtag
+# #   meta
+# #   content
+# #   poll {
+# #     ...poll
+# #   }
+# #   count {
+# #     ...boardCount
+# #   }
+# #   createdAt
+# #   updatedAt
+# # }
+
+# # fragment noteHead on NoteHead {
+# #   __typename
+# #   id
+# #   userId
+# #   content
+# #   timestamp
+# #   prevId
+# # }
+
+# # fragment noteBody on NoteBody {
+# #   __typename
+# #   id
+# #   userId
+# #   content
+# #   timestamp
+# #   prevId
+# # }
+
+# query Author($id: ID, $name: String) {
+#   author(id: $id, name: $name) {
+#     ...author
+#   }
+# }
+
+# query Bullet($id: ID!) {
+#   bullet(id: $id) {
 #     ...bullet
 #   }
 # }
 
-fragment note on Note {
-  __typename
-  id
-  link {
-    ...link
-  }
-  meta {
-    ...noteMeta
-  }
-  state {
-    ...noteState
-  }
-  sym {
-    ...sym
-  }
-  updatedAt
-}
-
-fragment noteDigest on NoteDigest {
-  __typename
-  commitId
-  noteId
-  noteMeta {
-    ...noteMeta
-  }
-  fromNoteId
-  sym {
-    ...sym
-  }
-  subSyms {
-    ...sym
-  }
-  picks
-  updatedAt
-}
-
-fragment noteEmoji on NoteEmoji {
-  __typename
-  id
-  code
-  count {
-    ...noteEmojiCount
-  }
-}
-
-fragment noteEmojiCount on NoteEmojiCount {
-  __typename
-  id
-  nUps
-}
-
-fragment noteEmojiLike on NoteEmojiLike {
-  __typename
-  id
-  noteEmojiId
-  liked
-  updatedAt
-}
-
-fragment noteMeta on NoteMeta {
-  __typename
-  author
-  duplicates
-  keywords
-  publishedAt
-  redirect
-  tickers
-  title
-  url
-}
-
-fragment noteState on NoteState {
-  __typename
-  id
-  noteId
-  userId
-  commitId
-  prevId
-  body {
-    prevStateId
-    sourceNoteId
-    changes
-    value
-  }
-  updatedAt
-}
-
-fragment commit on Commit {
-  __typename
-  id
-  userId
-  updatedAt
-  noteStates {
-    ...noteState
-  }
-  stateIdToCidDictEntryArray {
-    k
-    v
-  }
-}
-
-fragment discuss on Discuss {
-  __typename
-  id
-  userId
-  status
-  meta
-  title
-  content
-  createdAt
-  updatedAt
-  count {
-    nPosts
-  }
-}
-
-# fragment discussCount on DiscussCount {
-#   __typename
-#   id
-#   nPosts
+# query BulletEmojis($bulletId: ID!) {
+#   bulletEmojis(bulletId: $bulletId) {
+#     ...bulletEmoji
+#   }
 # }
 
-fragment discussEmoji on DiscussEmoji {
-  __typename
-  id
-  code
-  count {
-    ...discussEmojiCount
-  }
-}
-
-fragment discussEmojiCount on DiscussEmojiCount {
-  __typename
-  id
-  nUps
-}
-
-fragment discussEmojiLike on DiscussEmojiLike {
-  __typename
-  id
-  discussEmojiId
-  liked
-  updatedAt
-}
-
-fragment discussPost on DiscussPost {
-  __typename
-  id
-  userId
-  status
-  content
-  createdAt
-  updatedAt
-}
-
-fragment discussPostEmoji on DiscussPostEmoji {
-  __typename
-  id
-  code
-  count {
-    ...discussPostEmojiCount
-  }
-}
-
-fragment discussPostEmojiCount on DiscussPostEmojiCount {
-  __typename
-  id
-  nUps
-}
-
-fragment discussPostEmojiLike on DiscussPostEmojiLike {
-  __typename
-  id
-  discussPostEmojiId
-  liked
-  updatedAt
-}
-
-fragment link on Link {
-  __typename
-  id
-  url
-  authorId
-}
-
-fragment poll on Poll {
-  __typename
-  id
-  userId
-  choices
-  count {
-    id
-    nVotes
-  }
-  createdAt
-  updatedAt
-}
-
-fragment rate on Rate {
-  __typename
-  id
-  userId
-  authorId
-  linkId
-  symId
-  choice
-  # body {
-  #   ...shotBody
-  # }
-  createdAt
-  updatedAt
-}
-
-fragment rateBody on RateBody {
-  comment
-  quote
-}
-
-fragment searchHit on SearchHit {
-  id
-  str
-}
-
-fragment sym on Sym {
-  __typename
-  id
-  type
-  symbol
-}
-
-fragment user on User {
-  __typename
-  id
-}
-
-fragment vote on Vote {
-  __typename
-  id
-  pollId
-  choiceIdx
-}
-
-# fragment commentCount on CommentCount {
-#   __typename
-#   id
-#   nViews
-#   nUps
-#   nDowns
+# query Note($id: ID, $symbol: String, $url: String) {
+#   note(id: $id, symbol: $symbol, url: $url) {
+#     ...note
+#   }
 # }
 
-# fragment commentLike on CommentLike {
-#   __typename
-#   id
-#   commentId
-#   choice
-#   updatedAt
+# query NoteEmojis($noteId: ID!) {
+#   noteEmojis(noteId: $noteId) {
+#     ...noteEmoji
+#   }
 # }
 
-# fragment comment on Comment {
-#   __typename
-#   id
-#   userId
-#   oauthorName
-#   status
-#   content
-#   vote {
+# # query NoteMeta($symbol: String!) {
+# #   noteMeta(symbol: $symbol) {
+# #     ...noteMeta
+# #   }
+# # }
+
+# query NoteDigests($afterCommitId: String) {
+#   noteDigests(afterCommitId: $afterCommitId) {
+#     ...noteDigest
+#   }
+# }
+
+# query Discuss($id: ID!) {
+#   discuss(id: $id) {
+#     ...discuss
+#   }
+# }
+
+# query DiscussEmojis($discussId: ID!) {
+#   discussEmojis(discussId: $discussId) {
+#     ...discussEmoji
+#   }
+# }
+
+# query DiscussPosts($discussId: ID!) {
+#   discussPosts(discussId: $discussId) {
+#     ...discussPost
+#   }
+# }
+
+# query DiscussPostEmojis($discussPostId: ID!) {
+#   discussPostEmojis(discussPostId: $discussPostId) {
+#     ...discussPostEmoji
+#   }
+# }
+
+# query Link($id: ID, $url: String) {
+#   link(id: $id, url: $url) {
+#     ...link
+#   }
+# }
+
+# query Me {
+#   me {
+#     ...user
+#   }
+# }
+
+# query MyRates($symId: ID!) {
+#   myRates(symId: $symId) {
+#     ...rate
+#   }
+# }
+
+# query MyVotes($pollId: ID!) {
+#   myVotes(pollId: $pollId) {
 #     ...vote
 #   }
-#   count {
-#     ...commentCount
+# }
+
+# query MyBulletEmojiLike($bulletEmojiId: ID!) {
+#   myBulletEmojiLike(bulletEmojiId: $bulletEmojiId) {
+#     ...bulletEmojiLike
 #   }
-#   createdAt
-#   updatedAt
 # }
 
-# fragment boardLike on BoardLike {
-#   __typename
-#   id
-#   boardId
-#   choice
-#   updatedAt
+# query MyNoteEmojiLike($noteEmojiId: ID!) {
+#   myNoteEmojiLike(noteEmojiId: $noteEmojiId) {
+#     ...noteEmojiLike
+#   }
 # }
 
-# fragment boardCount on BoardCount {
-#   __typename
-#   id
-#   nViews
-#   nUps
-#   nDowns
+# query MyDiscussEmojiLike($discussEmojiId: ID!) {
+#   myDiscussEmojiLike(discussEmojiId: $discussEmojiId) {
+#     ...discussEmojiLike
+#   }
 # }
 
-# fragment board on Board {
-#   __typename
-#   id
-#   userId
-#   bulletId
-#   noteId
-#   status
-#   hashtag
-#   meta
-#   content
-#   poll {
+# query MyDiscussPostEmojiLike($discussPostEmojiId: ID!) {
+#   myDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId) {
+#     ...discussPostEmojiLike
+#   }
+# }
+
+# query Poll($id: ID!) {
+#   poll(id: $id) {
 #     ...poll
 #   }
-#   count {
-#     ...boardCount
-#   }
-#   createdAt
-#   updatedAt
 # }
-
-# fragment noteHead on NoteHead {
-#   __typename
-#   id
-#   userId
-#   content
-#   timestamp
-#   prevId
-# }
-
-# fragment noteBody on NoteBody {
-#   __typename
-#   id
-#   userId
-#   content
-#   timestamp
-#   prevId
-# }
-
-query Author($id: ID, $name: String) {
-  author(id: $id, name: $name) {
-    ...author
-  }
-}
-
-query Bullet($id: ID!) {
-  bullet(id: $id) {
-    ...bullet
-  }
-}
-
-query BulletEmojis($bulletId: ID!) {
-  bulletEmojis(bulletId: $bulletId) {
-    ...bulletEmoji
-  }
-}
-
-query Note($id: ID, $symbol: String, $url: String) {
-  note(id: $id, symbol: $symbol, url: $url) {
-    ...note
-  }
-}
-
-query NoteEmojis($noteId: ID!) {
-  noteEmojis(noteId: $noteId) {
-    ...noteEmoji
-  }
-}
-
-# query NoteMeta($symbol: String!) {
-#   noteMeta(symbol: $symbol) {
-#     ...noteMeta
+# query SearchAuthor($term: String!) {
+#   searchAuthor(term: $term) {
+#     ...searchHit
 #   }
 # }
 
-query NoteDigests($afterCommitId: String) {
-  noteDigests(afterCommitId: $afterCommitId) {
-    ...noteDigest
-  }
-}
-
-query Discuss($id: ID!) {
-  discuss(id: $id) {
-    ...discuss
-  }
-}
-
-query DiscussEmojis($discussId: ID!) {
-  discussEmojis(discussId: $discussId) {
-    ...discussEmoji
-  }
-}
-
-query DiscussPosts($discussId: ID!) {
-  discussPosts(discussId: $discussId) {
-    ...discussPost
-  }
-}
-
-query DiscussPostEmojis($discussPostId: ID!) {
-  discussPostEmojis(discussPostId: $discussPostId) {
-    ...discussPostEmoji
-  }
-}
-
-query Link($id: ID, $url: String) {
-  link(id: $id, url: $url) {
-    ...link
-  }
-}
-
-query Me {
-  me {
-    ...user
-  }
-}
-
-query MyRates($symId: ID!) {
-  myRates(symId: $symId) {
-    ...rate
-  }
-}
-
-query MyVotes($pollId: ID!) {
-  myVotes(pollId: $pollId) {
-    ...vote
-  }
-}
-
-query MyBulletEmojiLike($bulletEmojiId: ID!) {
-  myBulletEmojiLike(bulletEmojiId: $bulletEmojiId) {
-    ...bulletEmojiLike
-  }
-}
-
-query MyNoteEmojiLike($noteEmojiId: ID!) {
-  myNoteEmojiLike(noteEmojiId: $noteEmojiId) {
-    ...noteEmojiLike
-  }
-}
-
-query MyDiscussEmojiLike($discussEmojiId: ID!) {
-  myDiscussEmojiLike(discussEmojiId: $discussEmojiId) {
-    ...discussEmojiLike
-  }
-}
-
-query MyDiscussPostEmojiLike($discussPostEmojiId: ID!) {
-  myDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId) {
-    ...discussPostEmojiLike
-  }
-}
-
-query Poll($id: ID!) {
-  poll(id: $id) {
-    ...poll
-  }
-}
-query SearchAuthor($term: String!) {
-  searchAuthor(term: $term) {
-    ...searchHit
-  }
-}
-
-query SearchDiscuss($term: String!) {
-  searchDiscuss(term: $term) {
-    ...searchHit
-  }
-}
-
-query SearchSymbol($term: String!, $type: SymType) {
-  searchSymbol(term: $term, type: $type) {
-    ...searchHit
-  }
-}
-
-query Rate($id: ID!) {
-  rate(id: $id) {
-    ...rate
-  }
-}
-
-query RatesBySource($linkId: ID!) {
-  ratesBySource(linkId: $linkId) {
-    ...rate
-  }
-}
-
-query RatesByAuthor($authorId: ID!, $symId: ID!) {
-  ratesByAuthor(authorId: $authorId, symId: $symId) {
-    ...rate
-  }
-}
-
-# query Board($id: ID!) {
-#   board(id: $id) {
-#     ...board
+# query SearchDiscuss($term: String!) {
+#   searchDiscuss(term: $term) {
+#     ...searchHit
 #   }
 # }
 
-# query Comments($boardId: ID!, $afterId: ID) {
-#   comments(boardId: $boardId, afterId: $afterId) {
-#     ...comment
+# query SearchSymbol($term: String!, $type: SymType) {
+#   searchSymbol(term: $term, type: $type) {
+#     ...searchHit
 #   }
 # }
 
-# query MyVotes {
-#   myVotes {
+# query Rate($id: ID!) {
+#   rate(id: $id) {
+#     ...rate
+#   }
+# }
+
+# query RatesBySource($linkId: ID!) {
+#   ratesBySource(linkId: $linkId) {
+#     ...rate
+#   }
+# }
+
+# query RatesByAuthor($authorId: ID!, $symId: ID!) {
+#   ratesByAuthor(authorId: $authorId, symId: $symId) {
+#     ...rate
+#   }
+# }
+
+# # query Board($id: ID!) {
+# #   board(id: $id) {
+# #     ...board
+# #   }
+# # }
+
+# # query Comments($boardId: ID!, $afterId: ID) {
+# #   comments(boardId: $boardId, afterId: $afterId) {
+# #     ...comment
+# #   }
+# # }
+
+# # query MyVotes {
+# #   myVotes {
+# #     ...vote
+# #   }
+# # }
+
+# # query MyCommentLikes {
+# #   myCommentLikes {
+# #     ...commentLike
+# #   }
+# # }
+
+# # query MyBoardLikes {
+# #   myBoardLikes {
+# #     ...boardLike
+# #   }
+# # }
+
+# mutation CreateAuthor($data: AuthorInput!) {
+#   createAuthor(data: $data) {
+#     ...author
+#   }
+# }
+
+# mutation UpdateAuthor($id: ID!, $data: AuthorInput!) {
+#   updateAuthor(id: $id, data: $data) {
+#     ...author
+#   }
+# }
+
+# mutation CreateBulletEmoji($bulletId: ID!, $code: EmojiCode!) {
+#   createBulletEmoji(bulletId: $bulletId, code: $code) {
+#     emoji {
+#       ...bulletEmoji
+#     }
+#     like {
+#       ...bulletEmojiLike
+#     }
+#   }
+# }
+
+# mutation UpsertBulletEmojiLike($bulletEmojiId: ID!, $data: LikeInput!) {
+#   upsertBulletEmojiLike(bulletEmojiId: $bulletEmojiId, data: $data) {
+#     like {
+#       ...bulletEmojiLike
+#     }
+#     count {
+#       ...bulletEmojiCount
+#     }
+#   }
+# }
+
+# mutation CreateNoteEmoji($noteId: ID!, $code: EmojiCode!) {
+#   createNoteEmoji(noteId: $noteId, code: $code) {
+#     emoji {
+#       ...noteEmoji
+#     }
+#     like {
+#       ...noteEmojiLike
+#     }
+#   }
+# }
+
+# mutation UpsertNoteEmojiLike($noteEmojiId: ID!, $liked: Boolean!) {
+#   upsertNoteEmojiLike(noteEmojiId: $noteEmojiId, liked: $liked) {
+#     like {
+#       ...noteEmojiLike
+#     }
+#     count {
+#       ...noteEmojiCount
+#     }
+#   }
+# }
+
+# mutation UpdateNoteMeta($noteId: ID!, $data: NoteMetaInput!, $newSymbol: String) {
+#   updateNoteMeta(noteId: $noteId, data: $data, newSymbol: $newSymbol) {
+#     ...note
+#   }
+# }
+
+# mutation CreateCommit($data: CommitInput!) {
+#   createCommit(data: $data) {
+#     ...commit
+#   }
+# }
+
+# mutation CreateDiscuss($noteId: ID, $data: DiscussInput!) {
+#   createDiscuss(noteId: $noteId, data: $data) {
+#     ...discuss
+#   }
+# }
+
+# mutation UpdateDiscuss($id: ID!, $data: DiscussInput!) {
+#   updateDiscuss(id: $id, data: $data) {
+#     ...discuss
+#   }
+# }
+
+# mutation ConnectDiscussToNote($discussId: ID!, $noteId: ID!, $disconnect: Boolean) {
+#   connectDiscussToNote(discussId: $discussId, noteId: $noteId, disconnect: $disconnect)
+# }
+
+# mutation CreateDiscussEmoji($discussId: ID!, $code: EmojiCode!) {
+#   createDiscussEmoji(discussId: $discussId, code: $code) {
+#     emoji {
+#       ...discussEmoji
+#     }
+#     like {
+#       ...discussEmojiLike
+#     }
+#   }
+# }
+
+# mutation UpsertDiscussEmojiLike($discussEmojiId: ID!, $liked: Boolean!) {
+#   upsertDiscussEmojiLike(discussEmojiId: $discussEmojiId, liked: $liked) {
+#     like {
+#       ...discussEmojiLike
+#     }
+#     count {
+#       ...discussEmojiCount
+#     }
+#   }
+# }
+
+# mutation CreateDiscussPost($discussId: ID!, $data: DiscussPostInput!) {
+#   createDiscussPost(discussId: $discussId, data: $data) {
+#     ...discussPost
+#   }
+# }
+
+# mutation UpdateDiscussPost($id: ID!, $data: DiscussPostInput!) {
+#   updateDiscussPost(id: $id, data: $data) {
+#     ...discussPost
+#   }
+# }
+
+# mutation CreateDiscussPostEmoji($discussPostId: ID!, $code: EmojiCode!) {
+#   createDiscussPostEmoji(discussPostId: $discussPostId, code: $code) {
+#     emoji {
+#       ...discussPostEmoji
+#     }
+#     like {
+#       ...discussPostEmojiLike
+#     }
+#   }
+# }
+
+# mutation UpsertDiscussPostEmojiLike($discussPostEmojiId: ID!, $liked: Boolean!) {
+#   upsertDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId, liked: $liked) {
+#     like {
+#       ...discussPostEmojiLike
+#     }
+#     count {
+#       ...discussPostEmojiCount
+#     }
+#   }
+# }
+
+# mutation CreatePoll($data: PollInput!) {
+#   createPoll(data: $data) {
+#     ...poll
+#   }
+# }
+
+# mutation CreateRate($data: RateInput!) {
+#   createRate(data: $data) {
+#     ...rate
+#   }
+# }
+
+# mutation UpdateRate($id: ID!, $data: RateInput!) {
+#   updateRate(id: $id, data: $data) {
+#     ...rate
+#   }
+# }
+
+# mutation CreateVote($pollId: ID!, $data: VoteInput!) {
+#   createVote(pollId: $pollId, data: $data) {
 #     ...vote
 #   }
 # }
 
-# query MyCommentLikes {
-#   myCommentLikes {
-#     ...commentLike
+# mutation SessionLogin($idToken: String!, $csrfToken: String) {
+#   sessionLogin(idToken: $idToken, csrfToken: $csrfToken) {
+#     ...user
 #   }
 # }
 
-# query MyBoardLikes {
-#   myBoardLikes {
-#     ...boardLike
-#   }
+# mutation SessionLogout {
+#   sessionLogout
 # }
 
-mutation CreateAuthor($data: AuthorInput!) {
-  createAuthor(data: $data) {
-    ...author
-  }
-}
+# # mutation CreateComment($boardId: ID!, $pollId: ID, $data: CommentInput!) {
+# #   createComment(boardId: $boardId, pollId: $pollId, data: $data) {
+# #     ...comment
+# #   }
+# # }
 
-mutation UpdateAuthor($id: ID!, $data: AuthorInput!) {
-  updateAuthor(id: $id, data: $data) {
-    ...author
-  }
-}
+# # mutation createAuthorVote($pollId: ID!, $authorName: String!, $data: VoteInput!) {
+# #   createAuthorVote(pollId: $pollId, authorName: $authorName, data: $data) {
+# #     ...vote
+# #   }
+# # }
 
-mutation CreateBulletEmoji($bulletId: ID!, $code: EmojiCode!) {
-  createBulletEmoji(bulletId: $bulletId, code: $code) {
-    emoji {
-      ...bulletEmoji
-    }
-    like {
-      ...bulletEmojiLike
-    }
-  }
-}
+# # mutation CreateOauthorComment($boardId: ID!, $pollId: ID, $oauthorName: String!, $data: CommentInput!) {
+# #   createOauthorComment(boardId: $boardId, pollId: $pollId, oauthorName: $oauthorName, data: $data) {
+# #     ...comment
+# #   }
+# # }
 
-mutation UpsertBulletEmojiLike($bulletEmojiId: ID!, $data: LikeInput!) {
-  upsertBulletEmojiLike(bulletEmojiId: $bulletEmojiId, data: $data) {
-    like {
-      ...bulletEmojiLike
-    }
-    count {
-      ...bulletEmojiCount
-    }
-  }
-}
+# # mutation CreateCommentLike($commentId: ID!, $data: LikeInput!) {
+# #   createCommentLike(commentId: $commentId, data: $data) {
+# #     like {
+# #       ...commentLike
+# #     }
+# #     count {
+# #       ...commentCount
+# #     }
+# #   }
+# # }
 
-mutation CreateNoteEmoji($noteId: ID!, $code: EmojiCode!) {
-  createNoteEmoji(noteId: $noteId, code: $code) {
-    emoji {
-      ...noteEmoji
-    }
-    like {
-      ...noteEmojiLike
-    }
-  }
-}
+# # mutation UpdateCommentLike($id: ID!, $data: LikeInput!) {
+# #   updateCommentLike(id: $id, data: $data) {
+# #     like {
+# #       ...commentLike
+# #     }
+# #     count {
+# #       ...commentCount
+# #     }
+# #   }
+# # }
 
-mutation UpsertNoteEmojiLike($noteEmojiId: ID!, $liked: Boolean!) {
-  upsertNoteEmojiLike(noteEmojiId: $noteEmojiId, liked: $liked) {
-    like {
-      ...noteEmojiLike
-    }
-    count {
-      ...noteEmojiCount
-    }
-  }
-}
+# # mutation CreateBoardLike($boardId: ID!, $data: LikeInput!) {
+# #   createBoardLike(boardId: $boardId, data: $data) {
+# #     like {
+# #       ...boardLike
+# #     }
+# #     count {
+# #       ...boardCount
+# #     }
+# #   }
+# # }
 
-mutation UpdateNoteMeta($noteId: ID!, $data: NoteMetaInput!, $newSymbol: String) {
-  updateNoteMeta(noteId: $noteId, data: $data, newSymbol: $newSymbol) {
-    ...note
-  }
-}
+# # mutation UpdateBoardLike($id: ID!, $data: LikeInput!) {
+# #   updateBoardLike(id: $id, data: $data) {
+# #     like {
+# #       ...boardLike
+# #     }
+# #     count {
+# #       ...boardCount
+# #     }
+# #   }
+# # }
 
-mutation CreateCommit($data: CommitInput!) {
-  createCommit(data: $data) {
-    ...commit
-  }
-}
+# # mutation SignUp($email: String!, $password: String!) {
+# #   signUp(email: $email, password: $password) {
+# #     id
+# #     email
+# #   }
+# # }
 
-mutation CreateDiscuss($noteId: ID, $data: DiscussInput!) {
-  createDiscuss(noteId: $noteId, data: $data) {
-    ...discuss
-  }
-}
+# # mutation SignIn($email: String!, $password: String!) {
+# #   signIn(email: $email, password: $password) {
+# #     token
+# #     user {
+# #       id
+# #     }
+# #   }
+# # }
 
-mutation UpdateDiscuss($id: ID!, $data: DiscussInput!) {
-  updateDiscuss(id: $id, data: $data) {
-    ...discuss
-  }
-}
+# # mutation SignOut {
+# #   signOut
+# # }
 
-mutation ConnectDiscussToNote($discussId: ID!, $noteId: ID!, $disconnect: Boolean) {
-  connectDiscussToNote(discussId: $discussId, noteId: $noteId, disconnect: $disconnect)
-}
-
-mutation CreateDiscussEmoji($discussId: ID!, $code: EmojiCode!) {
-  createDiscussEmoji(discussId: $discussId, code: $code) {
-    emoji {
-      ...discussEmoji
-    }
-    like {
-      ...discussEmojiLike
-    }
-  }
-}
-
-mutation UpsertDiscussEmojiLike($discussEmojiId: ID!, $liked: Boolean!) {
-  upsertDiscussEmojiLike(discussEmojiId: $discussEmojiId, liked: $liked) {
-    like {
-      ...discussEmojiLike
-    }
-    count {
-      ...discussEmojiCount
-    }
-  }
-}
-
-mutation CreateDiscussPost($discussId: ID!, $data: DiscussPostInput!) {
-  createDiscussPost(discussId: $discussId, data: $data) {
-    ...discussPost
-  }
-}
-
-mutation UpdateDiscussPost($id: ID!, $data: DiscussPostInput!) {
-  updateDiscussPost(id: $id, data: $data) {
-    ...discussPost
-  }
-}
-
-mutation CreateDiscussPostEmoji($discussPostId: ID!, $code: EmojiCode!) {
-  createDiscussPostEmoji(discussPostId: $discussPostId, code: $code) {
-    emoji {
-      ...discussPostEmoji
-    }
-    like {
-      ...discussPostEmojiLike
-    }
-  }
-}
-
-mutation UpsertDiscussPostEmojiLike($discussPostEmojiId: ID!, $liked: Boolean!) {
-  upsertDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId, liked: $liked) {
-    like {
-      ...discussPostEmojiLike
-    }
-    count {
-      ...discussPostEmojiCount
-    }
-  }
-}
-
-mutation CreatePoll($data: PollInput!) {
-  createPoll(data: $data) {
-    ...poll
-  }
-}
-
-mutation CreateRate($data: RateInput!) {
-  createRate(data: $data) {
-    ...rate
-  }
-}
-
-mutation UpdateRate($id: ID!, $data: RateInput!) {
-  updateRate(id: $id, data: $data) {
-    ...rate
-  }
-}
-
-mutation CreateVote($pollId: ID!, $data: VoteInput!) {
-  createVote(pollId: $pollId, data: $data) {
-    ...vote
-  }
-}
-
-mutation SessionLogin($idToken: String!, $csrfToken: String) {
-  sessionLogin(idToken: $idToken, csrfToken: $csrfToken) {
-    ...user
-  }
-}
-
-mutation SessionLogout {
-  sessionLogout
-}
-
-# mutation CreateComment($boardId: ID!, $pollId: ID, $data: CommentInput!) {
-#   createComment(boardId: $boardId, pollId: $pollId, data: $data) {
-#     ...comment
-#   }
-# }
-
-# mutation createAuthorVote($pollId: ID!, $authorName: String!, $data: VoteInput!) {
-#   createAuthorVote(pollId: $pollId, authorName: $authorName, data: $data) {
-#     ...vote
-#   }
-# }
-
-# mutation CreateOauthorComment($boardId: ID!, $pollId: ID, $oauthorName: String!, $data: CommentInput!) {
-#   createOauthorComment(boardId: $boardId, pollId: $pollId, oauthorName: $oauthorName, data: $data) {
-#     ...comment
-#   }
-# }
-
-# mutation CreateCommentLike($commentId: ID!, $data: LikeInput!) {
-#   createCommentLike(commentId: $commentId, data: $data) {
-#     like {
-#       ...commentLike
-#     }
-#     count {
-#       ...commentCount
-#     }
-#   }
-# }
-
-# mutation UpdateCommentLike($id: ID!, $data: LikeInput!) {
-#   updateCommentLike(id: $id, data: $data) {
-#     like {
-#       ...commentLike
-#     }
-#     count {
-#       ...commentCount
-#     }
-#   }
-# }
-
-# mutation CreateBoardLike($boardId: ID!, $data: LikeInput!) {
-#   createBoardLike(boardId: $boardId, data: $data) {
-#     like {
-#       ...boardLike
-#     }
-#     count {
-#       ...boardCount
-#     }
-#   }
-# }
-
-# mutation UpdateBoardLike($id: ID!, $data: LikeInput!) {
-#   updateBoardLike(id: $id, data: $data) {
-#     like {
-#       ...boardLike
-#     }
-#     count {
-#       ...boardCount
-#     }
-#   }
-# }
-
-# mutation SignUp($email: String!, $password: String!) {
-#   signUp(email: $email, password: $password) {
-#     id
-#     email
-#   }
-# }
-
-# mutation SignIn($email: String!, $password: String!) {
-#   signIn(email: $email, password: $password) {
-#     token
-#     user {
-#       id
-#     }
-#   }
-# }
-
-# mutation SignOut {
-#   signOut
-# }
-
-# mutation CreateNoteBody($noteSymbol: String!, $data: NoteBodyInput!) {
-#   createNoteBody(noteSymbol: $noteSymbol, data: $data) {
-#     ...noteBody
-#   }
-# }
+# # mutation CreateNoteBody($noteSymbol: String!, $data: NoteBodyInput!) {
+# #   createNoteBody(noteSymbol: $noteSymbol, data: $data) {
+# #     ...noteBody
+# #   }
+# # }

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,12 +18,12 @@ model Author {
 }
 
 model Bullet {
-  id        String        @id @default(cuid())
-  docId     String
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  doc       NoteDoc       @relation(fields: [docId], references: [id])
-  emojis    BulletEmoji[]
+  id          String        @id @default(cuid())
+  noteStateId String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  noteState   NoteState     @relation(fields: [noteStateId], references: [id])
+  emojis      BulletEmoji[]
 }
 
 model BulletEmoji {
@@ -80,7 +77,6 @@ model Discuss {
   emojis    DiscussEmoji[]
   posts     DiscussPost[]
   notes     Note[]
-  drafts    NoteDraft[]
 }
 
 model DiscussCount {
@@ -177,18 +173,31 @@ model DiscussPostEmojiLike {
   @@unique([userId, discussPostEmojiId])
 }
 
+model Note {
+  id        String      @id @default(cuid())
+  symId     String      @unique
+  linkId    String?     @unique
+  meta      Json        @default("{}")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  link      Link?       @relation(fields: [linkId], references: [id])
+  sym       Sym         @relation(fields: [symId], references: [id])
+  discusses Discuss[]
+  emojis    NoteEmoji[]
+  states    NoteState[]
+}
+
 model NoteEmoji {
   id        Int             @id @default(autoincrement())
-  branchId  String
-  symId     String
+  noteId    String
   code      EmojiCode
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
+  note      Note            @relation(fields: [noteId], references: [id])
   count     NoteEmojiCount?
   likes     NoteEmojiLike[]
-  note      Note            @relation(fields: [branchId, symId], references: [branchId, symId])
 
-  @@unique([branchId, symId, code])
+  @@unique([noteId, code])
 }
 
 model NoteEmojiCount {
@@ -215,89 +224,30 @@ model NoteEmojiLike {
   @@unique([noteEmojiId, userId])
 }
 
-model NoteDraft {
-  id        String      @id @default(cuid())
-  branchId  String
-  symId     String?
-  commitId  String?
-  userId    String
-  fromDocId String?
-  domain    String
-  symbol    String
-  status    DraftStatus @default(EDIT)
-  noteMeta  Json        @default("{}")
-  content   Json
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  user      User        @relation(fields: [userId], references: [id])
-  fromDoc   NoteDoc?    @relation(fields: [fromDocId], references: [id])
-  branch    Branch      @relation(fields: [branchId], references: [id])
-  note      Note?       @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym       Sym?        @relation(fields: [symId], references: [id])
-  commit    Commit?     @relation(fields: [commitId], references: [id])
-  discusses Discuss[]
-}
-
-model Note {
-  id        String      @id @default(cuid())
-  branchId  String
-  symId     String
-  linkId    String?     @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  link      Link?       @relation(fields: [linkId], references: [id])
-  sym       Sym         @relation(fields: [symId], references: [id])
-  branch    Branch      @relation(fields: [branchId], references: [id])
-  discusses Discuss[]
-  emojis    NoteEmoji[]
-  docs      NoteDoc[]
-  drafts    NoteDraft[]
-
-  @@unique([branchId, symId])
-}
-
-model Branch {
-  id     String      @id @default(cuid())
-  name   String
-  notes  Note[]
-  drafts NoteDraft[]
-}
-
-model NoteDoc {
-  id        String      @id @default(cuid())
-  // branchId  String
-  // symId     String
+model NoteState {
+  id        String     @id @default(cuid())
   noteId    String
   commitId  String
   userId    String
-  parentId  String?     @unique
-  status    DocStatus   @default(CANDIDATE)
-  domain    String
-  noteMeta  Json        @default("{}")
-  content   Json
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  commit    Commit      @relation(fields: [commitId], references: [id])
-  parent    NoteDoc?    @relation("DocHistory", fields: [parentId], references: [id])
-  user      User        @relation(fields: [userId], references: [id])
-  note      Note        @relation(fields: [noteId], references: [id])
-  next      NoteDoc?    @relation("DocHistory")
+  body      Json
+  prevId    String?    @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  note      Note       @relation(fields: [noteId], references: [id])
+  commit    Commit     @relation(fields: [commitId], references: [id])
+  prev      NoteState? @relation("CardStateHistory", fields: [prevId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
   bullets   Bullet[]
-  drafts    NoteDraft[]
-  // verdictAt DateTime  // isolate the time for status change
-  // verdictPoll Poll @relation 1-1
-  // verdictPollId
+  next      NoteState? @relation("CardStateHistory")
 }
 
-// This model need to be modified since the definition is changed in Note and Draft model
 model Commit {
-  id        String      @id @default(cuid())
-  userId    String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  user      User        @relation(fields: [userId], references: [id])
-  drafts    NoteDraft[]
-  docs      NoteDoc[]
+  id         String      @id @default(cuid())
+  userId     String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id])
+  noteStates NoteState[]
 }
 
 model Link {
@@ -307,8 +257,8 @@ model Link {
   scraped  Json    @default("{}")
   authorId String?
   author   Author? @relation(fields: [authorId], references: [id])
+  note     Note?
   rates    Rate[]
-  notes    Note[]
 }
 
 model Poll {
@@ -351,16 +301,14 @@ model Rate {
   user      User       @relation(fields: [userId], references: [id])
 }
 
-// Why not ‘Symbol’? -> Symbol is preserved in js
 model Sym {
-  id        String      @id @default(cuid())
+  id        String   @id @default(cuid())
   type      SymType
-  symbol    String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  symbol    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  note      Note?
   rates     Rate[]
-  drafts    NoteDraft[]
-  notes     Note[]
 }
 
 model Vote {
@@ -379,7 +327,7 @@ model User {
   email                 String                 @unique
   bulletEmojiLikes      BulletEmojiLike[]
   noteEmojiLikes        NoteEmojiLike[]
-  docs                  NoteDoc[]
+  noteStates            NoteState[]
   commits               Commit[]
   discusses             Discuss[]
   discussEmojiLikes     DiscussEmojiLike[]
@@ -388,7 +336,6 @@ model User {
   polls                 Poll[]
   rates                 Rate[]
   votes                 Vote[]
-  drafts                NoteDraft[]
 }
 
 enum DiscussStatus {
@@ -450,16 +397,4 @@ enum SymType {
   TICKER
   TOPIC
   URL
-}
-
-enum DraftStatus {
-  EDIT
-  COMMIT
-  DROP
-}
-
-enum DocStatus {
-  CANDIDATE
-  MERGE
-  REJECT
 }

@@ -17,7 +17,7 @@ import { hasCount, toStringId } from '../lib/helpers'
 import { AuthorModel } from '../lib/models/author-model'
 // import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
 import { CommitModel } from '../lib/models/commit-model'
-import { NoteModel } from '../lib/models/note-model'
+import { NoteMeta, NoteModel } from '../lib/models/note-model'
 import { NoteDigestModel } from '../lib/models/note-digest-model'
 // import { NoteEmojiModel } from '../lib/models/note-emoji-model'
 import { NoteStateModel } from '../lib/models/note-state-model'
@@ -31,6 +31,8 @@ import prisma from '../lib/prisma'
 import { SearchAuthorService, SearchDiscussService, SearchSymService } from '../lib/search/search'
 import { ResolverContext } from './apollo-client'
 import { DiscussEmojiModel, DiscussPostEmojiModel, NoteEmojiModel } from '../lib/models/emoji-model'
+import { selectionSetMatchesResult } from '@apollo/client/cache/inmemory/helpers'
+import { orderBy } from 'lodash'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -255,24 +257,24 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return votes.map(e => ({ ...toStringId(e) }))
   },
 
-  async Branch(_parent, { id }, _context, _info) {
-    return await prisma.branch.findMany({
-      where: { id }
-    })
-  }
+  // async Branch(_parent, { id }, _context, _info) {
+  //   return await prisma.branch.findMany({
+  //     where: { id }
+  //   })
+  // }
 
-  async Note(_parent, { branch, symbol, url }, _context, _info) {
-    if (branch && symbol === undefined && url === undefined) {
-      return await NoteModel.get(branch)
-    }
-    if (symbol && id === undefined && url === undefined) {
-      return await NoteModel.getBySymbol(symbol)
-    }
-    if (url && id === undefined && symbol === undefined) {
-      return await NoteModel.getOrCreateByUrl({ scraper: fetcher, url })
-    }
-    throw 'Param requires to be either id, symbol or url'
-  },
+  // async Note(_parent, { branch, symbol, url }, _context, _info) {
+  //   if (branch && symbol === undefined && url === undefined) {
+  //     return await NoteModel.get(branch)
+  //   }
+  //   if (symbol && id === undefined && url === undefined) {
+  //     return await NoteModel.getBySymbol(symbol)
+  //   }
+  //   if (url && id === undefined && symbol === undefined) {
+  //     return await NoteModel.getOrCreateByUrl({ scraper: fetcher, url })
+  //   }
+  //   throw 'Param requires to be either id, symbol or url'
+  // },
 
   async noteState(_parent, { id }, _context, _info) {
     return await NoteStateModel.get(id)
@@ -300,39 +302,39 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     })
   },
 
-  async myNote(_parent, { noteStatus }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const notes = await prisma.note.findMany({
-      where: {
-        AND: {
-          id: userId,
-          noteStatus: { equals: noteStatus,} 
-        }
-      }
-    })
-    if (userId === null) {
-      throw 'Unexpected error'
-    }
-    return notes
-  }
+  // async myNote(_parent, { noteStatus }, { req }, _info) {
+  //   const { userId } = await isAuthenticated(req)
+  //   const notes = await prisma.note.findMany({
+  //     where: {
+  //       AND: {
+  //         id: userId,
+  //         noteStatus: { equals: noteStatus,}
+  //       }
+  //     }
+  //   })
+  //   if (userId === null) {
+  //     throw 'Unexpected error'
+  //   }
+  //   return notes
+  // }
 
-  // access all the drafts of the login user
-  async myDraft(_parent, _args, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const drafts = await prisma.draft.findMany({
-      where: {
-        AND: {
-          id: userId,
-          draftStatus: { equals: 'EDIT', } 
-        }
-      },
+  // // access all the drafts of the login user
+  // async myDraft(_parent, _args, { req }, _info) {
+  //   const { userId } = await isAuthenticated(req)
+  //   const drafts = await prisma.noteDraft.findMany({
+  //     where: {
+  //       AND: {
+  //         id: userId,
+  //         status: 'EDIT',
+  //       }
+  //     },
 
-    })
-    if (userId === null) {
-      throw 'Unexpected error'
-    }
-    return drafts
-  }
+  //   })
+  //   if (userId === null) {
+  //     throw 'Unexpected error'
+  //   }
+  //   return drafts
+  // }
 
   // async getOrCreateDraft(_parent, {branch, sym, }, _context, _info) {
 
@@ -409,6 +411,187 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const hits = await SearchSymService.search(term, type ?? undefined)
     return hits.map(e => ({ id: e.id, str: e.symbol }))
   },
+
+  // -------------New------------------
+
+  // # get all notes for homepage
+  // noteDocsJustMerged: [NoteDoc!]!
+  // process to comply with NoteDoc of type-defs version
+  async noteDocsJustMerged(_parent, _args, _context, _info) {
+    const docs = await prisma.noteDoc.findMany({
+      where: { status: 'MERGE' },
+      orderBy: { updatedAt: 'desc' },
+    })
+    return docs.map(e => {
+      return {
+        ...e,
+        meta: e.noteMeta as unknown as NoteMeta,
+        body: { blocks: [], symbolIdMap: {}, diff: {} },
+      }
+    })
+  },
+
+  // note(id: ID!, symbol: String, url: String): Note
+  async note(_parent, { id }, _context, _info) {
+    const note = await prisma.note.findUnique({
+      where: { id },
+      include: { sym: true, link: true },
+    })
+    const doc =
+      note &&
+      (await prisma.noteDoc.findFirst({
+        where: {
+          noteId: note.id, // change to use noteId instead
+          status: 'MERGE',
+        },
+        orderBy: { updatedAt: 'desc' },
+      }))
+    if (doc) {
+      return {
+        ...note,
+        doc: { ...doc, body: { blocks: [], symbolIdMap: {}, diff: {} } },
+        meta: doc.noteMeta as unknown as NoteMeta,
+      }
+    }
+    return null
+  },
+
+  // noteDocEntriesHistory(noteId: ID!): [NoteDocEntry!]!
+  async noteDocEntriesHistory(_parent, { noteId }, _context, _info) {
+    const entries = await prisma.note.findUnique({
+      where: { id: noteId },
+      select: { docs: { select: { id: true } } },
+    })
+    if (entries) {
+      return entries.docs
+    }
+    return []
+  },
+
+  // noteDraft(id: ID!): NoteDraft
+  // process to comply with NoteDraft of type-defs version
+  // meta: NoteDocMeta # not sure about this type
+  // body: NoteDocBody!
+  async noteDraft(_parent, { id, symbol, url }, _context, _info) {
+    const draft = await prisma.noteDraft.findUnique({
+      where: { id },
+      include: { note: true },
+    })
+    if (draft) {
+      return {
+        ...draft,
+        noteId: draft.note?.id,
+        meta: draft.noteMeta as unknown as NoteMeta,
+        body: { blocks: [], symbolIdMap: {}, diff: {} },
+      }
+    }
+    return null
+  },
+
+  // # to know all latest commit docs
+  // how latest?? take 10
+  // process to form Commit of type-defs version (DictEntryArray)
+  // myCommits: [Commit!]!
+  async myCommits(_parent, _args, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const commits = await prisma.commit.findMany({
+      where: { userId: userId },
+      include: { docs: true },
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+    })
+    // const docs = commits.map(e => {
+    //   return {
+    //     docs: e.docs.map(e => ({...e, body: { blocks: [], symbolIdMap: {}, diff: {} }}))
+    //   }
+    // })
+    return commits.map(e => {
+      return {
+        ...e,
+        docs: e.docs.map(e => ({ ...e, body: { blocks: [], symbolIdMap: {}, diff: {} } })),
+        stateIdToCidDictEntryArray: [{ k: '', v: '' }], // what is this??
+      }
+    })
+  },
+
+  // searchNote(symbol: String, title: String): [Note!]!
+  async searchNote(_parent, { symbol, title }, _context, _info) {
+    if (symbol && title === undefined) {
+      return await SearchNoteService.searchBySymbol(symbol)
+    }
+    if (symbol === undefined && title) {
+      return await SearchNoteService.searchByTitle(title)
+    }
+    return null
+  },
+
+  // searchByDomain(domain: String): Note
+  // use the data from prisma to form a simpler structure for Type Note specified in type-defs
+  // missing return: domain, doc, meta, sym
+  // need to use note-model.ts to deal with it
+  async searchByDomain(_parent, { domain }, _context, _info) {
+    const notes = prisma.note.findMany({
+      where: { domain },
+      orderBy: { updatedAt: 'desc' },
+    })
+    return {}
+  },
+
+  // searchByAuthor(name: String): [Note!]!
+  async searchByAuthor(_parent, { name }, _context, _info) {
+    const notes = await prisma.author.findUnique({
+      where: { name },
+      select: {
+        links: {
+          select: { notes: true },
+        },
+      },
+    })
+    if (notes) {
+      // process notes data to align with definition of Note in type-defs
+      return notes
+    } else {
+      return null
+    }
+  },
+
+  // # get user's all drafts for draft-sidebar
+  // # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
+  // myNoteDraftEntries: [NoteDraftEntry!]!
+  // can use select filter to only get id field
+  async myNoteDraftEntries(_parent, _args, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const drafts = await prisma.noteDraft.findMany({
+      where: {
+        AND: {
+          userId: userId,
+          status: 'EDIT',
+        },
+      },
+      select: { id: true },
+    })
+    return drafts
+  },
+
+  // # get all candidate docs for verdict
+  // filter: status = CANDIDATE
+  // time??
+  // id input is optional in order to query some specific note
+  // noteDocsToMerge(noteId:ID): [NoteDoc!]!
+  async noteDocsToMerge(_parent, _args, _context, _info) {
+    const candidates = await prisma.noteDoc.findMany({
+      where: { status: 'CANDIDATE' },
+    })
+    return candidates.map(e => {
+      return {
+        ...e,
+        meta: e.noteMeta as unknown as NoteMeta,
+        body: { blocks: [], symbolIdMap: {}, diff: {} },
+      }
+    })
+  },
+
+  // ------------New End---------------
 
   // tagHints: (parent, { term }, { prisma }) => {
   //   return null
@@ -942,6 +1125,87 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     await sessionLogout(req, res)
     return true
   },
+
+  // -------------New---------------
+  // createDraft(domain: String, url: String, symbol: String, fromDoc: ID, meta: NoteStateInput): NoteDraft!
+  async createDraft(_parent, { domain, url, symbol, fromDoc, meta }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const draft = await prisma.noteDraft.findUnique({
+      where: {
+        userId,
+        domain,
+        symName: symbol,
+        status: 'EDIT',
+      },
+    })
+    // created from new symbol
+    if (domain && symbol && url === undefined && fromDoc === undefined && meta === undefined) {
+      // check the existence of the symbol
+      // create if not and no draft or turn to edit mode
+      // create from existing note if no draft or turn to edit mode
+      const sym = await prisma.sym.findUnique({
+        where: { symbol },
+      })
+      if (sym) {
+        const draft = await prisma.noteDraft.findFirst({
+          where: { userId, symName: sym.symbol, status: 'EDIT' },
+          include: { note: true },
+        })
+        return draft
+          ? {
+              ...draft,
+              noteId: draft.note?.id,
+              meta: draft.noteMeta as unknown as NoteMeta,
+              body: { blocks: [], symbolIdMap: {}, diff: {} },
+            }
+          : prisma.noteDraft.create({ data: { branchId: '', userId, symName: symbol, domain, content: {} } })
+      }
+      prisma.noteDraft.create({ data: { branchId: '', userId, symName: symbol, domain, content: {} } })
+    }
+    // created from url
+    if (domain && url && symbol === undefined && fromDoc === undefined && meta === undefined) {
+      // check the existence of the symbol(url)
+      // create if not and no draft or turn to edit mode
+      // create from existing note if no draft or turn to edit mode
+      const sym = await prisma.sym.findUnique({
+        where: { symbol: url },
+      })
+      if (sym) {
+        const draft = await prisma.noteDraft.findFirst({
+          where: { userId, symName: sym.symbol, status: 'EDIT' },
+          include: { note: true },
+        })
+        return draft
+          ? {
+              ...draft,
+              noteId: draft.note?.id,
+              meta: draft.noteMeta as unknown as NoteMeta,
+              body: { blocks: [], symbolIdMap: {}, diff: {} },
+            }
+          : prisma.noteDraft.create({ data: { branchId: '', userId, symName: symbol, domain, content: {} } })
+      }
+      prisma.noteDraft.create({ data: { branchId: '', userId, symName: symbol, domain, content: {} } })
+    }
+    }
+    // created from existed doc
+    if (fromDoc && meta && domain === undefined && symbol === undefined && url === undefined) {
+      // create from existing note if no draft or turn to edit mode
+      if (localDraft) {
+        return noteDraft(localDraft.id)
+      } else {
+        return DraftModel.createFromDoc(fromDoc, meta)
+      }
+    }
+  },
+
+  // # input not yet decided
+  // updateDraft(data: DraftInput): NoteDraft!
+
+  // dropDraft(id: ID!): DraftDropResponse!
+
+  // commitDraft(draftId: ID!): DraftCommitResponse!
+
+  // -----------End New--------------
 
   // async signIn(_parent, { email, password }, { res }, _info) {
   //   console.log(res)
