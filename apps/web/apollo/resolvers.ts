@@ -33,6 +33,7 @@ import { ResolverContext } from './apollo-client'
 import { DiscussEmojiModel, DiscussPostEmojiModel, NoteEmojiModel } from '../lib/models/emoji-model'
 import { selectionSetMatchesResult } from '@apollo/client/cache/inmemory/helpers'
 import { orderBy } from 'lodash'
+import { fn } from 'moment'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -257,25 +258,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return votes.map(e => ({ ...toStringId(e) }))
   },
 
-  // async Branch(_parent, { id }, _context, _info) {
-  //   return await prisma.branch.findMany({
-  //     where: { id }
-  //   })
-  // }
-
-  // async Note(_parent, { branch, symbol, url }, _context, _info) {
-  //   if (branch && symbol === undefined && url === undefined) {
-  //     return await NoteModel.get(branch)
-  //   }
-  //   if (symbol && id === undefined && url === undefined) {
-  //     return await NoteModel.getBySymbol(symbol)
-  //   }
-  //   if (url && id === undefined && symbol === undefined) {
-  //     return await NoteModel.getOrCreateByUrl({ scraper: fetcher, url })
-  //   }
-  //   throw 'Param requires to be either id, symbol or url'
-  // },
-
   async noteState(_parent, { id }, _context, _info) {
     return await NoteStateModel.get(id)
   },
@@ -472,11 +454,32 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   // process to comply with NoteDraft of type-defs version
   // meta: NoteDocMeta # not sure about this type
   // body: NoteDocBody!
-  async noteDraft(_parent, { id, symbol, url }, _context, _info) {
-    const draft = await prisma.noteDraft.findUnique({
-      where: { id },
-      include: { note: true },
-    })
+  async noteDraft(_parent, { id, symbol, url }, {req}, _info) {
+    const {userId} = await isAuthenticated(req)
+    let getDraft = () => {
+      if (id) {
+        return await prisma.noteDraft.findUnique({
+          where: { id },
+          include: { note: true },
+        })
+      }
+      if (symbol) {
+        return await prisma.noteDraft.findFirst({
+          where: { userId, symbol, status: 'EDIT' },
+          include: { note: true },
+        })
+      }
+      if (url) {
+        return await prisma.noteDraft.findFirst({
+          where: { userId, symbol: url, status: 'EDIT' },
+          include: { note: true },
+        })
+      }
+      return null
+    }
+
+    const draft = getDraft()
+    
     if (draft) {
       return {
         ...draft,

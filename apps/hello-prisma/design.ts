@@ -1,12 +1,15 @@
 /**
  *
  * case: get my drafts from profile (d)
- * - allDrafts()
+ * - myNoteDraftEntries():[NoteDraftEntry!]!
+ * - find noteDraft(status=edit)
+ * - process to generate object complying with NoteDraftEntry
+ *
  *
  * case: get all notes from homepage (d)
- * - allNotes()
- * - order by descending
- * - latest docs and candidate docs
+ * - noteDocsJustMerged: [NoteDoc!]!
+ * - order by descending (updateAt or createAt of the Note)
+ * - latest docs and candidate docs (state != reject)
  *
  * case: get the note by id (via click) (d)
  * - note(id)
@@ -21,10 +24,13 @@
  *
  * case: search by domain (search or filter) (d)
  * - searchByDomain(domain)
- * - order by descending
+ * - search Note first by domain, get latest noteDoc
+ * - order by descending (latest noteDoc, Note.updateAt or Note.createAt)
+ * - domain field contains 'domain'
  *
  * case: search notes by author (search or filter) (d)
  * - searchByAuthor(authorName)
+ * - check whether author exists (Author.name) -> return null or filter Link with authorId -> return Link.notes
  * - order by dsc
  * - fuzzy search
  *
@@ -39,22 +45,30 @@
  * - order by date dsc
  *
  * case: get all docs from note pr records (d)
- * - docs(noteId)
+ * - noteDocEntriesHistory(noteId: ID!): [NoteDocEntry!]!
+ * - Note(id).docs -> map(e => {id: e.id})
  *
  * case: get all notes from profile (d)
- * - myNotes(): [Doc]!
+ * - myCommits(): [Doc]!
  * - order by date dsc
  *
  *
  * case: create draft from not-yet-existed-symbol (d)
- * - search for the symbol -> find nothing -> search for the draft -> no draft -> createDraft(sym, userId, domain)
+ * - search for the symbol -> find nothing -> search for the draft -> no draft -> createDraft(symName, userId, domain)
  *
  * case: create draft from the latest doc of branch-sym (d)
- * - search for the draft -> no draft -> createDraft(userId, domain, fromDoc, other meta)
+ * -> query local draft -> query remote draft
+ * -> query note(sym, link?, domain, doc)
+ * - search for the draft -> no draft -> createDraft(userId, fromDoc, other meta)
  *
  * case: create draft from a url (d)
- * - search for the symbol(url) -> find nothing -> search for the draft -> no draft -> createDraft(userId, domain, url)
- *                              -> find one -> direct to the note
+ * - find local draft first -> no, search for the Note(symName or url) -> find nothing and create getOrCreateLink -> return Link to client to query draft-> no draft -> createDraft(userId(context), domain, Link(prefer) or url)
+ *                                                                     -> find one -> remote draft -> loadDraft(url)
+ *                                                                                 -> no draft and no note -> createDraft(linkId or url)
+ *                                                                                 -> no draft but one note -> createDraftFromDoc(fromDocId)
+ * - url needs to be processed before going into search and saved to symName
+ * - when create from url, a Link will be created from the info fetched
+ *
  *
  * case: create draft from a doc (where previous draft exist) --> must search for a draft before every creating (d)
  * - create draft [[AA]] (#1) ---commit--> create doc [[AA]], draft#1 = {status='committed', docId=create-doc}

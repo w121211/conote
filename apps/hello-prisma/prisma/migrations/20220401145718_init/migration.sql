@@ -1,12 +1,3 @@
-/*
-  Warnings:
-
-  - The primary key for the `User` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - You are about to drop the column `name` on the `User` table. All the data in the column will be lost.
-  - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Profile` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "DiscussStatus" AS ENUM ('ACTIVE', 'LOCK', 'DELETE', 'ARCHIVE', 'REPORTED');
 
@@ -34,25 +25,11 @@ CREATE TYPE "RateChoice" AS ENUM ('LONG', 'SHORT', 'HOLD');
 -- CreateEnum
 CREATE TYPE "SymType" AS ENUM ('TICKER', 'TOPIC', 'URL');
 
--- DropForeignKey
-ALTER TABLE "Post" DROP CONSTRAINT "Post_authorId_fkey";
+-- CreateEnum
+CREATE TYPE "DraftStatus" AS ENUM ('EDIT', 'COMMIT', 'DROP');
 
--- DropForeignKey
-ALTER TABLE "Profile" DROP CONSTRAINT "Profile_userId_fkey";
-
--- AlterTable
-ALTER TABLE "User" DROP CONSTRAINT "User_pkey",
-DROP COLUMN "name",
-ALTER COLUMN "id" DROP DEFAULT,
-ALTER COLUMN "id" SET DATA TYPE TEXT,
-ADD CONSTRAINT "User_pkey" PRIMARY KEY ("id");
-DROP SEQUENCE "User_id_seq";
-
--- DropTable
-DROP TABLE "Post";
-
--- DropTable
-DROP TABLE "Profile";
+-- CreateEnum
+CREATE TYPE "DocStatus" AS ENUM ('CANDIDATE', 'MERGE', 'REJECT');
 
 -- CreateTable
 CREATE TABLE "Author" (
@@ -68,7 +45,7 @@ CREATE TABLE "Author" (
 -- CreateTable
 CREATE TABLE "Bullet" (
     "id" TEXT NOT NULL,
-    "noteId" TEXT NOT NULL,
+    "docId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -121,8 +98,6 @@ CREATE TABLE "Discuss" (
     "content" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "branchSymBranchId" TEXT,
-    "branchSymSymId" TEXT,
 
     CONSTRAINT "Discuss_pkey" PRIMARY KEY ("id")
 );
@@ -224,12 +199,11 @@ CREATE TABLE "DiscussPostEmojiLike" (
 -- CreateTable
 CREATE TABLE "NoteEmoji" (
     "id" SERIAL NOT NULL,
-    "noteId" TEXT NOT NULL,
+    "branchId" TEXT NOT NULL,
+    "symId" TEXT NOT NULL,
     "code" "EmojiCode" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "branchSymBranchId" TEXT,
-    "branchSymSymId" TEXT,
 
     CONSTRAINT "NoteEmoji_pkey" PRIMARY KEY ("id")
 );
@@ -260,29 +234,34 @@ CREATE TABLE "NoteEmojiLike" (
 );
 
 -- CreateTable
-CREATE TABLE "Draft" (
+CREATE TABLE "NoteDraft" (
     "id" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
-    "symId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "fromNoteId" TEXT,
-    "body" JSONB NOT NULL,
-    "status" TEXT NOT NULL,
+    "symId" TEXT,
     "commitId" TEXT,
-
-    CONSTRAINT "Draft_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "BranchSym" (
-    "symId" TEXT NOT NULL,
-    "branchId" TEXT NOT NULL,
-    "linkId" TEXT,
-    "meta" JSONB NOT NULL DEFAULT '{}',
+    "userId" TEXT NOT NULL,
+    "fromDocId" TEXT,
+    "domain" TEXT NOT NULL,
+    "symName" TEXT NOT NULL,
+    "status" "DraftStatus" NOT NULL DEFAULT E'EDIT',
+    "noteMeta" JSONB NOT NULL DEFAULT '{}',
+    "content" JSONB NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "BranchSym_pkey" PRIMARY KEY ("branchId","symId")
+    CONSTRAINT "NoteDraft_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Note" (
+    "id" TEXT NOT NULL,
+    "branchId" TEXT NOT NULL,
+    "symId" TEXT NOT NULL,
+    "linkId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Note_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -294,20 +273,21 @@ CREATE TABLE "Branch" (
 );
 
 -- CreateTable
-CREATE TABLE "Note" (
+CREATE TABLE "NoteDoc" (
     "id" TEXT NOT NULL,
     "branchId" TEXT NOT NULL,
     "symId" TEXT NOT NULL,
     "commitId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "meta" JSONB NOT NULL DEFAULT '{}',
     "parentId" TEXT,
+    "status" "DocStatus" NOT NULL DEFAULT E'CANDIDATE',
+    "domain" TEXT NOT NULL,
+    "noteMeta" JSONB NOT NULL DEFAULT '{}',
+    "content" JSONB NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "status" TEXT NOT NULL,
-    "discussId" TEXT,
 
-    CONSTRAINT "Note_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "NoteDoc_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -327,7 +307,6 @@ CREATE TABLE "Link" (
     "domain" TEXT NOT NULL,
     "scraped" JSONB NOT NULL DEFAULT '{}',
     "authorId" TEXT,
-    "noteId" TEXT,
 
     CONSTRAINT "Link_pkey" PRIMARY KEY ("id")
 );
@@ -377,7 +356,7 @@ CREATE TABLE "Rate" (
 CREATE TABLE "Sym" (
     "id" TEXT NOT NULL,
     "type" "SymType" NOT NULL,
-    "symbol" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -397,7 +376,21 @@ CREATE TABLE "Vote" (
 );
 
 -- CreateTable
-CREATE TABLE "_BranchToSym" (
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_DiscussToNote" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_DiscussToNoteDraft" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
 );
@@ -442,7 +435,7 @@ CREATE UNIQUE INDEX "DiscussPostEmojiLike_discussPostEmojiId_key" ON "DiscussPos
 CREATE UNIQUE INDEX "DiscussPostEmojiLike_userId_discussPostEmojiId_key" ON "DiscussPostEmojiLike"("userId", "discussPostEmojiId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "NoteEmoji_noteId_code_key" ON "NoteEmoji"("noteId", "code");
+CREATE UNIQUE INDEX "NoteEmoji_branchId_symId_code_key" ON "NoteEmoji"("branchId", "symId", "code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "NoteEmojiCount_noteEmojiId_key" ON "NoteEmojiCount"("noteEmojiId");
@@ -451,10 +444,16 @@ CREATE UNIQUE INDEX "NoteEmojiCount_noteEmojiId_key" ON "NoteEmojiCount"("noteEm
 CREATE UNIQUE INDEX "NoteEmojiLike_noteEmojiId_userId_key" ON "NoteEmojiLike"("noteEmojiId", "userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "BranchSym_linkId_key" ON "BranchSym"("linkId");
+CREATE UNIQUE INDEX "NoteDraft_symName_key" ON "NoteDraft"("symName");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Note_parentId_key" ON "Note"("parentId");
+CREATE UNIQUE INDEX "Note_linkId_key" ON "Note"("linkId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Note_branchId_symId_key" ON "Note"("branchId", "symId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "NoteDoc_parentId_key" ON "NoteDoc"("parentId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Link_url_key" ON "Link"("url");
@@ -463,16 +462,25 @@ CREATE UNIQUE INDEX "Link_url_key" ON "Link"("url");
 CREATE UNIQUE INDEX "PollCount_pollId_key" ON "PollCount"("pollId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Sym_symbol_key" ON "Sym"("symbol");
+CREATE UNIQUE INDEX "Sym_name_key" ON "Sym"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_BranchToSym_AB_unique" ON "_BranchToSym"("A", "B");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE INDEX "_BranchToSym_B_index" ON "_BranchToSym"("B");
+CREATE UNIQUE INDEX "_DiscussToNote_AB_unique" ON "_DiscussToNote"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_DiscussToNote_B_index" ON "_DiscussToNote"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_DiscussToNoteDraft_AB_unique" ON "_DiscussToNoteDraft"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_DiscussToNoteDraft_B_index" ON "_DiscussToNoteDraft"("B");
 
 -- AddForeignKey
-ALTER TABLE "Bullet" ADD CONSTRAINT "Bullet_noteId_fkey" FOREIGN KEY ("noteId") REFERENCES "Note"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Bullet" ADD CONSTRAINT "Bullet_docId_fkey" FOREIGN KEY ("docId") REFERENCES "NoteDoc"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "BulletEmoji" ADD CONSTRAINT "BulletEmoji_bulletId_fkey" FOREIGN KEY ("bulletId") REFERENCES "Bullet"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -485,9 +493,6 @@ ALTER TABLE "BulletEmojiLike" ADD CONSTRAINT "BulletEmojiLike_bulletEmojiId_fkey
 
 -- AddForeignKey
 ALTER TABLE "BulletEmojiLike" ADD CONSTRAINT "BulletEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Discuss" ADD CONSTRAINT "Discuss_branchSymBranchId_branchSymSymId_fkey" FOREIGN KEY ("branchSymBranchId", "branchSymSymId") REFERENCES "BranchSym"("branchId", "symId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Discuss" ADD CONSTRAINT "Discuss_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -526,10 +531,7 @@ ALTER TABLE "DiscussPostEmojiLike" ADD CONSTRAINT "DiscussPostEmojiLike_discussP
 ALTER TABLE "DiscussPostEmojiLike" ADD CONSTRAINT "DiscussPostEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "NoteEmoji" ADD CONSTRAINT "NoteEmoji_branchSymBranchId_branchSymSymId_fkey" FOREIGN KEY ("branchSymBranchId", "branchSymSymId") REFERENCES "BranchSym"("branchId", "symId") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "NoteEmoji" ADD CONSTRAINT "NoteEmoji_noteId_fkey" FOREIGN KEY ("noteId") REFERENCES "Note"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "NoteEmoji" ADD CONSTRAINT "NoteEmoji_branchId_symId_fkey" FOREIGN KEY ("branchId", "symId") REFERENCES "Note"("branchId", "symId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "NoteEmojiCount" ADD CONSTRAINT "NoteEmojiCount_noteEmojiId_fkey" FOREIGN KEY ("noteEmojiId") REFERENCES "NoteEmoji"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -541,55 +543,49 @@ ALTER TABLE "NoteEmojiLike" ADD CONSTRAINT "NoteEmojiLike_noteEmojiId_fkey" FORE
 ALTER TABLE "NoteEmojiLike" ADD CONSTRAINT "NoteEmojiLike_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Draft" ADD CONSTRAINT "Draft_branchId_symId_fkey" FOREIGN KEY ("branchId", "symId") REFERENCES "BranchSym"("branchId", "symId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "NoteDraft" ADD CONSTRAINT "NoteDraft_branchId_symId_fkey" FOREIGN KEY ("branchId", "symId") REFERENCES "Note"("branchId", "symId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Draft" ADD CONSTRAINT "Draft_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "NoteDraft" ADD CONSTRAINT "NoteDraft_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Draft" ADD CONSTRAINT "Draft_fromNoteId_fkey" FOREIGN KEY ("fromNoteId") REFERENCES "Note"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "NoteDraft" ADD CONSTRAINT "NoteDraft_fromDocId_fkey" FOREIGN KEY ("fromDocId") REFERENCES "NoteDoc"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Draft" ADD CONSTRAINT "Draft_commitId_fkey" FOREIGN KEY ("commitId") REFERENCES "Commit"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "NoteDraft" ADD CONSTRAINT "NoteDraft_commitId_fkey" FOREIGN KEY ("commitId") REFERENCES "Commit"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Draft" ADD CONSTRAINT "Draft_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "NoteDraft" ADD CONSTRAINT "NoteDraft_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Draft" ADD CONSTRAINT "Draft_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "NoteDraft" ADD CONSTRAINT "NoteDraft_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BranchSym" ADD CONSTRAINT "BranchSym_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Note" ADD CONSTRAINT "Note_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BranchSym" ADD CONSTRAINT "BranchSym_linkId_fkey" FOREIGN KEY ("linkId") REFERENCES "Link"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Note" ADD CONSTRAINT "Note_linkId_fkey" FOREIGN KEY ("linkId") REFERENCES "Link"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BranchSym" ADD CONSTRAINT "BranchSym_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Note" ADD CONSTRAINT "Note_symId_fkey" FOREIGN KEY ("symId") REFERENCES "Sym"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Note" ADD CONSTRAINT "Note_discussId_fkey" FOREIGN KEY ("discussId") REFERENCES "Discuss"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "NoteDoc" ADD CONSTRAINT "NoteDoc_branchId_symId_fkey" FOREIGN KEY ("branchId", "symId") REFERENCES "Note"("branchId", "symId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Note" ADD CONSTRAINT "Note_branchId_symId_fkey" FOREIGN KEY ("branchId", "symId") REFERENCES "BranchSym"("branchId", "symId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "NoteDoc" ADD CONSTRAINT "NoteDoc_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "NoteDoc"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Note" ADD CONSTRAINT "Note_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Note"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "NoteDoc" ADD CONSTRAINT "NoteDoc_commitId_fkey" FOREIGN KEY ("commitId") REFERENCES "Commit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Note" ADD CONSTRAINT "Note_commitId_fkey" FOREIGN KEY ("commitId") REFERENCES "Commit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Note" ADD CONSTRAINT "Note_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "NoteDoc" ADD CONSTRAINT "NoteDoc_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Commit" ADD CONSTRAINT "Commit_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Link" ADD CONSTRAINT "Link_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Author"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Link" ADD CONSTRAINT "Link_noteId_fkey" FOREIGN KEY ("noteId") REFERENCES "Note"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Poll" ADD CONSTRAINT "Poll_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -616,7 +612,13 @@ ALTER TABLE "Vote" ADD CONSTRAINT "Vote_pollId_fkey" FOREIGN KEY ("pollId") REFE
 ALTER TABLE "Vote" ADD CONSTRAINT "Vote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_BranchToSym" ADD FOREIGN KEY ("A") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_DiscussToNote" ADD FOREIGN KEY ("A") REFERENCES "Discuss"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_BranchToSym" ADD FOREIGN KEY ("B") REFERENCES "Sym"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_DiscussToNote" ADD FOREIGN KEY ("B") REFERENCES "Note"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_DiscussToNoteDraft" ADD FOREIGN KEY ("A") REFERENCES "Discuss"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_DiscussToNoteDraft" ADD FOREIGN KEY ("B") REFERENCES "NoteDraft"("id") ON DELETE CASCADE ON UPDATE CASCADE;
