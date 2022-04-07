@@ -1,5 +1,6 @@
+import { LikeChoice } from '@prisma/client'
 import React, { useEffect } from 'react'
-import { LikeChoice } from 'graphql-let/__generated__/__types__'
+// import { LikeChoice } from 'graphql-let/__generated__/__types__'
 import {
   NoteEmojiFragment,
   MyNoteEmojiLikeDocument,
@@ -8,7 +9,8 @@ import {
   useMyNoteEmojiLikeQuery,
   useUpsertNoteEmojiLikeMutation,
 } from '../../apollo/query.graphql'
-import EmojiIcon from './emoji-icon'
+import { EmojiBtn } from './emoji-btn'
+import { EmojiIcon } from './emoji-icon'
 
 const NoteEmojiBtn = ({
   noteEmoji,
@@ -51,7 +53,7 @@ const NoteEmojiBtn = ({
     variables: { noteEmojiId: noteEmoji.id },
   })
 
-  const handleLike = (choice: LikeChoice = 'UP') => {
+  const onClick = () => {
     const myLike = myEmojiLikeData?.myNoteEmojiLike
 
     if (myLike) {
@@ -98,30 +100,34 @@ const NoteEmojiBtn = ({
     // }
   }, [likedChoice])
 
+  if (showCounts) {
+    return <EmojiBtn onClick={onClick} emojiCode={noteEmoji.code} liked={myEmojiLikeData?.myNoteEmojiLike?.liked} />
+  }
+
   return (
-    <button
-      className={`btn-reset-style group p-1 rounded ${
-        noteEmoji.code === 'PIN' ? 'hover:bg-red-50' : 'hover:bg-blue-50'
-      }`}
-      onClick={() => {
-        handleLike('UP')
-      }}
-    >
-      <EmojiIcon
-        className={'text-gray-500'}
-        code={noteEmoji.code}
-        liked={myEmojiLikeData?.myNoteEmojiLike?.liked}
-        upDownClassName="!text-lg !leading-none group-hover:text-blue-600"
-        pinClassName="!text-xl !leading-none group-hover:text-red-600"
-      />
-      {showCounts && (
-        <span
-          className={`ml-[2px] text-sm  ${myEmojiLikeData?.myNoteEmojiLike?.liked ? 'text-blue-600' : 'text-gray-500'}`}
-        >
-          {noteEmoji.count.nUps}
-        </span>
-      )}
-    </button>
+    <EmojiBtn
+      onClick={onClick}
+      emojiCode={noteEmoji.code}
+      liked={myEmojiLikeData?.myNoteEmojiLike?.liked}
+      counts={noteEmoji.count.nUps}
+    />
+    // <button
+    //   className={`btn-reset-style group p-1 rounded ${
+    //     noteEmoji.code === 'PIN' ? 'hover:bg-red-50' : 'hover:bg-gray-100'
+    //   }`}
+    //   onClick={() => {
+    //     onClick()
+    //   }}
+    // >
+    //   <EmojiIcon
+    //     className={'text-gray-500'}
+    //     code={noteEmoji.code}
+    //     liked={myEmojiLikeData?.myNoteEmojiLike?.liked}
+    //     upDownClassName="!text-lg !leading-none "
+    //     pinClassName="!text-xl !leading-none group-hover:text-red-600"
+    //   />
+    //   {showCounts && <span className={`ml-[2px] text-sm`}>{noteEmoji.count.nUps}</span>}
+    // </button>
   )
 }
 export default NoteEmojiBtn

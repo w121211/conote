@@ -7,6 +7,7 @@ import DiscussBody from './post/discuss-posts'
 import DiscussEmojis from './discuss-emojis'
 import DiscussHeader from './discuss-header'
 import CreatePostForm from './post/create-post-form'
+import { DiscussTile } from './layout-components/discuss-tile'
 
 const dummyData = [
   '測試測試大家好',
@@ -16,7 +17,7 @@ const dummyData = [
   '好尷尬唷嗚嗚嗚',
 ]
 
-const DiscussFullPage = ({ id }: { id: string }) => {
+const DiscussPage = ({ id }: { id: string }) => {
   const { data } = useDiscussQuery({ variables: { id } })
 
   // console.log(id)
@@ -27,11 +28,12 @@ const DiscussFullPage = ({ id }: { id: string }) => {
   }
   return (
     <div className="flex flex-col gap-3 w-full">
-      <DiscussHeader data={data.discuss} />
+      {/* <DiscussHeader data={data.discuss} /> */}
+      <DiscussTile data={data.discuss} />
       <DiscussBody discussId={data.discuss.id} />
-      <CreatePostForm discussId={data.discuss.id} type="page" />
+      <CreatePostForm discussId={data.discuss.id} />
     </div>
   )
 }
 
-export default DiscussFullPage
+export default DiscussPage

@@ -7,7 +7,6 @@ import {
   useMyDiscussPostEmojiLikeLazyQuery,
   useMyDiscussPostEmojiLikeQuery,
 } from '../../../apollo/query.graphql'
-import Tooltip from '../../../layout/tooltip/tooltip'
 import CreateDiscussPostEmoji from './post-create-emoji'
 import UpdateDiscussPostEmoji from './post-update-emoji'
 import EmojisSwitch from '../emojis-switch'
@@ -20,7 +19,6 @@ const DiscussPostEmojis = ({
   discussPostId: string
   disable?: boolean
 }): JSX.Element | null => {
-  const [showTooltip, setShowTooltip] = useState(false)
   const [liked, setLiked] = useState('')
   const { data: emojisData } = useDiscussPostEmojisQuery({ variables: { discussPostId } })
   const [queryMyEmoji, { data: myEmojiLikeData }] = useMyDiscussPostEmojiLikeLazyQuery()
@@ -31,17 +29,7 @@ const DiscussPostEmojis = ({
   }
   return (
     <div className="flex items-center">
-      <ToggleMenu
-        className="flex  p-1"
-        summary={
-          <EmojisSwitch
-            showTooltip={showTooltip}
-            onShowTooltip={() => setShowTooltip(!showTooltip)}
-            disable={disable}
-          />
-        }
-        disabled={disable}
-      >
+      <ToggleMenu className="flex  p-1" summary={<EmojisSwitch disable={disable} />} disabled={disable}>
         {emojis.map((code, i) => {
           const data = emojisData?.discussPostEmojis.find(el => el.code === code)
           if (data) {

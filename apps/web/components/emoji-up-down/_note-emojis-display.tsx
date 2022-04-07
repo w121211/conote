@@ -8,7 +8,7 @@ import {
   useMyNoteEmojiLikeQuery,
   useUpsertNoteEmojiLikeMutation,
 } from '../../apollo/query.graphql'
-import EmojiIcon from './emoji-icon'
+import { EmojiIcon } from './emoji-icon'
 
 const NoteEmojiDisplay = ({ noteEmoji }: { noteEmoji: NoteEmojiFragment }): JSX.Element | null => {
   const {
@@ -27,7 +27,7 @@ const NoteEmojiDisplay = ({ noteEmoji }: { noteEmoji: NoteEmojiFragment }): JSX.
       <EmojiIcon
         className="hover:text-gray-500"
         code={noteEmoji.code}
-        nUps={noteEmoji.count.nUps}
+        // nUps={noteEmoji.count.nUps}
         liked={myEmojiLikeData?.myNoteEmojiLike?.liked}
       />
     </button>

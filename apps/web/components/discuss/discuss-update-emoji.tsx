@@ -9,7 +9,8 @@ import {
   useUpsertDiscussEmojiLikeMutation,
 } from '../../apollo/query.graphql'
 // import { DiscussEmoji } from 'graphql-let/__generated__/__types__'
-import EmojiIcon from '../emoji-up-down/emoji-icon'
+import { EmojiIcon } from '../emoji-up-down/emoji-icon'
+import { EmojiBtn } from './layout-components/emoji-btn'
 
 const UpdateDiscussEmoji = ({
   discussEmoji,
@@ -47,34 +48,15 @@ const UpdateDiscussEmoji = ({
   }
 
   if (type === 'panel') {
-    return (
-      <div className="flex items-center">
-        <button
-          className={`btn-reset-style group p-1 rounded
-                         hover:bg-blue-50
-                        `}
-          onClick={onClick}
-        >
-          <EmojiIcon
-            code={discussEmoji.code}
-            liked={data?.myDiscussEmojiLike?.liked}
-            upDownClassName="!text-sm !leading-none group-hover:text-blue-600"
-          />
-        </button>
-      </div>
-    )
+    return <EmojiBtn onClick={onClick} emojiCode={discussEmoji.code} liked={data?.myDiscussEmojiLike?.liked} />
   }
   return (
-    <button className="btn-reset-style flex items-center  p-1 rounded hover:bg-blue-50" onClick={onClick}>
-      <EmojiIcon
-        upDownClassName="!text-base !leading-none group-hover:text-blue-600"
-        code={discussEmoji.code}
-        liked={data?.myDiscussEmojiLike?.liked}
-      />
-      <span className={`text-xs ${data?.myDiscussEmojiLike?.liked ? 'text-blue-600' : 'text-gray-500'}`}>
-        {discussEmoji.count.nUps}
-      </span>
-    </button>
+    <EmojiBtn
+      onClick={onClick}
+      emojiCode={discussEmoji.code}
+      liked={data?.myDiscussEmojiLike?.liked}
+      counts={discussEmoji.count.nUps}
+    />
   )
 }
 

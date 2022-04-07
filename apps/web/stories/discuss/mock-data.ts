@@ -1,11 +1,25 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
-import React from 'react'
-import { DiscussPostFragment } from '../apollo/query.graphql'
-import { PostTileList } from '../layout/post-tile-list'
+import { DiscussFragment, DiscussPostFragment } from '../../apollo/query.graphql'
 
 const date = new Date()
 
-const mockPostList: DiscussPostFragment[] = [
+export const mockData: DiscussFragment = {
+  __typename: 'Discuss',
+  id: 'fjalsjoijfef',
+  userId: '',
+  status: 'ACTIVE',
+  meta: {},
+  title: '標題哈哈 測試',
+  content: `測試一下，寫一些東西，這個東西為啥呢? 不能斷航?
+  哈哈哈哈哈 給我 內容`,
+  createdAt: date,
+  updatedAt: date,
+  count: {
+    __typename: 'DiscussCount',
+    nPosts: 10,
+  },
+}
+
+export const mockPostList: DiscussPostFragment[] = [
   {
     __typename: 'DiscussPost',
     id: '1',
@@ -33,9 +47,9 @@ const mockPostList: DiscussPostFragment[] = [
 
     status: 'ACTIVE',
     content: `測試一下，寫一些東西，這個東西為啥呢? 不能斷航 這樣會有用嗎
-    第二行
-    第三行
-    `,
+      第二行
+      第三行
+      `,
     createdAt: date,
     updatedAt: date,
   },
@@ -49,22 +63,3 @@ const mockPostList: DiscussPostFragment[] = [
     updatedAt: date,
   },
 ]
-
-export default {
-  title: 'component/Post Tile List',
-  component: PostTileList,
-  decorators: [
-    Story => (
-      <div className="bg-gray-200" style={{ padding: '3rem' }}>
-        <Story />
-      </div>
-    ),
-  ],
-} as ComponentMeta<typeof PostTileList>
-
-const Template: ComponentStory<typeof PostTileList> = args => <PostTileList {...args} />
-
-export const Default = Template.bind({})
-Default.args = {
-  postList: mockPostList,
-}

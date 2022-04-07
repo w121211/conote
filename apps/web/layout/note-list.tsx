@@ -1,6 +1,6 @@
 import moment from 'moment'
 import React from 'react'
-import { styleSymbol } from './styleSymbol'
+import { styleSymbol } from './style-symbol'
 
 export interface NoteData {
   title: string

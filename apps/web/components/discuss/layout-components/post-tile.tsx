@@ -1,10 +1,10 @@
 import moment from 'moment'
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
-import { DiscussPostFragment } from '../apollo/query.graphql'
-import DiscussPostEmojis from '../components/discuss/post/post-emojis'
-import PostOptionsMenu from '../components/discuss/post/post-options-menu'
-import { Tile } from './tile'
+import { DiscussPostFragment } from '../../../apollo/query.graphql'
+import DiscussPostEmojis from '../post/post-emojis'
+import PostOptionsMenu from '../post/post-options-menu'
+import { Tile } from '../../../layout/tile'
 
 export const PostTile = ({ post, userId }: { post: DiscussPostFragment; userId: string }) => {
   return (
@@ -29,9 +29,9 @@ export const PostTile = ({ post, userId }: { post: DiscussPostFragment; userId: 
               {moment(post.createdAt).subtract(10, 'days').calendar()}
             </span>
           </div>
-          <div className=" pr-2 py-2 whitespace-pre-wrap [word-break:break-word] text-gray-700 text-sm">
+          <p className=" pr-2 py-2 whitespace-pre-wrap [word-break:break-word] text-gray-700 text-sm">
             {post.content.trim()}
-          </div>
+          </p>
 
           {/* <div className="flex pt-1 border-t border-gray-200">{bottomBtn}</div> */}
           <div className="flex pt-1 border-t border-gray-200">

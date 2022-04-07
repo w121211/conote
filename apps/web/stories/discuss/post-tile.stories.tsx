@@ -1,10 +1,9 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { DiscussPostFragment } from '../apollo/query.graphql'
-import DiscussPostEmojis from '../components/discuss/post/post-emojis'
-import PostOptionsMenu from '../components/discuss/post/post-options-menu'
-import { PostTile } from '../layout/post-tile'
-
+import { DiscussPostFragment } from '../../apollo/query.graphql'
+import DiscussPostEmojis from '../../components/discuss/post/post-emojis'
+import PostOptionsMenu from '../../components/discuss/post/post-options-menu'
+import { PostTile } from '../../components/discuss/layout-components/post-tile'
 const date = new Date()
 
 const mockPost: DiscussPostFragment = {
@@ -19,7 +18,7 @@ const mockPost: DiscussPostFragment = {
 }
 
 export default {
-  title: 'layout/Post Tile',
+  // title: 'layout/Post Tile',
   component: PostTile,
 
   argTypes: {
@@ -36,7 +35,7 @@ export default {
 
 const Template: ComponentStory<typeof PostTile> = args => <PostTile {...args} />
 
-export const Default = Template.bind({})
-Default.args = {
+export const Origin = Template.bind({})
+Origin.args = {
   post: mockPost,
 }

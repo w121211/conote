@@ -1,36 +1,9 @@
 import React, { ReactNode, useState } from 'react'
 import Tooltip from '../../layout/tooltip/tooltip'
 
-const EmojisSwitch = ({
-  showTooltip,
-  onShowTooltip,
-  // children,
-  disable,
-}: {
-  showTooltip: boolean
-  // children: ReactNode
-  onShowTooltip: () => void
-  disable?: boolean
-}) => {
+const EmojisSwitch = ({ disable }: { disable?: boolean }) => {
   const [showDisable, setShowDisable] = useState(false)
   return (
-    // <div
-    //   // className={`relative flex items-center leading-none ${
-    //   //   showTooltip
-    //   //     ? "before:content-[''] before:fixed before:z-50  before:block before:right-0 before:bottom-0 before:left-0 before:top-0 before:cursor-default"
-    //   //     : ''
-    //   // } `}
-    //   onMouseOver={() => {
-    //     if (disable) {
-    //       setShowDisable(true)
-    //     }
-    //   }}
-    //   onMouseOut={() => {
-    //     if (disable) {
-    //       setShowDisable(false)
-    //     }
-    //   }}
-    // >
     <div
       className={` relative text-gray-500    
         `}
@@ -72,8 +45,6 @@ const EmojisSwitch = ({
         不能對自己按讚
       </Tooltip>
     </div>
-    // {/* {children} */}
-    // </div>
   )
 }
 

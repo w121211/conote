@@ -15,7 +15,7 @@ type FormInputs = {
   description: string
 }
 
-const SymbolMetaForm = ({
+export const SymbolMetaForm = ({
   metaInput,
   onSubmit,
 }: {
@@ -121,5 +121,3 @@ const SymbolMetaForm = ({
     </FormProvider>
   )
 }
-
-export default SymbolMetaForm
