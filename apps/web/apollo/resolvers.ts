@@ -11,6 +11,7 @@ import {
   NoteDraft,
   NoteEmoji,
   NoteEmojiCount,
+  SymType,
 } from '@prisma/client'
 import { QueryResolvers, MutationResolvers } from 'graphql-let/__generated__/__types__'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
@@ -28,6 +29,7 @@ import { PollMeta } from '../lib/models/poll-model'
 import { RateModel } from '../lib/models/rate-model'
 import { getOrCreateUser } from '../lib/models/user-model'
 import { createVote } from '../lib/models/vote-model'
+import { SymModel } from '../lib/models/sym-model'
 // import { DiscussEmojiModel } from '../lib/models/discuss-emoji-model'
 // import { DiscussPostEmojiModel } from '../lib/models/discuss-post-emoji-model'
 import prisma from '../lib/prisma'
@@ -1157,25 +1159,29 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   //   symbolIdMap: JSON
   //   blocks: [Block!]!
   // }
-  async createDraft(_parent, { symbol, draftInput }, { req }, _info) {
+  async createNoteDraft(_parent, { symbol, draftInput }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { fromDocId, domain, meta, content } = draftInput
     // TODO: access branchId from context
     const branchId = ''
-    const fromDoc = fromDocId
-      ? await prisma.noteDoc.findUnique({ where: { id: fromDocId }, select: { symId: true } })
-      : null
+    const { type } = SymModel.parse(symbol)
+    if (type === SymType.URL) {
+      throw new Error('createNoteDraft not allow to create from url')
+    }
+    const fromDoc = fromDocId ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } }) : null
+    if (fromDocId && fromDoc === null) {
+      throw new Error('[createNoteDraft] fromDocId && fromDoc === null')
+    }
     const draft = await prisma.noteDraft.create({
       data: {
         symbol,
         branch: { connect: { id: branchId } },
         sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+        fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
         user: { connect: { id: userId } },
         domain,
         meta,
         content,
-        // discusses Discuss[]
       },
     })
     // convert JSON to GQL type
@@ -1186,6 +1192,40 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
+  async createNoteDraftByLink(_parent, { linkId, draftInput }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const { fromDocId, domain, meta, content } = draftInput
+    // TODO: access branchId from context
+    const branchId = ''
+    const fromDoc = fromDocId ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } }) : null
+    if (fromDocId && fromDoc === null) {
+      throw new Error('[createNoteDraft] fromDocId && fromDoc === null')
+    }
+    // TODO: handle the situation when different urls direct to the same webpage
+    const link = await prisma.link.findUnique({ where: { id: linkId } })
+    if (link === null) {
+      throw new Error('[createNoteDraftByLink] link === null')
+    }
+    const draft = await prisma.noteDraft.create({
+      data: {
+        symbol: link.url,
+        branch: { connect: { id: branchId } },
+        sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+        fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
+        link: { connect: { id: link.id } },
+        user: { connect: { id: userId } },
+        domain,
+        meta,
+        content,
+      },
+    })
+    // convert JSON to GQL type
+    return {
+      ...draft,
+      meta: draft.meta as unknown as NoteDocMeta,
+      content: draft.content as unknown as NoteDocContent,
+    }
+  },
   // type NoteDraft {
   //   id: ID!
   //   noteId: String
@@ -1199,11 +1239,40 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   // }
 
   // # input not yet decided
-  // updateDraft(data: DraftInput): NoteDraft!
+  // updateNoteDraft(data: DraftInput): NoteDraft!
+  async updateNoteDraft(_parent, { id, data }, _context, _info) {
+    const { domain, meta, content } = data
+    const draft = await prisma.noteDraft.update({
+      where: { id },
+      data: {
+        domain,
+        meta,
+        content,
+      },
+    })
+    return {
+      ...draft,
+      meta: draft.meta as unknown as NoteDocMeta,
+      content: draft.content as unknown as NoteDocContent,
+    }
+  },
 
-  // dropDraft(id: ID!): DraftDropResponse!
+  // dropNoteDraft(id: ID!): DraftDropResponse!
+  async dropNoteDraft(_parent, { id }, _context, _info) {
+    try {
+      await prisma.noteDraft.update({ where: { id }, data: { status: 'DROP' } })
+    } catch (e) {
+      // what error message should be thrown
+      throw new Error('[dropNoteDraft] Unable to drop the NoteDraft')
+      // throw e
+    }
+    return { response: 'Draft is successfully dropped.' }
+  },
 
   // commitDraft(draftId: ID!): DraftCommitResponse!
+  // async commitNoteDraft(_parent, { draftId }, _context, _info) {
+
+  // },
 
   // -----------End New--------------
 

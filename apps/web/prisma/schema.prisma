@@ -80,7 +80,6 @@ model Discuss {
   emojis    DiscussEmoji[]
   posts     DiscussPost[]
   notes     Note[]
-  drafts    NoteDraft[]
 }
 
 model DiscussCount {
@@ -223,6 +222,7 @@ model NoteDraft {
   symId     String?
   commitId  String?
   fromDocId String?
+  linkId    String?
   userId    String
   status    DraftStatus @default(EDIT)
   domain    String
@@ -233,10 +233,10 @@ model NoteDraft {
   branch    Branch      @relation(fields: [branchId], references: [id])
   commit    Commit?     @relation(fields: [commitId], references: [id])
   fromDoc   NoteDoc?    @relation(fields: [fromDocId], references: [id])
+  link      Link?       @relation(fields: [linkId], references: [id])
   note      Note?       @relation(fields: [branchId, symId], references: [branchId, symId])
   sym       Sym?        @relation(fields: [symId], references: [id])
   user      User        @relation(fields: [userId], references: [id])
-  discusses Discuss[]
 }
 
 model Note {
@@ -304,14 +304,15 @@ model Commit {
 }
 
 model Link {
-  id       String  @id @default(cuid())
-  url      String  @unique
+  id       String      @id @default(cuid())
+  url      String      @unique
   domain   String
-  scraped  Json    @default("{}")
+  scraped  Json        @default("{}")
   authorId String?
-  author   Author? @relation(fields: [authorId], references: [id])
+  author   Author?     @relation(fields: [authorId], references: [id])
   rates    Rate[]
   notes    Note[]
+  drafts   NoteDraft[]
 }
 
 model Poll {
@@ -396,6 +397,7 @@ model User {
 }
 
 enum DiscussStatus {
+  DRAFT
   ACTIVE
   LOCK
   DELETE

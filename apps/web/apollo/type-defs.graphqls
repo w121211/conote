@@ -223,14 +223,16 @@ type Mutation {
 
   #-------- New -------------
   # not sure about the type of meta, which is for creating from existing note
-  createDraft(symbol: String!, draftInput: NoteDraftInput!): NoteDraft!
+  createNoteDraft(symbol: String!, draftInput: NoteDraftInput!): NoteDraft!
+
+  createNoteDraftByLink(linkId: String!, draftInput: NoteDraftInput!): NoteDraft!
 
   # input not yet decided
-  updateDraft(data: NoteDraftInput): NoteDraft!
+  updateNoteDraft(id: ID!, data: NoteDraftInput!): NoteDraft!
 
-  dropDraft(id: ID!): DraftDropResponse!
+  dropNoteDraft(id: ID!): NoteDraftDropResponse!
 
-  commitDraft(draftId: ID!): DraftCommitResponse!
+  commitNoteDraft(draftId: ID!): NoteDraftCommitResponse!
   #---------------End------------------
 
   # createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
@@ -645,11 +647,11 @@ type NoteDraftEntry {
 #   body: JSON!
 # }
 
-type DraftDropResponse {
+type NoteDraftDropResponse {
   response: String!
 }
 
-type DraftCommitResponse {
+type NoteDraftCommitResponse {
   commitId: String!
   response: String!
 }
@@ -682,7 +684,8 @@ type NoteDocContent {
 }
 
 type NoteDocMeta {
-  duplicatedSymbols: [String] # to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  duplicatedSymbols: [String] # store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  blockUidAnddiscussIdsDict: [String] # store discussion ids
   keywords: [String] # note keywords
   redirectFroms: [String] # used when duplicate symbol exists
   redirectTo: String

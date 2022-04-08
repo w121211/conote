@@ -3,6 +3,7 @@
  */
 export type NoteDocMeta = {
   duplicatedSymbols?: string[] // to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  blockUidAnddiscussIdsDict?: string[] // store discussion ids
   keywords?: string[] // note keywords
   redirectFroms?: string[] // used when duplicate symbol exists
   redirectTo?: string
