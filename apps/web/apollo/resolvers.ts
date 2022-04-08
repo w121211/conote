@@ -7,6 +7,8 @@ import {
   DiscussEmojiCount,
   DiscussPostEmoji,
   DiscussPostEmojiCount,
+  Note,
+  NoteDraft,
   NoteEmoji,
   NoteEmojiCount,
 } from '@prisma/client'
@@ -18,6 +20,7 @@ import { AuthorModel } from '../lib/models/author-model'
 // import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
 import { CommitModel } from '../lib/models/commit-model'
 import { NoteMeta, NoteModel } from '../lib/models/note-model'
+import { NoteDocMeta, NoteDocContent } from '../lib/models/note-doc-model'
 import { NoteDigestModel } from '../lib/models/note-digest-model'
 // import { NoteEmojiModel } from '../lib/models/note-emoji-model'
 import { NoteStateModel } from '../lib/models/note-state-model'
@@ -34,6 +37,7 @@ import { DiscussEmojiModel, DiscussPostEmojiModel, NoteEmojiModel } from '../lib
 import { selectionSetMatchesResult } from '@apollo/client/cache/inmemory/helpers'
 import { orderBy } from 'lodash'
 import { fn } from 'moment'
+import { connect } from 'http2'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -432,7 +436,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       return {
         ...note,
         doc: { ...doc, body: { blocks: [], symbolIdMap: {}, diff: {} } },
-        meta: doc.noteMeta as unknown as NoteMeta,
+        meta: doc.meta as unknown as NoteMeta,
       }
     }
     return null
@@ -454,48 +458,36 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   // process to comply with NoteDraft of type-defs version
   // meta: NoteDocMeta # not sure about this type
   // body: NoteDocBody!
-  async noteDraft(_parent, { id, symbol, url }, {req}, _info) {
-    const {userId} = await isAuthenticated(req)
-    // let getDraft = () => {
-    //   if (id) {
-    //     return await prisma.noteDraft.findUnique({
-    //       where: { id },
-    //       include: { note: true },
-    //     })
-    //   }
-    //   if (symbol) {
-    //     return await prisma.noteDraft.findFirst({
-    //       where: { userId, symbol, status: 'EDIT' },
-    //       include: { note: true },
-    //     })
-    //   }
-    //   if (url) {
-    //     return await prisma.noteDraft.findFirst({
-    //       where: { userId, symbol: url, status: 'EDIT' },
-    //       include: { note: true },
-    //     })
-    //   }
-    //   return null
-    // }
+  async noteDraft(_parent, { id, symbol, url }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    let draft: (NoteDraft & { note: Note | null }) | null = null
 
-    // const draft = getDraft()
+    if (id) {
+      draft = await prisma.noteDraft.findUnique({
+        where: { id },
+        include: { note: true },
+      })
+    }
+    if (symbol) {
+      // TODO: use findMany and check there is only one element in the array
+      draft = await prisma.noteDraft.findFirst({
+        where: { userId, symbol, status: 'EDIT' },
+        include: { note: true },
+      })
+    }
+    if (url) {
+      // TODO: use findMany and check there is only one element in the array
+      draft = await prisma.noteDraft.findFirst({
+        where: { userId, symbol: url, status: 'EDIT' },
+        include: { note: true },
+      })
+    }
 
-    const draft = id?  await prisma.noteDraft.findUnique({
-      where: { id },
-      include: { note: true },
-    }): symbol? await prisma.noteDraft.findFirst({
-      where: { userId, symbol, status: 'EDIT' },
-      include: { note: true },
-    }): url? await prisma.noteDraft.findFirst({
-      where: { userId, symbol: url, status: 'EDIT' },
-      include: { note: true },
-    }): null
-    
     if (draft) {
       return {
         ...draft,
         noteId: draft.note?.id,
-        meta: draft.noteMeta as unknown as NoteMeta,
+        meta: draft.meta as unknown as NoteMeta,
         body: { blocks: [], symbolIdMap: {}, diff: {} },
       }
     }
@@ -1141,76 +1133,70 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   // -------------New---------------
-  // createDraft(domain: String, url: String, symbol: String, fromDoc: ID, meta: NoteStateInput): NoteDraft!
-  async createDraft(_parent, { domain, url, symbol, fromDoc, meta }, { req }, _info) {
+  // createDraft(id: ID, symbol: String, draftInput: DraftInput): NoteDraft!
+  // a new draft will be initiated locally at first
+  // after saving the draft, this function will be called to physically create it remotely
+  // input NoteDraftInput {
+  //
+  //   fromDocId: String
+  //   domain
+  //   meta: NoteDocMetaInput!
+  //   content: NoteDocContentInput!
+  // }
+
+  // # similar to NoteDocMeta
+  // input NoteDocMetaInput {
+  //   duplicatedSymbols: [String] # to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  //   keywords: [String] # note keywords
+  //   redirectFroms: [String] # used when duplicate symbol exists
+  //   redirectTo: String
+  // }
+
+  // input NoteDocContentInput {
+  //   diff: JSON
+  //   symbolIdMap: JSON
+  //   blocks: [Block!]!
+  // }
+  async createDraft(_parent, { symbol, draftInput }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    const draft = await prisma.noteDraft.findUnique({
-      where: {
-        userId,
+    const { fromDocId, domain, meta, content } = draftInput
+    // TODO: access branchId from context
+    const branchId = ''
+    const fromDoc = fromDocId
+      ? await prisma.noteDoc.findUnique({ where: { id: fromDocId }, select: { symId: true } })
+      : null
+    const draft = await prisma.noteDraft.create({
+      data: {
+        symbol,
+        branch: { connect: { id: branchId } },
+        sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+        user: { connect: { id: userId } },
         domain,
-        symName: symbol,
-        status: 'EDIT',
+        meta,
+        content,
+        // discusses Discuss[]
       },
     })
-    // created from new symbol
-    if (domain && symbol && url === undefined && fromDoc === undefined && meta === undefined) {
-      // check the existence of the symbol
-      // create if not and no draft or turn to edit mode
-      // create from existing note if no draft or turn to edit mode
-      const sym = await prisma.sym.findUnique({
-        where: { symbol },
-      })
-      if (sym) {
-        const draft = await prisma.noteDraft.findFirst({
-          where: { userId, symName: sym.symbol, status: 'EDIT' },
-          include: { note: true },
-        })
-        return draft
-          ? {
-              ...draft,
-              noteId: draft.note?.id,
-              meta: draft.noteMeta as unknown as NoteMeta,
-              body: { blocks: [], symbolIdMap: {}, diff: {} },
-            }
-          : prisma.noteDraft.create({ data: { branchId: '', userId, symName: symbol, domain, content: {} } })
-      }
-      prisma.noteDraft.create({ data: { branchId: '', userId, symName: symbol, domain, content: {} } })
-    }
-    // created from url
-    if (domain && url && symbol === undefined && fromDoc === undefined && meta === undefined) {
-      // check the existence of the symbol(url)
-      // create if not and no draft or turn to edit mode
-      // create from existing note if no draft or turn to edit mode
-      const sym = await prisma.sym.findUnique({
-        where: { symbol: url },
-      })
-      if (sym) {
-        const draft = await prisma.noteDraft.findFirst({
-          where: { userId, symName: sym.symbol, status: 'EDIT' },
-          include: { note: true },
-        })
-        return draft
-          ? {
-              ...draft,
-              noteId: draft.note?.id,
-              meta: draft.noteMeta as unknown as NoteMeta,
-              body: { blocks: [], symbolIdMap: {}, diff: {} },
-            }
-          : prisma.noteDraft.create({ data: { branchId: '', userId, symName: symbol, domain, content: {} } })
-      }
-      prisma.noteDraft.create({ data: { branchId: '', userId, symName: symbol, domain, content: {} } })
-    }
-    }
-    // created from existed doc
-    if (fromDoc && meta && domain === undefined && symbol === undefined && url === undefined) {
-      // create from existing note if no draft or turn to edit mode
-      if (localDraft) {
-        return noteDraft(localDraft.id)
-      } else {
-        return DraftModel.createFromDoc(fromDoc, meta)
-      }
+    // convert JSON to GQL type
+    return {
+      ...draft,
+      meta: draft.meta as unknown as NoteDocMeta,
+      content: draft.content as unknown as NoteDocContent,
     }
   },
+
+  // type NoteDraft {
+  //   id: ID!
+  //   noteId: String
+  //   userId: String!
+  //   commitId: String
+  //   fromDocId: String
+  //   meta: NoteDocMeta # not sure about this type
+  //   content: NoteDocBody!
+  //   updatedAt: DateTime!
+  //   status: DraftStatus!
+  // }
 
   // # input not yet decided
   // updateDraft(data: DraftInput): NoteDraft!

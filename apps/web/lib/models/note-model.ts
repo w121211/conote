@@ -6,21 +6,6 @@ import { NoteStateModel, NoteStateParsed } from './note-state-model'
 import { LinkService } from './link-model'
 import { SymModel } from './sym-model'
 
-export type NoteMeta = {
-  author?: string
-  // description?: string
-  duplicates?: string[]
-  keywords?: string[]
-  // lang?: string
-  publishedAt?: string
-  // redirects?: string[]
-  redirect?: string
-  // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
-  tickers?: string[]
-  title?: string
-  url?: string
-}
-
 export type NotePrarsed = Omit<Note, 'meta'> & {
   meta: NoteMeta
   sym: Sym

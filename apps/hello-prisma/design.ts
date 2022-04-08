@@ -67,7 +67,7 @@
  *                                                                                 -> no draft and no note -> createDraft(linkId or url)
  *                                                                                 -> no draft but one note -> createDraftFromDoc(fromDocId)
  * - url needs to be processed before going into search and saved to symName
- * - when create from url, a Link will be created from the info fetched
+ * - when create from url, a Link will be created from the info fetched if no Link doesn't exist. If a Link is exitent, get it.
  *
  *
  * case: create draft from a doc (where previous draft exist) --> must search for a draft before every creating (d)

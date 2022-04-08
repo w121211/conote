@@ -98,6 +98,7 @@ type Query {
 
   # get all candidate docs for verdict
   noteDocsToMerge: [NoteDoc!]!
+  # -------------End--------------
 
   # 以 note symbol 找該 note 所有的 active hashtags
   # hashtags(symbol: String!): [Hashtag!]
@@ -222,14 +223,15 @@ type Mutation {
 
   #-------- New -------------
   # not sure about the type of meta, which is for creating from existing note
-  createDraft(domain: String, url: String, symbol: String, fromDoc: ID, meta: NoteStateInput): NoteDraft!
+  createDraft(symbol: String!, draftInput: NoteDraftInput!): NoteDraft!
 
   # input not yet decided
-  updateDraft(data: DraftInput): NoteDraft!
+  updateDraft(data: NoteDraftInput): NoteDraft!
 
   dropDraft(id: ID!): DraftDropResponse!
 
   commitDraft(draftId: ID!): DraftCommitResponse!
+  #---------------End------------------
 
   # createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
   # createAuthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
@@ -444,6 +446,7 @@ type NoteEmojiLike {
 #   updatedAt: DateTime!
 # }
 
+# -----------Remove-----------
 type NoteMeta {
   author: String
   # // description?: string
@@ -458,65 +461,21 @@ type NoteMeta {
   url: String
 }
 
-# type NoteState {
-#   id: ID!
-#   noteId: String!
-#   userId: String!
-#   commitId: String!
-#   prevId: String
-#   body: NoteStateBody!
-#   updatedAt: DateTime!
-# }
-
-# ----------------Modified---------------
-type Block {
-  uid: ID!
-  content: JSON!
-  parentId: String!
-  pageName: String!
-  childrenUids: [String!]!
-}
-
-# What is this? why store duplicate preStateId??
-type NoteDocBody {
-  # changes: [BulletNodeChange!]!
-  # value: [BulletTreeNode!]!
-  diff: JSON!
-  symbolIdMap: JSON!
-  blocks: [Block!]!
-  # a symbol-noteId map, so later the cahnge of symbol name won't affect
-}
-
-type NoteDocMeta {
-  # external updates
-  updateSymName: String # request to update sym-name
-  updateDomain: String # request to update domain
-  # internal value
-  webpageTitle: String
-  keywords: [String!] # include tickers, keywords in the webpage
-  redirectFroms: [String!]
-  redirectTo: String
-}
-
-type NoteDocEntry {
+type NoteState {
   id: ID!
-}
-
-type Commit {
-  id: String!
+  noteId: String!
   userId: String!
-  docs: [NoteDoc!]!
+  commitId: String!
+  prevId: String
+  # body: NoteStateBody!
   updatedAt: DateTime!
-  stateIdToCidDictEntryArray: [DictEntryArray!]! # for client to match committed docs
 }
-
-# -------------End Modified----------------
 
 type DictEntryArray {
   k: String!
   v: String!
 }
-
+# ------------End Remove------------
 type Link {
   id: ID!
   url: String!
@@ -553,7 +512,7 @@ type RateBody {
 type Sym {
   id: ID!
   type: SymType!
-  symbol: String!
+  symbol: String! # this is mutable
 }
 
 type Poll {
@@ -665,12 +624,14 @@ type Note {
 
 type NoteDraft {
   id: ID!
-  noteId: String
+  # noteId: String  # not using for creating a draft and not this field in db
   userId: String!
   commitId: String
   fromDocId: String
+  domain: String
+  symbol: String
   meta: NoteDocMeta # not sure about this type
-  body: NoteDocBody!
+  content: NoteDocContent!
   updatedAt: DateTime!
   status: DraftStatus!
 }
@@ -699,10 +660,55 @@ type NoteDoc {
   userId: String!
   commitId: String!
   parentId: String
+  domain: String
   meta: NoteDocMeta # not sure about this type
-  body: NoteDocBody!
+  body: NoteDocContent!
   updatedAt: DateTime!
 }
+
+# ----------------Modified---------------
+type Block {
+  uid: ID!
+  str: String!
+  parentUid: String
+  docTitle: String
+}
+
+type NoteDocContent {
+  diff: JSON
+  symbolIdMap: JSON
+  blocks: [Block!]!
+  # a symbol-noteId map, so later the cahnge of symbol name won't affect
+}
+
+type NoteDocMeta {
+  duplicatedSymbols: [String] # to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  keywords: [String] # note keywords
+  redirectFroms: [String] # used when duplicate symbol exists
+  redirectTo: String
+  webpage: NoteDocMetaWebpage
+}
+
+type NoteDocMetaWebpage {
+  authors: [String]
+  title: String
+  publishedAt: DateTime # when the webpage content publish at
+  tickers: [String] # tickers mentioned in the webpage content
+}
+
+type NoteDocEntry {
+  id: ID!
+}
+
+type Commit {
+  id: String!
+  userId: String!
+  docs: [NoteDoc!]!
+  updatedAt: DateTime!
+  # stateIdToCidDictEntryArray: [DictEntryArray!]! # for client to match committed docs
+}
+
+# ------------------End-------------------
 
 # type Branch {
 #   id: ID!
@@ -803,6 +809,7 @@ input AuthorMetaSiteInput {
   url: String!
 }
 
+# ---------------Remove------------
 input NoteInput {
   symbol: String!
   # templateProps: NoteTemplatePropsInput
@@ -832,10 +839,7 @@ input NoteStateInput {
   changes: JSON!
   value: JSON! # for comparing changes
 }
-
-input CommitInput {
-  noteStateInputs: [NoteStateInput!]!
-}
+# -------------End Remove--------------
 
 input DiscussInput {
   meta: JSON
@@ -868,10 +872,57 @@ input VoteInput {
 }
 
 #------New-------
-input DraftInput {
-  # meta:
-  body: JSON!
+# id: ID!
+#   noteId: String
+#   userId: String!
+#   commitId: String
+#   fromDocId: String
+#   meta: NoteDocMeta # not sure about this type
+#   body: NoteDocContent!
+#   updatedAt: DateTime!
+#   status: DraftStatus!
+input NoteDraftInput {
+  # noteId: String   # not using for creating a draft and not this field in db
+  fromDocId: String
+  domain: String!
+  meta: NoteDocMetaInput!
+  content: NoteDocContentInput!
 }
+
+# similar to NoteDocMeta
+input NoteDocMetaInput {
+  duplicatedSymbols: [String]! # to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  keywords: [String]! # note keywords
+  redirectFroms: [String]! # used when duplicate symbol exists
+  redirectTo: String
+  # webpage: NoteDocMetaWebpageInput
+}
+
+# input NoteDocMetaWebpageInput {
+#   authors: [String]!
+#   title: String
+#   publishedAt: DateTime # when the webpage content publish at
+#   tickers: [String]! # tickers mentioned in the webpage content
+# }
+
+input NoteDocContentInput {
+  diff: JSON
+  symbolIdMap: JSON
+  blocks: [BlockInput!]!
+}
+
+input BlockInput {
+  uid: ID!
+  str: String!
+  parentUid: String
+  docTitle: String
+}
+
+# -----------Modified--------------
+input CommitInput {
+  noteDraftInputs: [NoteDraftInput!]!
+}
+#---------------End-----------------
 
 # input CommentInput {
 #   content: String!
