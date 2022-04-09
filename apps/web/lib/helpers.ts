@@ -52,3 +52,7 @@ export function toStringId<T extends { id: number }>(obj: T): T & { id: string }
 //   }
 //   return params
 // }
+
+export function isClientSide(): boolean {
+  return typeof window !== 'undefined'
+}

@@ -6,8 +6,9 @@ import ModalProvider from '../components/modal/modal-context'
 import Script from 'next/script'
 import ChannelProvider from '../components/channel/channel-context'
 
-export default function App({ Component, pageProps }: AppProps): JSX.Element {
+const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApollo(pageProps.initialApolloState)
+
   return (
     // <UserProvider>
     <>
@@ -30,3 +31,5 @@ export default function App({ Component, pageProps }: AppProps): JSX.Element {
     // </UserProvider>
   )
 }
+
+export default App
