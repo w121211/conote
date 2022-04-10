@@ -1,9 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 export const ModalContext = React.createContext<any>(null)
+
 const { Provider } = ModalContext
 
-const ModalProvider = ({ children }: { children: React.ReactNode }): JSX.Element => {
+const ModalProvider = ({
+  children,
+}: {
+  children: React.ReactNode
+}): JSX.Element => {
   const [context, setContext] = useState<HTMLElement | null>()
   const modalRef = useRef<HTMLDivElement>(null)
 

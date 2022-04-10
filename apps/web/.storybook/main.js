@@ -1,23 +1,8 @@
-// module.exports = {
-//   "stories": [
-//     "../stories/**/*.stories.mdx",
-//     "../stories/**/*.stories.@(js|jsx|ts|tsx)"
-//   ],
-//   "addons": [
-//     "@storybook/addon-links",
-//     "@storybook/addon-essentials"
-//   ]
-// }
-const path = require('path')
-
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
-
-// module.exports = {
-
-// }
-// Export a function. Accept the base config as the only param.
 module.exports = {
-  stories: ['../stories/**/*.stories.tsx'],
+  stories: [
+    '../stories/**/*.stories.tsx',
+    '../components/block-editor/src/**/*.stories.@(js|jsx|ts|tsx)',
+  ],
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-viewport',
@@ -57,68 +42,20 @@ module.exports = {
     },
   ],
   framework: '@storybook/react',
-  // include: path.resolve(__dirname, 'assets/svg'),
-  // typescript: {
-  //   tsconfigPath: 'tsconfig.build.json',
-  // },
 
   webpackFinal: async config => {
-    config.module.rules.push(
-      {
-        test: /\.(tsx|graphql)$/,
-        use: [
-          { loader: 'babel-loader', options: { presets: ['@babel/preset-typescript', '@babel/preset-react'] } },
-          { loader: 'graphql-let/loader' },
-        ],
-      },
-      //   {
-      //   test: /\.graphql$/,
-      //   exclude: /node_modules/,
-      //   loader: 'graphql-tag/loader',
-      // }
-    )
-    // add SCSS support for CSS Modules
-    // config.module.rules.push({
-    //   test: /\.scss$/,
-    //   use: [
-    //     'style-loader',
-    //     'css-loader?modules&importLoaders',
-    //     {
-    //       loader: 'sass-loader',
-    //       options: {
-    //         sassOptions: { includePaths: ['./src'] },
-    //         additionalData: `@import "style/variables.scss";`,
-    //       },
-    //     },
-    //   ],
-    //   include: path.resolve(__dirname, '../'),
-    // })
-    // config.module.rules.unshift({
-    //   test: /\.svg$/,
-    //   use: ['@svgr/webpack'],
-    //   include: path.resolve(__dirname, '../'),
-    // })
-    // const fileLoaderRule = config.module.rules.find(rule => rule.test && rule.test.test('.svg'))
-    // fileLoaderRule.exclude = /\.svg$/
-
-    // config.module.rules.push({
-    //   test: /\.svg$/,
-    //   enforce: 'pre',
-    //   loader: require.resolve('@svgr/webpack'),
-    // })
-    // config.module.rules.push({
-    //   test: /\,css&/,
-    //   use: [
-    //     {
-    //       loader: 'postcss-loader',
-    //       options: {
-    //         ident: 'postcss',
-    //         plugins: [require('tailwindcss'), require('autoprefixer')],
-    //       },
-    //     },
-    //   ],
-    //   include: path.resolve(__dirname, '../'),
-    // })
+    config.module.rules.push({
+      test: /\.(tsx|graphql)$/,
+      use: [
+        {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-typescript', '@babel/preset-react'],
+          },
+        },
+        { loader: 'graphql-let/loader' },
+      ],
+    })
     return config
   },
 }
