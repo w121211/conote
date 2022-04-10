@@ -255,7 +255,14 @@ v-next
   - consider switch to https://typegraphql.com/
 - loading -> static icon
 - auth
-  - [prior@chi] improve login, logout stablility -> require both server (useMe) & firebase to logged-in, if server-side not logged in, should also revoke client-side firebase token so client-side check not remained logged-in
+  - [v] improve login, logout stablility
+  - [next] switch to next-firebase-auth once it is upport for firebase v9 (token-based)
+    - for now, use firebase official example, cookie-based, no csrf
+    - require both server (useMe) & firebase to logged-in, if server-side not logged in, should also revoke client-side firebase token so client-side check not remained logged-in
+      - next-firebase-auth: auth token in header, support SSR, not support firebase v9 yet
+      - CSRF, if use auth token in header, no need to consider this, also in line with firebase
+      - token based apollo (similar to JWT?)
+        - https://github.com/gladly-team/next-firebase-auth/discussions/100#discussioncomment-1215068
 - user
   - [prior] (req) user-page, include user's notes, rates, interested fields
   - (?) anonymous user
@@ -324,6 +331,8 @@ v-next
   - check note-copy is in sync with the latest note
     - update note-meta should first check is the latest card
 - [@hsuan] invite code
+- storybook
+  - 
 
 v0.2
 

@@ -22,7 +22,7 @@ const ME = gql`
 const mocks = [
   {
     request: {
-      query: ME,
+      query: MeDocument,
     },
     result: {
       data: {
