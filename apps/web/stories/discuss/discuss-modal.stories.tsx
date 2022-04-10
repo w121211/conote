@@ -3,7 +3,7 @@ import React from 'react'
 import { DiscussTile } from '../../components/discuss/layout-components/discuss-tile'
 import { PostTileList } from '../../components/discuss/layout-components/post-tile-list'
 import { DiscussModalPage } from '../../components/discuss/modal-page/modal-page'
-import CreatePostForm from '../../components/discuss/post/create-post-form'
+import { CreatePostForm } from '../../components/discuss/post/create-post-form'
 import { mockData, mockPostList } from './mock-data'
 
 export default {

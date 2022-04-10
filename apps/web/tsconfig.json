@@ -26,7 +26,7 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.js",
-    "babel.config.js",
+    // "babel.config.js",
     "components/discuss/full-page/.create-post-form.tsx"
   ],
   "ts-node": {
