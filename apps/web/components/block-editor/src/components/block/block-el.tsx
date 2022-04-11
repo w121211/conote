@@ -195,7 +195,7 @@ export const BlockEl = ({
   const { open, str: defaultLocalStr } = block,
     isOpen = open ?? true,
     childrenBlockEls = useMemo(() => {
-      return children.map((e) => (
+      return children.map(e => (
         <BlockEl key={e.uid} uid={e.uid} isEditable={isEditable} />
       ))
     }, [children])
@@ -203,7 +203,7 @@ export const BlockEl = ({
   return (
     <BlockContainer
       data-uid={uid}
-      data-childrenuids={children.map((e) => e.uid).join(',')}
+      data-childrenuids={children.map(e => e.uid).join(',')}
       className={
         // [
         `block-container
@@ -223,9 +223,9 @@ export const BlockEl = ({
       //   onDragLeave={handleDragLeave}
       //   onDrop={handleDrop}
       // onDragOver={(e) => console.log('onDragOver')}
-      onDragOver={(e) => blockDragOver(e, block, setDragTarget)} // TODO: throttle
-      onDragLeave={(e) => blockDragLeave(e, block, setDragTarget)}
-      onDrop={(e) => blockDrop(e, block, dragTarget, setDragTarget)}
+      onDragOver={e => blockDragOver(e, block, setDragTarget)} // TODO: throttle
+      onDragLeave={e => blockDragLeave(e, block, setDragTarget)}
+      onDrop={e => blockDrop(e, block, dragTarget, setDragTarget)}
     >
       {dragTarget === 'before' && (
         <DropAreaIndicator style={{ gridArea: 'above' }} />
@@ -247,7 +247,7 @@ export const BlockEl = ({
         {children.length > 0 && (
           <Toggle
             isOpen={isOpen}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               events.blockOpen(uid, !isOpen)
             }}
@@ -261,7 +261,7 @@ export const BlockEl = ({
           // block,
           // onClick={(e) => router.navigateUid(uid, e)}
           // onContextMenu={(e) => bulletContextMenu(e, uid, state)}
-          onDragStart={(e) => bulletDragStart(e, uid, setDragging)}
+          onDragStart={e => bulletDragStart(e, uid, setDragging)}
           onDragEnd={() => bulletDragEnd(setDragging)}
         />
 

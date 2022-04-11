@@ -3,7 +3,7 @@ import { InlineItem } from './interfaces'
 // import { InlineItemService } from '../inline/inline-item-service'
 
 //
-// Helpers
+// Token Helpers
 //
 //
 //
@@ -35,7 +35,7 @@ const TokenHelper = {
 
   flatten(tokens: (string | Token)[]): FlatToken[] {
     return tokens
-      .map((e) => this._flatten(e))
+      .map(e => this._flatten(e))
       .reduce<FlatToken[]>((acc, cur) => [...acc, ...cur], [])
   },
 
@@ -68,6 +68,10 @@ const TokenHelper = {
     }
     return t
   },
+}
+
+function inlineItemsToStr(inlines: InlineItem[]): string {
+  return inlines.reduce((acc, cur) => `${acc}${cur.str}`, '')
 }
 
 //
@@ -156,18 +160,6 @@ const grammar: Grammar = {
   url: { pattern: reURL },
 }
 
-// function tokenizeBulletString(text: string): (string | Token)[] {
-//   return prismTokenize(text, grammar)
-// }
-
-// export const tokenizeBulletStringWithDecorate = (text: string): (string | Token)[] => {
-//   return prismTokenize(text, decorateGrammar)
-// }
-
-function inlineItemsToStr(inlines: InlineItem[]): string {
-  return inlines.reduce((acc, cur) => `${acc}${cur.str}`, '')
-}
-
 //
 // Parser
 //
@@ -178,8 +170,8 @@ function inlineItemsToStr(inlines: InlineItem[]): string {
 //
 
 /**
- * Inline rate string `!((rate:$ID))($AUTHOR $TARGET|[[Target]] #CHOICE)`
- * 不會做 validation，這是為了保留 user 所輸入的內容，在 rate form 裡做檢驗、修正
+ * Input string, eg "!((rate:$ID))($AUTHOR $TARGET|[[Target]] #CHOICE)"
+ * No validation here, validation happens in the rate-form
  */
 function parseInlineRateParams(params: string[]): {
   authorName?: string
@@ -192,7 +184,7 @@ function parseInlineRateParams(params: string[]): {
   return {
     authorName: _authorName,
     targetSymbol: _targetSymbol,
-    choice: isRateChoice(_choice) ? _choice : undefined,
+    // choice: isRateChoice(_choice) ? _choice : undefined,
   }
 }
 
@@ -327,12 +319,13 @@ function tokenToInlineItem(token: string | Token): InlineItem {
 
 /**
  * Parse block's string and transforms to inline-items
+ * Currently not support nested inline item parse
  *
  * @throws Parse error
  */
 export function parse(str: string): InlineItem[] {
   const tokens = tokenize(str, grammar),
-    inlineItems = tokens.map((e) => tokenToInlineItem(e))
+    inlineItems = tokens.map(e => tokenToInlineItem(e))
 
   return inlineItems
 }

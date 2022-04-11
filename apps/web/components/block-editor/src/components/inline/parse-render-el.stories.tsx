@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { setEntities } from '@ngneat/elf-entities'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
 import { blockRepo } from '../../stores/block.repository'
-import { mockLocalDoc } from '../../services/mock-data'
-import { RenderEl } from './inline-parse-renderer'
+import { mockBlockStr, mockLocalDoc } from '../../services/mock-data'
+import ParseRenderEl from './parse-renderer-el'
 
 /**
  * Setup data
@@ -11,22 +11,16 @@ import { RenderEl } from './inline-parse-renderer'
 blockRepo.update([setEntities(mockLocalDoc.blocks)])
 
 export default {
-  title: 'Component/InlineEl',
-  component: RenderEl,
-} as ComponentMeta<typeof RenderEl>
+  title: 'BlockEditor/parse-renderer',
+  component: ParseRenderEl,
+} as ComponentMeta<typeof ParseRenderEl>
 
-const Template: ComponentStory<typeof RenderEl> = (args) => (
-  <RenderEl {...args} />
+const Template: ComponentStory<typeof ParseRenderEl> = args => (
+  <ParseRenderEl {...args} />
 )
 
 export const Basic = Template.bind({})
-Basic.args = {
-  inlines: [
-    { type: 'discuss', str: 'hello' },
-    { type: 'text', str: ' ' },
-    { type: 'topic', str: 'world' },
-  ],
-}
+Basic.args = { str: mockBlockStr.symbolTitle }
 
 // export const WithDocContainerMock = () => (
 //   <div className="doc-container">

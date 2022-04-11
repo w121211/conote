@@ -4,6 +4,7 @@ import {
   DestructTextareaKeyEvent,
   BlockPositionRelation,
   Doc,
+  InlineItem,
 } from './interfaces'
 import * as ops from './op/ops'
 import { areSameParent, compatPosition } from './op/helpers'
@@ -619,9 +620,6 @@ export async function docOpen(title: string) {
     noteService.queryNote(title),
     draftService.queryDraft(title),
   ])
-
-  console.log(title, note, draft)
-
   const op = draft
     ? ops.docLoadOp(title, draft, note)
     : ops.docNewOp(title, note)
@@ -666,13 +664,22 @@ export async function docRename(doc: Doc, newTitle: string) {
   }
 }
 
+//
+// Editor Events
+//
+//
+//
+//
+//
+//
+
 /**
  * Save or remove current doc, and open the next doc
  * If current doc has draft, save it
  * If current doc does not have draft and has updated, show warnning
  * If current doc does not have draft and not update, remove doc
  */
-export async function editorChangeSymbolMain(symbol: string) {
+async function editorChangeSymbolMain(symbol: string) {
   const { route } = editorRepo.getValue(),
     curDoc = route.symbolMain ? getDoc(route.symbolMain) : null
 
@@ -689,15 +696,15 @@ export async function editorChangeSymbolMain(symbol: string) {
   editorRepo.updateRoute({ ...route, symbolMain: symbol })
 }
 
-export async function editorChangeSymbolModal(symbol: string | null) {
+async function editorChangeSymbolModal(symbol: string | null) {
   const { route } = editorRepo.getValue(),
-    doc = route.symbolModal ? getDoc(route.symbolModal) : null
+    curDoc = route.symbolModal ? getDoc(route.symbolModal) : null
 
-  if (doc) {
-    if (doc.noteDraftCopy) {
-      await docSave(doc)
+  if (curDoc) {
+    if (curDoc.noteDraftCopy) {
+      await docSave(curDoc)
     } else {
-      await docRemove(doc)
+      await docRemove(curDoc)
     }
   }
   if (symbol) await docOpen(symbol)
@@ -708,36 +715,37 @@ export async function editorChangeSymbolModal(symbol: string | null) {
 /**
  * Check is main-symbol or modal-symbol has changed by comparing with current value,
  * only one symbol can change at one time
- *
  * - main symbol changed
- * - modal symbol added
- * - modal symbol removed
+ * - modal symbol added (from null)
+ * - modal symbol removed (to null)
  * - modal symbol changed
  *
- * For current opened-doc,
+ * For current opened-doc
  * - If got draft, save doc
  * - If no draft, remove doc
  */
-export async function editorRouteChange(
-  symbol: string,
-  modal?: { symbol: string },
-) {
-  console.debug('[editorRouteChange] ' + symbol)
+export async function editorRouteUpdate({
+  mainSymbol,
+  modalSymbol,
+}: {
+  mainSymbol?: string
+  modalSymbol?: string | null
+}) {
+  console.debug('[editorRouteUpdate] ', mainSymbol, modalSymbol)
 
-  const { route } = editorRepo.getValue()
+  const { route } = editorRepo.getValue(),
+    mainSymbolChanged =
+      mainSymbol !== undefined && mainSymbol !== route.symbolMain,
+    modalSymbolChanged =
+      modalSymbol !== undefined && modalSymbol !== route.symbolModal
 
-  const mainSymbolChanged = symbol !== route.symbolMain,
-    modalSymbolChanged = modal?.symbol !== route.symbolModal
-
-  if (!mainSymbolChanged && !modalSymbolChanged) {
-    // do nothing
-  } else if (mainSymbolChanged) {
-    editorChangeSymbolMain(symbol)
+  if (mainSymbolChanged) {
+    editorChangeSymbolMain(mainSymbol)
   } else if (modalSymbolChanged) {
-    editorChangeSymbolModal(modal?.symbol ?? null)
+    editorChangeSymbolModal(modalSymbol)
+  } else if (!mainSymbolChanged && !modalSymbolChanged) {
+    // do nothing
   } else {
-    throw new Error(
-      '[editorRouteChange] mainSymbolChanged && modalSymbolChanged',
-    )
+    // unexpected case
   }
 }

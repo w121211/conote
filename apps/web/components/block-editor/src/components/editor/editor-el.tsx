@@ -1,40 +1,27 @@
 import React, { useEffect } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import { editorRouteChange } from '../../events'
+import { editorRouteUpdate } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import { DocEl } from '../doc/doc-el'
 import Modal from '../../../../modal/modal'
 
-type EditorElProps = {
-  route: {
-    symbol: string
-    modal?: {
-      symbol?: string
-      discussId?: string
-      discussTitle?: string
-    }
-  }
-}
+export const EditorEl = (): JSX.Element | null => {
+  const [alert] = useObservable(editorRepo.alter$),
+    [mainDoc] = useObservable(editorRepo.mainDoc$, { initialValue: null }),
+    [modalDoc] = useObservable(editorRepo.modalDoc$, { initialValue: null })
 
-export const EditorEl = ({ route }: EditorElProps): JSX.Element | null => {
-  const [mainDoc] = useObservable(editorRepo.mainDoc$),
-    [modalDoc] = useObservable(editorRepo.modalDoc$)
+  console.log(modalDoc)
 
-  useEffect(() => {
-    // console.log(route)
-    editorRouteChange(route.symbol)
-  }, [route])
-
-  console.log(mainDoc)
-
-  if (mainDoc === undefined) {
-    // wait until doc is loaded
-    return null
-  }
   return (
     <>
-      <DocEl doc={mainDoc} />
-      <Modal visible={modalDoc !== undefined} onClose={() => null}>
+      {alert && <div>{alert.message}</div>}
+
+      {mainDoc && <DocEl doc={mainDoc} />}
+
+      <Modal
+        visible={modalDoc !== undefined && modalDoc !== null}
+        onClose={() => editorRouteUpdate({ modalSymbol: null })}
+      >
         {modalDoc && <DocEl doc={modalDoc} />}
       </Modal>
     </>

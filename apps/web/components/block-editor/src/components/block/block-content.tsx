@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { tap } from 'rxjs'
 import {
   CaretPosition,
   DestructTextareaKeyEvent,
@@ -332,7 +331,6 @@ export const BlockContent = ({
 
   useEffect(() => {
     if (localStr !== defaultLocalStr) {
-      console.debug('textareaUnmount')
       textareaUnmount(uid, localStr)
     }
   }, [isEditing, showEditableDom])
@@ -360,9 +358,9 @@ export const BlockContent = ({
           // style={{ lineHeight: '1.40em' }}
           rows={1}
           value={localStr}
-          onChange={(e) => textareaChange(e, uid, setLocalStr)}
+          onChange={e => textareaChange(e, uid, setLocalStr)}
           // onPaste={(e) => textareaPaste(e, uid, state)}
-          onKeyDown={(e) =>
+          onKeyDown={e =>
             textareaKeyDown({
               e,
               uid,
@@ -375,10 +373,10 @@ export const BlockContent = ({
               setLastKeyDown,
             })
           }
-          onBlur={(e) => textareaBlur(e, uid)}
-          onClick={(e) => textareaClick(e, uid)}
-          onMouseDown={(e) => textareaMouseDown(e)}
-          onMouseEnter={(e) => textareaMouseEnter(e, uid)}
+          onBlur={e => textareaBlur(e, uid)}
+          onClick={e => textareaClick(e, uid)}
+          onMouseDown={e => textareaMouseDown(e)}
+          onMouseEnter={e => textareaMouseEnter(e, uid)}
         />
       )}
       <div className="rendered-content" style={{ color: 'red' }}>

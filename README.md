@@ -247,15 +247,14 @@ v-discuss
 - [?] note without bulletin
 - [?] remove bullet emoji -> easier & better for co-editing, note contribution calculated by counting words/lines
 
-v-next
+v-0.2.1
 
 - optimize
   - avoid rerender if possible
   - use SSR if possible
   - consider switch to https://typegraphql.com/
-- loading -> static icon
 - auth
-  - [v] improve login, logout stablility
+  - [v] improve login, logout stablility -> useMe()
   - [next] switch to next-firebase-auth once it is upport for firebase v9 (token-based)
     - for now, use firebase official example, cookie-based, no csrf
     - require both server (useMe) & firebase to logged-in, if server-side not logged in, should also revoke client-side firebase token so client-side check not remained logged-in
@@ -331,7 +330,8 @@ v-next
   - check note-copy is in sync with the latest note
     - update note-meta should first check is the latest card
 - [@hsuan] invite code
-- storybook
+- [@lisa] storybook
+  - [] user-page
   - block-editor
     - block
       - [] selected block
@@ -339,15 +339,19 @@ v-next
     - doc
       - [] doc-template (easy test bed for parse-render), include inline-items: discuss, symbol, url, comment
     - editor
-      - [] modal
+      - [] modal editor
     - [] search-panel
-- block-editor
-  - [] modal editor
+    - [] inline
+  - loading -> static icon
+- [@chi] block-editor
+  - modal editor
+    - [v] basic
+    - [] switch between titles or close
   - [] inline items
   - [v] auto complete
   - redo/undo
     - [v] basic redo/undo through elf/history
-    - [] caret lost after undo
+    - [] (issue) caret lost after undo
     - [] textarea value undo, redo
     - [] textarea value lost after undo
   - select
@@ -355,6 +359,9 @@ v-next
     - [] keyboard select
   - [] drag and drop
   - [] copy and paste
+  - doc store
+    - [] seperated blocks store for each doc
+  - doc save
 
 v0.2
 
@@ -397,7 +404,7 @@ v0.2
 - database
   - [v] migrate table
   - [pending] script for couting words/notes of an user -> use user instead
-- channel
+- branch
   - [prior@hsuan] design channel database schema
   - (req) subdomain/channel, eg [[dev/Browser Extension]]
   - switch commit to channel base, @eg @user/some_topic -> @all/some_topic

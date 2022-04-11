@@ -18,7 +18,7 @@ function getDescendantsUids(
     const childrenUids = uids_childrenUids[uid]
     if (childrenUids) {
       descendants = descendants.concat(childrenUids)
-      childrenUids.forEach((e) => stack.push(e))
+      childrenUids.forEach(e => stack.push(e))
     }
   }
 
@@ -52,8 +52,8 @@ function findSelectedItems(
   if (page) {
     const qBlockEls = page.querySelectorAll<HTMLElement>('.block-container'),
       blockEls = [...qBlockEls],
-      uids = blockEls.map((e) => getDatasetUid(e)),
-      childrenUids = blockEls.map((e) => getDatasetChildrenUid(e)),
+      uids = blockEls.map(e => getDatasetUid(e)),
+      childrenUids = blockEls.map(e => getDatasetChildrenUid(e)),
       uids_childrenUids = Object.fromEntries(
         uids.map<[string, string[] | null]>((e, i) => [e, childrenUids[i]]),
       ),
@@ -68,7 +68,7 @@ function findSelectedItems(
               Math.min(startIndex, endIndex) <= i &&
               i <= Math.max(startIndex, endIndex),
           )
-          .map((e) => e[1]),
+          .map(e => e[1]),
         descendantsUids = getDescendantsUids(candidateUids, uids_childrenUids),
         selectedUids = rfdbRepo.getValue().selection.items,
         toRemoveUids = intersection(selectedUids, descendantsUids),
@@ -218,5 +218,7 @@ export function textareaMouseEnter(
  * When textarea unmount, save local string to block
  */
 export function textareaUnmount(uid: string, localStr: string) {
+  console.debug('textareaUnmount')
+
   events.blockSave(uid, localStr)
 }

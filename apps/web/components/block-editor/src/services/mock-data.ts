@@ -1,4 +1,11 @@
-import { Block, Doc, Note, NoteDraft, SearchHit } from '../interfaces'
+import {
+  Block,
+  Doc,
+  InlineDiscuss,
+  Note,
+  NoteDraft,
+  SearchHit,
+} from '../interfaces'
 
 //
 // Mock note, note-draft
@@ -191,4 +198,48 @@ export const mockLocalDoc = {
       str: '[[Mock Local Doc]] child block',
     },
   ],
+}
+
+//
+// Mock inline items
+//
+//
+//
+//
+//
+//
+
+const inlineDiscussHasId: InlineDiscuss = {
+  type: 'inline-discuss',
+  str: 'string',
+  title: 'string',
+  id: 'string',
+}
+
+const inlineDiscussHasNoId: InlineDiscuss = {
+  type: 'inline-discuss',
+  str: 'string',
+  title: 'string',
+}
+
+export const inlineItems = {
+  inlineDiscussHasId,
+  inlineDiscussHasNoId,
+}
+
+export const mockBlockStr = {
+  // inline items
+  symbolTitle: '[[React (web framework)]] in cljs',
+  symbolTicker: '',
+  symbolUrl: '',
+  discuss: '',
+
+  // Markdown
+  h1: '',
+  h2: '',
+  h3: '',
+  bold: '',
+
+  // Mix markdown and inline items
+  mixHAndSymbol: '',
 }
