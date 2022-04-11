@@ -332,7 +332,29 @@ v-next
     - update note-meta should first check is the latest card
 - [@hsuan] invite code
 - storybook
-  - 
+  - block-editor
+    - block
+      - [] selected block
+      - [] block drag-drop indicator
+    - doc
+      - [] doc-template (easy test bed for parse-render), include inline-items: discuss, symbol, url, comment
+    - editor
+      - [] modal
+    - [] search-panel
+- block-editor
+  - [] modal editor
+  - [] inline items
+  - [v] auto complete
+  - redo/undo
+    - [v] basic redo/undo through elf/history
+    - [] caret lost after undo
+    - [] textarea value undo, redo
+    - [] textarea value lost after undo
+  - select
+    - [] mouse select
+    - [] keyboard select
+  - [] drag and drop
+  - [] copy and paste
 
 v0.2
 
