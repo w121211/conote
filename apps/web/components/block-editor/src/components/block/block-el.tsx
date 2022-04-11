@@ -19,13 +19,14 @@ import { blockRepo } from '../../stores/block.repository'
 import { rfdbRepo } from '../../stores/rfdb.repository'
 import { InlineSearchEl } from '../autocomplete-search/autocomplete-search'
 import { Anchor } from './anchor'
-import { BlockBody } from './block-body'
-import { BlockContainer } from './block-container'
+import { BlockBody } from './_block-body'
+import { BlockContainer } from './_block-container'
 import { BlockContent } from './block-content'
 import { DropAreaIndicator } from './drop-area-indicator'
 import { Toggle } from './toggle'
 import { throttle } from 'lodash'
 import { useEffect } from 'react'
+import './block-container.css'
 
 // export const BlockContainer = ({
 //   uid,
@@ -176,8 +177,9 @@ export const BlockEl = ({
     [contextMenu, setContextMenu] = useState({ x: null, y: null, show: false }),
     [dragging, setDragging] = useState(false),
     [dragTarget, setDragTarget] = useState<DragTarget | null>(null),
-    [lastKeyDown, setLastKeyDown] =
-      useState<DestructTextareaKeyEvent | null>(null),
+    [lastKeyDown, setLastKeyDown] = useState<DestructTextareaKeyEvent | null>(
+      null,
+    ),
     [showEditableDom, setShowEditableDom] = useState(false)
 
   //   const [avatarAnchorEl, setAvatarAnchorEl] =
@@ -195,15 +197,15 @@ export const BlockEl = ({
   const { open, str: defaultLocalStr } = block,
     isOpen = open ?? true,
     childrenBlockEls = useMemo(() => {
-      return children.map((e) => (
+      return children.map(e => (
         <BlockEl key={e.uid} uid={e.uid} isEditable={isEditable} />
       ))
     }, [children])
 
   return (
-    <BlockContainer
+    <div
       data-uid={uid}
-      data-childrenuids={children.map((e) => e.uid).join(',')}
+      data-childrenuids={children.map(e => e.uid).join(',')}
       className={
         // [
         `block-container
@@ -223,15 +225,21 @@ export const BlockEl = ({
       //   onDragLeave={handleDragLeave}
       //   onDrop={handleDrop}
       // onDragOver={(e) => console.log('onDragOver')}
-      onDragOver={(e) => blockDragOver(e, block, setDragTarget)} // TODO: throttle
-      onDragLeave={(e) => blockDragLeave(e, block, setDragTarget)}
-      onDrop={(e) => blockDrop(e, block, dragTarget, setDragTarget)}
+      onDragOver={e => blockDragOver(e, block, setDragTarget)} // TODO: throttle
+      onDragLeave={e => blockDragLeave(e, block, setDragTarget)}
+      onDrop={e => blockDrop(e, block, dragTarget, setDragTarget)}
     >
       {dragTarget === 'before' && (
         <DropAreaIndicator style={{ gridArea: 'above' }} />
       )}
 
-      <BlockBody
+      <div
+        className='
+      relative 
+      grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"] 
+      grid-cols-[1em_1em_1fr_auto] 
+      grid-rows-[0_1fr_0] 
+      rounded-lg'
         //   ref={showPresentUser && setAvatarAnchorEl}
         onMouseEnter={() => {
           // handleMouseEnterBlock
@@ -247,7 +255,7 @@ export const BlockEl = ({
         {children.length > 0 && (
           <Toggle
             isOpen={isOpen}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               events.blockOpen(uid, !isOpen)
             }}
@@ -261,7 +269,7 @@ export const BlockEl = ({
           // block,
           // onClick={(e) => router.navigateUid(uid, e)}
           // onContextMenu={(e) => bulletContextMenu(e, uid, state)}
-          onDragStart={(e) => bulletDragStart(e, uid, setDragging)}
+          onDragStart={e => bulletDragStart(e, uid, setDragging)}
           onDragEnd={() => bulletDragEnd(setDragging)}
         />
 
@@ -280,7 +288,7 @@ export const BlockEl = ({
         />
 
         {/* {refsCount >= 1 && <Refs refsCount={refsCount} />} */}
-      </BlockBody>
+      </div>
 
       {/* TODO: Why not search.type && InlineSearchEl ??? */}
       <InlineSearchEl {...{ blockUid: block.uid, caret, search, setSearch }} />
@@ -295,7 +303,7 @@ export const BlockEl = ({
       {dragTarget === 'after' && (
         <DropAreaIndicator style={{ gridArea: 'below' }} />
       )}
-    </BlockContainer>
+    </div>
   )
 }
 

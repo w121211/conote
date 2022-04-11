@@ -116,28 +116,28 @@ const Title = styled.h1`
 //   vertical-align: bottom;
 // `
 
-const PageMenuToggle = ({
-  onClick,
-  children,
-}: {
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
-  children: ReactNode
-}) => {
-  return (
-    <button
-      className="
-      float-left 
-      w-8 h-8 
-      rounded-full 
-      -ml-10 mt-2 
-      align-bottom 
-      text-[#AAA]/75"
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  )
-}
+// const PageMenuToggle = ({
+//   onClick,
+//   children,
+// }: {
+//   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
+//   children: ReactNode
+// }) => {
+//   return (
+//     <button
+//       className="
+//       float-left
+//       w-8 h-8
+//       rounded-full
+//       -ml-10 mt-2
+//       align-bottom
+//       text-[#AAA]/75"
+//       onClick={onClick}
+//     >
+//       {children}
+//     </button>
+//   )
+// }
 
 const BlocksContainer = styled(BlockListContainer)`
   padding-left: 1rem;
@@ -230,14 +230,28 @@ export const DocEl = ({
   }
 
   return (
-    <PageWrap>
-      <PageMenuToggle
+    <article
+      className="
+    basis-full 
+    self-stretch 
+    w-full max-w-[60em] 
+    mx-auto 
+    p-4"
+    >
+      <button
+        className="
+      float-left 
+      w-8 h-8 
+      rounded-full 
+      -ml-10 mt-2 
+      align-bottom 
+      text-[#AAA]/75"
         // shape="round"
         // isPressed={isPageMenuOpen}
         onClick={handlePressMenuToggle}
       >
         {/* <MoreHoriz /> */}
-      </PageMenuToggle>
+      </button>
       {/* <PopperUnstyled
         open={isPageMenuOpen}
         anchorEl={pageMenuAnchor}
@@ -339,6 +353,6 @@ export const DocEl = ({
           <DocPlaceholder />
         )
       }
-    </PageWrap>
+    </article>
   )
 }

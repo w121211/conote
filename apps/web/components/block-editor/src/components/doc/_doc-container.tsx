@@ -3,7 +3,7 @@ import React, { memo, useEffect } from 'react'
 import { tap } from 'rxjs'
 import { blockRepo } from '../../stores/block.repository'
 import { fetchNode, nodeEl$, syncTitle } from '../../stores/node-el.repository'
-import { BlockContainer } from '../block/block-container'
+import { BlockContainer } from '../block/_block-container'
 
 // Helpers
 

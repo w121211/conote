@@ -16,206 +16,207 @@ import {
   textareaUnmount,
 } from '../../handlers/textarea-handlers'
 import { useEffect } from 'react'
+import './block-content.css'
 
-const ContentWrap = styled.div`
-  grid-area: content;
-  display: grid;
-  grid-template-areas: 'main';
-  place-items: stretch;
-  place-content: stretch;
-  position: relative;
-  overflow: visible;
-  z-index: 2;
-  flex-grow: 1;
-  word-break: break-word;
+// const ContentWrap = styled.div`
+//   grid-area: content;
+//   display: grid;
+//   grid-template-areas: 'main';
+//   place-items: stretch;
+//   place-content: stretch;
+//   position: relative;
+//   overflow: visible;
+//   z-index: 2;
+//   flex-grow: 1;
+//   word-break: break-word;
 
-  .rendered-content,
-  textarea {
-    grid-area: main;
-    cursor: text;
-    font-size: inherit;
-    font-family: inherit;
-    color: inherit;
-  }
+//   .rendered-content,
+//   textarea {
+//     grid-area: main;
+//     cursor: text;
+//     font-size: inherit;
+//     font-family: inherit;
+//     color: inherit;
+//   }
 
-  textarea {
-    color: inherit;
-    font-size: inherit;
-    position: relative;
-    display: block;
-    -webkit-appearance: none;
-    resize: none;
-    transform: translate3d(0, 0, 0);
-    outline: none;
-    background: transparent;
-    caret-color: var(--link-color);
-    min-height: 100%;
-    padding: 0;
-    margin: 0;
-    border: 0;
-    opacity: 0;
-  }
+//   textarea {
+//     color: inherit;
+//     font-size: inherit;
+//     position: relative;
+//     display: block;
+//     -webkit-appearance: none;
+//     resize: none;
+//     transform: translate3d(0, 0, 0);
+//     outline: none;
+//     background: transparent;
+//     caret-color: var(--link-color);
+//     min-height: 100%;
+//     padding: 0;
+//     margin: 0;
+//     border: 0;
+//     opacity: 0;
+//   }
 
-  &.is-editing,
-  &.show-editable-dom {
-    textarea {
-      z-index: 3;
-      line-height: inherit;
-      opacity: 0;
-    }
-  }
+//   &.is-editing,
+//   &.show-editable-dom {
+//     textarea {
+//       z-index: 3;
+//       line-height: inherit;
+//       opacity: 0;
+//     }
+//   }
 
-  &.is-editing {
-    textarea {
-      opacity: 1;
-    }
+//   &.is-editing {
+//     textarea {
+//       opacity: 1;
+//     }
 
-    .rendered-content {
-      opacity: 0;
-    }
-  }
+//     .rendered-content {
+//       opacity: 0;
+//     }
+//   }
 
-  &:not(.is-editing):hover textarea {
-    line-height: inherit;
-  }
+//   &:not(.is-editing):hover textarea {
+//     line-height: inherit;
+//   }
 
-  .is-locked > .block-body > & {
-    opacity: 0.5;
-  }
+//   .is-locked > .block-body > & {
+//     opacity: 0.5;
+//   }
 
-  span.text-run {
-    pointer-events: none;
+//   span.text-run {
+//     pointer-events: none;
 
-    > a {
-      position: relative;
-      z-index: 2;
-      pointer-events: auto;
-    }
-  }
+//     > a {
+//       position: relative;
+//       z-index: 2;
+//       pointer-events: auto;
+//     }
+//   }
 
-  span {
-    grid-area: main;
+//   span {
+//     grid-area: main;
 
-    > span {
-      > a {
-        position: relative;
-        z-index: 2;
-      }
-    }
-  }
+//     > span {
+//       > a {
+//         position: relative;
+//         z-index: 2;
+//       }
+//     }
+//   }
 
-  abbr {
-    grid-area: main;
-    z-index: 4;
+//   abbr {
+//     grid-area: main;
+//     z-index: 4;
 
-    > span {
-      > a {
-        position: relative;
-        z-index: 2;
-      }
-    }
-  }
+//     > span {
+//       > a {
+//         position: relative;
+//         z-index: 2;
+//       }
+//     }
+//   }
 
-  code,
-  pre {
-    font-family: 'IBM Plex Mono';
-  }
+//   code,
+//   pre {
+//     font-family: 'IBM Plex Mono';
+//   }
 
-  .media-16-9 {
-    height: 0;
-    width: calc(100% - 0.25rem);
-    z-index: 1;
-    transform-origin: right center;
-    transition: all 0.2s ease;
-    padding-bottom: calc(9 / 16 * 100%);
-    margin-block: 0.25rem;
-    margin-inline-end: 0.25rem;
-    position: relative;
-  }
+//   .media-16-9 {
+//     height: 0;
+//     width: calc(100% - 0.25rem);
+//     z-index: 1;
+//     transform-origin: right center;
+//     transition: all 0.2s ease;
+//     padding-bottom: calc(9 / 16 * 100%);
+//     margin-block: 0.25rem;
+//     margin-inline-end: 0.25rem;
+//     position: relative;
+//   }
 
-  iframe {
-    border: 0;
-    box-shadow: inset 0 0 0 0.125rem var(background-minus-1);
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    cursor: default;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    border-radius: 0.25rem;
-  }
+//   iframe {
+//     border: 0;
+//     box-shadow: inset 0 0 0 0.125rem var(background-minus-1);
+//     position: absolute;
+//     height: 100%;
+//     width: 100%;
+//     cursor: default;
+//     top: 0;
+//     right: 0;
+//     left: 0;
+//     bottom: 0;
+//     border-radius: 0.25rem;
+//   }
 
-  img {
-    border-radius: 0.25rem;
-    max-width: calc(100% - 0.25rem);
-  }
+//   img {
+//     border-radius: 0.25rem;
+//     max-width: calc(100% - 0.25rem);
+//   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin: 0;
-    color: var(--body-text-color---opacity-higher);
-    font-weight: 500;
-  }
+//   h1,
+//   h2,
+//   h3,
+//   h4,
+//   h5,
+//   h6 {
+//     margin: 0;
+//     color: var(--body-text-color---opacity-higher);
+//     font-weight: 500;
+//   }
 
-  h1 {
-    padding: 0;
-    margin-block-start: '-0.1em';
-  }
+//   h1 {
+//     padding: 0;
+//     margin-block-start: '-0.1em';
+//   }
 
-  h2,
-  h3 {
-    padding: 0;
-  }
+//   h2,
+//   h3 {
+//     padding: 0;
+//   }
 
-  h4 {
-    padding: 0.25em 0;
-  }
+//   h4 {
+//     padding: 0.25em 0;
+//   }
 
-  h5 {
-    padding: 1em 0;
-  }
+//   h5 {
+//     padding: 1em 0;
+//   }
 
-  h6 {
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 1em 0;
-  }
+//   h6 {
+//     text-transform: uppercase;
+//     letter-spacing: 0.06em;
+//     padding: 1em 0;
+//   }
 
-  p {
-    margin: 0;
-    padding-bottom: 1em;
-  }
+//   p {
+//     margin: 0;
+//     padding-bottom: 1em;
+//   }
 
-  blockquote {
-    margin-block: 0.125rem;
-    margin-inline: 0.5em;
-    padding-block: calc(0.5em - 0.125rem - 0.125rem);
-    padding-inline: 1.5em;
-    border-radius: 0.25em;
-    background: var(--background-minus-1);
-    color: var(--body-text-color---opacity-high);
+//   blockquote {
+//     margin-block: 0.125rem;
+//     margin-inline: 0.5em;
+//     padding-block: calc(0.5em - 0.125rem - 0.125rem);
+//     padding-inline: 1.5em;
+//     border-radius: 0.25em;
+//     background: var(--background-minus-1);
+//     color: var(--body-text-color---opacity-high);
 
-    p {
-      padding-bottom: 1em;
+//     p {
+//       padding-bottom: 1em;
 
-      &:last-child {
-        padding-bottom: 0;
-      }
-    }
-  }
+//       &:last-child {
+//         padding-bottom: 0;
+//       }
+//     }
+//   }
 
-  mark.content-visibility.highlight {
-    padding: 0 0.2em;
-    border-radius: 0.125rem;
-    background-color: var(--text-highlight-color);
-  }
-`
+//   mark.content-visibility.highlight {
+//     padding: 0 0.2em;
+//     border-radius: 0.125rem;
+//     background-color: var(--text-highlight-color);
+//   }
+// `
 
 /**
  * "Actual string contents. Two elements, one for reading and one for writing.
@@ -338,7 +339,7 @@ export const BlockContent = ({
   }, [isEditing, showEditableDom])
 
   return (
-    <ContentWrap
+    <div
       className={[
         'block-content',
         // isLocked ? 'is-locked' : '',
@@ -360,9 +361,9 @@ export const BlockContent = ({
           // style={{ lineHeight: '1.40em' }}
           rows={1}
           value={localStr}
-          onChange={(e) => textareaChange(e, uid, setLocalStr)}
+          onChange={e => textareaChange(e, uid, setLocalStr)}
           // onPaste={(e) => textareaPaste(e, uid, state)}
-          onKeyDown={(e) =>
+          onKeyDown={e =>
             textareaKeyDown({
               e,
               uid,
@@ -375,16 +376,16 @@ export const BlockContent = ({
               setLastKeyDown,
             })
           }
-          onBlur={(e) => textareaBlur(e, uid)}
-          onClick={(e) => textareaClick(e, uid)}
-          onMouseDown={(e) => textareaMouseDown(e)}
-          onMouseEnter={(e) => textareaMouseEnter(e, uid)}
+          onBlur={e => textareaBlur(e, uid)}
+          onClick={e => textareaClick(e, uid)}
+          onMouseDown={e => textareaMouseDown(e)}
+          onMouseEnter={e => textareaMouseEnter(e, uid)}
         />
       )}
       <div className="rendered-content" style={{ color: 'red' }}>
         {localStr}
       </div>
       {/* {parseAndRender(state.string.local, originalUid || uid)} */}
-    </ContentWrap>
+    </div>
   )
 }
