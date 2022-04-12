@@ -1349,7 +1349,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     for (const e of drafts) {
       const { type } = SymModel.parse(e.symbol)
       // TODO: extract discussId from the meta from the draft
-      const discussIds: string[] = DiscussModel.getIdsFromDraft(e)
+      const discussIds: string[] = NoteDocModel.getIdsFromDraft(e.meta)
 
       const symFromPrisma = await prisma.sym.findUnique({ where: { symbol: e.symbol } })
       const sym = symFromPrisma
