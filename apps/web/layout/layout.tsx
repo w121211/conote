@@ -6,9 +6,11 @@ import Navbar from '../components/navbar'
 export function Layout({
   children,
   buttonRight,
+  backgroundColor,
 }: {
   children: React.ReactNode
   buttonRight?: React.ReactNode
+  backgroundColor?: string
 }): JSX.Element {
   const [showSider, setShowSider] = useState(true)
   const [pinSider, setPinMenu] = useState(true)
@@ -96,7 +98,7 @@ export function Layout({
     <div className="flex flex-row-reverse w-screen h-screen  ">
       <div
         className={`flex-grow pt-11 pb-[20vh] px-4  ${
-          pinSider ? 'xl:px-[10%] lg:px-[4%] ' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
+          pinSider ? 'xl:px-[10%] lg:px-[4%]' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
         }  overflow-y-scroll scroll-smooth scrollbar`}
       >
         {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
@@ -111,7 +113,12 @@ export function Layout({
         showSider={showSider}
         isPined={pinSider}
       />
-      <Navbar pinedSider={pinSider} rbtn={buttonRight} onClickMenu={triggerMenuHandler} />
+      <Navbar
+        pinedSider={pinSider}
+        rbtn={buttonRight}
+        backgroundColor={backgroundColor}
+        onClickMenu={triggerMenuHandler}
+      />
     </div>
   )
 }

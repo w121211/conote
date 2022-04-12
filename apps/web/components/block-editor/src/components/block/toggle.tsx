@@ -95,11 +95,11 @@ interface MyToggleProps {
 //   border: 2px solid var(--link-color);
 //   border-radius: 0.25rem;
 // `
-const FocusRing = () => {
-  return (
-    <div className="absolute inset-y-1 -inset-x-[0.125rem] border-2 border-[#0075E1] rounded"></div>
-  )
-}
+// const FocusRing = () => {
+//   return (
+//     <div className="absolute inset-y-1 -inset-x-[0.125rem] border-2 border-[#0075E1] rounded"></div>
+//   )
+// }
 
 interface ToggleProps extends React.HTMLAttributes<HTMLButtonElement> {
   isOpen: boolean
@@ -115,7 +115,7 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
 
     return (
       <button
-        className='
+        className="
         [grid-area:toggle] 
         flex-shrink-0 
         relative z-[2]
@@ -130,17 +130,8 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
         cursor-pointer 
         focus:outline-none 
         hover:text-[#AAA]/50 
-        before:content-[""] 
-        before:absolute before:z-[-1]
-        before:-inset-x-[0.125rem] before:inset-y-1 
-        before:rounded 
-        before:opacity-0 
-        before:transition-[opacity_.1s_ease] 
-        before:bg-[#333] 
-        before:shadow-[0_4px_8px_rgba(0,0,0,0.2)]
-        before:hover:opacity-100 
-        before:focus-visible:opacity-100 
-        empty:pointer-events-none'
+        
+        empty:pointer-events-none"
         ref={ref}
         // {...mergeProps(focusProps, props)}
       >

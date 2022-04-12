@@ -6,92 +6,93 @@ import styled from 'styled-components'
 // import { useTooltipTriggerState } from '@react-stately/tooltip'
 // import { TooltipTriggerProps } from '@react-types/tooltip'
 import { Block } from '../../interfaces'
+import './anchor.css'
 // import { DetailPopover } from '@/Block/components/DetailPopover'
 
-export const AnchorButton = styled.button`
-  flex-shrink: 0;
-  grid-area: bullet;
-  position: relative;
-  z-index: 2;
-  cursor: pointer;
-  appearance: none;
-  border: 0;
-  // background: transparent;
-  transition: all 0.05s ease;
-  color: inherit;
-  margin-right: 0.25em;
-  display: flex;
-  place-items: center;
-  place-content: center;
-  padding: 0;
-  height: 2em;
-  width: 1em;
+// export const AnchorButton = styled.button`
+//   flex-shrink: 0;
+//   grid-area: bullet;
+//   position: relative;
+//   z-index: 2;
+//   cursor: pointer;
+//   appearance: none;
+//   border: 0;
+//   // background: transparent;
+//   transition: all 0.05s ease;
+//   color: inherit;
+//   margin-right: 0.25em;
+//   display: flex;
+//   place-items: center;
+//   place-content: center;
+//   padding: 0;
+//   height: 2em;
+//   width: 1em;
 
-  svg {
-    pointer-events: none;
-    transform: scale(1.0001); // Prevents the bullet being squished
-    overflow: visible; // Prevents the bullet being cropped
-    width: 1em;
-    height: 1em;
-    color: var(--user-color, var(--body-text-color---opacity-low));
+//   svg {
+//     pointer-events: none;
+//     transform: scale(1.0001); // Prevents the bullet being squished
+//     overflow: visible; // Prevents the bullet being cropped
+//     width: 1em;
+//     height: 1em;
+//     color: var(--user-color, var(--body-text-color---opacity-low));
 
-    * {
-      vector-effect: non-scaling-stroke;
-    }
-  }
+//     * {
+//       vector-effect: non-scaling-stroke;
+//     }
+//   }
 
-  circle {
-    fill: currentColor;
-    transition: fill 0.05s ease, opacity 0.05s ease;
-  }
+//   circle {
+//     fill: currentColor;
+//     transition: fill 0.05s ease, opacity 0.05s ease;
+//   }
 
-  &:focus {
-    outline: none;
-  }
+//   &:focus {
+//     outline: none;
+//   }
 
-  &:before {
-    content: '';
-    inset: 0.25rem -0.125rem;
-    z-index: -1;
-    transition: opacity 0.1s ease;
-    position: absolute;
-    border-radius: 0.25rem;
-    opacity: 0;
-    background: var(--background-plus-2);
-    box-shadow: var(--depth-shadow-8);
-  }
+//   &:before {
+//     content: '';
+//     inset: 0.25rem -0.125rem;
+//     z-index: -1;
+//     transition: opacity 0.1s ease;
+//     position: absolute;
+//     border-radius: 0.25rem;
+//     opacity: 0;
+//     background: var(--background-plus-2);
+//     box-shadow: var(--depth-shadow-8);
+//   }
 
-  &:hover {
-    color: var(--link-color);
-    z-index: 100;
-  }
+//   &:hover {
+//     color: var(--link-color);
+//     z-index: 100;
+//   }
 
-  &:hover,
-  &:hover:before,
-  &:focus-visible:before {
-    opacity: 1;
-  }
+//   &:hover,
+//   &:hover:before,
+//   &:focus-visible:before {
+//     opacity: 1;
+//   }
 
-  &.closed-with-children {
-    circle {
-      stroke: var(--body-text-color);
-      fill: var(--body-text-color---opacity-low);
-      r: 5;
-      stroke-width: 2px;
-      opacity: var(--opacity-med);
-    }
-  }
+//   &.closed-with-children {
+//     circle {
+//       stroke: var(--body-text-color);
+//       fill: var(--body-text-color---opacity-low);
+//       r: 5;
+//       stroke-width: 2px;
+//       opacity: var(--opacity-med);
+//     }
+//   }
 
-  &:hover svg {
-    transform: scale(1.3);
-  }
+//   &:hover svg {
+//     transform: scale(1.3);
+//   }
 
-  &.dragging {
-    z-index: 1;
-    cursor: grabbing;
-    color: var(--body-text-color);
-  }
-`
+//   &.dragging {
+//     z-index: 1;
+//     cursor: grabbing;
+//     color: var(--body-text-color);
+//   }
+// `
 
 const anchorElements = {
   circle: (

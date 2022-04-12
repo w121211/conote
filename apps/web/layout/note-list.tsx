@@ -1,6 +1,7 @@
 import moment from 'moment'
 import React from 'react'
 import { styleSymbol } from './style-symbol'
+import { Tile } from './tile'
 
 export interface NoteData {
   title: string
@@ -10,7 +11,8 @@ export interface NoteData {
 
 export const NoteList = ({ data }: { data: NoteData[] }) => {
   return (
-    <div className="p-3 border border-gray-200 rounded text-sm shadow-sm">
+    <Tile>
+      {/* <div className="p-3 border border-gray-200 rounded text-sm shadow-sm"> */}
       <h4 className="  mb-2 text-base tracking-widest text-gray-700">筆記</h4>
       {data.map(({ symbol, title, updatedAt }, i) => {
         const styledSymbol = styleSymbol(symbol, title)
@@ -26,6 +28,7 @@ export const NoteList = ({ data }: { data: NoteData[] }) => {
           </div>
         )
       })}
-    </div>
+      {/* </div> */}
+    </Tile>
   )
 }

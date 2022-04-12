@@ -6,17 +6,24 @@ const Navbar = ({
   rbtn,
   onClickMenu,
   pinedSider,
+  backgroundColor,
 }: {
   rbtn?: ReactNode
   onClickMenu: (boo: boolean) => void
   pinedSider: boolean
+  backgroundColor?: string
 }) => {
   const { data: meData, error, loading } = useMeQuery()
   return (
     <nav
-      className={`fixed top-0 flex items-center justify-between h-11 bg-white  ${
-        pinedSider ? 'left-72 right-0' : 'w-screen'
-      }`}
+      className={`
+        fixed 
+        flex items-center justify-between 
+        top-0 
+        h-11 
+        ${backgroundColor ? backgroundColor : 'bg-white'}  
+        ${pinedSider ? 'left-72 right-0' : 'w-screen'}
+      `}
     >
       {/* {!pinedSider && ( */}
       {/* <div> */}
