@@ -125,6 +125,13 @@
  * - verdictMerge(docId): limited time after request or ups over downs -> reject merge
  * - rejectMerge(docId): can be incorporated into verdictMerge -> update docStatus to 'reject'
  *
+ * case: commit draft & some not-yet-edited notes were mentioned in the draft
+ * - following the check for existing note and other validation process, invoke the check for it when merging (inside Merge)
+ * -
+ *
+ * case: commit draft & other existing notes were mentioned in the draft
+ * - those mentioned notes are store in content (in GQL NoteDocContent.symbolIdMap)
+ *
  * case: update note.meta
  * - modifiable: note title .... (what else??)
  * - updateNoteMeta(meta)

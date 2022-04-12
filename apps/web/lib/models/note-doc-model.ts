@@ -1,6 +1,7 @@
 /**
  * Modified from note-state-model.ts
  */
+import { NoteDraft } from '@prisma/client'
 export type NoteDocMeta = {
   duplicatedSymbols?: string[] // to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
   blockUidAnddiscussIdsDict?: string[] // store discussion ids
@@ -27,4 +28,10 @@ export type NoteDocContent = {
   diff?: any
   symbolIdMap?: Record<string, string>
   blocks: Block[]
+}
+
+export type PrismaNoteDocMeta = {}
+
+export const NoteDocModel = {
+  async getIdsFromDraft(draftMeta: NoteDocMeta): Promise<string[]> {},
 }

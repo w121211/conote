@@ -232,7 +232,8 @@ type Mutation {
 
   dropNoteDraft(id: ID!): NoteDraftDropResponse!
 
-  commitNoteDraft(draftId: ID!): NoteDraftCommitResponse!
+  # commit must be created first -> createCommit ->
+  commitNoteDrafts(draftIds: [ID!]!): NoteDraftCommitResponse!
   #---------------End------------------
 
   # createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
@@ -617,7 +618,7 @@ type UpsertDiscussPostEmojiLikeResponse {
 
 type Note {
   id: ID!
-  meta: NoteMeta!
+  meta: NoteDocMeta!
   sym: Sym!
   link: Link
   doc: NoteDoc! # current doc 可能為 null (what does this mean?? the newest commit note??) -> 以前針對web-note的特殊情況 現在改成全部都要有doc
@@ -664,7 +665,7 @@ type NoteDoc {
   parentId: String
   domain: String
   meta: NoteDocMeta # not sure about this type
-  body: NoteDocContent!
+  content: NoteDocContent!
   updatedAt: DateTime!
 }
 
