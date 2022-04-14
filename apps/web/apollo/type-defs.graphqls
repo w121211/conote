@@ -659,10 +659,10 @@ type NoteDraftCommitResponse {
 
 type NoteDoc {
   id: ID!
-  noteId: String!
+  # noteId: String!
   userId: String!
   commitId: String!
-  parentId: String
+  fromDocId: String
   domain: String
   meta: NoteDocMeta # not sure about this type
   content: NoteDocContent!

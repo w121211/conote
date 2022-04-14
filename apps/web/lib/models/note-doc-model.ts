@@ -1,7 +1,8 @@
 /**
  * Modified from note-state-model.ts
  */
-import { NoteDraft } from '@prisma/client'
+import { NoteDoc, NoteDraft, Sym } from '@prisma/client'
+import prisma from '../prisma'
 export type NoteDocMeta = {
   duplicatedSymbols?: string[] // to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
   blockUidAnddiscussIdsDict?: string[] // store discussion ids
@@ -30,8 +31,31 @@ export type NoteDocContent = {
   blocks: Block[]
 }
 
-export type PrismaNoteDocMeta = {}
-
 export const NoteDocModel = {
-  async getIdsFromDraft(draftMeta: NoteDocMeta): Promise<string[]> {},
+  getDiscussIdsFromDraft(draft: NoteDraft): string[] {
+    // get the meta in the draft
+    const meta = draft.meta as unknown as NoteDocMeta
+    // get the snippet for discussIds (need to know what the snippet looks like)
+    return meta.blockUidAnddiscussIdsDict ? meta.blockUidAnddiscussIdsDict : []
+  },
+
+  async updateSymIdMap(docs: NoteDoc[], symbolIds: Map<string, string>): Promise<void> {
+    if (symbolIds.size === 0) return
+    const docContentDicts = docs.map(e => ({
+      id: e.id,
+      content: e.content as unknown as NoteDocContent,
+    }))
+    for (const e of docContentDicts) {
+      const { symbolIdMap } = e.content
+      if (symbolIdMap) {
+        for (const symbol in symbolIdMap) {
+          if (symbolIds.has(symbol)) {
+            symbolIdMap[symbol] = symbolIds.get(symbol) ?? ''
+          }
+        }
+      }
+      const newContent = { ...e, symbolIdMap }
+      await prisma.noteDoc.update({ where: { id: e.id }, data: { content: newContent } })
+    }
+  },
 }

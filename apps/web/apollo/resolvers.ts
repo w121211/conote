@@ -8,6 +8,7 @@ import {
   DiscussPostEmoji,
   DiscussPostEmojiCount,
   Note,
+  NoteDoc,
   NoteDraft,
   NoteEmoji,
   NoteEmojiCount,
@@ -21,7 +22,7 @@ import { AuthorModel } from '../lib/models/author-model'
 // import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
 import { CommitModel } from '../lib/models/commit-model'
 import { NoteMeta, NoteModel } from '../lib/models/note-model'
-import { NoteDocMeta, NoteDocContent } from '../lib/models/note-doc-model'
+import { NoteDocMeta, NoteDocContent, NoteDocModel } from '../lib/models/note-doc-model'
 import { NoteDigestModel } from '../lib/models/note-digest-model'
 // import { NoteEmojiModel } from '../lib/models/note-emoji-model'
 import { NoteStateModel } from '../lib/models/note-state-model'
@@ -596,8 +597,8 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return candidates.map(e => {
       return {
         ...e,
-        meta: e.noteMeta as unknown as NoteMeta,
-        body: { blocks: [], symbolIdMap: {}, diff: {} },
+        meta: e.meta as unknown as NoteDocMeta,
+        content: e.content as unknown as NoteDocContent,
       }
     })
   },
@@ -1346,10 +1347,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
     // For each draft, check note, sym and doc (create one if there is none)
     // At the same time, link DiscussId to Note and change Discuss status to Active or Lock
+    const noteDocs: NoteDoc[] = []
+    const symbolIdDict = new Map<string, string>()
     for (const e of drafts) {
       const { type } = SymModel.parse(e.symbol)
       // TODO: extract discussId from the meta from the draft
-      const discussIds: string[] = NoteDocModel.getIdsFromDraft(e.meta)
+      const discussIds: string[] = NoteDocModel.getDiscussIdsFromDraft(e)
 
       const symFromPrisma = await prisma.sym.findUnique({ where: { symbol: e.symbol } })
       const sym = symFromPrisma
@@ -1393,14 +1396,16 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
           content: e.content ?? {},
         },
       })
+      noteDocs.push(noteDoc)
+      symbolIdDict.set(sym.symbol, sym.id)
       // Connect draft to commit
       await prisma.noteDraft.update({ where: { id: e.id }, data: { commit: { connect: { id: commit.id } } } })
       // Update status of all discusses
-      await prisma.discuss.updateMany({ where: { notes: { every: { id: note.id } } }, data: { status: 'LOCK' } })
+      await prisma.discuss.updateMany({ where: { notes: { every: { id: note.id } } }, data: { status: 'ACTIVE' } })
     }
     // Update symIdMap for each draft with connections to drafts in this commit
     // TODO
-    const updatedSymIdMap = NoteDocModel.parseSymIdMap(drafts)
+    NoteDocModel.updateSymIdMap(noteDocs, symbolIdDict)
     return { commitId: commit.id, response: 'success' }
   },
   // type NoteDraftCommitResponse {
