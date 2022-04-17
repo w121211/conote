@@ -1,4 +1,6 @@
 import { Grammar, Token, tokenize, TokenStream } from 'prismjs'
+import React from 'react'
+import { inspect } from 'util'
 import { InlineItem } from './interfaces'
 // import { InlineItemService } from '../inline/inline-item-service'
 
@@ -124,11 +126,11 @@ const grammar: Grammar = {
 
   poll: { pattern: rePoll },
 
-  'poll-new': { pattern: rePollNew },
+  pollNew: { pattern: rePollNew },
 
   rate: { pattern: reRate },
 
-  'rate-new': { pattern: reRateNew },
+  rateNew: { pattern: reRateNew },
 
   discuss: {
     pattern: reDiscuss,
@@ -139,7 +141,14 @@ const grammar: Grammar = {
     },
   },
 
-  'discuss-new': { pattern: reDiscussNew },
+  discussNew: {
+    pattern: reDiscussNew,
+    inside: {
+      'discuss-bracket-start': /^#/,
+      'discuss-bracket-end': /#$/,
+      'discuss-id': /-(c[a-z0-9]{24,29})$/,
+    },
+  },
 
   // topic: { pattern: reTopic },
 
@@ -194,7 +203,11 @@ function parseInlineRateParams(params: string[]): {
  */
 function tokenToInlineItem(token: string | Token): InlineItem {
   if (typeof token === 'string') {
-    return { type: 'text', str: token }
+    return {
+      type: 'text',
+      str: token,
+      token: new Token('text', token),
+    }
   }
 
   const str = TokenHelper.toString(token.content)
@@ -206,43 +219,31 @@ function tokenToInlineItem(token: string | Token): InlineItem {
         return {
           type: 'inline-discuss',
           str,
+          token,
           id: match[2],
           title: match[1],
         }
       }
       throw 'parse error'
     }
-    case 'discuss-new': {
+    case 'discussNew': {
       return {
         type: 'inline-discuss',
         str,
+        token,
         title: str.substring(1, str.length - 1), // remove '#'
       }
     }
     case 'filtertag': {
-      return { type: 'inline-filtertag', str }
+      return { type: 'inline-filtertag', str, token }
     }
-    // case 'mirror-ticker':
-    // case 'mirror-topic': {
-    //   const match = token.type === 'mirror-ticker' ? reMirrorTicker.exec(str) : reMirrorTopic.exec(str)
-    //   if (match) {
-    //     return {
-    //       type: 'inline-mirror',
-    //       str,
-    //       mirrorSymbol: match[1],
-    //       author: match[2], // 沒有 match 到時會返回 undefined
-    //     }
-    //   } else {
-    //     console.error(str)
-    //     throw 'Parse error'
-    //   }
-    // }
     case 'poll': {
       const match = rePoll.exec(str)
       if (match) {
         return {
           type: 'inline-poll',
           str,
+          token,
           id: match[1],
           choices: match[2].split(' '),
         }
@@ -250,12 +251,13 @@ function tokenToInlineItem(token: string | Token): InlineItem {
         throw `Parse poll error,: ${str}`
       }
     }
-    case 'poll-new': {
+    case 'pollNew': {
       const match = rePollNew.exec(str)
       if (match) {
         return {
           type: 'inline-poll',
           str,
+          token,
           choices: match[1].split(' '),
         }
       } else {
@@ -273,17 +275,18 @@ function tokenToInlineItem(token: string | Token): InlineItem {
           type: 'inline-rate',
           id: match[1],
           str,
+          token,
           params,
           authorName,
           targetSymbol,
-          choice,
+          // choice,
         }
       } else {
         console.error(str)
         throw 'Parse error'
       }
     }
-    case 'rate-new': {
+    case 'rateNew': {
       const match = reRateNew.exec(str)
       if (match) {
         const params = match[1].split(' ')
@@ -292,10 +295,11 @@ function tokenToInlineItem(token: string | Token): InlineItem {
         return {
           type: 'inline-rate',
           str,
+          token,
           params,
           authorName,
           targetSymbol,
-          choice,
+          // choice,
         }
       } else {
         console.error(str)
@@ -306,10 +310,10 @@ function tokenToInlineItem(token: string | Token): InlineItem {
     case 'ticker':
     case 'topic':
     case 'url': {
-      return { type: 'inline-symbol', str, symbol: str }
+      return { type: 'inline-symbol', str, token, symbol: str }
     }
     case 'comment': {
-      return { type: 'inline-comment', str }
+      return { type: 'inline-comment', str, token }
     }
   }
   // tokens not catched
@@ -326,8 +330,43 @@ function tokenToInlineItem(token: string | Token): InlineItem {
 export function parse(str: string): InlineItem[] {
   const tokens = tokenize(str, grammar),
     inlineItems = tokens.map(e => tokenToInlineItem(e))
-
   return inlineItems
+}
+
+/**
+ *
+ */
+export function renderToken(token: Token | string): JSX.Element {
+  const el = React.createElement
+
+  if (typeof token === 'string') {
+    return el('span', null, token)
+  }
+  if (typeof token.content === 'string') {
+    switch (token.type) {
+      case 'comment':
+        return el(
+          'span',
+          { className: '', style: { color: 'gray' } },
+          token.content,
+        )
+      case 'topic-bracket-head':
+      case 'topic-bracket-tail':
+        return el(
+          'span',
+          { className: '', style: { color: 'red' } },
+          token.content,
+        )
+      default:
+        return el('span', null, token.content)
+    }
+  }
+  if (Array.isArray(token.content)) {
+    const tokenEls = token.content.map(e => renderToken(e))
+    return el(React.Fragment, null, ...tokenEls)
+  }
+
+  throw new Error('Unexpected error')
 }
 
 // export function parseRender(s: string, uid: string) {

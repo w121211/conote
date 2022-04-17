@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { setEntities } from '@ngneat/elf-entities'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
 import { blockRepo } from '../../stores/block.repository'
 import { BlockEl } from './block-el'
-import { mockLocalDoc } from '../../services/mock-data'
+import { mockLocalDoc } from '../../../test/__mocks__/mock-data'
+import { mockBlocks } from '../../../../../test/__mocks__/mock-block'
 
 /**
  * Setup data
  */
-blockRepo.update([setEntities(mockLocalDoc.blocks)])
+blockRepo.update([setEntities(mockBlocks)])
+// blockRepo.update([setEntities(mockLocalDoc.blocks)])
 
 export default {
   title: 'BlockEditor/BlockEl',
@@ -19,23 +21,13 @@ const Template: ComponentStory<typeof BlockEl> = args => <BlockEl {...args} />
 
 export const Basic = Template.bind({})
 Basic.args = {
-  uid: mockLocalDoc.blocks[0].uid,
+  uid: mockBlocks[0].uid,
+  // uid: mockLocalDoc.blocks[0].uid,
   isEditable: true,
 }
 
-export const WithDocContainerMock = () => (
-  <div className="doc-container">
-    <BlockEl uid="b1" isEditable />
-  </div>
-)
-
-// export const Editing = Template.bind({})
-// Editing.args = {
-//   label: 'Button',
-// }
-
-// export const Selected = Template.bind({})
-// Selected.args = {
-//   size: 'large',
-//   label: 'Button',
-// }
+// export const WithDocContainer = () => (
+//   <div className="doc-container">
+//     <BlockEl uid={mockBlocks[0].uid} isEditable />
+//   </div>
+// )

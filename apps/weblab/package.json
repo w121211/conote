@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "dependencies": {
     "@conote/docdiff": "^0.1.0",
+    "@prisma/client": "^3.12.0",
     "cookie": "^0.4.1",
     "firebase": "^9.6.0",
     "firebase-admin": "^10.0.0",
@@ -38,6 +39,7 @@
     "eslint-config-next": "^12.0.7",
     "jest": "^27.4.3",
     "jest-watch-typeahead": "^1.0.0",
+    "prisma": "^3.12.0",
     "typescript": "^4.5.4"
   },
   "private": true,
@@ -48,6 +50,9 @@
     "start": "next start",
     "test": "jest",
     "test-all": "yarn lint && yarn type-check && yarn test",
-    "type-check": "tsc --pretty --noEmit"
+    "type-check": "tsc --pretty --noEmit",
+    "migrate": "dotenv -e .env.local -- yarn run prisma migrate dev",
+    "seed": "dotenv -e .env.local -- ts-node prisma/scripts/seed.ts ./prisma/seeds",
+    "test-lib": "dotenv -e .env.local -- jest -c=./test/jest.lib.config.js --watch"
   }
 }

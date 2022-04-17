@@ -15,7 +15,7 @@ import {
   DragTarget,
   Search,
 } from '../../interfaces'
-import { blockRepo } from '../../stores/block.repository'
+import { blockRepo, blocksStore } from '../../stores/block.repository'
 import { rfdbRepo } from '../../stores/rfdb.repository'
 import { InlineSearchEl } from '../autocomplete-search/autocomplete-search'
 import { Anchor } from './anchor'
@@ -177,9 +177,8 @@ export const BlockEl = ({
     [contextMenu, setContextMenu] = useState({ x: null, y: null, show: false }),
     [dragging, setDragging] = useState(false),
     [dragTarget, setDragTarget] = useState<DragTarget | null>(null),
-    [lastKeyDown, setLastKeyDown] = useState<DestructTextareaKeyEvent | null>(
-      null,
-    ),
+    [lastKeyDown, setLastKeyDown] =
+      useState<DestructTextareaKeyEvent | null>(null),
     [showEditableDom, setShowEditableDom] = useState(false)
 
   //   const [avatarAnchorEl, setAvatarAnchorEl] =
@@ -191,6 +190,7 @@ export const BlockEl = ({
 
   if (block === undefined) {
     console.debug('<Block> block === undefined', uid)
+    console.debug(blocksStore.getValue())
     return null
   }
 

@@ -1,12 +1,6 @@
-import moment from 'moment'
-import { useRouter } from 'next/router'
 import React, { useEffect, useRef } from 'react'
-import { useForm } from 'react-hook-form'
 import { useDiscussQuery } from '../../apollo/query.graphql'
 import DiscussBody from './post/discuss-posts'
-import DiscussEmojis from './discuss-emojis'
-import DiscussHeader from './discuss-header'
-import CreatePostForm from './post/create-post-form'
 import { DiscussTile } from './layout-components/discuss-tile'
 
 const dummyData = [

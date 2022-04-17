@@ -42,23 +42,23 @@ class InlineService {
     return `!((rate))(@${author} ${symbol} #${choice})`
   }
 
-  toInlinePoll({
-    id,
-    choices,
-  }: {
-    id: string | number
-    choices: string[]
-  }): InlinePoll {
-    const _id = typeof id === 'number' ? id.toString() : id
-    return {
-      type: 'inline-poll',
-      str: `!((poll:${_id}))(${choices.join(' ')})`,
-      id: _id,
-      choices: choices,
-    }
-  }
+  // toInlinePoll({
+  //   id,
+  //   choices,
+  // }: {
+  //   id: string | number
+  //   choices: string[]
+  // }): InlinePoll {
+  //   const _id = typeof id === 'number' ? id.toString() : id
+  //   return {
+  //     type: 'inline-poll',
+  //     str: `!((poll:${_id}))(${choices.join(' ')})`,
+  //     id: _id,
+  //     choices: choices,
+  //   }
+  // }
 
-  toInlineDiscussString({ id, title }: { id: string; title: string }): string {
+  toInlineDiscussString(id: string, title: string): string {
     return `#${title}-${id}#`
   }
 }

@@ -77,7 +77,7 @@ export function getBlock(uid: string): Block {
 export function getBlockChildren(uid: string): Block[] {
   // return blocksStore.query(getAllEntitiesApply({ filterEntity: e => e.parentUid === uid }))
   const block = getBlock(uid),
-    children = block.childrenUids.map((e) => getBlock(e))
+    children = block.childrenUids.map(e => getBlock(e))
   return children
 }
 
@@ -97,7 +97,7 @@ class BlockRepository {
   getBlock$(uid: string) {
     return blocksStore.pipe(
       selectEntity(uid),
-      // tap((v) => console.log(`block   ${v ? v.uid + '-' + v.str : v}`)),
+      tap(v => console.log(`${uid} -> ${v ? v.uid + '-' + v.str : v}`)),
     )
   }
 
@@ -113,8 +113,8 @@ class BlockRepository {
       return of([])
     }
     return blocksStore.pipe(
-      selectManyByPredicate((e) => e.parentUid === uid),
-      map((e) => {
+      selectManyByPredicate(e => e.parentUid === uid),
+      map(e => {
         e.sort((a, b) => a.order - b.order)
         return e
       }),

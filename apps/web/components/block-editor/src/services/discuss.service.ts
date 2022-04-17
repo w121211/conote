@@ -3,7 +3,7 @@ import {
   mockGotDraftOnly,
   mockGotNoteAndDraft,
   mockMyAllDrafts,
-} from './mock-data'
+} from '../../test/__mocks__/mock-data'
 
 type DiscussInput = {
   title: string

@@ -5,7 +5,7 @@ import {
   Note,
   NoteDraft,
   SearchHit,
-} from '../interfaces'
+} from '../../src/interfaces'
 
 //
 // Mock note, note-draft
@@ -22,7 +22,7 @@ type MockQuerySymbolResult = {
   draft?: NoteDraft
 }
 
-const mockNoteBlocks: Block[] = [
+const mockBlocks: Block[] = [
   {
     uid: '8YKgEDhlUX',
     str: '[[Hello Note]]',
@@ -103,7 +103,7 @@ export const mockGotNoteOnly: MockQuerySymbolResult = {
       id: 'isy9ApWV0c',
       userId: 'nESCpMF5lg',
       noteMeta: {},
-      content: mockNoteBlocks,
+      content: mockBlocks,
     },
   },
 }
@@ -195,7 +195,7 @@ export const mockLocalDoc = {
       parentUid: 'Nu9RRlYtUm',
       order: 0,
       childrenUids: [],
-      str: '[[Mock Local Doc]] child block',
+      str: 'child block [[Hello world]]',
     },
   ],
 }
@@ -227,12 +227,17 @@ export const inlineItems = {
   inlineDiscussHasNoId,
 }
 
-export const mockBlockStr = {
+export const mockBlockStrDict = {
   // inline items
   symbolTitle: '[[React (web framework)]] in cljs',
-  symbolTicker: '',
+  symbolTicker: 'Buy $GOOG is just on time',
   symbolUrl: '',
-  discuss: '',
+  symbolMix: '',
+
+  discussHasId:
+    '#Recommend tutorials/resources on [[Clojure]] for begginners?-u129038012983091#',
+  discussHasNoId:
+    '#Recommend tutorials/resources on [[Clojure]] for begginners?#',
 
   // Markdown
   h1: '',

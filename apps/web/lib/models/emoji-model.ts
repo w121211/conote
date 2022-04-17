@@ -18,91 +18,59 @@ type EmojiCount = DiscussEmojiCount | DiscussPostEmojiCount | NoteEmojiCount
 
 type EmojiLike = DiscussEmojiLike | DiscussPostEmojiLike | NoteEmojiLike
 
-interface PrismaEmoji<T extends Emoji, U extends EmojiCount, V extends EmojiLike> {
-  emojiCreate: (subjId: string | number, code: EmojiCode) => Promise<T>
+interface EmojiHelper<
+  TEmoji extends Emoji,
+  TEmojiCount extends EmojiCount,
+  TEmojiLike extends EmojiLike,
+> {
+  emojiCreate: (subjId: string | number, code: EmojiCode) => Promise<TEmoji>
 
-  emojiFindUnique: (subjId: string | number, code: EmojiCode) => Promise<T | null>
+  emojiFindById: (id: number) => Promise<TEmoji | null>
 
-  emojiLikeCreate: (emojiId: number, userId: string, liked: boolean) => Promise<V>
+  emojiFindUnique: (
+    subjId: string | number,
+    code: EmojiCode,
+  ) => Promise<TEmoji | null>
 
-  emojiCountFindUnique: (emojiId: number) => Promise<U | null>
+  emojiLikeCreate: (
+    emojiId: number,
+    userId: string,
+    liked: boolean,
+  ) => Promise<TEmojiLike>
 
-  emojiCountUpdate: (emojiCountId: number, nUps: number) => Promise<U>
+  emojiCountFindUnique: (emojiId: number) => Promise<TEmojiCount | null>
 
-  emojiLikeFindUnique: (emojiId: number, userId: string) => Promise<V | null>
+  emojiCountUpdate: (emojiCountId: number, nUps: number) => Promise<TEmojiCount>
 
-  emojiLikeUpdate: (emojiLikeId: number, liked: boolean) => Promise<V>
+  emojiLikeFindUnique: (
+    emojiId: number,
+    userId: string,
+  ) => Promise<TEmojiLike | null>
+
+  emojiLikeUpdate: (emojiLikeId: number, liked: boolean) => Promise<TEmojiLike>
+
+  getSubjId: (emoji: TEmoji) => string | number
 }
 
-const compareEmojiLike = <T extends EmojiLike>(like: T, prevLike?: T): { dUp: number } => {
-  let dUp = 0
-  if (prevLike) {
-    if (prevLike) {
-      dUp -= 1
-    }
-  }
-  if (like) {
-    dUp += 1
-  }
+//
+// Helpers
+//
+//
+//
+//
+//
+//
+
+function compareEmojiLike<T extends EmojiLike>(like: T): { dUp: number } {
+  const dUp = like.liked ? 1 : -1
   return { dUp }
 }
 
-class EmojiModelFactory<T extends Emoji, U extends EmojiCount, V extends EmojiLike> {
-  prismaEmoji: PrismaEmoji<T, U, V>
-
-  constructor(prismaEmoji: PrismaEmoji<T, U, V>) {
-    this.prismaEmoji = prismaEmoji
-  }
-
-  async create(
-    subjId: string | number,
-    code: EmojiCode,
-    userId: string,
-  ): Promise<{
-    emoji: T & { count: U }
-    like: V
-  }> {
-    const found = await this.prismaEmoji.emojiFindUnique(subjId, code)
-    if (found) {
-      // emoji existed, upsert like
-      const { like, count } = await this.upsertLike({ liked: true, emojiId: found.id, userId })
-      return {
-        emoji: { ...found, count },
-        like,
-      }
-    }
-
-    // emoji not exist, create emoji & like
-    const emoji = await this.prismaEmoji.emojiCreate(subjId, code)
-    const { like, count } = await this.upsertLike({ liked: true, emojiId: emoji.id, userId })
-    return {
-      emoji: { ...emoji, count },
-      like,
-    }
-  }
-
-  async upsertLike({ liked, emojiId, userId }: { liked: boolean; emojiId: number; userId: string }): Promise<{
-    like: V
-    count: U
-  }> {
-    const curCount = await this.prismaEmoji.emojiCountFindUnique(emojiId)
-    if (curCount === null) {
-      throw 'Database unexpected error'
-    }
-
-    const curLike = await this.prismaEmoji.emojiLikeFindUnique(emojiId, userId)
-    const nextLike = curLike
-      ? await this.prismaEmoji.emojiLikeUpdate(curLike.id, liked)
-      : await this.prismaEmoji.emojiLikeCreate(emojiId, userId, liked)
-
-    const { dUp } = compareEmojiLike(nextLike, curLike ?? undefined)
-    const nextCount = await this.prismaEmoji.emojiCountUpdate(curCount.id, curCount.nUps + dUp)
-
-    return { like: nextLike, count: nextCount }
-  }
-}
-
-const DiscussPrismaEmoji: PrismaEmoji<DiscussEmoji, DiscussEmojiCount, DiscussEmojiLike> = {
+const discussEmojiHelper: EmojiHelper<
+  DiscussEmoji,
+  DiscussEmojiCount,
+  DiscussEmojiLike
+> = {
   emojiCreate(subjId, code) {
     if (typeof subjId === 'number') {
       throw "typeof subjId === 'number'"
@@ -115,25 +83,33 @@ const DiscussPrismaEmoji: PrismaEmoji<DiscussEmoji, DiscussEmojiCount, DiscussEm
       },
     })
   },
+
+  emojiFindById(id) {
+    return prisma.discussEmoji.findUnique({ where: { id } })
+  },
+
   emojiFindUnique(subjId, code) {
     if (typeof subjId === 'number') {
       throw "typeof subjId === 'number'"
     }
     return prisma.discussEmoji.findUnique({
-      where: { discussId_code: { code, discussId: subjId } },
+      where: { code_discussId: { code, discussId: subjId } },
     })
   },
+
   emojiCountFindUnique(emojiId) {
     return prisma.discussEmojiCount.findUnique({
       where: { discussEmojiId: emojiId },
     })
   },
+
   emojiCountUpdate(emojiCountId, nUps) {
     return prisma.discussEmojiCount.update({
       data: { nUps },
       where: { id: emojiCountId },
     })
   },
+
   emojiLikeCreate(emojiId, userId, liked) {
     return prisma.discussEmojiLike.create({
       data: {
@@ -143,20 +119,30 @@ const DiscussPrismaEmoji: PrismaEmoji<DiscussEmoji, DiscussEmojiCount, DiscussEm
       },
     })
   },
+
   emojiLikeFindUnique(emojiId, userId) {
     return prisma.discussEmojiLike.findUnique({
-      where: { userId_discussEmojiId: { discussEmojiId: emojiId, userId } },
+      where: { discussEmojiId_userId: { discussEmojiId: emojiId, userId } },
     })
   },
+
   emojiLikeUpdate(emojiLikeId, liked) {
     return prisma.discussEmojiLike.update({
       data: { liked },
       where: { id: emojiLikeId },
     })
   },
+
+  getSubjId(emoji) {
+    return emoji.discussId
+  },
 }
 
-const DiscussPostPrismaEmoji: PrismaEmoji<DiscussPostEmoji, DiscussPostEmojiCount, DiscussPostEmojiLike> = {
+const discussPostEmojiHelper: EmojiHelper<
+  DiscussPostEmoji,
+  DiscussPostEmojiCount,
+  DiscussPostEmojiLike
+> = {
   emojiCreate(subjId, code) {
     if (typeof subjId === 'string') {
       throw "typeof subjId === 'string'"
@@ -169,25 +155,33 @@ const DiscussPostPrismaEmoji: PrismaEmoji<DiscussPostEmoji, DiscussPostEmojiCoun
       },
     })
   },
+
+  emojiFindById(id) {
+    return prisma.discussPostEmoji.findUnique({ where: { id } })
+  },
+
   emojiFindUnique(subjId, code) {
     if (typeof subjId === 'string') {
       throw "typeof subjId === 'string'"
     }
     return prisma.discussPostEmoji.findUnique({
-      where: { discussPostId_code: { code, discussPostId: subjId } },
+      where: { code_discussPostId: { code, discussPostId: subjId } },
     })
   },
+
   emojiCountFindUnique(emojiId) {
     return prisma.discussPostEmojiCount.findUnique({
       where: { discussPostEmojiId: emojiId },
     })
   },
+
   emojiCountUpdate(emojiCountId, nUps) {
     return prisma.discussPostEmojiCount.update({
       data: { nUps },
       where: { id: emojiCountId },
     })
   },
+
   emojiLikeCreate(emojiId, userId, liked) {
     return prisma.discussPostEmojiLike.create({
       data: {
@@ -197,20 +191,28 @@ const DiscussPostPrismaEmoji: PrismaEmoji<DiscussPostEmoji, DiscussPostEmojiCoun
       },
     })
   },
+
   emojiLikeFindUnique(emojiId, userId) {
     return prisma.discussPostEmojiLike.findUnique({
-      where: { userId_discussPostEmojiId: { discussPostEmojiId: emojiId, userId } },
+      where: {
+        userId_discussPostEmojiId: { discussPostEmojiId: emojiId, userId },
+      },
     })
   },
+
   emojiLikeUpdate(emojiLikeId, liked) {
     return prisma.discussPostEmojiLike.update({
       data: { liked },
       where: { id: emojiLikeId },
     })
   },
+
+  getSubjId(emoji) {
+    return emoji.discussPostId
+  },
 }
 
-const NotePrismaEmoji: PrismaEmoji<NoteEmoji, NoteEmojiCount, NoteEmojiLike> = {
+const noteEmojiHelper: EmojiHelper<NoteEmoji, NoteEmojiCount, NoteEmojiLike> = {
   emojiCreate(subjId, code) {
     if (typeof subjId === 'number') {
       throw "typeof subjId === 'number'"
@@ -223,6 +225,11 @@ const NotePrismaEmoji: PrismaEmoji<NoteEmoji, NoteEmojiCount, NoteEmojiLike> = {
       },
     })
   },
+
+  emojiFindById(id) {
+    return prisma.noteEmoji.findUnique({ where: { id } })
+  },
+
   emojiFindUnique(subjId, code) {
     if (typeof subjId === 'number') {
       throw "typeof subjId === 'number'"
@@ -231,17 +238,20 @@ const NotePrismaEmoji: PrismaEmoji<NoteEmoji, NoteEmojiCount, NoteEmojiLike> = {
       where: { noteId_code: { code, noteId: subjId } },
     })
   },
+
   emojiCountFindUnique(emojiId) {
     return prisma.noteEmojiCount.findUnique({
       where: { noteEmojiId: emojiId },
     })
   },
+
   emojiCountUpdate(emojiCountId, nUps) {
     return prisma.noteEmojiCount.update({
       data: { nUps },
       where: { id: emojiCountId },
     })
   },
+
   emojiLikeCreate(emojiId, userId, liked) {
     return prisma.noteEmojiLike.create({
       data: {
@@ -251,21 +261,174 @@ const NotePrismaEmoji: PrismaEmoji<NoteEmoji, NoteEmojiCount, NoteEmojiLike> = {
       },
     })
   },
+
   emojiLikeFindUnique(emojiId, userId) {
     return prisma.noteEmojiLike.findUnique({
-      where: { userId_noteEmojiId: { noteEmojiId: emojiId, userId } },
+      where: { noteEmojiId_userId: { noteEmojiId: emojiId, userId } },
     })
   },
+
   emojiLikeUpdate(emojiLikeId, liked) {
     return prisma.noteEmojiLike.update({
       data: { liked },
       where: { id: emojiLikeId },
     })
   },
+
+  getSubjId(emoji) {
+    return emoji.noteId
+  },
 }
 
-export const DiscussEmojiModel = new EmojiModelFactory(DiscussPrismaEmoji)
+//
+// Factory class
+//
+//
+//
+//
+//
+//
 
-export const DiscussPostEmojiModel = new EmojiModelFactory(DiscussPostPrismaEmoji)
+class EmojiModelFactory<
+  TEmoji extends Emoji,
+  TEmojiCount extends EmojiCount,
+  TEmojiLike extends EmojiLike,
+> {
+  private helper: EmojiHelper<TEmoji, TEmojiCount, TEmojiLike>
 
-export const NoteEmojiModel = new EmojiModelFactory(NotePrismaEmoji)
+  private upndownReverseCode: Record<string, EmojiCode> = {
+    UP: 'DOWN',
+    DOWN: 'UP',
+  }
+
+  constructor(helper: EmojiHelper<TEmoji, TEmojiCount, TEmojiLike>) {
+    this.helper = helper
+  }
+
+  private async upsertEmojiLike(
+    emojiId: number,
+    userId: string,
+    liked: boolean,
+  ) {
+    const curCount = await this.helper.emojiCountFindUnique(emojiId)
+    if (curCount === null)
+      throw new Error('Database unexpected error: curCount === null')
+
+    const curLike = await this.helper.emojiLikeFindUnique(emojiId, userId),
+      nextLike = curLike
+        ? await this.helper.emojiLikeUpdate(curLike.id, liked)
+        : await this.helper.emojiLikeCreate(emojiId, userId, liked),
+      { dUp } = compareEmojiLike(nextLike),
+      nextCount = await this.helper.emojiCountUpdate(
+        curCount.id,
+        curCount.nUps + dUp,
+      )
+
+    return { like: nextLike, count: nextCount }
+  }
+
+  /**
+   * emojiToUnlike exist?
+   * -> user-like on emoji-to-unlike exist?
+   * -> user-like is true?
+   * -> update user-like to false
+   */
+  private async upsertLikeOnUpndownEmoji(emojiToLike: TEmoji, userId: string) {
+    if (!['UP', 'DOWN'].includes(emojiToLike.code)) {
+      throw new Error('emoji.code not equals to UP or DOWN')
+    }
+
+    const results: {
+      emoji: TEmoji
+      count: TEmojiCount
+      like: TEmojiLike
+    }[] = []
+
+    const subjId = this.helper.getSubjId(emojiToLike),
+      reverseCode = this.upndownReverseCode[emojiToLike.code],
+      emojiToUnlike =
+        reverseCode && (await this.helper.emojiFindUnique(subjId, reverseCode)),
+      emojiToUnlike_userLike =
+        emojiToUnlike &&
+        (await this.helper.emojiLikeFindUnique(emojiToUnlike.id, userId))
+
+    if (emojiToUnlike && emojiToUnlike_userLike?.liked) {
+      const { count, like } = await this.upsertEmojiLike(
+        emojiToUnlike.id,
+        userId,
+        false,
+      )
+      results.push({ emoji: emojiToUnlike, count, like })
+    }
+
+    const { count, like } = await this.upsertEmojiLike(
+      emojiToLike.id,
+      userId,
+      true,
+    )
+    results.push({ emoji: emojiToLike, count, like })
+
+    return results
+  }
+
+  /**
+   * Upsert a like on an emoji, if emoji-id is not given, try to create an emoji by the given subj
+   *
+   * Special cases:
+   * - like an 'upvote-emoji' will automatically unlike 'downvote-emoji' if possible, and vice versa
+   *
+   * @returns mutate emojis (with corresponding count and like)
+   *
+   */
+  async upsertLike({
+    userId,
+    liked,
+    emojiId,
+    subj,
+  }: {
+    userId: string
+    liked: boolean
+    emojiId?: number
+    subj?: {
+      subjId: string | number
+      code: EmojiCode
+    }
+  }): Promise<
+    {
+      emoji: TEmoji
+      count: TEmojiCount
+      like: TEmojiLike
+    }[]
+  > {
+    if (emojiId === undefined && subj === undefined)
+      throw new Error('emojiId === undefined && subj === undefined')
+
+    let emoji: TEmoji | null | undefined
+    if (emojiId) {
+      emoji = await this.helper.emojiFindById(emojiId)
+    } else if (emojiId === undefined && subj) {
+      const { subjId, code } = subj,
+        found = await this.helper.emojiFindUnique(subjId, code)
+      emoji = found ?? (await this.helper.emojiCreate(subjId, code))
+    }
+
+    if (emoji === undefined || emoji === null)
+      throw new Error('emoji === undefined || emoji === null')
+
+    // Special case
+    if ((emoji.code === 'UP' || emoji.code === 'DOWN') && liked === true) {
+      return await this.upsertLikeOnUpndownEmoji(emoji, userId)
+    }
+
+    const { count, like } = await this.upsertEmojiLike(emoji.id, userId, liked)
+    return [{ emoji, count, like }]
+  }
+}
+
+export const discussEmojiModel = new EmojiModelFactory(discussEmojiHelper)
+
+export const discussPostEmojiModel = new EmojiModelFactory(
+  discussPostEmojiHelper,
+)
+
+export const noteEmojiModel = new EmojiModelFactory(noteEmojiHelper)

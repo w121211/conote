@@ -5,7 +5,6 @@ import {
   Search,
 } from '../../interfaces'
 import { textareaKeyDown } from '../../handlers/textarea-keydown'
-import styled from 'styled-components'
 import {
   textareaBlur,
   textareaChange,
@@ -16,6 +15,7 @@ import {
 } from '../../handlers/textarea-handlers'
 import { useEffect } from 'react'
 import './block-content.css'
+import ParseRenderEl from '../inline/parse-renderer-el'
 
 // const ContentWrap = styled.div`
 //   grid-area: content;
@@ -384,6 +384,8 @@ export const BlockContent = ({
         {localStr}
       </div>
       {/* {parseAndRender(state.string.local, originalUid || uid)} */}
+
+      {/* <ParseRenderEl blockUid={uid} str={localStr} /> */}
     </div>
   )
 }

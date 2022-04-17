@@ -16,8 +16,13 @@ import LoginModal from '../../components/login-modal'
 import NoteMetaModal from '../../components/note-meta-modal'
 import AuthItem from '../../components/sidebar/auth-Item'
 import { NoteTemplate } from '../../components/note-template'
+import { EditorEl } from '../../components/block-editor/src/components/editor/editor-el'
 
-const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
+const MainNoteComponent = ({
+  symbol,
+}: {
+  symbol: string
+}): JSX.Element | null => {
   const { data: meData } = useMeQuery()
   const { data, error, loading } = useNoteQuery({ variables: { symbol } })
   const mainDoc = useObservable(() => workspace.mainDoc$)
@@ -26,7 +31,10 @@ const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
   useEffect(() => {
     const runAsync = async () => {
       if (data) {
-        const { doc, isFromSaved } = await workspace.openDoc({ symbol, note: data.note ?? null })
+        const { doc, isFromSaved } = await workspace.openDoc({
+          symbol,
+          note: data.note ?? null,
+        })
         if (!isFromSaved && doc.noteCopy === null) {
           setShowTemplate(true)
         }
@@ -75,7 +83,11 @@ const MainNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null =
   )
 }
 
-const ModalNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null => {
+const ModalNoteComponent = ({
+  symbol,
+}: {
+  symbol: string
+}): JSX.Element | null => {
   const { data, error, loading } = useNoteQuery({ variables: { symbol } })
   const mainDoc = useObservable(() => workspace.mainDoc$)
   const modalDoc = useObservable(() => workspace.modalDoc$)
@@ -85,7 +97,11 @@ const ModalNoteComponent = ({ symbol }: { symbol: string }): JSX.Element | null 
   useEffect(() => {
     const runAsync = async () => {
       if (data) {
-        const { doc, isFromSaved } = await workspace.openDoc({ symbol, note: data.note ?? null, openInModal: true })
+        const { doc, isFromSaved } = await workspace.openDoc({
+          symbol,
+          note: data.note ?? null,
+          openInModal: true,
+        })
         if (!isFromSaved && doc.noteCopy === null) {
           setShowTemplate(true)
         }
@@ -249,9 +265,16 @@ const NoteSymbolPage = (): JSX.Element | null => {
     <>
       <Modal
         topLeftBtn={
-          <Link href={{ pathname: '/note/[symbol]', query: { symbol: modalSymbol } }}>
+          <Link
+            href={{
+              pathname: '/note/[symbol]',
+              query: { symbol: modalSymbol },
+            }}
+          >
             <a className="flex items-center p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-              <span className="material-icons text-lg leading-none">open_in_full</span>
+              <span className="material-icons text-lg leading-none">
+                open_in_full
+              </span>
             </a>
           </Link>
         }
@@ -262,10 +285,14 @@ const NoteSymbolPage = (): JSX.Element | null => {
               <span className="material-icons text-lg leading-none ">edit_note</span>
             </button> */}
             <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-              <span className="material-icons-outlined text-lg leading-none ">category</span>
+              <span className="material-icons-outlined text-lg leading-none ">
+                category
+              </span>
             </button>
             <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-              <span className="material-icons-outlined text-lg leading-none ">more_horiz</span>
+              <span className="material-icons-outlined text-lg leading-none ">
+                more_horiz
+              </span>
             </button>
           </div>
         }
@@ -282,7 +309,10 @@ const NoteSymbolPage = (): JSX.Element | null => {
               workspace.closeDoc({ isModal: true }) // close doc to prevent component rerender
             }
           }
-          router.push({ pathname: router.pathname, query: { symbol: router.query.symbol } })
+          router.push({
+            pathname: router.pathname,
+            query: { symbol: router.query.symbol },
+          })
         }}
       >
         {modalNoteComponent}
@@ -304,10 +334,14 @@ const NoteSymbolPage = (): JSX.Element | null => {
                 }
               }}
             >
-              <span className="material-icons-outlined text-xl leading-none ">save</span>
+              <span className="material-icons-outlined text-xl leading-none ">
+                save
+              </span>
             </button>
             <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-              <span className="material-icons-outlined text-xl leading-none ">more_horiz</span>
+              <span className="material-icons-outlined text-xl leading-none ">
+                more_horiz
+              </span>
             </button>
             <AuthItem />
           </>

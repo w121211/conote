@@ -1,34 +1,36 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { inlineService } from '../../../services/inline.service'
-import { Discuss, InlineDiscuss } from '../../../interfaces'
 import CreateDiscussForm from '../../../../../discuss/create-discuss-form'
 import { DiscussModalPage } from '../../../../../discuss/modal-page/modal-page'
 import Modal from '../../../../../modal/modal'
+import { Discuss, InlineDiscuss } from '../../../interfaces'
+import { InlineElProps } from '../inline-el'
+import { blockStrReplace } from '../../../events'
+import { inlineService } from '../../../services/inline.service'
 
-// const onCreate = (data: DiscussFragment) => {
-//   const path = ReactEditor.findPath(editor, element)
-//   const inlineDiscussStr = InlineItemService.toInlineDiscussString({
-//     id: data.id,
-//     title: data.title,
-//   })
-//   Transforms.setNodes<InlineDiscussElement>(
-//     editor,
-//     { id: data.id },
-//     { at: path },
-//   )
-//   Transforms.insertText(editor, inlineDiscussStr, { at: path }) // replace existing text
-//   setShowModal(false)
-// }
+/**
+ * Update block string when discuss is created
+ */
+function discussOnCreate(
+  blockUid: string,
+  inlineDiscuss: InlineDiscuss,
+  discuss: Discuss,
+): void {
+  blockStrReplace(
+    blockUid,
+    inlineDiscuss.str,
+    inlineService.toInlineDiscussString(discuss.id, discuss.title),
+  )
+}
 
 const InlineDiscussEl = ({
-  // discussModal,
-  item,
+  children,
+  blockUid,
+  inline,
 }: {
-  // discussModal: React.ReactNode
-  item: InlineDiscuss
-}): JSX.Element => {
-  const { id, title, str } = item,
+  inline: InlineDiscuss
+} & InlineElProps): JSX.Element => {
+  const { id, title, str } = inline,
     [showModal, setShowModal] = useState(false),
     isDiscussCreated = id !== undefined,
     modalButtons = !isDiscussCreated && (
@@ -63,34 +65,31 @@ const InlineDiscussEl = ({
         topRightBtn={modalTopRightBtn}
         buttons={modalButtons}
       >
-        {item.id ? (
-          <DiscussModalPage id={item.id} title={item.title} />
+        {id ? (
+          <DiscussModalPage id={id} title={title} />
         ) : (
           <CreateDiscussForm
-            noteId={noteId}
-            title={element.title}
-            onCreate={onCreate}
+            title={title}
+            onCreate={data => discussOnCreate(blockUid, inline, data)}
           />
         )}
       </Modal>
-      <span contentEditable={false}>
-        {isDiscussCreated ? (
-          <button
-            className="btn-reset-style hover:bg-gray-100"
-            onClick={() => setShowModal(true)}
-          >
-            {item.str}
-          </button>
-        ) : (
-          <button
-            className="btn-reset-style hover:bg-gray-100"
-            onClick={() => setShowModal(true)}
-          >
-            {item.str}
-            <span>(click to create)</span>
-          </button>
-        )}
-      </span>
+      {isDiscussCreated ? (
+        <button
+          className="btn-reset-style hover:bg-gray-100"
+          onClick={() => setShowModal(true)}
+        >
+          {children}
+        </button>
+      ) : (
+        <button
+          className="btn-reset-style hover:bg-gray-100"
+          onClick={() => setShowModal(true)}
+        >
+          {children}
+          <span>(click to create)</span>
+        </button>
+      )}
     </>
   )
 }

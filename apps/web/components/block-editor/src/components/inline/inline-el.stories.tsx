@@ -2,13 +2,13 @@ import React, { useState } from 'react'
 import { setEntities } from '@ngneat/elf-entities'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
 import { blockRepo } from '../../stores/block.repository'
-import { mockLocalDoc } from '../../services/mock-data'
+import { mockLocalDoc } from '../../../test/__mocks__/mock-data'
 import InlineEl from './inline-el'
 
 /**
  * Setup data
  */
-blockRepo.update([setEntities(mockLocalDoc.blocks)])
+// blockRepo.update([setEntities(mockLocalDoc.blocks)])
 
 export default {
   title: 'BlockEditor/inline-el',
@@ -17,14 +17,14 @@ export default {
 
 const Template: ComponentStory<typeof InlineEl> = args => <InlineEl {...args} />
 
-export const Discuss = Template.bind({})
-Discuss.args = {
-  inline: {
-    type: 'inline-discuss',
-    str: '#hello world#',
-    title: 'hello world',
-  },
-}
+// export const Discuss = Template.bind({})
+// Discuss.args = {
+//   inline: {
+//     type: 'inline-discuss',
+//     str: '#hello world#',
+//     title: 'hello world',
+//   },
+// }
 
 // export const WithDocContainerMock = () => (
 //   <div className="doc-container">

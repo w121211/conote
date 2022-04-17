@@ -1,7 +1,7 @@
 import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
 import { setEntities } from '@ngneat/elf-entities'
-import { mockLocalDoc } from '../../services/mock-data'
+import { mockLocalDoc } from '../../../test/__mocks__/mock-data'
 import { blockRepo } from '../../stores/block.repository'
 import { docRepo } from '../../stores/doc.repository'
 import { DocEl } from './doc-el'
@@ -10,8 +10,8 @@ import { DocEl } from './doc-el'
  * Setup data (before all)
  */
 blockRepo.clearHistory()
-blockRepo.update([setEntities(mockLocalDoc.blocks)])
-docRepo.update([setEntities([mockLocalDoc.doc])])
+// blockRepo.update([setEntities(mockLocalDoc.blocks)])
+// docRepo.update([setEntities([mockLocalDoc.doc])])
 
 export default {
   title: 'BlockEditor/DocEl',

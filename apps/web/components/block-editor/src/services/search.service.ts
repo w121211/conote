@@ -1,5 +1,5 @@
 import { Search, SearchHit } from '../interfaces'
-import { mockSearchHit } from './mock-data'
+import { mockSearchHit } from '../../test/__mocks__/mock-data'
 
 interface ISearchService {
   searchAuthor(term: string): Promise<SearchHit[]>
