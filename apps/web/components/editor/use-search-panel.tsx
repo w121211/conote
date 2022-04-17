@@ -166,10 +166,9 @@ const SearchPanel = ({
         {hits.map((e, i) => (
           <div
             key={i}
+            className={`rounded ${i === selectedIdx ? 'bg-gray-100' : 'bg-transparent'}`}
             style={{
               padding: '1px 3px',
-              borderRadius: '3px',
-              background: i === selectedIdx ? '#B4D5FF' : 'transparent',
             }}
             onMouseEnter={event => {
               event.preventDefault()
@@ -196,15 +195,10 @@ const SearchPanel = ({
 
   return (
     <div
+      className="absolute min-w-[150px] p-1 border border-gray-100 bg-white rounded shadow-xl shadow-gray-300 z-[1] text-gray-600"
       style={{
         top: corner?.top ?? '-9999px',
         left: corner?.left ?? '-9999px',
-        position: 'absolute',
-        zIndex: 1,
-        padding: '3px',
-        background: 'white',
-        borderRadius: '4px',
-        boxShadow: '0 1px 5px rgba(0,0,0,.2)',
       }}
     >
       {items}
@@ -282,6 +276,36 @@ export const useSearchPanel = (
   const [hits, setHits] = useState<string[] | null>(null)
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
   const [corner, setCorner] = useState<{ top: string; left: string }>()
+
+  useEffect(() => {
+    window.addEventListener(
+      'scroll',
+      e => {
+        // console.log(corner)
+
+        if (!search) {
+          // const domRange = ReactEditor.toDOMRange(editor, search.range)
+          // const rect = domRange.getBoundingClientRect()
+          // setCorner({
+          //   top: `${rect.top + window.pageYOffset + 24}px`,
+          //   left: `${rect.left + window.pageXOffset}px`,
+          // })
+        }
+      },
+      true,
+    )
+    // return () =>
+    //   window.removeEventListener('scroll', () => {
+    //     if (search) {
+    //       const domRange = ReactEditor.toDOMRange(editor, search.range)
+    //       const rect = domRange.getBoundingClientRect()
+    //       setCorner({
+    //         top: `${rect.top + window.pageYOffset + 24}px`,
+    //         left: `${rect.left + window.pageXOffset}px`,
+    //       })
+    //     }
+    //   })
+  }, [])
 
   useEffect(() => {
     const searchAsync = async () => {

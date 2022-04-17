@@ -22,6 +22,7 @@ export const isInlineElement = (element: CustomElement): element is CustomInline
     'inline-poll',
     'inline-rate',
     'inline-symbol',
+    'inline-comment',
   ]
   return inlineTypes.includes(element.type)
 }

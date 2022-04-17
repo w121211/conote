@@ -51,6 +51,7 @@ const InlineDiscuss = ({
       <span contentEditable={false}>
         {isDiscussCreated ? (
           <button
+            className="btn-reset-style hover:bg-gray-100"
             onClick={() => {
               setShowModal(true)
             }}
@@ -59,6 +60,7 @@ const InlineDiscuss = ({
           </button>
         ) : (
           <button
+            className="btn-reset-style hover:bg-gray-100"
             onClick={() => {
               setShowModal(true)
             }}

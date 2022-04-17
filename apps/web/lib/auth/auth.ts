@@ -1,44 +1,24 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-// import { sign, verify } from 'jsonwebtoken'
-// import { setTokenCookie, getTokenCookie } from './auth-cookies'
 import { AuthenticationError } from 'apollo-server-micro'
 import { serialize } from 'cookie'
 import { auth } from 'firebase-admin'
 import { DecodedIdToken } from 'firebase-admin/auth'
 import { getFirebaseAdmin } from './firebase-admin'
 
-// if (process.env.APP_TOKEN_SECRET === undefined) {
-//   throw new Error('TOKEN_SECRET not found')
-// }
-
-// const TOKEN_SECRET = process.env.APP_TOKEN_SECRET
-
-// interface Session {
-//   userId: string
-// }
-
-// function getLoginSession(req: NextApiRequest): Session {
-//   const token = getTokenCookie(req)
-//   // if (!token) throw new Error('No token found')
-//   // try {
-//   //   return verify(token.replace('Bearer ', ''), TOKEN_SECRET) as Session
-//   // } catch (error) {
-//   //   removeTokenCookie(res)
-//   // }
-//   return verify(token.replace('Bearer ', ''), TOKEN_SECRET) as Session
-// }
-
-// function setLoginSession(res: NextApiResponse, session: Session): void {
-//   const token = sign(session, TOKEN_SECRET, { algorithm: 'HS256', expiresIn: '1d' })
-//   setTokenCookie(res, token)
-// }
-
 const TOKEN_NAME = 'session'
 
+/**
+ * Init firebase admin
+ */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const firebaseAdmin = getFirebaseAdmin() // init firebase admin
+const firebaseAdmin = getFirebaseAdmin()
 
-export const isAuthenticated = async (req: NextApiRequest): Promise<{ userId: string; email: string }> => {
+/**
+ *
+ */
+export async function isAuthenticated(
+  req: NextApiRequest,
+): Promise<{ userId: string; email: string }> {
   try {
     const sessionCookie = req.cookies[TOKEN_NAME] || ''
     const decodedClaims = await auth().verifySessionCookie(sessionCookie, true)
@@ -55,28 +35,28 @@ export const isAuthenticated = async (req: NextApiRequest): Promise<{ userId: st
   }
 }
 
-export const sessionLogin = async (
+/**
+ *
+ */
+export async function sessionLogin(
   req: NextApiRequest,
   res: NextApiResponse,
   idToken: string,
-): Promise<DecodedIdToken> => {
-  // console.log('API sessionLogin')
-
+  csrfToken?: string,
+): Promise<DecodedIdToken> {
   // Get ID token and CSRF token.
-  // const idToken = req.body.idToken.toString()
   // const csrfToken = req.body.csrfToken.toString()
   // console.log('idToken', idToken)
 
   // Guard against CSRF attacks.
   // if (!req.cookies || csrfToken !== req.cookies.csrfToken) {
-  //   res.status(401).send('UNAUTHORIZED REQUEST!')
-  //   return
+  //   console.debug(req.cookies)
+  //   throw new AuthenticationError('Not authenticated')
   // }
-
-  // setLoginSession()
 
   // Set session expiration to 5 days.
   const expiresIn = 60 * 60 * 24 * 5 * 1000
+
   // Create the session cookie. This will also verify the ID token in the process.
   // The session cookie will have the same claims as the ID token.
   // We could also choose to enforce that the ID token auth_time is recent.
@@ -84,7 +64,9 @@ export const sessionLogin = async (
 
   // In this case, we are enforcing that the user signed in in the last 5 minutes.
   if (new Date().getTime() / 1000 - decodedClaims.auth_time < 5 * 60) {
-    const sessionToken = await auth().createSessionCookie(idToken, { expiresIn })
+    const sessionToken = await auth().createSessionCookie(idToken, {
+      expiresIn,
+    })
     // console.log(sessionToken)
     // res.setHeader('Set-Cookie', sessionCookie)
     // res.end(JSON.stringify({ status: 'success' }))
@@ -95,23 +77,35 @@ export const sessionLogin = async (
       maxAge: expiresIn / 1000,
       path: '/',
       sameSite: 'lax',
-      // secure: process.env.NODE_ENV === 'production',  // needs https, @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
-    })
-    res.setHeader('Set-Cookie', cookie)
 
+      // Require https to work
+      // @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+      secure: process.env.NODE_ENV === 'production',
+    })
+
+    res.setHeader('Set-Cookie', cookie)
     return decodedClaims
   }
+
   throw new AuthenticationError('Not authenticated')
 }
 
-export const sessionLogout = async (req: NextApiRequest, res: NextApiResponse) => {
+/**
+ *
+ */
+export async function sessionLogout(req: NextApiRequest, res: NextApiResponse) {
   // console.log('API sessionLogout')
   const sessionCookie = req.cookies[TOKEN_NAME] || ''
 
   if (sessionCookie.length > 0) {
     try {
-      const decodedClaims = await auth().verifySessionCookie(sessionCookie, true)
-      auth().revokeRefreshTokens(decodedClaims.sub) // revoke token
+      const decodedClaims = await auth().verifySessionCookie(
+        sessionCookie,
+        true,
+      )
+
+      // Revoke firebase token
+      auth().revokeRefreshTokens(decodedClaims.sub)
     } catch (err) {
       console.error(err)
     }

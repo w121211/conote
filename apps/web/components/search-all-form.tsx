@@ -1,10 +1,17 @@
 import { cloneDeep } from 'lodash'
 import React, { useState, useEffect, CSSProperties } from 'react'
 import { useRouter } from 'next/router'
-import { ActionMeta, GroupBase, Options, OptionsOrGroups, StylesConfig } from 'react-select'
+import {
+  ActionMeta,
+  components,
+  ControlProps,
+  GroupBase,
+  Options,
+  OptionsOrGroups,
+  StylesConfig,
+} from 'react-select'
 import Creatable from 'react-select/creatable'
 import { Accessors } from 'react-select/dist/declarations/src/useCreatable'
-// import { toUrlParams } from '../lib/helper'
 import { useSearchSymbolLazyQuery } from '../apollo/query.graphql'
 
 type Option = {
@@ -12,6 +19,23 @@ type Option = {
   value: string
 }
 
+const Control = ({
+  children,
+  ...props
+}: ControlProps<Option, false, GroupBase<Option>>) => (
+  <components.Control
+    {...props}
+    className="!border-gray-200 hover:!border-transparent focus-within:!border-transparent"
+  >
+    <span className="material-icons-outlined ml-2 text-gray-400 ">search</span>
+    {children}
+  </components.Control>
+)
+
+const customComponents = {
+  DropdownIndicator: null,
+  Control,
+}
 export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
   const router = useRouter()
   const [searchSymbol, { data }] = useSearchSymbolLazyQuery()
@@ -20,9 +44,6 @@ export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
   const [inputValue, setInputValue] = useState('')
   const [openMenu, setOpenMenu] = useState(false)
 
-  const components = {
-    DropdownIndicator: null,
-  }
   const createOption = (label: string) => ({
     label,
     value: label.toUpperCase().replace(/\W/g, ''),
@@ -38,7 +59,7 @@ export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
 
   const handleChange = (value: Option | null, action: ActionMeta<Option>) => {
     if (action.action === 'select-option' && value) {
-      router.push(`/note/${encodeURIComponent(value.value)}`)
+      router.push(`/note/${encodeURIComponent(value.label)}`)
     }
     setValue(value)
   }
@@ -65,7 +86,9 @@ export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
 
   const handleInput = (value: string, action: any) => {
     const newValue = value
-      .replace(/[\uff01-\uff5e]/g, fullwidthChar => String.fromCharCode(fullwidthChar.charCodeAt(0) - 0xfee0))
+      .replace(/[\uff01-\uff5e]/g, fullwidthChar =>
+        String.fromCharCode(fullwidthChar.charCodeAt(0) - 0xfee0),
+      )
       .replace(/\u3000/g, '\u0020')
     setInputValue(newValue)
     if (newValue) {
@@ -124,34 +147,41 @@ export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
     control: (provided, { isFocused }) => ({
       ...provided,
       // width: '100%',
-
+      // border: 'none',
+      // backgroundColor: isFocused ? 'white' : '#f3f4f6',
+      // mixBlendMode: 'multiply',
       whiteSpace: 'nowrap',
       borderRadius: '4px',
       minHeight: '40px',
       lineHeight: small ? '1' : 'inherit',
       ':hover': {
-        borderColor: '#fff',
+        // backgroundColor: 'white',
+        // borderColor: '#fff',
         boxShadow: '0 1px 6px 0 #17171730',
         cursor: 'text',
       },
-      borderColor: isFocused ? '#fff' : 'hsl(0, 0%, 80%)',
+      // borderColor: isFocused ? '#fff' : '#f3f4f6',
       boxShadow: isFocused ? '0 1px 6px 0 #17171730' : 'none',
     }),
-    valueContainer: (provided, state) => ({
+    // valueContainer: (provided, state) => ({
+    //   ...provided,
+    //   // padding: '0 8px',
+    // }),
+    // input: (provided, state) => ({
+    //   ...provided,
+    //   // display: 'flex',
+    //   // alignItems: 'center',
+    // }),
+    placeholder: provided => ({
       ...provided,
-      // padding: '0 8px',
-    }),
-    input: (provided, state) => ({
-      ...provided,
-      // display: 'flex',
-      // alignItems: 'center',
+      color: 'rgb(156 163 175)',
     }),
   }
 
   return (
     <Creatable
       instanceId="search-all-form"
-      components={components}
+      components={customComponents}
       styles={customStyles}
       isValidNewOption={handleShowCreate}
       options={options}
@@ -163,7 +193,11 @@ export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
       menuIsOpen={openMenu}
       placeholder="搜尋 or 新增"
       formatCreateLabel={inputValue => {
-        if (!inputValue.startsWith('@') && !inputValue.startsWith('$') && !inputValue.startsWith('http')) {
+        if (
+          !inputValue.startsWith('@') &&
+          !inputValue.startsWith('$') &&
+          !inputValue.startsWith('http')
+        ) {
           return <>創建:[[{inputValue}]]</>
         }
         return <>創建:{inputValue}</>
@@ -191,18 +225,5 @@ export const SearchAllForm = ({ small }: { small?: boolean }): JSX.Element => {
       // filterOption={(inputValue, option) => option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1}
       // placeholder="input here"
     />
-    //   {/* <Input
-    //     placeholder="搜尋全站: $BA, Google, 自動駕駛"
-    //     onChange={e => setInputValue(e.target.value)}
-    //     onKeyDown={e => {
-    //       if (e.key === 'Enter') {
-    //         if (inputValue.startsWith('$') || inputValue.startsWith('[')) {
-    //           // navigate(`/card?${toUrlParams({ s: value })}`)
-    //           router.push(`/card?${toUrlParams({ s: inputValue.toUpperCase() })}`)
-    //         }
-    //       }
-    //     }}
-    //   /> */}
-    // {/* </AutoComplete> */}
   )
 }

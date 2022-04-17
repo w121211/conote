@@ -2,10 +2,10 @@ import moment from 'moment'
 import React, { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDiscussQuery } from '../../../apollo/query.graphql'
-import DiscussBody from '../discuss-body'
+import DiscussBody from '../post/discuss-posts'
 import DiscussEmojis from '../discuss-emojis'
 import DiscussHeader from '../discuss-header'
-import ModalCreatePostForm from '../create-post-form'
+import CreatePostForm from '../post/create-post-form'
 
 const dummyData = [
   '測試測試大家好',
@@ -15,7 +15,7 @@ const dummyData = [
   '好尷尬唷嗚嗚嗚',
 ]
 
-const DiscussModalPage = ({ id, title }: { id: string; title: string }) => {
+export const DiscussModalPage = ({ id, title }: { id: string; title: string }) => {
   const { data } = useDiscussQuery({ variables: { id } })
   if (!data?.discuss) {
     return null
@@ -26,10 +26,8 @@ const DiscussModalPage = ({ id, title }: { id: string; title: string }) => {
       <DiscussHeader data={data.discuss} />
       <DiscussBody discussId={data.discuss.id} />
 
-      <ModalCreatePostForm discussId={data.discuss.id} type="modal" />
+      <CreatePostForm discussId={data.discuss.id} isModal />
       {/* // </div> */}
     </React.Fragment>
   )
 }
-
-export default DiscussModalPage

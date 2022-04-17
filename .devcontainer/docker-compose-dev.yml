@@ -1,9 +1,9 @@
 version: '2'
 services:
-  app:
+  conote-app:
     volumes:
-      - app-sync:/workspace:nocopy # nocopy is important
+      - conote-app-sync:/workspace:nocopy # nocopy is important
 
 volumes:
-  app-sync:
+  conote-app-sync:
     external: true

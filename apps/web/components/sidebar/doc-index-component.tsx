@@ -95,21 +95,21 @@ const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }): JSX.Element 
   const router = useRouter()
   return (
     <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-500 mix-blend-multiply">
-      <span
-        className={`group flex items-center gap-1 pl-8 pr-4 leading-relax ${
-          router.query.symbol == node.data.symbol
-            ? 'bg-gray-200/70 hover:bg-gray-300/70'
-            : 'bg-transparent hover:bg-gray-200/70'
-        }  cursor-pointer`}
-      >
-        <span className="material-icons text-lg text-[20px] text-gray-300 mix-blend-multiply">
-          {node.data.symbol.startsWith('@') ? 'language' : 'insert_drive_file'}
-        </span>
-        <Link href={{ pathname: '/note/[symbol]', query: { symbol: node.data.symbol } }}>
-          <a className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">{changeTitle(node.data)}</a>
-        </Link>
-        <DocIndexPanel node={node} />
-      </span>
+      <Link href={{ pathname: '/note/[symbol]', query: { symbol: node.data.symbol } }}>
+        <a
+          className={`group flex items-center gap-1 pl-8 pr-4 leading-relax ${
+            router.query.symbol == node.data.symbol
+              ? 'bg-gray-200/70 hover:bg-gray-300/70'
+              : 'bg-transparent hover:bg-gray-200/70'
+          } `}
+        >
+          <span className="material-icons text-lg text-[20px] text-gray-300 mix-blend-multiply">
+            {node.data.symbol.startsWith('@') ? 'language' : 'insert_drive_file'}
+          </span>
+          <span className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">{changeTitle(node.data)}</span>
+          <DocIndexPanel node={node} />
+        </a>
+      </Link>
 
       {children.length > 0 && (
         <ul className="p-0">
@@ -118,22 +118,21 @@ const DocIndexComponent = ({ node }: { node: TreeNode<DocIndex> }): JSX.Element 
               throw 'e.data === undefined'
             }
             return (
-              <li
-                key={idx}
-                className={`group flex items-center gap-1 pl-14 pr-4 cursor-pointer ${
-                  router.query.symbol == e.data.symbol
-                    ? 'bg-gray-200/70 hover:bg-gray-300/70'
-                    : 'bg-transparent hover:bg-gray-200/70'
-                } `}
-              >
-                <span className={`material-icons text-lg text-gray-300 mix-blend-multiply`}>insert_drive_file</span>
+              <Link key={idx} href={{ pathname: '/note/[symbol]', query: { symbol: e.data.symbol } }}>
+                <a
+                  className={`group flex items-center gap-1 pl-14 pr-4  ${
+                    router.query.symbol == e.data.symbol
+                      ? 'bg-gray-200/70 hover:bg-gray-300/70'
+                      : 'bg-transparent hover:bg-gray-200/70'
+                  } `}
+                >
+                  <span className={`material-icons text-lg text-gray-300 mix-blend-multiply`}>insert_drive_file</span>
 
-                <Link href={{ pathname: '/note/[symbol]', query: { symbol: e.data.symbol } }}>
-                  <a className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">{changeTitle(e.data)}</a>
-                </Link>
+                  <span className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">{changeTitle(e.data)}</span>
 
-                <DocIndexPanel node={e} />
-              </li>
+                  <DocIndexPanel node={e} />
+                </a>
+              </Link>
             )
           })}
         </ul>

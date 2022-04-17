@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import { EmojiCode } from 'graphql-let/__generated__/__types__'
 import { BulletEmojiFragment } from '../../apollo/query.graphql'
 import BulletEmojiCreateButton from '../emoji-up-down/bullet-emoji-create-button'
-import MyTooltip from '../tooltip/tooltip'
+import MyTooltip from '../../layout/tooltip/tooltip'
 
 const BULLET_PANEL_EMOJIS: EmojiCode[] = ['PIN', 'UP', 'DOWN']
 

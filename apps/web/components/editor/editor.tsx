@@ -34,6 +34,7 @@ import { withAutoComplete } from './with-auto-complete'
 // import InlineDiscuss from '../inline/inline-discuss'
 import InlineDiscuss from '../inline/inline-discuss'
 import { useSearchPanel } from './use-search-panel'
+import InlineComment from '../inline/inline-comment'
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
   const { attributes, leaf, children } = props
@@ -44,13 +45,17 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
   let className = ''
 
   switch (leaf.tokenType) {
+    case 'comment': {
+      className = 'text-gray-400'
+      break
+    }
+    // case 'mirror-ticker':
+    // case 'mirror-topic':
     case 'author':
-    case 'mirror-ticker':
-    case 'mirror-topic':
     case 'rate':
     case 'topic':
     case 'ticker': {
-      className = 'text-blue-500'
+      className = 'text-blue-600'
       break
     }
     case 'discuss-id':
@@ -156,7 +161,7 @@ const Lc = ({
       }}
     >
       {children}
-      {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />}
+      {/* {element.bulletCopy?.id && <BulletEmojiButtonGroup bulletId={element.bulletCopy.id} />} */}
 
       {/* {sourceNoteId && ( 
        <span contentEditable={false}>
@@ -229,9 +234,11 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           </span>
         </span>
         <span
-          className={`relative flex-grow px-1 ${lc.bulletCopy?.id ? 'cursor-pointer' : 'cursor-default'}`}
-          onMouseEnter={() => setShowPanel(true)}
-          onMouseLeave={() => setShowPanel(false)}
+          className={`relative flex-grow px-1 
+          `}
+          // ${lc.bulletCopy?.id ? 'cursor-pointer' : 'cursor-default'}
+          // onMouseEnter={() => setShowPanel(true)}
+          // onMouseLeave={() => setShowPanel(false)}
         >
           <span
             className={`material-icons text-xs scale-[.65] text-gray-600 
@@ -241,15 +248,15 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
             fiber_manual_record
           </span>
 
-          {lc.bulletCopy?.id && (
+          {/* {lc.bulletCopy?.id && (
             <BulletPanel bulletId={lc.bulletCopy.id} visible={showPanel} onClose={() => setShowPanel(false)} />
-          )}
+          )} */}
         </span>
 
         {/* {lc.id && <AddEmojiButotn bulletId={lc.id} emojiText={'UP'} onCreated={onEmojiCreated} />} */}
       </div>
 
-      <div className=" w-full">{children}</div>
+      <div className=" w-full align-top">{children}</div>
     </div>
   )
 }
@@ -281,6 +288,8 @@ const CustomElement = ({
       return <InlineRate {...{ attributes, children, element }} />
     case 'inline-symbol':
       return <InlineSymbol {...{ attributes, children, element }} />
+    case 'inline-comment':
+      return <InlineComment {...{ attributes, children, element }} />
     case 'lc':
       return <Lc {...{ attributes, children, element, curNoteId: note?.id }} />
     case 'li':

@@ -1,10 +1,12 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import Layout from '../../components/layout'
+import Layout from '../../layout/layout'
 import Popup from '../../components/popup/popup'
-import AuthorRateTable, { TableData } from '../../components/list-row/author-rate-table'
-import AuthorArticleList from '../../components/list-row/author-article-list'
-import AuthorInfo from '../../components/author-info'
+import AuthorRateTable, { TableData } from '../../components/author/author-rate-table'
+import AuthorArticleList from '../../components/author/author-article-list'
+import { useAuthorLazyQuery } from '../../apollo/query.graphql'
+import AuthorMetaModal from '../../components/author/author-meta-modal'
+import AuthorInfo from '../../components/author/author-info'
 
 const mockRateData: TableData[] = [
   {
@@ -40,15 +42,31 @@ const mockRateData: TableData[] = [
 ]
 
 const AuthorPage = (): JSX.Element | null => {
-  const router = useRouter()
   const [showMentionedPopup, setShowMentionedPopup] = useState(false)
-  return (
-    <Layout>
-      <div className="flex flex-col gap-8">
-        <h1>{router.query.author}</h1>
+  const [queryAuthor, { data, loading, error }] = useAuthorLazyQuery()
+  const router = useRouter()
 
-        <AuthorRateTable data={mockRateData} />
+  useEffect(() => {
+    const { query, isReady } = router
+    if (isReady) {
+      const { author } = query
+      if (author && typeof author === 'string') {
+        queryAuthor({ variables: { name: 'firebase' } })
+      }
+    }
+  }, [router])
+
+  // if (!data === undefined || error || loading) {
+  //   return null
+  // }
+
+  return (
+    <Layout buttonRight={data?.author && <AuthorMetaModal data={data.author} />}>
+      <div className="flex flex-col gap-8">
+        <h1>@{router.query.author}</h1>
+        {data?.author?.meta}
         <AuthorInfo />
+        <AuthorRateTable data={mockRateData} />
 
         <div className="">
           <h2 className="my-5  text-lg text-gray-800 ">文章</h2>

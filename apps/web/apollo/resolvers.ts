@@ -1125,7 +1125,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async sessionLogin(_parent, { idToken, csrfToken }, { req, res }, _info) {
-    const claims = await sessionLogin(req, res, idToken)
+    const claims = await sessionLogin(req, res, idToken, csrfToken)
     if (claims.email) {
       const user = await getOrCreateUser(claims.uid, claims.email)
       return user

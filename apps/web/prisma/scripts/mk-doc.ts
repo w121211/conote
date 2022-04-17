@@ -9,8 +9,8 @@ import { Markerline } from '@conote/editor'
 import { Bullet } from '../../components/bullet/bullet'
 
 type MKDocProps = {
-  cardCopy: GQLCard | null
-  cardInput: GQLCardInput | null
+  noteCopy: GQLCard | null
+  noteInput: GQLCardInput | null
   fromDocCid: string | null
   updatedAt?: number
   value: TreeNode<Bullet>[]
@@ -19,23 +19,23 @@ type MKDocProps = {
 export class MKDoc {
   // readonly symbol: string // as CID
   readonly cid: string
-  readonly cardCopy: GQLCard | null // to keep the prev-state,
+  readonly noteCopy: GQLCard | null // to keep the prev-state,
   readonly fromDocCid: string | null
-  cardInput: GQLCardInput | null // required if card is null
+  noteInput: GQLCardInput | null // required if card is null
   updatedAt: number = Date.now() // timestamp
   value: TreeNode<Bullet>[]
 
-  constructor({ cardInput, cardCopy, fromDocCid, value }: MKDocProps) {
-    if (cardCopy && cardInput) {
+  constructor({ noteInput, noteCopy, fromDocCid, value }: MKDocProps) {
+    if (noteCopy && noteInput) {
       throw 'Card-snapshot & card-input cannot co-exist'
     }
-    if (cardCopy === null && cardInput === null) {
+    if (noteCopy === null && noteInput === null) {
       throw 'Need card-input if no card-snapshot'
     }
     this.cid = nanoid()
     this.fromDocCid = fromDocCid
-    this.cardCopy = cardCopy
-    this.cardInput = cardInput
+    this.noteCopy = noteCopy
+    this.noteInput = noteInput
     this.value = value
   }
 
@@ -87,14 +87,14 @@ export class MKDoc {
   }
 
   toGQLCardStateInput(): GQLCardStateInput {
-    const { cid, fromDocCid, cardInput, cardCopy, value } = this
+    const { cid, fromDocCid, noteInput, noteCopy, value } = this
     // const changes = this.updateChanges()
     return {
       cid,
       fromDocCid,
-      noteInput: cardInput,
-      noteId: cardCopy?.id,
-      prevStateId: cardCopy?.state?.id,
+      noteInput,
+      noteId: noteCopy?.id,
+      prevStateId: noteCopy?.state?.id,
       changes: [], // TODO
       value,
     }

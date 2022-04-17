@@ -8,9 +8,11 @@ Adopt monorepo style through yarn workspace, see https://github.com/vercel/next.
   - /k8s --- deployment configs
 
 ```sh
-# from project-root, sync packages versions in order to share dependencies, @see https://github.com/JamieMason/syncpack/
+# from project-root, sync packages versions in order to share dependencies
+# @see https://github.com/JamieMason/syncpack/
 npx syncpack list-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
 npx syncpack fix-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
+
 
 # install all packages
 yarn install
@@ -247,15 +249,21 @@ v-discuss
 - [?] note without bulletin
 - [?] remove bullet emoji -> easier & better for co-editing, note contribution calculated by counting words/lines
 
-v-next
+v-0.2.1
 
 - optimize
   - avoid rerender if possible
   - use SSR if possible
   - consider switch to https://typegraphql.com/
-- loading -> static icon
 - auth
-  - [prior@chi] improve login, logout stablility -> require both server (useMe) & firebase to logged-in, if server-side not logged in, should also revoke client-side firebase token so client-side check not remained logged-in
+  - [v] improve login, logout stablility -> useMe()
+  - [next] switch to next-firebase-auth once it is upport for firebase v9 (token-based)
+    - for now, use firebase official example, cookie-based, no csrf
+    - require both server (useMe) & firebase to logged-in, if server-side not logged in, should also revoke client-side firebase token so client-side check not remained logged-in
+      - next-firebase-auth: auth token in header, support SSR, not support firebase v9 yet
+      - CSRF, if use auth token in header, no need to consider this, also in line with firebase
+      - token based apollo (similar to JWT?)
+        - https://github.com/gladly-team/next-firebase-auth/discussions/100#discussioncomment-1215068
 - user
   - [prior] (req) user-page, include user's notes, rates, interested fields
   - (?) anonymous user
@@ -267,10 +275,10 @@ v-next
   - inline-poll
   - inline filtertag `#filter-tag`
   - inline url, eg https://arxiv.org/abs/2112.00114
-  - [prior@lisa] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
+  - [v] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
   - [?] root li without bullet icon?
   - [pending] 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
-  - [prior@lisa] labels @eg #new-note #fisrt-commit
+  - [v@lisa] labels @eg #new-note #fisrt-commit
   - (req) show doc diff
   - (req) easy to reference sourc url -> eg copy url button, @url
   - (req) show keyword as hints (optional disable by setting)
@@ -324,6 +332,50 @@ v-next
   - check note-copy is in sync with the latest note
     - update note-meta should first check is the latest card
 - [@hsuan] invite code
+- [@lisa] i18n https://react.i18next.com/
+- [@lisa] storybook
+  - [] discuss-modal -> input should not fixed in the bottom
+  - user-page
+    - [] gray-bg
+  - block-editor
+    - block
+      - [] selected block
+      - [] block drag-drop indicator
+    - doc
+      - [] doc-template (easy test bed for parse-render), include inline-items: discuss, symbol, url, comment
+    - editor
+      - [] modal editor
+    - [] search-panel
+    - [] inline
+  - loading -> static icon
+  - global search
+  - user page gray
+- [@chi] block-editor
+  - modal editor
+    - [v] basic
+    - [] switch between titles or close
+  - [] inline items
+  - [v] auto complete
+  - redo/undo
+    - [v] basic redo/undo through elf/history
+    - [] (issue) caret lost after undo
+    - [] textarea value undo, redo
+    - [] textarea value lost after undo
+  - select
+    - [] mouse select
+    - [] keyboard select
+  - [] drag and drop
+  - [] copy and paste
+  - doc store
+    - [] seperated blocks store for each doc
+  - doc save
+- check
+  - seed
+  - discuss emoji, note emoji test add-with-auto-remove -> backend like unlinke return mutations
+  - discuss post
+  - discuss -> inline-discuss
+  - rate & create author
+- mock data
 
 v0.2
 
@@ -334,7 +386,7 @@ v0.2
 - /author
   - [v] gql create/update author
   - [prior@lisa] edit author meta (ie intro)
-  - [prior@lisa] (ui) add @ mark on author
+  - [v] (ui) add @ mark on author
   - [v] author rates <- gql rates by author
   - [pending] author articles <- gql links by author <- similar to rates
 - /editor
@@ -366,7 +418,7 @@ v0.2
 - database
   - [v] migrate table
   - [pending] script for couting words/notes of an user -> use user instead
-- channel
+- branch
   - [prior@hsuan] design channel database schema
   - (req) subdomain/channel, eg [[dev/Browser Extension]]
   - switch commit to channel base, @eg @user/some_topic -> @all/some_topic
@@ -412,7 +464,7 @@ v0.1.1
   - [v] (ui) line space
   - [pending] (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
   - [v] (ui) :pin emoji should not have count
-  - [@lisa] (ui) :pin emoji color -> gray (unclick)
+  - [v] (ui) :pin emoji color -> gray (unclick)
   - [pending@lisa] (ui) conote -> konote & when on-hover button add some feedback
   - [v] (bug) while not logged in can still typing in the editor
 - workspace

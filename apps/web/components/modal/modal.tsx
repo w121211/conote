@@ -1,4 +1,4 @@
-import React, { HtmlHTMLAttributes, ReactNode, useContext } from 'react'
+import React, { ReactNode, useContext } from 'react'
 import { createPortal } from 'react-dom'
 import Popover, { PopoverProps } from '../popover'
 import { ModalContext } from './modal-context'
@@ -11,6 +11,7 @@ const Modal = ({
   buttons,
   topRightBtn,
   mask,
+  topLeftBtn,
 }: {
   children: ReactNode
   visible: boolean
@@ -20,7 +21,14 @@ const Modal = ({
   const modalRoot = useContext(ModalContext)
   if (modalRoot && visible) {
     return createPortal(
-      <Popover hideBoard={onClose} subTitle={subTitle} buttons={buttons} topRightBtn={topRightBtn} mask={mask}>
+      <Popover
+        hideBoard={onClose}
+        subTitle={subTitle}
+        buttons={buttons}
+        topRightBtn={topRightBtn}
+        mask={mask}
+        topLeftBtn={topLeftBtn}
+      >
         {children}
       </Popover>,
       modalRoot,

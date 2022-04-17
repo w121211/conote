@@ -1,39 +1,51 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useState } from 'react'
+import Tooltip from '../../layout/tooltip/tooltip'
 
-const EmojisWrapper = ({
-  showTooltip,
-  onShowTooltip,
-  children,
-}: {
-  showTooltip: boolean
-  children: ReactNode
-  onShowTooltip: () => void
-}) => {
+const EmojisSwitch = ({ disable }: { disable?: boolean }) => {
+  const [showDisable, setShowDisable] = useState(false)
   return (
     <div
-      className={`relative flex items-center leading-none ${
-        showTooltip
-          ? "before:content-[''] before:fixed before:z-50  before:block before:right-0 before:bottom-0 before:left-0 before:top-0 before:cursor-default"
-          : ''
-      } `}
+      className={` relative text-gray-500    
+        `}
+      onClick={e => {
+        if (disable) {
+          e.preventDefault()
+        }
+      }}
+      onMouseOver={() => {
+        if (disable) {
+          setShowDisable(true)
+        }
+      }}
+      onMouseOut={() => {
+        if (disable) {
+          setShowDisable(false)
+        }
+      }}
+      // disabled={disable}
     >
-      <button
-        className="btn-reset-style p-1 hover:bg-gray-100 z-100 rounded"
-        onClick={e => {
-          e.stopPropagation()
-          onShowTooltip()
-        }}
+      <span
+        className={`material-icons-outlined p-1 rounded select-none text-base leading-none 
+    mix-blend-multiply ${
+      disable ? 'bg-transparent text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 hover:text-gray-700'
+    }`}
       >
-        <span
-          className={`material-icons-outlined select-none leading-none 
-  text-base text-gray-400 mix-blend-multiply `}
-        >
-          sentiment_satisfied_alt
-        </span>
-      </button>
-      {children}
+        sentiment_satisfied_alt
+      </span>
+      <Tooltip
+        className="left-1/2 -translate-x-1/2 z-50"
+        visible={showDisable}
+        onClose={() => {
+          setShowDisable(false)
+        }}
+        size="sm"
+        darkMode
+        direction="top"
+      >
+        不能對自己按讚
+      </Tooltip>
     </div>
   )
 }
 
-export default EmojisWrapper
+export default EmojisSwitch

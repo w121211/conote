@@ -1,6 +1,5 @@
 module.exports = {
   preset: 'ts-jest',
-  // roots: ['<rootDir>'],
   roots: ['<rootDir>/lib'],
   setupFiles: ['<rootDir>/setup-tests.ts'],
   silent: false,

@@ -1,4 +1,4 @@
-import { EmojiCode } from 'graphql-let/__generated__/__types__'
+import { EmojiCode } from '@prisma/client'
 
 const emojiToChinese = (code: EmojiCode): string => {
   switch (code) {
@@ -11,13 +11,15 @@ const emojiToChinese = (code: EmojiCode): string => {
     case 'DOWN': {
       return '倒讚'
     }
+    default: {
+      return code
+    }
   }
-  throw `Unkown emoji code ${code}`
+  // throw `Unkown emoji code ${code}`
 }
 
-const EmojiIcon = ({
+export const EmojiIcon = ({
   code,
-  nUps,
   liked,
   showText,
   className,
@@ -26,7 +28,6 @@ const EmojiIcon = ({
   pinClassName,
 }: {
   code: EmojiCode
-  nUps?: number
   liked?: boolean
   showText?: boolean
   className?: string
@@ -50,7 +51,6 @@ const EmojiIcon = ({
           >
             {liked ? 'favorite' : 'favorite_border'}
           </span>
-          {nUps}
           {showText && text}
         </span>
       )
@@ -61,14 +61,7 @@ const EmojiIcon = ({
             isColumn ? 'flex-col' : 'flex-row'
           } ${className ?? ''}`}
         >
-          <span
-            className={` ${liked ? 'material-icons text-blue-600' : 'material-icons-outlined '} text-lg leading-none ${
-              upDownClassName ? upDownClassName : ''
-            } `}
-          >
-            thumb_up_alt
-          </span>
-          {nUps}
+          <span className={`leading-none ${upDownClassName ? upDownClassName : ''} `}>👍</span>
           {showText && text}
         </span>
       )
@@ -80,12 +73,11 @@ const EmojiIcon = ({
           } ${className ?? ''}`}
         >
           <span
-            className={` ${liked ? 'material-icons text-blue-600' : 'material-icons-outlined '} text-lg 
+            className={`
             leading-none ${upDownClassName ? upDownClassName : ''}`}
           >
-            thumb_down_alt
+            👎
           </span>
-          {nUps}
           {showText && text}
         </span>
       )
@@ -97,11 +89,8 @@ const EmojiIcon = ({
           } ${className ?? ''}`}
         >
           {code}
-          {nUps}
           {showText && text}
         </span>
       )
   }
 }
-
-export default EmojiIcon

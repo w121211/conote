@@ -8,16 +8,16 @@ import { inspect } from 'util'
 import { createReadStream, readdirSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
 import { format, parse, parseFile } from 'fast-csv'
-import { Author, Card, CardState, Link, PrismaClient, Rate, RateChoice, Sym } from '@prisma/client'
+import { Author, NoteState, Link, PrismaClient, Rate, RateChoice, Sym } from '@prisma/client'
 
-const keepLastOneOnly = (states: CardState[]) => {
+const keepLastOneOnly = (states: NoteState[]) => {
   states.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
 
   const set = new Set<string>()
-  const filtered: CardState[] = []
+  const filtered: NoteState[] = []
   states.forEach(e => {
-    if (!set.has(e.cardId)) {
-      set.add(e.cardId)
+    if (!set.has(e.noteId)) {
+      set.add(e.noteId)
       filtered.push(e)
     }
   })
@@ -26,7 +26,7 @@ const keepLastOneOnly = (states: CardState[]) => {
 
 type CardStateRow = {
   id: string
-  cardId: string
+  noteId: string
   commitId: string
   userId: string
   body: string
@@ -35,10 +35,10 @@ type CardStateRow = {
   updatedAt: string
 }
 
-const cardStates: CardState[] = []
+const cardStates: NoteState[] = []
 
-parseFile<CardStateRow, CardState>(resolve(process.cwd(), process.argv[2]), { headers: true, encoding: 'utf8' })
-  .transform((data: CardStateRow): CardState => {
+parseFile<CardStateRow, NoteState>(resolve(process.cwd(), process.argv[2]), { headers: true, encoding: 'utf8' })
+  .transform((data: CardStateRow): NoteState => {
     // console.log(data)
     return {
       ...data,
@@ -49,7 +49,7 @@ parseFile<CardStateRow, CardState>(resolve(process.cwd(), process.argv[2]), { he
     }
   })
   .on('error', error => console.error(error))
-  .on('data', (row: CardState) => {
+  .on('data', (row: NoteState) => {
     // console.log(row)
     cardStates.push(row)
   })

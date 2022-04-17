@@ -8,9 +8,18 @@ export interface PopoverProps {
   mask?: boolean
   buttons?: React.ReactNode
   topRightBtn?: React.ReactNode
+  topLeftBtn?: React.ReactNode
 }
 
-const Popover = ({ children, hideBoard, subTitle, mask, buttons, topRightBtn }: PopoverProps): JSX.Element | null => {
+const Popover = ({
+  children,
+  hideBoard,
+  subTitle,
+  mask,
+  buttons,
+  topRightBtn,
+  topLeftBtn,
+}: PopoverProps): JSX.Element | null => {
   // console.log(mask)
 
   return (
@@ -30,15 +39,16 @@ const Popover = ({ children, hideBoard, subTitle, mask, buttons, topRightBtn }: 
       >
         <div className="flex items-center justify-between w-full h-6 px-4 sm:h-8 bg-white">
           <div className="flex items-center">
-            <span
-              className="sm:hidden material-icons-outlined hover:cursor-pointer text-gray-500 hover:text-gray-700 leading-none"
+            {/* <span
+              className="sm:hidden material-icons-outlined hover:cursor-pointer text-xl text-gray-500 hover:text-gray-700 leading-none"
               onClick={(e: any) => {
                 e.stopPropagation()
                 hideBoard()
               }}
             >
               close
-            </span>
+            </span> */}
+            {topLeftBtn}
 
             {subTitle && (
               <span className="ml-5 overflow-hidden whitespace-nowrap text-ellipsis text-gray-600">{subTitle}</span>
