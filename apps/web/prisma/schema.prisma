@@ -259,7 +259,7 @@ model Note {
 
 model Branch {
   id      String      @id @default(cuid())
-  name    String
+  name    String      @unique
   notes   Note[]
   drafts  NoteDraft[]
   NoteDoc NoteDoc[]

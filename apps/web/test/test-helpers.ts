@@ -1,11 +1,12 @@
 // import { hash, hashSync } from 'bcryptjs'
 import { create, isEqual } from 'lodash'
 import { faker } from '@faker-js/faker'
-import { PrismaClient } from '@prisma/client'
+import { prisma, PrismaClient } from '@prisma/client'
 import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
 import { Bullet } from '../components/bullet/bullet'
 import { getBotEmail } from '../lib/models/user-model'
 import { CommitModel } from '../lib/models/commit-model'
+import { NoteDocContent } from '../lib/models/note-doc-model'
 
 // fake incremental id
 let i = 0
@@ -35,7 +36,38 @@ export const TESTUSERS = [
   { id: 'testuser4', email: 'eee@eee.com', password: 'eee' },
 ]
 
+export const TEST_SYMBOLS = [
+  { id: 'sym0', symbol: '[[Apple]]', type: 'TOPIC' },
+  { id: 'sym1', symbol: '[[Google]]', type: 'TOPIC' },
+]
+
 export const TESTAUTHORS = [{ name: 'test-author-1' }]
+
+export const TEST_NOTEDRAFTS = [
+  {
+    id: 'testdraft0',
+    symbol: TEST_SYMBOLS[0].symbol,
+    symId: TEST_SYMBOLS[0].id,
+    userId: 'testuser0',
+    domain: 'domain0',
+    symbolIdMap: { '[[Google]]': '' },
+    blocks: [{ uid: '1', str: 'kkk' }],
+    // discusses: [TEST_DISCUSSES[0].id],
+  },
+  {
+    id: 'testdraft1',
+    symbol: TEST_SYMBOLS[1].symbol,
+    symId: TEST_SYMBOLS[1].id,
+    userId: 'testuser0',
+    domain: 'domain0',
+    symbolIdMap: { '[[Apple]]': '' },
+    blocks: [{ uid: '1', str: 'aba' }],
+    discusses: [TEST_DISCUSSES[1].id, TEST_DISCUSSES[0].id],
+  },
+  { id: 'testdraft2', symbol: '$symbolcc', userId: 'testuser1', domain: 'domain1' },
+]
+
+export const TEST_COMMIT = [{ id: 'commit0', userId: 'testuser0' }]
 
 // --- Tree values ---
 
@@ -107,64 +139,117 @@ export const TestDataHelper = {
     )
   },
 
-  createCommits: async (): Promise<void> => {
-    const v: TreeNode<Bullet>[][] = [[], [bt(0)], [bt(1, [bt(3), bt(4)]), bt(2)]]
+  // createBranch: async (prisma: PrismaClient): Promise<void> => {
+  //   await prisma.branch.create({
+  //     data: { name: 'branch01' },
+  //   })
+  // },
 
-    const values: [TreeNode<Bullet>[], TreeNode<Bullet>[], NodeChange<Bullet>[]][] = [
-      [v[0], v[1]],
-      [v[1], v[2]],
-    ].map(([s, f]) => [s, f, TreeChangeService.getChnages(f, s, isEqual)])
-
-    const commit0 = await CommitModel.create(
-      {
-        noteStateInputs: [
-          {
-            cid: '$AA',
-            prevStateId: null,
-            noteInput: { symbol: '$AA' },
-            value: values[0][1],
-            changes: values[0][2],
-          },
-        ],
-      },
-      TESTUSERS[0].id,
-    )
-    const state0 = commit0.commit.noteStates[0]
-    if (state0 === undefined) {
-      throw 'createCommits(): state0 === undefined'
+  createNoteDrafts: async (prisma: PrismaClient): Promise<void> => {
+    const branch = await prisma.branch.create({
+      data: { name: 'branch01' },
+    })
+    const content: NoteDocContent = {
+      blocks: [{ uid: '1', str: 'kkk' }],
     }
-
-    const commit1 = await CommitModel.create(
-      {
-        noteStateInputs: [
-          {
-            cid: '$AA',
-            prevStateId: state0.id,
-            noteId: state0.noteId,
-            value: values[1][1],
-            changes: values[1][2],
+    await prisma.$transaction(
+      TEST_NOTEDRAFTS.map(e =>
+        prisma.noteDraft.create({
+          data: {
+            id: e.id,
+            symbol: e.symbol,
+            branch: { connect: { id: branch.id } },
+            user: { connect: { id: e.userId } },
+            domain: e.domain,
+            meta: { blockUidAnddiscussIdsDict: e.discusses },
+            content: { symbolIdMap: e.symbolIdMap, blocks: e.blocks },
           },
-          {
-            cid: '$BB',
-            prevStateId: null,
-            // sourceNoteId: state0.noteId,
-            noteInput: { symbol: '$BB' },
-            value: values[0][1],
-            changes: values[0][2],
-          },
-          {
-            cid: '$CC',
-            prevStateId: null,
-            // sourceNoteId: state0.noteId,
-            noteInput: { symbol: '$CC' },
-            value: values[0][1],
-            changes: values[0][2],
-          },
-        ],
-      },
-      TESTUSERS[0].id,
+        }),
+      ),
     )
+    // await prisma.noteDraft.create({
+    //   data: {
+    //     id: 'testerror0',
+    //     symbol: '[[test01]]',
+    //     branch: { connect: { id: branch.id } },
+    //     // sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+    //     // fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
+    //     user: { connect: { id: 'testuser0' } },
+    //     domain: 'domain01',
+    //     content,
+    //   },
+    // })
+    // await prisma.noteDraft.create({
+    //   data: {
+    //     symbol: '[[test02]]',
+    //     branch: { connect: { id: branch.id } },
+    //     // sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+    //     // fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
+    //     user: { connect: { id: 'testuser0' } },
+    //     domain: 'domain01',
+    //     content,
+    //   },
+    // })
   },
+
+  // createCommits: async (): Promise<void> => {
+  //   const v: TreeNode<Bullet>[][] = [[], [bt(0)], [bt(1, [bt(3), bt(4)]), bt(2)]]
+
+  //   const values: [TreeNode<Bullet>[], TreeNode<Bullet>[], NodeChange<Bullet>[]][] = [
+  //     [v[0], v[1]],
+  //     [v[1], v[2]],
+  //   ].map(([s, f]) => [s, f, TreeChangeService.getChnages(f, s, isEqual)])
+
+  //   const commit0 = await CommitModel.create(
+  //     {
+  //       noteStateInputs: [
+  //         {
+  //           cid: '$AA',
+  //           prevStateId: null,
+  //           noteInput: { symbol: '$AA' },
+  //           value: values[0][1],
+  //           changes: values[0][2],
+  //         },
+  //       ],
+  //     },
+  //     TESTUSERS[0].id,
+  //   )
+  //   const state0 = commit0.commit.noteStates[0]
+  //   if (state0 === undefined) {
+  //     throw 'createCommits(): state0 === undefined'
+  //   }
+
+  //   const commit1 = await CommitModel.create(
+  //     {
+  //       noteStateInputs: [
+  //         {
+  //           cid: '$AA',
+  //           prevStateId: state0.id,
+  //           noteId: state0.noteId,
+  //           value: values[1][1],
+  //           changes: values[1][2],
+  //         },
+  //         {
+  //           cid: '$BB',
+  //           prevStateId: null,
+  //           // sourceNoteId: state0.noteId,
+  //           noteInput: { symbol: '$BB' },
+  //           value: values[0][1],
+  //           changes: values[0][2],
+  //         },
+  //         {
+  //           cid: '$CC',
+  //           prevStateId: null,
+  //           // sourceNoteId: state0.noteId,
+  //           noteInput: { symbol: '$CC' },
+  //           value: values[0][1],
+  //           changes: values[0][2],
+  //         },
+  //       ],
+  //     },
+  //     TESTUSERS[0].id,
+  //   )
+  // },
 }
 
 // export async function createTestSymbols(prisma: PrismaClient): Promise<void> {

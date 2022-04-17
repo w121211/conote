@@ -1,4 +1,4 @@
-import { Commit, NoteState, PrismaPromise, Sym } from '@prisma/client'
+import { Commit, NoteState, NoteDraft, NoteDoc, PrismaPromise, Sym } from '@prisma/client'
 import cuid from 'cuid'
 import {
   NoteInput as GQLNoteInput,
@@ -13,6 +13,7 @@ import prisma from '../prisma'
 import { PrismaNote } from './note-model'
 import { NoteStateBody, NoteStateModel, NoteStateParsed } from './note-state-model'
 import { SymbolParsed, SymModel } from './sym-model'
+import { NoteDocModel } from './note-doc-model'
 
 type BulletInsert = {
   gid: string // pre-generated bullet id
