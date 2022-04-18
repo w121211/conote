@@ -1,4 +1,5 @@
 import { setEntities, updateEntities } from '@ngneat/elf-entities'
+import { mockBlocks } from '../../../../test/__mocks__/mock-block'
 import { validateChildrenUids } from '../../src/op/helpers'
 import {
   allDescendants,
@@ -34,7 +35,7 @@ beforeEach(() => {
 const [a0, b1, b2, c3, c4, d5, c6, d7, e8, d9, d10] = blocks
 
 it('allDescendants()', () => {
-  expect(allDescendants(a0).map((e) => e.uid)).toMatchInlineSnapshot(`
+  expect(allDescendants(a0).map(e => e.uid)).toMatchInlineSnapshot(`
     Array [
       "b1",
       "b2",
@@ -48,7 +49,7 @@ it('allDescendants()', () => {
       "e8",
     ]
   `)
-  expect(allDescendants(b1).map((e) => e.uid)).toMatchInlineSnapshot(`
+  expect(allDescendants(b1).map(e => e.uid)).toMatchInlineSnapshot(`
     Array [
       "c3",
       "c4",
@@ -207,5 +208,23 @@ describe('prevBlock()', () => {
 
   it('prev is sibling-kid', () => {
     expect(prevBlock(c4, b1)).toEqual(e8)
+  })
+})
+
+describe('next, prev on mockBlocks', () => {
+  // console.debug(mockBlocks)
+
+  const discussBlock = mockBlocks.find(e => e.str === 'Discuss')
+
+  if (discussBlock === undefined) {
+    console.error(mockBlocks)
+    throw new Error()
+  }
+
+  it('next `Discuss`', () => {
+    blockRepo.update([setEntities(mockBlocks)])
+    expect(nextBlock(discussBlock)?.str).toMatchInlineSnapshot(
+      `"#How Firefox compares to other browsers?#"`,
+    )
   })
 })

@@ -1,3 +1,5 @@
+import { Token } from 'prismjs'
+
 //
 // Component State - commonly used in various components & handlers
 //
@@ -235,9 +237,14 @@ export type NoteDraft = {
 //
 //
 
-export type InlineText = {
-  type: 'text'
+export interface InlineBase {
+  type: string
   str: string
+  token: Token
+}
+
+export interface InlineText extends InlineBase {
+  type: 'text'
 }
 
 // export type InlineAuthor = {
@@ -246,16 +253,14 @@ export type InlineText = {
 //   authorName: string
 // }
 
-export type InlineDiscuss = {
+export interface InlineDiscuss extends InlineBase {
   type: 'inline-discuss'
-  str: string
   title: string
   id?: string
 }
 
-export type InlineFiltertag = {
+export interface InlineFiltertag extends InlineBase {
   type: 'inline-filtertag'
-  str: string
 }
 
 // export type InlineMirror = {
@@ -278,18 +283,16 @@ export type InlineFiltertag = {
 //   str: string
 // }
 
-export type InlinePoll = {
+export interface InlinePoll extends InlineBase {
   type: 'inline-poll'
-  str: string
   id?: string
   choices: string[]
   // pollCopy?: PollFragment
   // vote?: author vote
 }
 
-export type InlineRate = {
+export interface InlineRate extends InlineBase {
   type: 'inline-rate'
-  str: string
   id?: string
   params: string[]
   // rateCopy?: RateFragment
@@ -299,16 +302,14 @@ export type InlineRate = {
   // vote?: author vote
 }
 
-export type InlineSymbol = {
+export interface InlineSymbol extends InlineBase {
   type: 'inline-symbol'
-  str: string
   // symbolType: SymbolType
   symbol: string
 }
 
-export type InlineComment = {
+export interface InlineComment extends InlineBase {
   type: 'inline-comment'
-  str: string
 }
 
 export type InlineItem =

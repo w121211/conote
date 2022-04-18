@@ -15,7 +15,7 @@ export function allDescendants(block: Block): Block[] {
     const block = stack.pop()
     if (block) {
       const children = getBlockChildren(block.uid)
-      children.forEach((e) => stack.push(e))
+      children.forEach(e => stack.push(e))
       kids = kids.concat(children)
     }
   }
@@ -106,7 +106,7 @@ export function prevBlock(block: Block, parent: Block): Block | null {
   const prevSibling = nthSiblingBlock(block, parent, -1)
 
   let prevBlock: Block | undefined
-  if (block.order === 0 && parent.pageTitle === undefined) {
+  if (block.order === 0 && parent.docTitle === undefined) {
     prevBlock = parent
   } else if (prevSibling && !prevSibling.open) {
     prevBlock = prevSibling

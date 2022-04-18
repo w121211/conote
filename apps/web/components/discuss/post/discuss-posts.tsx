@@ -1,10 +1,7 @@
 import moment from 'moment'
 import React, { useEffect, useRef } from 'react'
-import { useForm } from 'react-hook-form'
 import { useDiscussPostsQuery, useMeQuery } from '../../../apollo/query.graphql'
 import { PostTileList } from '../layout-components/post-tile-list'
-import DiscussPostEmojis from './post-emojis'
-import PostOptionsMenu from './post-options-menu'
 
 const dummyData = [
   '測試測試大家好',

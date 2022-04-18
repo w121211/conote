@@ -1,6 +1,9 @@
 import React, { useRef } from 'react'
 import { useForm } from 'react-hook-form'
-import { useCreateDiscussMutation, DiscussFragment } from '../../apollo/query.graphql'
+import {
+  DiscussFragment,
+  useCreateDiscussMutation,
+} from '../../apollo/query.graphql'
 
 interface FormInput {
   title: string
@@ -16,7 +19,9 @@ const CreateDiscussForm = ({
   title: string
   onCreate: (data: DiscussFragment) => void
 }) => {
-  const { handleSubmit, register, setValue } = useForm<FormInput>({ defaultValues: { title } })
+  const { handleSubmit, register, setValue } = useForm<FormInput>({
+    defaultValues: { title },
+  })
   const contentRef = useRef<HTMLDivElement>(null)
   const [createDiscuss] = useCreateDiscussMutation({
     onCompleted(data) {
@@ -28,7 +33,8 @@ const CreateDiscussForm = ({
   const deleteEmptyChild = () => {
     if (
       contentRef.current &&
-      (contentRef.current.innerHTML === '<br>' || contentRef.current?.innerHTML === '<div><br></div>')
+      (contentRef.current.innerHTML === '<br>' ||
+        contentRef.current?.innerHTML === '<div><br></div>')
     ) {
       contentRef.current.innerHTML = ''
     }

@@ -15,7 +15,7 @@ import {
   DragTarget,
   Search,
 } from '../../interfaces'
-import { blockRepo } from '../../stores/block.repository'
+import { blockRepo, blocksStore } from '../../stores/block.repository'
 import { rfdbRepo } from '../../stores/rfdb.repository'
 import { InlineSearchEl } from '../autocomplete-search/autocomplete-search'
 import { Anchor } from './anchor'
@@ -192,6 +192,7 @@ export const BlockEl = ({
 
   if (block === undefined) {
     console.debug('<Block> block === undefined', uid)
+    console.debug(blocksStore.getValue())
     return null
   }
 

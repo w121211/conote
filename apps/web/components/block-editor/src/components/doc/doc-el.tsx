@@ -22,6 +22,7 @@ import { Doc } from '../../interfaces'
 import { useObservable } from '@ngneat/react-rxjs'
 import { docRemove, docSave, historyClear, historyUndo } from '../../events'
 import { hotkey, multiBlockSelection } from '../../listeners'
+import NoteHead from '../../../../note-head'
 
 // const PageWrap = styled.article`
 //   padding: 1rem;
@@ -252,6 +253,7 @@ export const DocEl = ({
       >
         {/* <MoreHoriz /> */}
       </button>
+
       {/* <PopperUnstyled
         open={isPageMenuOpen}
         anchorEl={pageMenuAnchor}

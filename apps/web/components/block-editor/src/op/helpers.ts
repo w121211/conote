@@ -58,7 +58,7 @@ export function getRefBlockOfPosition(position: BlockPosition): Block {
 }
 
 export function blocksDict(blocks: Block[]): Record<string, Block> {
-  return Object.fromEntries(blocks.map((e) => [e.uid, e]))
+  return Object.fromEntries(blocks.map(e => [e.uid, e]))
 }
 
 //
@@ -99,6 +99,8 @@ export function validatePosition({
 
 /**
  * Exaustively check every block's children-uids is matching the children's parent
+ *
+ * @param dict key: block-uid, value: block
  *
  */
 export function validateChildrenUids(dict: Record<string, Block>): void {
@@ -159,7 +161,7 @@ export function validateUid(newUid: string): void {
  */
 export function isDescendant(a: Block, b: Block): boolean {
   const kids = allDescendants(b),
-    found = kids.find((e) => e.uid === a.uid)
+    found = kids.find(e => e.uid === a.uid)
 
   return found !== undefined
 }

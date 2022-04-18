@@ -357,6 +357,21 @@ export function blockSave(uid: string, str: string) {
   }
 }
 
+/**
+ * Replace block's partial string if found and save
+ */
+export function blockStrReplace(
+  uid: string,
+  searchStr: string,
+  replaceStr: string,
+) {
+  const block = getBlock(uid),
+    { str } = block,
+    str_ = str.replace(searchStr, replaceStr)
+
+  blockSave(uid, str_)
+}
+
 //
 // Drop Events
 //
@@ -723,6 +738,8 @@ async function editorChangeSymbolModal(symbol: string | null) {
  * For current opened-doc
  * - If got draft, save doc
  * - If no draft, remove doc
+ *
+ * TODO: route side-effect
  */
 export async function editorRouteUpdate({
   mainSymbol,

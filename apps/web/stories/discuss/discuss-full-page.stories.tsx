@@ -1,5 +1,4 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import { useParameter } from '@storybook/api'
 import React from 'react'
 import DiscussPage from '../../components/discuss/discuss-page'
 import { CreatePostForm } from '../../components/discuss/post/create-post-form'

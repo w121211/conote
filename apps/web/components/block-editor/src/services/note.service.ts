@@ -1,5 +1,8 @@
 import { Note } from '../interfaces'
-import { mockGotNoteAndDraft, mockGotNoteOnly } from './mock-data'
+import {
+  mockGotNoteAndDraft,
+  mockGotNoteOnly,
+} from '../../test/__mocks__/mock-data'
 
 interface INoteService {
   queryNote(symbol: string): Promise<Note | null>

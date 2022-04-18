@@ -6,7 +6,7 @@ import {
   mockGotNoteOnly,
   mockGotDraftOnly,
   mockGotNoteAndDraft,
-} from '../../services/mock-data'
+} from '../../../test/__mocks__/mock-data'
 import ModalProvider from '../../../../modal/modal-context'
 import { editorRouteUpdate } from '../../events'
 

@@ -1,0 +1,461 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Author {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  links     Link[]
+  rates     Rate[]
+}
+
+model Bullet {
+  id        String        @id @default(cuid())
+  docId     String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  doc       NoteDoc       @relation(fields: [docId], references: [id])
+  emojis    BulletEmoji[]
+}
+
+model BulletEmoji {
+  id        String            @id @default(cuid())
+  bulletId  String
+  code      EmojiCode
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  bullet    Bullet            @relation(fields: [bulletId], references: [id])
+  count     BulletEmojiCount?
+  likes     BulletEmojiLike[]
+
+  @@unique([bulletId, code])
+}
+
+model BulletEmojiCount {
+  id            Int         @id @default(autoincrement())
+  bulletEmojiId String      @unique
+  nViews        Int         @default(0)
+  nUps          Int         @default(0)
+  nDowns        Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  bulletEmoji   BulletEmoji @relation(fields: [bulletEmojiId], references: [id])
+}
+
+model BulletEmojiLike {
+  id            Int         @id @default(autoincrement())
+  userId        String
+  bulletEmojiId String
+  choice        LikeChoice
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  bulletEmoji   BulletEmoji @relation(fields: [bulletEmojiId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+
+  @@unique([userId, bulletEmojiId])
+}
+
+model Discuss {
+  id        String         @id @default(cuid())
+  userId    String
+  status    DiscussStatus  @default(ACTIVE)
+  meta      Json           @default("{}")
+  title     String
+  content   String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id])
+  count     DiscussCount? // 1-to-1
+  emojis    DiscussEmoji[]
+  posts     DiscussPost[]
+  notes     Note[]
+  drafts    NoteDraft[]
+}
+
+model DiscussCount {
+  id        Int      @id @default(autoincrement())
+  discussId String   @unique
+  nPosts    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  discuss   Discuss  @relation(fields: [discussId], references: [id])
+}
+
+model DiscussEmoji {
+  id        Int                @id @default(autoincrement())
+  discussId String
+  code      EmojiCode
+  nUps      Int                @default(0) // record number of likes
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  discuss   Discuss            @relation(fields: [discussId], references: [id])
+  count     DiscussEmojiCount?
+  likes     DiscussEmojiLike[]
+
+  @@unique([code, discussId])
+}
+
+model DiscussEmojiCount {
+  id             Int          @id @default(autoincrement())
+  discussEmojiId Int          @unique
+  nUps           Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id])
+}
+
+model DiscussEmojiLike {
+  id             Int          @id @default(autoincrement())
+  discussEmojiId Int          @unique
+  userId         String
+  liked          Boolean
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+
+  @@unique([discussEmojiId, userId])
+}
+
+model DiscussPost {
+  id        Int                @id @default(autoincrement())
+  discussId String
+  userId    String
+  status    DiscussPostStatus  @default(ACTIVE)
+  content   String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  discuss   Discuss            @relation(fields: [discussId], references: [id])
+  user      User               @relation(fields: [userId], references: [id])
+  emojis    DiscussPostEmoji[]
+}
+
+model DiscussPostEmoji {
+  id            Int                    @id @default(autoincrement())
+  discussPostId Int
+  code          EmojiCode
+  nUps          Int                    @default(0)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  discussPost   DiscussPost            @relation(fields: [discussPostId], references: [id])
+  count         DiscussPostEmojiCount?
+  likes         DiscussPostEmojiLike[]
+
+  @@unique([code, discussPostId])
+}
+
+model DiscussPostEmojiCount {
+  id                 Int              @id @default(autoincrement())
+  discussPostEmojiId Int              @unique
+  nUps               Int              @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id])
+}
+
+model DiscussPostEmojiLike {
+  id                 Int              @id @default(autoincrement())
+  discussPostEmojiId Int              @unique
+  userId             String
+  liked              Boolean
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id])
+  user               User             @relation(fields: [userId], references: [id])
+
+  @@unique([userId, discussPostEmojiId])
+}
+
+model NoteEmoji {
+  id        Int             @id @default(autoincrement())
+  branchId  String
+  symId     String
+  code      EmojiCode
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  count     NoteEmojiCount?
+  likes     NoteEmojiLike[]
+  note      Note            @relation(fields: [branchId, symId], references: [branchId, symId])
+
+  @@unique([branchId, symId, code])
+}
+
+model NoteEmojiCount {
+  id          Int       @id @default(autoincrement())
+  noteEmojiId Int       @unique
+  nViews      Int       @default(0)
+  nUps        Int       @default(0)
+  nDowns      Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  noteEmoji   NoteEmoji @relation(fields: [noteEmojiId], references: [id])
+}
+
+model NoteEmojiLike {
+  id          Int       @id @default(autoincrement())
+  noteEmojiId Int
+  userId      String
+  liked       Boolean
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  noteEmoji   NoteEmoji @relation(fields: [noteEmojiId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([noteEmojiId, userId])
+}
+
+model NoteDraft {
+  id        String      @id @default(cuid())
+  branchId  String
+  symId     String?
+  commitId  String?
+  userId    String
+  fromDocId String?
+  domain    String
+  symName   String      @unique
+  status    DraftStatus @default(EDIT)
+  noteMeta  Json        @default("{}")
+  content   Json
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id])
+  fromDoc   NoteDoc?    @relation(fields: [fromDocId], references: [id])
+  branch    Branch      @relation(fields: [branchId], references: [id])
+  note      Note?       @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym       Sym?        @relation(fields: [symId], references: [id])
+  commit    Commit?     @relation(fields: [commitId], references: [id])
+  discusses Discuss[]
+}
+
+model Note {
+  id        String      @id @default(cuid())
+  branchId  String
+  symId     String
+  linkId    String?     @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  link      Link?       @relation(fields: [linkId], references: [id])
+  sym       Sym         @relation(fields: [symId], references: [id])
+  branch    Branch      @relation(fields: [branchId], references: [id])
+  discusses Discuss[]
+  emojis    NoteEmoji[]
+  docs      NoteDoc[]
+  drafts    NoteDraft[]
+
+  @@unique([branchId, symId])
+}
+
+model Branch {
+  id     String      @id @default(cuid())
+  name   String
+  notes  Note[]
+  drafts NoteDraft[]
+}
+
+model NoteDoc {
+  id        String      @id @default(cuid())
+  branchId  String
+  symId     String
+  commitId  String
+  userId    String
+  parentId  String?     @unique
+  status    DocStatus   @default(CANDIDATE)
+  domain    String
+  noteMeta  Json        @default("{}")
+  content   Json
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  commit    Commit      @relation(fields: [commitId], references: [id])
+  parent    NoteDoc?    @relation("DocHistory", fields: [parentId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
+  note      Note        @relation(fields: [branchId, symId], references: [branchId, symId])
+  next      NoteDoc?    @relation("DocHistory")
+  bullets   Bullet[]
+  drafts    NoteDraft[]
+}
+
+// This model need to be modified since the definition is changed in Note and Draft model
+model Commit {
+  id        String      @id @default(cuid())
+  userId    String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id])
+  drafts    NoteDraft[]
+  docs      NoteDoc[]
+}
+
+model Link {
+  id       String  @id @default(cuid())
+  url      String  @unique
+  domain   String
+  scraped  Json    @default("{}")
+  authorId String?
+  author   Author? @relation(fields: [authorId], references: [id])
+  rates    Rate[]
+  notes    Note[]
+}
+
+model Poll {
+  id        String     @id @default(cuid())
+  userId    String
+  type      PollType   @default(FIXED)
+  status    PollStatus @default(OPEN)
+  meta      Json       @default("{}")
+  choices   String[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id])
+  count     PollCount?
+  votes     Vote[]
+}
+
+model PollCount {
+  id         Int      @id @default(autoincrement())
+  pollId     String   @unique
+  nVotes     Int[]
+  nJudgments Int[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  poll       Poll     @relation(fields: [pollId], references: [id])
+}
+
+model Rate {
+  id        String     @id @default(cuid())
+  linkId    String?
+  userId    String
+  authorId  String?
+  symId     String
+  choice    RateChoice
+  body      Json       @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  author    Author?    @relation(fields: [authorId], references: [id])
+  link      Link?      @relation(fields: [linkId], references: [id])
+  sym       Sym        @relation(fields: [symId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+}
+
+// Why not ‘Symbol’? -> Symbol is preserved in js
+model Sym {
+  id        String      @id @default(cuid())
+  type      SymType
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  rates     Rate[]
+  drafts    NoteDraft[]
+  notes     Note[]
+}
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  pollId    String
+  choiceIdx Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  poll      Poll     @relation(fields: [pollId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id                    String                 @id
+  email                 String                 @unique
+  bulletEmojiLikes      BulletEmojiLike[]
+  noteEmojiLikes        NoteEmojiLike[]
+  docs                  NoteDoc[]
+  commits               Commit[]
+  discusses             Discuss[]
+  discussEmojiLikes     DiscussEmojiLike[]
+  discussPosts          DiscussPost[]
+  discussPostEmojiLikes DiscussPostEmojiLike[]
+  polls                 Poll[]
+  rates                 Rate[]
+  votes                 Vote[]
+  drafts                NoteDraft[]
+}
+
+enum DiscussStatus {
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
+}
+
+enum DiscussPostStatus {
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
+}
+
+enum EmojiCode {
+  UP
+  DOWN
+  PIN
+  REPORT
+}
+
+enum LikeChoice {
+  UP
+  NEUTRAL
+}
+
+enum PollFailReason {
+  MIN_VOTES
+  MIN_JUDGMENTS
+  MAJOR_VERDICT
+  VERDICT_AS_FAIL
+  OTHER
+}
+
+enum PollStatus {
+  OPEN
+  JUDGE
+  CLOSE_SUCCESS
+  CLOSE_FAIL
+}
+
+enum PollType {
+  FIXED
+  ADD
+  ADD_BY_POST
+}
+
+enum RateChoice {
+  LONG
+  SHORT
+  HOLD
+}
+
+enum SymType {
+  TICKER
+  TOPIC
+  URL
+}
+
+enum DraftStatus {
+  EDIT
+  COMMIT
+  DROP
+}
+
+enum DocStatus {
+  CANDIDATE
+  MERGE
+  REJECT
+}

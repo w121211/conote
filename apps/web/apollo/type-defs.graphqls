@@ -13,17 +13,15 @@ type Query {
   bulletEmojis(bulletId: ID!): [BulletEmoji!]!
 
   # search by id, symbol, or url, if id or symbol not found return nulll, if url not found will try to fetch and create a new note
-  note(id: ID, symbol: String, url: String): Note
+  # notes(branchId: ID, symbol: String, url: String): Note
 
   # notesByAuthor(authorId: ID!): [Note!]!
 
-  # if not found return null
-  noteState(id: ID!): NoteState
-
+  # need to modify the input (confirm the prisma)
   noteEmojis(noteId: ID!): [NoteEmoji!]!
 
-  # latest note digests
-  noteDigests(afterCommitId: String): [NoteDigest!]!
+  # latest note digests (what does this mean??)
+  # noteDigests(afterCommitId: String): [NoteDigest!]!
 
   discuss(id: ID!): Discuss
 
@@ -67,6 +65,40 @@ type Query {
   ratesByAuthor(authorId: ID!, symId: ID!): [Rate!]!
 
   ratesBySource(linkId: ID!): [Rate!]!
+
+  #-----New-----
+
+  # get all notes for homepage
+  noteDocsJustMerged: [NoteDoc!]!
+
+  # if not found return null
+  note(id: ID!): Note
+
+  # get all docs from note pr records
+  noteDocEntriesHistory(noteId: ID!): [NoteDocEntry!]!
+
+  # get login user's draft
+  noteDraft(id: ID, symbol: String, url: String): NoteDraft
+
+  # myNoteDocs(): [NoteDoc!]!
+
+  # to know all latest commit docs
+  myCommits: [Commit!]!
+
+  # search note by sym or title
+  searchNote(symbol: String, title: String): [Note!]!
+
+  searchByDomain(domain: String!): [Note!]!
+
+  searchByAuthor(name: String!): [Note!]!
+
+  # get user's all drafts for draft-sidebar
+  # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
+  myNoteDraftEntries: [NoteDraftEntry!]!
+
+  # get all candidate docs for verdict
+  noteDocsToMerge: [NoteDoc!]!
+  # -------------End--------------
 
   # 以 note symbol 找該 note 所有的 active hashtags
   # hashtags(symbol: String!): [Hashtag!]
@@ -150,7 +182,10 @@ type Mutation {
   createBulletEmoji(bulletId: ID!, code: EmojiCode!): CreateBulletEmojiResponse!
 
   # create or update an emoji-up
-  upsertBulletEmojiLike(bulletEmojiId: ID!, data: LikeInput!): UpsertBulletEmojiLikeResponse!
+  upsertBulletEmojiLike(
+    bulletEmojiId: ID!
+    data: LikeInput!
+  ): UpsertBulletEmojiLikeResponse!
 
   # @throw validation error
   createCommit(data: CommitInput!): Commit!
@@ -159,19 +194,38 @@ type Mutation {
   createDiscuss(noteId: ID, data: DiscussInput!): Discuss!
   updateDiscuss(id: ID!, data: DiscussInput!): Discuss!
 
-  connectDiscussToNote(discussId: ID!, noteId: ID!, disconnect: Boolean): Boolean!
+  connectDiscussToNote(
+    discussId: ID!
+    noteId: ID!
+    disconnect: Boolean
+  ): Boolean!
 
-  createDiscussEmoji(discussId: ID!, code: EmojiCode!): CreateDiscussEmojiResponse!
-  upsertDiscussEmojiLike(discussEmojiId: ID!, liked: Boolean!): UpsertDiscussEmojiLikeResponse!
+  createDiscussEmoji(
+    discussId: ID!
+    code: EmojiCode!
+  ): CreateDiscussEmojiResponse!
+  upsertDiscussEmojiLike(
+    discussEmojiId: ID!
+    liked: Boolean!
+  ): UpsertDiscussEmojiLikeResponse!
 
   createDiscussPost(discussId: ID!, data: DiscussPostInput!): DiscussPost!
   updateDiscussPost(id: ID!, data: DiscussPostInput!): DiscussPost!
 
-  createDiscussPostEmoji(discussPostId: ID!, code: EmojiCode!): CreateDiscussPostEmojiResponse!
-  upsertDiscussPostEmojiLike(discussPostEmojiId: ID!, liked: Boolean!): UpsertDiscussPostEmojiLikeResponse!
+  createDiscussPostEmoji(
+    discussPostId: ID!
+    code: EmojiCode!
+  ): CreateDiscussPostEmojiResponse!
+  upsertDiscussPostEmojiLike(
+    discussPostEmojiId: ID!
+    liked: Boolean!
+  ): UpsertDiscussPostEmojiLikeResponse!
 
   createNoteEmoji(noteId: ID!, code: EmojiCode!): CreateNoteEmojiResponse!
-  upsertNoteEmojiLike(noteEmojiId: ID!, liked: Boolean!): UpsertNoteEmojiLikeResponse!
+  upsertNoteEmojiLike(
+    noteEmojiId: ID!
+    liked: Boolean!
+  ): UpsertNoteEmojiLikeResponse!
 
   # if newSymbol is given, will also update note symbol
   # @throw validation error
@@ -182,11 +236,30 @@ type Mutation {
   createRate(data: RateInput!): Rate!
   updateRate(id: ID!, data: RateInput!): Rate!
 
+  # also used for merge verdict
   createVote(pollId: ID!, data: VoteInput!): Vote!
 
   # csrf token not support yet
   sessionLogin(idToken: String!, csrfToken: String): User!
   sessionLogout: Boolean!
+
+  #-------- New -------------
+  # not sure about the type of meta, which is for creating from existing note
+  createNoteDraft(symbol: String!, draftInput: NoteDraftInput!): NoteDraft!
+
+  createNoteDraftByLink(
+    linkId: String!
+    draftInput: NoteDraftInput!
+  ): NoteDraft!
+
+  # input not yet decided
+  updateNoteDraft(id: ID!, data: NoteDraftInput!): NoteDraft!
+
+  dropNoteDraft(id: ID!): NoteDraftDropResponse!
+
+  # commit must be created first -> createCommit ->
+  commitNoteDrafts(draftIds: [ID!]!): NoteDraftCommitResponse!
+  #---------------End------------------
 
   # createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
   # createAuthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
@@ -368,15 +441,6 @@ type DiscussPostEmojiLike {
   updatedAt: DateTime!
 }
 
-type Note {
-  id: ID!
-  meta: NoteMeta!
-  sym: Sym!
-  link: Link
-  state: NoteState # 可能為 null
-  updatedAt: DateTime!
-}
-
 type NoteEmoji {
   id: ID!
   code: EmojiCode!
@@ -396,19 +460,21 @@ type NoteEmojiLike {
   updatedAt: DateTime!
 }
 
-type NoteDigest {
-  commitId: String!
-  noteId: String!
-  noteMeta: NoteMeta! # includes title
-  fromNoteId: String
-  sym: Sym!
-  subSyms: [Sym!]!
-  # title: String!
-  picks: [String!]!
-  # rates: [String!]!
-  updatedAt: DateTime!
-}
+# type NoteDigest {
+#   commitId: String!
+#   noteId: String!
+#   noteMeta: NoteMeta! # includes title
+#   fromNoteId: String
+#   branchName: String!
+#   sym: Sym!
+#   subSyms: [Sym!]!
+#   # title: String!
+#   picks: [String!]!
+#   # rates: [String!]!
+#   updatedAt: DateTime!
+# }
 
+# -----------Remove-----------
 type NoteMeta {
   author: String
   # // description?: string
@@ -429,34 +495,15 @@ type NoteState {
   userId: String!
   commitId: String!
   prevId: String
-  body: NoteStateBody!
+  # body: NoteStateBody!
   updatedAt: DateTime!
-}
-
-type NoteStateBody {
-  prevStateId: String
-  sourceNoteId: String
-  # changes: [BulletNodeChange!]!
-  # value: [BulletTreeNode!]!
-  changes: JSON!
-  value: JSON!
-  # symbolToNoteId: JSON!
-  # a symbol-noteId map, so later the cahnge of symbol name won't affect
-}
-
-type Commit {
-  id: String!
-  userId: String!
-  noteStates: [NoteState!]!
-  updatedAt: DateTime!
-  stateIdToCidDictEntryArray: [DictEntryArray!]! # for client to match committed docs
 }
 
 type DictEntryArray {
   k: String!
   v: String!
 }
-
+# ------------End Remove------------
 type Link {
   id: ID!
   url: String!
@@ -493,7 +540,7 @@ type RateBody {
 type Sym {
   id: ID!
   type: SymType!
-  symbol: String!
+  symbol: String! # this is mutable
 }
 
 type Poll {
@@ -592,6 +639,114 @@ type UpsertDiscussPostEmojiLikeResponse {
   count: DiscussPostEmojiCount!
 }
 
+#-------New-------
+
+type Note {
+  id: ID!
+  meta: NoteDocMeta!
+  sym: Sym!
+  link: Link
+  doc: NoteDoc! # current doc 可能為 null (what does this mean?? the newest commit note??) -> 以前針對web-note的特殊情況 現在改成全部都要有doc
+  updatedAt: DateTime!
+}
+
+type NoteDraft {
+  id: ID!
+  # noteId: String  # not using for creating a draft and not this field in db
+  userId: String!
+  commitId: String
+  fromDocId: String
+  domain: String
+  symbol: String
+  meta: NoteDocMeta # not sure about this type
+  content: NoteDocContent!
+  updatedAt: DateTime!
+  status: DraftStatus!
+}
+
+type NoteDraftEntry {
+  id: ID!
+}
+
+# # similar design as NoteDocBody
+# type DraftBody {
+#   body: JSON!
+# }
+
+type NoteDraftDropResponse {
+  response: String!
+}
+
+type NoteDraftCommitResponse {
+  commitId: String!
+  response: String!
+}
+
+type NoteDoc {
+  id: ID!
+  # noteId: String!
+  userId: String!
+  commitId: String!
+  fromDocId: String
+  domain: String
+  meta: NoteDocMeta # not sure about this type
+  content: NoteDocContent!
+  updatedAt: DateTime!
+}
+
+# ----------------Modified---------------
+type Block {
+  uid: ID!
+  str: String!
+  parentUid: String
+  docTitle: String
+}
+
+type NoteDocContent {
+  diff: JSON
+  symbolIdDict: JSON
+  blocks: [Block!]!
+  # a symbol-noteId map, so later the cahnge of symbol name won't affect
+}
+
+type NoteDocMeta {
+  duplicatedSymbols: [String] # store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  blockUidAnddiscussIdsDict: [String] # store discussion ids
+  keywords: [String] # note keywords
+  redirectFroms: [String] # used when duplicate symbol exists
+  redirectTo: String
+  webpage: NoteDocMetaWebpage
+}
+
+type NoteDocMetaWebpage {
+  authors: [String]
+  title: String
+  publishedAt: DateTime # when the webpage content publish at
+  tickers: [String] # tickers mentioned in the webpage content
+}
+
+type NoteDocEntry {
+  id: ID!
+}
+
+type Commit {
+  id: String!
+  userId: String!
+  docs: [NoteDoc!]!
+  updatedAt: DateTime!
+  # stateIdToCidDictEntryArray: [DictEntryArray!]! # for client to match committed docs
+}
+
+# ------------------End-------------------
+
+# type Branch {
+#   id: ID!
+#   name: String!
+#   syms: [Sym]!
+#   drafts: [NoteDraft]!
+#   notes: [Note!]!
+# }
+
 # type PollMeta {
 #   code: String
 #   text: String
@@ -683,6 +838,7 @@ input AuthorMetaSiteInput {
   url: String!
 }
 
+# ---------------Remove------------
 input NoteInput {
   symbol: String!
   # templateProps: NoteTemplatePropsInput
@@ -712,10 +868,7 @@ input NoteStateInput {
   changes: JSON!
   value: JSON! # for comparing changes
 }
-
-input CommitInput {
-  noteStateInputs: [NoteStateInput!]!
-}
+# -------------End Remove--------------
 
 input DiscussInput {
   meta: JSON
@@ -746,6 +899,59 @@ input RateInput {
 input VoteInput {
   choiceIdx: Int!
 }
+
+#------New-------
+# id: ID!
+#   noteId: String
+#   userId: String!
+#   commitId: String
+#   fromDocId: String
+#   meta: NoteDocMeta # not sure about this type
+#   body: NoteDocContent!
+#   updatedAt: DateTime!
+#   status: DraftStatus!
+input NoteDraftInput {
+  # noteId: String   # not using for creating a draft and not this field in db
+  fromDocId: String
+  domain: String!
+  meta: NoteDocMetaInput!
+  content: NoteDocContentInput!
+}
+
+# similar to NoteDocMeta
+input NoteDocMetaInput {
+  duplicatedSymbols: [String]! # to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  keywords: [String]! # note keywords
+  redirectFroms: [String]! # used when duplicate symbol exists
+  redirectTo: String
+  # webpage: NoteDocMetaWebpageInput
+}
+
+# input NoteDocMetaWebpageInput {
+#   authors: [String]!
+#   title: String
+#   publishedAt: DateTime # when the webpage content publish at
+#   tickers: [String]! # tickers mentioned in the webpage content
+# }
+
+input NoteDocContentInput {
+  diff: JSON
+  symbolIdMap: JSON
+  blocks: [BlockInput!]!
+}
+
+input BlockInput {
+  uid: ID!
+  str: String!
+  parentUid: String
+  docTitle: String
+}
+
+# -----------Modified--------------
+input CommitInput {
+  noteDraftInputs: [NoteDraftInput!]!
+}
+#---------------End-----------------
 
 # input CommentInput {
 #   content: String!
@@ -915,3 +1121,16 @@ enum SymType {
 #   ARCHIVE
 #   REPORTED
 # }
+
+#-------New-------
+enum DraftStatus {
+  EDIT
+  COMMIT
+  DROP
+}
+
+enum DocStatus {
+  CANDIDATE
+  MERGE
+  REJECT
+}

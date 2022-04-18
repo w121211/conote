@@ -8,9 +8,11 @@ Adopt monorepo style through yarn workspace, see https://github.com/vercel/next.
   - /k8s --- deployment configs
 
 ```sh
-# from project-root, sync packages versions in order to share dependencies, @see https://github.com/JamieMason/syncpack/
+# from project-root, sync packages versions in order to share dependencies
+# @see https://github.com/JamieMason/syncpack/
 npx syncpack list-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
 npx syncpack fix-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
+
 
 # install all packages
 yarn install
@@ -330,8 +332,11 @@ v-0.2.1
   - check note-copy is in sync with the latest note
     - update note-meta should first check is the latest card
 - [@hsuan] invite code
+- [@lisa] i18n https://react.i18next.com/
 - [@lisa] storybook
-  - [] user-page
+  - [] discuss-modal -> input should not fixed in the bottom
+  - user-page
+    - [] gray-bg
   - block-editor
     - block
       - [] selected block
@@ -343,6 +348,8 @@ v-0.2.1
     - [] search-panel
     - [] inline
   - loading -> static icon
+  - global search
+  - user page gray
 - [@chi] block-editor
   - modal editor
     - [v] basic
@@ -362,6 +369,13 @@ v-0.2.1
   - doc store
     - [] seperated blocks store for each doc
   - doc save
+- check
+  - seed
+  - discuss emoji, note emoji test add-with-auto-remove -> backend like unlinke return mutations
+  - discuss post
+  - discuss -> inline-discuss
+  - rate & create author
+- mock data
 
 v0.2
 

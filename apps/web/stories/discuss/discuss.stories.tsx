@@ -42,6 +42,7 @@ const Template: ComponentStory<typeof DiscussTile> = args => (
     {Default.args?.postList && <Default postList={Default.args.postList} />}
   </>
 )
+
 export const Origin = Template.bind({})
 Origin.args = {
   data: mockData,
