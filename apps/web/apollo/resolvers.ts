@@ -14,7 +14,10 @@ import {
   NoteEmojiCount,
   SymType,
 } from '@prisma/client'
-import { QueryResolvers, MutationResolvers } from 'graphql-let/__generated__/__types__'
+import {
+  QueryResolvers,
+  MutationResolvers,
+} from 'graphql-let/__generated__/__types__'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import fetcher from '../lib/fetcher/fetcher'
 import { hasCount, toStringId } from '../lib/helpers'
@@ -22,7 +25,11 @@ import { AuthorModel } from '../lib/models/author-model'
 // import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
 import { CommitModel } from '../lib/models/commit-model'
 import { NoteMeta, NoteModel } from '../lib/models/note-model'
-import { NoteDocMeta, NoteDocContent, NoteDocModel } from '../lib/models/note-doc-model'
+import {
+  NoteDocMeta,
+  NoteDocContent,
+  NoteDocModel,
+} from '../lib/models/note-doc-model'
 import { NoteDigestModel } from '../lib/models/note-digest-model'
 // import { NoteEmojiModel } from '../lib/models/note-emoji-model'
 import { NoteStateModel } from '../lib/models/note-state-model'
@@ -34,9 +41,17 @@ import { SymModel } from '../lib/models/sym-model'
 // import { DiscussEmojiModel } from '../lib/models/discuss-emoji-model'
 // import { DiscussPostEmojiModel } from '../lib/models/discuss-post-emoji-model'
 import prisma from '../lib/prisma'
-import { SearchAuthorService, SearchDiscussService, SearchSymService } from '../lib/search/search'
+import {
+  SearchAuthorService,
+  SearchDiscussService,
+  SearchSymService,
+} from '../lib/search/search'
 import { ResolverContext } from './apollo-client'
-import { DiscussEmojiModel, DiscussPostEmojiModel, NoteEmojiModel } from '../lib/models/emoji-model'
+import {
+  DiscussEmojiModel,
+  DiscussPostEmojiModel,
+  NoteEmojiModel,
+} from '../lib/models/emoji-model'
 import { selectionSetMatchesResult } from '@apollo/client/cache/inmemory/helpers'
 import { orderBy } from 'lodash'
 import { fn } from 'moment'
@@ -229,17 +244,28 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req)
     const like = await prisma.discussEmojiLike.findUnique({
       where: {
-        discussEmojiId_userId: { discussEmojiId: parseInt(discussEmojiId), userId },
+        discussEmojiId_userId: {
+          discussEmojiId: parseInt(discussEmojiId),
+          userId,
+        },
       },
     })
     return like ? toStringId(like) : null
   },
 
-  async myDiscussPostEmojiLike(_parent, { discussPostEmojiId }, { req }, _info) {
+  async myDiscussPostEmojiLike(
+    _parent,
+    { discussPostEmojiId },
+    { req },
+    _info,
+  ) {
     const { userId } = await isAuthenticated(req)
     const like = await prisma.discussPostEmojiLike.findUnique({
       where: {
-        userId_discussPostEmojiId: { discussPostEmojiId: parseInt(discussPostEmojiId), userId },
+        userId_discussPostEmojiId: {
+          discussPostEmojiId: parseInt(discussPostEmojiId),
+          userId,
+        },
       },
     })
     return like ? toStringId(like) : null
@@ -416,7 +442,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       return {
         ...e,
         meta: e.meta as unknown as NoteMeta,
-        body: { blocks: [], symbolIdMap: {}, diff: {} },
+        body: { blocks: [], symbolIdDict: {}, diff: {} },
       }
     })
   },
@@ -441,7 +467,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       return {
         ...note,
         // TODO: stuff the real data from the note later
-        doc: { ...doc, content: { blocks: [], symbolIdMap: {}, diff: {} } },
+        doc: { ...doc, content: { blocks: [], symbolIdDict: {}, diff: {} } },
         meta: doc.meta as unknown as NoteDocMeta,
       }
     }
@@ -494,7 +520,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         ...draft,
         noteId: draft.note?.id,
         meta: draft.meta as unknown as NoteMeta,
-        content: { blocks: [], symbolIdMap: {}, diff: {} },
+        content: { blocks: [], symbolIdDict: {}, diff: {} },
       }
     }
     return null
@@ -520,7 +546,10 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return commits.map(e => {
       return {
         ...e,
-        docs: e.docs.map(e => ({ ...e, content: { blocks: [], symbolIdMap: {}, diff: {} } })),
+        docs: e.docs.map(e => ({
+          ...e,
+          content: { blocks: [], symbolIdDict: {}, diff: {} },
+        })),
         stateIdToCidDictEntryArray: [{ k: '', v: '' }], // what is this??
       }
     })
@@ -862,7 +891,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     // }
   },
 
-  async upsertBulletEmojiLike(_parent, { bulletEmojiId, data }, { req }, _info) {
+  async upsertBulletEmojiLike(
+    _parent,
+    { bulletEmojiId, data },
+    { req },
+    _info,
+  ) {
     throw 'consider to drop'
     // const { userId } = await isAuthenticated(req)
     // const { like, count } = await BulletEmojiModel.upsertLike({
@@ -878,7 +912,10 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   async createCommit(_parent, { data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    const { commit, stateGidToCid, symsCommitted } = await CommitModel.create(data, userId)
+    const { commit, stateGidToCid, symsCommitted } = await CommitModel.create(
+      data,
+      userId,
+    )
 
     // add newly created symbols to search (if any)
     for (const e of symsCommitted) {
@@ -886,7 +923,10 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
     return {
       ...commit,
-      stateIdToCidDictEntryArray: Object.entries(stateGidToCid).map<{ k: string; v: string }>(([k, v]) => ({ k, v })),
+      stateIdToCidDictEntryArray: Object.entries(stateGidToCid).map<{
+        k: string
+        v: string
+      }>(([k, v]) => ({ k, v })),
     }
   },
 
@@ -943,7 +983,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     throw 'Not authorized, only author is allowed to update discuss'
   },
 
-  async connectDiscussToNote(_parent, { discussId, noteId, disconnect }, { req }, _info) {
+  async connectDiscussToNote(
+    _parent,
+    { discussId, noteId, disconnect },
+    { req },
+    _info,
+  ) {
     await isAuthenticated(req)
     const discuss = disconnect
       ? await prisma.discuss.update({
@@ -966,7 +1011,11 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   async createDiscussEmoji(_parent, { discussId, code }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    const { emoji, like } = await DiscussEmojiModel.create(discussId, code, userId)
+    const { emoji, like } = await DiscussEmojiModel.create(
+      discussId,
+      code,
+      userId,
+    )
     return {
       emoji: {
         ...toStringId(emoji),
@@ -976,7 +1025,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async upsertDiscussEmojiLike(_parent, { discussEmojiId, liked }, { req }, _info) {
+  async upsertDiscussEmojiLike(
+    _parent,
+    { discussEmojiId, liked },
+    { req },
+    _info,
+  ) {
     const { userId } = await isAuthenticated(req)
     const { like, count } = await DiscussEmojiModel.upsertLike({
       liked,
@@ -1018,9 +1072,18 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     throw 'Not authorized, only author is allowed to update discuss'
   },
 
-  async createDiscussPostEmoji(_parent, { discussPostId, code }, { req }, _info) {
+  async createDiscussPostEmoji(
+    _parent,
+    { discussPostId, code },
+    { req },
+    _info,
+  ) {
     const { userId } = await isAuthenticated(req)
-    const { emoji, like } = await DiscussPostEmojiModel.create(parseInt(discussPostId), code, userId)
+    const { emoji, like } = await DiscussPostEmojiModel.create(
+      parseInt(discussPostId),
+      code,
+      userId,
+    )
     return {
       emoji: {
         ...toStringId(emoji),
@@ -1030,7 +1093,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async upsertDiscussPostEmojiLike(_parent, { discussPostEmojiId, liked }, { req }, _info) {
+  async upsertDiscussPostEmojiLike(
+    _parent,
+    { discussPostEmojiId, liked },
+    { req },
+    _info,
+  ) {
     const { userId } = await isAuthenticated(req)
     const { like, count } = await DiscussPostEmojiModel.upsertLike({
       liked,
@@ -1107,7 +1175,13 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     if (note === null) {
       throw 'Target note not found'
     }
-    return await RateModel.create({ choice, symbol: note.sym.symbol, userId, authorId, linkId })
+    return await RateModel.create({
+      choice,
+      symbol: note.sym.symbol,
+      userId,
+      authorId,
+      linkId,
+    })
   },
 
   async updateRate(_parent, { id, data }, { req }, _info) {
@@ -1172,7 +1246,9 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     if (type === SymType.URL) {
       throw new Error('createNoteDraft not allow to create from url')
     }
-    const fromDoc = fromDocId ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } }) : null
+    const fromDoc = fromDocId
+      ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } })
+      : null
     if (fromDocId && fromDoc === null) {
       throw new Error('[createNoteDraft] fromDocId && fromDoc === null')
     }
@@ -1201,7 +1277,9 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { fromDocId, domain, meta, content } = draftInput
     // TODO: access branchId from context
     const branchId = ''
-    const fromDoc = fromDocId ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } }) : null
+    const fromDoc = fromDocId
+      ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } })
+      : null
     if (fromDocId && fromDoc === null) {
       throw new Error('[createNoteDraft] fromDocId && fromDoc === null')
     }
@@ -1332,7 +1410,9 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req)
     const drafts: NoteDraft[] = []
     for (const id of draftIds) {
-      const draft: NoteDraft | null = await prisma.noteDraft.findUnique({ where: { id } })
+      const draft: NoteDraft | null = await prisma.noteDraft.findUnique({
+        where: { id },
+      })
       if (draft) {
         drafts.push(draft)
       }
@@ -1354,7 +1434,9 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       // TODO: extract discussId from the meta from the draft
       const discussIds: string[] = NoteDocModel.getDiscussIdsFromDraft(e)
 
-      const symFromPrisma = await prisma.sym.findUnique({ where: { symbol: e.symbol } })
+      const symFromPrisma = await prisma.sym.findUnique({
+        where: { symbol: e.symbol },
+      })
       const sym = symFromPrisma
         ? symFromPrisma
         : await prisma.sym.create({
@@ -1372,15 +1454,26 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
         }))
       const note = noteDocFromPrisma
         ? await prisma.note.update({
-            where: { branchId_symId: { branchId: noteDocFromPrisma.branchId, symId: sym.id } },
-            data: { discusses: discussIds ? { connect: discussIds.map(e => ({ id: e })) } : undefined },
+            where: {
+              branchId_symId: {
+                branchId: noteDocFromPrisma.branchId,
+                symId: sym.id,
+              },
+            },
+            data: {
+              discusses: discussIds
+                ? { connect: discussIds.map(e => ({ id: e })) }
+                : undefined,
+            },
           })
         : await prisma.note.create({
             data: {
               branch: { connect: { id: e.branchId } },
               sym: { connect: { id: sym.id } },
               link: e.linkId ? { connect: { id: e.linkId } } : undefined,
-              discusses: discussIds ? { connect: discussIds.map(e => ({ id: e })) } : undefined,
+              discusses: discussIds
+                ? { connect: discussIds.map(e => ({ id: e })) }
+                : undefined,
             },
           })
       const noteDoc = await prisma.noteDoc.create({
@@ -1399,13 +1492,19 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       noteDocs.push(noteDoc)
       symbolIdDict.set(sym.symbol, sym.id)
       // Connect draft to commit
-      await prisma.noteDraft.update({ where: { id: e.id }, data: { commit: { connect: { id: commit.id } } } })
+      await prisma.noteDraft.update({
+        where: { id: e.id },
+        data: { commit: { connect: { id: commit.id } } },
+      })
       // Update status of all discusses
-      await prisma.discuss.updateMany({ where: { notes: { every: { id: note.id } } }, data: { status: 'ACTIVE' } })
+      await prisma.discuss.updateMany({
+        where: { notes: { every: { id: note.id } } },
+        data: { status: 'ACTIVE' },
+      })
     }
     // Update symIdMap for each draft with connections to drafts in this commit
     // TODO
-    NoteDocModel.updateSymIdMap(noteDocs, symbolIdDict)
+    NoteDocModel.updateSymbolIdDict(noteDocs, symbolIdDict)
     return { commitId: commit.id, response: 'success' }
   },
   // type NoteDraftCommitResponse {

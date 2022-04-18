@@ -46,15 +46,27 @@ class NoteDocModel {
     return meta.blockUidAnddiscussIdsDict ? meta.blockUidAnddiscussIdsDict : []
   }
 
-  async updateSymbolIdDict(doc: NoteDoc, incomingSymbols: SymbolIdDict): Promise<void> {
+  async updateSymbolIdDict(
+    doc: NoteDoc,
+    incomingSymbols: SymbolIdDict,
+  ): Promise<void> {
     const docContent = doc.content as unknown as NoteDocContent
-    const { symbolIdDict } = docContent
+    const symbolIdDict = docContent?.symbolIdDict ?? null
 
     for (const symbol in symbolIdDict) {
-      symbolIdDict[symbol] = symbol in incomingSymbols ? incomingSymbols[symbol] : null
+      if (symbol in incomingSymbols) {
+        symbolIdDict[symbol] = incomingSymbols[symbol]
+      }
     }
-    const newContent = { diff: docContent.diff, symbolIdDict, blocks: docContent.blocks }
-    await prisma.noteDoc.update({ where: { id: doc.id }, data: { content: newContent } })
+    const newContent = {
+      diff: docContent.diff,
+      symbolIdDict: symbolIdDict,
+      blocks: docContent.blocks,
+    }
+    await prisma.noteDoc.update({
+      where: { id: doc.id },
+      data: { content: newContent },
+    })
   }
 }
 
