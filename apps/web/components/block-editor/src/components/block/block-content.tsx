@@ -15,7 +15,7 @@ import {
   textareaUnmount,
 } from '../../handlers/textarea-handlers'
 import { useEffect } from 'react'
-import './block-content.css'
+// import './block-content.module.css'
 
 // const ContentWrap = styled.div`
 //   grid-area: content;
@@ -334,29 +334,50 @@ export const BlockContent = ({
     if (localStr !== defaultLocalStr) {
       textareaUnmount(uid, localStr)
     }
+    // console.log(isEditing, showEditableDom)
   }, [isEditing, showEditableDom])
 
   return (
     <div
-      className={[
-        'block-content',
-        // isLocked ? 'is-locked' : '',
-        isEditing ? 'is-editing' : '',
-        showEditableDom ? 'show-editable-dom' : '',
-      ].join(' ')}
+      className={`[grid-area:content]
+        grid [grid-template-areas:'main']
+        place-items-stretch place-content-stretch
+        relative z-[2]
+        overflow-visible
+        flex-grow
+        [word-break:break-word]`}
     >
       {(isEditing || showEditableDom) && (
         <textarea
-          // rows={1}
-          // placeholder="Enter text"
-          // {...textareaProps}
-          // onKeyUp={handleContentChange}
-          // defaultValue={rawContent}
-          //
           id={'editable-uid-' + uid}
           data-testid="block-content-textarea"
-          // className={['textarea', empty(selectedItems) && editing ? 'is-editing' : undefined].join('')}
-          // style={{ lineHeight: '1.40em' }}
+          className={`
+            [grid-area:main]
+            relative
+            block
+            [transform:translate3d(0,0,0)]
+            min-h-full
+            p-0
+            m-0
+            border-none
+            outline-none
+            bg-transparent
+            appearance-none
+            resize-none
+            text-inherit
+            font-[inherit]
+          
+            cursor-text
+            
+            
+            ${
+              isEditing
+                ? 'opacity-100 z-[3] leading-[inherit]'
+                : showEditableDom
+                ? 'opacity-0 z-[3] leading-[inherit] hover:leading-[inherit]'
+                : 'opacity-0 hover:leading-[inherit]'
+            }
+            `}
           rows={1}
           value={localStr}
           onChange={e => textareaChange(e, uid, setLocalStr)}
@@ -380,7 +401,14 @@ export const BlockContent = ({
           onMouseEnter={e => textareaMouseEnter(e, uid)}
         />
       )}
-      <div className="rendered-content" style={{ color: 'red' }}>
+      <div
+        className="
+        [grid-area:main]
+        text-inherit
+        font-[inherit]
+        cursor-text"
+        style={{ color: 'red' }}
+      >
         {localStr}
       </div>
       {/* {parseAndRender(state.string.local, originalUid || uid)} */}

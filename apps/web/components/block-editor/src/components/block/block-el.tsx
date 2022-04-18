@@ -26,7 +26,7 @@ import { DropAreaIndicator } from './drop-area-indicator'
 import { Toggle } from './toggle'
 import { throttle } from 'lodash'
 import { useEffect } from 'react'
-import './block-container.css'
+import './block-container.module.css'
 
 // export const BlockContainer = ({
 //   uid,
@@ -159,9 +159,11 @@ import './block-container.css'
 export const BlockEl = ({
   uid,
   isEditable,
+  isChild,
 }: {
   uid: string
   isEditable: boolean
+  isChild?: boolean
 }): JSX.Element | null => {
   const [block] = useObservable(blockRepo.getBlock$(uid)),
     [children] = useObservable(blockRepo.getBlockChildren$(uid)),
@@ -177,9 +179,8 @@ export const BlockEl = ({
     [contextMenu, setContextMenu] = useState({ x: null, y: null, show: false }),
     [dragging, setDragging] = useState(false),
     [dragTarget, setDragTarget] = useState<DragTarget | null>(null),
-    [lastKeyDown, setLastKeyDown] = useState<DestructTextareaKeyEvent | null>(
-      null,
-    ),
+    [lastKeyDown, setLastKeyDown] =
+      useState<DestructTextareaKeyEvent | null>(null),
     [showEditableDom, setShowEditableDom] = useState(false)
 
   //   const [avatarAnchorEl, setAvatarAnchorEl] =
@@ -198,7 +199,7 @@ export const BlockEl = ({
     isOpen = open ?? true,
     childrenBlockEls = useMemo(() => {
       return children.map(e => (
-        <BlockEl key={e.uid} uid={e.uid} isEditable={isEditable} />
+        <BlockEl key={e.uid} uid={e.uid} isEditable={isEditable} isChild />
       ))
     }, [children])
 
@@ -209,11 +210,12 @@ export const BlockEl = ({
       className={
         // [
         `block-container
+        ${isChild ? 'ml-[2em] [grid-area:body]' : ''}
         ${children.length > 0 && isOpen && 'show-tree-indicator'}
-           ${isOpen ? 'is-open' : 'is-closed'}
-           ${isSelected ? 'is-selected' : ''}
-           ${isSelected && dragging && 'is-dragging'}
-           ${isEditing && 'is-editing'}`
+        ${isOpen ? 'is-open' : 'is-closed'}
+        ${isSelected ? 'is-selected' : ''}
+        ${isSelected && dragging ? 'is-dragging' : ''}
+        ${isEditing ? 'is-editing' : ''}`
         // ]
         // isLocked && 'is-locked',
         // linkedRef && 'is-linked-ref',
@@ -235,11 +237,11 @@ export const BlockEl = ({
 
       <div
         className='
-      relative 
-      grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"] 
-      grid-cols-[1em_1em_1fr_auto] 
-      grid-rows-[0_1fr_0] 
-      rounded-lg'
+          relative 
+          grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"] 
+          grid-cols-[1em_1em_1fr_auto] 
+          grid-rows-[0_1fr_0] 
+          rounded-lg'
         //   ref={showPresentUser && setAvatarAnchorEl}
         onMouseEnter={() => {
           // handleMouseEnterBlock
