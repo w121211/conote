@@ -32,7 +32,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Note", "NoteDoc", "NoteDraft", "NoteEmoji", "Link", "Poll", "Sym", "Branch", "User" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", "Branch", "Note", "NoteDoc", "NoteDraft", "NoteEmoji", "Link", "Poll", "Sym",  "User" CASCADE;`
 
   // Bug: comment out to avoid rerun loop  @see https://github.com/facebook/jest/issues/2516
   // fetcher.dump()
@@ -110,6 +110,7 @@ test('updateSymbol', async () => {
             },
           ],
           "symbolIdDict": Object {
+            "$BA": "sym2",
             "[[Google]]": "sym1",
           },
         },
