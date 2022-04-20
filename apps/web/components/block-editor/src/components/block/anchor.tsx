@@ -164,7 +164,13 @@ export interface AnchorProps {
  * @bug firefox draggable won't work, possibly caused by styled-component
  */
 export const Anchor = (props: AnchorProps) => {
-  const { isClosedWithChildren, anchorElement, shouldShowDebugDetails } = props,
+  const {
+      isClosedWithChildren,
+      anchorElement,
+      shouldShowDebugDetails,
+      onDragStart,
+      onDragEnd,
+    } = props,
     ref = React.useRef<HTMLButtonElement>(null)
   // state = useTooltipTriggerState(props)
   // { triggerProps, tooltipProps } = useTooltipTrigger(
@@ -212,6 +218,8 @@ export const Anchor = (props: AnchorProps) => {
       `}
         ref={ref}
         draggable={true}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
         // {...mergeProps(props, focusProps, triggerProps)}
       >
         <svg

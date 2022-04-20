@@ -233,6 +233,7 @@ export const DocEl = ({
   return (
     <article
       className="
+      node-page
     basis-full 
     self-stretch 
     w-full max-w-[60em] 

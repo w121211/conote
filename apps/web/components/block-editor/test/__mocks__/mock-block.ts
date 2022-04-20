@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
-import { Block } from '../../components/block-editor/src/interfaces'
-import { validateChildrenUids } from '../../components/block-editor/src/op/helpers'
+import { Block } from '../../src/interfaces'
+import { validateChildrenUids } from '../../src/op/helpers'
 
 type BlockInput = [string, BlockInput[]] | string
 

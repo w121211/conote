@@ -186,13 +186,13 @@ export const BlockEl = ({
   //   const [avatarAnchorEl, setAvatarAnchorEl] =
   //     React.useState<HTMLDivElement | null>(null)
 
-  useEffect(() => {
-    console.log('isEditing ' + uid, isEditing)
-  }, [isEditing])
+  // useEffect(() => {
+  //   console.log('isEditing ' + uid, isEditing)
+  // }, [isEditing])
 
   if (block === undefined) {
-    console.debug('<Block> block === undefined', uid)
-    console.debug(blocksStore.getValue())
+    // console.debug('<Block> block === undefined', uid)
+    // console.debug(blocksStore.getValue())
     return null
   }
 
