@@ -18,6 +18,7 @@ import {
 } from '../../test-helpers'
 import { commitNoteDrafts } from '../../../lib/models/commit-draft-model'
 import { SymModel } from '../../../lib/models/sym-model'
+import exp from 'constants'
 
 beforeEach(async () => {
   console.log('Writing required data into database')
@@ -46,6 +47,7 @@ test('commitNoteDrafts', async () => {
   const updatedDrafts = await prisma.noteDraft.findMany({
     where: { commit: { id: result.commit.id } },
   })
+
   // Check the status of Draft is changed
   expect(updatedDrafts.map(e => e.status)).toMatchInlineSnapshot(`
     Array [
@@ -83,18 +85,7 @@ test('commitNoteDrafts got discusses id ', async () => {
     }),
   ).toMatchInlineSnapshot(`
     Array [
-      Array [
-        Object {
-          "id": "testdiscuss0",
-          "status": "ACTIVE",
-          "userId": "testuser0",
-        },
-        Object {
-          "id": "testdiscuss1",
-          "status": "ACTIVE",
-          "userId": "testuser1",
-        },
-      ],
+      Array [],
     ]
   `)
 })
@@ -148,7 +139,6 @@ test('commitNoteDrafts fromDoc is empty but there is a latest doc ', async () =>
       },
     },
   })
-  // const result = await commitNoteDrafts([TEST_NOTEDRAFTS[0].id], 'testuser0')
   await expect(async () => {
     await commitNoteDrafts([TEST_NOTEDRAFTS[0].id], TEST_NOTEDRAFTS[0].userId)
   }).rejects.toThrowErrorMatchingInlineSnapshot(
