@@ -380,12 +380,12 @@ export const BlockContent = ({
           onMouseEnter={e => textareaMouseEnter(e, uid)}
         />
       )}
-      <div className="rendered-content" style={{ color: 'red' }}>
+      {/* <div className="rendered-content" style={{ color: 'red' }}>
         {localStr}
-      </div>
+      </div> */}
       {/* {parseAndRender(state.string.local, originalUid || uid)} */}
 
-      {/* <ParseRenderEl blockUid={uid} str={localStr} /> */}
+      <ParseRenderEl blockUid={uid} str={localStr} />
     </div>
   )
 }

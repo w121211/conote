@@ -475,6 +475,7 @@ type NoteEmojiLike {
 # }
 
 # -----------Remove-----------
+
 type NoteMeta {
   author: String
   # // description?: string
@@ -503,7 +504,9 @@ type DictEntryArray {
   k: String!
   v: String!
 }
+
 # ------------End Remove------------
+
 type Link {
   id: ID!
   url: String!
@@ -650,6 +653,18 @@ type Note {
   updatedAt: DateTime!
 }
 
+type NoteDoc {
+  id: ID!
+  # noteId: String!
+  userId: String!
+  commitId: String!
+  fromDocId: String
+  domain: String!
+  meta: NoteDocMeta # not sure about this type
+  content: NoteDocContent!
+  updatedAt: DateTime!
+}
+
 type NoteDraft {
   id: ID!
   # noteId: String  # not using for creating a draft and not this field in db
@@ -680,18 +695,6 @@ type NoteDraftDropResponse {
 type NoteDraftCommitResponse {
   commitId: String!
   response: String!
-}
-
-type NoteDoc {
-  id: ID!
-  # noteId: String!
-  userId: String!
-  commitId: String!
-  fromDocId: String
-  domain: String
-  meta: NoteDocMeta # not sure about this type
-  content: NoteDocContent!
-  updatedAt: DateTime!
 }
 
 # ----------------Modified---------------

@@ -3,12 +3,12 @@ import * as events from '../events'
 import { rfdbRepo } from '../stores/rfdb.repository'
 import { getDatasetChildrenUid, getDatasetUid } from '../utils'
 
-function getDescendantsUids(
+export function getDescendantsUids(
   candidateUids: string[],
   uids_childrenUids: Record<string, string[] | null>,
 ) {
   let descendants: string[] = []
-  const stack = candidateUids
+  const stack = [...candidateUids]
 
   while (stack.length > 0) {
     const uid = stack.shift()
@@ -41,7 +41,7 @@ function getDescendantsUids(
    • 3
   Because of this bug, add additional exit cases to prevent stack overflow."
  */
-function findSelectedItems(
+export function findSelectedItems(
   e: React.MouseEvent<HTMLTextAreaElement>,
   sourceUid: string,
   targetUid: string,
@@ -61,9 +61,9 @@ function findSelectedItems(
       startIndex = indexedUids.find(([_, uid]) => sourceUid === uid)?.[0],
       endIndex = indexedUids.find(([_, uid]) => targetUid === uid)?.[0]
 
-    if (startIndex && endIndex) {
+    if (startIndex !== undefined && endIndex !== undefined) {
       const candidateUids = indexedUids
-          ?.filter(
+          .filter(
             ([i, uid]) =>
               Math.min(startIndex, endIndex) <= i &&
               i <= Math.max(startIndex, endIndex),
@@ -80,6 +80,14 @@ function findSelectedItems(
         selectionOrder = indexedUids
           .filter(([, v]) => newSelectedUids.includes(v))
           .map(([, v]) => v)
+
+      // console.debug(
+      //   indexedUids,
+      //   candidateUids,
+      //   selectedUids,
+      //   toRemoveUids,
+      //   selectionNewUids,
+      // )
 
       if (selectionOrder) {
         events.selectionSetItems(selectionOrder)
@@ -218,7 +226,6 @@ export function textareaMouseEnter(
  * When textarea unmount, save local string to block
  */
 export function textareaUnmount(uid: string, localStr: string) {
-  console.debug('textareaUnmount')
-
+  // console.debug('textareaUnmount')
   events.blockSave(uid, localStr)
 }

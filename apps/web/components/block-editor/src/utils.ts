@@ -65,6 +65,8 @@ export function getDatasetUid(el: HTMLElement): string {
 export function getDatasetChildrenUid(el: HTMLElement): string[] | null {
   const block = el.closest('.block-container'),
     childrenuids = block && block.getAttribute('data-childrenuids')?.split(',')
+
+  console.debug(block)
   return childrenuids ?? null
 }
 

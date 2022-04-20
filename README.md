@@ -354,7 +354,7 @@ v-0.2.1
   - modal editor
     - [v] basic
     - [] switch between titles or close
-  - [] inline items
+  - [] inline items, decorate
   - [v] auto complete
   - redo/undo
     - [v] basic redo/undo through elf/history
