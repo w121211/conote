@@ -94,25 +94,31 @@ export function Layout({
     // }
   }
 
+  // ${
+  //   pinSider
+  //     ? 'xl:px-[10%] lg:px-[4%]'
+  //     : 'md:w-[720px] md:px-2 lg:w-[900px] lg:px-24'
+  // }
+
   return (
-    <div className="flex flex-row-reverse w-screen h-screen  ">
-      <div
-        className={`flex-grow pt-11 pb-[20vh] px-4  ${
-          pinSider ? 'xl:px-[10%] lg:px-[4%]' : 'sm:px-[10%] md:px-[15%] lg:px-[20%]'
-        }  overflow-y-scroll scroll-smooth scrollbar`}
-      >
-        {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
-        <div className="">
-          {children}
-          {/* <LoginModal>{children}</LoginModal> */}
-        </div>
-      </div>
+    <div className="flex w-screen h-screen  ">
       <SideBar
         showMenuHandler={triggerMenuHandler}
         pinMenuHandler={pinMenuHandler}
         showSider={showSider}
         isPined={pinSider}
       />
+      <div
+        className={`flex-grow  pt-11 pb-[20vh]   
+        
+        overflow-y-scroll scroll-smooth scrollbar`}
+      >
+        {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
+        <div className=" mx-auto px-2 w-[425px] md:max-w-[720px] md:w-full lg:max-w-[900px] lg:px-24">
+          {children}
+          {/* <LoginModal>{children}</LoginModal> */}
+        </div>
+      </div>
       <Navbar
         pinedSider={pinSider}
         rbtn={buttonRight}

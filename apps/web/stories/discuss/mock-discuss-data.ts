@@ -1,6 +1,8 @@
-import { DiscussFragment, DiscussPostFragment } from '../../apollo/query.graphql'
-
-const date = new Date()
+import {
+  DiscussFragment,
+  DiscussPostFragment,
+} from '../../apollo/query.graphql'
+import { mockDate } from '../mock-data'
 
 export const mockData: DiscussFragment = {
   __typename: 'Discuss',
@@ -11,8 +13,8 @@ export const mockData: DiscussFragment = {
   title: '標題哈哈 測試',
   content: `測試一下，寫一些東西，這個東西為啥呢? 不能斷航?
   哈哈哈哈哈 給我 內容`,
-  createdAt: date,
-  updatedAt: date,
+  createdAt: mockDate,
+  updatedAt: mockDate,
   count: {
     __typename: 'DiscussCount',
     nPosts: 10,
@@ -27,8 +29,8 @@ export const mockPostList: DiscussPostFragment[] = [
 
     status: 'ACTIVE',
     content: '測試一下，寫一些東西，這個東西為啥呢? 不能斷航?',
-    createdAt: date,
-    updatedAt: date,
+    createdAt: mockDate,
+    updatedAt: mockDate,
   },
   {
     __typename: 'DiscussPost',
@@ -37,8 +39,8 @@ export const mockPostList: DiscussPostFragment[] = [
 
     status: 'ACTIVE',
     content: '測試一下，寫一些東西，這個東西為啥呢? 不能斷航?',
-    createdAt: date,
-    updatedAt: date,
+    createdAt: mockDate,
+    updatedAt: mockDate,
   },
   {
     __typename: 'DiscussPost',
@@ -50,8 +52,8 @@ export const mockPostList: DiscussPostFragment[] = [
       第二行
       第三行
       `,
-    createdAt: date,
-    updatedAt: date,
+    createdAt: mockDate,
+    updatedAt: mockDate,
   },
   {
     __typename: 'DiscussPost',
@@ -59,7 +61,7 @@ export const mockPostList: DiscussPostFragment[] = [
     userId: 'ajsdlkjflkj',
     status: 'ACTIVE',
     content: '測試一下，寫一些東西，這個東西為啥呢? 不能餓不知道要怎麼弄?',
-    createdAt: date,
-    updatedAt: date,
+    createdAt: mockDate,
+    updatedAt: mockDate,
   },
 ]

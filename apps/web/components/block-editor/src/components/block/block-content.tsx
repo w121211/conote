@@ -14,8 +14,7 @@ import {
   textareaUnmount,
 } from '../../handlers/textarea-handlers'
 import { useEffect } from 'react'
-// import './block-content.module.css'
-import './block-content.css'
+
 import ParseRenderEl from '../inline/parse-renderer-el'
 
 // const ContentWrap = styled.div`
@@ -370,7 +369,6 @@ export const BlockContent = ({
           
             cursor-text
             
-            
             ${
               isEditing
                 ? 'opacity-100 z-[3] leading-[inherit]'
@@ -402,7 +400,7 @@ export const BlockContent = ({
           onMouseEnter={e => textareaMouseEnter(e, uid)}
         />
       )}
-      <div
+      {/* <div
         className="
         [grid-area:main]
         text-inherit
@@ -411,10 +409,10 @@ export const BlockContent = ({
         style={{ color: 'red' }}
       >
         {localStr}
-      </div>
+      </div> */}
       {/* {parseAndRender(state.string.local, originalUid || uid)} */}
 
-      {/* <ParseRenderEl blockUid={uid} str={localStr} /> */}
+      <ParseRenderEl blockUid={uid} str={localStr} />
     </div>
   )
 }

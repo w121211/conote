@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
-import { useMeQuery } from '../apollo/query.graphql'
+// import { useMeQuery } from '../apollo/query.graphql'
 
 const Navbar = ({
   rbtn,
@@ -13,7 +13,7 @@ const Navbar = ({
   pinedSider: boolean
   backgroundColor?: string
 }) => {
-  const { data: meData, error, loading } = useMeQuery()
+  // const { data: meData, error, loading } = useMeQuery()
   return (
     <nav
       className={`
@@ -27,7 +27,9 @@ const Navbar = ({
     >
       {/* {!pinedSider && ( */}
       {/* <div> */}
-      <div className={`flex items-center ml-2 ${pinedSider ? 'invisible' : ''}`}>
+      <div
+        className={`flex items-center ml-2 ${pinedSider ? 'invisible' : ''}`}
+      >
         <span
           className="material-icons p-1 rounded leading-none hover:bg-gray-100 hover:cursor-pointer"
           onClick={() => {
