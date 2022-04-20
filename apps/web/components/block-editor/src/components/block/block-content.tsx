@@ -15,7 +15,7 @@ import {
 } from '../../handlers/textarea-handlers'
 import { useEffect } from 'react'
 import './block-content.css'
-import ParseRenderEl from '../inline/parse-renderer-el'
+import ParseRenderEl from '../inline/parse-render-el'
 
 // const ContentWrap = styled.div`
 //   grid-area: content;

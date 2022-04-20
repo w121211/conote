@@ -97,7 +97,7 @@ class BlockRepository {
   getBlock$(uid: string) {
     return blocksStore.pipe(
       selectEntity(uid),
-      tap(v => console.log(`${uid} -> ${v ? v.uid + '-' + v.str : v}`)),
+      // tap(v => console.log(`${uid} -> ${v ? v.uid + '-' + v.str : v}`)),
     )
   }
 
