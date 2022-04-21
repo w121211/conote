@@ -200,7 +200,7 @@ export const Anchor = (props: AnchorProps) => {
       flex-shrink-0
       [grid-area:bullet]
       flex place-items-center place-content-center
-      h-[2em]
+      h-[1.5em]
       w-[1em]
       mr-1
       p-0

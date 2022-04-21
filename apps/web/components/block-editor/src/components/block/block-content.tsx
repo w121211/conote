@@ -15,7 +15,7 @@ import {
 } from '../../handlers/textarea-handlers'
 import { useEffect } from 'react'
 
-import ParseRenderEl from '../inline/parse-renderer-el'
+import ParseRenderEl from '../inline/parse-render-el'
 
 // const ContentWrap = styled.div`
 //   grid-area: content;
@@ -345,7 +345,8 @@ export const BlockContent = ({
         relative z-[2]
         overflow-visible
         flex-grow
-        [word-break:break-word]`}
+        [word-break:break-word]
+        text-gray-700`}
     >
       {(isEditing || showEditableDom) && (
         <textarea
@@ -373,7 +374,7 @@ export const BlockContent = ({
               isEditing
                 ? 'opacity-100 z-[3] leading-[inherit]'
                 : showEditableDom
-                ? 'opacity-0 z-[3] leading-[inherit] hover:leading-[inherit]'
+                ? 'opacity-0 leading-[inherit] hover:leading-[inherit]'
                 : 'opacity-0 hover:leading-[inherit]'
             }
             `}
@@ -412,7 +413,16 @@ export const BlockContent = ({
       </div> */}
       {/* {parseAndRender(state.string.local, originalUid || uid)} */}
 
-      <ParseRenderEl blockUid={uid} str={localStr} />
+      <ParseRenderEl
+        className={`[grid-area:main]
+          text-inherit
+          font-[inherit]
+          cursor-text 
+          whitespace-pre-wrap [word-break:break-word]
+          ${isEditing ? 'opacity-0' : ''}`}
+        blockUid={uid}
+        str={localStr}
+      />
     </div>
   )
 }

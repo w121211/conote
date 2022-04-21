@@ -242,16 +242,21 @@ export const BlockEl = ({
           grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"] 
           grid-cols-[1em_1em_1fr_auto] 
           grid-rows-[0_1fr_0] 
-          rounded-lg'
+          rounded-lg
+          leading-normal
+          my-1
+         '
         //   ref={showPresentUser && setAvatarAnchorEl}
-        onMouseEnter={() => {
+        onMouseEnter={e => {
           // handleMouseEnterBlock
           // isEditable && setRenderEditableDom(true)
+
           isEditable && setShowEditableDom(true)
         }}
-        onMouseLeave={() => {
+        onMouseLeave={e => {
           // handleMouseLeaveBlock
           // isEditable && setRenderEditableDom(false)
+
           isEditable && setShowEditableDom(false)
         }}
       >

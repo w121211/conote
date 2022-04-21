@@ -6,15 +6,21 @@ import { InlineElProps } from '../inline-el'
 const InlineSymbolEl = ({
   children,
   inline,
-}: InlineElProps & { inline: InlineSymbol }): JSX.Element => {
+}: InlineElProps & {
+  inline: InlineSymbol
+}): JSX.Element => {
   return (
-    <span>
-      <button
-        className="btn-reset-style inline text-left text-blue-500 hover:cursor-pointer hover:bg-gray-100"
-        onClick={e => editorRouteUpdate({ modalSymbol: inline.symbol })}
+    <span
+      className="relative text-blue-500 hover:bg-gray-100"
+      onClick={e => editorRouteUpdate({ modalSymbol: inline.symbol })}
+      role="button"
+    >
+      {children}
+      {/* <button
+       
+        
       >
-        {children}
-      </button>
+      </button> */}
     </span>
   )
 }

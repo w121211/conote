@@ -22,7 +22,8 @@ import { Doc } from '../../interfaces'
 import { useObservable } from '@ngneat/react-rxjs'
 import { docRemove, docSave, historyClear, historyUndo } from '../../events'
 import { hotkey, multiBlockSelection } from '../../listeners'
-import NoteHead from '../../../../note-head'
+import { NoteHead } from '../../../../note-head'
+import moment from 'moment'
 
 // const PageWrap = styled.article`
 //   padding: 1rem;
@@ -234,13 +235,13 @@ export const DocEl = ({
     <article
       className="
       node-page
-    basis-full 
-    self-stretch 
-    w-full max-w-[60em] 
-    mx-auto 
-    p-4"
+      basis-full 
+      self-stretch 
+      w-full max-w-[60em] 
+      mx-auto 
+      p-4"
     >
-      <button
+      {/* <button
         className="
       float-left 
       w-8 h-8 
@@ -252,8 +253,8 @@ export const DocEl = ({
         // isPressed={isPageMenuOpen}
         onClick={handlePressMenuToggle}
       >
-        {/* <MoreHoriz /> */}
-      </button>
+        <MoreHoriz />
+      </button> */}
 
       {/* <PopperUnstyled
         open={isPageMenuOpen}
@@ -325,7 +326,16 @@ export const DocEl = ({
         <DocPlaceholder />
       )} */}
 
-      <button
+      <NoteHead
+        isNew
+        symbol="test"
+        title="test test test"
+        link="http://asdfasdf.asdfasdf.com"
+        fetchTime={new Date()}
+        nodeId="asdfasdfas"
+      />
+
+      {/* <button
         onClick={() => {
           docSave(doc)
         }}
@@ -339,7 +349,7 @@ export const DocEl = ({
         }}
       >
         Remove
-      </button>
+      </button> */}
 
       {
         // children ? (

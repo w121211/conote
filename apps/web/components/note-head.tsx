@@ -21,8 +21,8 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
   const { isNew, symbol, title, link, fetchTime, nodeId } = props
 
   return (
-    <div className="pl-9 mb-2">
-      <div className="flex items-center gap-2 mb-5">
+    <div className="ml-6 mb-5">
+      <div className="flex items-center gap-2 mb-4">
         <span
           className="h-fit bg-orange-200/60 text-gray-900 px-2 rounded
              font-[Consolas] select-none font-bold text-xl"
@@ -40,7 +40,7 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
         )}
       </div>
 
-      <div className="relative ">
+      <div className="relative mb-1">
         <h1 className=" line-clamp-2 break-words text-gray-800 ">
           {link && (
             <span className="material-icons text-blue-400 text-3xl align-bottom">
@@ -52,7 +52,7 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
       </div>
 
       {(fetchTime || link) && (
-        <div className="flex flex-col pt-2 text-gray-400 text-sm italic">
+        <div className="flex flex-col text-gray-400 text-sm italic">
           {/* {(doc.noteCopy?.sym.type === 'TICKER' || (doc.noteCopy === null && doc.getSymbol().startsWith('$'))) &&
             metaInput.title && <span className="text-sm ">{metaInput.title}</span>} */}
           {/* {metaInput.author && (
