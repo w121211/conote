@@ -291,6 +291,54 @@ fragment vote on Vote {
   pollId
   choiceIdx
 }
+
+# -----------NEW-----------
+fragment note on Note {
+  __typename
+  id
+  meta
+  sym
+  link
+  doc
+  updatedAt
+}
+
+fragment noteDoc on NoteDoc {
+  __typename
+  id
+  userId
+  commitId
+  fromDocId
+  domain
+  meta
+  content
+  updatedAt
+}
+
+fragment noteDocEntry on NoteDocEntry {
+  __typename
+  id
+}
+
+fragment noteDraft on NoteDraft {
+  __typename
+  id
+  userId
+  commitId
+  fromDocId
+  domain
+  symbol
+  meta
+  content
+  updatedAt
+  status
+}
+
+fragment noteDraftEntry on NoteDraftEntry {
+  __typename
+  id
+}
+#--------------END------------------
 # DELETE-------------------
 # fragment commentCount on CommentCount {
 #   __typename
@@ -396,12 +444,61 @@ query BulletEmojis($bulletId: ID!) {
     ...bulletEmoji
   }
 }
+# --------NEW--------
+query Note($id: ID!) {
+  note(id: $id) {
+    ...note
+  }
+}
 
-# query Note($id: ID, $symbol: String, $url: String) {
-#   note(id: $id, symbol: $symbol, url: $url) {
-#     ...note
-#   }
-# }
+query NoteDocsJustMerged {
+  noteDocsJustMerged {
+    ...noteDoc
+  }
+}
+
+query noteDocEntriesHistory($noteId: ID!) {
+  noteDocEntriesHistory(noteId: $noteId) {
+    ...noteDocEntry
+  }
+}
+
+query noteDraft($id: ID, $symbol: String, $url: String) {
+  noteDraft(id: $id, symbol: $symbol, url: $url) {
+    ...noteDraft
+  }
+}
+
+query searchNote($symbol: String, $title: String) {
+  searchNote(symbol: $symbol, title: $title) {
+    ...note
+  }
+}
+
+query searchByDomain($domain: String!) {
+  searchByDomain(domain: $domain) {
+    ...note
+  }
+}
+
+query searchByAuthor($name: String!) {
+  searchByAuthor(domain: $name) {
+    ...note
+  }
+}
+
+query myNoteDraftEntries {
+  myNoteDraftEntries {
+    ...NoteDraftEntry
+  }
+}
+
+query noteDocsToMerge {
+  noteDocsToMerge {
+    ...noteDoc
+  }
+}
+#-----------END----------------
 
 query NoteEmojis($noteId: ID!) {
   noteEmojis(noteId: $noteId) {
@@ -533,7 +630,7 @@ query RatesByAuthor($authorId: ID!, $symId: ID!) {
     ...rate
   }
 }
-# DELETE-----------------
+# COMMENT-----------------
 # query Board($id: ID!) {
 #   board(id: $id) {
 #     ...board
@@ -563,7 +660,7 @@ query RatesByAuthor($authorId: ID!, $symId: ID!) {
 #     ...boardLike
 #   }
 # }
-
+# END------------------
 mutation CreateAuthor($data: AuthorInput!) {
   createAuthor(data: $data) {
     ...author
@@ -755,7 +852,7 @@ mutation SessionLogin($idToken: String!, $csrfToken: String) {
 mutation SessionLogout {
   sessionLogout
 }
-
+# -------COMMENT---------
 # mutation CreateComment($boardId: ID!, $pollId: ID, $data: CommentInput!) {
 #   createComment(boardId: $boardId, pollId: $pollId, data: $data) {
 #     ...comment
@@ -843,3 +940,4 @@ mutation SessionLogout {
 #     ...noteBody
 #   }
 # }
+# END-----------------------
