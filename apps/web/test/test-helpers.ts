@@ -23,6 +23,12 @@ const TEST_DISCUSSES = [
     userId: 'testuser0',
   },
   { id: 'testdiscuss1', title: faker.lorem.lines(1), userId: 'testuser1' },
+  {
+    id: 'testdiscuss2',
+    title: faker.lorem.lines(1),
+    content: faker.lorem.paragraph(),
+    userId: 'testuser1',
+  },
 ]
 
 const TEST_POSTS = [
@@ -68,7 +74,10 @@ export const TEST_NOTEDRAFTS = [
     domain: 'domain0',
     symbolIdDict: { '[[Apple]]': '' },
     blocks: [{ uid: '1', str: 'aba' }],
-    discusses: [TEST_DISCUSSES[1].id, TEST_DISCUSSES[0].id],
+    discusses: {
+      1: [TEST_DISCUSSES[1].id],
+      2: [TEST_DISCUSSES[0].id, TEST_DISCUSSES[2].id],
+    },
   },
   {
     id: 'testdraft2',
@@ -185,7 +194,7 @@ export const TestDataHelper = {
             branch: { connect: { name: TEST_BRANCH[0].name } },
             user: { connect: { id: e.userId } },
             domain: e.domain,
-            meta: { blockUidAnddiscussIdsDict: e.discusses },
+            meta: { blockUid_discussIdsDict: e.discusses },
             content: { symbolIdDict: e.symbolIdDict, blocks: e.blocks },
           },
         }),

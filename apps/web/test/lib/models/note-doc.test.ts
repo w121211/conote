@@ -39,6 +39,35 @@ afterAll(async () => {
   await prisma.$disconnect()
 })
 
+test('getDiscussIdsFromDraft', async () => {
+  const draft = await prisma.noteDraft.create({
+    data: {
+      id: TEST_NOTEDRAFTS[1].id,
+      symbol: TEST_NOTEDRAFTS[1].symbol,
+      branch: { connect: { name: TEST_BRANCH[0].name } },
+      user: { connect: { id: TEST_NOTEDRAFTS[1].userId } },
+      domain: TEST_NOTEDRAFTS[1].domain,
+      meta: { blockUid_discussIdsDict: TEST_NOTEDRAFTS[1].discusses },
+      content: {
+        symbolIdDict: TEST_NOTEDRAFTS[1].symbolIdDict,
+        blocks: TEST_NOTEDRAFTS[1].blocks,
+      },
+    },
+  })
+  const result = noteDocModel.getDiscussIdsFromDraft(draft)
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "1": Array [
+        "testdiscuss1",
+      ],
+      "2": Array [
+        "testdiscuss0",
+        "testdiscuss2",
+      ],
+    }
+  `)
+})
+
 test('updateSymbol', async () => {
   const syms = await prisma.$transaction(
     TEST_SYMBOLS.map(e =>

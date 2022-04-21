@@ -85,7 +85,23 @@ test('commitNoteDrafts got discusses id ', async () => {
     }),
   ).toMatchInlineSnapshot(`
     Array [
-      Array [],
+      Array [
+        Object {
+          "id": "testdiscuss0",
+          "status": "ACTIVE",
+          "userId": "testuser0",
+        },
+        Object {
+          "id": "testdiscuss1",
+          "status": "ACTIVE",
+          "userId": "testuser1",
+        },
+        Object {
+          "id": "testdiscuss2",
+          "status": "ACTIVE",
+          "userId": "testuser1",
+        },
+      ],
     ]
   `)
 })

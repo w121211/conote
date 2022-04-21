@@ -71,9 +71,11 @@ export async function commitNoteDrafts(
     const blockId_discussIds: Record<string, string[]> | null =
       noteDocModel.getDiscussIdsFromDraft(e)
     const discussIds: string[] = []
+
     if (blockId_discussIds) {
       for (const blockId in blockId_discussIds) {
-        discussIds.concat(blockId_discussIds[blockId].map(e => e))
+        const values = blockId_discussIds[blockId]
+        discussIds.push(...values)
       }
     }
 
@@ -213,11 +215,10 @@ export async function commitNoteDrafts(
         discusses: true,
       },
     })
-    if (note === null) {
-      throw new Error('One or more Notes do not exist.')
-    }
-    console.log(`note ${note.id}`)
-    notes.push(note)
+    // if (note === null) {
+    //   throw new Error('One or more Notes do not exist.')
+    // }
+    notes.push(note!)
   }
 
   return { symbolToSymIdDicts, commit, notes, noteDocs }
