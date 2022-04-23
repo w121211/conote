@@ -6,7 +6,7 @@ import prisma from '../prisma'
 
 export type NoteDocMeta = {
   duplicatedSymbols?: string[] // to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
-  blockUidAnddiscussIdsDict?: string[] // store discussion ids
+  blockUid_discussIdsDict?: Record<string, string[]> // store discussion ids
   keywords?: string[] // note keywords
   redirectFroms?: string[] // used when duplicate symbol exists
   redirectTo?: string
@@ -39,11 +39,11 @@ export type NoteDocContent = {
 export type SymbolIdDict = Record<string, string | null>
 
 class NoteDocModel {
-  getDiscussIdsFromDraft(draft: NoteDraft): string[] {
+  getDiscussIdsFromDraft(draft: NoteDraft): Record<string, string[]> | null {
     // get the meta in the draft
     const meta = draft.meta as unknown as NoteDocMeta
     // get the snippet for discussIds (need to know what the snippet looks like)
-    return meta.blockUidAnddiscussIdsDict ? meta.blockUidAnddiscussIdsDict : []
+    return meta.blockUid_discussIdsDict ? meta.blockUid_discussIdsDict : null
   }
 
   async updateSymbolIdDict(

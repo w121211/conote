@@ -23,6 +23,12 @@ const TEST_DISCUSSES = [
     userId: 'testuser0',
   },
   { id: 'testdiscuss1', title: faker.lorem.lines(1), userId: 'testuser1' },
+  {
+    id: 'testdiscuss2',
+    title: faker.lorem.lines(1),
+    content: faker.lorem.paragraph(),
+    userId: 'testuser1',
+  },
 ]
 
 const TEST_POSTS = [
@@ -56,7 +62,7 @@ export const TEST_NOTEDRAFTS = [
     symId: TEST_SYMBOLS[0].id,
     userId: 'testuser0',
     domain: 'domain0',
-    symbolIdDict: { '[[Google]]': '' },
+    symbolIdDict: { '[[Google]]': '', $BA: '' },
     blocks: [{ uid: '1', str: 'kkk' }],
     // discusses: [TEST_DISCUSSES[0].id],
   },
@@ -68,12 +74,16 @@ export const TEST_NOTEDRAFTS = [
     domain: 'domain0',
     symbolIdDict: { '[[Apple]]': '' },
     blocks: [{ uid: '1', str: 'aba' }],
-    discusses: [TEST_DISCUSSES[1].id, TEST_DISCUSSES[0].id],
+    discusses: {
+      1: [TEST_DISCUSSES[1].id],
+      2: [TEST_DISCUSSES[0].id, TEST_DISCUSSES[2].id],
+    },
   },
   {
     id: 'testdraft2',
     symbol: TEST_SYMBOLS[2].symbol,
     symId: TEST_SYMBOLS[2].id,
+    fromDocId: 'testdoc0',
     userId: 'testuser1',
     domain: 'domain1',
     symbolIdDict: { '[[Apple]]': '' },
@@ -168,22 +178,23 @@ export const TestDataHelper = {
   },
 
   createNoteDrafts: async (prisma: PrismaClient): Promise<void> => {
-    const branch = await prisma.branch.create({
-      data: { name: TEST_BRANCH[0].name },
-    })
-    const content: NoteDocContent = {
-      blocks: [{ uid: '1', str: 'kkk' }],
-    }
+    // const branch = await prisma.branch.create({
+    //   data: { name: 'branch01' },
+    // })
+    // const content: NoteDocContent = {
+    //   blocks: [{ uid: '1', str: 'kkk' }],
+    // }
+
     await prisma.$transaction(
       TEST_NOTEDRAFTS.map(e =>
         prisma.noteDraft.create({
           data: {
             id: e.id,
             symbol: e.symbol,
-            branch: { connect: { id: branch.id } },
+            branch: { connect: { name: TEST_BRANCH[0].name } },
             user: { connect: { id: e.userId } },
             domain: e.domain,
-            meta: { blockUidAnddiscussIdsDict: e.discusses },
+            meta: { blockUid_discussIdsDict: e.discusses },
             content: { symbolIdDict: e.symbolIdDict, blocks: e.blocks },
           },
         }),
