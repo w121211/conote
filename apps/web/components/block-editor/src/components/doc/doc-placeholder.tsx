@@ -10,5 +10,8 @@ const Message = ({ children }: { children: ReactNode }) => {
 }
 
 export const DocPlaceholder = () => (
-  <Message>Doc Placeholder (show template)</Message>
+  <>
+    <Message>Doc Placeholder (show template)</Message>
+    <button>Template A</button>
+  </>
 )

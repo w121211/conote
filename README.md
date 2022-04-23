@@ -354,8 +354,11 @@ v-0.2.1
   - modal editor
     - [v] basic
     - [] switch between titles or close
+  - template
+    - [] create a template
   - inline items
     - [v] decorate (render-token)
+    - [v] inline-symbol
   - [v] auto complete
   - redo/undo
     - [v] basic redo/undo through elf/history
@@ -365,15 +368,15 @@ v-0.2.1
   - select
     - [] mouse select
     - [] keyboard select
-  - [] drag and drop
+  - [v] drag and drop (not fully tested)
   - [] copy and paste
   - doc store
     - [] seperated blocks store for each doc
   - doc save
 - check
   - seed
-  - discuss emoji, note emoji test add-with-auto-remove -> backend like unlinke return mutations
-  - discuss post
+  - [v] discuss emoji, note emoji test add-with-auto-remove -> backend like unlinke return mutations
+  - [v] discuss post
   - discuss -> inline-discuss
   - rate & create author
 - mock data

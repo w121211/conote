@@ -47,7 +47,7 @@ import { allDescendants } from './queries'
 //
 
 function reorderOps(reorderBlocks: Block[]): BlockReducer[] {
-  return reorderBlocks.map((e) => updateEntities(e.uid, { order: e.order }))
+  return reorderBlocks.map(e => updateEntities(e.uid, { order: e.order }))
 }
 
 //
@@ -125,7 +125,7 @@ export function blockMoveOp(
 
     ops.push(
       updateEntities(oldParent.uid, {
-        childrenUids: children_.map((e) => e.uid),
+        childrenUids: children_.map(e => e.uid),
         editTime,
       }),
     )
@@ -145,11 +145,11 @@ export function blockMoveOp(
 
     ops = ops.concat([
       updateEntities(oldParent.uid, {
-        childrenUids: originChildren_.map((e) => e.uid),
+        childrenUids: originChildren_.map(e => e.uid),
         editTime,
       }),
       updateEntities(newParentBlock.uid, {
-        childrenUids: destChildren_.map((e) => e.uid),
+        childrenUids: destChildren_.map(e => e.uid),
         editTime,
       }),
     ])
@@ -197,7 +197,7 @@ export function blockNewOp(
   let ops: BlockReducer[] = [
     addEntities([newBlock]),
     updateEntities(newParentBlock.uid, {
-      childrenUids: children_.map((e) => e.uid),
+      childrenUids: children_.map(e => e.uid),
       editTime,
     }),
   ]
@@ -229,7 +229,7 @@ export function blockOpenOp(uid: string, open: boolean): BlockReducer[] {
  */
 export function blockRemoveOp(removeBlock: Block): BlockReducer[] {
   const kids = allDescendants(removeBlock),
-    kidsUids = kids.map((e) => e.uid),
+    kidsUids = kids.map(e => e.uid),
     parent = removeBlock.parentUid ? getBlock(removeBlock.parentUid) : null
 
   let ops: BlockReducer[] = []
@@ -239,7 +239,7 @@ export function blockRemoveOp(removeBlock: Block): BlockReducer[] {
       reorder_ = reorder(parentChildren, parentChildren_)
     ops = ops.concat([
       updateEntities(parent.uid, {
-        childrenUids: parentChildren_.map((e) => e.uid),
+        childrenUids: parentChildren_.map(e => e.uid),
       }),
       ...reorderOps(reorder_),
     ])
@@ -251,6 +251,29 @@ export function blockRemoveOp(removeBlock: Block): BlockReducer[] {
 
 export function blockSaveOp(uid: string, str: string): BlockReducer[] {
   return [updateEntities(uid, { str, editTime: Date.now() })]
+}
+
+/**
+ * @param parent blocks attach to, only allow non-children block to insert
+ * @param blocks
+ */
+export function blocksInsertOp(parent: Block, blocks: Block[]): BlockReducer[] {
+  const parentChildrenUids = blocks
+    .filter(e => e.parentUid === parent.uid)
+    .map(e => e.uid)
+
+  if (parent.childrenUids.length > 0)
+    throw new Error('Only allow non children block to insert')
+  if (parentChildrenUids.length === 0)
+    throw new Error('No blocks are attached to the parent')
+
+  return [
+    updateEntities(parent.uid, {
+      editTime: Date.now(),
+      childrenUids: parentChildrenUids,
+    }),
+    addEntities(blocks),
+  ]
 }
 
 //
@@ -300,7 +323,7 @@ export function blockMergeChainOp(
   //   saveOp = blockSaveOp(mergeBlock.uid, mergeBlock.str + value)
   // return [...moveOps, ...removeOp, ...saveOp]
 
-  const fns: BlockReducerFn[] = removeBlock.childrenUids.map((e) => {
+  const fns: BlockReducerFn[] = removeBlock.childrenUids.map(e => {
     const block = getBlock(e)
     return () =>
       blockMoveOp(block, { refBlockUid: mergeBlock.uid, relation: 'last' })
@@ -348,7 +371,7 @@ export function blockMergeWithUpdatedChainOp(
   //   }),
   //   deleteAndMergeOp = moveOps.concat([removeOp, saveOp])
 
-  const fns: BlockReducerFn[] = removeBlock.childrenUids.map((e) => {
+  const fns: BlockReducerFn[] = removeBlock.childrenUids.map(e => {
     const block = getBlock(e)
     return () =>
       blockMoveOp(block, { refBlockUid: mergeBlock.uid, relation: 'last' })
@@ -407,7 +430,7 @@ export function blockMoveChainOp(
  *
  */
 export function blockRemoveManyChainOp(removeUids: string[]): BlockReducerFn[] {
-  const chainOps: BlockReducerFn[] = removeUids.map((e) => {
+  const chainOps: BlockReducerFn[] = removeUids.map(e => {
     const block = getBlock(e)
     return () => blockRemoveOp(block)
   })
@@ -503,7 +526,7 @@ export function docLoadOp(
   if (docRepo.findDoc(title) !== undefined) throw new Error('Doc is existed')
 
   const { content } = noteDraft
-  const docBlock = content.find((e) => e.docTitle === title)
+  const docBlock = content.find(e => e.docTitle === title)
 
   if (docBlock === undefined)
     throw new Error(
@@ -539,7 +562,7 @@ export function docNewOp(
 
   if (note) {
     const { doc: noteDoc } = note,
-      docBlock = noteDoc.content.find((e) => e.docTitle === title)
+      docBlock = noteDoc.content.find(e => e.docTitle === title)
 
     if (docBlock === undefined)
       throw new Error(

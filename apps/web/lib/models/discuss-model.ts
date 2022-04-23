@@ -1,7 +1,7 @@
 import { Discuss } from '@prisma/client'
 import prisma from '../prisma'
 
-export const DiscussModel = {
+class DiscussModel {
   async getAll(): Promise<Discuss[]> {
     console.log('Retreiving all discusses from database...')
 
@@ -24,5 +24,7 @@ export const DiscussModel = {
       cursor = res[res.length - 1].id
     }
     return discusses
-  },
+  }
 }
+
+export const discussModel = new DiscussModel()
