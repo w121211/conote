@@ -1,4 +1,10 @@
-import React, { forwardRef, ReactPropTypes, useEffect, useRef, useState } from 'react'
+import React, {
+  forwardRef,
+  ReactPropTypes,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import Link from 'next/link'
 import { SearchAllForm } from '../search-all-form'
 import DocIndexSection from './doc-index-section'
@@ -8,7 +14,7 @@ import { TreeNode, TreeService } from '@conote/docdiff'
 import { DocIndex } from '../workspace/doc-index'
 import { Doc } from '../workspace/doc'
 import { useApolloClient } from '@apollo/client'
-import { useMeQuery } from '../../apollo/query.graphql'
+// import { useMeQuery } from '../../apollo/query.graphql'
 import { useRouter } from 'next/router'
 import AuthItem from './auth-Item'
 import Select from 'react-select'
@@ -52,9 +58,13 @@ const SideBar = ({
     <>
       <div
         className={`absolute left-0 w-72 h-screen pt-0  border-gray-200 flex flex-col flex-shrink-0  transition-all shadow-l2xl
-      ${showSider ? ' translate-x-0 translate-y-0 ' : '-translate-x-full translate-y-0 '} ${
-          isPined ? 'sm:relative bg-gray-100' : 'z-50 bg-white'
-        } ${isPined || !showSider ? 'shadow-transparent' : ''}
+      ${
+        showSider
+          ? ' translate-x-0 translate-y-0 '
+          : '-translate-x-full translate-y-0 '
+      } ${isPined ? 'sm:relative bg-gray-100' : 'z-50 bg-white'} ${
+          isPined || !showSider ? 'shadow-transparent' : ''
+        }
       `}
         onMouseLeave={() => {
           if (isPined) {
@@ -72,7 +82,7 @@ const SideBar = ({
               <a href="/" className="py-1  rounded mix-blend-multiply ">
                 Konote
               </a>
-              <ChannelSelect />
+              {/* <ChannelSelect /> */}
             </div>
             <span
               className={`hidden md:block ${
@@ -96,9 +106,7 @@ const SideBar = ({
             </span>
           </div>
         </div>
-        <div className="mt-2 mb-3 mx-4">
-          <SearchAllForm small />
-        </div>
+        <div className="mt-2 mb-3 mx-4">{/* <SearchAllForm small /> */}</div>
         {/* <DocIndexSection title="最近同步的筆記" indexArray={committedDocIndicies} /> */}
         <DocIndexSection title="暫存區" docIndicies={editingdDocIndicies} />
       </div>

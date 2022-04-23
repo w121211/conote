@@ -6,7 +6,11 @@ module.exports = {
     // removeDeprecatedGapUtilities: true,
     // purgeLayersByDefault: true,
   },
-  content: ['./pages/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}', './layout/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './layout/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
     extend: {
       flex: {
@@ -17,11 +21,12 @@ module.exports = {
         3: ' 3',
       },
       colors: {
-        gray: colors.gray,
+        // gray: colors.gray,
         red: colors.rose,
-        cyan: colors.cyan,
-        sky: colors.sky,
-        pink: colors.pink,
+        yellow: colors.amber,
+        // cyan: colors.cyan,
+        // sky: colors.sky,
+        // pink: colors.pink,
         // blue: colors.Indigo,
       },
       transformOrigin: {

@@ -14,17 +14,17 @@
         after:transition-opacity after:duration-75
         after:bg-[#0075E1]/10;
 }
-.block-container .block-container {
+/* .block-container .block-container {
   @apply ml-[2em]
         [grid-area:body];
-}
+} */
 .block-container.is-selected:after {
   @apply opacity-100;
 }
 .is-selected .block-container.is-selected:after {
   @apply opacity-0;
 }
-.block-container.show-tree-indicator {
+/* .block-container.show-tree-indicator {
   @apply before:content-[''] 
            before:absolute
            before:w-[1px] 
@@ -34,4 +34,4 @@
            before:translate-x-1/2
            before:transition-[background-color] before:duration-200 before:ease-in-out
            before:border-[hsla(32,81%,10%,0.08)];
-}
+} */

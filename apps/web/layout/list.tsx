@@ -1,7 +1,7 @@
 import moment from 'moment'
 import Link from 'next/link'
 import React from 'react'
-import { styleSymbol } from './style-symbol'
+import { styleSymbol } from './style-fc/style-symbol'
 import { Tile } from './tile'
 
 type Hashtags = '#討論' | '#機會' | '#Battle' | '#事件'
@@ -55,7 +55,12 @@ export const List = ({ listData, currentTab }: ListProps) => {
               )}
               <div className=" flex justify-end items-center gap-2 text-xs text-right">
                 {source && (
-                  <Link href={{ pathname: `/note/[symbol]`, query: { symbol: source } }}>
+                  <Link
+                    href={{
+                      pathname: `/note/[symbol]`,
+                      query: { symbol: source },
+                    }}
+                  >
                     <a>
                       <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-blue-500 hover:underline hover:underline-offset-2">
                         {styleSymbol(source, '')}
@@ -68,7 +73,9 @@ export const List = ({ listData, currentTab }: ListProps) => {
                   <span className="material-icons-outlined text-sm leading-none ">mode_comment</span>
                   <b>3</b>則回覆
                 </span> */}
-                <span className="text-gray-500">{moment().subtract(10, 'days').calendar()}</span>
+                <span className="text-gray-500">
+                  {moment().subtract(10, 'days').calendar()}
+                </span>
               </div>
               {/* {summary && (
         <div className="mb-1 line-clamp-2 text-ellipsis text-sm">
