@@ -97,7 +97,7 @@ const InlinePoll = (
   // }
   // if (element.type === 'poll') {
   return (
-    <button className="btn-reset-style" {...attributes}>
+    <button className="" {...attributes}>
       {/* <span style={selected ? undefined : { display: 'none' }}>{children}</span> */}
 
       {!selected && (
@@ -106,11 +106,11 @@ const InlinePoll = (
             // bulletId={parent.id}
             choices={element.choices}
             pollId={element.id?.toString()}
-            handleShowPopover={(b) => {
+            handleShowPopover={b => {
               setShowPopover(b)
             }}
             onCreatePoll={handleCreatePoll}
-            handleClickedIdx={(i) => {
+            handleClickedIdx={i => {
               setClickedIdx(i)
             }}
             handlePollId={(id: string) => {

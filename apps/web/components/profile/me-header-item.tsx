@@ -23,12 +23,14 @@ const MeHeaderItem = ({ className }: { className?: string }) => {
     <div className=" flex items-center hover:cursor-pointer">
       <Link href={`/user/${data.me.id}`}>
         <a className="flex-1 min-w-0 flex items-center p-1 rounded hover:bg-gray-100">
-          <span className="material-icons text-3xl leading-none text-gray-300 mix-blend-multiply">account_circle</span>
+          <span className="material-icons text-3xl leading-none text-gray-300 mix-blend-multiply">
+            account_circle
+          </span>
           {/* <span className=" truncate border-gray-200 text-gray-600 text-sm font-medium">{data.me.id}</span> */}
         </a>
       </Link>
       <button
-        className="btn-reset-style group relative "
+        className=" group relative "
         onClick={e => {
           e.stopPropagation()
           setShowToolTip(!showToolTip)

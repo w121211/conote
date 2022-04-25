@@ -1,6 +1,13 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useState, useMemo, useCallback, useEffect, CSSProperties, useRef } from 'react'
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  CSSProperties,
+  useRef,
+} from 'react'
 import { useObservable } from 'rxjs-hooks'
 import { RenderElementProps } from 'slate-react'
 import Discuss from '../discuss/modal-page/modal-page'
@@ -44,12 +51,15 @@ const InlineFiltertag = ({
   return (
     <span {...attributes} contentEditable={false}>
       <button
-        className="btn-reset-style text-green-600 hover:underline-offset-2 hover:underline"
+        className=" text-green-600 hover:underline-offset-2 hover:underline"
         onClick={() => {
           // setShowModal(true)
           router.push(
             // { pathname: '/discuss/[discussId]', query: { discussId: element.str } },
-            { pathname: router.pathname, query: { symbol: router.query.symbol, discuss: element.str } },
+            {
+              pathname: router.pathname,
+              query: { symbol: router.query.symbol, discuss: element.str },
+            },
             `/discuss/${encodeURIComponent(element.str)}`,
             {
               shallow: true,

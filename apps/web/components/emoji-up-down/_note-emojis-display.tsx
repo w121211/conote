@@ -10,7 +10,11 @@ import {
 } from '../../apollo/query.graphql'
 import { EmojiIcon } from './emoji-icon'
 
-const NoteEmojiDisplay = ({ noteEmoji }: { noteEmoji: NoteEmojiFragment }): JSX.Element | null => {
+const NoteEmojiDisplay = ({
+  noteEmoji,
+}: {
+  noteEmoji: NoteEmojiFragment
+}): JSX.Element | null => {
   const {
     data: myEmojiLikeData,
     loading,
@@ -21,7 +25,7 @@ const NoteEmojiDisplay = ({ noteEmoji }: { noteEmoji: NoteEmojiFragment }): JSX.
 
   if (noteEmoji.count.nUps === 0) return null
   return (
-    <button className={`btn-reset-style`}>
+    <button className={``}>
       {/* {data.myHashtagLike?.choice && hashtag.text} */}
       {/* {hashtag.text} */}
       <EmojiIcon
@@ -35,8 +39,17 @@ const NoteEmojiDisplay = ({ noteEmoji }: { noteEmoji: NoteEmojiFragment }): JSX.
 }
 
 const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
-  const { data, error, loading } = useNoteEmojisQuery({ fetchPolicy: 'cache-first', variables: { noteId } })
-  if (!data || error || loading || data?.noteEmojis.length === 0 || data.noteEmojis.every(e => e.count.nUps === 0)) {
+  const { data, error, loading } = useNoteEmojisQuery({
+    fetchPolicy: 'cache-first',
+    variables: { noteId },
+  })
+  if (
+    !data ||
+    error ||
+    loading ||
+    data?.noteEmojis.length === 0 ||
+    data.noteEmojis.every(e => e.count.nUps === 0)
+  ) {
     return null
   }
   return (

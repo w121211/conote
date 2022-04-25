@@ -6,9 +6,9 @@ export function styleSymbol(
   if (symbol.startsWith('[[')) {
     return (
       <span>
-        <span className={`text-gray-300 font-medium`}>[[</span>
+        <span className={`text-gray-400/50 `}>[[</span>
         {symbol.substring(2, symbol.length - 2)}
-        <span className={`text-gray-300 font-medium`}>]]</span>
+        <span className={`text-gray-400/50 `}>]]</span>
       </span>
     )
   }

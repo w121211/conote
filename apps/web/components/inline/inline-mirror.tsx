@@ -9,16 +9,24 @@ const InlineMirror = ({
   children,
   element,
   sourceNoteId,
-}: RenderElementProps & { element: InlineMirrorElement; sourceNoteId?: string }): JSX.Element => {
+}: RenderElementProps & {
+  element: InlineMirrorElement
+  sourceNoteId?: string
+}): JSX.Element => {
   const router = useRouter()
   return (
     <span {...attributes} className="hover:cursor-pointer">
       <button
-        className="btn-reset-style text-blue-500 hover:underline hover:underline-offset-2"
+        className=" text-blue-500 hover:underline hover:underline-offset-2"
         onClick={e => {
           // e.preventDefault()
           // e.stopPropagation()
-          router.push(DocPathService.toURL(element.mirrorSymbol.substring(2), sourceNoteId))
+          router.push(
+            DocPathService.toURL(
+              element.mirrorSymbol.substring(2),
+              sourceNoteId,
+            ),
+          )
         }}
       >
         {children}

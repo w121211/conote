@@ -47,7 +47,9 @@ export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
       {quote && (
         <div className="mt-2 mb-4 px-4 py-2 bg-gray-100 text-sm text-gray-600">
           <div className="flex items-center">
-            <span className="material-icons-round text-lg leading-none">warning</span>
+            <span className="material-icons-round text-lg leading-none">
+              warning
+            </span>
             <p>{quote}</p>
           </div>
           <p className="text-right text-gray-400">{moment().calendar()}</p>
@@ -56,10 +58,16 @@ export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
 
       <div className="flex pt-1 border-t border-gray-200">
         <div className="flex-grow">
-          <DiscussEmojis discussId={data.id} disable={meData?.me.id === data.userId} />
+          <DiscussEmojis
+            discussId={data.id}
+            disable={meData?.me.id === data.userId}
+          />
         </div>
-        <button className="btn-reset-style p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
-          <span className="material-icons-outlined text-base leading-none">reply</span>回覆
+        <button className=" p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
+          <span className="material-icons-outlined text-base leading-none">
+            reply
+          </span>
+          回覆
         </button>
         <PostOptionsMenu isMyPost={meData?.me.id === data.userId ?? false} />
       </div>

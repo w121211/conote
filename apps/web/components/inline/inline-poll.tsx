@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { ReactEditor, RenderElementProps, useSelected, useSlateStatic } from 'slate-react'
+import {
+  ReactEditor,
+  RenderElementProps,
+  useSelected,
+  useSlateStatic,
+} from 'slate-react'
 import { InlinePollElement } from '../editor/slate-custom-types'
 import { Transforms } from 'slate'
 import { PollFragment, usePollLazyQuery } from '../../apollo/query.graphql'
 import PollGroup from '../emoji-up-down/poll-group'
 import { InlineItemService } from './inline-item-service'
 
-const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }): JSX.Element => {
+const InlinePoll = (
+  props: RenderElementProps & { element: InlinePollElement },
+): JSX.Element => {
   const { attributes, children, element } = props
   const selected = useSelected()
   // const context = useContext(Context)
@@ -21,7 +28,10 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
   function onCreated(poll: PollFragment) {
     // const editor = useSlateStatic()
     // const path = ReactEditor.findPath(editor, element)
-    const inlinePoll = InlineItemService.toInlinePoll({ id: poll.id, choices: poll.choices })
+    const inlinePoll = InlineItemService.toInlinePoll({
+      id: poll.id,
+      choices: poll.choices,
+    })
     Transforms.setNodes<InlinePollElement>(editor, inlinePoll, { at: path })
     Transforms.insertText(editor, inlinePoll.str, { at: path })
   }
@@ -87,7 +97,7 @@ const InlinePoll = (props: RenderElementProps & { element: InlinePollElement }):
   // }
   // if (element.type === 'poll') {
   return (
-    <button className="btn-reset-style" {...attributes}>
+    <button className="" {...attributes}>
       {/* <span style={selected ? undefined : { display: 'none' }}>{children}</span> */}
 
       {!selected && (

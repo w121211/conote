@@ -21,18 +21,27 @@ const BulletEmojiCreateButton = ({
     variables: { bulletId, code: emojiCode },
 
     update(cache, { data }) {
-      const res = cache.readQuery<BulletEmojisQuery, BulletEmojisQueryVariables>({
+      const res = cache.readQuery<
+        BulletEmojisQuery,
+        BulletEmojisQueryVariables
+      >({
         query: BulletEmojisDocument,
         variables: { bulletId },
       })
       if (data?.createBulletEmoji) {
-        if (res?.bulletEmojis.find(e => e.id === data.createBulletEmoji.emoji.id)) {
+        if (
+          res?.bulletEmojis.find(e => e.id === data.createBulletEmoji.emoji.id)
+        ) {
           //
         } else {
           cache.writeQuery<BulletEmojisQuery, BulletEmojisQueryVariables>({
             query: BulletEmojisDocument,
             variables: { bulletId },
-            data: { bulletEmojis: (res?.bulletEmojis ?? []).concat(data.createBulletEmoji.emoji) },
+            data: {
+              bulletEmojis: (res?.bulletEmojis ?? []).concat(
+                data.createBulletEmoji.emoji,
+              ),
+            },
           })
         }
       }
@@ -56,7 +65,9 @@ const BulletEmojiCreateButton = ({
   })
 
   if (error) {
-    if (error.graphQLErrors.find(e => e.extensions.code === 'UNAUTHENTICATED')) {
+    if (
+      error.graphQLErrors.find(e => e.extensions.code === 'UNAUTHENTICATED')
+    ) {
       return (
         <Popup
           visible={true}
@@ -72,13 +83,18 @@ const BulletEmojiCreateButton = ({
   return (
     <>
       <button
-        className={`btn-reset-style flex justify-start ${className ? className : ''} `}
+        className={` flex justify-start ${className ? className : ''} `}
         onClick={e => {
           e.stopPropagation()
           createBulletEmoji()
         }}
       >
-        <EmojiIcon code={emojiCode} showText upDownClassName="py-1" pinClassName="py-1" />
+        <EmojiIcon
+          code={emojiCode}
+          showText
+          upDownClassName="py-1"
+          pinClassName="py-1"
+        />
       </button>
     </>
   )

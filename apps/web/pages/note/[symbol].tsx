@@ -281,15 +281,15 @@ const NoteSymbolPage = (): JSX.Element | null => {
         topRightBtn={
           <div className="flex ">
             {modalDoc?.doc && <NoteMetaModal doc={modalDoc.doc} modal />}
-            {/* <button className="btn-reset-style text-gray-500 hover:text-gray-700">
+            {/* <button className=" text-gray-500 hover:text-gray-700">
               <span className="material-icons text-lg leading-none ">edit_note</span>
             </button> */}
-            <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+            <button className=" p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
               <span className="material-icons-outlined text-lg leading-none ">
                 category
               </span>
             </button>
-            <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+            <button className=" p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
               <span className="material-icons-outlined text-lg leading-none ">
                 more_horiz
               </span>
@@ -327,7 +327,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
               </div>
             )}
             <button
-              className="btn-reset-style p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
+              className=" p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
               onClick={() => {
                 if (mainDoc?.doc) {
                   workspace.save(mainDoc.doc)
@@ -338,7 +338,7 @@ const NoteSymbolPage = (): JSX.Element | null => {
                 save
               </span>
             </button>
-            <button className="btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+            <button className=" p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
               <span className="material-icons-outlined text-xl leading-none ">
                 more_horiz
               </span>

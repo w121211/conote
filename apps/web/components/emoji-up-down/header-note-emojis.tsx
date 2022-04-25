@@ -5,13 +5,17 @@ import NoteEmojiBtn from './note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
 import ToggleMenu from '../../layout/toggle-menu'
 
-const HeaderNoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
+const HeaderNoteEmojis = ({
+  noteId,
+}: {
+  noteId: string
+}): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)
   const [likedChoice, setLikedChoice] = useState<'UP' | 'DOWN' | null>(null)
   const [hoverEmoji, setHoverEmoji] = useState<number | undefined>()
   const { data: emojiData } = useNoteEmojisQuery({ variables: { noteId } })
   const emojis: EmojiCode[] = ['UP', 'DOWN']
-  const mockEmojis = ['很棒', '很糟', '需補充內容']
+  const mockEmojis = ['up', 'down', 'need coorperattion']
   const pinEmojiData = emojiData?.noteEmojis.find(e => e.code === 'PIN')
 
   return (
@@ -54,14 +58,20 @@ const HeaderNoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null =>
         }
       >
         <div className="block w-[150px] ">
-          <p className="block p-1 border-b border-gray-200 text-sm text-gray-500">
-            {hoverEmoji !== undefined ? mockEmojis[hoverEmoji] : '這篇筆記...'}
+          <p className="block p-1 border-b border-gray-200 text-sm text-gray-500 capitalize">
+            {hoverEmoji !== undefined
+              ? mockEmojis[hoverEmoji]
+              : 'pick your emoji'}
           </p>
           <div className="p-1">
             {emojis.map((e, i) => {
               const foundData = emojiData?.noteEmojis.find(el => el.code === e)
               return (
-                <span key={i} onMouseEnter={() => setHoverEmoji(i)} onMouseLeave={() => setHoverEmoji(undefined)}>
+                <span
+                  key={i}
+                  onMouseEnter={() => setHoverEmoji(i)}
+                  onMouseLeave={() => setHoverEmoji(undefined)}
+                >
                   {foundData !== undefined ? (
                     <NoteEmojiBtn
                       key={i}
@@ -78,11 +88,13 @@ const HeaderNoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null =>
               )
             })}
             <button
-              className="btn-reset-style p-1 rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+              className=" p-1 rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700"
               onMouseEnter={() => setHoverEmoji(2)}
               onMouseLeave={() => setHoverEmoji(undefined)}
             >
-              <span className="material-icons-outlined  text-lg leading-none ">waving_hand</span>
+              <span className="material-icons-outlined  text-lg leading-none ">
+                waving_hand
+              </span>
             </button>
           </div>
         </div>

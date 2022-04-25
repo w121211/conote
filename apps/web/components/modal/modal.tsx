@@ -12,6 +12,7 @@ const Modal = ({
   topRightBtn,
   mask,
   topLeftBtn,
+  sectionClassName,
 }: {
   children: ReactNode
   visible: boolean
@@ -22,12 +23,13 @@ const Modal = ({
   if (modalRoot && visible) {
     return createPortal(
       <Popover
-        hideBoard={onClose}
+        onClose={onClose}
         subTitle={subTitle}
         buttons={buttons}
         topRightBtn={topRightBtn}
         mask={mask}
         topLeftBtn={topLeftBtn}
+        sectionClassName={sectionClassName}
       >
         {children}
       </Popover>,
