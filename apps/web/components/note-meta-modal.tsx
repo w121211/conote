@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Modal from './modal/modal'
-import NoteMetaForm from './note-meta-form'
+import NoteMetaForm from './note-meta-form/note-meta-form'
 import { Doc } from './workspace/doc'
 
 const NoteMetaModal = ({ doc, modal }: { doc: Doc; modal?: boolean }) => {

@@ -211,7 +211,7 @@ export const BlockEl = ({
       className={
         // [
         `block-container
-        ${isChild ? 'ml-[2em] [grid-area:body]' : ''}
+        ${isChild ? 'ml-[1em] [grid-area:body]' : ''}
         ${children.length > 0 && isOpen && 'show-tree-indicator'}
         ${isOpen ? 'is-open' : 'is-closed'}
         ${isSelected ? 'is-selected' : ''}
@@ -262,6 +262,7 @@ export const BlockEl = ({
       >
         {children.length > 0 && (
           <Toggle
+            isShow={showEditableDom}
             isOpen={isOpen}
             onClick={e => {
               e.stopPropagation()

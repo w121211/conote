@@ -2,7 +2,7 @@ import React from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { NoteMetaInput } from 'graphql-let/__generated__/__types__'
 import CreatableSelect from 'react-select/creatable'
-import { customComponents, toNoteMetaInput } from '../note-meta-form'
+import { customComponents, toNoteMetaInput } from './note-meta-form'
 
 type FormInputs = {
   title: string
@@ -86,7 +86,11 @@ export const SymbolMetaForm = ({
                       isMulti
                       styles={{
                         control: () => ({}),
-                        container: () => ({ position: 'relative', width: '100%', cursor: 'text' }),
+                        container: () => ({
+                          position: 'relative',
+                          width: '100%',
+                          cursor: 'text',
+                        }),
                       }}
                       value={value}
                       components={customComponents}

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import Link from 'next/link'
-import NoteMetaForm from './note-meta-form'
+import NoteMetaForm from './note-meta-form/note-meta-form'
 import HeaderNoteEmojis from './emoji-up-down/header-note-emojis'
 import Modal from './modal/modal'
 import { Doc } from './workspace/doc'
@@ -19,6 +19,7 @@ interface NoteHeadProps {
 
 export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
   const { isNew, symbol, title, link, fetchTime, nodeId } = props
+  const [showMetaForm, setShowMetaForm] = useState(false)
 
   return (
     <div className="ml-6 mb-5">
@@ -40,7 +41,12 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
         )}
       </div>
 
-      <div className="relative mb-1">
+      <div
+        className="relative mb-1 hover:cursor-pointer"
+        onClick={() => {
+          setShowMetaForm(true)
+        }}
+      >
         <h1 className=" line-clamp-2 break-words text-gray-800 ">
           {link && (
             <span className="material-icons text-blue-400 text-3xl align-bottom">
@@ -50,6 +56,32 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
           {styleSymbol(symbol, title)}
         </h1>
       </div>
+
+      <Modal
+        visible={showMetaForm}
+        onClose={() => {
+          setShowMetaForm(false)
+        }}
+      >
+        <div className="w-full px-4 md:py-6 md:px-12">
+          <h2 className="text-lg mb-4 sm:mb-6 sm:text-2xl font-bold text-gray-800">
+            卡片資訊
+          </h2>
+          <NoteMetaForm
+            type={'TICKER'}
+            // metaInput={metaInput}
+            onSubmit={input => {
+              // const { isUpdated } = doc.updateNoteMetaInput(input)
+              // if (isUpdated) {
+              //   doc.save()
+              //   setShowMetaForm(false)
+              // } else {
+              //   console.warn('note meta input not updated, skip saving')
+              // }
+            }}
+          />
+        </div>
+      </Modal>
 
       {(fetchTime || link) && (
         <div className="flex flex-col text-gray-400 text-sm italic">

@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 // import { Nav } from '../../pages/note/[symbol]'
-import MyTooltip from '../../layout/tooltip/tooltip'
+import MyTooltip from '../../layout/tooltip/popup'
 import RightArrow from '../../assets/svg/right-arrow.svg'
-import { getNavLocation, locationToUrl, NavLocation } from '../../components/editor/with-location'
+import {
+  getNavLocation,
+  locationToUrl,
+  NavLocation,
+} from '../../components/editor/with-location'
 import { UrlObject } from 'url'
 import Link from 'next/link'
 import { useNoteQuery } from '../../apollo/query.graphql'
@@ -27,7 +31,11 @@ export interface NavPathProps {
 
 const rePoll = /\B!\(\(poll:(\d+)\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/g
 
-const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX.Element => {
+const NavPath: React.FC<NavPathProps> = ({
+  path,
+  mirrorHomeUrl,
+  location,
+}): JSX.Element => {
   const [myPath, setMyPath] = useState<(DocIndex | string)[] | undefined>(path)
   const [hiddenPath, setHiddenPath] = useState<(DocIndex | string)[]>([])
 
@@ -127,14 +135,20 @@ const NavPath: React.FC<NavPathProps> = ({ path, mirrorHomeUrl, location }): JSX
           <Link href={mirrorHomeUrl}>
             <a>{data?.note && data?.note.meta.title}</a>
           </Link>
-          <div className="flex items-center flex-shrink-0 mx-2">/{/* <RightArrow /> */}</div>
+          <div className="flex items-center flex-shrink-0 mx-2">
+            /{/* <RightArrow /> */}
+          </div>
         </li>
       )}
       {myPath &&
         myPath.length !== 0 &&
         myPath.map((e, i) => (
           <li key={i}>
-            {i !== 0 && <div className="flex items-center flex-shrink-0 mx-2">{/* <RightArrow /> */}/</div>}
+            {i !== 0 && (
+              <div className="flex items-center flex-shrink-0 mx-2">
+                {/* <RightArrow /> */}/
+              </div>
+            )}
 
             {
               <span

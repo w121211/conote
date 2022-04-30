@@ -6,13 +6,18 @@ import { LiElement } from '../components/editor/slate-custom-types'
 import { NoteHead } from '../components/note-head'
 import { Doc } from '../components/workspace/doc'
 import { mockDate, mockLink } from './mock-data'
+import ModalProvider from '../components/modal/modal-context'
 
 export default {
   title: 'component/Note Head',
   component: NoteHead,
 } as ComponentMeta<typeof NoteHead>
 
-const Template: ComponentStory<typeof NoteHead> = args => <NoteHead {...args} />
+const Template: ComponentStory<typeof NoteHead> = args => (
+  <ModalProvider>
+    <NoteHead {...args} />
+  </ModalProvider>
+)
 
 export const Symbol = Template.bind({})
 Symbol.args = {

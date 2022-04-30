@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { useMeQuery } from '../../apollo/query.graphql'
 import ToggleMenu from '../../layout/toggle-menu'
-import Tooltip from '../../layout/tooltip/tooltip'
+import Tooltip from '../../layout/tooltip/popup'
 
 const AuthItem = () => {
   const { data, loading } = useMeQuery({ fetchPolicy: 'network-only' })
@@ -30,14 +30,25 @@ const AuthItem = () => {
               </div>
             }
           >
-            <span className="block px-2  truncate  text-gray-600 text-sm font-medium cursor-default">{data.me.id}</span>
+            <span className="block px-2  truncate  text-gray-600 text-sm font-medium cursor-default">
+              {data.me.id}
+            </span>
             <div className="h-[1px] my-2 bg-gray-200"></div>
-            <Link href={{ pathname: '/user/[userId]', query: { userId: data.me.id } }}>
-              <a className="block px-2 py-1 text-sm text-gray-600 hover:bg-blue-500 hover:text-white">個人頁面</a>
+            <Link
+              href={{
+                pathname: '/user/[userId]',
+                query: { userId: data.me.id },
+              }}
+            >
+              <a className="block px-2 py-1 text-sm text-gray-600 hover:bg-blue-500 hover:text-white">
+                個人頁面
+              </a>
             </Link>
             <div className="h-[1px] my-2 bg-gray-200"></div>
             <Link href="/login">
-              <a className="block px-2 py-1 text-sm text-gray-600 hover:bg-blue-500 hover:text-white">登出</a>
+              <a className="block px-2 py-1 text-sm text-gray-600 hover:bg-blue-500 hover:text-white">
+                登出
+              </a>
             </Link>
           </ToggleMenu>
         ) : (

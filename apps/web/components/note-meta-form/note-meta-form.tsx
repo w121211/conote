@@ -1,5 +1,10 @@
 import React from 'react'
-import { FormProvider, useFieldArray, useForm, Controller } from 'react-hook-form'
+import {
+  FormProvider,
+  useFieldArray,
+  useForm,
+  Controller,
+} from 'react-hook-form'
 import {
   components,
   ControlProps,
@@ -12,9 +17,9 @@ import {
 import CreatableSelect from 'react-select/creatable'
 import { NoteMetaInput } from 'graphql-let/__generated__/__types__'
 import { SymType } from '@prisma/client'
-import SymbolMetaForm from './note-meta-form/symbol-meta-form'
-import TopicMetaForm from './note-meta-form/topic-meta-form'
-import WebMetaForm from './note-meta-form/web-meta-topic'
+import { SymbolMetaForm } from './symbol-meta-form'
+import { TopicMetaForm } from './topic-meta-form'
+import { WebMetaForm } from './web-meta-topic'
 
 type Option = {
   label: string
@@ -37,7 +42,9 @@ export const Control = (props: ControlProps<Option[], true>) => {
   return (
     <components.Control
       {...rest}
-      className={`flex-grow min-h-[38px] rounded hover:bg-gray-100 ${rest.isFocused ? 'bg-gray-100 ' : ''}  `}
+      className={`flex-grow min-h-[38px] rounded hover:bg-gray-100 ${
+        rest.isFocused ? 'bg-gray-100 ' : ''
+      }  `}
     >
       {children}
     </components.Control>
@@ -63,7 +70,16 @@ const changeInputwidth = (name: string) => {
 }
 
 export const toNoteMetaInput = (input: FormInputs): NoteMetaInput => {
-  const { title, author, url, keywords, redirects, duplicates, date, description } = input
+  const {
+    title,
+    author,
+    url,
+    keywords,
+    redirects,
+    duplicates,
+    date,
+    description,
+  } = input
   const stringOrUndefined = (str: string) => (str === '' ? undefined : str)
   const stringArrayOrUndefined = (str: string, splitter: string) =>
     str === '' ? undefined : duplicates.split(splitter)

@@ -43,7 +43,7 @@ const Popover = ({
         className={`relative  flex flex-col h-fit py-2 rounded  shadow-2xl 
         w-[80vw] max-h-[80vh] sm:min-w-[20vw] sm:max-w-[80vw] sm:max-h-[90vh] mt-[5vh] 
       md:max-w-[65vw] lg:max-w-[55vw] ${
-        sectionClassName ? sectionClassName : ''
+        sectionClassName ? sectionClassName : 'bg-white'
       }`}
       >
         {(topLeftBtn || subTitle || topRightBtn) && (
