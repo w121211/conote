@@ -6,7 +6,7 @@ import styled from 'styled-components'
 // import { useTooltipTriggerState } from '@react-stately/tooltip'
 // import { TooltipTriggerProps } from '@react-types/tooltip'
 import { Block } from '../../interfaces'
-import './anchor.css'
+import './anchor.module.css'
 // import { DetailPopover } from '@/Block/components/DetailPopover'
 
 // export const AnchorButton = styled.button`
@@ -94,25 +94,34 @@ import './anchor.css'
 //   }
 // `
 
-const anchorElements = {
-  circle: (
-    <svg viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="4" />
-    </svg>
-  ),
-  dash: (
-    <svg viewBox="0 0 1 1">
-      <line
-        x1="-1"
-        y1="0"
-        x2="1"
-        y2="0"
-        stroke="currentColor"
-        strokeWidth="0.5"
-      />
-    </svg>
-  ),
-}
+// const anchorElements = {
+//   circle: (
+//     <svg viewBox="0 0 24 24"
+//         className='
+//           w-[1em] h-[1em]
+//         text-[#433F38]/25
+//           pointer-events-none
+//           scale-[1.0001]
+//           overflow-visible
+//           fill-current
+//           transition-[opacity,fill] duration-[.05s]'>
+//       <circle cx="12" cy="12" r="4"
+//       className='vector-effect:none-scaling-stroke'/>
+//     </svg>
+//   ),
+//   dash: (
+//     <svg viewBox="0 0 1 1">
+//       <line
+//         x1="-1"
+//         y1="0"
+//         x2="1"
+//         y2="0"
+//         stroke="currentColor"
+//         strokeWidth="0.5"
+//       />
+//     </svg>
+//   ),
+// }
 
 // const FocusRing = styled.div`
 //   position: absolute;
@@ -120,11 +129,11 @@ const anchorElements = {
 //   border: 2px solid var(--link-color);
 //   border-radius: 0.25rem;
 // `
-const FocusRing = () => {
-  return (
-    <div className="absolute inset-y-1 inset-x-[-0.125rem] border-2 border-[#0075E1] rounded"></div>
-  )
-}
+// const FocusRing = () => {
+//   return (
+//     <div className="absolute inset-y-1 inset-x-[-0.125rem] border-2 border-[#0075E1] rounded"></div>
+//   )
+// }
 
 // export interface AnchorProps extends TooltipTriggerProps {
 export interface AnchorProps {
@@ -155,7 +164,13 @@ export interface AnchorProps {
  * @bug firefox draggable won't work, possibly caused by styled-component
  */
 export const Anchor = (props: AnchorProps) => {
-  const { isClosedWithChildren, anchorElement, shouldShowDebugDetails } = props,
+  const {
+      isClosedWithChildren,
+      anchorElement,
+      shouldShowDebugDetails,
+      onDragStart,
+      onDragEnd,
+    } = props,
     ref = React.useRef<HTMLButtonElement>(null)
   // state = useTooltipTriggerState(props)
   // { triggerProps, tooltipProps } = useTooltipTrigger(
@@ -179,14 +194,63 @@ export const Anchor = (props: AnchorProps) => {
         firefox drag-drop works here
       </button> */}
       <button
-        className={['anchor', isClosedWithChildren && 'closed-with-children']
-          .filter(Boolean)
-          .join(' ')}
+        className={`
+        relative
+      z-[2]
+      flex-shrink-0
+      [grid-area:bullet]
+      flex place-items-center place-content-center
+      h-[1.5em]
+      w-[1em]
+      mr-1
+      p-0
+      border-none
+      text-inherit
+      cursor-pointer
+      appearance-none
+      transition-all duration-[0.05s]
+
+      outline-none
+      focus:outline-none
+      
+      hover:opacity-100
+      
+      `}
         ref={ref}
         draggable={true}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
         // {...mergeProps(props, focusProps, triggerProps)}
       >
-        {anchorElements[anchorElement] ?? anchorElements['circle']}
+        <svg
+          viewBox="0 0 24 24"
+          className="
+          w-[1em] h-[1em]
+        text-gray-300
+          pointer-events-none
+          scale-[1.0001]
+          overflow-visible
+          fill-current
+          transition-[opacity,fill] duration-[.05s]"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="4"
+            className={`
+            ${
+              isClosedWithChildren
+                ? `
+                  stroke-2
+                stroke-gray-600
+                fill-gray-300
+                  opacity-50
+                  [r:5]`
+                : ''
+            }
+            vector-effect:none-scaling-stroke`}
+          />
+        </svg>
         {/* {isFocusVisible && <FocusRing />} */}
       </button>
       {/* {shouldShowDebugDetails && state.isOpen && (

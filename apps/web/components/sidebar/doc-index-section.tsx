@@ -3,14 +3,20 @@ import { TreeNode } from '@conote/docdiff'
 import { DocIndex } from '../workspace/doc-index'
 import DocIndexComponent from './doc-index-component'
 
-const DocIndexSection = ({ docIndicies, title }: { docIndicies: TreeNode<DocIndex>[]; title: string }): JSX.Element => {
+const DocIndexSection = ({
+  docIndicies,
+  title,
+}: {
+  docIndicies: TreeNode<DocIndex>[]
+  title: string
+}): JSX.Element => {
   const [folded, setFolded] = useState(false)
   return (
     <div className="flex-grow flex flex-col min-h-0 overflow-hidden">
       <div className="flex flex-col min-h-0 overflow-hidden">
         <div
           className={`group flex justify-between items-center px-2 text-sm text-gray-700 
-          tracking-wide leading-7 cursor-pointer select-none  hover:bg-gray-200/70 
+          tracking-wide leading-7 cursor-pointer select-none  hover:bg-gray-200/70 mix-blend-multiply
           `}
           onClick={() => {
             setFolded(!folded)
@@ -24,7 +30,7 @@ const DocIndexSection = ({ docIndicies, title }: { docIndicies: TreeNode<DocInde
             )}
             <span className="flex items-center gap-1 font-medium">
               {title}
-              <span className="leading-snug px-2 rounded-full text-xs bg-gray-200 text-gray-700 font-medium mix-blend-multiply">
+              <span className=" px-2 rounded-full text-xs leading-normal bg-blue-500 text-white font-medium mix-blend-normal">
                 {docIndicies.length}
               </span>
             </span>
@@ -33,9 +39,12 @@ const DocIndexSection = ({ docIndicies, title }: { docIndicies: TreeNode<DocInde
       </div>
 
       {docIndicies?.length > 0
-        ? !folded && docIndicies.map((e, i) => <DocIndexComponent key={i} node={e} />)
+        ? !folded &&
+          docIndicies.map((e, i) => <DocIndexComponent key={i} node={e} />)
         : !folded && (
-            <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow">尚無筆記</span>
+            <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow">
+              尚無筆記
+            </span>
           )}
     </div>
   )

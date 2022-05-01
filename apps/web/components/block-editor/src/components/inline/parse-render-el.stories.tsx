@@ -3,7 +3,7 @@ import { setEntities } from '@ngneat/elf-entities'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
 import { blockRepo } from '../../stores/block.repository'
 import { mockBlockStrDict } from '../../../test/__mocks__/mock-data'
-import ParseRenderEl from './parse-renderer-el'
+import ParseRenderEl from './parse-render-el'
 
 /**
  * Setup data

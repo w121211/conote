@@ -4,7 +4,7 @@ import DiscussPage from '../../components/discuss/discuss-page'
 import { CreatePostForm } from '../../components/discuss/post/create-post-form'
 import { DiscussTile } from '../../components/discuss/layout-components/discuss-tile'
 import { PostTileList } from '../../components/discuss/layout-components/post-tile-list'
-import { mockData, mockPostList } from './mock-data'
+import { mockData, mockPostList } from './mock-discuss-data'
 import { Layout } from '../../layout/layout'
 
 export default {

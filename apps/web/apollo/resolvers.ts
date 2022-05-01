@@ -56,7 +56,7 @@ import { selectionSetMatchesResult } from '@apollo/client/cache/inmemory/helpers
 import { orderBy } from 'lodash'
 import { fn } from 'moment'
 import { connect } from 'http2'
-import { DiscussModel } from '../lib/models/discuss-model'
+import { discussModel } from '../lib/models/discuss-model'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T

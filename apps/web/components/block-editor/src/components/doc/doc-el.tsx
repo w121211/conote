@@ -1,4 +1,7 @@
-import React, { ReactNode, useEffect } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
+import { Observable, switchMap, tap } from 'rxjs'
+// import { useObservable } from '@ngneat/react-rxjs'
+import { useObservable } from 'rxjs-hooks'
 import styled from 'styled-components'
 // import { MoreHoriz } from '@material-ui/icons'
 // import PopperUnstyled from '@mui/base/PopperUnstyled'
@@ -18,11 +21,17 @@ import { DocPlaceholder } from './doc-placeholder'
 import { DOMRoot } from '../utils'
 import { BlockListContainer } from '../block/block-list'
 import { blockRepo, getBlock } from '../../stores/block.repository'
-import { Doc } from '../../interfaces'
-import { useObservable } from '@ngneat/react-rxjs'
-import { docRemove, docSave, historyClear, historyUndo } from '../../events'
+import { Block, Doc } from '../../interfaces'
+import {
+  docRemove,
+  docSave,
+  historyClear,
+  historyUndo,
+  templateSet,
+} from '../../events'
 import { hotkey, multiBlockSelection } from '../../listeners'
-import NoteHead from '../../../../note-head'
+import { NoteHead } from '../../../../note-head'
+import moment from 'moment'
 
 // const PageWrap = styled.article`
 //   padding: 1rem;
@@ -200,46 +209,73 @@ export const DocEl = ({
   const [isPageMenuOpen, setIsPageMenuOpen] = React.useState(false)
   const [pageMenuAnchor, setPageMenuAnchor] =
     React.useState<HTMLButtonElement | null>(null)
+
   // const { PresenceProvider, clearPresence } = usePresenceProvider({
   //   presentPeople: mockPresence,
   // })
-  const handlePressMenuToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setPageMenuAnchor(e.currentTarget)
-    setIsPageMenuOpen(true)
-  }
-  const handleClosePageMenu = () => {
-    setPageMenuAnchor(null)
-    setIsPageMenuOpen(false)
-  }
+
+  // const { title } = doc,
+  //   block = getBlock(doc.blockUid)
+
+  // const [block$, setBlock$] = useState<Observable<Block | undefined>>(
+  //     blockRepo.getBlock$(doc.blockUid),
+  //   ),
+  //   [docBlock] = useObservable(block$)
+  // const [docBlock] = useObservable(blockRepo.getBlock$(docBlockUid))
+
+  // const [docBlock] = useObservable(blockRepo.getBlock$(doc.blockUid))
+
+  // (BUG) `useObservable` set docBlock as `null` initially if default value is `undefined`
+  //   however, the return type will not include `null`
+  const docBlock = useObservable<Block | undefined, [Doc]>(
+    (_, inputs$) =>
+      inputs$.pipe(
+        // tap(console.log),
+        switchMap(([v]) => blockRepo.getBlock$(v.blockUid)),
+      ),
+    undefined,
+    [doc],
+  )
+
+  // useEffect(() => {
+  //   console.log(docBlockUid, docBlock)
+  //   // console.log(docBlock)
+  // }, [docBlockUid, docBlock])
 
   useEffect(() => {
     document.addEventListener('keydown', hotkey)
     document.addEventListener('keydown', multiBlockSelection)
+
     return () => {
       document.removeEventListener('keydown', hotkey)
       document.removeEventListener('keydown', multiBlockSelection)
     }
   }, [])
 
-  // const { title } = doc,
-  //   block = getBlock(doc.blockUid)
+  const handlePressMenuToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setPageMenuAnchor(e.currentTarget)
+    setIsPageMenuOpen(true)
+  }
+  // const handleClosePageMenu = () => {
+  //   setPageMenuAnchor(null)
+  //   setIsPageMenuOpen(false)
+  // }
 
-  const [docBlock] = useObservable(blockRepo.getBlock$(doc.blockUid))
-
-  if (docBlock === undefined) {
+  if (docBlock === undefined || docBlock === null) {
     return null
   }
 
   return (
     <article
       className="
-    basis-full 
-    self-stretch 
-    w-full max-w-[60em] 
-    mx-auto 
-    p-4"
+      node-page
+      basis-full 
+      self-stretch 
+      w-full max-w-[60em] 
+      mx-auto 
+      p-4"
     >
-      <button
+      {/* <button
         className="
       float-left 
       w-8 h-8 
@@ -251,8 +287,8 @@ export const DocEl = ({
         // isPressed={isPageMenuOpen}
         onClick={handlePressMenuToggle}
       >
-        {/* <MoreHoriz /> */}
-      </button>
+        <MoreHoriz />
+      </button> */}
 
       {/* <PopperUnstyled
         open={isPageMenuOpen}
@@ -324,7 +360,16 @@ export const DocEl = ({
         <DocPlaceholder />
       )} */}
 
-      <button
+      <NoteHead
+        isNew
+        symbol="test"
+        title="test test test"
+        link="http://asdfasdf.asdfasdf.com"
+        fetchTime={new Date()}
+        nodeId="asdfasdfas"
+      />
+
+      {/* <button
         onClick={() => {
           docSave(doc)
         }}
@@ -338,7 +383,7 @@ export const DocEl = ({
         }}
       >
         Remove
-      </button>
+      </button> */}
 
       {
         // children ? (
@@ -352,7 +397,8 @@ export const DocEl = ({
             ))}
           </div>
         ) : (
-          <DocPlaceholder />
+          // <DocPlaceholder />
+          <button onClick={e => templateSet(docBlock)}>demo-template</button>
         )
       }
     </article>

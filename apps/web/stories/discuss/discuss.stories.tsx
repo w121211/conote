@@ -1,13 +1,14 @@
+import { Discuss } from '@prisma/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { DiscussFragment } from '../../apollo/query.graphql'
+// import { DiscussFragment } from '../../apollo/query.graphql'
 import { DiscussTile } from '../../components/discuss/layout-components/discuss-tile'
 import { Default } from './post-tile-list.stories'
 // import {De} from './discss.tile.stories';
 
 const date = new Date()
 
-const mockData: DiscussFragment = {
+const mockData: Discuss = {
   __typename: 'Discuss',
   id: 'fjalsjoijfef',
   userId: '',

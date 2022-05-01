@@ -26,7 +26,7 @@ import { DropAreaIndicator } from './drop-area-indicator'
 import { Toggle } from './toggle'
 import { throttle } from 'lodash'
 import { useEffect } from 'react'
-import './block-container.css'
+import './block-container.module.css'
 
 // export const BlockContainer = ({
 //   uid,
@@ -159,9 +159,11 @@ import './block-container.css'
 export const BlockEl = ({
   uid,
   isEditable,
+  isChild,
 }: {
   uid: string
   isEditable: boolean
+  isChild?: boolean
 }): JSX.Element | null => {
   const [block] = useObservable(blockRepo.getBlock$(uid)),
     [children] = useObservable(blockRepo.getBlockChildren$(uid)),
@@ -184,21 +186,26 @@ export const BlockEl = ({
   //   const [avatarAnchorEl, setAvatarAnchorEl] =
   //     React.useState<HTMLDivElement | null>(null)
 
-  useEffect(() => {
-    console.log('isEditing ' + uid, isEditing)
-  }, [isEditing])
+  // useEffect(() => {
+  //   console.log('isEditing ' + uid, isEditing)
+  // }, [isEditing])
 
   if (block === undefined) {
-    console.debug('<Block> block === undefined', uid)
-    console.debug(blocksStore.getValue())
+    // console.debug('<Block> block === undefined', uid)
+    // console.debug(blocksStore.getValue())
     return null
   }
+
+  // useEffect(() => {
+  //   console.log(uid, children)
+  // }, [uid, children])
 
   const { open, str: defaultLocalStr } = block,
     isOpen = open ?? true,
     childrenBlockEls = useMemo(() => {
+      // console.log('childrenBlockEls')
       return children.map(e => (
-        <BlockEl key={e.uid} uid={e.uid} isEditable={isEditable} />
+        <BlockEl key={e.uid} uid={e.uid} isEditable={isEditable} isChild />
       ))
     }, [children])
 
@@ -209,11 +216,12 @@ export const BlockEl = ({
       className={
         // [
         `block-container
+        ${isChild ? 'ml-[2em] [grid-area:body]' : ''}
         ${children.length > 0 && isOpen && 'show-tree-indicator'}
-           ${isOpen ? 'is-open' : 'is-closed'}
-           ${isSelected ? 'is-selected' : ''}
-           ${isSelected && dragging && 'is-dragging'}
-           ${isEditing && 'is-editing'}`
+        ${isOpen ? 'is-open' : 'is-closed'}
+        ${isSelected ? 'is-selected' : ''}
+        ${isSelected && dragging ? 'is-dragging' : ''}
+        ${isEditing ? 'is-editing' : ''}`
         // ]
         // isLocked && 'is-locked',
         // linkedRef && 'is-linked-ref',
@@ -235,20 +243,25 @@ export const BlockEl = ({
 
       <div
         className='
-      relative 
-      grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"] 
-      grid-cols-[1em_1em_1fr_auto] 
-      grid-rows-[0_1fr_0] 
-      rounded-lg'
+          relative 
+          grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"] 
+          grid-cols-[1em_1em_1fr_auto] 
+          grid-rows-[0_1fr_0] 
+          rounded-lg
+          leading-normal
+          my-1
+         '
         //   ref={showPresentUser && setAvatarAnchorEl}
-        onMouseEnter={() => {
+        onMouseEnter={e => {
           // handleMouseEnterBlock
           // isEditable && setRenderEditableDom(true)
+
           isEditable && setShowEditableDom(true)
         }}
-        onMouseLeave={() => {
+        onMouseLeave={e => {
           // handleMouseLeaveBlock
           // isEditable && setRenderEditableDom(false)
+
           isEditable && setShowEditableDom(false)
         }}
       >

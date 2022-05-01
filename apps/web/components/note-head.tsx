@@ -5,83 +5,83 @@ import HeaderNoteEmojis from './emoji-up-down/header-note-emojis'
 import Modal from './modal/modal'
 import { Doc } from './workspace/doc'
 import Select from 'react-select'
-import { styleSymbol } from '../layout/style-symbol'
+import { styleSymbol } from '../layout/style-fc/style-symbol'
+import moment from 'moment'
 
-const NoteHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
-  // const [showModal, setShowModal] = useState(false)
-  // const [showHiddenDiv, setShowHiddenDiv] = useState(false)
-  // const hiddenDivRef = useRef<HTMLDivElement>(null)
+interface NoteHeadProps {
+  isNew: boolean
+  symbol: string
+  title: string | undefined
+  link: string | undefined
+  fetchTime: Date | undefined
+  nodeId: string
+}
 
-  // const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-  //   if (!hiddenDivRef.current?.contains(event.target as Node)) {
-  //     setShowHiddenDiv(false)
-  //   } else {
-  //     setShowHiddenDiv(true)
-  //   }
-  // }
-  // const onMouseOut = () => {
-  //   setShowHiddenDiv(false)
-  // }
-  const metaInput = doc.getNoteMetaInput()
-  const title = metaInput.title ?? null
-  const symbol = doc.getSymbol()
+export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
+  const { isNew, symbol, title, link, fetchTime, nodeId } = props
 
   return (
-    <div className="pl-9 mb-2">
-      <div className="flex items-center gap-1 mb-1">
-        {!doc?.noteCopy && (
+    <div className="ml-6 mb-5">
+      <div className="flex items-center gap-2 mb-4">
+        <span
+          className="h-fit bg-orange-200/60 text-gray-900 px-2 rounded
+             font-[Consolas] select-none font-bold text-xl"
+        >
+          dev
+        </span>
+
+        {isNew && (
           <span
-            className="h-fit bg-yellow-400 text-white px-1 rounded
-             text-sm select-none "
+            className="h-fit bg-yellow-200/60 text-gray-900 px-2 rounded
+             font-[Consolas] select-none font-bold text-xl"
           >
-            New
+            new
           </span>
         )}
       </div>
-      {/* <div className={`flex items-center gap-4 ${showHiddenDiv ? 'opacity-100' : 'opacity-0'}`}>
-            
-            <button
-              className={`btn-reset-style inline-flex items-center px-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-200`}
-              onClick={() => {
-                setShowModal(true)
-              }}
-            >
-              <span className="material-icons text-base">edit_note</span>
-              <span className="whitespace-nowrap text-sm">編輯卡片資訊</span>
-            </button>
-          </div> */}
-      {(metaInput.title || metaInput.author || doc.noteCopy?.link) && (
-        <div className="flex gap-4 pt-2 text-gray-500">
-          {(doc.noteCopy?.sym.type === 'TICKER' || (doc.noteCopy === null && doc.getSymbol().startsWith('$'))) &&
-            metaInput.title && <span className="text-sm ">{metaInput.title}</span>}
-          {metaInput.author && (
+
+      <div className="relative mb-1">
+        <h1 className=" line-clamp-2 break-words text-gray-800 ">
+          {link && (
+            <span className="material-icons text-blue-400 text-3xl align-bottom">
+              language
+            </span>
+          )}
+          {styleSymbol(symbol, title)}
+        </h1>
+      </div>
+
+      {(fetchTime || link) && (
+        <div className="flex flex-col text-gray-400 text-sm italic">
+          {/* {(doc.noteCopy?.sym.type === 'TICKER' || (doc.noteCopy === null && doc.getSymbol().startsWith('$'))) &&
+            metaInput.title && <span className="text-sm ">{metaInput.title}</span>} */}
+          {/* {metaInput.author && (
             <Link href={{ pathname: '/author/[author]', query: { author: metaInput.author } }}>
               <a className="flex-shrink-0 text-sm  hover:underline hover:underline-offset-2">@{metaInput.author}</a>
             </Link>
+          )} */}
+          {link && (
+            <p className="truncate first-letter:capitalize">
+              link:<span> </span>
+              <a
+                className="flex-shrink min-w-0 truncate hover:underline hover:underline-offset-2"
+                target="_blank"
+                href={link}
+                rel="noreferrer"
+              >
+                {link}
+              </a>
+            </p>
           )}
-          {doc.noteCopy?.link && (
-            <a
-              className="flex-shrink min-w-0 truncate text-sm  hover:underline hover:underline-offset-2"
-              href={doc.noteCopy.link.url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {/* <span className="material-icons text-base">open_in_new</span> */}
-              <span className="truncate">{doc.noteCopy.link.url}</span>
-            </a>
+          {fetchTime && (
+            <p className="first-letter:capitalize">
+              fetch time: {moment(fetchTime).calendar()}
+            </p>
           )}
         </div>
       )}
 
-      <div className="relative">
-        <h1 className=" line-clamp-2 break-words text-gray-800 ">
-          {doc.noteCopy?.sym.type === 'TICKER' || (doc.noteCopy === null && doc.getSymbol().startsWith('$'))
-            ? symbol
-            : title || styleSymbol(symbol, '', true)}
-        </h1>
-      </div>
-
-      {/* {doc.noteCopy && <HeaderNoteEmojis noteId={doc.noteCopy.id} />} */}
+      {/* <HeaderNoteEmojis noteId={nodeId} /> */}
 
       {/* {noteMetaData?.noteMeta.keywords && (
         <div className={classes.headerKw}>
@@ -129,5 +129,3 @@ const NoteHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
     </div>
   )
 }
-
-export default NoteHead

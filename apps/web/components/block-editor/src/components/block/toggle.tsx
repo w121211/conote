@@ -111,7 +111,7 @@ interface ToggleProps extends React.HTMLAttributes<HTMLButtonElement> {
 export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
   (props: ToggleProps, ref) => {
     // const { isFocusVisible, focusProps } = useFocusRing()
-    const { isOpen } = props
+    const { isOpen, onClick } = props
 
     return (
       <button
@@ -120,24 +120,27 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
         flex-shrink-0 
         relative z-[2]
         flex items-center justify-center 
-        w-[1em] h-[2em] 
+        w-[1em] h-[1.5em] 
         bg-none 
         border-none 
         p-0 
         appearance-none 
-        transition-[color_.05s_ease] 
-        text-[#AAA]/25
+        transition-colors
+        duration-[.05s]
+        ease-linear
+        text-gray-300
         cursor-pointer 
         focus:outline-none 
-        hover:text-[#AAA]/50 
+        hover:text-gray-700
         
         empty:pointer-events-none"
         ref={ref}
+        onClick={onClick}
         // {...mergeProps(focusProps, props)}
       >
         <svg
-          className={`rotate-90 [vector-effect:non-scaling-stroke] transition-[transform_.1s_ease-in-out] ${
-            isOpen ? '' : 'rotate-0'
+          className={` [vector-effect:non-scaling-stroke] transition duration-100 ease-linear ${
+            isOpen ? 'rotate-90' : 'rotate-0'
           }`}
           width="24"
           height="24"

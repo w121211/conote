@@ -6,6 +6,7 @@ import {
   NoteDraft,
   SearchHit,
 } from '../../src/interfaces'
+import { writeBlocks } from '../../src/utils'
 
 //
 // Mock note, note-draft
@@ -94,16 +95,25 @@ export const mockGotNothing: MockQuerySymbolResult = {
  * Got note only
  */
 export const mockGotNoteOnly: MockQuerySymbolResult = {
-  title: '[[Hello Note]]',
+  title: '[[Got Note Only]]',
   note: {
-    symbol: '[[Hello Note]]',
+    symbol: '[[Got Note Only]]',
     id: 'ttsZotJMy9',
     branch: 'playground',
     doc: {
       id: 'isy9ApWV0c',
       userId: 'nESCpMF5lg',
       noteMeta: {},
-      content: mockBlocks,
+      content: writeBlocks([
+        '[[Got Note Only]]',
+        [
+          'self -> [[Got Note Only]]',
+          '[[Got Note And Draft]]',
+          '[[Got Draft Only]]',
+          '[[Got Nothing]]',
+          ['child 3', ['child-child 1', 'child-child 2']],
+        ],
+      ]),
     },
   },
 }
@@ -112,32 +122,49 @@ export const mockGotNoteOnly: MockQuerySymbolResult = {
  * Got draft only
  */
 export const mockGotDraftOnly: MockQuerySymbolResult = {
-  title: '[[Hello Draft]]',
+  title: '[[Got Draft Only]]',
   draft: {
     id: '08xc91MX8v',
-    content: mockDraftFromNothingBlocks,
+    // content: mockDraftFromNothingBlocks,
+    content: writeBlocks([
+      '[[Got Draft Only]]',
+      [
+        'self -> [[Got Draft Only]]',
+        'child 2',
+        ['child 3', ['child-child 1', 'child-child 2']],
+      ],
+    ]),
   },
 }
 
 /**
  * Got both note & draft
  */
+const gotNoteAndDraftBlocks = writeBlocks([
+  '[[Got Note And Draft]]',
+  [
+    'self -> [[Got Note And Draft]]',
+    '[[Got Note Only]]',
+    '[[Got Draft Only]]',
+    ['child 3', ['child-child 1', 'child-child 2']],
+  ],
+])
 export const mockGotNoteAndDraft: MockQuerySymbolResult = {
-  title: '[[Hello]]',
+  title: '[[Got Note And Draft]]',
   note: {
-    symbol: '[[Hello]]',
+    symbol: '[[Got Note And Draft]]',
     id: 'ttsZotJMy9',
     branch: 'playground',
     doc: {
       id: 'isy9ApWV0c',
       userId: 'nESCpMF5lg',
       noteMeta: {},
-      content: mockDraftFromNoteBlocks.slice(0, 2),
+      content: gotNoteAndDraftBlocks,
     },
   },
   draft: {
     id: 'afxAdVY2U',
-    content: mockDraftFromNoteBlocks,
+    content: gotNoteAndDraftBlocks,
   },
 }
 
@@ -187,15 +214,36 @@ export const mockLocalDoc = {
       docTitle: '[[Mock Local Doc]]',
       parentUid: null,
       order: 0,
-      childrenUids: ['v3HRC2gEyq'],
+      childrenUids: ['v3HRC2gEyq1', 'v3HRC2gEyq2', 'v3HRC2gEyq3'],
       str: '[[Mock Local Doc]]',
     },
     {
-      uid: 'v3HRC2gEyq',
+      uid: 'v3HRC2gEyq1',
       parentUid: 'Nu9RRlYtUm',
       order: 0,
       childrenUids: [],
-      str: 'child block [[Hello world]]',
+      str: 'child block 1',
+    },
+    {
+      uid: 'v3HRC2gEyq2',
+      parentUid: 'Nu9RRlYtUm',
+      order: 1,
+      childrenUids: [],
+      str: 'child block 2',
+    },
+    {
+      uid: 'v3HRC2gEyq3',
+      parentUid: 'Nu9RRlYtUm',
+      order: 2,
+      childrenUids: [],
+      str: 'child block 3',
+    },
+    {
+      uid: 'ttsZotJMy91',
+      parentUid: 'v3HRC2gEyq1',
+      order: 0,
+      childrenUids: [],
+      str: 'child of child block 1',
     },
   ],
 }

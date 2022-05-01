@@ -1,4 +1,4 @@
-.block-content {
+/* .block-content {
   @apply [grid-area:content]
       grid [grid-template-areas:'main']
       place-items-stretch place-content-stretch
@@ -6,15 +6,15 @@
       overflow-visible
       flex-grow
       [word-break:break-word];
-}
-.block-content .rendered-content,
+} */
+/* .block-content .rendered-content,
 .block-content textarea {
   @apply [grid-area:main]
       text-inherit
       font-[inherit]
       cursor-text;
-}
-.block-content textarea {
+} */
+/* .block-content textarea {
   @apply relative
       block
       [transform:translate3d(0,0,0)]
@@ -30,28 +30,28 @@
       text-inherit
       font-[inherit]
       caret-[#0075E1];
-}
-.block-content.is-editing textarea,
+} */
+/* .block-content.is-editing textarea,
 .block-content.show-editable-dom textarea {
   @apply z-[3]
       opacity-0
       leading-[inherit];
-}
-.block-content.is-editing textarea {
+} */
+/* .block-content.is-editing textarea {
   @apply opacity-100;
-}
-.block-content:not(.is-editing):hover textarea {
+} */
+/* .block-content:not(.is-editing):hover textarea {
   @apply leading-[inherit];
-}
-.block-content .is-locked > .block-body > .block-content {
+} */
+/* .block-content .is-locked > .block-body > .block-content {
   @apply opacity-50;
-}
-.block-content span {
+} */
+/* .block-content span {
   @apply [grid-area:main];
 }
 .block-content span > span > a {
   @apply relative z-[2];
-}
-.block-content p {
+} */
+/* .block-content p {
   @apply m-0 pb-[1em];
-}
+} */

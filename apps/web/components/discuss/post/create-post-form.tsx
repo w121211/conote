@@ -1,25 +1,41 @@
 import moment from 'moment'
-import React, { ReactEventHandler, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, {
+  ReactEventHandler,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism'
+// import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { githubGist } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 import { useForm } from 'react-hook-form'
-import { DiscussPostsDocument, useCreateDiscussPostMutation } from '../../../apollo/query.graphql'
+import {
+  DiscussPostsDocument,
+  useCreateDiscussPostMutation,
+} from '../../../apollo/query.graphql'
 // import 'github-markdown-css/github-markdown-light.css'
 // import SyntaxHighlighter from 'react-syntax-highlighter'
-import './github-markdown-light.css'
+import './github-markdown-light.module.css'
 
 interface FormInput {
   content: string
 }
 
-export const CreatePostForm = ({ discussId, isModal }: { discussId: string; isModal?: boolean }) => {
+export const CreatePostForm = ({
+  discussId,
+  isModal,
+}: {
+  discussId: string
+  isModal?: boolean
+}) => {
   const [showTextarea, setShowTextarea] = useState(true)
   const [preview, setPreview] = useState('')
-  const { register, handleSubmit, getValues, watch, reset, formState } = useForm<FormInput>({
-    defaultValues: { content: '' },
-  })
+  const { register, handleSubmit, getValues, watch, reset, formState } =
+    useForm<FormInput>({
+      defaultValues: { content: '' },
+    })
   const { isSubmitSuccessful } = formState
   const commentRef = useRef<HTMLDivElement>(null)
   const submitRef = useRef<HTMLButtonElement>(null)
@@ -43,7 +59,9 @@ export const CreatePostForm = ({ discussId, isModal }: { discussId: string; isMo
   const watchContent = watch('content')
 
   const onSubmit = (d: FormInput) => {
-    createPost({ variables: { discussId, data: { content: d.content.trim() } } })
+    createPost({
+      variables: { discussId, data: { content: d.content.trim() } },
+    })
   }
 
   const formClassName = isModal
@@ -64,7 +82,10 @@ export const CreatePostForm = ({ discussId, isModal }: { discussId: string; isMo
       // Reset height - important to shrink on delete
       textareaTest.style.height = isModal ? '44px' : 'inherit'
       //   // Set height
-      textareaTest.style.height = `${Math.min(textareaTest.scrollHeight, maxTextareaHeight)}px`
+      textareaTest.style.height = `${Math.min(
+        textareaTest.scrollHeight,
+        maxTextareaHeight,
+      )}px`
       //
     }
     // const converMd=async () => {
@@ -75,7 +96,12 @@ export const CreatePostForm = ({ discussId, isModal }: { discussId: string; isMo
   console.log(watchContent.length === 0, isSubmitSuccessful)
 
   return (
-    <form className={formClassName} onSubmit={handleSubmit(onSubmit)} autoComplete="off" ref={formRef}>
+    <form
+      className={formClassName}
+      onSubmit={handleSubmit(onSubmit)}
+      autoComplete="off"
+      ref={formRef}
+    >
       {/* <div
         className="absolute  w-full h-10 group-focus-within:h-32 left-0 top-0 flex-grow flex items-center rounded 
           border border-gray-200
@@ -168,7 +194,11 @@ export const CreatePostForm = ({ discussId, isModal }: { discussId: string; isMo
                 code({ node, inline, className, children, ...props }) {
                   const match = /language-(\w+)/.exec(className || '')
                   return !inline && match ? (
-                    <SyntaxHighlighter language={match[1]} style={prism} {...props}>
+                    <SyntaxHighlighter
+                      language={match[1]}
+                      // style={prism}
+                      {...props}
+                    >
                       {String(children).replace(/\n$/, '')}
                     </SyntaxHighlighter>
                   ) : (

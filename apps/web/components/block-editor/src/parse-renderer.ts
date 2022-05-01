@@ -345,18 +345,10 @@ export function renderToken(token: Token | string): JSX.Element {
   if (typeof token.content === 'string') {
     switch (token.type) {
       case 'comment':
-        return el(
-          'span',
-          { className: '', style: { color: 'gray' } },
-          token.content,
-        )
+        return el('span', { className: 'text-gray-400' }, token.content)
       case 'topic-bracket-head':
       case 'topic-bracket-tail':
-        return el(
-          'span',
-          { className: '', style: { color: 'red' } },
-          token.content,
-        )
+        return el('span', { className: 'text-gray-300' }, token.content)
       default:
         return el('span', null, token.content)
     }

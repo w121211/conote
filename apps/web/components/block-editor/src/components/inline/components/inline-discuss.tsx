@@ -36,7 +36,7 @@ const InlineDiscussEl = ({
     modalButtons = !isDiscussCreated && (
       <button
         form="create-discuss-form"
-        className="btn-primary h-10 w-24 "
+        className={`btn-primary h-10 w-24 `}
         type="submit"
       >
         提交
@@ -75,20 +75,23 @@ const InlineDiscussEl = ({
         )}
       </Modal>
       {isDiscussCreated ? (
-        <button
-          className="btn-reset-style hover:bg-gray-100"
+        <span
+          className="relative hover:bg-gray-100"
           onClick={() => setShowModal(true)}
+          role="button"
         >
           {children}
-        </button>
+        </span>
       ) : (
-        <button
-          className="btn-reset-style hover:bg-gray-100"
+        <span
+          // relative 為必要 才可點擊到 和 hover 效果
+          className="relative hover:bg-gray-100 "
           onClick={() => setShowModal(true)}
+          role="button"
         >
           {children}
           <span>(click to create)</span>
-        </button>
+        </span>
       )}
     </>
   )

@@ -59,13 +59,16 @@ export function blockDragLeave(
 ) {
   e.preventDefault()
   e.stopPropagation()
+
   const { uid: targetUid } = block,
     relatedUid =
       e.relatedTarget instanceof HTMLElement
         ? getDatasetUid(e.relatedTarget)
         : null
 
-  if (relatedUid !== targetUid) setDragTarget(null)
+  if (relatedUid !== targetUid) {
+    setDragTarget(null)
+  }
 }
 
 /**
@@ -113,17 +116,17 @@ export function blockDragOver(
   : https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#Define_a_drop_zone"
  */
 export function blockDrop(
-  event: React.DragEvent,
+  e: React.DragEvent,
   block: Block,
   dragTarget: DragTarget | null,
   setDragTarget: React.Dispatch<React.SetStateAction<DragTarget | null>>,
 ) {
-  event.stopPropagation()
+  e.stopPropagation()
 
   const { uid: targetUid } = block,
-    sourceUid = event.dataTransfer.getData('text/plain'),
-    effectAllowed = event.dataTransfer.effectAllowed,
-    items = event.dataTransfer.items,
+    sourceUid = e.dataTransfer.getData('text/plain'),
+    effectAllowed = e.dataTransfer.effectAllowed,
+    items = e.dataTransfer.items,
     item = items[0],
     datatype = item.type,
     // imgRgex = /(?i)^image\/(p?jpeg|gif|png)$/,
@@ -144,10 +147,6 @@ export function blockDrop(
   }
 
   events.mouseDownUnset()
-  // setState({
-  //   ...state,
-  //   dragTarget: null,
-  // })
   setDragTarget(null)
 }
 
