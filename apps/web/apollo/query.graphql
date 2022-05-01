@@ -296,10 +296,18 @@ fragment vote on Vote {
 fragment note on Note {
   __typename
   id
-  meta
-  sym
-  link
-  doc
+  meta {
+    ...noteDocMeta
+  }
+  sym {
+    ...sym
+  }
+  link {
+    ...link
+  }
+  doc {
+    ...noteDoc
+  }
   updatedAt
 }
 
@@ -310,9 +318,42 @@ fragment noteDoc on NoteDoc {
   commitId
   fromDocId
   domain
-  meta
-  content
+  meta {
+    ...noteDocMeta
+  }
+  content {
+    ...noteDocContent
+  }
   updatedAt
+}
+
+fragment noteDocMeta on NoteDocMeta {
+  duplicatedSymbols
+  blockUidAnddiscussIdsDict
+  keywords
+  redirectFroms
+  redirectTo
+  webpage {
+    ...noteDocMetaWebpage
+  }
+}
+
+fragment noteDocContent on NoteDocContent {
+  diff
+  symbolIdDict
+  blocks {
+    uid
+    str
+    parentUid
+    docTitle
+  }
+}
+
+fragment noteDocMetaWebpage on NoteDocMetaWebpage {
+  authors
+  title
+  publishedAt
+  tickers
 }
 
 fragment noteDocEntry on NoteDocEntry {
@@ -328,8 +369,12 @@ fragment noteDraft on NoteDraft {
   fromDocId
   domain
   symbol
-  meta
-  content
+  meta {
+    ...noteDocMeta
+  }
+  content {
+    ...noteDocContent
+  }
   updatedAt
   status
 }
@@ -337,6 +382,17 @@ fragment noteDraft on NoteDraft {
 fragment noteDraftEntry on NoteDraftEntry {
   __typename
   id
+}
+
+fragment noteDraftDropResponse on NoteDraftDropResponse {
+  __typename
+  response
+}
+
+fragment noteDraftCommitResponse on NoteDraftCommitResponse {
+  __typename
+  commitId
+  response
 }
 #--------------END------------------
 # DELETE-------------------
@@ -475,21 +531,21 @@ query searchNote($symbol: String, $title: String) {
   }
 }
 
-query searchByDomain($domain: String!) {
-  searchByDomain(domain: $domain) {
-    ...note
-  }
-}
+# query searchByDomain($domain: String!) {
+#   searchByDomain(domain: $domain) {
+#     ...note
+#   }
+# }
 
-query searchByAuthor($name: String!) {
-  searchByAuthor(domain: $name) {
-    ...note
-  }
-}
+# query searchByAuthor($name: String!) {
+#   searchByAuthor(domain: $name) {
+#     ...note
+#   }
+# }
 
 query myNoteDraftEntries {
   myNoteDraftEntries {
-    ...NoteDraftEntry
+    ...noteDraftEntry
   }
 }
 
@@ -727,11 +783,12 @@ mutation UpdateNoteMeta(
   }
 }
 
-mutation CreateCommit($data: CommitInput!) {
-  createCommit(data: $data) {
-    ...commit
-  }
-}
+# TODO: need to modify
+# mutation CreateCommit($data: CommitInput!) {
+#   createCommit(data: $data) {
+#     ...commit
+#   }
+# }
 
 mutation CreateDiscuss($noteId: ID, $data: DiscussInput!) {
   createDiscuss(noteId: $noteId, data: $data) {
@@ -852,6 +909,39 @@ mutation SessionLogin($idToken: String!, $csrfToken: String) {
 mutation SessionLogout {
   sessionLogout
 }
+
+# ------------- NEW ------------
+mutation CreateNoteDraft($symbol: String!, $draftInput: NoteDraftInput!) {
+  createNoteDraft(symbol: $symbol, draftInput: $draftInput) {
+    ...noteDraft
+  }
+}
+
+mutation CreateNoteDraftByLink($linkId: String!, $draftInput: NoteDraftInput!) {
+  createNoteDraftByLink(linkId: $linkId, draftInput: $draftInput) {
+    ...noteDraft
+  }
+}
+
+mutation UpdateNoteDraft($id: ID!, $data: NoteDraftInput!) {
+  updateNoteDraft(id: $id, data: $data) {
+    ...noteDraft
+  }
+}
+
+mutation DropNoteDraft($id: ID!) {
+  dropNoteDraft(id: $id) {
+    ...noteDraftDropResponse
+  }
+}
+
+mutation CommitNoteDrafts($draftIds: [ID!]!) {
+  commitNoteDrafts(draftIds: $draftIds) {
+    ...noteDraftCommitResponse
+  }
+}
+
+# commit must be created first -> createCommit ->
 # -------COMMENT---------
 # mutation CreateComment($boardId: ID!, $pollId: ID, $data: CommentInput!) {
 #   createComment(boardId: $boardId, pollId: $pollId, data: $data) {

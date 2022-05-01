@@ -571,11 +571,11 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   // missing return: domain, doc, meta, sym
   // need to use note-model.ts to deal with it
   async searchByDomain(_parent, { domain }, _context, _info) {
-    const notes = prisma.note.findMany({
+    const noteDocs = prisma.noteDoc.findMany({
       where: { domain },
       orderBy: { updatedAt: 'desc' },
     })
-    return {}
+    return noteDocs
   },
 
   // searchByAuthor(name: String): [Note!]!
