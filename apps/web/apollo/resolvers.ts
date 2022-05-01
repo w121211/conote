@@ -910,6 +910,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     // }
   },
 
+  // TODO: modify the commit
   async createCommit(_parent, { data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { commit, stateGidToCid, symsCommitted } = await CommitModel.create(
