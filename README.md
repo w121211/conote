@@ -249,14 +249,14 @@ v-discuss
 - [?] note without bulletin
 - [?] remove bullet emoji -> easier & better for co-editing, note contribution calculated by counting words/lines
 
-v-0.2.1
+v0.2.1
 
 - optimize
   - avoid rerender if possible
   - use SSR if possible
   - consider switch to https://typegraphql.com/
 - auth
-  - [v] improve login, logout stablility -> useMe()
+  - [x] improve login, logout stablility -> useMe()
   - [next] switch to next-firebase-auth once it is upport for firebase v9 (token-based)
     - for now, use firebase official example, cookie-based, no csrf
     - require both server (useMe) & firebase to logged-in, if server-side not logged in, should also revoke client-side firebase token so client-side check not remained logged-in
@@ -275,7 +275,7 @@ v-0.2.1
   - inline-poll
   - inline filtertag `#filter-tag`
   - inline url, eg https://arxiv.org/abs/2112.00114
-  - [v] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
+  - [x] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
   - [?] root li without bullet icon?
   - [pending] 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
   - [v@lisa] labels @eg #new-note #fisrt-commit
@@ -287,7 +287,7 @@ v-0.2.1
   - get is doc modified
   - if not saved, jump warning before leaving
   - edit source directly (for fixing bugs)
-  - [v] (req) auto complete support selection, eg selection 'twitter' + key '[' => [twitter]
+  - [x] (req) auto complete support selection, eg selection 'twitter' + key '[' => [twitter]
   - (req) suggest similar topics for newly created note, eg [[twitter]] (new), suggest [[Twitter]]
 - author
   - support author and its ogranization, eg 楊惠宇分析師*永誠國際投顧* -> @楊惠宇(永誠國際投顧分析師) @永誠國際投顧
@@ -316,7 +316,7 @@ v-0.2.1
   - http redirect to https
   - redirect konote.one to www.konote.one
 - [@hsuan] nlp
-  - [v] greedy rate samples from cnyes news
+  - [x] greedy rate samples from cnyes news
   - [working@chi] training on greedy samples
     - train ner -> entities, subj/obj
     - train classifier -> rate (long, short, hold)
@@ -343,67 +343,79 @@ v-0.2.1
       - [] block drag-drop indicator
     - doc
       - [] doc-template (easy test bed for parse-render), include inline-items: discuss, symbol, url, comment
-    - editor
-      - [] modal editor
+    - [x] modal editor
     - [] search-panel
-    - [] inline
+    - [x] inline-symbol
+    - [] inline-discuss
   - loading -> static icon
   - global search
   - user page gray
 - [@chi] block-editor
   - modal editor
-    - [v] basic
+    - [x] basic
     - [] switch between titles or close
   - template
     - [] create a template
   - inline items
-    - [v] decorate (render-token)
-    - [v] inline-symbol
-  - [v] auto complete
+    - [x] decorate (render-token)
+    - [x] inline-symbol
+  - [x] auto complete
   - redo/undo
-    - [v] basic redo/undo through elf/history
+    - [x] basic redo/undo through elf/history
     - [] (issue) caret lost after undo
     - [] textarea value undo, redo
     - [] textarea value lost after undo
   - select
-    - [] mouse select
-    - [] keyboard select
-  - [v] drag and drop (not fully tested)
-  - [] copy and paste
+    - [x] mouse select
+    - [x] keyboard select
+    - [] rewrite findSelectedItems
+  - [x] drag and drop (not fully tested)
+  - copy and paste
+    - [] external
+    - [] internal -> really need this?
   - doc store
     - [] seperated blocks store for each doc
   - doc save
 - check
   - seed
-  - [v] discuss emoji, note emoji test add-with-auto-remove -> backend like unlinke return mutations
-  - [v] discuss post
+  - [x] discuss emoji, note emoji test add-with-auto-remove -> backend like unlinke return mutations
+  - [x] discuss post
   - discuss -> inline-discuss
   - rate & create author
-- mock data
+- [@chi] mock data
+- [@hsuan] git-style commit -> add branch, domain
+  - [x] database schema
+  - [x] graphql schema
+  - [-] (req) subdomain/channel, eg [[dev/Browser Extension]] -> use domain instead
+  - [x] commit drafts
+  - merge/reject doc
+  - query note (include head-doc)
+  - query draft
+  - handle doc conflict -> git mechanism
 
 v0.2
 
 - /index
-  - [v] announcement
+  - [x] announcement
 - naming
-  - [v] 'card' to 'note'
+  - [x] 'card' to 'note'
 - /author
-  - [v] gql create/update author
+  - [x] gql create/update author
   - [prior@lisa] edit author meta (ie intro)
-  - [v] (ui) add @ mark on author
-  - [v] author rates <- gql rates by author
+  - [x] (ui) add @ mark on author
+  - [x] author rates <- gql rates by author
   - [pending] author articles <- gql links by author <- similar to rates
 - /editor
-  - [v] auto-complete brackets, eg [[]], (()), ←, → , ##
-  - [v] (req) a save button
+  - [x] auto-complete brackets, eg [[]], (()), ←, → , ##
+  - [x] (req) a save button
   - [pending] (req) a setting button
-  - [v] (req) search panel, including ticker, topic, discuss
+  - [x] (req) search panel, including ticker, topic, discuss
   - [prior] (req) web-note with keyword hints -> auto fill the note (optional)
   - [prior@lisa] (req) auto fill template (optional)
 - discuss `#a discussion topic here#` @eg https://github.com/prisma/prisma/discussions https://github.com/discourse/discourse/tree/main/app/models
-  - [v] editor parser, inline element
-  - [v] (bk) prisma model, graphql api, resolvers
-  - [v] (ui) modal
+  - [x] editor parser, inline element
+  - [x] (bk) prisma model, graphql api, resolvers
+  - [x] (ui) modal
   - [@lisa] action button for delete, edit, report
 - note
   - [prior@lisa] add note emoji :wish (or :watch), eg intersted on this topic and wish someone to fill
@@ -411,32 +423,27 @@ v0.2
 - note-digest
   - [pending] add note emojis
 - note search panel
-  - [v] newly added symbol should be searchable
-  - [v] graphql add search author, ticker with id
-  - [v] switch search discuss select to panel
+  - [x] newly added symbol should be searchable
+  - [x] graphql add search author, ticker with id
+  - [x] switch search discuss select to panel
   - search panel with keyboard support
 - browser extension
-  - [v] (ui) remove scss
+  - [x] (ui) remove scss
   - [working@chi] add inline-rate
   - [pending] deploy to chrome/firefox store -> require to fill tons of info
 - database
-  - [v] migrate table
+  - [x] migrate table
   - [pending] script for couting words/notes of an user -> use user instead
-- branch
-  - [prior@hsuan] design channel database schema
-  - (req) subdomain/channel, eg [[dev/Browser Extension]]
-  - switch commit to channel base, @eg @user/some_topic -> @all/some_topic
-  - handle doc conflict -> git mechanism
 - note-meta
-  - should keep user update record -> (?) allow update card-meta without commit note?
+  - [-] should keep user update record -> (?) allow update card-meta without commit note?
 
 v0.1.1
 
-- [v] (bug) digests load more
+- [x] (bug) digests load more
 - card-meta-form
-  - [v] (ui) field width align -> keywords
-  - [v] (bug) keywords broken
-  - [v] (req) card-meta-form field should not memorize value
+  - [x] (ui) field width align -> keywords
+  - [x] (bug) keywords broken
+  - [x] (req) card-meta-form field should not memorize value
   - fields
     - title -> 1. [[title]], 2. HTML title
     - redirect
@@ -444,39 +451,39 @@ v0.1.1
     - keywords
   - if card is existed (ie got id), able to update note meta instantly without commit
 - doc-index
-  - [v] (bug) doc-index tree fail when removing parent docs -> remove parent doc also remove children
-  - [v] (bug) child doc-index-panel hidden delete not show
-  - [v] (ui) doc-index title/symbol display, Webpage -> symbol, title, Ticker -> symbol + title, eg $BA 波音, Topic -> symbol only
+  - [x] (bug) doc-index tree fail when removing parent docs -> remove parent doc also remove children
+  - [x] (bug) child doc-index-panel hidden delete not show
+  - [x] (ui) doc-index title/symbol display, Webpage -> symbol, title, Ticker -> symbol + title, eg $BA 波音, Topic -> symbol only
 - /index
-  - [v] (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
-  - [v] (ui) fit differnt window width
+  - [x] (ui) search input box width not full, eg https://www.mobile01.com/topicdetail.php?f=793&t=6520838
+  - [x] (ui) fit differnt window width
   - [pending] (bug) search box: 'home', 'end' key has no effect
 - /card?url
   - (req) a better error message and report
-  - [v] (req) if url is not reachable (eg 503), still create a card, eg https://www.fantom.foundation/
+  - [x] (req) if url is not reachable (eg 503), still create a card, eg https://www.fantom.foundation/
 - card-head
-  - [v] (ui) card-emojis horizontal display
-  - [v] (ui) card-emoji pin should not display count
-  - [v] (req) change card symbol name
+  - [x] (ui) card-emojis horizontal display
+  - [x] (ui) card-emoji pin should not display count
+  - [x] (req) change card symbol name
   - [pending] change card symbol name -> note's reverse-link will fail -> store sym-id in the card-state
 - editor
-  - [v] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
+  - [x] (bug) webpage card create error: https://www.mobile01.com/topicdetail.php?f=793&t=6520838
   - [x] (ui) modal editor scroll bar
-  - [v] (bug) 'delete-key' error at the end of string followed by 1. inlines, 2. nested, cases: 1. -a --b 2. -a -$X
-  - [v] (bug) require cmd+z twice to redo
-  - [v] (ui) min width -> left/right margin
-  - [v] (ui) line space
+  - [x] (bug) 'delete-key' error at the end of string followed by 1. inlines, 2. nested, cases: 1. -a --b 2. -a -$X
+  - [x] (bug) require cmd+z twice to redo
+  - [x] (ui) min width -> left/right margin
+  - [x] (ui) line space
   - [pending] (req) parse lc use 'wrapNoe()' instead of 'removeNodes() & insertNodes()' <- keeps original strucutre & avoid undo bug
-  - [v] (ui) :pin emoji should not have count
-  - [v] (ui) :pin emoji color -> gray (unclick)
+  - [x] (ui) :pin emoji should not have count
+  - [x] (ui) :pin emoji color -> gray (unclick)
   - [pending@lisa] (ui) conote -> konote & when on-hover button add some feedback
-  - [v] (bug) while not logged in can still typing in the editor
+  - [x] (bug) while not logged in can still typing in the editor
 - workspace
-  - [v] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved
-  - [v] (bug) delete note will not work if that note is opening in the editor -> use disabled (raise warning to prevent deletion)
+  - [x] (bug) (critical) modal editor open another modal editor, the previous note was not automatically saved
+  - [x] (bug) delete note will not work if that note is opening in the editor -> use disabled (raise warning to prevent deletion)
 - link
   - [pending] (bug) URL failed: https://www.mobile01.com/topicdetail.php?f=803&t=6541514 -> fail only on server, possibly caused by cloudflare guard
-- [v] (req) domain name
-- [v] browser extension window popup
+- [x] (req) domain name
+- [x] browser extension window popup
 - login
-  - [v] (bug) unable to logout, possbily caused by client-side token not deleted -> add client-side logout
+  - [x] (bug) unable to logout, possbily caused by client-side token not deleted -> add client-side logout

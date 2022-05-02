@@ -1,8 +1,6 @@
 import { AuthenticationError } from 'apollo-server-micro'
 // import { compare, hash } from 'bcryptjs'
 import {
-  BulletEmoji,
-  BulletEmojiCount,
   DiscussEmoji,
   DiscussEmojiCount,
   DiscussPostEmoji,
@@ -19,27 +17,13 @@ import {
   MutationResolvers,
 } from 'graphql-let/__generated__/__types__'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
-import fetcher from '../lib/fetcher/fetcher'
 import { hasCount, toStringId } from '../lib/helpers'
 import { AuthorModel } from '../lib/models/author-model'
-// import { BulletEmojiModel } from '../lib/models/bullet-emoji-model'
-import { CommitModel } from '../lib/models/commit-model'
-import { NoteMeta, NoteModel } from '../lib/models/note-model'
-import {
-  NoteDocMeta,
-  NoteDocContent,
-  NoteDocModel,
-} from '../lib/models/note-doc-model'
-import { NoteDigestModel } from '../lib/models/note-digest-model'
-// import { NoteEmojiModel } from '../lib/models/note-emoji-model'
-import { NoteStateModel } from '../lib/models/note-state-model'
 import { PollMeta } from '../lib/models/poll-model'
 import { RateModel } from '../lib/models/rate-model'
 import { getOrCreateUser } from '../lib/models/user-model'
 import { createVote } from '../lib/models/vote-model'
 import { SymModel } from '../lib/models/sym-model'
-// import { DiscussEmojiModel } from '../lib/models/discuss-emoji-model'
-// import { DiscussPostEmojiModel } from '../lib/models/discuss-post-emoji-model'
 import prisma from '../lib/prisma'
 import {
   SearchAuthorService,
@@ -48,15 +32,10 @@ import {
 } from '../lib/search/search'
 import { ResolverContext } from './apollo-client'
 import {
-  DiscussEmojiModel,
-  DiscussPostEmojiModel,
-  NoteEmojiModel,
+  discussEmojiModel,
+  discussPostEmojiModel,
+  noteEmojiModel,
 } from '../lib/models/emoji-model'
-import { selectionSetMatchesResult } from '@apollo/client/cache/inmemory/helpers'
-import { orderBy } from 'lodash'
-import { fn } from 'moment'
-import { connect } from 'http2'
-import { discussModel } from '../lib/models/discuss-model'
 
 // function _deleteNull<T>(obj: T) {
 //   let k: keyof T
@@ -107,28 +86,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     })
   },
 
-  async bulletEmojis(_parent, { bulletId }, _context, _info) {
-    const emojis = (
-      await prisma.bulletEmoji.findMany({
-        // where: { AND: [{ note: { symbol } }, { status: HashtagStatus.ACTIVE }] },
-        where: { bulletId },
-        include: { count: true },
-      })
-    ).filter(
-      (
-        e,
-      ): e is BulletEmoji & {
-        count: BulletEmojiCount
-      } => e.count !== null,
-    )
-    return emojis.map(e => {
-      return {
-        ...e,
-        count: { ...toStringId(e.count) },
-      }
-    })
-  },
-
   async discuss(_parent, { id }, _context, _info) {
     const discuss = await prisma.discuss.findUnique({
       where: { id },
@@ -137,8 +94,10 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     if (discuss && discuss.count) {
       const a = {
         ...discuss,
+        id: discuss.id.toString(),
         meta: {},
-        count: { ...toStringId(discuss.count) },
+        content: {},
+        count: toStringId(discuss.count),
       }
       return a
     }
@@ -220,16 +179,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return user
   },
 
-  async myBulletEmojiLike(_parent, { bulletEmojiId }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const like = await prisma.bulletEmojiLike.findUnique({
-      where: {
-        userId_bulletEmojiId: { bulletEmojiId, userId },
-      },
-    })
-    return like ? toStringId(like) : null
-  },
-
   async myNoteEmojiLike(_parent, { noteEmojiId }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const like = await prisma.noteEmojiLike.findUnique({
@@ -290,10 +239,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       },
     })
     return votes.map(e => ({ ...toStringId(e) }))
-  },
-
-  async noteState(_parent, { id }, _context, _info) {
-    return await NoteStateModel.get(id)
   },
 
   async noteEmojis(_parent, { noteId }, _context, _info) {
@@ -369,10 +314,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   //   // return meta
   // },
 
-  async noteDigests(_parent, { afterCommitId }, _context, _info) {
-    return await NoteDigestModel.getLatest(afterCommitId ?? undefined)
-  },
-
   async poll(_parent, { id }, _context, _info) {
     const poll = await prisma.poll.findUnique({
       include: { count: true },
@@ -442,7 +383,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       return {
         ...e,
         meta: e.meta as unknown as NoteMeta,
-        body: { blocks: [], symbolIdDict: {}, diff: {} },
+        // body: { blocks: [], symbolIdDict: {}, diff: {} },
       }
     })
   },
@@ -520,6 +461,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         ...draft,
         noteId: draft.note?.id,
         meta: draft.meta as unknown as NoteMeta,
+        // TODO
         content: { blocks: [], symbolIdDict: {}, diff: {} },
       }
     }
@@ -548,6 +490,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         ...e,
         docs: e.docs.map(e => ({
           ...e,
+          // TODO
           content: { blocks: [], symbolIdDict: {}, diff: {} },
         })),
         stateIdToCidDictEntryArray: [{ k: '', v: '' }], // what is this??
@@ -878,58 +821,25 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return AuthorModel.toGQLAuthor(author)
   },
 
-  async createBulletEmoji(_parent, { bulletId, code }, { req }, _info) {
-    throw 'consider to drop'
-    // const { userId } = await isAuthenticated(req)
-    // const { emoji, like } = await BulletEmojiModel.create({ bulletId, code, userId })
-    // return {
-    //   emoji: {
-    //     ...emoji,
-    //     count: toStringId(emoji.count),
-    //   },
-    //   like: toStringId(like),
-    // }
-  },
+  // async createCommit(_parent, { data }, { req }, _info) {
+  //   const { userId } = await isAuthenticated(req)
+  //   const { commit, stateGidToCid, symsCommitted } = await CommitModel.create(
+  //     data,
+  //     userId,
+  //   )
 
-  async upsertBulletEmojiLike(
-    _parent,
-    { bulletEmojiId, data },
-    { req },
-    _info,
-  ) {
-    throw 'consider to drop'
-    // const { userId } = await isAuthenticated(req)
-    // const { like, count } = await BulletEmojiModel.upsertLike({
-    //   choice: data.choice,
-    //   bulletEmojiId,
-    //   userId,
-    // })
-    // return {
-    //   like: toStringId(like),
-    //   count: toStringId(count),
-    // }
-  },
-
-  // TODO: modify the commit
-  async createCommit(_parent, { data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const { commit, stateGidToCid, symsCommitted } = await CommitModel.create(
-      data,
-      userId,
-    )
-
-    // add newly created symbols to search (if any)
-    for (const e of symsCommitted) {
-      SearchSymService.add(e)
-    }
-    return {
-      ...commit,
-      stateIdToCidDictEntryArray: Object.entries(stateGidToCid).map<{
-        k: string
-        v: string
-      }>(([k, v]) => ({ k, v })),
-    }
-  },
+  //   // add newly created symbols to search (if any)
+  //   for (const e of symsCommitted) {
+  //     SearchSymService.add(e)
+  //   }
+  //   return {
+  //     ...commit,
+  //     stateIdToCidDictEntryArray: Object.entries(stateGidToCid).map<{
+  //       k: string
+  //       v: string
+  //     }>(([k, v]) => ({ k, v })),
+  //   }
+  // },
 
   async createDiscuss(_parent, { noteId, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
@@ -984,64 +894,33 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     throw 'Not authorized, only author is allowed to update discuss'
   },
 
-  async connectDiscussToNote(
-    _parent,
-    { discussId, noteId, disconnect },
-    { req },
-    _info,
-  ) {
-    await isAuthenticated(req)
-    const discuss = disconnect
-      ? await prisma.discuss.update({
-          where: { id: discussId },
-          data: {
-            notes: { disconnect: [{ id: noteId }] },
-          },
-        })
-      : await prisma.discuss.update({
-          where: { id: discussId },
-          data: {
-            notes: { connect: [{ id: noteId }] },
-          },
-        })
-    if (discuss) {
-      return true
-    }
-    throw 'Internal error'
-  },
-
-  async createDiscussEmoji(_parent, { discussId, code }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const { emoji, like } = await DiscussEmojiModel.create(
-      discussId,
-      code,
-      userId,
-    )
-    return {
-      emoji: {
-        ...toStringId(emoji),
-        count: toStringId(emoji.count),
-      },
-      like: toStringId(like),
-    }
-  },
-
   async upsertDiscussEmojiLike(
     _parent,
-    { discussEmojiId, liked },
+    { liked, emojiId, discussId, emojiCode },
     { req },
     _info,
   ) {
     const { userId } = await isAuthenticated(req)
-    const { like, count } = await DiscussEmojiModel.upsertLike({
-      liked,
-      emojiId: parseInt(discussEmojiId),
-      userId,
-    })
-    return {
-      like: toStringId(like),
-      count: toStringId(count),
+    let results
+    if (emojiId) {
+      results = await discussEmojiModel.upsertLike({ userId, liked, emojiId })
+    } else if (discussId && emojiCode) {
+      results = await discussEmojiModel.upsertLike({
+        userId,
+        liked,
+        subj: { subjId: discussId, code: emojiCode },
+      })
+    } else {
+      throw new Error('Input error')
     }
+    return results.map(({ emoji, count, like }) => ({
+      emoji: {
+        ...emoji,
+        id: emoji.id.toString(),
+        count: toStringId(count),
+      },
+      like: toStringId(like),
+    }))
   },
 
   async createDiscussPost(_parent, { discussId, data }, { req }, _info) {
@@ -1073,77 +952,70 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     throw 'Not authorized, only author is allowed to update discuss'
   },
 
-  async createDiscussPostEmoji(
-    _parent,
-    { discussPostId, code },
-    { req },
-    _info,
-  ) {
-    const { userId } = await isAuthenticated(req)
-    const { emoji, like } = await DiscussPostEmojiModel.create(
-      parseInt(discussPostId),
-      code,
-      userId,
-    )
-    return {
-      emoji: {
-        ...toStringId(emoji),
-        count: toStringId(emoji.count),
-      },
-      like: toStringId(like),
-    }
-  },
-
   async upsertDiscussPostEmojiLike(
     _parent,
-    { discussPostEmojiId, liked },
+    { liked, emojiId, discussPostId, emojiCode },
     { req },
     _info,
   ) {
     const { userId } = await isAuthenticated(req)
-    const { like, count } = await DiscussPostEmojiModel.upsertLike({
-      liked,
-      emojiId: parseInt(discussPostEmojiId),
-      userId,
-    })
-    return {
-      like: toStringId(like),
-      count: toStringId(count),
+    let results
+    if (emojiId) {
+      results = await discussPostEmojiModel.upsertLike({
+        userId,
+        liked,
+        emojiId,
+      })
+    } else if (discussPostId && emojiCode) {
+      results = await discussPostEmojiModel.upsertLike({
+        userId,
+        liked,
+        subj: { subjId: discussPostId, code: emojiCode },
+      })
+    } else {
+      throw new Error('Input error')
     }
-  },
-
-  async createNoteEmoji(_parent, { noteId, code }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const { emoji, like } = await NoteEmojiModel.create(noteId, code, userId)
-    return {
+    return results.map(({ emoji, count, like }) => ({
       emoji: {
-        ...toStringId(emoji),
-        count: toStringId(emoji.count),
+        ...emoji,
+        id: emoji.id.toString(),
+        count: toStringId(count),
       },
       like: toStringId(like),
-    }
+    }))
   },
 
-  async upsertNoteEmojiLike(_parent, { noteEmojiId, liked }, { req }, _info) {
+  async upsertNoteEmojiLike(
+    _parent,
+    { liked, emojiId, noteId, emojiCode },
+    { req },
+    _info,
+  ) {
     const { userId } = await isAuthenticated(req)
-    const { like, count } = await NoteEmojiModel.upsertLike({
-      liked,
-      emojiId: parseInt(noteEmojiId),
-      userId,
-    })
-    return {
+    let results
+    if (emojiId) {
+      results = await noteEmojiModel.upsertLike({
+        userId,
+        liked,
+        emojiId,
+      })
+    } else if (noteId && emojiCode) {
+      results = await noteEmojiModel.upsertLike({
+        userId,
+        liked,
+        subj: { subjId: noteId, code: emojiCode },
+      })
+    } else {
+      throw new Error('Input error')
+    }
+    return results.map(({ emoji, count, like }) => ({
+      emoji: {
+        ...emoji,
+        id: emoji.id.toString(),
+        count: toStringId(count),
+      },
       like: toStringId(like),
-      count: toStringId(count),
-    }
-  },
-
-  async updateNoteMeta(_parent, { noteId, data, newSymbol }, { req }, _info) {
-    await isAuthenticated(req)
-    if (newSymbol) {
-      await NoteModel.udpateNoteSymbol(noteId, newSymbol)
-    }
-    const note = await NoteModel.udpateNoteMeta(noteId, data)
-    return note
+    }))
   },
 
   async createPoll(_parent, { data }, { req }, _info) {
@@ -1309,6 +1181,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       content: draft.content as unknown as NoteDocContent,
     }
   },
+
   // type NoteDraft {
   //   id: ID!
   //   noteId: String

@@ -235,7 +235,7 @@ const noteEmojiHelper: EmojiHelper<NoteEmoji, NoteEmojiCount, NoteEmojiLike> = {
       throw "typeof subjId === 'number'"
     }
     return prisma.noteEmoji.findUnique({
-      where: { noteId_code: { code, noteId: subjId } },
+      where: { code_noteId: { code, noteId: subjId } },
     })
   },
 
@@ -372,7 +372,7 @@ class EmojiModelFactory<
   }
 
   /**
-   * Upsert a like on an emoji, if emoji-id is not given, try to create an emoji by the given subj
+   * Upsert like on an emoji, if emoji-id is not given, try to create an emoji by the given subj
    *
    * Special cases:
    * - like an 'upvote-emoji' will automatically unlike 'downvote-emoji' if possible, and vice versa
