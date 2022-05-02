@@ -1,0 +1,42 @@
+import { NoteDoc } from '@prisma/client'
+import { mockBlocks } from '../../components/block-editor/test/__mocks__/mock-block'
+import { NoteDocParsed } from '../../lib/interfaces'
+import { mockBranches } from './mock-branch'
+import { mockCommits } from './mock-commit'
+import { mockSyms } from './mock-sym'
+import { mockUsers } from './mock-user'
+
+const base = {
+  branchId: mockBranches[0].id,
+  symId: mockSyms[0].id,
+  commitId: mockCommits[0].id,
+  fromDocId: null,
+  userId: mockUsers[0].id,
+  domain: 'domain0',
+  meta: {},
+  content: {
+    blockUid_discussIds: {},
+    symbol_symId: { '[[Google]]': null, $BA: null },
+    blocks: mockBlocks,
+  },
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
+export const mockNoteDocs: NoteDocParsed[] = [
+  {
+    ...base,
+    id: 'mock-doc-0_candidate',
+    status: 'CANDIDATE',
+  },
+  {
+    ...base,
+    id: 'mock-doc-1_merge',
+    status: 'MERGE',
+  },
+  {
+    ...base,
+    id: 'mock-doc-2_reject',
+    status: 'REJECT',
+  },
+]

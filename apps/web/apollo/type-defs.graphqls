@@ -9,9 +9,6 @@ type Query {
 
   bullet(id: ID!): Bullet
 
-  # all emojis of a bullet
-  bulletEmojis(bulletId: ID!): [BulletEmoji!]!
-
   # search by id, symbol, or url, if id or symbol not found return nulll, if url not found will try to fetch and create a new note
   # notes(branchId: ID, symbol: String, url: String): Note
 
@@ -34,8 +31,6 @@ type Query {
   link(id: ID, url: String): Link
 
   me: User!
-
-  myBulletEmojiLike(bulletEmojiId: ID!): BulletEmojiLike
 
   myNoteEmojiLike(noteEmojiId: ID!): NoteEmojiLike
 
@@ -71,8 +66,8 @@ type Query {
   # get all notes for homepage
   noteDocsJustMerged: [NoteDoc!]!
 
-  # if not found return null
-  note(id: ID!): Note
+  # throws error if not found
+  note(id: ID!): Note!
 
   # get all docs from note pr records
   noteDocEntriesHistory(noteId: ID!): [NoteDocEntry!]!
@@ -176,64 +171,54 @@ type Query {
 
 type Mutation {
   createAuthor(data: AuthorInput!): Author!
+
   updateAuthor(id: ID!, data: AuthorInput!): Author!
-
-  # if emoji has existed, like the emoji and return
-  createBulletEmoji(bulletId: ID!, code: EmojiCode!): CreateBulletEmojiResponse!
-
-  # create or update an emoji-up
-  upsertBulletEmojiLike(
-    bulletEmojiId: ID!
-    data: LikeInput!
-  ): UpsertBulletEmojiLikeResponse!
-
-  # @throw validation error
-  createCommit(data: CommitInput!): Commit!
 
   # optional noteId for connecting discuss with note
   createDiscuss(noteId: ID, data: DiscussInput!): Discuss!
+
   updateDiscuss(id: ID!, data: DiscussInput!): Discuss!
 
-  connectDiscussToNote(
-    discussId: ID!
-    noteId: ID!
-    disconnect: Boolean
-  ): Boolean!
+  # connectDiscussToNote(
+  #   discussId: ID!
+  #   noteId: ID!
+  #   disconnect: Boolean
+  # ): Boolean!
 
-  createDiscussEmoji(
-    discussId: ID!
-    code: EmojiCode!
-  ): CreateDiscussEmojiResponse!
+  # Either emoji-id or (discuss-id, code) is required
   upsertDiscussEmojiLike(
-    discussEmojiId: ID!
     liked: Boolean!
-  ): UpsertDiscussEmojiLikeResponse!
+    emojiId: Int
+    emojiCode: EmojiCode
+    discussId: String
+  ): [UpsertDiscussEmojiLikeResult!]!
 
   createDiscussPost(discussId: ID!, data: DiscussPostInput!): DiscussPost!
+
   updateDiscussPost(id: ID!, data: DiscussPostInput!): DiscussPost!
 
-  createDiscussPostEmoji(
-    discussPostId: ID!
-    code: EmojiCode!
-  ): CreateDiscussPostEmojiResponse!
   upsertDiscussPostEmojiLike(
-    discussPostEmojiId: ID!
     liked: Boolean!
-  ): UpsertDiscussPostEmojiLikeResponse!
+    emojiId: Int
+    emojiCode: EmojiCode
+    discussPostId: Int
+  ): [UpsertDiscussPostEmojiLikeResult!]!
 
-  createNoteEmoji(noteId: ID!, code: EmojiCode!): CreateNoteEmojiResponse!
   upsertNoteEmojiLike(
-    noteEmojiId: ID!
     liked: Boolean!
-  ): UpsertNoteEmojiLikeResponse!
+    emojiId: Int
+    emojiCode: EmojiCode
+    noteId: String
+  ): [UpsertNoteEmojiLikeResult!]!
 
   # if newSymbol is given, will also update note symbol
   # @throw validation error
-  updateNoteMeta(noteId: ID!, data: NoteMetaInput!, newSymbol: String): Note!
+  # updateNoteMeta(noteId: ID!, data: NoteMetaInput!, newSymbol: String): Note!
 
   createPoll(data: PollInput!): Poll!
 
   createRate(data: RateInput!): Rate!
+
   updateRate(id: ID!, data: RateInput!): Rate!
 
   # also used for merge verdict
@@ -241,6 +226,7 @@ type Mutation {
 
   # csrf token not support yet
   sessionLogin(idToken: String!, csrfToken: String): User!
+
   sessionLogout: Boolean!
 
   #-------- New -------------
@@ -340,26 +326,6 @@ type Bullet {
   # noteId: String!
   # createdAt: DateTime!
   # updatedAt: DateTime!
-}
-
-type BulletEmoji {
-  id: ID!
-  code: EmojiCode!
-  count: BulletEmojiCount!
-}
-
-type BulletEmojiCount {
-  id: ID!
-  nUps: Int!
-  nDowns: Int!
-}
-
-type BulletEmojiLike {
-  id: ID!
-  bulletEmojiId: String!
-  choice: LikeChoice!
-  createdAt: DateTime!
-  updatedAt: DateTime!
 }
 
 # type BulletNodeChange {
@@ -476,34 +442,34 @@ type NoteEmojiLike {
 
 # -----------Remove-----------
 
-type NoteMeta {
-  author: String
-  # // description?: string
-  duplicates: [String!]
-  keywords: [String!]
-  # // lang?: string
-  publishedAt: String
-  redirect: String
-  # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
-  tickers: [String!]
-  title: String
-  url: String
-}
+# type NoteMeta {
+#   author: String
+#   # // description?: string
+#   duplicates: [String!]
+#   keywords: [String!]
+#   # // lang?: string
+#   publishedAt: String
+#   redirect: String
+#   # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
+#   tickers: [String!]
+#   title: String
+#   url: String
+# }
 
-type NoteState {
-  id: ID!
-  noteId: String!
-  userId: String!
-  commitId: String!
-  prevId: String
-  # body: NoteStateBody!
-  updatedAt: DateTime!
-}
+# type NoteState {
+#   id: ID!
+#   noteId: String!
+#   userId: String!
+#   commitId: String!
+#   prevId: String
+#   # body: NoteStateBody!
+#   updatedAt: DateTime!
+# }
 
-type DictEntryArray {
-  k: String!
-  v: String!
-}
+# type DictEntryArray {
+#   k: String!
+#   v: String!
+# }
 
 # ------------End Remove------------
 
@@ -602,44 +568,19 @@ type Vote {
   # updatedAt: DateTime!
 }
 
-type CreateBulletEmojiResponse {
-  emoji: BulletEmoji!
-  like: BulletEmojiLike!
-}
-
-type UpsertBulletEmojiLikeResponse {
-  like: BulletEmojiLike!
-  count: BulletEmojiCount!
-}
-
-type CreateNoteEmojiResponse {
-  emoji: NoteEmoji!
-  like: NoteEmojiLike!
-}
-
-type UpsertNoteEmojiLikeResponse {
-  like: NoteEmojiLike!
-  count: NoteEmojiCount!
-}
-
-type CreateDiscussEmojiResponse {
+type UpsertDiscussEmojiLikeResult {
   emoji: DiscussEmoji!
   like: DiscussEmojiLike!
 }
 
-type UpsertDiscussEmojiLikeResponse {
-  like: DiscussEmojiLike!
-  count: DiscussEmojiCount!
-}
-
-type CreateDiscussPostEmojiResponse {
+type UpsertDiscussPostEmojiLikeResult {
   emoji: DiscussPostEmoji!
   like: DiscussPostEmojiLike!
 }
 
-type UpsertDiscussPostEmojiLikeResponse {
-  like: DiscussPostEmojiLike!
-  count: DiscussPostEmojiCount!
+type UpsertNoteEmojiLikeResult {
+  emoji: NoteEmoji!
+  like: NoteEmojiLike!
 }
 
 #-------New-------
@@ -842,35 +783,35 @@ input AuthorMetaSiteInput {
 }
 
 # ---------------Remove------------
-input NoteInput {
-  symbol: String!
-  # templateProps: NoteTemplatePropsInput
-  meta: NoteMetaInput
-}
+# input NoteInput {
+#   symbol: String!
+#   # templateProps: NoteTemplatePropsInput
+#   meta: NoteMetaInput
+# }
 
-input NoteMetaInput {
-  author: String
-  # // description?: string
-  duplicates: [String!]
-  keywords: [String!]
-  # // lang?: string
-  publishedAt: String
-  redirect: String
-  # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
-  tickers: [String!]
-  title: String
-  # url: String
-}
+# input NoteMetaInput {
+#   author: String
+#   # // description?: string
+#   duplicates: [String!]
+#   keywords: [String!]
+#   # // lang?: string
+#   publishedAt: String
+#   redirect: String
+#   # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
+#   tickers: [String!]
+#   title: String
+#   # url: String
+# }
 
-input NoteStateInput {
-  cid: String!
-  fromDocCid: String # for doc-index tree
-  noteInput: NoteInput # for creating note or update note-meta
-  noteId: String
-  prevStateId: String
-  changes: JSON!
-  value: JSON! # for comparing changes
-}
+# input NoteStateInput {
+#   cid: String!
+#   fromDocCid: String # for doc-index tree
+#   noteInput: NoteInput # for creating note or update note-meta
+#   noteId: String
+#   prevStateId: String
+#   changes: JSON!
+#   value: JSON! # for comparing changes
+# }
 # -------------End Remove--------------
 
 input DiscussInput {
