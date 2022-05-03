@@ -43,9 +43,17 @@ export const mockNoteDrafts: Omit<
     meta: {},
     content: {
       discussIds: [
-        { blockUid: 'uid-0', discussId: mockDiscusses[0].id },
+        {
+          blockUid: 'uid-0',
+          discussId: mockDiscusses[0].id,
+          commitId: 'commit-id-0',
+        },
         { blockUid: 'uid-1', discussId: mockDiscusses[1].id },
-        { blockUid: 'uid-1', discussId: mockDiscusses[2].id },
+        {
+          blockUid: 'uid-1',
+          discussId: mockDiscusses[2].id,
+          commitId: 'commit-id-2',
+        },
       ],
       symbols: [],
       blocks: mockBlocks,

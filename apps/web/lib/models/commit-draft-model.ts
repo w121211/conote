@@ -60,7 +60,19 @@ async function validateDraft(id: string, userId: string) {
             where: { id: e.discussId },
           }),
         ),
+      )),
+    existingDiscussIds =
+      draftParsed &&
+      draftParsed.content.discussIds.filter(e => e.commitId !== undefined),
+    existingDiscusses =
+      existingDiscussIds &&
+      (await prisma.$transaction(
+        existingDiscussIds.map(e =>
+          prisma.discuss.findUnique({ where: { id: e.discussId } }),
+        ),
       ))
+
+  // console.log(`existing discuss ${existingDiscusses?.length}`)
 
   if (draft === null) {
     throw new Error('Some draftId does not exist.')
@@ -81,7 +93,15 @@ async function validateDraft(id: string, userId: string) {
     throw new Error('User is not the owner of the draft')
   }
 
-  return { draft, draftParsed, fromDoc: curDoc, sym, note, newJoinedDiscusses }
+  return {
+    draft,
+    draftParsed,
+    fromDoc: curDoc,
+    sym,
+    note,
+    newJoinedDiscusses,
+    existingDiscusses,
+  }
 }
 
 /**
@@ -107,8 +127,15 @@ export async function commitNoteDrafts(
 
   // Loop first run
   for (const id of draftIds) {
-    const { draft, draftParsed, fromDoc, sym, note, newJoinedDiscusses } =
-        await validateDraft(id, userId),
+    const {
+        draft,
+        draftParsed,
+        fromDoc,
+        sym,
+        note,
+        newJoinedDiscusses,
+        existingDiscusses,
+      } = await validateDraft(id, userId),
       { branchId, linkId, symbol } = draft,
       symId = sym ? sym.id : cuid(),
       noteId = note ? note.id : cuid()
@@ -153,6 +180,20 @@ export async function commitNoteDrafts(
             }),
           )
         }
+      })
+    }
+
+    // Connect each existing discuss to Note
+    if (existingDiscusses) {
+      existingDiscusses.forEach(e => {
+        promises.push(
+          prisma.discuss.update({
+            data: {
+              notes: { connect: { branchId_symId: { branchId, symId } } },
+            },
+            where: { id: e?.id },
+          }),
+        )
       })
     }
   }

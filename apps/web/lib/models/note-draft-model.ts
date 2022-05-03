@@ -8,13 +8,14 @@ class NoteDraftModel {
     branch: string,
     symbol: string,
     userId: string,
-    { domain, meta, content }: NoteDraftInput,
+    { fromDocId, domain, meta, content }: NoteDraftInput,
   ) {
     return prisma.noteDraft.create({
       data: {
         symbol: symbol,
         branch: { connect: { name: branch } },
         user: { connect: { id: userId } },
+        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
         domain: domain,
         meta,
         content,
