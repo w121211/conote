@@ -1,6 +1,10 @@
 import { NoteDoc } from '@prisma/client'
 import { mockBlocks } from '../../components/block-editor/test/__mocks__/mock-block'
-import { NoteDocParsed } from '../../lib/interfaces'
+import {
+  NoteDocContent,
+  NoteDocMeta,
+  NoteDocParsed,
+} from '../../lib/interfaces'
 import { mockBranches } from './mock-branch'
 import { mockCommits } from './mock-commit'
 import { mockSyms } from './mock-sym'
@@ -28,15 +32,21 @@ export const mockNoteDocs: NoteDocParsed[] = [
     ...base,
     id: 'mock-doc-0_candidate',
     status: 'CANDIDATE',
+    meta: base.meta as unknown as NoteDocMeta,
+    content: base.content as unknown as NoteDocContent,
   },
   {
     ...base,
     id: 'mock-doc-1_merge',
     status: 'MERGE',
+    meta: base.meta as unknown as NoteDocMeta,
+    content: base.content as unknown as NoteDocContent,
   },
   {
     ...base,
     id: 'mock-doc-2_reject',
     status: 'REJECT',
+    meta: base.meta as unknown as NoteDocMeta,
+    content: base.content as unknown as NoteDocContent,
   },
 ]

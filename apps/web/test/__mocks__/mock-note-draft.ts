@@ -43,17 +43,9 @@ export const mockNoteDrafts: Omit<
     meta: {},
     content: {
       discussIds: [
-        {
-          blockUid: 'uid-0',
-          discussId: mockDiscusses[0].id,
-          commitId: 'commit-id-0',
-        },
+        { blockUid: 'uid-0', discussId: mockDiscusses[0].id },
         { blockUid: 'uid-1', discussId: mockDiscusses[1].id },
-        {
-          blockUid: 'uid-1',
-          discussId: mockDiscusses[2].id,
-          commitId: 'commit-id-2',
-        },
+        { blockUid: 'uid-1', discussId: mockDiscusses[2].id },
       ],
       symbols: [],
       blocks: mockBlocks,
@@ -74,6 +66,37 @@ export const mockNoteDrafts: Omit<
     meta: {},
     content: {
       discussIds: [],
+      symbols: [],
+      blocks: mockBlocks,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'mock-draft-1_got-discusses',
+    symbol: mockSyms[1].symbol,
+    userId: mockUsers[1].id,
+
+    fromDocId: null,
+    linkId: null,
+
+    status: 'EDIT',
+    domain: 'domain0',
+    meta: {},
+    content: {
+      discussIds: [
+        {
+          blockUid: 'uid-0',
+          discussId: mockDiscusses[0].id,
+          commitId: 'commit-id-0',
+        },
+        { blockUid: 'uid-1', discussId: mockDiscusses[1].id },
+        {
+          blockUid: 'uid-1',
+          discussId: mockDiscusses[2].id,
+          commitId: 'commit-id-1',
+        },
+      ],
       symbols: [],
       blocks: mockBlocks,
     },

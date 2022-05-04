@@ -175,7 +175,7 @@ class TestHelper {
             symbol,
             branch: { connect: { name: mockBranches[0].name } },
             user: { connect: { id: userId } },
-            // fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+            fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
             domain,
             meta,
             content,

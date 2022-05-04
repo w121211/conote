@@ -1,9 +1,10 @@
 /* eslint-disable no-await-in-loop */
 import prisma from '../../../lib/prisma'
 import { testHelper } from '../../test-helpers'
-import { commitNoteDrafts } from '../../../lib/models/commit-draft-model'
+import { commitNoteDrafts } from '../../../lib/models/commit-model'
 import { mockNoteDrafts } from '../../__mocks__/mock-note-draft'
 import { mockUsers } from '../../__mocks__/mock-user'
+import { mockNoteDocs } from '../../__mocks__/mock-note-doc'
 
 beforeEach(async () => {
   // Writing required data into database
@@ -34,56 +35,51 @@ describe('commitNoteDrafts()', () => {
    * - [x] fromDoc does not match
    *
    */
-
-  // it('throws if user is not the owner of draft', async () => {
-  //   await testHelper.createNoteDrafts(prisma)
-
-  //   await expect(async () => {
-  //     await commitNoteDrafts(
-  //       [mockNoteDrafts[0].id, mockNoteDrafts[1].id],
-  //       mockUsers[0].id,
-  //     )
-  //   }).rejects.toThrowErrorMatchingInlineSnapshot(
-  //     `"User is not the owner of the draft"`,
-  //   )
-  // })
-
-  // it('throws if draftId cannot be found', async () => {
-  //   await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-
-  //   await expect(async () => {
-  //     await commitNoteDrafts(
-  //       [mockNoteDrafts[0].id, 'a-not-found-draft-id'],
-  //       mockUsers[0].id,
-  //     )
-  //   }).rejects.toThrowErrorMatchingInlineSnapshot(
-  //     `"Some draftId does not exist."`,
-  //   )
-  // })
-
-  // it('throws if fromDoc is empty but there is a latest doc ', async () => {
-  //   await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-  //   await testHelper.createCommit(prisma)
-
-  //   await expect(async () => {
-  //     await commitNoteDrafts([mockNoteDrafts[0].id], mockUsers[0].id)
-  //   }).rejects.toThrowErrorMatchingInlineSnapshot(
-  //     `"FromDoc is not the latest doc of this note."`,
-  //   )
-  // })
-
+  it('throws if user is not the owner of draft', async () => {
+    await testHelper.createNoteDrafts(prisma, [
+      mockNoteDrafts[0],
+      mockNoteDrafts[1],
+    ])
+    await expect(async () => {
+      await commitNoteDrafts(
+        [mockNoteDrafts[0].id, mockNoteDrafts[1].id],
+        mockUsers[0].id,
+      )
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"User is not the owner of the draft"`,
+    )
+  })
+  it('throws if draftId cannot be found', async () => {
+    await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
+    await expect(async () => {
+      await commitNoteDrafts(
+        [mockNoteDrafts[0].id, 'a-not-found-draft-id'],
+        mockUsers[0].id,
+      )
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Some draftId does not exist."`,
+    )
+  })
+  it('throws if fromDoc is empty but there is a latest doc ', async () => {
+    await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
+    await testHelper.createCommit(prisma)
+    await expect(async () => {
+      await commitNoteDrafts([mockNoteDrafts[0].id], mockUsers[0].id)
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"FromDoc is not the latest doc of this note."`,
+    )
+  })
   /**
    * Executions
    *
    * Cases:
    * - [x] (1) from-doc is null, create sym, note
-   * - [ ] (2) from-doc is not null
-   * - [ ] mix of (1) and (2)
+   * - [x] (2) from-doc is not null
+   * - [x] mix of (1) and (2) (commit drafts with null and not null for from-doc)
    * - [x] got discuss ids, should only set this-draft-created-discusses to "ACTIVE"
    *
    *
    */
-
   it('create sym, note if from-doc not exist', async () => {
     await testHelper.createNoteDrafts(prisma, [
       mockNoteDrafts[0],
@@ -92,30 +88,28 @@ describe('commitNoteDrafts()', () => {
         userId: mockUsers[0].id,
       },
     ])
-
     const { commit, notes, noteDocs, symbol_symId } = await commitNoteDrafts(
       [mockNoteDrafts[0].id, mockNoteDrafts[1].id],
       mockUsers[0].id,
     )
-    // expect(Object.keys(symbol_symId)).toMatchInlineSnapshot(`
-    //   Array [
-    //     "[[Apple]]",
-    //     "[[Google]]",
-    //   ]
-    // `)
-    // expect(notes.map(e => e.sym.symbol)).toMatchInlineSnapshot(`
-    //   Array [
-    //     "[[Apple]]",
-    //     "[[Google]]",
-    //   ]
-    // `)
-    // expect(noteDocs.map(e => e.status)).toMatchInlineSnapshot(`
-    //   Array [
-    //     "CANDIDATE",
-    //     "CANDIDATE",
-    //   ]
-    // `)
-
+    expect(Object.keys(symbol_symId)).toMatchInlineSnapshot(`
+      Array [
+        "[[Apple]]",
+        "[[Google]]",
+      ]
+    `)
+    expect(notes.map(e => e.sym.symbol)).toMatchInlineSnapshot(`
+      Array [
+        "[[Apple]]",
+        "[[Google]]",
+      ]
+    `)
+    expect(noteDocs.map(e => e.status)).toMatchInlineSnapshot(`
+      Array [
+        "CANDIDATE",
+        "CANDIDATE",
+      ]
+    `)
     const updatedDrafts = await prisma.noteDraft.findMany({
       where: { commit: { id: commit.id } },
     })
@@ -131,7 +125,6 @@ describe('commitNoteDrafts()', () => {
         ],
       ]
     `)
-
     const noteDocHistory = await prisma.noteDoc.findMany({
       where: { note: { id: notes[0].id } },
       take: 3,
@@ -142,10 +135,8 @@ describe('commitNoteDrafts()', () => {
       ]
     `)
   })
-
   it('got discuss ids, should only set this-draft-created-discusses to "ACTIVE"', async () => {
     await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[1]])
-
     expect(
       (await prisma.discuss.findMany()).map(e => ({
         id: e.id,
@@ -171,7 +162,6 @@ describe('commitNoteDrafts()', () => {
         },
       ]
     `)
-
     const result = await commitNoteDrafts(
       [mockNoteDrafts[1].id],
       mockUsers[1].id,
@@ -206,152 +196,142 @@ describe('commitNoteDrafts()', () => {
       ]
     `)
   })
+  it('create noteDoc if from-doc exists', async () => {
+    await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
+    await testHelper.createCommit(prisma)
+    await testHelper.createNoteDrafts(prisma, [
+      {
+        ...mockNoteDrafts[0],
+        id: 'mock-draft-0-1_from-empty',
+        userId: mockUsers[1].id,
+        fromDocId: mockNoteDocs[1].id,
+      },
+    ])
+    expect(
+      await prisma.noteDraft.findUnique({
+        where: { id: 'mock-draft-0-1_from-empty' },
+        select: { fromDocId: true },
+      }),
+    ).toMatchInlineSnapshot(`
+      Object {
+        "fromDocId": "mock-doc-1_merge",
+      }
+    `)
+
+    const { commit, notes, noteDocs, symbol_symId } = await commitNoteDrafts(
+      ['mock-draft-0-1_from-empty'],
+      mockUsers[1].id,
+    )
+    expect(Object.keys(symbol_symId)).toMatchInlineSnapshot(`
+      Array [
+        "[[Apple]]",
+      ]
+    `)
+    expect(notes.map(e => e.sym.symbol)).toMatchInlineSnapshot(`
+      Array [
+        "[[Apple]]",
+      ]
+    `)
+    expect(noteDocs.map(e => e.status)).toMatchInlineSnapshot(`
+      Array [
+        "CANDIDATE",
+      ]
+    `)
+
+    const updatedDrafts = await prisma.noteDraft.findMany({
+      where: { commit: { id: commit.id } },
+    })
+    expect(updatedDrafts.map(e => [e.symbol, e.status])).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "[[Apple]]",
+          "COMMIT",
+        ],
+      ]
+    `)
+
+    const noteDocHistory = await prisma.noteDoc.findMany({
+      where: { note: { id: notes[0].id } },
+      take: 3,
+      orderBy: { createdAt: 'asc' },
+    })
+    expect(
+      noteDocHistory.map(e => ({
+        domain: e.domain,
+        status: e.status,
+        fromDocId: e.fromDocId,
+      })),
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "domain": "domain0",
+          "fromDocId": null,
+          "status": "MERGE",
+        },
+        Object {
+          "domain": "domain0",
+          "fromDocId": "mock-doc-1_merge",
+          "status": "CANDIDATE",
+        },
+      ]
+    `)
+  })
+
+  it('create multiple noteDocs if one from-doc exists and the other does not', async () => {
+    await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
+    await testHelper.createCommit(prisma)
+    await testHelper.createNoteDrafts(prisma, [
+      {
+        ...mockNoteDrafts[0],
+        id: 'mock-draft-0-1_from-empty',
+        userId: mockUsers[1].id,
+        fromDocId: mockNoteDocs[1].id,
+      },
+      mockNoteDrafts[1],
+    ])
+    const { commit, notes, noteDocs, symbol_symId } = await commitNoteDrafts(
+      ['mock-draft-0-1_from-empty', mockNoteDrafts[1].id],
+      mockUsers[1].id,
+    )
+    expect(Object.keys(symbol_symId)).toMatchInlineSnapshot(`
+      Array [
+        "[[Apple]]",
+        "[[Google]]",
+      ]
+    `)
+    expect(notes.map(e => e.sym.symbol)).toMatchInlineSnapshot(`
+      Array [
+        "[[Apple]]",
+        "[[Google]]",
+      ]
+    `)
+    expect(noteDocs.map(e => ({ fromDocId: e.fromDocId, status: e.status })))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "fromDocId": "mock-doc-1_merge",
+          "status": "CANDIDATE",
+        },
+        Object {
+          "fromDocId": null,
+          "status": "CANDIDATE",
+        },
+      ]
+    `)
+    const updatedDrafts = await prisma.noteDraft.findMany({
+      where: { commit: { id: commit.id } },
+    })
+    expect(updatedDrafts.map(e => [e.symbol, e.status])).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "[[Google]]",
+          "COMMIT",
+        ],
+        Array [
+          "[[Apple]]",
+          "COMMIT",
+        ],
+      ]
+    `)
+  })
 })
-
-// test('commitNoteDrafts fromDoc does not match', async () => {
-//   const { commit, notes, noteDocs } = await commitNoteDrafts(
-//     [TEST_NOTEDRAFTS[0].id],
-//     'testuser0',
-//   )
-//   const commit1 = await prisma.commit.create({
-//     data: {
-//       id: 'commit00',
-//       user: { connect: { id: TEST_USERS[0].id } },
-//     },
-//   })
-
-//   await prisma.noteDoc.create({
-//     data: {
-//       id: 'testdoc0',
-//       branch: { connect: { name: TEST_BRANCH[0].name } },
-//       sym: { connect: { id: notes[0].symId } },
-//       commit: { connect: { id: commit1.id } },
-//       note: { connect: { id: notes[0].id } },
-//       user: { connect: { id: TEST_USERS[1].id } },
-//       status: 'MERGE',
-//       domain: noteDocs[0].domain,
-//       content: {
-//         blocks: [
-//           { uid: '2', str: 'a' },
-//           { uid: '4', str: 'ii' },
-//         ],
-//       },
-//     },
-//   })
-
-//   const symbol = await prisma.sym.findUnique({
-//     where: { id: notes[0].symId },
-//     select: { symbol: true },
-//   })
-
-//   const newDraft = await prisma.noteDraft.create({
-//     data: {
-//       id: 'testdraft99',
-//       symbol: symbol!.symbol,
-//       branch: { connect: { name: TEST_BRANCH[0].name } },
-//       sym: { connect: { id: notes[0].symId } },
-//       note: { connect: { id: notes[0].id } },
-//       user: { connect: { id: TEST_USERS[0].id } },
-//       domain: noteDocs[0].domain,
-//       content: {
-//         blocks: [
-//           { uid: '1', str: 'abpp' },
-//           { uid: '3', str: 'illi' },
-//         ],
-//       },
-//     },
-//   })
-//   await expect(async () => {
-//     await commitNoteDrafts([newDraft.id], TEST_USERS[0].id)
-//   }).rejects.toThrowErrorMatchingInlineSnapshot(
-//     `"FromDoc is not the latest doc of this note."`,
-//   )
-// })
-
-// test('commitNoteDrafts recommit the same drafts after commit failed to accomplish', async () => {
-//   const { commit, notes, noteDocs } = await commitNoteDrafts(
-//     [TEST_NOTEDRAFTS[0].id],
-//     'testuser0',
-//   )
-//   const commit1 = await prisma.commit.create({
-//     data: {
-//       id: 'commit00',
-//       user: { connect: { id: TEST_USERS[0].id } },
-//     },
-//   })
-
-//   await prisma.noteDoc.create({
-//     data: {
-//       id: 'testdoc0',
-//       branch: { connect: { name: TEST_BRANCH[0].name } },
-//       sym: { connect: { id: notes[0].symId } },
-//       commit: { connect: { id: commit1.id } },
-//       note: { connect: { id: notes[0].id } },
-//       user: { connect: { id: TEST_USERS[1].id } },
-//       status: 'MERGE',
-//       domain: noteDocs[0].domain,
-//       content: {
-//         blocks: [
-//           { uid: '2', str: 'a' },
-//           { uid: '4', str: 'ii' },
-//         ],
-//       },
-//     },
-//   })
-
-//   const symbol = await prisma.sym.findUnique({
-//     where: { id: notes[0].symId },
-//     select: { symbol: true },
-//   })
-
-//   const newDraft = await prisma.noteDraft.create({
-//     data: {
-//       id: 'testdraft99',
-//       symbol: symbol!.symbol,
-//       branch: { connect: { name: TEST_BRANCH[0].name } },
-//       sym: { connect: { id: notes[0].symId } },
-//       note: { connect: { id: notes[0].id } },
-//       user: { connect: { id: TEST_USERS[0].id } },
-//       domain: noteDocs[0].domain,
-//       content: {
-//         blocks: [
-//           { uid: '1', str: 'abpp' },
-//           { uid: '3', str: 'illi' },
-//         ],
-//       },
-//     },
-//   })
-//   await expect(async () => {
-//     await commitNoteDrafts(
-//       [TEST_NOTEDRAFTS[1].id, newDraft.id],
-//       TEST_USERS[0].id,
-//     )
-//   }).rejects.toThrowErrorMatchingInlineSnapshot(
-//     `"FromDoc is not the latest doc of this note."`,
-//   )
-
-//   const draft1FailedToCommit = await prisma.noteDraft.findUnique({
-//     where: { id: TEST_NOTEDRAFTS[1].id },
-//   })
-
-//   expect(draft1FailedToCommit!.status).toMatchInlineSnapshot(`"EDIT"`)
-
-//   const result = await commitNoteDrafts(
-//     [TEST_NOTEDRAFTS[1].id],
-//     TEST_USERS[0].id,
-//   )
-
-//   const draft1ToCommit = await prisma.noteDraft.findUnique({
-//     where: { id: TEST_NOTEDRAFTS[1].id },
-//   })
-
-//   expect(result.noteDocs.map(e => ({ status: e.status })))
-//     .toMatchInlineSnapshot(`
-//     Array [
-//       Object {
-//         "status": "CANDIDATE",
-//       },
-//     ]
-//   `)
-//   expect(draft1ToCommit!.status).toMatchInlineSnapshot(`"COMMIT"`)
-// })

@@ -8,7 +8,7 @@ import prisma from '../../../lib/prisma'
 import { NoteModel } from '../../../lib/models/note-model'
 import { CommitModel } from '../../../lib/models/commit-model'
 import { testHelper } from '../../test-helpers'
-import { commitNoteDrafts } from '../../../lib/models/commit-draft-model'
+import { commitNoteDrafts } from '../../../lib/models/commit-model'
 import { noteDocModel } from '../../../lib/models/note-doc-model'
 import { SymType } from '@prisma/client'
 import { noteDraftModel } from '../../../lib/models/note-draft-model'
@@ -39,4 +39,5 @@ afterAll(async () => {
  */
 describe('noteDraftModel.create()', () => {
   noteDraftModel.create()
+  // use implementation in resolver
 })

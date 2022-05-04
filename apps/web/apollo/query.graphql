@@ -150,20 +150,20 @@ fragment author on Author {
 # #   }
 # # }
 
-# fragment discuss on Discuss {
-#   __typename
-#   id
-#   userId
-#   status
-#   meta
-#   title
-#   content
-#   createdAt
-#   updatedAt
-#   count {
-#     nPosts
-#   }
-# }
+fragment discuss on Discuss {
+  __typename
+  id
+  userId
+  status
+  meta
+  title
+  content
+  createdAt
+  updatedAt
+  count {
+    nPosts
+  }
+}
 
 # # DELETE
 # # fragment discussCount on DiscussCount {
@@ -790,7 +790,6 @@ query myNoteDraftEntries {
 #   }
 # }
 
-
 # TODO: need to modify
 # mutation CreateCommit($data: CommitInput!) {
 #   createCommit(data: $data) {
@@ -803,7 +802,6 @@ mutation CreateDiscuss($noteId: ID, $data: DiscussInput!) {
     ...discuss
   }
 }
-
 
 # query MyDiscussPostEmojiLike($discussPostEmojiId: ID!) {
 #   myDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId) {
