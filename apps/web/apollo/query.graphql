@@ -338,7 +338,7 @@ fragment noteDoc on NoteDoc {
 
 fragment noteDocMeta on NoteDocMeta {
   duplicatedSymbols
-  blockUidAnddiscussIdsDict
+  # blockUidAnddiscussIdsDict
   keywords
   redirectFroms
   redirectTo
@@ -348,6 +348,11 @@ fragment noteDocMeta on NoteDocMeta {
 }
 
 fragment noteDocContent on NoteDocContent {
+  discussIds {
+    blockUid
+    discussId
+    commitId
+  }
   diff
   symbolIdDict
   blocks {

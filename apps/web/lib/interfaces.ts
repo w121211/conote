@@ -46,7 +46,7 @@ export type NoteDocMeta = {
   webpage?: {
     authors?: string[]
     title?: string
-    publishedAt?: number // when the webpage content publish at
+    publishedAt?: Date // when the webpage content publish at
     tickers?: string[] // tickers mentioned in the webpage content
   }
 }

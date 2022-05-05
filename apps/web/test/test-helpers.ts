@@ -1,4 +1,4 @@
-import { prisma, PrismaClient } from '@prisma/client'
+import { prisma, PrismaClient, Sym } from '@prisma/client'
 import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
 import { Bullet } from '../components/bullet/bullet'
 import { getBotEmail } from '../lib/models/user-model'
@@ -183,29 +183,11 @@ class TestHelper {
         })
       }),
     )
-    // await prisma.noteDraft.create({
-    //   data: {
-    //     id: 'testerror0',
-    //     symbol: '[[test01]]',
-    //     branch: { connect: { id: branch.id } },
-    //     // sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-    //     // fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
-    //     user: { connect: { id: 'testuser0' } },
-    //     domain: 'domain01',
-    //     content,
-    //   },
-    // })
-    // await prisma.noteDraft.create({
-    //   data: {
-    //     symbol: '[[test02]]',
-    //     branch: { connect: { id: branch.id } },
-    //     // sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-    //     // fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
-    //     user: { connect: { id: 'testuser0' } },
-    //     domain: 'domain01',
-    //     content,
-    //   },
-    // })
+  }
+  async createLink(prisma: PrismaClient): Promise<void> {
+    const { id, symbol: url } = mockSyms[3]
+    const domain = mockNoteDrafts[3].domain
+    await prisma.link.create({ data: { id, url, domain } })
   }
 }
 

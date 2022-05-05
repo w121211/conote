@@ -37,4 +37,11 @@ export const mockSyms: Sym[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+  {
+    id: 'mock-sym-3-link',
+    symbol: 'www.link.com',
+    type: 'URL',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
 ]

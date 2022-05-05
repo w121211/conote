@@ -103,4 +103,23 @@ export const mockNoteDrafts: Omit<
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+  {
+    id: 'mock-draft-3_got-link',
+    symbol: mockSyms[3].symbol,
+    userId: mockUsers[1].id,
+
+    fromDocId: null,
+    linkId: mockSyms[3].id,
+
+    status: 'EDIT',
+    domain: 'domain0',
+    meta: {},
+    content: {
+      discussIds: [],
+      symbols: [],
+      blocks: mockBlocks,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
 ]

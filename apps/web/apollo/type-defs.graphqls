@@ -62,23 +62,32 @@ type Query {
   ratesBySource(linkId: ID!): [Rate!]!
 
   #-----New-----
+  # throws error if not found
+  note(id: ID!): Note!
+
+  # get noteDoc and throws error if not found
+  noteDoc(id: ID!): NoteDoc!
 
   # get all notes for homepage
   noteDocsJustMerged: [NoteDoc!]!
 
-  # throws error if not found
-  note(id: ID!): Note!
+  # get all candidate docs for verdict
+  noteDocsToMerge: [NoteDoc!]!
 
-  # get all docs from note pr records
-  noteDocEntriesHistory(noteId: ID!): [NoteDocEntry!]!
-
-  # get login user's draft
+  # get user's draft
   noteDraft(id: ID, symbol: String, url: String): NoteDraft
+
+  # get all docs from note pull request records including candidates (like Github pr history)
+  noteHistory(noteId: ID!, status: NoteDocStatus): [NoteDocEntry!]!
 
   # myNoteDocs(): [NoteDoc!]!
 
   # to know all latest commit docs
   myCommits: [Commit!]!
+
+  # get user's all drafts for draft-sidebar
+  # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
+  myNoteDraftEntries: [NoteDraftEntry!]!
 
   # search note by sym or title
   searchNote(symbol: String, title: String): [Note!]!
@@ -87,12 +96,6 @@ type Query {
 
   searchByAuthor(name: String!): [Note!]!
 
-  # get user's all drafts for draft-sidebar
-  # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
-  myNoteDraftEntries: [NoteDraftEntry!]!
-
-  # get all candidate docs for verdict
-  noteDocsToMerge: [NoteDoc!]!
   # -------------End--------------
 
   # 以 note symbol 找該 note 所有的 active hashtags
@@ -349,7 +352,7 @@ type Discuss {
   id: ID!
   userId: String!
   status: DiscussStatus!
-  meta: JSON!
+  meta: JSON! # TODO: define the content of meta
   title: String!
   content: String
   createdAt: DateTime!
@@ -587,19 +590,20 @@ type UpsertNoteEmojiLikeResult {
 
 type Note {
   id: ID!
-  meta: NoteDocMeta!
   sym: Sym!
   link: Link
-  doc: NoteDoc! # current doc 可能為 null (what does this mean?? the newest commit note??) -> 以前針對web-note的特殊情況 現在改成全部都要有doc
+  meta: NoteDocMeta!
+  doc: NoteDoc! # the latest merged NoteDoc, throw error if there is none (it's impossible to be null because first NoteDoc will auto-merge to the newly-built Note)
   updatedAt: DateTime!
 }
 
 type NoteDoc {
   id: ID!
   # noteId: String!
-  userId: String!
   commitId: String!
   fromDocId: String
+  userId: String!
+  status: NoteDocStatus!
   domain: String!
   meta: NoteDocMeta # not sure about this type
   content: NoteDocContent!
@@ -617,7 +621,7 @@ type NoteDraft {
   meta: NoteDocMeta # not sure about this type
   content: NoteDocContent!
   updatedAt: DateTime!
-  status: DraftStatus!
+  status: NoteDraftStatus!
 }
 
 type NoteDraftEntry {
@@ -639,6 +643,7 @@ type NoteDraftCommitResponse {
 }
 
 # ----------------Modified---------------
+# TODO: confirm using the structure specified in block-editor/src/interfaces.ts or not
 type Block {
   uid: ID!
   str: String!
@@ -646,7 +651,14 @@ type Block {
   docTitle: String
 }
 
+type BlockUid_DiscussId {
+  blockUid: String!
+  discussId: String!
+  commitId: String
+}
+
 type NoteDocContent {
+  discussIds: [BlockUid_DiscussId]!
   diff: JSON
   symbolIdDict: JSON
   blocks: [Block!]!
@@ -655,7 +667,7 @@ type NoteDocContent {
 
 type NoteDocMeta {
   duplicatedSymbols: [String] # store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
-  blockUidAnddiscussIdsDict: [String] # store discussion ids
+  # blockUidAnddiscussIdsDict: [String] # store discussion ids
   keywords: [String] # note keywords
   redirectFroms: [String] # used when duplicate symbol exists
   redirectTo: String
@@ -676,9 +688,9 @@ type NoteDocEntry {
 type Commit {
   id: String!
   userId: String!
+  drafts: [NoteDraft!]!
   docs: [NoteDoc!]!
   updatedAt: DateTime!
-  # stateIdToCidDictEntryArray: [DictEntryArray!]! # for client to match committed docs
 }
 
 # ------------------End-------------------
@@ -871,6 +883,7 @@ input NoteDocMetaInput {
   # webpage: NoteDocMetaWebpageInput
 }
 
+# data extracted from the webpage
 # input NoteDocMetaWebpageInput {
 #   authors: [String]!
 #   title: String
@@ -878,7 +891,14 @@ input NoteDocMetaInput {
 #   tickers: [String]! # tickers mentioned in the webpage content
 # }
 
+input BlockUid_DiscussIdInput {
+  blockUid: String!
+  discussId: String!
+  commitId: String
+}
+
 input NoteDocContentInput {
+  discussIds: [BlockUid_DiscussIdInput]!
   diff: JSON
   symbolIdMap: JSON
   blocks: [BlockInput!]!
@@ -982,6 +1002,7 @@ enum NoteStatus {
 }
 
 enum DiscussStatus {
+  DRAFT
   ACTIVE
   LOCK
   DELETE
@@ -1067,13 +1088,13 @@ enum SymType {
 # }
 
 #-------New-------
-enum DraftStatus {
+enum NoteDraftStatus {
   EDIT
   COMMIT
   DROP
 }
 
-enum DocStatus {
+enum NoteDocStatus {
   CANDIDATE
   MERGE
   REJECT
