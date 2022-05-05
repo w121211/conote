@@ -1,108 +1,271 @@
-import { Note, NoteDraft, NoteDoc, Commit, Discuss } from '@prisma/client'
-import { type } from 'os'
+import {
+  Commit,
+  Discuss,
+  Note,
+  NoteDoc,
+  NoteDraft,
+  PrismaPromise,
+  Sym,
+} from '@prisma/client'
+import cuid from 'cuid'
+import { isNumber } from 'lodash'
 import prisma from '../prisma'
-import { noteDocModel, SymbolIdDict } from './note-doc-model'
+import { noteDocModel } from './note-doc-model'
+import { noteDraftModel } from './note-draft-model'
 import { SymModel } from './sym-model'
 
+/**
+ *
+ */
+async function validateDraft(id: string, userId: string) {
+  const draft = await prisma.noteDraft.findUnique({
+      where: { id },
+    }),
+    sym =
+      draft &&
+      (await prisma.sym.findUnique({
+        where: { symbol: draft.symbol },
+      })),
+    curDoc =
+      sym &&
+      // TODO: noteDocModel.getCurrentNoteDoc(branchId, symId)
+      (await prisma.noteDoc.findFirst({
+        where: {
+          branchId: draft.branchId,
+          symId: sym.id,
+          status: 'MERGE',
+        },
+        orderBy: { updatedAt: 'desc' },
+      })),
+    note =
+      draft &&
+      sym &&
+      (await prisma.note.findUnique({
+        where: {
+          branchId_symId: {
+            branchId: draft.branchId,
+            symId: sym.id,
+          },
+        },
+      })),
+    draftParsed = draft && noteDraftModel.parse(draft),
+    newJoinedDiscussIds =
+      draftParsed &&
+      draftParsed.content.discussIds.filter(e => e.commitId === undefined),
+    newJoinedDiscusses =
+      newJoinedDiscussIds &&
+      (await prisma.$transaction(
+        newJoinedDiscussIds.map(e =>
+          prisma.discuss.findUnique({
+            where: { id: e.discussId },
+          }),
+        ),
+      )),
+    existingDiscussIds =
+      draftParsed &&
+      draftParsed.content.discussIds.filter(e => e.commitId !== undefined),
+    existingDiscusses =
+      existingDiscussIds &&
+      (await prisma.$transaction(
+        existingDiscussIds.map(e =>
+          prisma.discuss.findUnique({ where: { id: e.discussId } }),
+        ),
+      ))
+
+  // console.log(`existing discuss ${existingDiscusses?.length}`)
+
+  if (draft === null) {
+    throw new Error('Some draftId does not exist.')
+  }
+  if (draftParsed === null) {
+    throw new Error('Some draftId does not exist.')
+  }
+  if (draft.fromDocId && (curDoc === null || draft.fromDocId !== curDoc.id)) {
+    throw new Error('FromDoc is not the latest doc of this note.')
+  }
+  if (draft.fromDocId === null && curDoc !== null) {
+    throw new Error('FromDoc is not the latest doc of this note.')
+  }
+  if (sym && note === null) {
+    throw new Error('Unexpected error: found sym but not found note')
+  }
+  if (draft.userId !== userId) {
+    throw new Error('User is not the owner of the draft')
+  }
+
+  return {
+    draft,
+    draftParsed,
+    fromDoc: curDoc,
+    sym,
+    note,
+    newJoinedDiscusses,
+    existingDiscusses,
+  }
+}
+
+/**
+ *
+ */
 export async function commitNoteDrafts(
   draftIds: string[],
   userId: string,
 ): Promise<{
-  symbolIdDict: SymbolIdDict
+  symbol_symId: Record<string, string>
   commit: Commit
   notes: (Note & {
     discusses: Discuss[]
+    sym: Sym
   })[]
   noteDocs: NoteDoc[]
 }> {
-  //   const { userId } = await isAuthenticated(req)
-  const drafts: NoteDraft[] = []
+  const drafts: NoteDraft[] = [],
+    symbol_symId: Record<string, string> = {},
+    symbol_noteId: Record<string, string> = {},
+    promises: PrismaPromise<any>[] = [],
+    commitId = cuid()
+
+  // Loop first run
   for (const id of draftIds) {
-    const draft: NoteDraft | null = await prisma.noteDraft.findUnique({ where: { id } })
-    if (draft) {
-      drafts.push(draft)
+    const {
+        draft,
+        draftParsed,
+        fromDoc,
+        sym,
+        note,
+        newJoinedDiscusses,
+        existingDiscusses,
+      } = await validateDraft(id, userId),
+      { branchId, linkId, symbol } = draft,
+      symId = sym ? sym.id : cuid(),
+      noteId = note ? note.id : cuid()
+
+    drafts.push(draft)
+    symbol_symId[symbol] = symId
+    symbol_noteId[symbol] = noteId
+
+    // Create Sym and Note if not found
+    if (sym === null) {
+      const { type } = SymModel.parse(symbol)
+      promises.push(
+        prisma.sym.create({
+          data: {
+            id: symId,
+            type,
+            symbol,
+            notes: {
+              create: {
+                id: noteId,
+                branch: { connect: { id: branchId } },
+                link: linkId ? { connect: { id: linkId } } : undefined,
+              },
+            },
+          },
+        }),
+      )
+    }
+
+    // Connect each new-joined-discuss && whose status is "DRAFT" to Note
+    // and update its status to "ACITVE"
+    if (newJoinedDiscusses) {
+      newJoinedDiscusses.forEach(e => {
+        if (e?.status === 'DRAFT') {
+          promises.push(
+            prisma.discuss.update({
+              data: {
+                notes: { connect: { branchId_symId: { branchId, symId } } },
+                status: 'ACTIVE',
+              },
+              where: { id: e.id },
+            }),
+          )
+        }
+      })
+    }
+
+    // Connect each existing discuss to Note
+    if (existingDiscusses) {
+      existingDiscusses.forEach(e => {
+        promises.push(
+          prisma.discuss.update({
+            data: {
+              notes: { connect: { branchId_symId: { branchId, symId } } },
+            },
+            where: { id: e?.id },
+          }),
+        )
+      })
     }
   }
-  if (drafts.length !== draftIds.length) {
-    throw new Error('Some draftId does not exist.')
-  }
-  // Create Commit
-  const commit = await prisma.commit.create({
-    data: { user: { connect: { id: userId } } },
-  })
 
-  // For each draft, check note, sym and doc (create one if there is none)
-  // At the same time, link DiscussId to Note and change Discuss status to Active or Lock
-  const notes: (Note & {
-    discusses: Discuss[]
-  })[] = []
-  const noteDocs: NoteDoc[] = []
-  const symbolIdDict: SymbolIdDict = {}
+  // Loop second run: for each draft, create doc and connect to the note
   for (const e of drafts) {
-    const { type } = SymModel.parse(e.symbol)
-    // TODO: extract discussId from the meta from the draft
-    const discussIds: string[] = noteDocModel.getDiscussIdsFromDraft(e)
-    // console.log(`discussIds return ${discussIds.length}`)
+    const draftParsed = noteDraftModel.parse(e),
+      symId = symbol_symId[e.symbol]
 
-    const symFromPrisma = await prisma.sym.findUnique({ where: { symbol: e.symbol } })
-    // TODO: update existing sym with this draft id
-    const sym = symFromPrisma
-      ? symFromPrisma
-      : await prisma.sym.create({
-          data: {
-            type,
-            symbol: e.symbol,
-            // drafts: { connect: { id: e.id } },
-          },
-        })
-    const noteDocFromPrisma =
-      sym &&
-      (await prisma.noteDoc.findFirst({
-        where: { branchId: e.branchId, symId: sym.id, domain: e.domain },
-        include: { note: true },
-      }))
+    if (symId === null) throw new Error('Unexpected error: symId === null')
 
-    const note = noteDocFromPrisma
-      ? await prisma.note.update({
-          where: { branchId_symId: { branchId: noteDocFromPrisma.branchId, symId: sym.id } },
-          data: { discusses: discussIds.length ? { connect: discussIds.map(e => ({ id: e })) } : undefined },
-          include: { discusses: true },
-        })
-      : await prisma.note.create({
-          data: {
-            branch: { connect: { id: e.branchId } },
-            sym: { connect: { id: sym.id } },
-            link: e.linkId ? { connect: { id: e.linkId } } : undefined,
-            discusses: discussIds.length ? { connect: discussIds.map(e => ({ id: e })) } : undefined,
+    promises.push(
+      // Also update symbol_symId in this function
+      noteDocModel.createDoc(
+        draftParsed,
+        commitId,
+        symId,
+        userId,
+        symbol_symId,
+      ),
+    )
+
+    // For each draft, connect draft to commit and update its status to commit
+    promises.push(
+      prisma.noteDraft.update({
+        where: { id: e.id },
+        data: { commit: { connect: { id: commitId } }, status: 'COMMIT' },
+      }),
+    )
+  }
+
+  // Create Commit and get or create Sym, Note and NoteDoc
+  const [commit] = await prisma.$transaction([
+    prisma.commit.create({
+      data: { id: commitId, user: { connect: { id: userId } } },
+    }),
+    ...promises,
+  ])
+
+  // TODO: consider to remove
+  const noteDocs = await prisma.noteDoc.findMany({
+    where: { commitId: commit.id },
+  })
+  // if (noteDocs.length === 0) {
+  //   throw new Error('One or more drafts are not commited successfully.')
+  // }
+
+  const notes = (
+    await prisma.$transaction(
+      drafts.map(e =>
+        prisma.note.findUnique({
+          where: {
+            branchId_symId: {
+              branchId: e.branchId,
+              symId: symbol_symId[e.symbol],
+            },
           },
-          include: { discusses: true },
-        })
-    notes.push(note)
-    // console.log(`discuss part ${note.discusses.length}`)
-    const noteDoc = await prisma.noteDoc.create({
-      data: {
-        branch: { connect: { id: e.branchId } },
-        sym: { connect: { id: sym.id } },
-        commit: { connect: { id: commit.id } },
-        fromDoc: e.fromDocId ? { connect: { id: e.fromDocId } } : undefined,
-        user: { connect: { id: e.userId } },
-        note: { connect: { id: note.id } },
-        domain: e.domain,
-        meta: e.meta ?? undefined,
-        content: e.content ?? {},
-      },
-    })
-    noteDocs.push(noteDoc)
-    symbolIdDict[sym.symbol] = sym.id
-    // Connect draft to commit
-    await prisma.noteDraft.update({ where: { id: e.id }, data: { commit: { connect: { id: commit.id } } } })
-    // Update status of all discusses
-    await prisma.discuss.updateMany({ where: { notes: { every: { id: note.id } } }, data: { status: 'ACTIVE' } })
-  }
-  // Update symIdMap for each draft with connections to drafts in this commit
-  // TODO
-  for (const doc of noteDocs) {
-    noteDocModel.updateSymbolIdDict(doc, symbolIdDict)
-  }
-  return { symbolIdDict, commit, notes, noteDocs }
+          include: {
+            discusses: true,
+            sym: true,
+          },
+        }),
+      ),
+    )
+  ).filter(
+    (
+      e,
+    ): e is Note & {
+      discusses: Discuss[]
+      sym: Sym
+    } => e !== null,
+  )
+
+  return { symbol_symId, commit, notes, noteDocs }
 }

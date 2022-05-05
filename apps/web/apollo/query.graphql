@@ -43,7 +43,7 @@ fragment author on Author {
 #   choice
 #   updatedAt
 # }
-
+# # DELETE
 # # fragment bulletNodeChange on BulletNodeChange {
 # #   __typename
 # #   type
@@ -55,38 +55,38 @@ fragment author on Author {
 # #   }
 # # }
 
-# fragment note on Note {
-#   __typename
-#   id
-#   link {
-#     ...link
-#   }
-#   meta {
-#     ...noteMeta
-#   }
-#   sym {
-#     ...sym
-#   }
-#   updatedAt
-# }
+# # fragment note on Note {
+# #   __typename
+# #   id
+# #   link {
+# #     ...link
+# #   }
+# #   meta {
+# #     ...noteMeta
+# #   }
+# #   sym {
+# #     ...sym
+# #   }
+# #   updatedAt
+# # }
 
-# fragment noteDigest on NoteDigest {
-#   __typename
-#   commitId
-#   noteId
-#   noteMeta {
-#     ...noteMeta
-#   }
-#   fromNoteId
-#   sym {
-#     ...sym
-#   }
-#   subSyms {
-#     ...sym
-#   }
-#   picks
-#   updatedAt
-# }
+# # fragment noteDigest on NoteDigest {
+# #   __typename
+# #   commitId
+# #   noteId
+# #   noteMeta {
+# #     ...noteMeta
+# #   }
+# #   fromNoteId
+# #   sym {
+# #     ...sym
+# #   }
+# #   subSyms {
+# #     ...sym
+# #   }
+# #   picks
+# #   updatedAt
+# # }
 
 # fragment noteEmoji on NoteEmoji {
 #   __typename
@@ -111,17 +111,17 @@ fragment author on Author {
 #   updatedAt
 # }
 
-# fragment noteMeta on NoteMeta {
-#   __typename
-#   author
-#   duplicates
-#   keywords
-#   publishedAt
-#   redirect
-#   tickers
-#   title
-#   url
-# }
+# # fragment noteMeta on NoteMeta {
+# #   __typename
+# #   author
+# #   duplicates
+# #   keywords
+# #   publishedAt
+# #   redirect
+# #   tickers
+# #   title
+# #   url
+# # }
 
 # # fragment noteState on NoteState {
 # #   __typename
@@ -139,16 +139,16 @@ fragment author on Author {
 # #   updatedAt
 # # }
 
-# fragment commit on Commit {
-#   __typename
-#   id
-#   userId
-#   updatedAt
-#   stateIdToCidDictEntryArray {
-#     k
-#     v
-#   }
-# }
+# # fragment commit on Commit {
+# #   __typename
+# #   id
+# #   userId
+# #   updatedAt
+# #   stateIdToCidDictEntryArray {
+# #     k
+# #     v
+# #   }
+# # }
 
 # fragment discuss on Discuss {
 #   __typename
@@ -165,6 +165,7 @@ fragment author on Author {
 #   }
 # }
 
+# # DELETE
 # # fragment discussCount on DiscussCount {
 # #   __typename
 # #   id
@@ -180,7 +181,231 @@ fragment author on Author {
 #   }
 # }
 
-# fragment discussEmojiCount on DiscussEmojiCount {
+fragment discussEmoji on DiscussEmoji {
+  __typename
+  id
+  code
+  count {
+    ...discussEmojiCount
+  }
+}
+
+fragment discussEmojiCount on DiscussEmojiCount {
+  __typename
+  id
+  nUps
+}
+
+fragment discussEmojiLike on DiscussEmojiLike {
+  __typename
+  id
+  discussEmojiId
+  liked
+  updatedAt
+}
+
+fragment discussPost on DiscussPost {
+  __typename
+  id
+  userId
+  status
+  content
+  createdAt
+  updatedAt
+}
+
+fragment discussPostEmoji on DiscussPostEmoji {
+  __typename
+  id
+  code
+  count {
+    ...discussPostEmojiCount
+  }
+}
+
+fragment discussPostEmojiCount on DiscussPostEmojiCount {
+  __typename
+  id
+  nUps
+}
+
+fragment discussPostEmojiLike on DiscussPostEmojiLike {
+  __typename
+  id
+  discussPostEmojiId
+  liked
+  updatedAt
+}
+
+fragment link on Link {
+  __typename
+  id
+  url
+  authorId
+}
+
+fragment poll on Poll {
+  __typename
+  id
+  userId
+  choices
+  count {
+    id
+    nVotes
+  }
+  createdAt
+  updatedAt
+}
+
+fragment rate on Rate {
+  __typename
+  id
+  userId
+  authorId
+  linkId
+  symId
+  choice
+  # body {
+  #   ...shotBody
+  # }
+  createdAt
+  updatedAt
+}
+
+fragment rateBody on RateBody {
+  comment
+  quote
+}
+
+fragment searchHit on SearchHit {
+  id
+  str
+}
+
+fragment sym on Sym {
+  __typename
+  id
+  type
+  symbol
+}
+
+fragment user on User {
+  __typename
+  id
+}
+
+fragment vote on Vote {
+  __typename
+  id
+  pollId
+  choiceIdx
+}
+
+# -----------NEW-----------
+fragment note on Note {
+  __typename
+  id
+  meta {
+    ...noteDocMeta
+  }
+  sym {
+    ...sym
+  }
+  link {
+    ...link
+  }
+  doc {
+    ...noteDoc
+  }
+  updatedAt
+}
+
+fragment noteDoc on NoteDoc {
+  __typename
+  id
+  userId
+  commitId
+  fromDocId
+  domain
+  meta {
+    ...noteDocMeta
+  }
+  content {
+    ...noteDocContent
+  }
+  updatedAt
+}
+
+fragment noteDocMeta on NoteDocMeta {
+  duplicatedSymbols
+  blockUidAnddiscussIdsDict
+  keywords
+  redirectFroms
+  redirectTo
+  webpage {
+    ...noteDocMetaWebpage
+  }
+}
+
+fragment noteDocContent on NoteDocContent {
+  diff
+  symbolIdDict
+  blocks {
+    uid
+    str
+    parentUid
+    docTitle
+  }
+}
+
+fragment noteDocMetaWebpage on NoteDocMetaWebpage {
+  authors
+  title
+  publishedAt
+  tickers
+}
+
+fragment noteDocEntry on NoteDocEntry {
+  __typename
+  id
+}
+
+fragment noteDraft on NoteDraft {
+  __typename
+  id
+  userId
+  commitId
+  fromDocId
+  domain
+  symbol
+  meta {
+    ...noteDocMeta
+  }
+  content {
+    ...noteDocContent
+  }
+  updatedAt
+  status
+}
+
+fragment noteDraftEntry on NoteDraftEntry {
+  __typename
+  id
+}
+
+fragment noteDraftDropResponse on NoteDraftDropResponse {
+  __typename
+  response
+}
+
+fragment noteDraftCommitResponse on NoteDraftCommitResponse {
+  __typename
+  commitId
+  response
+}
+#--------------END------------------
+# DELETE-------------------
+# fragment commentCount on CommentCount {
 #   __typename
 #   id
 #   nUps
@@ -284,13 +509,49 @@ fragment author on Author {
 #   id
 # }
 
-# fragment vote on Vote {
-#   __typename
-#   id
-#   pollId
-#   choiceIdx
+# query searchByDomain($domain: String!) {
+#   searchByDomain(domain: $domain) {
+#     ...note
+#   }
 # }
 
+# query searchByAuthor($name: String!) {
+#   searchByAuthor(domain: $name) {
+#     ...note
+#   }
+# }
+
+query myNoteDraftEntries {
+  myNoteDraftEntries {
+    ...noteDraftEntry
+  }
+}
+
+# fragment noteDocEntry on NoteDocEntry {
+#   __typename
+#   id
+# }
+
+# fragment noteDraft on NoteDraft {
+#   __typename
+#   id
+#   userId
+#   commitId
+#   fromDocId
+#   domain
+#   symbol
+#   meta
+#   content
+#   updatedAt
+#   status
+# }
+
+# fragment noteDraftEntry on NoteDraftEntry {
+#   __typename
+#   id
+# }
+# #--------------END------------------
+# # DELETE-------------------
 # # fragment commentCount on CommentCount {
 # #   __typename
 # #   id
@@ -377,7 +638,7 @@ fragment author on Author {
 # #   timestamp
 # #   prevId
 # # }
-
+# # END DELETE---------------------
 # query Author($id: ID, $name: String) {
 #   author(id: $id, name: $name) {
 #     ...author
@@ -395,12 +656,61 @@ fragment author on Author {
 #     ...bulletEmoji
 #   }
 # }
-
-# query Note($id: ID, $symbol: String, $url: String) {
-#   note(id: $id, symbol: $symbol, url: $url) {
+# # --------NEW--------
+# query Note($id: ID!) {
+#   note(id: $id) {
 #     ...note
 #   }
 # }
+
+# query NoteDocsJustMerged {
+#   noteDocsJustMerged {
+#     ...noteDoc
+#   }
+# }
+
+# query noteDocEntriesHistory($noteId: ID!) {
+#   noteDocEntriesHistory(noteId: $noteId) {
+#     ...noteDocEntry
+#   }
+# }
+
+# query noteDraft($id: ID, $symbol: String, $url: String) {
+#   noteDraft(id: $id, symbol: $symbol, url: $url) {
+#     ...noteDraft
+#   }
+# }
+
+# query searchNote($symbol: String, $title: String) {
+#   searchNote(symbol: $symbol, title: $title) {
+#     ...note
+#   }
+# }
+
+# query searchByDomain($domain: String!) {
+#   searchByDomain(domain: $domain) {
+#     ...note
+#   }
+# }
+
+# query searchByAuthor($name: String!) {
+#   searchByAuthor(domain: $name) {
+#     ...note
+#   }
+# }
+
+# query myNoteDraftEntries {
+#   myNoteDraftEntries {
+#     ...NoteDraftEntry
+#   }
+# }
+
+# query noteDocsToMerge {
+#   noteDocsToMerge {
+#     ...noteDoc
+#   }
+# }
+# #-----------END----------------
 
 # query NoteEmojis($noteId: ID!) {
 #   noteEmojis(noteId: $noteId) {
@@ -414,11 +724,11 @@ fragment author on Author {
 # #   }
 # # }
 
-# query NoteDigests($afterCommitId: String) {
-#   noteDigests(afterCommitId: $afterCommitId) {
-#     ...noteDigest
-#   }
-# }
+# # query NoteDigests($afterCommitId: String) {
+# #   noteDigests(afterCommitId: $afterCommitId) {
+# #     ...noteDigest
+# #   }
+# # }
 
 # query Discuss($id: ID!) {
 #   discuss(id: $id) {
@@ -480,11 +790,20 @@ fragment author on Author {
 #   }
 # }
 
-# query MyDiscussEmojiLike($discussEmojiId: ID!) {
-#   myDiscussEmojiLike(discussEmojiId: $discussEmojiId) {
-#     ...discussEmojiLike
+
+# TODO: need to modify
+# mutation CreateCommit($data: CommitInput!) {
+#   createCommit(data: $data) {
+#     ...commit
 #   }
 # }
+
+mutation CreateDiscuss($noteId: ID, $data: DiscussInput!) {
+  createDiscuss(noteId: $noteId, data: $data) {
+    ...discuss
+  }
+}
+
 
 # query MyDiscussPostEmojiLike($discussPostEmojiId: ID!) {
 #   myDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId) {
@@ -532,7 +851,7 @@ fragment author on Author {
 #     ...rate
 #   }
 # }
-
+# # COMMENT-----------------
 # # query Board($id: ID!) {
 # #   board(id: $id) {
 # #     ...board
@@ -562,7 +881,7 @@ fragment author on Author {
 # #     ...boardLike
 # #   }
 # # }
-
+# # END------------------
 # mutation CreateAuthor($data: AuthorInput!) {
 #   createAuthor(data: $data) {
 #     ...author
@@ -619,15 +938,56 @@ fragment author on Author {
 #   }
 # }
 
-# mutation UpdateNoteMeta($noteId: ID!, $data: NoteMetaInput!, $newSymbol: String) {
+# mutation UpdateNoteMeta(
+#   $noteId: ID!
+#   $data: NoteMetaInput!
+#   $newSymbol: String
+# ) {
 #   updateNoteMeta(noteId: $noteId, data: $data, newSymbol: $newSymbol) {
 #     ...note
 #   }
 # }
 
-# mutation CreateCommit($data: CommitInput!) {
-#   createCommit(data: $data) {
-#     ...commit
+mutation SessionLogout {
+  sessionLogout
+}
+
+# ------------- NEW ------------
+mutation CreateNoteDraft($symbol: String!, $draftInput: NoteDraftInput!) {
+  createNoteDraft(symbol: $symbol, draftInput: $draftInput) {
+    ...noteDraft
+  }
+}
+
+mutation CreateNoteDraftByLink($linkId: String!, $draftInput: NoteDraftInput!) {
+  createNoteDraftByLink(linkId: $linkId, draftInput: $draftInput) {
+    ...noteDraft
+  }
+}
+
+mutation UpdateNoteDraft($id: ID!, $data: NoteDraftInput!) {
+  updateNoteDraft(id: $id, data: $data) {
+    ...noteDraft
+  }
+}
+
+mutation DropNoteDraft($id: ID!) {
+  dropNoteDraft(id: $id) {
+    ...noteDraftDropResponse
+  }
+}
+
+mutation CommitNoteDrafts($draftIds: [ID!]!) {
+  commitNoteDrafts(draftIds: $draftIds) {
+    ...noteDraftCommitResponse
+  }
+}
+
+# commit must be created first -> createCommit ->
+# -------COMMENT---------
+# mutation CreateComment($boardId: ID!, $pollId: ID, $data: CommentInput!) {
+#   createComment(boardId: $boardId, pollId: $pollId, data: $data) {
+#     ...comment
 #   }
 # }
 
@@ -643,8 +1003,16 @@ fragment author on Author {
 #   }
 # }
 
-# mutation ConnectDiscussToNote($discussId: ID!, $noteId: ID!, $disconnect: Boolean) {
-#   connectDiscussToNote(discussId: $discussId, noteId: $noteId, disconnect: $disconnect)
+# mutation ConnectDiscussToNote(
+#   $discussId: ID!
+#   $noteId: ID!
+#   $disconnect: Boolean
+# ) {
+#   connectDiscussToNote(
+#     discussId: $discussId
+#     noteId: $noteId
+#     disconnect: $disconnect
+#   )
 # }
 
 # mutation CreateDiscussEmoji($discussId: ID!, $code: EmojiCode!) {
@@ -692,8 +1060,14 @@ fragment author on Author {
 #   }
 # }
 
-# mutation UpsertDiscussPostEmojiLike($discussPostEmojiId: ID!, $liked: Boolean!) {
-#   upsertDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId, liked: $liked) {
+# mutation UpsertDiscussPostEmojiLike(
+#   $discussPostEmojiId: ID!
+#   $liked: Boolean!
+# ) {
+#   upsertDiscussPostEmojiLike(
+#     discussPostEmojiId: $discussPostEmojiId
+#     liked: $liked
+#   ) {
 #     like {
 #       ...discussPostEmojiLike
 #     }
@@ -736,7 +1110,7 @@ fragment author on Author {
 # mutation SessionLogout {
 #   sessionLogout
 # }
-
+# # -------COMMENT---------
 # # mutation CreateComment($boardId: ID!, $pollId: ID, $data: CommentInput!) {
 # #   createComment(boardId: $boardId, pollId: $pollId, data: $data) {
 # #     ...comment
@@ -824,3 +1198,4 @@ fragment author on Author {
 # #     ...noteBody
 # #   }
 # # }
+# # END-----------------------

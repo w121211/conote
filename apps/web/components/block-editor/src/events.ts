@@ -11,11 +11,12 @@ import { areSameParent, compatPosition } from './op/helpers'
 import {
   BlockReducer,
   blockRepo,
+  blocksStore,
   getBlock,
   getBlockChildren,
 } from './stores/block.repository'
 import { rfdbRepo } from './stores/rfdb.repository'
-import { genBlockUid } from './utils'
+import { genBlockUid, isDocBlock, writeBlocks } from './utils'
 import { isInteger } from 'lodash'
 import { nextBlock, nthSiblingBlock, prevBlock } from './op/queries'
 import { docRepo, getDoc } from './stores/doc.repository'
@@ -722,14 +723,16 @@ async function editorChangeSymbolModal(symbol: string | null) {
       await docRemove(curDoc)
     }
   }
-  if (symbol) await docOpen(symbol)
-
+  if (symbol) {
+    await docOpen(symbol)
+  }
   editorRepo.updateRoute({ ...route, symbolModal: symbol })
 }
 
 /**
  * Check is main-symbol or modal-symbol has changed by comparing with current value,
  * only one symbol can change at one time
+ * - incoming modal symbol equals to current main symbol -> set modal symbol as null
  * - main symbol changed
  * - modal symbol added (from null)
  * - modal symbol removed (to null)
@@ -748,21 +751,44 @@ export async function editorRouteUpdate({
   mainSymbol?: string
   modalSymbol?: string | null
 }) {
-  console.debug('[editorRouteUpdate] ', mainSymbol, modalSymbol)
-
   const { route } = editorRepo.getValue(),
-    mainSymbolChanged =
-      mainSymbol !== undefined && mainSymbol !== route.symbolMain,
+    { symbolMain, symbolModal } = route,
+    modalSymbol_ =
+      modalSymbol !== undefined && modalSymbol === symbolMain
+        ? null
+        : modalSymbol,
+    mainSymbolChanged = mainSymbol !== undefined && mainSymbol !== symbolMain,
     modalSymbolChanged =
-      modalSymbol !== undefined && modalSymbol !== route.symbolModal
+      modalSymbol_ !== undefined && modalSymbol_ !== symbolModal
 
   if (mainSymbolChanged) {
     editorChangeSymbolMain(mainSymbol)
   } else if (modalSymbolChanged) {
-    editorChangeSymbolModal(modalSymbol)
+    editorChangeSymbolModal(modalSymbol_)
   } else if (!mainSymbolChanged && !modalSymbolChanged) {
     // do nothing
   } else {
     // unexpected case
   }
+  // console.debug(mainSymbol, modalSymbol, mainSymbolChanged, modalSymbolChanged)
+}
+
+//
+// Template Events
+//
+//
+//
+//
+//
+//
+
+export async function templateSet(docBlock: Block) {
+  if (!isDocBlock(docBlock)) throw new Error('Given block is not doc-block')
+
+  const blocks = writeBlocks(['__DUMMY_ROOT__', ['hello', 'world']], docBlock),
+    [, ...children] = blocks
+
+  const op = ops.blocksInsertOp(docBlock, children)
+
+  blockRepo.update(op)
 }

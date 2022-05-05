@@ -1,12 +1,16 @@
-// import { hash, hashSync } from 'bcryptjs'
-import { create, isEqual } from 'lodash'
-import { faker } from '@faker-js/faker'
 import { prisma, PrismaClient } from '@prisma/client'
 import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
 import { Bullet } from '../components/bullet/bullet'
 import { getBotEmail } from '../lib/models/user-model'
-import { CommitModel } from '../lib/models/commit-model'
-import { NoteDocContent } from '../lib/models/note-doc-model'
+import { mockDiscusses, mockDiscussPosts } from './__mocks__/mock-discuss'
+import { mockUsers } from './__mocks__/mock-user'
+import { mockBranches } from './__mocks__/mock-branch'
+import { mockNoteDrafts } from './__mocks__/mock-note-draft'
+import { NoteDraftParsed } from '../lib/interfaces'
+import { mockSyms } from './__mocks__/mock-sym'
+import { mockNotes } from './__mocks__/mock-note'
+import { mockCommits } from './__mocks__/mock-commit'
+import { mockNoteDocs } from './__mocks__/mock-note-doc'
 
 // fake incremental id
 let i = 0
@@ -15,74 +19,11 @@ const fid = () => {
   return i.toString()
 }
 
-const TEST_DISCUSSES = [
-  {
-    id: 'testdiscuss0',
-    title: faker.lorem.lines(1),
-    content: faker.lorem.paragraph(),
-    userId: 'testuser0',
-  },
-  { id: 'testdiscuss1', title: faker.lorem.lines(1), userId: 'testuser1' },
-]
-
-const TEST_POSTS = [
-  { userId: 'testuser0', content: faker.lorem.paragraph() },
-  { userId: 'testuser1', content: faker.lorem.paragraph() },
-  { userId: 'testuser2', content: faker.lorem.paragraph() },
-]
-
 export const BOT = { id: 'bot', email: getBotEmail() }
 
-export const TESTUSERS = [
-  { id: 'testuser0', email: 'aaa@aaa.com', password: 'aaa' },
-  { id: 'testuser1', email: 'bbb@bbb.com', password: 'bbb' },
-  { id: 'testuser2', email: 'ccc@ccc.com', password: 'ccc' },
-  { id: 'testuser3', email: 'ddd@ddd.com', password: 'ddd' },
-  { id: 'testuser4', email: 'eee@eee.com', password: 'eee' },
-]
-
-export const TEST_SYMBOLS = [
-  { id: 'sym0', symbol: '[[Apple]]', type: 'TOPIC' },
-  { id: 'sym1', symbol: '[[Google]]', type: 'TOPIC' },
-  { id: 'sym2', symbol: '$BA', type: 'TICKER' },
-]
-
-export const TESTAUTHORS = [{ name: 'test-author-1' }]
-
-export const TEST_NOTEDRAFTS = [
-  {
-    id: 'testdraft0',
-    symbol: TEST_SYMBOLS[0].symbol,
-    symId: TEST_SYMBOLS[0].id,
-    userId: 'testuser0',
-    domain: 'domain0',
-    symbolIdDict: { '[[Google]]': '' },
-    blocks: [{ uid: '1', str: 'kkk' }],
-    // discusses: [TEST_DISCUSSES[0].id],
-  },
-  {
-    id: 'testdraft1',
-    symbol: TEST_SYMBOLS[1].symbol,
-    symId: TEST_SYMBOLS[1].id,
-    userId: 'testuser0',
-    domain: 'domain0',
-    symbolIdDict: { '[[Apple]]': '' },
-    blocks: [{ uid: '1', str: 'aba' }],
-    discusses: [TEST_DISCUSSES[1].id, TEST_DISCUSSES[0].id],
-  },
-  {
-    id: 'testdraft2',
-    symbol: TEST_SYMBOLS[2].symbol,
-    symId: TEST_SYMBOLS[2].id,
-    userId: 'testuser1',
-    domain: 'domain1',
-    symbolIdDict: { '[[Apple]]': '' },
-    blocks: [{ uid: '1', str: 'ooo' }],
-  },
-]
+export const TEST_AUTHORS = [{ name: 'test-author-1' }]
 
 export const TEST_COMMIT = [{ id: 'commit0', userId: 'testuser0' }]
-export const TEST_BRANCH = [{ name: 'branch00' }]
 
 // --- Tree values ---
 
@@ -100,189 +41,6 @@ export const bt = (
     children,
   }
 }
-
-// const isBulletEqual = (a: Bullet, b: Bullet) => {
-// }
-
-// const CARD_STATES: NoteStateParsed[] = []
-
-// export const TEST_SYMBOLS = [
-//   { name: '$AAA', cat: SymbolCat.TICKER },
-//   { name: '$ABB', cat: SymbolCat.TICKER },
-//   { name: '$ACC', cat: SymbolCat.TICKER },
-//   { name: '$BBB', cat: SymbolCat.TICKER },
-//   { name: '$CCC', cat: SymbolCat.TICKER },
-//   { name: '$DDD', cat: SymbolCat.TICKER },
-//   { name: '[[Apple]]', cat: SymbolCat.TOPIC },
-//   { name: '[[Google]]', cat: SymbolCat.TOPIC },
-//   { name: '[[蘋果]]', cat: SymbolCat.TOPIC },
-//   { name: '[[估狗]]', cat: SymbolCat.TOPIC },
-//   { name: '[[Apple love Google]]', cat: SymbolCat.TOPIC },
-//   { name: '[[Google hate Apple]]', cat: SymbolCat.TOPIC },
-// ]
-
-export const TestDataHelper = {
-  createDiscusses: async (prisma: PrismaClient): Promise<void> => {
-    await prisma.$transaction(
-      TEST_DISCUSSES.map(e =>
-        prisma.discuss.create({
-          data: {
-            id: e.id,
-            userId: e.userId,
-            title: e.title,
-            content: e.content,
-            count: { create: {} },
-            posts: { createMany: { data: TEST_POSTS } },
-          },
-        }),
-      ),
-    )
-  },
-
-  createUsers: async (prisma: PrismaClient): Promise<void> => {
-    await prisma.user.create({
-      // data: { id: BOT.id, email: BOT.email, password: await hash(BOT.password, 10) },
-      data: { id: BOT.id, email: BOT.email },
-    })
-    await prisma.$transaction(
-      TESTUSERS.map(e =>
-        prisma.user.create({
-          // data: { id: e.id, email: e.email, password: hashSync(e.password, 10) },
-          data: { id: e.id, email: e.email },
-        }),
-      ),
-    )
-    await prisma.$transaction(
-      TESTAUTHORS.map(e =>
-        prisma.author.create({
-          data: { name: e.name },
-        }),
-      ),
-    )
-  },
-
-  createBranch: async (prisma: PrismaClient): Promise<void> => {
-    await prisma.branch.create({
-      data: { name: TEST_BRANCH[0].name },
-    })
-  },
-
-  createNoteDrafts: async (prisma: PrismaClient): Promise<void> => {
-    const branch = await prisma.branch.create({
-      data: { name: TEST_BRANCH[0].name },
-    })
-    const content: NoteDocContent = {
-      blocks: [{ uid: '1', str: 'kkk' }],
-    }
-    await prisma.$transaction(
-      TEST_NOTEDRAFTS.map(e =>
-        prisma.noteDraft.create({
-          data: {
-            id: e.id,
-            symbol: e.symbol,
-            branch: { connect: { id: branch.id } },
-            user: { connect: { id: e.userId } },
-            domain: e.domain,
-            meta: { blockUidAnddiscussIdsDict: e.discusses },
-            content: { symbolIdDict: e.symbolIdDict, blocks: e.blocks },
-          },
-        }),
-      ),
-    )
-    // await prisma.noteDraft.create({
-    //   data: {
-    //     id: 'testerror0',
-    //     symbol: '[[test01]]',
-    //     branch: { connect: { id: branch.id } },
-    //     // sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-    //     // fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
-    //     user: { connect: { id: 'testuser0' } },
-    //     domain: 'domain01',
-    //     content,
-    //   },
-    // })
-    // await prisma.noteDraft.create({
-    //   data: {
-    //     symbol: '[[test02]]',
-    //     branch: { connect: { id: branch.id } },
-    //     // sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-    //     // fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
-    //     user: { connect: { id: 'testuser0' } },
-    //     domain: 'domain01',
-    //     content,
-    //   },
-    // })
-  },
-
-  // createCommits: async (): Promise<void> => {
-  //   const v: TreeNode<Bullet>[][] = [[], [bt(0)], [bt(1, [bt(3), bt(4)]), bt(2)]]
-
-  //   const values: [TreeNode<Bullet>[], TreeNode<Bullet>[], NodeChange<Bullet>[]][] = [
-  //     [v[0], v[1]],
-  //     [v[1], v[2]],
-  //   ].map(([s, f]) => [s, f, TreeChangeService.getChnages(f, s, isEqual)])
-
-  //   const commit0 = await CommitModel.create(
-  //     {
-  //       noteStateInputs: [
-  //         {
-  //           cid: '$AA',
-  //           prevStateId: null,
-  //           noteInput: { symbol: '$AA' },
-  //           value: values[0][1],
-  //           changes: values[0][2],
-  //         },
-  //       ],
-  //     },
-  //     TESTUSERS[0].id,
-  //   )
-  //   const state0 = commit0.commit.noteStates[0]
-  //   if (state0 === undefined) {
-  //     throw 'createCommits(): state0 === undefined'
-  //   }
-
-  //   const commit1 = await CommitModel.create(
-  //     {
-  //       noteStateInputs: [
-  //         {
-  //           cid: '$AA',
-  //           prevStateId: state0.id,
-  //           noteId: state0.noteId,
-  //           value: values[1][1],
-  //           changes: values[1][2],
-  //         },
-  //         {
-  //           cid: '$BB',
-  //           prevStateId: null,
-  //           // sourceNoteId: state0.noteId,
-  //           noteInput: { symbol: '$BB' },
-  //           value: values[0][1],
-  //           changes: values[0][2],
-  //         },
-  //         {
-  //           cid: '$CC',
-  //           prevStateId: null,
-  //           // sourceNoteId: state0.noteId,
-  //           noteInput: { symbol: '$CC' },
-  //           value: values[0][1],
-  //           changes: values[0][2],
-  //         },
-  //       ],
-  //     },
-  //     TESTUSERS[0].id,
-  //   )
-  // },
-}
-
-// export async function createTestSymbols(prisma: PrismaClient): Promise<void> {
-//   await prisma.$transaction(
-//     TEST_SYMBOLS.map(e =>
-//       prisma.symbol.create({
-//         data: { name: e.name, cat: e.cat },
-//       }),
-//     ),
-//   )
-// }
 
 /**
  * Recursively remove keys from an object
@@ -337,3 +95,118 @@ export const clean = (
         omitDeep(obj, ['createdAt', 'updatedAt', 'id', 'symId', 'noteId']),
       )
 }
+
+/**
+ *
+ */
+class TestHelper {
+  async createBranch(prisma: PrismaClient): Promise<void> {
+    await prisma.$transaction(
+      mockBranches.map(e => prisma.branch.create({ data: e })),
+    )
+  }
+
+  /**
+   * Create Commit and also create Sym, Note, NoteDoc
+   */
+  async createCommit(prisma: PrismaClient): Promise<void> {
+    const sym = await prisma.sym.create({
+        data: mockSyms[0],
+      }),
+      note = await prisma.note.create({
+        data: mockNotes[0],
+      }),
+      commit = await prisma.commit.create({
+        data: mockCommits[0],
+      })
+    await prisma.noteDoc.create({
+      data: mockNoteDocs[1],
+    })
+  }
+
+  async createDiscusses(prisma: PrismaClient): Promise<void> {
+    await prisma.$transaction([
+      ...mockDiscusses.map(e =>
+        prisma.discuss.create({
+          data: {
+            ...e,
+            count: { create: {} },
+          },
+        }),
+      ),
+      ...mockDiscussPosts.map(e => prisma.discussPost.create({ data: e })),
+    ])
+  }
+
+  async createUsers(prisma: PrismaClient): Promise<void> {
+    await prisma.user.create({
+      data: { id: BOT.id, email: BOT.email },
+    })
+    await prisma.$transaction(
+      mockUsers.map(e =>
+        prisma.user.create({
+          data: { id: e.id, email: e.email },
+        }),
+      ),
+    )
+    // await prisma.$transaction(
+    //   TEST_AUTHORS.map(e =>
+    //     prisma.author.create({
+    //       data: { name: e.name },
+    //     }),
+    //   ),
+    // )
+  }
+
+  async createNoteDrafts(
+    prisma: PrismaClient,
+    drafts: Omit<
+      NoteDraftParsed,
+      'symId' | 'branchId' | 'commitId'
+    >[] = mockNoteDrafts,
+  ): Promise<void> {
+    await prisma.$transaction(
+      drafts.map(e => {
+        // TODO: fromDoc
+        const { id, symbol, userId, domain, meta, content, fromDocId } = e
+        return prisma.noteDraft.create({
+          data: {
+            id,
+            symbol,
+            branch: { connect: { name: mockBranches[0].name } },
+            user: { connect: { id: userId } },
+            // fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+            domain,
+            meta,
+            content,
+          },
+        })
+      }),
+    )
+    // await prisma.noteDraft.create({
+    //   data: {
+    //     id: 'testerror0',
+    //     symbol: '[[test01]]',
+    //     branch: { connect: { id: branch.id } },
+    //     // sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+    //     // fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
+    //     user: { connect: { id: 'testuser0' } },
+    //     domain: 'domain01',
+    //     content,
+    //   },
+    // })
+    // await prisma.noteDraft.create({
+    //   data: {
+    //     symbol: '[[test02]]',
+    //     branch: { connect: { id: branch.id } },
+    //     // sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+    //     // fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
+    //     user: { connect: { id: 'testuser0' } },
+    //     domain: 'domain01',
+    //     content,
+    //   },
+    // })
+  }
+}
+
+export const testHelper = new TestHelper()

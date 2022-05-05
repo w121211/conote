@@ -95,7 +95,6 @@ model DiscussEmoji {
   id        Int                @id @default(autoincrement())
   discussId String
   code      EmojiCode
-  nUps      Int                @default(0) // record number of likes
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
   discuss   Discuss            @relation(fields: [discussId], references: [id])
@@ -144,7 +143,6 @@ model DiscussPostEmoji {
   id            Int                    @id @default(autoincrement())
   discussPostId Int
   code          EmojiCode
-  nUps          Int                    @default(0)
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @updatedAt
   discussPost   DiscussPost            @relation(fields: [discussPostId], references: [id])
@@ -178,16 +176,19 @@ model DiscussPostEmojiLike {
 
 model NoteEmoji {
   id        Int             @id @default(autoincrement())
-  branchId  String
-  symId     String
+  // branchId  String
+  // symId     String
+  noteId    String
   code      EmojiCode
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   count     NoteEmojiCount?
   likes     NoteEmojiLike[]
-  note      Note            @relation(fields: [branchId, symId], references: [branchId, symId])
+  // note      Note            @relation(fields: [branchId, symId], references: [branchId, symId])
+  note      Note            @relation(fields: [noteId], references: [id])
 
-  @@unique([branchId, symId, code])
+  // @@unique([branchId, symId, code])
+  @@unique([code, noteId])
 }
 
 model NoteEmojiCount {
@@ -233,10 +234,13 @@ model NoteDraft {
   branch    Branch      @relation(fields: [branchId], references: [id])
   commit    Commit?     @relation(fields: [commitId], references: [id])
   fromDoc   NoteDoc?    @relation(fields: [fromDocId], references: [id])
-  link      Link?       @relation(fields: [linkId], references: [id])
-  note      Note?       @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym       Sym?        @relation(fields: [symId], references: [id])
-  user      User        @relation(fields: [userId], references: [id])
+
+  // TODO: consider to remove?
+  link Link? @relation(fields: [linkId], references: [id])
+
+  note Note? @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym  Sym?  @relation(fields: [symId], references: [id])
+  user User  @relation(fields: [userId], references: [id])
 }
 
 model Note {

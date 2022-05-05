@@ -196,9 +196,14 @@ export const BlockEl = ({
     return null
   }
 
+  // useEffect(() => {
+  //   console.log(uid, children)
+  // }, [uid, children])
+
   const { open, str: defaultLocalStr } = block,
     isOpen = open ?? true,
     childrenBlockEls = useMemo(() => {
+      // console.log('childrenBlockEls')
       return children.map(e => (
         <BlockEl key={e.uid} uid={e.uid} isEditable={isEditable} isChild />
       ))

@@ -1,16 +1,19 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
+import Modal from '../../../../modal/modal'
 import { editorRouteUpdate } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import { DocEl } from '../doc/doc-el'
-import Modal from '../../../../modal/modal'
 
 export const EditorEl = (): JSX.Element | null => {
   const [alert] = useObservable(editorRepo.alter$),
     [mainDoc] = useObservable(editorRepo.mainDoc$, { initialValue: null }),
     [modalDoc] = useObservable(editorRepo.modalDoc$, { initialValue: null })
 
-  console.log(modalDoc)
+  // useEffect(() => {
+  //   console.log(mainDoc)
+  //   console.log(modalDoc)
+  // }, [modalDoc])
 
   return (
     <>

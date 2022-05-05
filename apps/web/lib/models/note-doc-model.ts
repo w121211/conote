@@ -1,72 +1,134 @@
-/**
- * Modified from note-state-model.ts
- */
-import { NoteDoc, NoteDraft, Sym } from '@prisma/client'
+import { NoteDoc, PrismaPromise } from '@prisma/client'
+import { NoteDocContent, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
 
-export type NoteDocMeta = {
-  duplicatedSymbols?: string[] // to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
-  blockUidAnddiscussIdsDict?: string[] // store discussion ids
-  keywords?: string[] // note keywords
-  redirectFroms?: string[] // used when duplicate symbol exists
-  redirectTo?: string
-  // fields of webpage is not allowed to change
-  webpage?: {
-    authors?: string[]
-    title?: string
-    publishedAt?: Date // when the webpage content publish at
-    tickers?: string[] // tickers mentioned in the webpage content
-  }
-}
+//
+// Merge functions
+//
+//
+//
+//
+//
+//
 
-export type Block = {
-  uid: string
-  str: string
-  parentUid?: string
-  docTitle?: string
-}
-
-export type NoteDocContent = {
-  diff?: any
-  symbolIdDict?: SymbolIdDict
-  blocks: Block[]
+/**
+ * Steps:
+ * - update doc's status
+ *
+ * Is reject the same as merge?
+ *
+ */
+function merge() {
+  throw 'Not implemented'
 }
 
 /**
- * key: symbol
- * value: sym.id or null
+ * Merge automatcially if:
+ * - no previous-doc
+ * - no deletions, changes to the previous-doc's content (ie, has only additions to the previous-doc)
+ *
+ * Auto reject if:
+ * - no changes  ->  move to commit-drafts input checking
  */
-export type SymbolIdDict = Record<string, string | null>
+function mergeAutomatical(doc: NoteDoc): void {
+  throw 'Not implemented'
+}
+
+/**
+ * Merge on periodical checks:
+ * - poll is open for a specific time && ups is higher than downs
+ *
+ * Reject on periodical checks:
+ * - poll is open for a specific time && ups is lower than downs
+ */
+function mergePeriodical() {
+  throw 'Not implemented'
+}
+
+//
+// Model
+//
+//
+//
+//
+//
+//
 
 class NoteDocModel {
-  getDiscussIdsFromDraft(draft: NoteDraft): string[] {
-    // get the meta in the draft
-    const meta = draft.meta as unknown as NoteDocMeta
-    // get the snippet for discussIds (need to know what the snippet looks like)
-    return meta.blockUidAnddiscussIdsDict ? meta.blockUidAnddiscussIdsDict : []
+  /**
+   * throws if:
+   * - has previous doc && no changes to previous doc
+   *
+   */
+  checkDraftForCommit(draftId: NoteDraftParsed) {
+    throw 'Not implemented'
   }
 
-  async updateSymbolIdDict(
-    doc: NoteDoc,
-    incomingSymbols: SymbolIdDict,
-  ): Promise<void> {
-    const docContent = doc.content as unknown as NoteDocContent
-    const symbolIdDict = docContent?.symbolIdDict ?? null
+  /**
+   * TODO: validate meta, content
+   *
+   * @param incomingSymbolsDict { [symbol]: sym-id } dict
+   */
+  createDoc(
+    draft: NoteDraftParsed,
+    commitId: string,
+    symId: string,
+    userId: string,
+    incomingSymbolsDict: Record<string, string>,
+  ): PrismaPromise<NoteDoc> {
+    const { branchId, fromDocId, domain, meta, content } = draft,
+      content_ = this.updateContent(content, commitId, incomingSymbolsDict)
 
-    for (const symbol in symbolIdDict) {
-      if (symbol in incomingSymbols) {
-        symbolIdDict[symbol] = incomingSymbols[symbol]
-      }
-    }
-    const newContent = {
-      diff: docContent.diff,
-      symbolIdDict: symbolIdDict,
-      blocks: docContent.blocks,
-    }
-    await prisma.noteDoc.update({
-      where: { id: doc.id },
-      data: { content: newContent },
+    return prisma.noteDoc.create({
+      data: {
+        branch: { connect: { id: branchId } },
+        sym: { connect: { id: symId } },
+        commit: { connect: { id: commitId } },
+        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+        user: { connect: { id: userId } },
+        note: {
+          connect: {
+            branchId_symId: {
+              branchId,
+              symId: symId,
+            },
+          },
+        },
+        domain,
+        meta,
+        content: content_,
+      },
     })
+  }
+
+  /**
+   * For all discuss-ids whose commit-id is undefined, set its commit-id
+   * For all symbols whose sym-id is null, try to find sym-id in the incoming symbols
+   */
+  private updateContent(
+    content: NoteDocContent,
+    commitId: string,
+    incomingSymbolsDict: Record<string, string>,
+  ): NoteDocContent {
+    const { discussIds, symbols } = content,
+      discussIds_ = discussIds.map(e => {
+        return e.commitId ? e : { ...e, commitId }
+      }),
+      symbols_ = symbols.map(e => {
+        if (e.symId === null && incomingSymbolsDict[e.symbol]) {
+          return {
+            ...e,
+            symId: incomingSymbolsDict[e.symbol],
+          }
+        }
+        return e
+      })
+
+    return {
+      ...content,
+      discussIds: discussIds_,
+      symbols: symbols_,
+    }
   }
 }
 

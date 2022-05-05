@@ -81,7 +81,7 @@
     "@types/cookie": "^0.4.1",
     "@types/jest": "^27.4.0",
     "@types/micro-cors": "^0.1.1",
-    "@types/node": "^16.11.11",
+    "@types/node": "^17.0.21",
     "@types/prismjs": "^1.16.6",
     "@types/react": "^17.0.37",
     "@types/react-dom": "^17.0.11",
@@ -111,7 +111,7 @@
     "style-loader": "^3.3.1",
     "tailwindcss": "^3.0.23",
     "tsconfig-paths-webpack-plugin": "^3.5.1",
-    "typescript": "^4.5.4"
+    "typescript": "^4.6.2"
   },
   "private": true,
   "scripts": {
