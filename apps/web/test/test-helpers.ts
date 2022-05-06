@@ -177,7 +177,7 @@ class TestHelper {
             user: { connect: { id: userId } },
             fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
             domain,
-            meta,
+            meta: meta as object,
             content,
           },
         })

@@ -1,7 +1,9 @@
-import { NoteDraft } from '@prisma/client'
+import { NoteDraft, PrismaPromise, SymType } from '@prisma/client'
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
+import { LinkService } from './link-model'
+import { SymModel } from './sym-model'
 
 class NoteDraftModel {
   async create(
@@ -9,26 +11,40 @@ class NoteDraftModel {
     symbol: string,
     userId: string,
     { fromDocId, domain, meta, content }: NoteDraftInput,
-  ) {
-    const { fromDocId, domain, meta, content } = draftInput
+  ): Promise<NoteDraftParsed> {
+    // const { fromDocId, domain, meta, content } = draftInput
     // TODO: access branchId from context
-    const branchId = ''
-    const { type } = SymModel.parse(symbol)
-    if (type === SymType.URL) {
-      throw new Error('createNoteDraft not allow to create from url')
+    const prismaBranch = await prisma.branch.findUnique({
+      where: { name: branch },
+      select: { id: true },
+    })
+    if (prismaBranch === null) {
+      throw new Error('[createNoteDraft] branch does not exist')
     }
+
+    const { type } = SymModel.parse(symbol)
+    // if its type is url, get or create link after checking
+    const linkParsed =
+      type === SymType.URL ? LinkService.getOrCreateLink({ url: symbol }) : null
+    // if (type === SymType.URL) {
+    //   const link = LinkService.getOrCreateLink({ url: symbol })
+    // }
+    // if (type === SymType.TICKER)
+
     const fromDoc = fromDocId
       ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } })
       : null
+
     if (fromDocId && fromDoc === null) {
       throw new Error('[createNoteDraft] fromDocId && fromDoc === null')
     }
+
     const draft = await prisma.noteDraft.create({
       data: {
         symbol,
-        branch: { connect: { id: branchId } },
+        branch: { connect: { id: prismaBranch.id } },
         sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-        fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
+        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
         user: { connect: { id: userId } },
         domain,
         meta,
@@ -41,17 +57,18 @@ class NoteDraftModel {
       meta: draft.meta as unknown as NoteDocMeta,
       content: draft.content as unknown as NoteDocContent,
     }
-    return prisma.noteDraft.create({
-      data: {
-        symbol: symbol,
-        branch: { connect: { name: branch } },
-        user: { connect: { id: userId } },
-        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
-        domain: domain,
-        meta,
-        content,
-      },
+  }
+
+  async drop(id: string): Promise<NoteDraftParsed> {
+    const draft = await prisma.noteDraft.update({
+      data: { status: 'DROP' },
+      where: { id },
     })
+    return {
+      ...draft,
+      meta: draft.meta as unknown as NoteDocMeta,
+      content: draft.content as unknown as NoteDocContent,
+    }
   }
 
   /**

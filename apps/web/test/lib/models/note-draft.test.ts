@@ -161,41 +161,24 @@ describe('noteDraftModel.create()', () => {
       status: noteDraft.status,
     }).toMatchInlineSnapshot()
   })
-  // use implementation in resolver
-  // async noteDraft(_parent, { id, symbol, url }, { req }, _info) {
-  //   const { userId } = await isAuthenticated(req)
-  //   let draft: (NoteDraft & { note: Note | null }) | null = null
+})
 
-  //   if (id) {
-  //     draft = await prisma.noteDraft.findUnique({
-  //       where: { id },
-  //       include: { note: true },
-  //     })
-  //   }
-  //   if (symbol) {
-  //     // TODO: use findMany and check there is only one element in the array
-  //     draft = await prisma.noteDraft.findFirst({
-  //       where: { userId, symbol, status: 'EDIT' },
-  //       include: { note: true },
-  //     })
-  //   }
-  //   if (url) {
-  //     // TODO: use findMany and check there is only one element in the array
-  //     draft = await prisma.noteDraft.findFirst({
-  //       where: { userId, symbol: url, status: 'EDIT' },
-  //       include: { note: true },
-  //     })
-  //   }
+it('noteDraftModel.update()', async () => {
+  await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
+  // update: domain, meta (duplicatedSymbols, keywords...), content, discusses, fromDocId
+  const draftId = mockNoteDrafts[0].id
+  const update = {
+    domain: 'new_domain',
+    meta: { duplicatedSymbols: ['duplicate-1'], keywords: ['key-1', 'key-2'] },
+    content,
+    discuss,
+    fromDocId,
+  }
+  const result = await noteDraftModel.update()
+})
 
-  //   if (draft) {
-  //     return {
-  //       ...draft,
-  //       noteId: draft.note?.id,
-  //       meta: draft.meta as unknown as NoteMeta,
-  //       // TODO
-  //       content: { blocks: [], symbolIdDict: {}, diff: {} },
-  //     }
-  //   }
-  //   return null
-  // },
+it('noteDraftModel.drop()', async () => {
+  await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
+  const result = await noteDraftModel.drop(mockNoteDrafts[0].id)
+  expect(result.status).toMatchInlineSnapshot()
 })

@@ -10,9 +10,6 @@ type Query {
 
   # notesByAuthor(authorId: ID!): [Note!]!
 
-  # need to modify the input (confirm the prisma)
-  noteEmojis(noteId: ID!): [NoteEmoji!]!
-
   discuss(id: ID!): Discuss
 
   discussEmojis(discussId: ID!): [DiscussEmoji!]!
@@ -38,17 +35,11 @@ type Query {
   # NEXT: Priority, will be used for merge request
   myVotes(pollId: ID!): [Vote!]!
 
+  # need to modify the input (confirm the prisma)
+  noteEmojis(noteId: ID!): [NoteEmoji!]!
+
   # NEXT: Priority, same as Votes
   poll(id: ID!): Poll
-
-  # NEXT:
-  searchAuthor(term: String!): [SearchHit!]!
-
-  # fuzzy search discuss title by given term
-  searchDiscuss(term: String!): [SearchHit!]!
-
-  # fuzzy search symbol name, if 'type' not given, search both ticker & topic
-  searchSymbol(term: String!, type: SymType): [SearchHit!]!
 
   # NEXT:
   rate(id: ID!): Rate
@@ -59,14 +50,31 @@ type Query {
   # NEXT:
   ratesBySource(linkId: ID!): [Rate!]!
 
+  # NEXT:
+  searchAuthor(term: String!): [SearchHit!]!
+
+  # fuzzy search discuss title by given term
+  searchDiscuss(term: String!): [SearchHit!]!
+
+  # fuzzy search symbol name, if 'type' not given, search both ticker & topic
+  searchSymbol(term: String!, type: SymType): [SearchHit!]!
+
   #-----New-----
+
+  # to know all latest commit docs
+  myCommits: [Commit!]!
+
+  # get user's all drafts for draft-sidebar
+  # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
+  myNoteDraftEntries: [NoteDraftEntry!]!
+
   # throws error if not found
   note(id: ID!): Note!
 
   # get noteDoc and throws error if not found
   noteDoc(id: ID!): NoteDoc!
 
-  # get all notes for homepage
+  # get all notes with merged docs for homepage
   noteDocsJustMerged: [NoteDoc!]!
 
   # get all candidate docs for verdict
@@ -77,15 +85,6 @@ type Query {
 
   # get all docs from note pull request records including candidates (like Github pr history)
   noteHistory(noteId: ID!, status: NoteDocStatus): [NoteDocEntry!]!
-
-  # myNoteDocs(): [NoteDoc!]!
-
-  # to know all latest commit docs
-  myCommits: [Commit!]!
-
-  # get user's all drafts for draft-sidebar
-  # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
-  myNoteDraftEntries: [NoteDraftEntry!]!
 
   # search note by sym or title, using domain for filtering
   searchNote(symbol: String, title: String, domain: String): [Note!]!
@@ -220,6 +219,10 @@ type Mutation {
   sessionLogout: Boolean!
 
   #-------- New -------------
+
+  # commit must be created first -> createCommit ->
+  commitNoteDrafts(draftIds: [ID!]!): NoteDraftCommitResponse!
+
   # not sure about the type of meta, which is for creating from existing note
   createNoteDraft(symbol: String!, draftInput: NoteDraftInput!): NoteDraft!
 
@@ -233,8 +236,6 @@ type Mutation {
 
   dropNoteDraft(id: ID!): NoteDraftDropResponse!
 
-  # commit must be created first -> createCommit ->
-  commitNoteDrafts(draftIds: [ID!]!): NoteDraftCommitResponse!
   #---------------End------------------
 
   # --- NEXT ---
@@ -353,6 +354,13 @@ type DiscussPostEmojiLike {
   updatedAt: DateTime!
 }
 
+type Link {
+  id: ID!
+  url: String!
+  authorId: String
+  # scraped: Scraped!
+}
+
 type NoteEmoji {
   id: ID!
   code: EmojiCode!
@@ -370,45 +378,6 @@ type NoteEmojiLike {
   noteEmojiId: Int!
   liked: Boolean!
   updatedAt: DateTime!
-}
-
-type Link {
-  id: ID!
-  url: String!
-  authorId: String
-  # scraped: Scraped!
-}
-
-type Scraped {
-  authorName: String
-  date: String
-  description: String
-  title: String
-  keywords: [String!]
-  tickers: [String!]
-}
-
-type Rate {
-  id: ID!
-  userId: String!
-  authorId: String
-  linkId: String
-  symId: String!
-  choice: RateChoice!
-  # body: ShotBody
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type RateBody {
-  comment: String
-  quote: String
-}
-
-type Sym {
-  id: ID!
-  type: SymType!
-  symbol: String! # this is mutable
 }
 
 type Poll {
@@ -446,9 +415,27 @@ type PollCount {
   # failedMsg: String
 }
 
+type Rate {
+  id: ID!
+  userId: String!
+  authorId: String
+  linkId: String
+  symId: String!
+  choice: RateChoice!
+  # body: ShotBody
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type SearchHit {
   id: String!
   str: String!
+}
+
+type Sym {
+  id: ID!
+  type: SymType!
+  symbol: String! # this is mutable
 }
 
 type User {
@@ -484,6 +471,27 @@ type UpsertNoteEmojiLikeResult {
 
 #-------New-------
 
+type Block {
+  uid: ID!
+  str: String!
+  parentUid: String
+  docTitle: String
+}
+
+type BlockUid_DiscussId {
+  blockUid: String!
+  discussId: String!
+  commitId: String
+}
+
+type Commit {
+  id: String!
+  userId: String!
+  drafts: [NoteDraft!]!
+  docs: [NoteDoc!]!
+  updatedAt: DateTime!
+}
+
 type Note {
   id: ID!
   sym: Sym!
@@ -506,53 +514,16 @@ type NoteDoc {
   updatedAt: DateTime!
 }
 
-type NoteDraft {
-  id: ID!
-  # noteId: String  # not using for creating a draft and not this field in db
-  userId: String!
-  commitId: String
-  fromDocId: String
-  domain: String
-  symbol: String
-  meta: NoteDocMeta # not sure about this type
-  content: NoteDocContent!
-  updatedAt: DateTime!
-  status: NoteDraftStatus!
-}
-
-type NoteDraftEntry {
-  id: ID!
-}
-
-type NoteDraftDropResponse {
-  response: String!
-}
-
-type NoteDraftCommitResponse {
-  commitId: String!
-  response: String!
-}
-
-# ----------------Modified---------------
-type Block {
-  uid: ID!
-  str: String!
-  parentUid: String
-  docTitle: String
-}
-
-type BlockUid_DiscussId {
-  blockUid: String!
-  discussId: String!
-  commitId: String
-}
-
 type NoteDocContent {
   discussIds: [BlockUid_DiscussId!]!
   diff: JSON
   symbolIdDict: JSON
   blocks: [Block!]!
   # a symbol-noteId map, so later the cahnge of symbol name won't affect
+}
+
+type NoteDocEntry {
+  id: ID!
 }
 
 type NoteDocMeta {
@@ -570,16 +541,31 @@ type NoteDocMetaWebpage {
   tickers: [String] # tickers mentioned in the webpage content
 }
 
-type NoteDocEntry {
+type NoteDraft {
   id: ID!
+  # noteId: String  # not using for creating a draft and not this field in db
+  userId: String!
+  commitId: String
+  fromDocId: String
+  domain: String
+  symbol: String
+  meta: NoteDocMeta # not sure about this type
+  content: NoteDocContent!
+  updatedAt: DateTime!
+  status: NoteDraftStatus!
 }
 
-type Commit {
-  id: String!
-  userId: String!
-  drafts: [NoteDraft!]!
-  docs: [NoteDoc!]!
-  updatedAt: DateTime!
+type NoteDraftCommitResponse {
+  commitId: String!
+  docs: [NoteDoc!]! # corresponding to the noteDraft, for the purpose of merge status display
+}
+
+type NoteDraftDropResponse {
+  response: String!
+}
+
+type NoteDraftEntry {
+  id: ID!
 }
 
 # ------------------End-------------------
@@ -631,12 +617,36 @@ input VoteInput {
 
 #------New-------
 
+input BlockInput {
+  uid: ID!
+  str: String!
+  parentUid: String
+  docTitle: String
+}
+
+input BlockUid_DiscussIdInput {
+  blockUid: String!
+  discussId: String!
+  commitId: String
+}
+
+input CommitInput {
+  noteDraftInputs: [NoteDraftInput!]!
+}
+
 input NoteDraftInput {
   # noteId: String   # not using for creating a draft and not this field in db
   fromDocId: String
   domain: String!
   meta: NoteDocMetaInput!
   content: NoteDocContentInput!
+}
+
+input NoteDocContentInput {
+  discussIds: [BlockUid_DiscussIdInput!]!
+  diff: JSON
+  symbolIdMap: JSON
+  blocks: [BlockInput!]!
 }
 
 # similar to NoteDocMeta
@@ -656,30 +666,6 @@ input NoteDocMetaWebpageInput {
   tickers: [String]! # tickers mentioned in the webpage content
 }
 
-input BlockUid_DiscussIdInput {
-  blockUid: String!
-  discussId: String!
-  commitId: String
-}
-
-input NoteDocContentInput {
-  discussIds: [BlockUid_DiscussIdInput!]!
-  diff: JSON
-  symbolIdMap: JSON
-  blocks: [BlockInput!]!
-}
-
-input BlockInput {
-  uid: ID!
-  str: String!
-  parentUid: String
-  docTitle: String
-}
-
-# -----------Modified--------------
-input CommitInput {
-  noteDraftInputs: [NoteDraftInput!]!
-}
 #---------------End-----------------
 
 # ------ NEXT ------
@@ -738,14 +724,6 @@ enum PollStatus {
   JUDGE
   CLOSE_SUCCESS
   CLOSE_FAIL
-}
-
-enum PollFailReason {
-  MIN_VOTES
-  MIN_JUDGMENTS
-  MAJOR_VERDICT
-  VERDICT_AS_FAIL
-  OTHER
 }
 
 enum RateChoice {
