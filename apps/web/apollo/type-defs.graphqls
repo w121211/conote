@@ -7,8 +7,6 @@ type Query {
   # search by id or name, if not found return null
   author(id: ID, name: String): Author
 
-  bullet(id: ID!): Bullet
-
   # search by id, symbol, or url, if id or symbol not found return nulll, if url not found will try to fetch and create a new note
   # notes(branchId: ID, symbol: String, url: String): Note
 
@@ -228,7 +226,7 @@ type Mutation {
   createVote(pollId: ID!, data: VoteInput!): Vote!
 
   # csrf token not support yet
-  sessionLogin(idToken: String!, csrfToken: String): User!
+  sessionLogin(idToken: String!): User!
 
   sessionLogout: Boolean!
 
@@ -322,13 +320,6 @@ type AuthorMeta {
 type AuthorMetaSite {
   name: String!
   url: String!
-}
-
-type Bullet {
-  id: ID!
-  # noteId: String!
-  # createdAt: DateTime!
-  # updatedAt: DateTime!
 }
 
 # type BulletNodeChange {
