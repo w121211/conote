@@ -104,7 +104,7 @@ export const mockNoteDrafts: Omit<
     updatedAt: new Date(),
   },
   {
-    id: 'mock-draft-3_got-link',
+    id: 'mock-draft-3_got-linkId',
     symbol: mockSyms[3].symbol,
     userId: mockUsers[1].id,
 

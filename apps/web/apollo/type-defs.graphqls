@@ -658,7 +658,7 @@ type BlockUid_DiscussId {
 }
 
 type NoteDocContent {
-  discussIds: [BlockUid_DiscussId]!
+  discussIds: [BlockUid_DiscussId!]!
   diff: JSON
   symbolIdDict: JSON
   blocks: [Block!]!
@@ -880,16 +880,16 @@ input NoteDocMetaInput {
   keywords: [String]! # note keywords
   redirectFroms: [String]! # used when duplicate symbol exists
   redirectTo: String
-  # webpage: NoteDocMetaWebpageInput
+  webpage: NoteDocMetaWebpageInput
 }
 
 # data extracted from the webpage
-# input NoteDocMetaWebpageInput {
-#   authors: [String]!
-#   title: String
-#   publishedAt: DateTime # when the webpage content publish at
-#   tickers: [String]! # tickers mentioned in the webpage content
-# }
+input NoteDocMetaWebpageInput {
+  authors: [String]!
+  title: String
+  publishedAt: DateTime # when the webpage content publish at
+  tickers: [String]! # tickers mentioned in the webpage content
+}
 
 input BlockUid_DiscussIdInput {
   blockUid: String!
@@ -898,7 +898,7 @@ input BlockUid_DiscussIdInput {
 }
 
 input NoteDocContentInput {
-  discussIds: [BlockUid_DiscussIdInput]!
+  discussIds: [BlockUid_DiscussIdInput!]!
   diff: JSON
   symbolIdMap: JSON
   blocks: [BlockInput!]!

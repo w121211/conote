@@ -42,7 +42,8 @@ afterEach(async () => {
  * Cases
  * - [] create without link and symId
  * - [] create without link but with symId and fromDoc
- * - [] create by link
+ * - [] create by link if the link exists
+ * - [] create by link if the link does not exist
  * - [] update (save)
  * - [] drop
  */
@@ -82,9 +83,8 @@ describe('noteDraftModel.create()', () => {
 
   it('create without link but with symId and fromDoc', async () => {
     await testHelper.createCommit(prisma)
-    const { symbol, userId, domain, meta: meta_, content } = mockNoteDrafts[0]
+    const { symbol, userId, domain, meta, content } = mockNoteDrafts[0]
     const fromDocId = mockNoteDocs[1].id
-    const meta = meta_ as unknown as NoteDocMetaInput
     const noteDraft = await noteDraftModel.create(
       mockBranches[0].name,
       symbol,
@@ -92,7 +92,7 @@ describe('noteDraftModel.create()', () => {
       {
         fromDocId,
         domain,
-        meta,
+        meta: meta as unknown as NoteDocMetaInput,
         content,
       },
     )
@@ -108,22 +108,23 @@ describe('noteDraftModel.create()', () => {
     }).toMatchInlineSnapshot()
   })
 
-  it('create by link', async () => {
-    await testHelper.createCommit(prisma)
-    const { symbol, userId, domain, meta: meta_, content } = mockNoteDrafts[0]
-    const fromDocId = mockNoteDocs[1].id
-    const meta = meta_ as unknown as NoteDocMetaInput
+  it('create by link if the link exists', async () => {
+    // await testHelper.createCommit(prisma)
+    const { symbol, userId, linkId, domain, meta, content } = mockNoteDrafts[3]
+    await prisma.link.create({ data: { id: linkId!, url: symbol, domain } })
     const noteDraft = await noteDraftModel.create(
       mockBranches[0].name,
       symbol,
       userId,
       {
-        fromDocId,
         domain,
-        meta,
+        meta: meta as unknown as NoteDocMetaInput,
         content,
       },
     )
+    expect(
+      (await prisma.link.findUnique({ where: { id: linkId! } }))?.url,
+    ).toMatchInlineSnapshot()
     expect({
       branchId: noteDraft.branchId,
       symId: noteDraft.symId,
@@ -132,10 +133,34 @@ describe('noteDraftModel.create()', () => {
     expect({
       domain: noteDraft.domain,
       status: noteDraft.status,
-      fromDocId: noteDraft.fromDocId,
     }).toMatchInlineSnapshot()
   })
 
+  it('create by link if the link does not exist', async () => {
+    const { symbol, userId, linkId, domain, meta, content } = mockNoteDrafts[3]
+    const noteDraft = await noteDraftModel.create(
+      mockBranches[0].name,
+      symbol,
+      userId,
+      {
+        domain,
+        meta: meta as unknown as NoteDocMetaInput,
+        content,
+      },
+    )
+    expect(
+      (await prisma.link.findUnique({ where: { id: linkId! } }))?.url,
+    ).toMatchInlineSnapshot()
+    expect({
+      branchId: noteDraft.branchId,
+      symId: noteDraft.symId,
+      symbol: noteDraft.symbol,
+    }).toMatchInlineSnapshot()
+    expect({
+      domain: noteDraft.domain,
+      status: noteDraft.status,
+    }).toMatchInlineSnapshot()
+  })
   // use implementation in resolver
   // async noteDraft(_parent, { id, symbol, url }, { req }, _info) {
   //   const { userId } = await isAuthenticated(req)

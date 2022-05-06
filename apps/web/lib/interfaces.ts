@@ -54,7 +54,6 @@ export type NoteDocMeta = {
 export type NoteDocContent = {
   discussIds: BlockUid_DiscussId[]
   symbols: Symbol_SymId[]
-
   diff?: any
   blocks: Block[]
 }
