@@ -82,12 +82,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return await AuthorModel.get(id ?? undefined, name ?? undefined)
   },
 
-  async bullet(_parent, { id }, _context, _info) {
-    return await prisma.bullet.findUnique({
-      where: { id },
-    })
-  },
-
   async discuss(_parent, { id }, _context, _info) {
     const discuss = await prisma.discuss.findUnique({
       where: { id },
@@ -1087,8 +1081,8 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return toStringId(vote)
   },
 
-  async sessionLogin(_parent, { idToken, csrfToken }, { req, res }, _info) {
-    const claims = await sessionLogin(req, res, idToken, csrfToken)
+  async sessionLogin(_parent, { idToken }, { req, res }, _info) {
+    const claims = await sessionLogin(req, res, idToken)
     if (claims.email) {
       const user = await getOrCreateUser(claims.uid, claims.email)
       return user

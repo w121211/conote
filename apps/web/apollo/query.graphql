@@ -13,48 +13,6 @@ fragment author on Author {
   }
 }
 
-# fragment bullet on Bullet {
-#   id
-#   # noteStateId
-#   # createdAt
-#   # updatedAt
-# }
-
-# fragment bulletEmoji on BulletEmoji {
-#   __typename
-#   id
-#   code
-#   count {
-#     ...bulletEmojiCount
-#   }
-# }
-
-# fragment bulletEmojiCount on BulletEmojiCount {
-#   __typename
-#   id
-#   nUps
-#   nDowns
-# }
-
-# fragment bulletEmojiLike on BulletEmojiLike {
-#   __typename
-#   id
-#   bulletEmojiId
-#   choice
-#   updatedAt
-# }
-# # DELETE
-# # fragment bulletNodeChange on BulletNodeChange {
-# #   __typename
-# #   type
-# #   cid
-# #   toParentCid
-# #   toIndex
-# #   data {
-# #     ...bullet
-# #   }
-# # }
-
 # # fragment note on Note {
 # #   __typename
 # #   id
