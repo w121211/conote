@@ -120,7 +120,7 @@ class TestHelper {
         data: mockCommits[0],
       })
     await prisma.noteDoc.create({
-      data: mockNoteDocs[1],
+      data: { ...mockNoteDocs[1], meta: mockNoteDocs[1].meta as object },
     })
   }
 
