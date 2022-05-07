@@ -1,8 +1,10 @@
 import { NoteDraft, PrismaPromise, SymType } from '@prisma/client'
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
+import { getFontDefinitionFromManifest } from 'next/dist/server/font-utils'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
 import { LinkService } from './link-model'
+import { NoteDocMetaModel, noteDocModel } from './note-doc-model'
 import { SymModel } from './sym-model'
 
 class NoteDraftModel {
@@ -56,6 +58,39 @@ class NoteDraftModel {
       ...draft,
       meta: draft.meta as unknown as NoteDocMeta,
       content: draft.content as unknown as NoteDocContent,
+    }
+  }
+
+  async createByLink(
+    branch: string,
+    linkId: string,
+    userId: string,
+    { fromDocId, domain, meta, content }: NoteDraftInput,
+  ) {}
+
+  async update(
+    draftId: string,
+    { fromDocId, domain, meta, content }: NoteDraftInput,
+  ): Promise<NoteDraftParsed> {
+    const draft = await prisma.noteDraft.findUnique({ where: { id: draftId } })
+    if (draft === null) {
+      throw new Error('NoteDraft not found.')
+    }
+
+    const metaInJson = NoteDocMetaModel.toJSON(meta as NoteDocMeta)
+    const updatedDraft = await prisma.noteDraft.update({
+      data: {
+        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+        domain: domain,
+        meta: metaInJson,
+        content,
+      },
+      where: { id: draftId },
+    })
+    return {
+      ...updatedDraft,
+      meta: NoteDocMetaModel.fromJSON(updatedDraft.meta),
+      content: updatedDraft.content as unknown as NoteDocContent,
     }
   }
 

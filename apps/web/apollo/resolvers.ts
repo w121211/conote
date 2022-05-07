@@ -651,7 +651,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       emoji: {
         ...emoji,
         id: emoji.id.toString(),
-        // count: toStringId(count),
+        count: toStringId(count),
       },
       like: toStringId(like),
     }))

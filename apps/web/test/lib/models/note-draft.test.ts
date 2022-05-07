@@ -5,6 +5,7 @@ import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
 import {
   CommitInput as GQLCommitInput,
   NoteDocMetaInput,
+  NoteDraftInput,
 } from 'graphql-let/__generated__/__types__'
 import { Bullet } from '../../../components/bullet/bullet'
 import prisma from '../../../lib/prisma'
@@ -20,6 +21,8 @@ import { mockNoteDrafts } from '../../__mocks__/mock-note-draft'
 import CreateSymbolForm from '../../../components/rate-form/create-symbol-form'
 import { mockSyms } from '../../__mocks__/mock-sym'
 import { mockNoteDocs } from '../../__mocks__/mock-note-doc'
+import { mockDiscusses } from '../../__mocks__/mock-discuss'
+import { mockBlocks } from '../../../components/block-editor/test/__mocks__/mock-block'
 
 beforeEach(async () => {
   console.log('Writing required data into database')
@@ -165,16 +168,27 @@ describe('noteDraftModel.create()', () => {
 
 it('noteDraftModel.update()', async () => {
   await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-  // update: domain, meta (duplicatedSymbols, keywords...), content, discusses, fromDocId
+  // update: domain, meta (duplicatedSymbols, keywords...), content, fromDocId
   const draftId = mockNoteDrafts[0].id
-  const update = {
+  const update: NoteDraftInput = {
     domain: 'new_domain',
-    meta: { duplicatedSymbols: ['duplicate-1'], keywords: ['key-1', 'key-2'] },
-    content,
-    discuss,
-    fromDocId,
+    meta: {
+      duplicatedSymbols: ['duplicate-1'],
+      keywords: ['key-1', 'key-2'],
+      redirectFroms: [],
+    },
+    content: {
+      discussIds: [{ blockUid: 'uid-0', discussId: mockDiscusses[0].id }],
+      symbolIdMap: [],
+      blocks: mockBlocks,
+    },
+    fromDocId: 'testdoc0',
   }
-  const result = await noteDraftModel.update()
+  const result = await noteDraftModel.update(draftId, update)
+  expect(result.domain).toMatchInlineSnapshot()
+  expect(result.meta).toMatchInlineSnapshot()
+  expect(result.content).toMatchInlineSnapshot()
+  expect(result.fromDocId).toMatchInlineSnapshot()
 })
 
 it('noteDraftModel.drop()', async () => {

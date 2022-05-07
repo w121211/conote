@@ -1,4 +1,5 @@
 import { NoteDoc, Prisma, PrismaPromise } from '@prisma/client'
+import { NoteDocMetaWebpageFragmentDoc } from '../../apollo/query.graphql'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
 
@@ -57,6 +58,25 @@ function mergePeriodical() {
 export class NoteDocMetaModel {
   static fromJSON(json: Prisma.JsonValue): NoteDocMeta {
     // TODO
+    const parsed = json as NoteDocMeta
+    return {
+      duplicatedSymbols: JSON.parse(),
+
+      // note keywords
+      keywords?: string[]
+    
+      // used when duplicate symbol exists
+      redirectFroms?: string[]
+      redirectTo?: string
+      
+      // fields of webpage is not allowed to change
+      webpage?: {
+        authors?: string[]
+        title?: string
+        publishedAt?: Date // when the webpage content publish at
+        tickers?: string[] // tickers mentioned in the webpage content
+      }
+    }
   }
 
   /**
@@ -64,6 +84,13 @@ export class NoteDocMetaModel {
    */
   static toJSON(meta: NoteDocMeta): Prisma.InputJsonValue {
     // TODO
+    return {
+      ...meta,
+      webpage: {
+        ...meta.webpage,
+        publishedAt: meta.webpage?.publishedAt?.toISOString(),
+      },
+    }
   }
 }
 
