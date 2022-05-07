@@ -11,6 +11,7 @@ import { mockSyms } from './__mocks__/mock-sym'
 import { mockNotes } from './__mocks__/mock-note'
 import { mockCommits } from './__mocks__/mock-commit'
 import { mockNoteDocs } from './__mocks__/mock-note-doc'
+import { NoteDocMetaModel, noteDocModel } from '../lib/models/note-doc-model'
 
 // fake incremental id
 let i = 0
@@ -120,7 +121,10 @@ class TestHelper {
         data: mockCommits[0],
       })
     await prisma.noteDoc.create({
-      data: { ...mockNoteDocs[1], meta: mockNoteDocs[1].meta as object },
+      data: {
+        ...mockNoteDocs[1],
+        meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
+      },
     })
   }
 

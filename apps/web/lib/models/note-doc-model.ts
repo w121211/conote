@@ -1,5 +1,5 @@
-import { NoteDoc, PrismaPromise } from '@prisma/client'
-import { NoteDocContent, NoteDraftParsed } from '../interfaces'
+import { NoteDoc, Prisma, PrismaPromise } from '@prisma/client'
+import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
 
 //
@@ -46,13 +46,26 @@ function mergePeriodical() {
 }
 
 //
-// Model
+// Models
 //
 //
 //
 //
 //
 //
+
+export class NoteDocMetaModel {
+  static fromJSON(json: Prisma.JsonValue): NoteDocMeta {
+    // TODO
+  }
+
+  /**
+   * @returns JSON, cannot return native JSON due to prisma's bug: https://github.com/prisma/prisma/issues/9247
+   */
+  static toJSON(meta: NoteDocMeta): Prisma.InputJsonValue {
+    // TODO
+  }
+}
 
 class NoteDocModel {
   /**
@@ -95,7 +108,7 @@ class NoteDocModel {
           },
         },
         domain,
-        meta,
+        meta: NoteDocMetaModel.toJSON(meta),
         content: content_,
       },
     })

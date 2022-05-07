@@ -555,13 +555,23 @@ mutation UpdateDiscuss($id: ID!, $data: DiscussInput!) {
   }
 }
 
-mutation UpsertDiscussEmojiLike($discussEmojiId: ID!, $liked: Boolean!) {
-  upsertDiscussEmojiLike(discussEmojiId: $discussEmojiId, liked: $liked) {
+mutation UpsertDiscussEmojiLike(
+  $liked: Boolean!
+  $emojiId: Int
+  $emojiCode: EmojiCode
+  $discussId: String
+) {
+  upsertDiscussEmojiLike(
+    liked: $liked
+    emojiId: $emojiId
+    emojiCode: $emojiCode
+    discussId: $discussId
+  ) {
+    emoji {
+      ...discussEmoji
+    }
     like {
       ...discussEmojiLike
-    }
-    count {
-      ...discussEmojiCount
     }
   }
 }
@@ -579,29 +589,43 @@ mutation UpdateDiscussPost($id: ID!, $data: DiscussPostInput!) {
 }
 
 mutation UpsertDiscussPostEmojiLike(
-  $discussPostEmojiId: ID!
   $liked: Boolean!
+  $emojiId: Int
+  $emojiCode: EmojiCode
+  $discussPostId: Int
 ) {
   upsertDiscussPostEmojiLike(
-    discussPostEmojiId: $discussPostEmojiId
     liked: $liked
+    emojiId: $emojiId
+    emojiCode: $emojiCode
+    discussPostId: $discussPostId
   ) {
+    emoji {
+      ...discussPostEmoji
+    }
     like {
       ...discussPostEmojiLike
-    }
-    count {
-      ...discussPostEmojiCount
     }
   }
 }
 
-mutation UpsertNoteEmojiLike($noteEmojiId: ID!, $liked: Boolean!) {
-  upsertNoteEmojiLike(noteEmojiId: $noteEmojiId, liked: $liked) {
+mutation UpsertNoteEmojiLike(
+  $liked: Boolean!
+  $emojiId: Int
+  $emojiCode: EmojiCode
+  $noteId: String
+) {
+  upsertNoteEmojiLike(
+    liked: $liked
+    emojiId: $emojiId
+    emojiCode: $emojiCode
+    noteId: $noteId
+  ) {
+    emoji {
+      ...noteEmoji
+    }
     like {
       ...noteEmojiLike
-    }
-    count {
-      ...noteEmojiCount
     }
   }
 }
