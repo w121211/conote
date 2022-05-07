@@ -1,10 +1,10 @@
 /**
  * yarn run test-lib sym.test
  */
-import { SymModel } from '../../../lib/models/sym-model'
+import { symModel } from '../../../lib/models/sym-model'
 
 it('SymModel.getAll()', async () => {
-  const symbols = await SymModel.getAll()
+  const symbols = await symModel.getAll()
   expect(symbols.map(e => e.symbol)).toEqual([
     '$AAA',
     '$ABB',

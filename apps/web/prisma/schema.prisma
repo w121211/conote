@@ -16,54 +16,28 @@ model Author {
   meta      Json     @default("{}")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  links     Link[]
   rates     Rate[]
 }
 
-model Bullet {
-  id        String        @id @default(cuid())
-  docId     String
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  doc       NoteDoc       @relation(fields: [docId], references: [id])
-  emojis    BulletEmoji[]
+model Branch {
+  id         String      @id @default(cuid())
+  name       String      @unique
+  notes      Note[]
+  noteDrafts NoteDraft[]
+  noteDocs   NoteDoc[]
 }
 
-model BulletEmoji {
-  id        String            @id @default(cuid())
-  bulletId  String
-  code      EmojiCode
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  bullet    Bullet            @relation(fields: [bulletId], references: [id])
-  count     BulletEmojiCount?
-  likes     BulletEmojiLike[]
-
-  @@unique([bulletId, code])
-}
-
-model BulletEmojiCount {
-  id            Int         @id @default(autoincrement())
-  bulletEmojiId String      @unique
-  nViews        Int         @default(0)
-  nUps          Int         @default(0)
-  nDowns        Int         @default(0)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  bulletEmoji   BulletEmoji @relation(fields: [bulletEmojiId], references: [id])
-}
-
-model BulletEmojiLike {
-  id            Int         @id @default(autoincrement())
-  userId        String
-  bulletEmojiId String
-  choice        LikeChoice
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  bulletEmoji   BulletEmoji @relation(fields: [bulletEmojiId], references: [id])
-  user          User        @relation(fields: [userId], references: [id])
-
-  @@unique([userId, bulletEmojiId])
+//
+// TODO: This model need to be modified since the definition is changed in Note and Draft model
+//
+model Commit {
+  id         String      @id @default(cuid())
+  userId     String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id])
+  noteDrafts NoteDraft[]
+  noteDocs   NoteDoc[]
 }
 
 model Discuss {
@@ -174,6 +148,77 @@ model DiscussPostEmojiLike {
   @@unique([userId, discussPostEmojiId])
 }
 
+model Note {
+  id        String      @id @default(cuid())
+  branchId  String
+  symId     String
+  linkId    String?     @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  link      Link?       @relation(fields: [linkId], references: [id])
+  sym       Sym         @relation(fields: [symId], references: [id])
+  branch    Branch      @relation(fields: [branchId], references: [id])
+  discusses Discuss[]
+  emojis    NoteEmoji[]
+  docs      NoteDoc[]
+  drafts    NoteDraft[]
+
+  @@unique([branchId, symId])
+}
+
+model NoteDoc {
+  id         String        @id @default(cuid())
+  branchId   String
+  symId      String
+  commitId   String
+  fromDocId  String?       @unique
+  userId     String
+  status     NoteDocStatus @default(CANDIDATE)
+  domain     String
+  meta       Json          @default("{}")
+  content    Json
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  branch     Branch        @relation(fields: [branchId], references: [id])
+  commit     Commit        @relation(fields: [commitId], references: [id])
+  fromDoc    NoteDoc?      @relation("DocHistory", fields: [fromDocId], references: [id])
+  nextDoc    NoteDoc?      @relation("DocHistory")
+  note       Note          @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym        Sym           @relation(fields: [symId], references: [id])
+  user       User          @relation(fields: [userId], references: [id])
+  noteDrafts NoteDraft[]
+}
+
+model NoteDraft {
+  id String @id @default(cuid())
+
+  // use as an identifier
+  symbol String
+
+  branchId  String
+  symId     String?
+  commitId  String?
+  fromDocId String?
+  linkId    String?
+  userId    String
+  status    NoteDraftStatus @default(EDIT)
+  domain    String
+  meta      Json            @default("{}")
+  content   Json
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  branch    Branch          @relation(fields: [branchId], references: [id])
+  commit    Commit?         @relation(fields: [commitId], references: [id])
+  fromDoc   NoteDoc?        @relation(fields: [fromDocId], references: [id])
+
+  // TODO: consider to remove?
+  link Link? @relation(fields: [linkId], references: [id])
+
+  note Note? @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym  Sym?  @relation(fields: [symId], references: [id])
+  user User  @relation(fields: [userId], references: [id])
+}
+
 model NoteEmoji {
   id        Int             @id @default(autoincrement())
   // branchId  String
@@ -215,108 +260,15 @@ model NoteEmojiLike {
   @@unique([noteEmojiId, userId])
 }
 
-model NoteDraft {
-  id        String      @id @default(cuid())
-  // use as identifier
-  symbol    String
-  branchId  String
-  symId     String?
-  commitId  String?
-  fromDocId String?
-  linkId    String?
-  userId    String
-  status    DraftStatus @default(EDIT)
-  domain    String
-  meta      Json        @default("{}")
-  content   Json
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  branch    Branch      @relation(fields: [branchId], references: [id])
-  commit    Commit?     @relation(fields: [commitId], references: [id])
-  fromDoc   NoteDoc?    @relation(fields: [fromDocId], references: [id])
-
-  // TODO: consider to remove?
-  link Link? @relation(fields: [linkId], references: [id])
-
-  note Note? @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym  Sym?  @relation(fields: [symId], references: [id])
-  user User  @relation(fields: [userId], references: [id])
-}
-
-model Note {
-  id        String      @id @default(cuid())
-  branchId  String
-  symId     String
-  linkId    String?     @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  link      Link?       @relation(fields: [linkId], references: [id])
-  sym       Sym         @relation(fields: [symId], references: [id])
-  branch    Branch      @relation(fields: [branchId], references: [id])
-  discusses Discuss[]
-  emojis    NoteEmoji[]
-  docs      NoteDoc[]
-  drafts    NoteDraft[]
-
-  @@unique([branchId, symId])
-}
-
-model Branch {
-  id      String      @id @default(cuid())
-  name    String      @unique
-  notes   Note[]
-  drafts  NoteDraft[]
-  NoteDoc NoteDoc[]
-}
-
-model NoteDoc {
-  id        String      @id @default(cuid())
-  branchId  String
-  symId     String
-  commitId  String
-  fromDocId String?     @unique
-  userId    String
-  status    DocStatus   @default(CANDIDATE)
-  domain    String
-  meta      Json        @default("{}")
-  content   Json
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  branch    Branch      @relation(fields: [branchId], references: [id])
-  commit    Commit      @relation(fields: [commitId], references: [id])
-  fromDoc   NoteDoc?    @relation("DocHistory", fields: [fromDocId], references: [id])
-  nextDoc   NoteDoc?    @relation("DocHistory")
-  note      Note        @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym       Sym         @relation(fields: [symId], references: [id])
-  user      User        @relation(fields: [userId], references: [id])
-  bullets   Bullet[]
-  drafts    NoteDraft[]
-  // verdictAt DateTime  // isolate the time for status change
-  // verdictPoll Poll @relation 1-1
-  // verdictPollId
-}
-
-// This model need to be modified since the definition is changed in Note and Draft model
-model Commit {
-  id        String      @id @default(cuid())
-  userId    String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  user      User        @relation(fields: [userId], references: [id])
-  drafts    NoteDraft[]
-  docs      NoteDoc[]
-}
-
 model Link {
-  id       String      @id @default(cuid())
-  url      String      @unique
-  domain   String
-  scraped  Json        @default("{}")
-  authorId String?
-  author   Author?     @relation(fields: [authorId], references: [id])
-  rates    Rate[]
-  notes    Note[]
-  drafts   NoteDraft[]
+  id         String      @id @default(cuid())
+  url        String      @unique
+  domain     String
+  scraped    Json        @default("{}")
+  rates      Rate[]
+  sym        Sym?
+  notes      Note[]
+  noteDrafts NoteDraft[]
 }
 
 model Poll {
@@ -359,17 +311,37 @@ model Rate {
   user      User       @relation(fields: [userId], references: [id])
 }
 
-// Why not ‘Symbol’? -> Symbol is preserved in js
+//
+// Q: Why not naming "Symbol"? "Symbol" is a preserved keyword in javascript
+//
 model Sym {
   id        String      @id @default(cuid())
+  linkId    String?     @unique
   type      SymType
   symbol    String      @unique
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  link      Link?       @relation(fields: [linkId], references: [id])
   rates     Rate[]
   drafts    NoteDraft[]
   notes     Note[]
-  NoteDoc   NoteDoc[]
+  noteDocs  NoteDoc[]
+}
+
+model User {
+  id                    String                 @id
+  email                 String                 @unique
+  commits               Commit[]
+  discusses             Discuss[]
+  discussEmojiLikes     DiscussEmojiLike[]
+  discussPosts          DiscussPost[]
+  discussPostEmojiLikes DiscussPostEmojiLike[]
+  noteEmojiLikes        NoteEmojiLike[]
+  noteDocs              NoteDoc[]
+  noteDrafts            NoteDraft[]
+  polls                 Poll[]
+  rates                 Rate[]
+  votes                 Vote[]
 }
 
 model Vote {
@@ -381,23 +353,6 @@ model Vote {
   updatedAt DateTime @updatedAt
   poll      Poll     @relation(fields: [pollId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
-}
-
-model User {
-  id                    String                 @id
-  email                 String                 @unique
-  bulletEmojiLikes      BulletEmojiLike[]
-  noteEmojiLikes        NoteEmojiLike[]
-  docs                  NoteDoc[]
-  commits               Commit[]
-  discusses             Discuss[]
-  discussEmojiLikes     DiscussEmojiLike[]
-  discussPosts          DiscussPost[]
-  discussPostEmojiLikes DiscussPostEmojiLike[]
-  polls                 Poll[]
-  rates                 Rate[]
-  votes                 Vote[]
-  drafts                NoteDraft[]
 }
 
 enum DiscussStatus {
@@ -427,6 +382,18 @@ enum EmojiCode {
 enum LikeChoice {
   UP
   NEUTRAL
+}
+
+enum NoteDocStatus {
+  CANDIDATE
+  MERGE
+  REJECT
+}
+
+enum NoteDraftStatus {
+  EDIT
+  COMMIT
+  DROP
 }
 
 enum PollFailReason {
@@ -460,16 +427,4 @@ enum SymType {
   TICKER
   TOPIC
   URL
-}
-
-enum DraftStatus {
-  EDIT
-  COMMIT
-  DROP
-}
-
-enum DocStatus {
-  CANDIDATE
-  MERGE
-  REJECT
 }

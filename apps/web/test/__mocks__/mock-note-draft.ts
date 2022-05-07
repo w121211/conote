@@ -1,6 +1,7 @@
 import { mockBlocks } from '../../components/block-editor/test/__mocks__/mock-block'
 import { NoteDraftParsed } from '../../lib/interfaces'
 import { mockDiscusses } from './mock-discuss'
+import { mockLinks } from './mock-link'
 import { mockSyms } from './mock-sym'
 import { mockUsers } from './mock-user'
 
@@ -54,7 +55,7 @@ export const mockNoteDrafts: Omit<
     updatedAt: new Date(),
   },
   {
-    id: 'mock-draft-2-from-doc',
+    id: 'mock-draft-2_got-from-doc',
     symbol: mockSyms[2].symbol,
     userId: mockUsers[2].id,
 
@@ -104,13 +105,14 @@ export const mockNoteDrafts: Omit<
     updatedAt: new Date(),
   },
   {
-    id: 'mock-draft-3_got-linkId',
-    symbol: mockSyms[3].symbol,
+    id: 'mock-draft-3_got-linkId-but-no-from-doc',
+
+    // web-note use url as symbol
+    symbol: mockLinks[0].url,
+
     userId: mockUsers[1].id,
-
     fromDocId: null,
-    linkId: mockSyms[3].id,
-
+    linkId: mockLinks[0].id,
     status: 'EDIT',
     domain: 'domain0',
     meta: {},

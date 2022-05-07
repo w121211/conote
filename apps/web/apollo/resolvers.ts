@@ -1,12 +1,9 @@
 import { AuthenticationError } from 'apollo-server-micro'
-// import { compare, hash } from 'bcryptjs'
 import {
   DiscussEmoji,
   DiscussEmojiCount,
   DiscussPostEmoji,
   DiscussPostEmojiCount,
-  Note,
-  NoteDoc,
   NoteDraft,
   NoteEmoji,
   NoteEmojiCount,
@@ -20,10 +17,10 @@ import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import { hasCount, toStringId } from '../lib/helpers'
 import { AuthorModel } from '../lib/models/author-model'
 import { PollMeta } from '../lib/models/poll-model'
-import { RateModel } from '../lib/models/rate-model'
+import { rateModel } from '../lib/models/rate-model'
 import { getOrCreateUser } from '../lib/models/user-model'
 import { createVote } from '../lib/models/vote-model'
-import { SymModel } from '../lib/models/sym-model'
+import { symModel } from '../lib/models/sym-model'
 import prisma from '../lib/prisma'
 import {
   SearchAuthorService,
@@ -284,19 +281,19 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req)
     const commits = await prisma.commit.findMany({
       where: { userId: userId },
-      include: { drafts: true, docs: true },
+      include: { noteDrafts: true, noteDocs: true },
       take: 10,
       orderBy: { createdAt: 'desc' },
     })
     return commits.map(e => {
       return {
         ...e,
-        drafts: e.drafts.map(d => ({
+        drafts: e.noteDrafts.map(d => ({
           ...d,
           meta: d.meta as unknown as NoteDocMeta,
           content: d.content as unknown as NoteDocContent,
         })),
-        docs: e.docs.map(d => ({
+        docs: e.noteDocs.map(d => ({
           ...d,
           meta: d.meta as unknown as NoteDocMeta,
           content: d.content as unknown as NoteDocContent,
@@ -651,7 +648,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
       emoji: {
         ...emoji,
         id: emoji.id.toString(),
-        // count: toStringId(count),
+        count: toStringId(count),
       },
       like: toStringId(like),
     }))
@@ -687,7 +684,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     if (note === null) {
       throw 'Target note not found'
     }
-    return await RateModel.create({
+    return await rateModel.create({
       choice,
       symbol: note.sym.symbol,
       userId,
@@ -747,7 +744,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { fromDocId, domain, meta, content } = draftInput
     // TODO: access branchId from context
     const branchId = ''
-    const { type } = SymModel.parse(symbol)
+    const { type } = symModel.parse(symbol)
     if (type === SymType.URL) {
       throw new Error('createNoteDraft not allow to create from url')
     }

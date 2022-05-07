@@ -1,30 +1,17 @@
-import { Author, Link, Note, Sym } from '@prisma/client'
+import { Link, Sym } from '@prisma/client'
 import { FetchClient, FetchResult } from '../fetcher/fetch-client'
 import { tryFetch } from '../fetcher/vendors'
 import prisma from '../prisma'
 
-const bannedCharMatcher = /[^a-zA-Z0-9_\p{Letter}]/gu
-
-const toAuthorName = (domain: string, domainAuthorName: string) => {
-  const author = domainAuthorName.trim().replace(bannedCharMatcher, '_')
-  // return `${author}:${domain}`
-  return author
-}
-
 type LinkParsed = Omit<Link, 'scraped'> & {
-  author: Author | null
-  note: (Note & { sym: Sym }) | null
+  sym: Sym | null
   scraped: FetchResult
 }
 
-export const LinkService = {
-  toSymbol(link: Link): string {
-    return `@${link.url}`
-  },
-
-  async _find(url: string): Promise<LinkParsed | null> {
+class LinkModel {
+  private async find(url: string): Promise<LinkParsed | null> {
     const found = await prisma.link.findUnique({
-      include: { author: true, note: { include: { sym: true } } },
+      include: { sym: true },
       where: { url },
     })
     if (found) {
@@ -34,12 +21,13 @@ export const LinkService = {
       }
     }
     return null
-  },
+  }
 
   /**
-   * Given a url, get or fetch/create a link (also author)
-   * @returns Prisma.Link
+   * If url is found, return link
+   * If url is not found, fetch the url and create a link and return
    *
+   * TODO: consider redirect, different urls refers to the same page
    */
   async getOrCreateLink({
     url,
@@ -48,49 +36,52 @@ export const LinkService = {
     url: string
     scraper?: FetchClient
   }): Promise<[LinkParsed, { fetchResult: FetchResult }]> {
-    // 先嘗試 unresolved url, 需要考慮 redirect、不同 url 指向同一個頁面的情況
-    let found = await this._find(url)
-    if (found) {
-      return [found, { fetchResult: found.scraped }]
+    const linkByUrl = await this.find(url)
+    if (linkByUrl) {
+      return [linkByUrl, { fetchResult: linkByUrl.scraped }]
     }
 
-    // Link 未存在，嘗試 fetch 取得來源資訊，建立 link, cocard, oauthor 後返回
-    // TODO: 可能在fetch後發現resolved-url已經存在
-    let res: FetchResult = scraper ? await scraper.fetch(url) : await tryFetch(url)
-    found = await this._find(res.finalUrl)
-    if (found) {
-      return [found, { fetchResult: found.scraped }]
+    // TODO: found resolved-url is existed in database after fetch
+    const fetchResult: FetchResult = scraper
+        ? await scraper.fetch(url)
+        : await tryFetch(url),
+      linkByFinalUrl = await this.find(fetchResult.finalUrl)
+
+    if (linkByFinalUrl) {
+      return [linkByFinalUrl, { fetchResult: linkByFinalUrl.scraped }]
     }
 
-    // TODO: Author 的辨識太低，而且沒有統一
-    let author: Author | undefined
-    if (res.authorName) {
-      const authorName = toAuthorName(res.domain, res.authorName)
-      author = await prisma.author.upsert({
-        where: { name: authorName },
-        create: { name: authorName },
-        update: {},
-      })
-      res = { ...res, authorName }
-    }
+    // TODO: if fetch result contains authors
+    // let author: Author | undefined
+    // if (res.authorName) {
+    //   const authorName = toAuthorName(res.domain, res.authorName)
+    //   author = await prisma.author.upsert({
+    //     where: { name: authorName },
+    //     create: { name: authorName },
+    //     update: {},
+    //   })
+    //   res = { ...res, authorName }
+    // }
 
     const link = await prisma.link.create({
       data: {
-        url: res.finalUrl,
-        domain: res.domain,
+        url: fetchResult.finalUrl,
+        domain: fetchResult.domain,
         // sourceType: res.srcType,
         // sourceId: res.srcId,
-        scraped: res as any,
-        author: author ? { connect: { id: author.id } } : undefined,
+        scraped: fetchResult as any,
       },
-      include: { note: { include: { sym: true } }, author: true },
+      include: { sym: true },
     })
+
     return [
       {
         ...link,
         scraped: link.scraped as unknown as FetchResult,
       },
-      { fetchResult: res },
+      { fetchResult: fetchResult },
     ]
-  },
+  }
 }
+
+export const linkModel = new LinkModel()

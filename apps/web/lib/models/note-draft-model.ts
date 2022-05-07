@@ -2,8 +2,8 @@ import { NoteDraft, PrismaPromise, SymType } from '@prisma/client'
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
-import { LinkService } from './link-model'
-import { SymModel } from './sym-model'
+import { linkModel } from './link-model'
+import { symModel } from './sym-model'
 
 class NoteDraftModel {
   async create(
@@ -22,7 +22,7 @@ class NoteDraftModel {
       throw new Error('[createNoteDraft] branch does not exist')
     }
 
-    const { type } = SymModel.parse(symbol)
+    const { type } = symModel.parse(symbol)
     // if its type is url, get or create link after checking
     const linkParsed =
       type === SymType.URL ? LinkService.getOrCreateLink({ url: symbol }) : null

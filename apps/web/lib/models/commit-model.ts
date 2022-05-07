@@ -12,7 +12,7 @@ import { isNumber } from 'lodash'
 import prisma from '../prisma'
 import { noteDocModel } from './note-doc-model'
 import { noteDraftModel } from './note-draft-model'
-import { SymModel } from './sym-model'
+import { symModel } from './sym-model'
 
 /**
  *
@@ -128,7 +128,7 @@ export async function commitNoteDrafts(
 
     // Create Sym and Note if not found
     if (sym === null) {
-      const { type } = SymModel.parse(symbol)
+      const { type } = symModel.parse(symbol)
       promises.push(
         prisma.sym.create({
           data: {
