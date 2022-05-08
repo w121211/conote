@@ -15,7 +15,9 @@ export const EmojiBtn = ({
 }) => {
   return (
     <button
-      className={`btn-reset-style group p-1 rounded ${emojiCode === 'PIN' ? 'hover:bg-red-50' : 'hover:bg-gray-100'}`}
+      className={` group p-1 rounded ${
+        emojiCode === 'PIN' ? 'hover:bg-red-50' : 'hover:bg-gray-100'
+      }`}
       onClick={() => {
         onClick()
       }}
@@ -27,7 +29,9 @@ export const EmojiBtn = ({
         upDownClassName="!text-lg !leading-none "
         pinClassName="!text-xl !leading-none group-hover:text-red-600"
       />
-      {counts !== undefined && <span className={`ml-[2px] text-sm`}>{counts}</span>}
+      {counts !== undefined && (
+        <span className={`ml-[2px] text-sm`}>{counts}</span>
+      )}
     </button>
   )
 }

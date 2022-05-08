@@ -111,7 +111,7 @@ export const CreatePostForm = ({
         <div className="relative z-[1] mb-[-1px] ml-2 text-sm " role="tablist">
           <button
             className={`
-            btn-reset-style
+            
             px-4 py-2
             border-x border-t
             rounded-t
@@ -125,11 +125,11 @@ export const CreatePostForm = ({
             role="tab"
             type="button"
           >
-            編輯
+            Edit
           </button>
           <button
             className={`
-            btn-reset-style
+            
             px-4 py-2
             border-x border-t
             rounded-t
@@ -143,7 +143,7 @@ export const CreatePostForm = ({
             role="tab"
             type="button"
           >
-            預覽
+            Preview
           </button>
         </div>
       </div>
@@ -168,7 +168,7 @@ export const CreatePostForm = ({
               focus:border-blue-400
               focus:outline-blue-300
             `}
-              placeholder="留言..."
+              placeholder="Leave a comment"
               ref={e => {
                 contentRef(e)
                 textareaTest = e
@@ -232,7 +232,7 @@ export const CreatePostForm = ({
             disabled={watchContent.length === 0 || isSubmitSuccessful}
             ref={submitRef}
           >
-            留言
+            Comment
           </button>
         </div>
       </div>

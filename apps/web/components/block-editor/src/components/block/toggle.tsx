@@ -103,6 +103,7 @@ interface MyToggleProps {
 
 interface ToggleProps extends React.HTMLAttributes<HTMLButtonElement> {
   isOpen: boolean
+  isShow: boolean
 }
 
 /**
@@ -111,11 +112,11 @@ interface ToggleProps extends React.HTMLAttributes<HTMLButtonElement> {
 export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
   (props: ToggleProps, ref) => {
     // const { isFocusVisible, focusProps } = useFocusRing()
-    const { isOpen, onClick } = props
+    const { isOpen, isShow, onClick } = props
 
     return (
       <button
-        className="
+        className={`
         [grid-area:toggle] 
         flex-shrink-0 
         relative z-[2]
@@ -133,7 +134,8 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
         focus:outline-none 
         hover:text-gray-700
         
-        empty:pointer-events-none"
+        empty:pointer-events-none
+        ${isShow ? 'opacity-100' : 'opacity-0'}`}
         ref={ref}
         onClick={onClick}
         // {...mergeProps(focusProps, props)}

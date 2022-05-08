@@ -5,6 +5,7 @@ import { mockLocalDoc } from '../../../test/__mocks__/mock-data'
 import { blockRepo } from '../../stores/block.repository'
 import { docRepo } from '../../stores/doc.repository'
 import { DocEl } from './doc-el'
+import { TooltipProvider } from '../../../../../layout/tooltip/tooltip-provider'
 
 export default {
   title: 'BlockEditor/DocEl',
@@ -23,7 +24,11 @@ export default {
   ],
 } as ComponentMeta<typeof DocEl>
 
-const Template: ComponentStory<typeof DocEl> = args => <DocEl {...args} />
+const Template: ComponentStory<typeof DocEl> = args => (
+  <TooltipProvider>
+    <DocEl {...args} />
+  </TooltipProvider>
+)
 
 export const Basic = Template.bind({})
 Basic.args = {

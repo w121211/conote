@@ -64,7 +64,7 @@ const CreateDiscussForm = ({
         {...register('title', { required: true })}
         className="text-2xl font-bold focus:outline-none"
         type="text"
-        placeholder="標題"
+        placeholder="Title"
         autoFocus
       />
       <div
@@ -73,7 +73,7 @@ const CreateDiscussForm = ({
           deleteEmptyChild()
           setValue('content', e.currentTarget.textContent ?? '')
         }}
-        className="min-h-[80px] bg-gray-100 rounded px-2 py-1 outline-none focus:outline-none empty:before:content-['詳述(選填)'] before:text-gray-400 before:text-sm "
+        className="min-h-[80px] bg-gray-100 rounded px-2 py-1 outline-none focus:outline-none empty:before:content-['description(optional)'] before:text-gray-400 before:text-sm "
         ref={contentRef}
       />
       {/* <textarea {...register('content')} className="text-sm" placeholder="詳述(選填)" rows={4} /> */}

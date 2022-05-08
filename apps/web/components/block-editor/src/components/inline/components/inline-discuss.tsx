@@ -7,6 +7,7 @@ import { Discuss, InlineDiscuss } from '../../../interfaces'
 import { InlineElProps } from '../inline-el'
 import { blockStrReplace } from '../../../events'
 import { inlineService } from '../../../services/inline.service'
+import { Tooltip } from '../../../../../../layout/tooltip/tooltip'
 
 /**
  * Update block string when discuss is created
@@ -32,6 +33,7 @@ const InlineDiscussEl = ({
 } & InlineElProps): JSX.Element => {
   const { id, title, str } = inline,
     [showModal, setShowModal] = useState(false),
+    // [showWarnTooltip, setShowWarnTooltip] = useState(false),
     isDiscussCreated = id !== undefined,
     modalButtons = !isDiscussCreated && (
       <button
@@ -76,22 +78,38 @@ const InlineDiscussEl = ({
       </Modal>
       {isDiscussCreated ? (
         <span
-          className="relative hover:bg-gray-100"
+          className="relative text-blue-500 hover:bg-gray-100"
           onClick={() => setShowModal(true)}
           role="button"
         >
           {children}
         </span>
       ) : (
-        <span
-          // relative 為必要 才可點擊到 和 hover 效果
-          className="relative hover:bg-gray-100 "
-          onClick={() => setShowModal(true)}
-          role="button"
+        <Tooltip
+          title="⚠ 尚未創建"
+          // visible={showWarnTooltip}
+          // visible={showWarnTooltip}
+          // onClose={() => setShowWarnTooltip(false)}
+          size="sm"
+          state="warn"
         >
-          {children}
-          <span>(click to create)</span>
-        </span>
+          <span
+            // relative 為必要 才可點擊到 和 hover 效果
+
+            className="relative text-red-600 bg-red-50 hover:bg-red-100 "
+            onClick={() => setShowModal(true)}
+            // onMouseEnter={() => {
+            //   setShowWarnTooltip(true)
+            // }}
+            // onMouseLeave={() => {
+            //   setShowWarnTooltip(false)
+            // }}
+            role="button"
+          >
+            {children}
+            {/* <span>(click to create)</span> */}
+          </span>
+        </Tooltip>
       )}
     </>
   )

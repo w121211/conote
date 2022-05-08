@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Modal from './modal/modal'
-import NoteMetaForm from './note-meta-form'
+import NoteMetaForm from './note-meta-form/note-meta-form'
 import { Doc } from './workspace/doc'
 
 const NoteMetaModal = ({ doc, modal }: { doc: Doc; modal?: boolean }) => {
@@ -10,12 +10,18 @@ const NoteMetaModal = ({ doc, modal }: { doc: Doc; modal?: boolean }) => {
   return (
     <React.Fragment>
       <button
-        className={`btn-reset-style p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100`}
+        className={` p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100`}
         onClick={() => {
           setShowModal(true)
         }}
       >
-        <span className={`material-icons !leading-none ${modal ? 'text-lg' : 'text-xl'}`}>edit_note</span>
+        <span
+          className={`material-icons !leading-none ${
+            modal ? 'text-lg' : 'text-xl'
+          }`}
+        >
+          edit_note
+        </span>
         {/* <span className="whitespace-nowrap text-sm">編輯卡片資訊</span> */}
       </button>
 
@@ -27,7 +33,9 @@ const NoteMetaModal = ({ doc, modal }: { doc: Doc; modal?: boolean }) => {
         mask={!modal}
       >
         <div className="px-2 md:px-4">
-          <h2 className="text-lg mb-4 sm:mb-6 sm:text-2xl font-bold text-gray-800">卡片資訊</h2>
+          <h2 className="text-lg mb-4 sm:mb-6 sm:text-2xl font-bold text-gray-800">
+            卡片資訊
+          </h2>
           <NoteMetaForm
             type={doc.noteCopy?.sym.type || symbol}
             metaInput={metaInput}

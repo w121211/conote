@@ -5,13 +5,17 @@ import { Doc } from '../workspace/doc'
 import { DocIndex } from '../workspace/doc-index'
 import { workspace } from '../workspace/workspace'
 
-const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> | NodeBody<DocIndex> }) => {
+const DocIndexPanel = ({
+  node,
+}: {
+  node: TreeNode<DocIndex> | NodeBody<DocIndex>
+}) => {
   const router = useRouter()
   const client = useApolloClient()
   const commitButton =
     isTreeNode(node) && TreeService.isRoot(node) ? (
       <button
-        className="btn-reset-style px-[2px]"
+        className=" px-[2px]"
         onClick={async () => {
           await workspace.commit(node, client) // commit node-doc and all of its child-docs
         }}
@@ -28,7 +32,7 @@ const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> | NodeBody<DocIndex>
       {commitButton}
       {/* {TreeService.isRoot(node) && (
         <button
-          className="btn-reset-style"
+          className=""
           onClick={async () => {
             await workspace.commit(node, client) // commit node-doc and all of its child-docs
           }}
@@ -37,7 +41,7 @@ const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> | NodeBody<DocIndex>
         </button>
       )} */}
       <button
-        className="btn-reset-style px-[2px] !pointer-events-auto disabled:bg-transparent disabled:!cursor-not-allowed text-gray-400 disabled:text-gray-300 hover:text-gray-500 
+        className=" px-[2px] !pointer-events-auto disabled:bg-transparent disabled:!cursor-not-allowed text-gray-400 disabled:text-gray-300 hover:text-gray-500 
         hover:disabled:text-gray-300"
         onClick={async e => {
           // if (node.data?.symbol === router.query.symbol) {
@@ -49,7 +53,9 @@ const DocIndexPanel = ({ node }: { node: TreeNode<DocIndex> | NodeBody<DocIndex>
         }}
         disabled={node.data?.symbol === router.query.symbol}
       >
-        <span className="material-icons-outlined text-xl  mix-blend-multiply">delete_forever</span>
+        <span className="material-icons-outlined text-xl  mix-blend-multiply">
+          delete_forever
+        </span>
       </button>
     </div>
   )

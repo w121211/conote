@@ -5,6 +5,7 @@ import '../style/global.css'
 import ModalProvider from '../components/modal/modal-context'
 import Script from 'next/script'
 import ChannelProvider from '../components/channel/channel-context'
+import { TooltipProvider} from '../layout/tooltip/tooltip-provider'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApollo(pageProps.initialApolloState)
@@ -21,11 +22,13 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
       }`
     }}/> */}
       <ApolloProvider client={apolloClient}>
-        <ChannelProvider>
-          <ModalProvider>
-            <Component {...pageProps} />
-          </ModalProvider>
-        </ChannelProvider>
+        {/* <ChannelProvider> */}
+          <TooltipProvider>
+        <ModalProvider>
+          <Component {...pageProps} />
+        </ModalProvider>
+          <TooltipProvider/>
+        {/* </ChannelProvider> */}
       </ApolloProvider>
     </>
     // </UserProvider>

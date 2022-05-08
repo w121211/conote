@@ -5,6 +5,7 @@ import { blockRepo } from '../../stores/block.repository'
 import { BlockEl } from './block-el'
 import { mockLocalDoc } from '../../../test/__mocks__/mock-data'
 import { mockBlocks } from '../../../test/__mocks__/mock-block'
+import { TooltipProvider } from '../../../../../layout/tooltip/tooltip-provider'
 
 export default {
   title: 'BlockEditor/BlockEl',
@@ -30,5 +31,9 @@ export const Basic = () => {
   blockRepo.clearHistory()
   blockRepo.update([setEntities(mockBlocks)])
 
-  return <BlockEl uid={mockBlocks[0].uid} isEditable />
+  return (
+    <TooltipProvider>
+      <BlockEl uid={mockBlocks[0].uid} isEditable />
+    </TooltipProvider>
+  )
 }

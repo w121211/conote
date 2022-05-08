@@ -346,6 +346,8 @@ export function renderToken(token: Token | string): JSX.Element {
     switch (token.type) {
       case 'comment':
         return el('span', { className: 'text-gray-400' }, token.content)
+      case 'discuss-bracket-start':
+      case 'discuss-bracket-end':
       case 'topic-bracket-head':
       case 'topic-bracket-tail':
         return el('span', { className: 'text-gray-300' }, token.content)

@@ -22,30 +22,38 @@ const BulletEmojiButton = ({
   iconClassName?: string
 } & React.HTMLAttributes<HTMLElement>): JSX.Element | null => {
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const { data, loading, error } = useMyBulletEmojiLikeQuery({ variables: { bulletEmojiId: emoji.id } })
-  const [upsertBulletEmojiLike, { error: upsertBulletEmojiError }] = useUpsertBulletEmojiLikeMutation({
-    update(cache, { data }) {
-      // TODO: 這裡忽略了更新 count
-      if (data?.upsertBulletEmojiLike) {
-        cache.writeQuery<MyBulletEmojiLikeQuery, MyBulletEmojiLikeQueryVariables>({
-          query: MyBulletEmojiLikeDocument,
-          variables: { bulletEmojiId: data.upsertBulletEmojiLike.like.bulletEmojiId },
-          data: { myBulletEmojiLike: data.upsertBulletEmojiLike.like },
-        })
-      }
-    },
-    onError(error) {
-      if (error.graphQLErrors) {
-        error.graphQLErrors.forEach(e => {
-          if (e.extensions.code === 'UNAUTHENTICATED') {
-            setShowLoginModal(true)
-          }
-        })
-      }
-
-      console.log(error.graphQLErrors)
-    },
+  const { data, loading, error } = useMyBulletEmojiLikeQuery({
+    variables: { bulletEmojiId: emoji.id },
   })
+  const [upsertBulletEmojiLike, { error: upsertBulletEmojiError }] =
+    useUpsertBulletEmojiLikeMutation({
+      update(cache, { data }) {
+        // TODO: 這裡忽略了更新 count
+        if (data?.upsertBulletEmojiLike) {
+          cache.writeQuery<
+            MyBulletEmojiLikeQuery,
+            MyBulletEmojiLikeQueryVariables
+          >({
+            query: MyBulletEmojiLikeDocument,
+            variables: {
+              bulletEmojiId: data.upsertBulletEmojiLike.like.bulletEmojiId,
+            },
+            data: { myBulletEmojiLike: data.upsertBulletEmojiLike.like },
+          })
+        }
+      },
+      onError(error) {
+        if (error.graphQLErrors) {
+          error.graphQLErrors.forEach(e => {
+            if (e.extensions.code === 'UNAUTHENTICATED') {
+              setShowLoginModal(true)
+            }
+          })
+        }
+
+        console.log(error.graphQLErrors)
+      },
+    })
 
   const onLikeBulletEmoji = (myLike: BulletEmojiLikeFragment | null) => {
     if (myLike && myLike.choice === 'UP') {
@@ -81,7 +89,7 @@ const BulletEmojiButton = ({
   return (
     <>
       <button
-        className={`btn-reset-style flex ${className ? className : ''} `}
+        className={` flex ${className ? className : ''} `}
         onClick={e => {
           e.stopPropagation()
           onLikeBulletEmoji(data?.myBulletEmojiLike ?? null)

@@ -7,7 +7,10 @@ import { Doc } from './workspace/doc'
 import { workspace } from './workspace/workspace'
 
 const templateContent: LiElement[] = [
-  { type: 'li', children: [{ type: 'lc', cid: nanoid(), children: [{ text: '22222' }] }] },
+  {
+    type: 'li',
+    children: [{ type: 'lc', cid: nanoid(), children: [{ text: '22222' }] }],
+  },
 ]
 
 export const NoteTemplate = ({
@@ -43,13 +46,13 @@ export const NoteTemplate = ({
   return (
     <div className="inline-flex flex-col ml-9 gap-4">
       <button
-        className="btn-reset-style px-3 py-2 rounded bg-gray-100  text-gray-500 hover:text-gray-800 hover:bg-gray-200"
+        className=" px-3 py-2 rounded bg-gray-100  text-gray-500 hover:text-gray-800 hover:bg-gray-200"
         onClick={() => onTemplateChoose(templateContent)}
       >
         使用模版頁面
       </button>
       <button
-        className="btn-reset-style px-3 py-2 rounded bg-gray-100  text-gray-500 hover:text-gray-800 hover:bg-gray-200"
+        className=" px-3 py-2 rounded bg-gray-100  text-gray-500 hover:text-gray-800 hover:bg-gray-200"
         onClick={() => onTemplateChoose(null)}
       >
         使用空白頁面

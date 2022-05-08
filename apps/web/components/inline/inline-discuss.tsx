@@ -27,21 +27,36 @@ const InlineDiscuss = ({
       id: data.id,
       title: data.title,
     })
-    Transforms.setNodes<InlineDiscussElement>(editor, { id: data.id }, { at: path })
+    Transforms.setNodes<InlineDiscussElement>(
+      editor,
+      { id: data.id },
+      { at: path },
+    )
     Transforms.insertText(editor, inlineDiscussStr, { at: path }) // replace existing text
     setShowModal(false)
   }
 
   const isDiscussCreated = element.id !== undefined
   const modalButtons = !isDiscussCreated && (
-    <button form="create-discuss-form" className="btn-primary h-10 w-24 " type="submit">
+    <button
+      form="create-discuss-form"
+      className="btn-primary h-10 w-24 "
+      type="submit"
+    >
       提交
     </button>
   )
   const modalTopRightBtn = isDiscussCreated && (
-    <Link href={{ pathname: '/discuss/[discussId]', query: { discussId: element.id } }}>
+    <Link
+      href={{
+        pathname: '/discuss/[discussId]',
+        query: { discussId: element.id },
+      }}
+    >
       <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
-        <span className="material-icons text-lg text-gray-500 hover:text-gray-700">open_in_full</span>
+        <span className="material-icons text-lg text-gray-500 hover:text-gray-700">
+          open_in_full
+        </span>
       </a>
     </Link>
   )
@@ -51,7 +66,7 @@ const InlineDiscuss = ({
       <span contentEditable={false}>
         {isDiscussCreated ? (
           <button
-            className="btn-reset-style hover:bg-gray-100"
+            className=" hover:bg-gray-100"
             onClick={() => {
               setShowModal(true)
             }}
@@ -60,7 +75,7 @@ const InlineDiscuss = ({
           </button>
         ) : (
           <button
-            className="btn-reset-style hover:bg-gray-100"
+            className=" hover:bg-gray-100"
             onClick={() => {
               setShowModal(true)
             }}
@@ -80,7 +95,11 @@ const InlineDiscuss = ({
           {element.id ? (
             <DiscussModalPage id={element.id} title={element.title} />
           ) : (
-            <CreateDiscussForm noteId={noteId} title={element.title} onCreate={onCreate} />
+            <CreateDiscussForm
+              noteId={noteId}
+              title={element.title}
+              onCreate={onCreate}
+            />
           )}
         </Modal>
       </span>

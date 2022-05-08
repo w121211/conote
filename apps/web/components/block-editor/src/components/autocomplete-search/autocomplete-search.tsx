@@ -68,20 +68,24 @@ export const InlineSearchEl = ({
   }
   return (
     <div
+      className="absolute z-10  border border-gray-200 rounded shadow-lg"
       style={{ top: caret.top + 24, left: caret.left + 24 }}
       ref={searchPanel}
       // ;; don't blur textarea when clicking to auto-complete
-      onMouseDown={(e) => e.preventDefault()}
+      onMouseDown={e => e.preventDefault()}
     >
-      <div className="dropdown-menu">
+      <div className="dropdown-menu flex flex-col content-start text-gray-700">
         {term === '' || hits.length === 0 ? (
-          <button>Search for {type}</button>
+          <button className="px-4 py-1 text-gray-500">
+            Search for <span className="text-gray-700 font-bold">{type}</span>
+          </button>
         ) : (
           hits.map((e, i) => {
             // const { nodeTitle, blockStr, blockUid } = e
             const { id, note } = e
             return (
               <button
+                className="px-4 py-1 text-left hover:bg-gray-200"
                 key={'inline-search-item-' + id}
                 id={'dropdown-item-' + i}
                 // isPressed={index === i}

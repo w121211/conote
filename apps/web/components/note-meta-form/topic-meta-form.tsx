@@ -1,6 +1,6 @@
 import React from 'react'
 import { NoteMetaInput } from 'graphql-let/__generated__/__types__'
-import { customComponents, toNoteMetaInput } from '../note-meta-form'
+import { customComponents, toNoteMetaInput } from './note-meta-form'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import CreatableSelect from 'react-select/creatable'
 
@@ -83,7 +83,11 @@ export const TopicMetaForm = ({
                       isMulti
                       styles={{
                         control: () => ({}),
-                        container: () => ({ position: 'relative', width: '100%', cursor: 'text' }),
+                        container: () => ({
+                          position: 'relative',
+                          width: '100%',
+                          cursor: 'text',
+                        }),
                       }}
                       value={value}
                       components={customComponents}

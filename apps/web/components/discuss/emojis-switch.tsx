@@ -1,5 +1,5 @@
 import React, { ReactNode, useState } from 'react'
-import Tooltip from '../../layout/tooltip/tooltip'
+import Tooltip from '../../layout/tooltip/popup'
 
 const EmojisSwitch = ({ disable }: { disable?: boolean }) => {
   const [showDisable, setShowDisable] = useState(false)
@@ -27,7 +27,9 @@ const EmojisSwitch = ({ disable }: { disable?: boolean }) => {
       <span
         className={`material-icons-outlined p-1 rounded select-none text-base leading-none 
     mix-blend-multiply ${
-      disable ? 'bg-transparent text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 hover:text-gray-700'
+      disable
+        ? 'bg-transparent text-gray-300 cursor-not-allowed'
+        : 'hover:bg-gray-100 hover:text-gray-700'
     }`}
       >
         sentiment_satisfied_alt
