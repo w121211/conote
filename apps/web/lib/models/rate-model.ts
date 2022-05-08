@@ -1,13 +1,13 @@
 import { Author, Rate, RateChoice, Sym } from '@prisma/client'
 import prisma from '../prisma'
-import { SymModel } from './sym-model'
+import { symModel } from './sym-model'
 
 export type RateBody = {
   comment?: string
   quote?: string
 }
 
-export const RateModel = {
+class RateModel {
   /**
    * If symbol not exist, create symbol in the same time
    */
@@ -41,7 +41,7 @@ export const RateModel = {
         throw 'Create author rate require both authorId & linkId'
       }
     }
-    const sym = await SymModel.getOrCreate(symbol)
+    const sym = await symModel.getOrCreate(symbol)
     return await prisma.rate.create({
       data: {
         choice,
@@ -56,5 +56,7 @@ export const RateModel = {
         sym: true,
       },
     })
-  },
+  }
 }
+
+export const rateModel = new RateModel()

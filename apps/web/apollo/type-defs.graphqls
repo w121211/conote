@@ -5,20 +5,10 @@ scalar JSON
 
 type Query {
   # search by id or name, if not found return null
+  # NEXT:
   author(id: ID, name: String): Author
 
-  bullet(id: ID!): Bullet
-
-  # search by id, symbol, or url, if id or symbol not found return nulll, if url not found will try to fetch and create a new note
-  # notes(branchId: ID, symbol: String, url: String): Note
-
   # notesByAuthor(authorId: ID!): [Note!]!
-
-  # need to modify the input (confirm the prisma)
-  noteEmojis(noteId: ID!): [NoteEmoji!]!
-
-  # latest note digests (what does this mean??)
-  # noteDigests(afterCommitId: String): [NoteDigest!]!
 
   discuss(id: ID!): Discuss
 
@@ -38,13 +28,29 @@ type Query {
 
   myDiscussPostEmojiLike(discussPostEmojiId: ID!): DiscussPostEmojiLike
 
+  # NEXT:
   myRates(symId: ID!): [Rate!]!
 
   # allow vote multiple times on the same poll
+  # NEXT: Priority, will be used for merge request
   myVotes(pollId: ID!): [Vote!]!
 
+  # need to modify the input (confirm the prisma)
+  noteEmojis(noteId: ID!): [NoteEmoji!]!
+
+  # NEXT: Priority, same as Votes
   poll(id: ID!): Poll
 
+  # NEXT:
+  rate(id: ID!): Rate
+
+  # NEXT:
+  ratesByAuthor(authorId: ID!, symId: ID!): [Rate!]!
+
+  # NEXT:
+  ratesBySource(linkId: ID!): [Rate!]!
+
+  # NEXT:
   searchAuthor(term: String!): [SearchHit!]!
 
   # fuzzy search discuss title by given term
@@ -53,46 +59,36 @@ type Query {
   # fuzzy search symbol name, if 'type' not given, search both ticker & topic
   searchSymbol(term: String!, type: SymType): [SearchHit!]!
 
-  rate(id: ID!): Rate
-
-  # rates(authorId: ID!): [Rate!]!
-
-  ratesByAuthor(authorId: ID!, symId: ID!): [Rate!]!
-
-  ratesBySource(linkId: ID!): [Rate!]!
-
   #-----New-----
-
-  # get all notes for homepage
-  noteDocsJustMerged: [NoteDoc!]!
-
-  # throws error if not found
-  note(id: ID!): Note!
-
-  # get all docs from note pr records
-  noteDocEntriesHistory(noteId: ID!): [NoteDocEntry!]!
-
-  # get login user's draft
-  noteDraft(id: ID, symbol: String, url: String): NoteDraft
-
-  # myNoteDocs(): [NoteDoc!]!
 
   # to know all latest commit docs
   myCommits: [Commit!]!
-
-  # search note by sym or title
-  searchNote(symbol: String, title: String): [Note!]!
-
-  searchByDomain(domain: String!): [Note!]!
-
-  searchByAuthor(name: String!): [Note!]!
 
   # get user's all drafts for draft-sidebar
   # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
   myNoteDraftEntries: [NoteDraftEntry!]!
 
+  # throws error if not found
+  note(id: ID!): Note!
+
+  # get noteDoc and throws error if not found
+  noteDoc(id: ID!): NoteDoc!
+
+  # get all notes with merged docs for homepage
+  noteDocsJustMerged: [NoteDoc!]!
+
   # get all candidate docs for verdict
   noteDocsToMerge: [NoteDoc!]!
+
+  # get user's draft
+  noteDraft(id: ID, symbol: String, url: String): NoteDraft
+
+  # get all docs from note pull request records including candidates (like Github pr history)
+  noteHistory(noteId: ID!, status: NoteDocStatus): [NoteDocEntry!]!
+
+  # search note by sym or title, using domain for filtering
+  searchNote(symbol: String, title: String, domain: String): [Note!]!
+
   # -------------End--------------
 
   # 以 note symbol 找該 note 所有的 active hashtags
@@ -170,20 +166,15 @@ type Query {
 }
 
 type Mutation {
+  # NEXT:
   createAuthor(data: AuthorInput!): Author!
-
+  # NEXT:
   updateAuthor(id: ID!, data: AuthorInput!): Author!
 
   # optional noteId for connecting discuss with note
   createDiscuss(noteId: ID, data: DiscussInput!): Discuss!
 
   updateDiscuss(id: ID!, data: DiscussInput!): Discuss!
-
-  # connectDiscussToNote(
-  #   discussId: ID!
-  #   noteId: ID!
-  #   disconnect: Boolean
-  # ): Boolean!
 
   # Either emoji-id or (discuss-id, code) is required
   upsertDiscussEmojiLike(
@@ -211,25 +202,27 @@ type Mutation {
     noteId: String
   ): [UpsertNoteEmojiLikeResult!]!
 
-  # if newSymbol is given, will also update note symbol
-  # @throw validation error
-  # updateNoteMeta(noteId: ID!, data: NoteMetaInput!, newSymbol: String): Note!
-
+  #  NEXT:
   createPoll(data: PollInput!): Poll!
-
+  #  NEXT:
   createRate(data: RateInput!): Rate!
-
+  #  NEXT:
   updateRate(id: ID!, data: RateInput!): Rate!
 
   # also used for merge verdict
+  #  NEXT:
   createVote(pollId: ID!, data: VoteInput!): Vote!
 
   # csrf token not support yet
-  sessionLogin(idToken: String!, csrfToken: String): User!
+  sessionLogin(idToken: String!): User!
 
   sessionLogout: Boolean!
 
   #-------- New -------------
+
+  # commit must be created first -> createCommit ->
+  commitNoteDrafts(draftIds: [ID!]!): NoteDraftCommitResponse!
+
   # not sure about the type of meta, which is for creating from existing note
   createNoteDraft(symbol: String!, draftInput: NoteDraftInput!): NoteDraft!
 
@@ -243,24 +236,7 @@ type Mutation {
 
   dropNoteDraft(id: ID!): NoteDraftDropResponse!
 
-  # commit must be created first -> createCommit ->
-  commitNoteDrafts(draftIds: [ID!]!): NoteDraftCommitResponse!
   #---------------End------------------
-
-  # createComment(boardId: ID!, pollId: ID, data: CommentInput!): Comment!
-  # createAuthorComment(boardId: ID!, pollId: ID, oauthorName: String!, data: CommentInput!): Comment!
-
-  # createOauthorComment(boardId: ID!, data: CommentInput!)
-  # updateComment(id: ID!, data: CommentInput!): Comment!
-
-  # createBulletLike(bulletId: ID!, data: LikeInput!): BulletLikeResponse!
-  # updateBulletLike(id: ID!, data: LikeInput!): BulletLikeResponse!
-
-  # createCommentLike(commentId: ID!, data: LikeInput!): CommentLikeResponse!
-  # updateCommentLike(id: ID!, data: LikeInput!): CommentLikeResponse!
-
-  # createBoardLike(boardId: ID!, data: LikeInput!): BoardLikeResponse!
-  # updateBoardLike(id: ID!, data: LikeInput!): BoardLikeResponse!
 
   # --- NEXT ---
 
@@ -298,11 +274,6 @@ type Mutation {
   # inviteJoin(groupId: ID, criteria: String): Boolean
 }
 
-# type AuthPayload {
-#   token: String!
-#   user: User!
-# }
-
 type Author {
   id: ID!
   name: String!
@@ -321,35 +292,11 @@ type AuthorMetaSite {
   url: String!
 }
 
-type Bullet {
-  id: ID!
-  # noteId: String!
-  # createdAt: DateTime!
-  # updatedAt: DateTime!
-}
-
-# type BulletNodeChange {
-#   type: String!
-#   cid: String!
-#   toParentCid: String!
-#   toIndex: Int
-#   data: Bullet
-# }
-
-# type BulletTreeNode {
-#   cid: String!
-#   parentCid: String
-#   index: Int
-#   data: Bullet
-#   # change?: 'move' // record change-event lively
-#   children: BulletTreeNode
-# }
-
 type Discuss {
   id: ID!
   userId: String!
   status: DiscussStatus!
-  meta: JSON!
+  meta: JSON! # TODO: define the content of meta
   title: String!
   content: String
   createdAt: DateTime!
@@ -407,6 +354,13 @@ type DiscussPostEmojiLike {
   updatedAt: DateTime!
 }
 
+type Link {
+  id: ID!
+  url: String!
+  authorId: String
+  # scraped: Scraped!
+}
+
 type NoteEmoji {
   id: ID!
   code: EmojiCode!
@@ -424,92 +378,6 @@ type NoteEmojiLike {
   noteEmojiId: Int!
   liked: Boolean!
   updatedAt: DateTime!
-}
-
-# type NoteDigest {
-#   commitId: String!
-#   noteId: String!
-#   noteMeta: NoteMeta! # includes title
-#   fromNoteId: String
-#   branchName: String!
-#   sym: Sym!
-#   subSyms: [Sym!]!
-#   # title: String!
-#   picks: [String!]!
-#   # rates: [String!]!
-#   updatedAt: DateTime!
-# }
-
-# -----------Remove-----------
-
-# type NoteMeta {
-#   author: String
-#   # // description?: string
-#   duplicates: [String!]
-#   keywords: [String!]
-#   # // lang?: string
-#   publishedAt: String
-#   redirect: String
-#   # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
-#   tickers: [String!]
-#   title: String
-#   url: String
-# }
-
-# type NoteState {
-#   id: ID!
-#   noteId: String!
-#   userId: String!
-#   commitId: String!
-#   prevId: String
-#   # body: NoteStateBody!
-#   updatedAt: DateTime!
-# }
-
-# type DictEntryArray {
-#   k: String!
-#   v: String!
-# }
-
-# ------------End Remove------------
-
-type Link {
-  id: ID!
-  url: String!
-  authorId: String
-  # scraped: Scraped!
-}
-
-type Scraped {
-  authorName: String
-  date: String
-  description: String
-  title: String
-  keywords: [String!]
-  tickers: [String!]
-}
-
-type Rate {
-  id: ID!
-  userId: String!
-  authorId: String
-  linkId: String
-  symId: String!
-  choice: RateChoice!
-  # body: ShotBody
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type RateBody {
-  comment: String
-  quote: String
-}
-
-type Sym {
-  id: ID!
-  type: SymType!
-  symbol: String! # this is mutable
 }
 
 type Poll {
@@ -547,9 +415,27 @@ type PollCount {
   # failedMsg: String
 }
 
+type Rate {
+  id: ID!
+  userId: String!
+  authorId: String
+  linkId: String
+  symId: String!
+  choice: RateChoice!
+  # body: ShotBody
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type SearchHit {
   id: String!
   str: String!
+}
+
+type Sym {
+  id: ID!
+  type: SymType!
+  symbol: String! # this is mutable
 }
 
 type User {
@@ -585,60 +471,6 @@ type UpsertNoteEmojiLikeResult {
 
 #-------New-------
 
-type Note {
-  id: ID!
-  meta: NoteDocMeta!
-  sym: Sym!
-  link: Link
-  doc: NoteDoc! # current doc 可能為 null (what does this mean?? the newest commit note??) -> 以前針對web-note的特殊情況 現在改成全部都要有doc
-  updatedAt: DateTime!
-}
-
-type NoteDoc {
-  id: ID!
-  # noteId: String!
-  userId: String!
-  commitId: String!
-  fromDocId: String
-  domain: String!
-  meta: NoteDocMeta # not sure about this type
-  content: NoteDocContent!
-  updatedAt: DateTime!
-}
-
-type NoteDraft {
-  id: ID!
-  # noteId: String  # not using for creating a draft and not this field in db
-  userId: String!
-  commitId: String
-  fromDocId: String
-  domain: String
-  symbol: String
-  meta: NoteDocMeta # not sure about this type
-  content: NoteDocContent!
-  updatedAt: DateTime!
-  status: DraftStatus!
-}
-
-type NoteDraftEntry {
-  id: ID!
-}
-
-# # similar design as NoteDocBody
-# type DraftBody {
-#   body: JSON!
-# }
-
-type NoteDraftDropResponse {
-  response: String!
-}
-
-type NoteDraftCommitResponse {
-  commitId: String!
-  response: String!
-}
-
-# ----------------Modified---------------
 type Block {
   uid: ID!
   str: String!
@@ -646,16 +478,56 @@ type Block {
   docTitle: String
 }
 
+type BlockUid_DiscussId {
+  blockUid: String!
+  discussId: String!
+  commitId: String
+}
+
+type Commit {
+  id: String!
+  userId: String!
+  drafts: [NoteDraft!]!
+  docs: [NoteDoc!]!
+  updatedAt: DateTime!
+}
+
+type Note {
+  id: ID!
+  sym: Sym!
+  link: Link
+  meta: NoteDocMeta!
+  doc: NoteDoc! # the latest merged NoteDoc, throw error if there is none (it's impossible to be null because first NoteDoc will auto-merge to the newly-built Note)
+  updatedAt: DateTime!
+}
+
+type NoteDoc {
+  id: ID!
+  # noteId: String!
+  commitId: String!
+  fromDocId: String
+  userId: String!
+  status: NoteDocStatus!
+  domain: String!
+  meta: NoteDocMeta # not sure about this type
+  content: NoteDocContent!
+  updatedAt: DateTime!
+}
+
 type NoteDocContent {
+  discussIds: [BlockUid_DiscussId!]!
   diff: JSON
   symbolIdDict: JSON
   blocks: [Block!]!
   # a symbol-noteId map, so later the cahnge of symbol name won't affect
 }
 
+type NoteDocEntry {
+  id: ID!
+}
+
 type NoteDocMeta {
   duplicatedSymbols: [String] # store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
-  blockUidAnddiscussIdsDict: [String] # store discussion ids
   keywords: [String] # note keywords
   redirectFroms: [String] # used when duplicate symbol exists
   redirectTo: String
@@ -669,103 +541,34 @@ type NoteDocMetaWebpage {
   tickers: [String] # tickers mentioned in the webpage content
 }
 
-type NoteDocEntry {
+type NoteDraft {
+  id: ID!
+  # noteId: String  # not using for creating a draft and not this field in db
+  userId: String!
+  commitId: String
+  fromDocId: String
+  domain: String
+  symbol: String
+  meta: NoteDocMeta # not sure about this type
+  content: NoteDocContent!
+  updatedAt: DateTime!
+  status: NoteDraftStatus!
+}
+
+type NoteDraftCommitResponse {
+  commitId: String!
+  docs: [NoteDoc!]! # corresponding to the noteDraft, for the purpose of merge status display
+}
+
+type NoteDraftDropResponse {
+  response: String!
+}
+
+type NoteDraftEntry {
   id: ID!
 }
 
-type Commit {
-  id: String!
-  userId: String!
-  docs: [NoteDoc!]!
-  updatedAt: DateTime!
-  # stateIdToCidDictEntryArray: [DictEntryArray!]! # for client to match committed docs
-}
-
 # ------------------End-------------------
-
-# type Branch {
-#   id: ID!
-#   name: String!
-#   syms: [Sym]!
-#   drafts: [NoteDraft]!
-#   notes: [Note!]!
-# }
-
-# type PollMeta {
-#   code: String
-#   text: String
-# }
-
-# type CommentLike {
-#   id: ID!
-#   commentId: Int!
-#   choice: LikeChoice!
-#   createdAt: DateTime!
-#   updatedAt: DateTime!
-# }
-
-# type CommentCount {
-#   id: ID!
-#   nViews: Int!
-#   nUps: Int!
-#   nDowns: Int!
-# }
-
-# type CommentLikeResponse {
-#   like: CommentLike!
-#   count: CommentCount!
-# }
-
-# type Comment {
-#   id: ID!
-#   userId: String!
-#   oauthorName: String
-#   status: CommentStatus!
-#   content: String!
-
-#   # 若是投票的會一起記錄
-#   vote: Vote
-
-#   count: CommentCount!
-#   createdAt: DateTime!
-#   updatedAt: DateTime!
-# }
-
-# type BoardLike {
-#   id: ID!
-#   boardId: Int!
-#   choice: LikeChoice!
-#   createdAt: DateTime!
-#   updatedAt: DateTime!
-# }
-
-# type BoardCount {
-#   id: ID!
-#   nViews: Int!
-#   nUps: Int!
-#   nDowns: Int!
-#   # nComments: Int!
-# }
-
-# type BoardLikeResponse {
-#   like: BoardLike!
-#   count: BoardCount!
-# }
-
-# type Board {
-#  id: ID!
-#  userId: String!
-#  bulletId: Int
-#  noteId: Int
-#  status: BoardStatus!
-#  hashtag: String!
-#  meta: String! # json
-#  content: String! # json
-#  poll: Poll
-#  count: BoardCount!
-#  createdAt: DateTime!
-#  updatedAt: DateTime!
-# }
 
 # ------ Inputs ------
 
@@ -781,38 +584,6 @@ input AuthorMetaSiteInput {
   name: String!
   url: String!
 }
-
-# ---------------Remove------------
-# input NoteInput {
-#   symbol: String!
-#   # templateProps: NoteTemplatePropsInput
-#   meta: NoteMetaInput
-# }
-
-# input NoteMetaInput {
-#   author: String
-#   # // description?: string
-#   duplicates: [String!]
-#   keywords: [String!]
-#   # // lang?: string
-#   publishedAt: String
-#   redirect: String
-#   # // template?: 'webpage' | 'ticker' | 'topic' | 'vs'
-#   tickers: [String!]
-#   title: String
-#   # url: String
-# }
-
-# input NoteStateInput {
-#   cid: String!
-#   fromDocCid: String # for doc-index tree
-#   noteInput: NoteInput # for creating note or update note-meta
-#   noteId: String
-#   prevStateId: String
-#   changes: JSON!
-#   value: JSON! # for comparing changes
-# }
-# -------------End Remove--------------
 
 input DiscussInput {
   meta: JSON
@@ -845,44 +616,6 @@ input VoteInput {
 }
 
 #------New-------
-# id: ID!
-#   noteId: String
-#   userId: String!
-#   commitId: String
-#   fromDocId: String
-#   meta: NoteDocMeta # not sure about this type
-#   body: NoteDocContent!
-#   updatedAt: DateTime!
-#   status: DraftStatus!
-input NoteDraftInput {
-  # noteId: String   # not using for creating a draft and not this field in db
-  fromDocId: String
-  domain: String!
-  meta: NoteDocMetaInput!
-  content: NoteDocContentInput!
-}
-
-# similar to NoteDocMeta
-input NoteDocMetaInput {
-  duplicatedSymbols: [String]! # to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
-  keywords: [String]! # note keywords
-  redirectFroms: [String]! # used when duplicate symbol exists
-  redirectTo: String
-  # webpage: NoteDocMetaWebpageInput
-}
-
-# input NoteDocMetaWebpageInput {
-#   authors: [String]!
-#   title: String
-#   publishedAt: DateTime # when the webpage content publish at
-#   tickers: [String]! # tickers mentioned in the webpage content
-# }
-
-input NoteDocContentInput {
-  diff: JSON
-  symbolIdMap: JSON
-  blocks: [BlockInput!]!
-}
 
 input BlockInput {
   uid: ID!
@@ -891,22 +624,49 @@ input BlockInput {
   docTitle: String
 }
 
-# -----------Modified--------------
+input BlockUid_DiscussIdInput {
+  blockUid: String!
+  discussId: String!
+  commitId: String
+}
+
 input CommitInput {
   noteDraftInputs: [NoteDraftInput!]!
 }
+
+input NoteDraftInput {
+  # noteId: String   # not using for creating a draft and not this field in db
+  fromDocId: String
+  domain: String!
+  meta: NoteDocMetaInput!
+  content: NoteDocContentInput!
+}
+
+input NoteDocContentInput {
+  discussIds: [BlockUid_DiscussIdInput!]!
+  diff: JSON
+  symbolIdMap: JSON
+  blocks: [BlockInput!]!
+}
+
+# similar to NoteDocMeta
+input NoteDocMetaInput {
+  duplicatedSymbols: [String]! # to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  keywords: [String]! # note keywords
+  redirectFroms: [String]! # used when duplicate symbol exists
+  redirectTo: String
+  webpage: NoteDocMetaWebpageInput
+}
+
+# data extracted from the webpage
+input NoteDocMetaWebpageInput {
+  authors: [String]!
+  title: String
+  publishedAt: DateTime # when the webpage content publish at
+  tickers: [String]! # tickers mentioned in the webpage content
+}
+
 #---------------End-----------------
-
-# input CommentInput {
-#   content: String!
-#   vote: VoteInput
-# }
-
-# input BoardInput {
-#   hashtag: String!
-#   meta: String!
-#   content: String!
-# }
 
 # ------ NEXT ------
 
@@ -917,71 +677,14 @@ input CommitInput {
 #   at: DateTime!
 # }
 
-# type PollJudgment {
-#   id: ID!
-#   pollId: Int!
-#   choice: Int!
-#   comment: Comment!
-#   createdAt: DateTime!
-#   updatedAt: DateTime!
-# }
-
-# input PollJudgmentInput {
-#   choice: Int!
-# }
-
-# type Page {
-#   id: ID!
-#   # null if not existed
-#   createdPostId: ID
-#   # symbols: [String!]
-#   suggestTitle: String
-#   suggestTags: [String!]!
-#   suggestEvents: [String!]!
-#   suggestTickers: [String!]!
-#   # null if not created
-#   createdEvent: Symbol
-# }
-
-# type EventContent {
-#   tags: [String!]!
-#   tickers: [String!]!
-#   events: [String!]!
-#   equalEvents: [String!]!
-# }
-
-# type PostLink {
-#   url: String!
-# }
-
-# type Follow {
-#   id: ID!
-#   # symbol: Symbol!
-#   symbolId: Int!
-#   followed: Boolean!
-#   # createdAt: DateTime!
-#   updatedAt: DateTime!
-# }
-
-# input FollowInput {
-#   symbolId: ID!
-#   followed: Boolean!
-# }
-
+#-------------ENUM--------------
 enum AuthorType {
   ORG
   PERSON
 }
 
-enum NoteStatus {
-  ACTIVE
-  ARCHIVE
-  REDIRECT
-  REPORTED
-  DUPLICATED
-}
-
 enum DiscussStatus {
+  DRAFT
   ACTIVE
   LOCK
   DELETE
@@ -1023,25 +726,10 @@ enum PollStatus {
   CLOSE_FAIL
 }
 
-enum PollFailReason {
-  MIN_VOTES
-  MIN_JUDGMENTS
-  MAJOR_VERDICT
-  VERDICT_AS_FAIL
-  OTHER
-}
-
 enum RateChoice {
   LONG
   SHORT
   HOLD
-}
-
-enum SourceType {
-  VIDEO
-  POST
-  AUTHOR
-  OTHER
 }
 
 enum SymType {
@@ -1050,30 +738,14 @@ enum SymType {
   URL
 }
 
-# enum BoardStatus {
-#   ACTIVE
-#   LOCK
-#   DELETE
-#   ARCHIVE
-#   REPORTED
-# }
-
-# enum CommentStatus {
-#   ACTIVE
-#   LOCK
-#   DELETE
-#   ARCHIVE
-#   REPORTED
-# }
-
 #-------New-------
-enum DraftStatus {
+enum NoteDraftStatus {
   EDIT
   COMMIT
   DROP
 }
 
-enum DocStatus {
+enum NoteDocStatus {
   CANDIDATE
   MERGE
   REJECT

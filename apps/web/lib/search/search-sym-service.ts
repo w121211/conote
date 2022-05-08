@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js'
 import { Sym, SymType } from '@prisma/client'
-import { SymModel } from '../models/sym-model'
+import { symModel } from '../models/sym-model'
 
 type FuseDict = {
   all: Fuse<Sym>
@@ -40,7 +40,7 @@ export class SearchSymServiceClass {
   async initFuse(): Promise<FuseDict> {
     console.log('init fuse dict...')
     if (this.fuseDict === null) {
-      const syms = await SymModel.getAll()
+      const syms = await symModel.getAll()
       const fuseDict: FuseDict = {
         all: new Fuse(
           syms.filter(e => ['TICKER', 'TOPIC'].includes(e.type)),

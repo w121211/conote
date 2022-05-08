@@ -3,7 +3,7 @@ import { NoteMetaInput as GQLNoteMetaInput } from 'graphql-let/__generated__/__t
 import { FetchClient } from '../fetcher/fetch-client'
 import prisma from '../prisma'
 import { NoteStateModel, NoteStateParsed } from './note-state-model'
-import { LinkService } from './link-model'
+import { linkModel } from './link-model'
 import { SymModel } from './sym-model'
 
 export type NotePrarsed = Omit<Note, 'meta'> & {
@@ -77,7 +77,10 @@ export const NoteModel = {
     scraper?: FetchClient
     url: string
   }): Promise<NotePrarsed & { link: Link }> {
-    const [link, { fetchResult }] = await LinkService.getOrCreateLink({ scraper, url })
+    const [link, { fetchResult }] = await LinkService.getOrCreateLink({
+      scraper,
+      url,
+    })
     if (link.note) {
       const { note, ...linkRest } = link
       return {
@@ -121,7 +124,10 @@ export const NoteModel = {
     }
   },
 
-  parse(note: PrismaNote, noteState: NoteStateParsed | null = null): NotePrarsed {
+  parse(
+    note: PrismaNote,
+    noteState: NoteStateParsed | null = null,
+  ): NotePrarsed {
     const { link, sym } = note
     return {
       ...note,
@@ -147,7 +153,10 @@ export const NoteModel = {
     }
   },
 
-  async udpateNoteMeta(id: string, newNoteMeta: GQLNoteMetaInput): Promise<NotePrarsed> {
+  async udpateNoteMeta(
+    id: string,
+    newNoteMeta: GQLNoteMetaInput,
+  ): Promise<NotePrarsed> {
     const newNote = await prisma.note.update({
       data: { meta: newNoteMeta },
       include: {

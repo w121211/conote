@@ -1,4 +1,5 @@
 import { Sym } from '@prisma/client'
+import { mockLinks } from './mock-link'
 
 // export const TEST_SYMBOLS = [
 //   { name: '$AAA', cat: SymbolCat.TICKER },
@@ -18,6 +19,7 @@ import { Sym } from '@prisma/client'
 export const mockSyms: Sym[] = [
   {
     id: 'mock-sym-0',
+    linkId: null,
     symbol: '[[Apple]]',
     type: 'TOPIC',
     createdAt: new Date(),
@@ -25,15 +27,25 @@ export const mockSyms: Sym[] = [
   },
   {
     id: 'mock-sym-1',
+    linkId: null,
     symbol: '[[Google]]',
     type: 'TOPIC',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
-    id: 'mock-sym-2',
+    id: 'mock-sym-2_ticker',
+    linkId: null,
     symbol: '$BA',
     type: 'TICKER',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'mock-sym-3_link',
+    linkId: mockLinks[0].id,
+    symbol: mockLinks[0].url,
+    type: 'URL',
     createdAt: new Date(),
     updatedAt: new Date(),
   },

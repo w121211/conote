@@ -2,13 +2,20 @@ import { Sym, SymType } from '@prisma/client'
 import prisma from '../prisma'
 
 /**
- * Symbol types:
- * - Ticker: $AB, $A01
- * - Topic: [[what ever]], [[中文範例]]
- * - URL: @https://github.com/typescript-eslint
+ * Symbol types and its format:
+ *
+ * - Ticker: start with '$', all capital alphabet-letter or number
+ *   @eg $AB, $A01
+ *
+ * - Topic: a title enclosed by `[[...]]`
+ *   @eg [[what ever]], [[中文範例]]
+ *
+ * - URL: a valide http url start with 'http://' or 'https://'
+ *   @eg https://github.com/typescript-eslint
+ *
  */
 
-export type SymbolParsed = {
+type SymbolParsed = {
   symbol: string
   type: SymType
 }
@@ -17,15 +24,31 @@ const reTicker = /^\$[A-Z0-9]+$/
 
 const reTopic = /^\[\[[^\]]+\]\]$/
 
-// eg @https://regex101.com/ 非常簡單的 url regex，會捕捉到很多非 url 的 string
-const reUrl = /^@[a-zA-Z0-9:/.]+/
+/**
+ * Check is given sting a url
+ *
+ * @reference https://stackoverflow.com/a/43467144/2293778
+ */
+function isURL(str: string) {
+  try {
+    const url = new URL(str)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch (err) {
+    return false
+  }
+}
 
-export const SymModel = {
+class SymModel {
+  /**
+   * Use to build fuzzy search symbols
+   */
   async getAll(): Promise<Sym[]> {
-    console.log('Retreiving all syms from database...')
+    console.log(
+      'Retreiving all syms of TICKER and TOPIC from database... (heavy call)',
+    )
 
-    let syms: Sym[] = []
-    let cursor: string | undefined = undefined
+    let syms: Sym[] = [],
+      cursor: string | undefined = undefined
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -39,49 +62,51 @@ export const SymModel = {
         orderBy: { id: 'asc' },
         cursor: cursor ? { id: cursor } : undefined,
       })
-      if (res.length === 0) {
-        break
-      }
+
+      if (res.length === 0) break
+
       syms = syms.concat(res)
       cursor = res[res.length - 1].id
     }
     return syms
-  },
-
-  async getOrCreate(symbol: string): Promise<Sym> {
-    const parsed = this.parse(symbol)
-    return prisma.sym.upsert({
-      create: { symbol: parsed.symbol, type: parsed.type },
-      where: { symbol: parsed.symbol },
-      update: {},
-    })
-  },
+  }
 
   /**
-   * Parse symbol
    *
-   * @throws Symbol格式無法辨識
+   */
+  async getOrCreate(symbol: string): Promise<Sym> {
+    const { symbol: symbol_, type } = this.parse(symbol)
+    return prisma.sym.upsert({
+      create: { symbol: symbol_, type },
+      where: { symbol: symbol_ },
+      update: {},
+    })
+  }
+
+  /**
+   * Attempt to parse a symbol
    *
-   * TODO:
-   * 1. 無法區別[[topic]] vs [[https://...]], [[https://...]]應要parse為WEBPAGE
-   * 2. 無法辨識oauthor
+   * @throws Symbol format is not recognized
+   *
+   * TODOS:
+   * - [] Not able to distinguish bettween [[topic]] vs [[https://...]],
+   *      while [[https://...]] should be parsed as URL?
+   * - [] Not able to recognize author
    */
   parse(symbol: string): SymbolParsed {
     let type: SymType
+
     if (symbol.match(reTicker) !== null) {
       type = SymType.TICKER
     } else if (symbol.match(reTopic) !== null) {
       type = SymType.TOPIC
-    } else if (symbol.match(reUrl) !== null) {
+    } else if (isURL(symbol)) {
       type = SymType.URL
     } else {
       throw new Error(`symbol parse error: ${symbol}`)
     }
-    return {
-      symbol,
-      type,
-    }
-  },
+    return { symbol, type }
+  }
 
   async update(id: string, newSymbol: string): Promise<Sym> {
     const sym = await prisma.sym.findUnique({
@@ -107,8 +132,10 @@ export const SymModel = {
       },
       where: { id },
     })
-  },
+  }
 }
+
+export const symModel = new SymModel()
 
 // export function urlToSymbol(url: string): string | null {
 //   // TODO: 需檢驗這是否符合symbol格式

@@ -6,6 +6,13 @@ import {
 } from 'graphql-let/__generated__/__types__'
 import prisma from '../prisma'
 
+type AuthorMeta = {
+  type: 'ORG' | 'PERSON'
+  job?: string // eg youtuber, analylist
+  org?: string
+  sites: [string, string][] // [site_url, site_name]
+}
+
 // type Job = {
 //   name: string
 //   org: string
@@ -13,11 +20,12 @@ import prisma from '../prisma'
 //   endedAt?: Date
 // }
 
-type AuthorMeta = {
-  type: 'ORG' | 'PERSON'
-  job?: string // eg youtuber, analylist
-  org?: string
-  sites: [string, string][] // [site_url, site_name]
+const bannedCharMatcher = /[^a-zA-Z0-9_\p{Letter}]/gu
+
+const toAuthorName = (domain: string, domainAuthorName: string) => {
+  const author = domainAuthorName.trim().replace(bannedCharMatcher, '_')
+  // return `${author}:${domain}`
+  return author
 }
 
 export const AuthorModel = {
