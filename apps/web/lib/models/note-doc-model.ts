@@ -56,26 +56,26 @@ function mergePeriodical() {
 //
 
 export class NoteDocMetaModel {
-  static fromJSON(json: Prisma.JsonValue): NoteDocMeta {
+  static fromJSON(json: Prisma.JsonValue | undefined): NoteDocMeta {
     // TODO
-    const parsed = json as NoteDocMeta
+    if (json === undefined) {
+      return {}
+    }
+    const jsonString = json as string
+    const parsed = JSON.parse(jsonString)
     return {
-      duplicatedSymbols: JSON.parse(),
-
-      // note keywords
-      keywords?: string[]
-    
-      // used when duplicate symbol exists
-      redirectFroms?: string[]
-      redirectTo?: string
-      
-      // fields of webpage is not allowed to change
-      webpage?: {
-        authors?: string[]
-        title?: string
-        publishedAt?: Date // when the webpage content publish at
-        tickers?: string[] // tickers mentioned in the webpage content
-      }
+      ...parsed,
+      // duplicatedSymbols: parsed.duplicatedSymbols,
+      // keywords: parsed.keywords,
+      // redirectFroms: parsed.redirectFroms,
+      // redirectTo: parsed.redirectTo,
+      webpage: {
+        ...parsed.webpage,
+        // authors: parsed.webpage.authors,
+        // title: parsed.webpage.title,
+        publishedAt: new Date(parsed.webpage.publishedAt),
+        // tickers: parsed.webpage.tickers,
+      },
     }
   }
 
