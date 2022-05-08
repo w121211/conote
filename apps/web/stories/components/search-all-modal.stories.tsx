@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import ModalProvider from '../components/modal/modal-context'
-import { SearchAll } from '../components/search-all-modal'
+import ModalProvider from '../../components/modal/modal-context'
+import { SearchAll } from '../../components/search-all-modal'
 
 export default {
   component: SearchAll,

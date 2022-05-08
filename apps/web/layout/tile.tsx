@@ -1,6 +1,5 @@
 import moment from 'moment'
 import React, { ReactNode } from 'react'
-import { useDiscussPostsQuery, useMeQuery } from '../apollo/query.graphql'
 
 export const Tile = ({
   className,

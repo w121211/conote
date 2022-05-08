@@ -2,14 +2,13 @@ import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { nanoid } from 'nanoid'
 // import { NoteFragment } from '../apollo/query.graphql'
-import { LiElement } from '../components/editor/slate-custom-types'
-import { NoteHead } from '../components/note-head'
-import { Doc } from '../components/workspace/doc'
-import { mockDate, mockLink } from './mock-data'
-import ModalProvider from '../components/modal/modal-context'
+import { LiElement } from '../../components/editor/slate-custom-types'
+import { NoteHead } from '../../components/note-head'
+import { Doc } from '../../components/workspace/doc'
+import { mockDate, mockLink } from '../mock-data'
+import ModalProvider from '../../components/modal/modal-context'
 
 export default {
-  title: 'component/Note Head',
   component: NoteHead,
 } as ComponentMeta<typeof NoteHead>
 

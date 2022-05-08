@@ -1,10 +1,9 @@
 import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import { UserPage } from '../pages/user/[userId]'
-import { MeDocument } from '../apollo/query.graphql'
+import { UserPage } from '../../pages/user/[userId]'
+import { MeDocument } from '../../apollo/query.graphql'
 
 export default {
-  title: 'pages/User Page',
   component: UserPage,
 } as ComponentMeta<typeof UserPage>
 

@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { Tile } from '../layout/tile'
+import { Tile } from '../../layout/tile'
 
 export default {
   title: 'layout/Tile',

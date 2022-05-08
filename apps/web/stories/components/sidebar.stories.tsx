@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import SideBar from '../components/sidebar/sidebar'
-import { ThemeProvider } from '../components/theme/theme-provider'
+import SideBar from '../../components/sidebar/sidebar'
+import { ThemeProvider } from '../../components/theme/theme-provider'
 
 export default {
   title: 'component/SideBar',
