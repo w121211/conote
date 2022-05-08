@@ -25,13 +25,15 @@ export const List = ({ listData, currentTab }: ListProps) => {
         return (
           <div
             key={i}
-            className="flex overflow-hidden min-w-0 pt-3 first:pt-0 pb-6  last:border-none border-b border-gray-200 first:rounded-t last:rounded-b"
+            className="flex overflow-hidden min-w-0 pt-3 first:pt-0 pb-6  last:border-none border-b border-inherit first:rounded-t last:rounded-b"
           >
-            <span className="material-icons-outlined text-gray-300">tag</span>
+            <span className="material-icons-outlined text-gray-300 dark:text-gray-500">
+              tag
+            </span>
             <div className="flex-grow">
               <Link href={href}>
                 <a className="m-0 line-clamp-2">
-                  <h3 className=" text-gray-700 text-base font-medium hover:underline-offset-2 hover:underline">
+                  <h3 className=" text-gray-700 dark:text-gray-200 text-base font-medium hover:underline-offset-2 hover:underline">
                     {title}
                   </h3>
                 </a>
@@ -41,8 +43,10 @@ export const List = ({ listData, currentTab }: ListProps) => {
                   {hashtags.map((tag, i) => {
                     return (
                       <span
-                        className={` px-1 last:mr-0 rounded text-xs text-gray-800 bg-gray-200 tracking-wide ${
-                          currentTab === tag ? 'text-blue-500' : ''
+                        className={` px-1 last:mr-0 rounded text-xs text-gray-800 dark:text-gray-200 bg-gray-200 dark:bg-gray-500 tracking-wide ${
+                          currentTab === tag
+                            ? 'text-blue-500 dark:text-blue-300'
+                            : ''
                         }`}
                         key={i}
                       >
@@ -62,7 +66,7 @@ export const List = ({ listData, currentTab }: ListProps) => {
                     }}
                   >
                     <a>
-                      <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-blue-500 hover:underline hover:underline-offset-2">
+                      <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis text-blue-500 dark:text-blue-300 hover:underline hover:underline-offset-2">
                         {styleSymbol(source, '')}
                       </span>
                     </a>
@@ -73,7 +77,7 @@ export const List = ({ listData, currentTab }: ListProps) => {
                   <span className="material-icons-outlined text-sm leading-none ">mode_comment</span>
                   <b>3</b>則回覆
                 </span> */}
-                <span className="text-gray-500">
+                <span className="text-gray-400">
                   {moment().subtract(10, 'days').calendar()}
                 </span>
               </div>

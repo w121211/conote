@@ -790,7 +790,6 @@ query myNoteDraftEntries {
 #   }
 # }
 
-
 # TODO: need to modify
 # mutation CreateCommit($data: CommitInput!) {
 #   createCommit(data: $data) {
@@ -798,12 +797,11 @@ query myNoteDraftEntries {
 #   }
 # }
 
-mutation CreateDiscuss($noteId: ID, $data: DiscussInput!) {
-  createDiscuss(noteId: $noteId, data: $data) {
-    ...discuss
-  }
-}
-
+# mutation CreateDiscuss($noteId: ID, $data: DiscussInput!) {
+#   createDiscuss(noteId: $noteId, data: $data) {
+#     ...discuss
+#   }
+# }
 
 # query MyDiscussPostEmojiLike($discussPostEmojiId: ID!) {
 #   myDiscussPostEmojiLike(discussPostEmojiId: $discussPostEmojiId) {

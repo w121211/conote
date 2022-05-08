@@ -17,17 +17,7 @@ export function Layout({
   // const [scroll, setScroll] = useState(0)
   const layoutRef = useRef<HTMLDivElement>(null)
 
-  // const childrenWithCallback = useCallback(() => children, [children])
-  useEffect(() => {
-    if (window) {
-      if (window.innerWidth < 768) {
-        setShowSider(false)
-        setPinMenu(false)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
+  function handleLocalSiderState() {
     const storageMenu = localStorage.getItem('showSider')
     const storagePin = localStorage.getItem('pinSider')
     if (window.innerWidth < 769) {
@@ -48,6 +38,19 @@ export function Layout({
         localStorage.setItem('pinSider', 'true')
       }
     }
+  }
+
+  useEffect(() => {
+    if (window) {
+      if (window.innerWidth < 768) {
+        setShowSider(false)
+        setPinMenu(false)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    handleLocalSiderState()
   }, [])
 
   useEffect(() => {
@@ -109,12 +112,15 @@ export function Layout({
         isPined={pinSider}
       />
       <div
-        className={`flex-grow  pt-11 pb-[20vh]   
-        
-        overflow-y-scroll scroll-smooth scrollbar`}
+        className={`flex-grow  mt-11 pb-[20vh]  
+        overflow-y-scroll scroll-smooth scrollbar
+        bg-white dark:bg-gray-700`}
       >
         {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
-        <div className=" mx-auto px-2 w-[425px] md:max-w-[720px] md:w-full lg:max-w-[900px] lg:px-24">
+        <div
+          className=" mx-auto px-2 w-[425px] md:max-w-[720px] md:w-full lg:max-w-[900px] lg:px-24
+                        "
+        >
           {children}
           {/* <LoginModal>{children}</LoginModal> */}
         </div>

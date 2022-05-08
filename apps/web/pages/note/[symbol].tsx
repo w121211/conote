@@ -14,7 +14,7 @@ import { Doc } from '../../components/workspace/doc'
 import { workspace } from '../../components/workspace/workspace'
 import LoginModal from '../../components/login-modal'
 import NoteMetaModal from '../../components/note-meta-modal'
-import AuthItem from '../../components/sidebar/auth-Item'
+import AuthItem from '../../components/sidebar/_auth-Item'
 import { NoteTemplate } from '../../components/note-template'
 import { EditorEl } from '../../components/block-editor/src/components/editor/editor-el'
 

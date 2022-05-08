@@ -15,8 +15,13 @@ const DocIndexSection = ({
     <div className="flex-grow flex flex-col min-h-0 overflow-hidden">
       <div className="flex flex-col min-h-0 overflow-hidden">
         <div
-          className={`group flex justify-between items-center px-2 text-sm text-gray-700 
-          tracking-wide leading-7 cursor-pointer select-none  hover:bg-gray-200/70 mix-blend-multiply
+          className={`group flex justify-between items-center 
+            px-2 
+            text-sm 
+            text-gray-700 dark:text-gray-300 
+            tracking-wide leading-7 
+            cursor-pointer select-none  
+            hover:bg-gray-200/70 dark:hover:bg-gray-600/70
           `}
           onClick={() => {
             setFolded(!folded)
@@ -42,8 +47,8 @@ const DocIndexSection = ({
         ? !folded &&
           docIndicies.map((e, i) => <DocIndexComponent key={i} node={e} />)
         : !folded && (
-            <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow">
-              尚無筆記
+            <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow ">
+              no note :{'('}
             </span>
           )}
     </div>

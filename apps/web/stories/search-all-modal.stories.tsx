@@ -12,6 +12,15 @@ export default {
       </div>
     ),
   ],
+  parameters: {
+    backgrounds: {
+      values: [
+        { name: 'dark', value: 'rgb(55 65 81)' },
+        { name: 'gray', value: 'rgb(243 244 246)' },
+        { name: 'white', value: '#fff' },
+      ],
+    },
+  },
 } as ComponentMeta<typeof SearchAll>
 
 const Template: ComponentStory<typeof SearchAll> = _ => (

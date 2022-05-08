@@ -13,18 +13,22 @@ export type TableData = {
 export const RateTable = ({ data }: { data: TableData[] }): JSX.Element => {
   return (
     <Tile className="flex-1 min-w-[300px] w-full p-3 overflow-hidden  text-sm">
-      <h4 className="  mb-2 text-base tracking-widest text-gray-700">預測</h4>
+      <h4 className="  mb-2 text-base tracking-widest text-gray-700 dark:text-gray-200">
+        預測
+      </h4>
       {data.map(({ ticker, title, rate, srcSym }, i) => {
         return (
           <div
             key={i}
-            className="flex justify-between items-center gap-8 py-3 border-b border-gray-200 last:border-none "
+            className="flex justify-between items-center gap-8 py-3 border-b border-inherit last:border-none "
           >
-            <Link href={{ pathname: '/card/[symbol]', query: { symbol: ticker } }}>
-              <a className="flex-grow flex flex-col text-gray-700 underline-offset-2 hover:underline cursor-pointer">
+            <Link
+              href={{ pathname: '/card/[symbol]', query: { symbol: ticker } }}
+            >
+              <a className="flex-grow flex flex-col text-gray-700 dark:text-gray-200 underline-offset-2 hover:underline cursor-pointer">
                 {ticker}
 
-                <span className="font-normal text-xs text-gray-500 whitespace-nowrap capitalize">
+                <span className="font-normal text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap capitalize">
                   {title == '' ? '-' : title}
                 </span>
               </a>
@@ -34,10 +38,10 @@ export const RateTable = ({ data }: { data: TableData[] }): JSX.Element => {
               <span
                 className={`inline-flex px-2 rounded text-sm leading-6 ${
                   rate === 'LONG'
-                    ? 'text-green-700 bg-green-100'
+                    ? 'text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-800'
                     : rate === 'SHORT'
-                    ? 'text-red-700 bg-red-100'
-                    : 'text-gray-700 bg-gray-100'
+                    ? 'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-800'
+                    : 'text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-500'
                 }`}
               >
                 {rate === 'LONG' ? '看多' : rate === 'SHORT' ? '看空' : '觀望'}

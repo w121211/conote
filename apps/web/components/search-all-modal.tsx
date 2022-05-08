@@ -131,12 +131,13 @@ export const SearchAll = () => {
 
   return (
     <>
+      {/* search button */}
       <button
         className="
           flex items-center 
           w-full
           px-4 py-2
-          border border-gray-200
+          border border-gray-200 dark:border-gray-500
           rounded
           appearance-none 
           capitalize"
@@ -149,32 +150,33 @@ export const SearchAll = () => {
         </span>
         <div className="flex-1 flex">
           <p className="flex-grow text-left text-gray-400">search</p>
-          <span className="text-gray-500 ">
-            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-200 font-sans text-sm leading-none">
+          <span className="text-gray-500 dark:text-gray-300">
+            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-200 dark:bg-gray-600 font-sans text-sm leading-none">
               {modifierKeyPrefix}
             </kbd>
-            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-200 font-sans text-sm leading-none">
+            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-200 dark:bg-gray-600 font-sans text-sm leading-none">
               K
             </kbd>
           </span>
         </div>
       </button>
 
+      {/* search modal */}
       <Modal
-        sectionClassName="bg-gray-100"
+        sectionClassName="bg-gray-100 dark:bg-gray-700"
         visible={showModal}
         onClose={() => {
           setShowModal(false)
         }}
       >
-        <div className="flex flex-col w-full ">
+        <div className="flex flex-col w-full border-gray-200 dark:border-gray-500">
           {/* input */}
-          <div className="flex items-center mx-4 border-b border-gray-200">
+          <div className="flex items-center mx-4 border-b border-inherit">
             <span className="material-icons text-xl text-gray-400 leading-none">
               search
             </span>
             <input
-              className="w-full h-12 mx-2 outline-none bg-transparent text-gray-800"
+              className="w-full h-12 mx-2 outline-none bg-transparent text-gray-800 dark:text-gray-200 dark:caret-gray-100"
               autoFocus
               autoCorrect="off"
               autoComplete="off"
@@ -190,8 +192,8 @@ export const SearchAll = () => {
           </div>
 
           {/* list */}
-          <div className="flex-1 overflow-y-auto">
-            <section className="px-4">
+          <div className="flex-1 overflow-y-auto pb-2">
+            <section className="px-4 border-gray-200 dark:border-gray-500">
               {inputValue.length > 0 ? (
                 // result list
                 <>
@@ -202,14 +204,14 @@ export const SearchAll = () => {
                     role="option"
                     aria-selected={selectedIdx === 0}
                   >
-                    <span className="mr-2 text-gray-500 uppercase font-bold">
+                    <span className="mr-2 text-gray-500 dark:text-gray-400 uppercase font-bold">
                       create symbol
                     </span>
-                    <span className="text-gray-800 font-bold">
+                    <span className="text-gray-800 dark:text-gray-200 font-bold">
                       {inputValue}
                     </span>
                   </p>
-                  <ul className="text-gray-700/80">
+                  <ul className="text-gray-700/80 dark:text-gray-200/70">
                     {mockList.map(({ title, keywords }, i) => {
                       return (
                         <li
@@ -223,7 +225,7 @@ export const SearchAll = () => {
                           <h4 className="font-medium leading-relaxed">
                             {styleSymbol(title, '')}
                           </h4>
-                          <p className="flex text-xs text-blue-500/80 gap-1 ">
+                          <p className="flex text-xs text-blue-500/80 dark:text-blue-300/80 gap-1 ">
                             {keywords.map(keyword => {
                               return styleSymbol(keyword, '')
                             })}
@@ -236,10 +238,10 @@ export const SearchAll = () => {
               ) : (
                 // recent list
                 <>
-                  <header className="mt-6 mb-3 pl-2 pb-2 border-b border-gray-200 text-gray-700">
+                  <header className="mt-6 mb-3 pl-2 pb-2 border-b border-inherit text-gray-700 dark:text-gray-200">
                     <h2 className=" font-semibold capitalize ">recent</h2>
                   </header>
-                  <ul className="text-gray-700/80">
+                  <ul className="text-gray-700/80 dark:text-gray-200/70">
                     {mockList.map(({ title, keywords }, i) => {
                       return (
                         <li
@@ -254,7 +256,7 @@ export const SearchAll = () => {
                           <h4 className="font-medium leading-relaxed ">
                             {styleSymbol(title, '')}
                           </h4>
-                          <p className="flex text-xs text-blue-500/80 gap-1 ">
+                          <p className="flex text-xs text-blue-500/80 dark:text-blue-300/80 gap-1 ">
                             {keywords.map(keyword => {
                               return styleSymbol(keyword, '')
                             })}
@@ -268,19 +270,19 @@ export const SearchAll = () => {
             </section>
           </div>
 
-          <footer className="px-4 pt-2 shadow-footer">
-            <ul className="flex gap-4 text-xs leading-none text-gray-500">
+          <footer className="px-4 pt-2 shadow-footer dark:shadow-footer-dark">
+            <ul className="flex gap-4 text-xs leading-none text-gray-500 dark:text-gray-400">
               <li className=" ">
-                <kbd className="inline-block mr-[2px] py-[2px] px-1 rounded-sm border-gray-300 font-sans bg-gray-300/50 text-gray-600 ">
+                <kbd className="inline-block mr-[2px] py-[2px] px-1 rounded-sm font-sans bg-gray-300/50 dark:bg-gray-600 text-gray-600 dark:text-gray-300">
                   ↑
                 </kbd>
-                <kbd className="inline-block mr-1 py-[2px] px-1 rounded-sm border-gray-300 font-sans bg-gray-300/50 text-gray-600 ">
+                <kbd className="inline-block mr-1 py-[2px] px-1 rounded-sm  font-sans bg-gray-300/50 dark:bg-gray-600 text-gray-600 dark:text-gray-300">
                   ↓
                 </kbd>
                 <span>to navigate</span>
               </li>
               <li>
-                <kbd className="inline-block mr-1 py-[2px] px-1 rounded-sm border-gray-300 bg-gray-300/50 text-gray-600 ">
+                <kbd className="inline-block mr-1 py-[2px] px-1 rounded-sm bg-gray-300/50 dark:bg-gray-600  text-gray-600 dark:text-gray-300 ">
                   esc
                 </kbd>
                 <span>to close</span>
