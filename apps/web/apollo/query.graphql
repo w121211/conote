@@ -244,14 +244,12 @@ fragment vote on Vote {
 fragment note on Note {
   __typename
   id
+  branch
   sym {
     ...sym
   }
   link {
     ...link
-  }
-  meta {
-    ...noteDocMeta
   }
   doc {
     ...noteDoc
@@ -485,8 +483,14 @@ query MyNoteDraftEntries {
   }
 }
 
-query Note($id: ID!) {
+query NoteById($id: ID!) {
   note(id: $id) {
+    ...note
+  }
+}
+
+query NoteBySymbol($symbol: String!) {
+  note(symbol: $symbol) {
     ...note
   }
 }

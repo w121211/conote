@@ -25,7 +25,7 @@ class NoteDraftModel {
     const { type } = symModel.parse(symbol)
     // if its type is url, get or create link after checking
     const linkParsed =
-      type === SymType.URL ? LinkService.getOrCreateLink({ url: symbol }) : null
+      type === SymType.URL ? linkModel.getOrCreateLink({ url: symbol }) : null
     // if (type === SymType.URL) {
     //   const link = LinkService.getOrCreateLink({ url: symbol })
     // }

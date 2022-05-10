@@ -1,3 +1,8 @@
+/**
+ * Source https://github.com/athensresearch/athens/blob/main/src/js/textarea.js
+ *
+ */
+
 // We'll copy the properties below into the mirror div.
 // Note that some browsers, such as Firefox, do not concatenate properties
 // into their shorthand (e.g. padding-top, padding-bottom etc. -> padding),
@@ -91,7 +96,7 @@ export function getCaretCoordinates(
   if (!debug) style.visibility = 'hidden' // not 'display: none' because we want rendering
 
   // Transfer the element's properties to the div
-  properties.forEach((prop) => {
+  properties.forEach(prop => {
     if (isInput && prop === 'lineHeight') {
       // Special case for <input>s because text is rendered centered and line height may be != height
       if (computed.boxSizing === 'border-box') {

@@ -27,7 +27,7 @@ import {
   SearchDiscussService,
   SearchSymService,
 } from '../lib/search/search'
-import { ResolverContext } from './apollo-client'
+import { ResolverContext } from './apollo-client-ssr'
 import {
   discussEmojiModel,
   discussPostEmojiModel,

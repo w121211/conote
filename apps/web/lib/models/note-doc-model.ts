@@ -54,19 +54,6 @@ function mergePeriodical() {
 //
 //
 
-export class NoteDocMetaModel {
-  static fromJSON(json: Prisma.JsonValue): NoteDocMeta {
-    // TODO
-  }
-
-  /**
-   * @returns JSON, cannot return native JSON due to prisma's bug: https://github.com/prisma/prisma/issues/9247
-   */
-  static toJSON(meta: NoteDocMeta): Prisma.InputJsonValue {
-    // TODO
-  }
-}
-
 class NoteDocModel {
   /**
    * throws if:
@@ -108,7 +95,8 @@ class NoteDocModel {
           },
         },
         domain,
-        meta: NoteDocMetaModel.toJSON(meta),
+        // meta: NoteDocMetaModel.toJSON(meta),
+        meta: meta as object,
         content: content_,
       },
     })

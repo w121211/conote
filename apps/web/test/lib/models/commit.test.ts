@@ -21,7 +21,7 @@ beforeEach(async () => {
   await testHelper.createDiscusses(prisma)
 })
 
-afterEach(async () => {
+afterAll(async () => {
   // Bug: comment out to avoid rerun loop  @see https://github.com/facebook/jest/issues/2516
   // fetcher.dump()
   await prisma.$disconnect()
