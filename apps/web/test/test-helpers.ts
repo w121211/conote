@@ -123,7 +123,7 @@ class TestHelper {
     await prisma.noteDoc.create({
       data: {
         ...mockNoteDocs[1],
-        meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
+        // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
       },
     })
   }
@@ -181,7 +181,7 @@ class TestHelper {
             user: { connect: { id: userId } },
             fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
             domain,
-            meta: meta as object,
+            meta,
             content,
           },
         })

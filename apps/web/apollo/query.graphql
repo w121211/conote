@@ -485,8 +485,8 @@ query MyNoteDraftEntries {
   }
 }
 
-query Note($id: ID!) {
-  note(id: $id) {
+query Note($id: ID, $symbol: String) {
+  note(id: $id, symbol: $symbol) {
     ...note
   }
 }
@@ -672,14 +672,26 @@ mutation CommitNoteDrafts($draftIds: [ID!]!) {
   }
 }
 
-mutation CreateNoteDraft($symbol: String!, $draftInput: NoteDraftInput!) {
-  createNoteDraft(symbol: $symbol, draftInput: $draftInput) {
+mutation CreateNoteDraft(
+  $branch: String!
+  $symbol: String!
+  $draftInput: NoteDraftInput!
+) {
+  createNoteDraft(branch: $branch, symbol: $symbol, draftInput: $draftInput) {
     ...noteDraft
   }
 }
 
-mutation CreateNoteDraftByLink($linkId: String!, $draftInput: NoteDraftInput!) {
-  createNoteDraftByLink(linkId: $linkId, draftInput: $draftInput) {
+mutation CreateNoteDraftByLink(
+  $branch: String!
+  $linkId: String!
+  $draftInput: NoteDraftInput!
+) {
+  createNoteDraftByLink(
+    branch: $branch
+    linkId: $linkId
+    draftInput: $draftInput
+  ) {
     ...noteDraft
   }
 }
