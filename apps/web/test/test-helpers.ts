@@ -94,8 +94,8 @@ export const clean = (
   return obj === null
     ? obj
     : omitUndefined(
-        omitDeep(obj, ['createdAt', 'updatedAt', 'id', 'symId', 'noteId']),
-      )
+      omitDeep(obj, ['createdAt', 'updatedAt', 'id', 'symId', 'noteId']),
+    )
 }
 
 /**
@@ -113,8 +113,8 @@ class TestHelper {
    */
   async createCommit(prisma: PrismaClient) {
     const sym = await prisma.sym.create({
-        data: mockSyms[0],
-      }),
+      data: mockSyms[0],
+    }),
       note = await prisma.note.create({
         data: mockNotes[0],
       }),
@@ -129,7 +129,12 @@ class TestHelper {
           meta: {},
         },
       })
-    return { commit, note, noteDoc, sym }
+    await prisma.noteDoc.create({
+      data: {
+        ...mockNoteDocs[1],
+        // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
+      },
+    })
   }
 
   async createDiscusses(prisma: PrismaClient): Promise<void> {
@@ -198,6 +203,38 @@ class TestHelper {
     //     }),
     //   ),
     // )
+  }
+
+  async createNoteDrafts(
+    prisma: PrismaClient,
+    drafts: Omit<
+      NoteDraftParsed,
+      'symId' | 'branchId' | 'commitId'
+    >[] = mockNoteDrafts,
+  ): Promise<void> {
+    await prisma.$transaction(
+      drafts.map(e => {
+        // TODO: fromDoc
+        const { id, symbol, userId, domain, meta, content, fromDocId } = e
+        return prisma.noteDraft.create({
+          data: {
+            id,
+            symbol,
+            branch: { connect: { name: mockBranches[0].name } },
+            user: { connect: { id: userId } },
+            fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+            domain,
+            meta,
+            content,
+          },
+        })
+      }),
+    )
+  }
+  async createLink(prisma: PrismaClient): Promise<void> {
+    const { id, symbol: url } = mockSyms[3]
+    const domain = mockNoteDrafts[3].domain
+    await prisma.link.create({ data: { id, url, domain } })
   }
 }
 

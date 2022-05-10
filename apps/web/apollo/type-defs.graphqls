@@ -68,8 +68,8 @@ type Query {
   # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
   myNoteDraftEntries: [NoteDraftEntry!]!
 
-  # return null if not found
-  note(id: ID, symbol: String): Note
+  # throws error if not found
+  note(id: ID, symbol: String): Note!
 
   # get noteDoc and throws error if not found
   noteDoc(id: ID!): NoteDoc!
@@ -224,9 +224,14 @@ type Mutation {
   commitNoteDrafts(draftIds: [ID!]!): NoteDraftCommitResponse!
 
   # not sure about the type of meta, which is for creating from existing note
-  createNoteDraft(symbol: String!, draftInput: NoteDraftInput!): NoteDraft!
+  createNoteDraft(
+    branch: String!
+    symbol: String!
+    draftInput: NoteDraftInput!
+  ): NoteDraft!
 
   createNoteDraftByLink(
+    branch: String!
     linkId: String!
     draftInput: NoteDraftInput!
   ): NoteDraft!

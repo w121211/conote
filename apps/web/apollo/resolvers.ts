@@ -35,6 +35,7 @@ import {
 } from '../lib/models/emoji-model'
 import { NoteDocContent, NoteDocMeta } from '../lib/interfaces'
 import { commitNoteDrafts } from '../lib/models/commit-model'
+import { noteDraftModel } from '../lib/models/note-draft-model'
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
   async author(_parent, { id, name }, _context, _info) {
@@ -320,7 +321,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return drafts
   },
 
-  async note(_parent, { id }, _context, _info) {
+  async note(_parent, { id, symbol }, _context, _info) {
     const note = await prisma.note.findUnique({
       where: { id },
       include: { sym: true, link: true },
@@ -739,76 +740,24 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     throw new Error('Commit failed')
   },
 
-  async createNoteDraft(_parent, { symbol, draftInput }, { req }, _info) {
+  async createNoteDraft(
+    _parent,
+    { branch, symbol, draftInput },
+    { req },
+    _info,
+  ) {
     const { userId } = await isAuthenticated(req)
-    const { fromDocId, domain, meta, content } = draftInput
-    // TODO: access branchId from context
-    const branchId = ''
-    const { type } = symModel.parse(symbol)
-    if (type === SymType.URL) {
-      throw new Error('createNoteDraft not allow to create from url')
-    }
-    const fromDoc = fromDocId
-      ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } })
-      : null
-    if (fromDocId && fromDoc === null) {
-      throw new Error('[createNoteDraft] fromDocId && fromDoc === null')
-    }
-    const draft = await prisma.noteDraft.create({
-      data: {
-        symbol,
-        branch: { connect: { id: branchId } },
-        sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-        fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
-        user: { connect: { id: userId } },
-        domain,
-        meta: meta as object,
-        content,
-      },
-    })
-    // convert JSON to GQL type
-    return {
-      ...draft,
-      meta: draft.meta as unknown as NoteDocMeta,
-      content: draft.content as unknown as NoteDocContent,
-    }
+    return await noteDraftModel.create(branch, symbol, userId, draftInput)
   },
 
-  async createNoteDraftByLink(_parent, { linkId, draftInput }, { req }, _info) {
+  async createNoteDraftByLink(
+    _parent,
+    { branch, linkId, draftInput },
+    { req },
+    _info,
+  ) {
     const { userId } = await isAuthenticated(req)
-    const { fromDocId, domain, meta, content } = draftInput
-    // TODO: access branchId from context
-    const branchId = ''
-    const fromDoc = fromDocId
-      ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } })
-      : null
-    if (fromDocId && fromDoc === null) {
-      throw new Error('[createNoteDraft] fromDocId && fromDoc === null')
-    }
-    // TODO: handle the situation when different urls direct to the same webpage
-    const link = await prisma.link.findUnique({ where: { id: linkId } })
-    if (link === null) {
-      throw new Error('[createNoteDraftByLink] link === null')
-    }
-    const draft = await prisma.noteDraft.create({
-      data: {
-        symbol: link.url,
-        branch: { connect: { id: branchId } },
-        sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-        fromDoc: fromDoc ? { connect: { id: fromDoc.id } } : undefined,
-        link: { connect: { id: link.id } },
-        user: { connect: { id: userId } },
-        domain,
-        meta: meta as object,
-        content,
-      },
-    })
-    // convert JSON to GQL type
-    return {
-      ...draft,
-      meta: draft.meta as unknown as NoteDocMeta,
-      content: draft.content as unknown as NoteDocContent,
-    }
+    return await noteDraftModel.createByLink(branch, linkId, userId, draftInput)
   },
 
   // # input not yet decided
