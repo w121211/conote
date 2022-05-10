@@ -495,12 +495,6 @@ query NoteByBranchSymbol($branch: String!, $symbol: String!) {
   }
 }
 
-query NoteBySymbol($symbol: String!) {
-  note(symbol: $symbol) {
-    ...note
-  }
-}
-
 query NoteDoc($id: ID!) {
   noteDoc(id: $id) {
     ...noteDoc

@@ -282,19 +282,19 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req)
     const commits = await prisma.commit.findMany({
       where: { userId: userId },
-      include: { noteDrafts: true, noteDocs: true },
+      include: { drafts: true, docs: true },
       take: 10,
       orderBy: { createdAt: 'desc' },
     })
     return commits.map(e => {
       return {
         ...e,
-        drafts: e.noteDrafts.map(d => ({
+        drafts: e.drafts.map(d => ({
           ...d,
           meta: d.meta as unknown as NoteDocMeta,
           content: d.content as unknown as NoteDocContent,
         })),
-        docs: e.noteDocs.map(d => ({
+        docs: e.docs.map(d => ({
           ...d,
           meta: d.meta as unknown as NoteDocMeta,
           content: d.content as unknown as NoteDocContent,
@@ -386,7 +386,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         },
       }
     }
-    return null
+    throw null
   },
 
   async noteDoc(_parent, { id }, _context, _info) {
