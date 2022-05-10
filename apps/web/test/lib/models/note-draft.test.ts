@@ -29,7 +29,6 @@ beforeAll(async () => {
   await prisma.$queryRaw`TRUNCATE "Author", "Branch", "User" CASCADE;`
   await testHelper.createUsers(prisma)
   await testHelper.createBranch(prisma)
-  // await testHelper.createLink(prisma)
 
   console.log('Setting up a fetch-client')
   // fetcher = new FetchClient(resolve(__dirname, '.cache.fetcher.json'))
@@ -44,7 +43,7 @@ afterAll(async () => {
 })
 
 afterEach(async () => {
-  await prisma.$queryRaw`TRUNCATE "Note", "NoteDoc", "NoteDraft", "Sym" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Note", "NoteDoc", "NoteDraft", "Sym", "Commit" CASCADE;`
 })
 
 /**
@@ -86,114 +85,98 @@ describe('noteDraftModel.validateCreateInput()', () => {
     )
   })
 })
-// describe('noteDraftModel.create()', () => {
-//   it('create without link and symId', async () => {
-//     const {
-//       symbol,
-//       userId,
-//       fromDocId,
-//       domain,
-//       meta: meta_,
-//       content,
-//     } = mockNoteDrafts[0]
-//     const meta = meta_ as unknown as NoteDocMetaInput
-//     const noteDraft = await noteDraftModel.create(
-//       mockBranches[0].name,
-//       symbol,
-//       userId,
-//       {
-//         fromDocId,
-//         domain,
-//         meta,
-//         content,
-//       },
-//     )
-//     expect({
-//       branchId: noteDraft.branchId,
-//       symId: noteDraft.symId,
-//       symbol: noteDraft.symbol,
-//     }).toMatchInlineSnapshot()
-//     expect({
-//       domain: noteDraft.domain,
-//       status: noteDraft.status,
-//       fromDocId: noteDraft.fromDocId,
-//     }).toMatchInlineSnapshot()
-//   })
-
-//   it('create without link but with symId and fromDoc', async () => {
-//     await testHelper.createCommit(prisma)
-//     const { symbol, userId, domain, meta, content } = mockNoteDrafts[0]
-//     const fromDocId = mockNoteDocs[1].id
-//     const noteDraft = await noteDraftModel.create(
-//       mockBranches[0].name,
-//       symbol,
-//       userId,
-//       {
-//         fromDocId,
-//         domain,
-//         meta: meta as unknown as NoteDocMetaInput,
-//         content,
-//       },
-//     )
-//     expect({
-//       branchId: noteDraft.branchId,
-//       symId: noteDraft.symId,
-//       symbol: noteDraft.symbol,
-//     }).toMatchInlineSnapshot()
-//     expect({
-//       domain: noteDraft.domain,
-//       status: noteDraft.status,
-//       fromDocId: noteDraft.fromDocId,
-//     }).toMatchInlineSnapshot()
-//   })
-
-it('create by link if the link exists', async () => {
-  await testHelper.createLink(prisma)
-  const { symbol, userId, linkId, domain, meta, content } = mockNoteDrafts[4]
-  // await prisma.link.create({ data: { id: linkId!, url: symbol, domain } })
-  const noteDraft = await noteDraftModel.create(
-    mockBranches[0].name,
-    symbol,
-    userId,
-    {
+describe('noteDraftModel.create()', () => {
+  it('create without link and symId', async () => {
+    const {
+      symbol,
+      userId,
+      fromDocId,
       domain,
-      meta: meta as unknown as NoteDocMetaInput,
+      meta: meta_,
       content,
-    },
-  )
-  expect(
-    (await prisma.link.findUnique({ where: { id: linkId! } }))?.url,
-  ).toMatchInlineSnapshot(`"www.link.com"`)
-  expect({
-    branchId: noteDraft.branchId,
-    symId: noteDraft.symId,
-    symbol: noteDraft.symbol,
-    fromDoc: noteDraft.fromDocId,
-  }).toMatchInlineSnapshot(`
+    } = mockNoteDrafts[0]
+    const meta = meta_ as unknown as NoteDocMetaInput
+    const noteDraft = await noteDraftModel.create(
+      mockBranches[0].name,
+      symbol,
+      userId,
+      {
+        fromDocId,
+        domain,
+        meta,
+        content,
+      },
+    )
+    expect({
+      branchId: noteDraft.branchId,
+      symId: noteDraft.symId,
+      symbol: noteDraft.symbol,
+    }).toMatchInlineSnapshot(`
     Object {
       "branchId": "mock-branch-0",
-      "fromDoc": null,
       "symId": null,
-      "symbol": "www.link.com",
+      "symbol": "[[Apple]]",
     }
   `)
-  expect({
-    domain: noteDraft.domain,
-    status: noteDraft.status,
-  }).toMatchInlineSnapshot(`
+    expect({
+      domain: noteDraft.domain,
+      status: noteDraft.status,
+      fromDocId: noteDraft.fromDocId,
+    }).toMatchInlineSnapshot(`
     Object {
       "domain": "domain0",
+      "fromDocId": null,
       "status": "EDIT",
     }
   `)
-})
+  })
 
-it('create by link if the link does not exist', async () => {
-  const { symbol, userId, domain, meta, content } = mockNoteDrafts[4]
-  expect(async () => {
-    await noteDraftModel.createByLink(
+  it('create without link but with symId and fromDoc', async () => {
+    await testHelper.createCommit(prisma)
+    const { symbol, userId, domain, meta, content } = mockNoteDrafts[0]
+    const fromDocId = mockNoteDocs[1].id
+    const noteDraft = await noteDraftModel.create(
       mockBranches[0].name,
-      'mock-sym-no-link',
+      symbol,
+      userId,
+      {
+        fromDocId,
+        domain,
+        meta: meta as unknown as NoteDocMetaInput,
+        content,
+      },
+    )
+    expect({
+      branchId: noteDraft.branchId,
+      symId: noteDraft.symId,
+      symbol: noteDraft.symbol,
+    }).toMatchInlineSnapshot(`
+    Object {
+      "branchId": "mock-branch-0",
+      "symId": "mock-sym-0",
+      "symbol": "[[Apple]]",
+    }
+  `)
+    expect({
+      domain: noteDraft.domain,
+      status: noteDraft.status,
+      fromDocId: noteDraft.fromDocId,
+    }).toMatchInlineSnapshot(`
+    Object {
+      "domain": "domain0",
+      "fromDocId": "mock-doc-1_merge",
+      "status": "EDIT",
+    }
+  `)
+  })
+
+  it('create by link if the link exists', async () => {
+    await testHelper.createLink(prisma)
+    const { symbol, userId, linkId, domain, meta, content } = mockNoteDrafts[4]
+    // await prisma.link.create({ data: { id: linkId!, url: symbol, domain } })
+    const noteDraft = await noteDraftModel.create(
+      mockBranches[0].name,
+      symbol,
       userId,
       {
         domain,
@@ -201,11 +184,51 @@ it('create by link if the link does not exist', async () => {
         content,
       },
     )
-  }).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[NoteDraftModel.createByLink] link not found."`,
-  )
+    expect(
+      (await prisma.link.findUnique({ where: { id: linkId! } }))?.url,
+    ).toMatchInlineSnapshot(`"www.link.com"`)
+    expect({
+      branchId: noteDraft.branchId,
+      symId: noteDraft.symId,
+      symbol: noteDraft.symbol,
+      fromDoc: noteDraft.fromDocId,
+    }).toMatchInlineSnapshot(`
+    Object {
+      "branchId": "mock-branch-0",
+      "fromDoc": null,
+      "symId": null,
+      "symbol": "www.link.com",
+    }
+  `)
+    expect({
+      domain: noteDraft.domain,
+      status: noteDraft.status,
+    }).toMatchInlineSnapshot(`
+    Object {
+      "domain": "domain0",
+      "status": "EDIT",
+    }
+  `)
+  })
+
+  it('create by link if the link does not exist', async () => {
+    const { symbol, userId, domain, meta, content } = mockNoteDrafts[4]
+    expect(async () => {
+      await noteDraftModel.createByLink(
+        mockBranches[0].name,
+        'mock-sym-no-link',
+        userId,
+        {
+          domain,
+          meta: meta as unknown as NoteDocMetaInput,
+          content,
+        },
+      )
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"[NoteDraftModel.createByLink] link not found."`,
+    )
+  })
 })
-// })
 
 it('noteDraftModel.update()', async () => {
   await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
@@ -260,8 +283,7 @@ it('noteDraftModel.update()', async () => {
 })
 
 it('noteDraftModel.drop()', async () => {
-  await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-  const result = await noteDraftModel.drop(mockNoteDrafts[0].id)
+  await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[1]])
+  const result = await noteDraftModel.drop(mockNoteDrafts[1].id)
   expect(result.status).toMatchInlineSnapshot(`"DROP"`)
 })
-// })

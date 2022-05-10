@@ -51,22 +51,10 @@ class NoteDraftModel {
     userId: string,
     { fromDocId, domain, meta, content }: NoteDraftInput,
   ): Promise<NoteDraftParsed> {
-    // const { fromDocId, domain, meta, content } = draftInput
-    // TODO: access branchId from context
-    const prismaBranch = await prisma.branch.findUnique({
-      where: { name: branch },
-      select: { id: true },
-    })
-    const fromDoc =
-      fromDocId &&
-      (await prisma.noteDoc.findUnique({ where: { id: fromDocId } }))
-
-    if (prismaBranch === null) {
-      throw new Error('[NoteDraftModel.create] branch does not exist')
-    }
-    if (fromDocId && fromDoc === null) {
-      throw new Error('[NoteDraftModel.create] fromDoc not found.')
-    }
+    const { prismaBranch, fromDoc } = await this.validateCreateInput(
+      branch,
+      fromDocId ?? undefined,
+    )
 
     const draft = await prisma.noteDraft.create({
       data: {
@@ -129,7 +117,6 @@ class NoteDraftModel {
       throw new Error('NoteDraft not found.')
     }
 
-    // const metaInJson = NoteDocMetaModel.toJSON(meta as NoteDocMeta)
     const updatedDraft = await prisma.noteDraft.update({
       data: {
         fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
