@@ -69,7 +69,9 @@ type Query {
   myNoteDraftEntries: [NoteDraftEntry!]!
 
   # throws error if not found
-  note(id: ID, symbol: String): Note!
+  noteById(id: ID!): Note!
+
+  noteByBranchSymbol(branch: String!, symbol: String!): Note
 
   # get noteDoc and throws error if not found
   noteDoc(id: ID!): NoteDoc!

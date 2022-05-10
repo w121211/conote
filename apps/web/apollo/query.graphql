@@ -483,8 +483,14 @@ query MyNoteDraftEntries {
   }
 }
 
-query Note($id: ID, $symbol: String) {
-  note(id: $id, symbol: $symbol) {
+query NoteById($id: ID!) {
+  noteById(id: $id) {
+    ...note
+  }
+}
+
+query NoteByBranchSymbol($branch: String!, $symbol: String!) {
+  noteByBranchSymbol(branch: $branch, symbol: $symbol) {
     ...note
   }
 }
