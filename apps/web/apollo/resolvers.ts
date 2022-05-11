@@ -282,19 +282,19 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req)
     const commits = await prisma.commit.findMany({
       where: { userId: userId },
-      include: { noteDrafts: true, noteDocs: true },
+      include: { drafts: true, docs: true },
       take: 10,
       orderBy: { createdAt: 'desc' },
     })
     return commits.map(e => {
       return {
         ...e,
-        drafts: e.noteDrafts.map(d => ({
+        drafts: e.drafts.map(d => ({
           ...d,
           meta: d.meta as unknown as NoteDocMeta,
           content: d.content as unknown as NoteDocContent,
         })),
-        docs: e.noteDocs.map(d => ({
+        docs: e.docs.map(d => ({
           ...d,
           meta: d.meta as unknown as NoteDocMeta,
           content: d.content as unknown as NoteDocContent,
@@ -321,7 +321,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return drafts
   },
 
-  async note(_parent, { id, symbol }, _context, _info) {
+  async noteById(_parent, { id }, _context, _info) {
     const note = await prisma.note.findUnique({
       where: { id },
       include: { sym: true, link: true },
@@ -348,6 +348,45 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       }
     }
     throw new Error('Note not found.')
+  },
+
+  async noteByBranchSymbol(_parent, { branch, symbol }, _context, _info) {
+    const branchPrisma = await prisma.branch.findUnique({
+      where: { name: branch },
+    })
+    const sym = await prisma.sym.findUnique({ where: { symbol } })
+    if (branchPrisma === null) {
+      throw new Error('Branch not found.')
+    }
+    if (sym === null) {
+      throw new Error('Sym not found.')
+    }
+    const note = await prisma.note.findUnique({
+      where: { branchId_symId: { branchId: branchPrisma!.id, symId: sym!.id } },
+      include: { sym: true, link: true },
+    })
+    const doc =
+      note &&
+      (await prisma.noteDoc.findFirst({
+        where: {
+          branchId: note.branchId,
+          symId: note.symId,
+          status: 'MERGE',
+        },
+        orderBy: { updatedAt: 'desc' },
+      }))
+    if (doc) {
+      return {
+        ...note,
+        meta: doc.meta as unknown as NoteDocMeta,
+        doc: {
+          ...doc,
+          meta: doc.meta as unknown as NoteDocMeta,
+          content: doc.content as unknown as NoteDocContent,
+        },
+      }
+    }
+    throw null
   },
 
   async noteDoc(_parent, { id }, _context, _info) {

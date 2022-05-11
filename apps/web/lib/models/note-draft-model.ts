@@ -1,28 +1,22 @@
-import {
-  Link,
-  NoteDoc,
-  NoteDraft,
-  PrismaPromise,
-  SymType,
-} from '@prisma/client'
+import { NoteDraft, SymType } from '@prisma/client'
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
-import { getFontDefinitionFromManifest } from 'next/dist/server/font-utils'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
-import { linkModel } from './link-model'
-import { NoteDocMetaModel, noteDocModel } from './note-doc-model'
 import { symModel } from './sym-model'
 
 class NoteDraftModel {
   async validateCreateInput(
     branch: string,
+    symbol?: string,
     fromDocId?: string,
     linkId?: string,
   ) {
+    // TODO: validate the symbol
     const prismaBranch = await prisma.branch.findUnique({
       where: { name: branch },
       select: { id: true },
     })
+    const symbolParsed = symbol ? symModel.parse(symbol) : null
     const link = linkId
       ? await prisma.link.findUnique({ where: { id: linkId } })
       : null
@@ -53,6 +47,7 @@ class NoteDraftModel {
   ): Promise<NoteDraftParsed> {
     const { prismaBranch, fromDoc } = await this.validateCreateInput(
       branch,
+      symbol,
       fromDocId ?? undefined,
     )
 
@@ -84,6 +79,7 @@ class NoteDraftModel {
   ): Promise<NoteDraftParsed> {
     const { prismaBranch, fromDoc, link } = await this.validateCreateInput(
       branch,
+      undefined,
       fromDocId ?? undefined,
       linkId,
     )

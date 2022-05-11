@@ -28,7 +28,7 @@ beforeAll(async () => {
   console.log('Writing required data into database')
   await prisma.$queryRaw`TRUNCATE "Author", "Branch", "User" CASCADE;`
   await testHelper.createUsers(prisma)
-  await testHelper.createBranch(prisma)
+  await testHelper.createBranches(prisma)
 
   console.log('Setting up a fetch-client')
   // fetcher = new FetchClient(resolve(__dirname, '.cache.fetcher.json'))
@@ -63,10 +63,18 @@ describe('noteDraftModel.validateCreateInput()', () => {
       `"[NoteDraftModel.createByLink] branch not found."`,
     )
   })
+  it('symbol is not in valid form', async () => {
+    await expect(
+      noteDraftModel.validateCreateInput(mockBranches[0].name, 'test-symbol'),
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"symbol parse error: test-symbol"`,
+    )
+  })
   it('fromDoc not found', async () => {
     await expect(
       noteDraftModel.validateCreateInput(
         mockBranches[0].name,
+        undefined,
         mockNoteDocs[0].id,
       ),
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -77,6 +85,7 @@ describe('noteDraftModel.validateCreateInput()', () => {
     await expect(
       noteDraftModel.validateCreateInput(
         mockBranches[0].name,
+        undefined,
         undefined,
         mockSyms[3].id,
       ),
@@ -112,23 +121,23 @@ describe('noteDraftModel.create()', () => {
       symId: noteDraft.symId,
       symbol: noteDraft.symbol,
     }).toMatchInlineSnapshot(`
-    Object {
-      "branchId": "mock-branch-0",
-      "symId": null,
-      "symbol": "[[Apple]]",
-    }
-  `)
+          Object {
+            "branchId": "mock-branch-0",
+            "symId": null,
+            "symbol": "[[Apple]]",
+          }
+      `)
     expect({
       domain: noteDraft.domain,
       status: noteDraft.status,
       fromDocId: noteDraft.fromDocId,
     }).toMatchInlineSnapshot(`
-    Object {
-      "domain": "domain0",
-      "fromDocId": null,
-      "status": "EDIT",
-    }
-  `)
+          Object {
+            "domain": "domain0",
+            "fromDocId": null,
+            "status": "EDIT",
+          }
+      `)
   })
 
   it('create without link but with symId and fromDoc', async () => {
@@ -151,23 +160,23 @@ describe('noteDraftModel.create()', () => {
       symId: noteDraft.symId,
       symbol: noteDraft.symbol,
     }).toMatchInlineSnapshot(`
-    Object {
-      "branchId": "mock-branch-0",
-      "symId": "mock-sym-0",
-      "symbol": "[[Apple]]",
-    }
-  `)
+          Object {
+            "branchId": "mock-branch-0",
+            "symId": "mock-sym-0",
+            "symbol": "[[Apple]]",
+          }
+      `)
     expect({
       domain: noteDraft.domain,
       status: noteDraft.status,
       fromDocId: noteDraft.fromDocId,
     }).toMatchInlineSnapshot(`
-    Object {
-      "domain": "domain0",
-      "fromDocId": "mock-doc-1_merge",
-      "status": "EDIT",
-    }
-  `)
+          Object {
+            "domain": "domain0",
+            "fromDocId": "mock-doc-1_merge",
+            "status": "EDIT",
+          }
+      `)
   })
 
   it('create by link if the link exists', async () => {
@@ -186,29 +195,31 @@ describe('noteDraftModel.create()', () => {
     )
     expect(
       (await prisma.link.findUnique({ where: { id: linkId! } }))?.url,
-    ).toMatchInlineSnapshot(`"www.link.com"`)
+    ).toMatchInlineSnapshot(
+      `"https://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url"`,
+    )
     expect({
       branchId: noteDraft.branchId,
       symId: noteDraft.symId,
       symbol: noteDraft.symbol,
       fromDoc: noteDraft.fromDocId,
     }).toMatchInlineSnapshot(`
-    Object {
-      "branchId": "mock-branch-0",
-      "fromDoc": null,
-      "symId": null,
-      "symbol": "www.link.com",
-    }
-  `)
+      Object {
+        "branchId": "mock-branch-0",
+        "fromDoc": null,
+        "symId": null,
+        "symbol": "https://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url",
+      }
+    `)
     expect({
       domain: noteDraft.domain,
       status: noteDraft.status,
     }).toMatchInlineSnapshot(`
-    Object {
-      "domain": "domain0",
-      "status": "EDIT",
-    }
-  `)
+          Object {
+            "domain": "domain0",
+            "status": "EDIT",
+          }
+      `)
   })
 
   it('create by link if the link does not exist', async () => {
@@ -233,7 +244,6 @@ describe('noteDraftModel.create()', () => {
 it('noteDraftModel.update()', async () => {
   await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
   await testHelper.createCommit(prisma)
-  // update: domain, meta (duplicatedSymbols, keywords...), content, fromDocId
   const draftId = mockNoteDrafts[0].id
   const update: NoteDraftInput = {
     domain: 'new_domain',
