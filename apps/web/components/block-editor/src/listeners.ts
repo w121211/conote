@@ -1,4 +1,6 @@
 import * as events from './events'
+import { Block, BlockWithChildren } from './interfaces'
+import { blockRepo } from './stores/block.repository'
 import { rfdbRepo, rfdbStore } from './stores/rfdb.repository'
 import { destructKeyDown, isShortcutKey } from './utils'
 
@@ -60,10 +62,12 @@ export function multiBlockSelection(e: KeyboardEvent) {
     const { shift, key } = destructKeyDown(e),
       enter = key === 'Enter',
       bksp = key === 'Backspace',
+      tab = key === 'Tab',
+      dlt = key === 'Delete',
       up = key === 'ArrowUp',
       down = key === 'ArrowDown',
-      tab = key === 'Tab',
-      dlt = key === 'Delete'
+      left = key === 'ArrowLeft',
+      right = key === 'ArrowRight'
 
     if (enter) {
       events.editingUid(selectedItems[0])
@@ -91,6 +95,15 @@ export function multiBlockSelection(e: KeyboardEvent) {
         events.up(selectedItems[0], 'end')
       } else {
         events.down(selectedItems[selectedItems.length - 1], 'end')
+      }
+    } else if (left || right) {
+      e.preventDefault()
+      events.selectionClear()
+
+      if (left) {
+        events.editingUid(selectedItems[0], 0)
+      } else {
+        events.editingUid(selectedItems[selectedItems.length - 1], 'end')
       }
     }
   }
@@ -138,54 +151,83 @@ export function hotkey(event: KeyboardEvent) {
 //
 //
 
-const unformatDoubleBrackets = () => {}
-
-const blocksToClipboardData = (depth, node, unformat = false) => {
-  const { string: _string, children, _header } = node.block,
-    leftOffset = '    '.repeat(depth),
-    walkChildren = children.map((e) =>
-      blocksToClipboardData(depth++, e, unformat),
-    ),
-    // string = unformat ? _string
-    dash = unformat ? '' : '- '
-  return leftOffset + dash + string + '\n' + walkChildren
+/**
+ * https://github.com/ryanguill/roam-tools/blob/eda72040622555b52e40f7a28a14744bce0496e5/src/index.js#L336-L345
+ */
+function unformatDoubleBrackets(s: string): string {
+  throw new Error('Not implemented')
 }
 
-const copy = (js, e) => {
-  const uids = subscribe('::select-subs/items')
-  if (!empty(uids)) {
-    const copyData = uids
-        .map((e) => getReactiveBlockDocument(dsdb, [':block/uid', e]))
-        .map((e) => blocksToClipboardData(0, e))
-        .join(),
-      clipboardData = e.event_.clipboardData,
-      copiedBlocks = mapv(() => {
-        getInternalRepresentation(dsdb, [':block/uid', uids]), uids
-      })
+/**
+ * Four spaces per depth level.
+ */
+function blocksToClipboardData(
+  depth: number,
+  block: BlockWithChildren,
+  unformat = false,
+): string {
+  const { str, children } = block,
+    leftOffset = '    '.repeat(depth),
+    walkChildren = children.map(e =>
+      blocksToClipboardData(depth++, e, unformat),
+    ),
+    // string_ = unformat ? unformatDoubleBrackets(str),
+    dash = unformat ? '' : '- '
+  return leftOffset + dash + str + '\n' + walkChildren
+}
 
-    clipboardData.setData('text/plain', copyData)
-    clipboardData.setData(
-      'application/athens-representation',
-      prStr(copiedBlocks),
-    )
-    clipboardData.setData('application/athens', prStr({ uids }))
+/**
+ *   "If blocks are selected, copy blocks as markdown list.
+  Use -event_ because goog events quirk "
+ */
+function copy(e: ClipboardEvent): void {
+  const uids = rfdbRepo.getValue().selection.items
+
+  if (uids.length > 0) {
+    const copyData = uids
+      .map(e => getReactiveBlockDocument(blockRepo))
+      .map(e => blocksToClipboardData(0, e))
+      .join()
+    // clipboardData = e.event_.clipboardData,
+    // copiedBlocks = mapv(() => {
+    //   getInternalRepresentation(dsdb, [':block/uid', uids]), uids
+    // })
+    const { clipboardData } = e
+
+    if (clipboardData) {
+      clipboardData.setData('text/plain', copyData)
+      clipboardData.setData(
+        'application/athens-representation',
+        prStr(copiedBlocks),
+      )
+      clipboardData.setData('application/athens', prStr({ uids }))
+    }
 
     e.preventDefault()
   }
 }
 
-const cut = (js, e) => {
-  const uids = subscribe('::select-subs/items')
-  if (!empty(uids)) {
+/**
+ * Cut is essentially copy AND delete selected blocks
+ */
+function cut(e: ClipboardEvent) {
+  const uids = rfdbRepo.getValue().selection.items
+  if (uids.length > 0) {
     copy(e)
-    dispatch('::select-events/delete')
+    events.selectionDelete()
   }
+
+  // const uids = subscribe('::select-subs/items')
+  // if (!empty(uids)) {
+  //   copy(e)
+  //   dispatch('::select-events/delete')
+  // }
 }
 
 // const forceLeave = atom(false)
 
 const preventSave = () => {
-  window.addEventListener('beforeunload', (e) => {
+  window.addEventListener('beforeunload', e => {
     const synced = subscribe(':db/synced'),
       e2eIgnoreSave = localStorage.getItem('E2E_IGNORE_SAVE') === 'true'
     if (!synced && !forceLeave && !e2eIgnoreSave) {

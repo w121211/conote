@@ -134,15 +134,13 @@ export function blockDrop(
       dragTarget && sourceUid !== targetUid && effectAllowed === 'move',
     selectedItem = rfdbRepo.getValue().selection.items
 
-  // if (reFind(imgRgex, datatype)) { }
-  // else
-  if (datatype.includes('text/plain')) {
-    if (validTextDrop) {
-      if (selectedItem.length === 0) {
-        dropBullet(sourceUid, targetUid, dragTarget, effectAllowed)
-      } else {
-        dropBulletMulti(selectedItem, targetUid, dragTarget)
-      }
+  // console.debug(sourceUid, targetUid, dragTarget, effectAllowed)
+
+  if (datatype.includes('text/plain') && validTextDrop) {
+    if (selectedItem.length === 0) {
+      dropBullet(sourceUid, targetUid, dragTarget, effectAllowed)
+    } else {
+      dropBulletMulti(selectedItem, targetUid, dragTarget)
     }
   }
 

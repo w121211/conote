@@ -3,7 +3,7 @@ import { Block, PositionRelation } from '../interfaces'
 import { isSiblingRelation } from './helpers'
 
 export function remove(v: Block[], x: Block): Block[] {
-  return v.filter((e) => e.uid !== x.uid)
+  return v.filter(e => e.uid !== x.uid)
 }
 
 function insertAt(v: Block[], x: Block, index: number): Block[] {
@@ -22,7 +22,7 @@ export function insert(
 ): Block[] {
   // use if-else because index=0 is interpretated as 'false'
   const index = isSiblingRelation(relation)
-    ? v.findIndex((e) => e.uid === ref.uid)
+    ? v.findIndex(e => e.uid === ref.uid)
     : null
 
   if (relation === 'first') {
@@ -54,12 +54,12 @@ export function moveBetween(
 
   assert(x.uid !== ref.uid, '[moveBetween] x and ref are the same block')
   assert(
-    src.find((e) => e.uid === x.uid),
+    src.find(e => e.uid === x.uid),
     '[moveBetween] x is not in src',
   )
   if (
     isSiblingRelation(relation) &&
-    dest.find((e) => e.uid === ref.uid) === undefined
+    dest.find(e => e.uid === ref.uid) === undefined
   ) {
     throw new Error('[moveBetween] ref is not in dest')
   }
@@ -83,10 +83,10 @@ export function moveWithin(
 
   assert(x.uid !== ref.uid, '[moveWithin] x and ref are the same block')
   assert(
-    v.find((e) => e.uid === x.uid),
+    v.find(e => e.uid === x.uid),
     '[moveWithin] x is not in v',
   )
-  if (isSiblingRelation(relation) && !v.find((e) => e.uid === ref.uid))
+  if (isSiblingRelation(relation) && !v.find(e => e.uid === ref.uid))
     throw new Error('[moveWithin] ref is not in v')
 
   const vRemoveX = remove(v, x),
@@ -112,7 +112,7 @@ export function reorder(before: Block[], after: Block[]): Block[] {
       return { ...e, order: i }
     }),
     _beforeSet = new Set(_before.map(makeKey)),
-    diff = _after.filter((e) => !_beforeSet.has(makeKey(e)))
+    diff = _after.filter(e => !_beforeSet.has(makeKey(e)))
 
   return diff
 }

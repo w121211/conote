@@ -11,6 +11,7 @@ import {
   textareaClick,
   textareaMouseDown,
   textareaMouseEnter,
+  textareaPaste,
   textareaUnmount,
 } from '../../handlers/textarea-handlers'
 import { useEffect } from 'react'
@@ -314,6 +315,7 @@ export const BlockContent = ({
   setCaret,
   search,
   setSearch,
+  lastKeyDown,
   setLastKeyDown,
 }: {
   uid: string
@@ -324,18 +326,24 @@ export const BlockContent = ({
   setCaret: React.Dispatch<React.SetStateAction<CaretPosition>>
   search: Search
   setSearch: React.Dispatch<React.SetStateAction<Search>>
+  lastKeyDown: DestructTextareaKeyEvent | null
   setLastKeyDown: React.Dispatch<
     React.SetStateAction<DestructTextareaKeyEvent | null>
   >
 }): JSX.Element => {
   const [localStr, setLocalStr] = useState(defaultLocalStr)
 
+  // useEffect(() => {
+  //   if (localStr !== defaultLocalStr) {
+  //     // textareaUnmount(uid, localStr)
+  //   }
+  //   // console.log(isEditing, showEditableDom)
+  // }, [isEditing, showEditableDom])
+
   useEffect(() => {
-    if (localStr !== defaultLocalStr) {
-      textareaUnmount(uid, localStr)
-    }
-    // console.log(isEditing, showEditableDom)
-  }, [isEditing, showEditableDom])
+    // console.log(defaultLocalStr, localStr)
+    setLocalStr(defaultLocalStr)
+  }, [defaultLocalStr])
 
   return (
     <div
@@ -381,7 +389,7 @@ export const BlockContent = ({
           rows={1}
           value={localStr}
           onChange={e => textareaChange(e, uid, setLocalStr)}
-          // onPaste={(e) => textareaPaste(e, uid, state)}
+          onPaste={e => textareaPaste(e, lastKeyDown)}
           onKeyDown={e =>
             textareaKeyDown({
               e,
@@ -395,12 +403,26 @@ export const BlockContent = ({
               setLastKeyDown,
             })
           }
+          // onKeyUp={e =>
+          //   textareaKeyDown({
+          //     e,
+          //     uid,
+          //     editing: isEditing,
+          //     localStr,
+          //     caret,
+          //     setCaret,
+          //     search,
+          //     setSearch,
+          //     setLastKeyDown,
+          //   })
+          // }
           onBlur={e => textareaBlur(e, uid)}
           onClick={e => textareaClick(e, uid)}
           onMouseDown={e => textareaMouseDown(e)}
           onMouseEnter={e => textareaMouseEnter(e, uid)}
         />
       )}
+
       {/* <div
         className="
         [grid-area:main]
@@ -411,7 +433,6 @@ export const BlockContent = ({
       >
         {localStr}
       </div> */}
-      {/* {parseAndRender(state.string.local, originalUid || uid)} */}
 
       <ParseRenderEl
         className={`[grid-area:main]

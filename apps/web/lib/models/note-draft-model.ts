@@ -9,9 +9,9 @@ import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
 import { getFontDefinitionFromManifest } from 'next/dist/server/font-utils'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
-import { LinkService } from './link-model'
+import { linkModel } from './link-model'
 import { NoteDocMetaModel, noteDocModel } from './note-doc-model'
-import { SymModel } from './sym-model'
+import { symModel } from './sym-model'
 
 class NoteDraftModel {
   async validateCreateInput(
