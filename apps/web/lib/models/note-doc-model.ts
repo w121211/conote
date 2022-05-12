@@ -29,9 +29,21 @@ function merge() {
  * - no deletions, changes to the previous-doc's content (ie, has only additions to the previous-doc)
  *
  * Auto reject if:
- * - no changes  ->  move to commit-drafts input checking
+ * - no changes, the same as fromDoc  ->  move to commit-drafts input checking (implementing in validateCommit)
+ *
  */
-function mergeAutomatical(doc: NoteDoc): void {
+export async function mergeAutomatical(doc: NoteDoc): Promise<void> {
+  if (doc.fromDocId === null) {
+    await prisma.noteDoc.update({
+      data: { status: 'MERGE' },
+      where: { id: doc.id },
+    })
+  }
+  // { fromDocId, domain, meta, content }: NoteDraftInput
+  const fromDoc = await prisma.noteDoc.findUnique({
+    where: { id: doc.fromDocId! },
+  })
+
   throw 'Not implemented'
 }
 
@@ -150,11 +162,11 @@ class NoteDocModel {
     commitId: string,
     incomingSymbolsDict: Record<string, string>,
   ): NoteDocContent {
-    const { discussIds, symbols } = content,
+    const { discussIds, symbolIdMap } = content,
       discussIds_ = discussIds.map(e => {
         return e.commitId ? e : { ...e, commitId }
       }),
-      symbols_ = symbols.map(e => {
+      symbols_ = symbolIdMap.map(e => {
         if (e.symId === null && incomingSymbolsDict[e.symbol]) {
           return {
             ...e,
@@ -167,7 +179,7 @@ class NoteDocModel {
     return {
       ...content,
       discussIds: discussIds_,
-      symbols: symbols_,
+      symbolIdMap: symbols_,
     }
   }
 }

@@ -9,7 +9,9 @@ import {
 } from '@prisma/client'
 import cuid from 'cuid'
 import { isNumber } from 'lodash'
+import { NoteDocContent, NoteDocMeta } from '../interfaces'
 import prisma from '../prisma'
+import { getContentDiff, metaDiff } from './change-model'
 import { noteDocModel } from './note-doc-model'
 import { noteDraftModel } from './note-draft-model'
 import { symModel } from './sym-model'
@@ -82,6 +84,13 @@ async function validateDraft(id: string, userId: string) {
   if (draft.userId !== userId) {
     throw new Error('User is not the owner of the draft')
   }
+  // TODO: check if the draft is the same as curDoc
+  // if(draft.fromDocId) {
+  //   const domainChanged = draft.domain === curDoc!.domain
+  //   const metaChanged = metaDiff(curDoc!.meta as unknown as NoteDocMeta, draftParsed.meta)
+  //   const contentChanged = getContentDiff(curDoc!.content as unknown as NoteDocContent, draftParsed.content)
+  //   if (!domainChanged && !metaChange && !contentChange)
+  // }
 
   return {
     draft,

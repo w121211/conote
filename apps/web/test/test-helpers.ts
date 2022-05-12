@@ -111,7 +111,7 @@ class TestHelper {
   /**
    * Create Commit and also create Sym, Note, NoteDoc
    */
-  async createCommit(prisma: PrismaClient) {
+  async createMergeCommit(prisma: PrismaClient) {
     const sym = await prisma.sym.create({
         data: mockSyms[0],
       }),
@@ -125,6 +125,26 @@ class TestHelper {
       noteDoc = await prisma.noteDoc.create({
         data: {
           ...mockNoteDocs[1],
+          // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
+          meta: {},
+        },
+      })
+  }
+
+  async createCandidateCommit(prisma: PrismaClient) {
+    const sym = await prisma.sym.create({
+        data: mockSyms[0],
+      }),
+      note = await prisma.note.create({
+        data: mockNotes[0],
+      }),
+      // Need to create commit before note-doc so the note-doc can connect to it
+      commit = await prisma.commit.create({
+        data: mockCommits[0],
+      }),
+      noteDoc = await prisma.noteDoc.create({
+        data: {
+          ...mockNoteDocs[0],
           // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
           meta: {},
         },

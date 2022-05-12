@@ -6,6 +6,6 @@
     "composite": true,
     "declaration": true
   },
-  "include": ["src"],
+  "include": ["src", "../../apps/web/lib/models/doc-change.ts"],
   "exclude": ["**/__deprecated__", "node_modules", "**/__tests__"]
 }

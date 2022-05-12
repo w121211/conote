@@ -5,6 +5,7 @@ import { commitNoteDrafts } from '../../../lib/models/commit-model'
 import { mockNoteDrafts } from '../../__mocks__/mock-note-draft'
 import { mockUsers } from '../../__mocks__/mock-user'
 import { mockNoteDocs } from '../../__mocks__/mock-note-doc'
+import { mockCommits } from '../../__mocks__/mock-commit'
 
 beforeAll(async () => {
   // Writing required data into database
@@ -36,6 +37,7 @@ describe('commitNoteDrafts()', () => {
    * - [x] draftId cannot be found
    * - [x] fromDoc is empty but there is a latest doc
    * - [x] fromDoc does not match
+   * - [] the draft is the same as fromDoc
    *
    */
 
@@ -68,12 +70,22 @@ describe('commitNoteDrafts()', () => {
 
   it('throws if fromDoc is empty but there is a latest doc ', async () => {
     await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-    await testHelper.createCommit(prisma)
+    await testHelper.createMergeCommit(prisma)
     await expect(async () => {
       await commitNoteDrafts([mockNoteDrafts[0].id], mockUsers[0].id)
     }).rejects.toThrowErrorMatchingInlineSnapshot(
       `"FromDoc is not the latest doc of this note."`,
     )
+  })
+
+  it('draft is the same as fromDoc', async () => {
+    await testHelper.createMergeCommit(prisma)
+    const draft = { ...mockNoteDrafts[0], fromDocId: mockNoteDocs[1].id }
+    await testHelper.createNoteDrafts(prisma, [draft])
+
+    await expect(async () => {
+      await commitNoteDrafts([draft!.id], mockUsers[0].id)
+    }).rejects.toThrowErrorMatchingInlineSnapshot()
   })
 
   /**
@@ -149,16 +161,17 @@ describe('commitNoteDrafts()', () => {
   it('create noteDoc if from-doc exists', async () => {
     // Start with a draft without from-doc and simulate the first-commit to get the note-doc as from-doc
     // This way removes the hassle of caring the commit process
-    await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-    const { sym, noteDoc } = await testHelper.createCommit(prisma)
+    // await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
+    await testHelper.createMergeCommit(prisma)
+    // const fromDoc = await prisma.noteDoc.findUnique({where:{}})
     await testHelper.createNoteDrafts(prisma, [
       {
         ...mockNoteDrafts[0],
-        id: 'mock-draft-0-1_from-empty',
-        symbol: sym.symbol,
-        userId: mockUsers[1].id,
-        fromDocId: noteDoc.id,
-        domain: noteDoc.domain,
+        // id: 'mock-draft-0-1_from-empty',
+        // symbol: sym.symbol,
+        // userId: mockUsers[1].id,
+        fromDocId: mockNoteDocs[1].id,
+        domain: mockNoteDocs[1].domain,
       },
     ])
 
@@ -297,7 +310,7 @@ describe('commitNoteDrafts()', () => {
 
   it('create multiple noteDocs if one from-doc exists and the other does not', async () => {
     await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-    await testHelper.createCommit(prisma)
+    await testHelper.createMergeCommit(prisma)
     await testHelper.createNoteDrafts(prisma, [
       {
         ...mockNoteDrafts[0],
