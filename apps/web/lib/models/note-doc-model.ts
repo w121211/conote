@@ -2,6 +2,8 @@ import { NoteDoc, Prisma, PrismaPromise } from '@prisma/client'
 import { NoteDocMetaWebpageFragmentDoc } from '../../apollo/query.graphql'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
+import { getContentDiff, isMetaChanged, metaDiff } from './change-model'
+import { createMergePoll } from './poll-model'
 
 //
 // Merge functions
@@ -32,9 +34,9 @@ function merge() {
  * - no changes, the same as fromDoc  ->  move to commit-drafts input checking (implementing in validateCommit)
  *
  */
-export async function mergeAutomatical(doc: NoteDoc): Promise<void> {
+export async function mergeAutomatical(doc: NoteDoc): Promise<NoteDoc | null> {
   if (doc.fromDocId === null) {
-    await prisma.noteDoc.update({
+    return await prisma.noteDoc.update({
       data: { status: 'MERGE' },
       where: { id: doc.id },
     })
@@ -43,8 +45,23 @@ export async function mergeAutomatical(doc: NoteDoc): Promise<void> {
   const fromDoc = await prisma.noteDoc.findUnique({
     where: { id: doc.fromDocId! },
   })
-
-  throw 'Not implemented'
+  const metaChanged = isMetaChanged(
+    fromDoc!.meta as unknown as NoteDocMeta,
+    doc.meta as unknown as NoteDocMeta,
+  )
+  const contentDiff = getContentDiff(
+    fromDoc?.content as unknown as NoteDocContent,
+    doc.content as unknown as NoteDocContent,
+  )
+  // no deletions, changes to the previous-doc's content, but addition
+  // TODO: compare meta and content
+  if (doc.domain === fromDoc?.domain && !metaChanged && contentDiff.change) {
+    return await prisma.noteDoc.update({
+      data: { status: 'MERGE' },
+      where: { id: doc.id },
+    })
+  }
+  return null
 }
 
 /**
@@ -54,7 +71,7 @@ export async function mergeAutomatical(doc: NoteDoc): Promise<void> {
  * Reject on periodical checks:
  * - poll is open for a specific time && ups is lower than downs
  */
-function mergePeriodical() {
+export function mergePeriodical() {
   throw 'Not implemented'
 }
 
@@ -120,22 +137,23 @@ class NoteDocModel {
    *
    * @param incomingSymbolsDict { [symbol]: sym-id } dict
    */
-  createDoc(
+  async createDoc(
     draft: NoteDraftParsed,
     commitId: string,
     symId: string,
     userId: string,
     incomingSymbolsDict: Record<string, string>,
-  ): PrismaPromise<NoteDoc> {
+  ): Promise<NoteDoc> {
     const { branchId, fromDocId, domain, meta, content } = draft,
       content_ = this.updateContent(content, commitId, incomingSymbolsDict)
-
-    return prisma.noteDoc.create({
+    const poll = await createMergePoll({ meta: {}, userId })
+    return await prisma.noteDoc.create({
       data: {
         branch: { connect: { id: branchId } },
         sym: { connect: { id: symId } },
         commit: { connect: { id: commitId } },
         fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+        mergePoll: { connect: { id: poll.id } },
         user: { connect: { id: userId } },
         note: {
           connect: {
@@ -146,7 +164,6 @@ class NoteDocModel {
           },
         },
         domain,
-        // meta: NoteDocMetaModel.toJSON(meta),
         meta: meta as object,
         content: content_,
       },

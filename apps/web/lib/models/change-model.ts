@@ -1,7 +1,7 @@
 import { Block } from '../../components/block-editor/src/interfaces'
 import { NoteDocContent, NoteDocMeta } from '../interfaces'
 
-export function metaDiff(prevMeta: NoteDocMeta, curMeta: NoteDocMeta) {
+export function isMetaChanged(prevMeta: NoteDocMeta, curMeta: NoteDocMeta) {
   throw 'not implement'
 }
 

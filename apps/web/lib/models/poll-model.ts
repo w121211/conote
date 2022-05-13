@@ -30,3 +30,27 @@ export async function createPoll({
   }
   throw 'Prisma internal error'
 }
+
+export async function createMergePoll({
+  choices = ['UP', 'DOWN'],
+  meta,
+  userId,
+}: {
+  choices?: string[]
+  meta?: PollMeta
+  userId: string
+}): Promise<Poll & { count: PollCount }> {
+  const poll = await prisma.poll.create({
+    data: {
+      user: { connect: { id: userId } },
+      meta,
+      choices,
+      count: { create: {} },
+    },
+    include: { count: true },
+  })
+  if (hasCount(poll)) {
+    return poll
+  }
+  throw 'Prisma internal error'
+}

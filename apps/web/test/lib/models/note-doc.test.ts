@@ -3,6 +3,7 @@ import {
   noteDocModel,
   NoteDocMetaModel,
   mergeAutomatical,
+  mergePeriodical,
 } from '../../../lib/models/note-doc-model'
 import { testHelper } from '../../test-helpers'
 import { Bullet } from '../../../components/bullet/bullet'
@@ -47,9 +48,9 @@ describe('mergeAutomatical()', () => {
     const doc = await prisma.noteDoc.findUnique({
       where: { id: mockNoteDocs[1].id },
     })
-    mergeAutomatical(doc!)
-    const afterDoc = await prisma.noteDoc.findUnique({ where: { id: doc!.id } })
-    expect(afterDoc?.status).toMatchInlineSnapshot()
+    const afterDoc = await mergeAutomatical(doc!)
+    // const afterDoc = await prisma.noteDoc.findUnique({ where: { id: doc!.id } })
+    expect(afterDoc!.status).toMatchInlineSnapshot()
   })
 
   it("no deletions and changes to the previous-doc's content except for addition", async () => {
@@ -73,11 +74,11 @@ describe('mergeAutomatical()', () => {
         content: newContent,
       },
     })
-    mergeAutomatical(docToMerge)
-    const afterDoc = await prisma.noteDoc.findUnique({
-      where: { id: docToMerge.id },
-    })
-    expect(afterDoc?.status).toMatchInlineSnapshot()
+    const afterDoc = await mergeAutomatical(docToMerge)
+    // const afterDoc = await prisma.noteDoc.findUnique({
+    //   where: { id: docToMerge.id },
+    // })
+    expect(afterDoc!.status).toMatchInlineSnapshot()
   })
   it("deletions or changes to the previous-doc's content", async () => {
     await testHelper.createMergeCommit
@@ -101,11 +102,11 @@ describe('mergeAutomatical()', () => {
         content: newContent,
       },
     })
-    mergeAutomatical(docToMerge)
-    const afterDoc = await prisma.noteDoc.findUnique({
-      where: { id: docToMerge.id },
-    })
-    expect(afterDoc?.status).toMatchInlineSnapshot()
+    const afterDoc = await mergeAutomatical(docToMerge)
+    // const afterDoc = await prisma.noteDoc.findUnique({
+    //   where: { id: docToMerge.id },
+    // })
+    expect(afterDoc!.status).toMatchInlineSnapshot()
   })
   // Move to ValidateCommit
   // it('no change', async () => {
@@ -132,7 +133,15 @@ describe('mergeAutomatical()', () => {
   //   expect(resultDoc).rejects.toThrowErrorMatchingInlineSnapshot()
   // })
 })
-// noteDocModel()
+
+describe('mergePeriodical()', () => {
+  it('merge if the time is up and ups are more than downs', async () => {
+    await testHelper.createCandidateCommit(prisma)
+    const docMerged = mergePeriodical(mockNoteDocs[0])
+    expect(docMerged.status).toMatchInlineSnapshot()
+  })
+  it('reject if the time is up and downs are more than ups', () => {})
+})
 
 // describe('NoteDocMetaModel', () => {
 //   it('NoteDocMetaModel.fromJSON()', async () => {
