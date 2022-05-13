@@ -60,7 +60,7 @@ describe('blockMergeOp()', () => {
   it('merge with previous sibling', () => {
     const remove = getBlock('c4'),
       merge = getBlock('c3')
-    blockRepo.updateInChain(blockMergeChainOp(remove, merge, remove.str))
+    blockRepo.updateChain(blockMergeChainOp(remove, merge, remove.str))
     expect(() =>
       validateChildrenUids(blocksStore.getValue().entities),
     ).not.toThrow()
@@ -105,7 +105,7 @@ describe('blockMergeOp()', () => {
   it('merge with next sibling', () => {
     const remove = getBlock('c3'),
       merge = getBlock('c4')
-    blockRepo.updateInChain(blockMergeChainOp(remove, merge, remove.str))
+    blockRepo.updateChain(blockMergeChainOp(remove, merge, remove.str))
     expect(() =>
       validateChildrenUids(blocksStore.getValue().entities),
     ).not.toThrow()

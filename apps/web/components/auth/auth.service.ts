@@ -82,8 +82,9 @@ export async function getLoggedInUser(
   if (me && firebaseUser) {
     const { email } = firebaseUser
 
-    if (email === null) throw new Error('[getLoggedInUser] email === null')
-
+    if (email === null) {
+      throw new Error('[getLoggedInUser] email === null')
+    }
     return { id: me.id, email }
   }
   if (me === null && firebaseUser === null) {
@@ -98,7 +99,7 @@ export async function getLoggedInUser(
     return null
   }
 
-  console.debug('Unexpected case')
+  console.debug('[getLoggedInUser] Unexpected case')
   // await logout(firebaseAuth, apolloClient)
   return null
 }

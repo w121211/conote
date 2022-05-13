@@ -1,4 +1,28 @@
 import { Token } from 'prismjs'
+import { NoteDocMetaInput as GQLNoteDocMetaInput } from 'graphql-let/__generated__/__types__'
+import {
+  DiscussFragment,
+  NoteDraftEntryFragment,
+  NoteDraftFragment,
+  NoteFragment,
+} from '../../../apollo/query.graphql'
+
+//
+// GraphQL datatypes (server-side)
+//
+//
+//
+//
+//
+//
+
+export type GQLDiscuss = DiscussFragment
+
+export type GQLNote = NoteFragment
+
+export type GQLNoteDraft = NoteDraftFragment
+
+export type GQLNoteDraftEntry = NoteDraftEntryFragment
 
 //
 // Component State - commonly used in various components & handlers
@@ -141,18 +165,27 @@ export type Block = {
   editTime?: number // TBC, consider to drop
 }
 
+export type BlockWithChildren = Block & { children: BlockWithChildren[] }
+
 /**
  * In athensresearch, 'Doc' is named as 'Node' and 'Page',
- * with a concept of node-block (node-page-block), ndoe-title, page-title, page-block (or context-block)
+ * alone with a concept of node-block (node-page-block), ndoe-title, page-title, page-block (or context-block)
  */
 export type Doc = {
-  title: string // use as id, no duplicated titles area allowed
-  blockUid: string // corresponding root block
+  // use as id, no duplicated titles area allowed
+  title: string
 
-  noteCopy?: Note // the latest note by query
-  noteDraftCopy?: NoteDraft // the latest note-draft
+  // corresponding root block
+  blockUid: string
 
-  noteMeta?: NoteMeta // updates in note meta
+  // the latest note by query
+  noteCopy?: GQLNote
+
+  // the latest note-draft
+  noteDraftCopy?: GQLNoteDraft
+
+  // updates in note meta
+  noteMeta?: GQLNoteDocMetaInput
 }
 
 export type EditorProps = {
@@ -187,45 +220,6 @@ export type EditorProps = {
     // (future) when open a block
     blockUid?: string
   }
-}
-
-//
-// Server-side datatypes
-//
-//
-//
-//
-//
-//
-
-export type Discuss = {
-  id: string
-  title: string
-}
-
-type NoteMeta = {
-  webTitle?: string
-  keywords?: string[]
-}
-
-export type Note = {
-  id: string
-  branch: string
-  symbol: string
-  doc: NoteDoc
-}
-
-export type NoteDoc = {
-  id: string
-  userId: string
-  noteMeta: NoteMeta
-  content: Block[]
-}
-
-export type NoteDraft = {
-  id: string
-  content: Block[]
-  fromNoteDocId?: string
 }
 
 //

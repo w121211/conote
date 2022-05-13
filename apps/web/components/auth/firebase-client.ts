@@ -14,7 +14,7 @@ const config: FirebaseOptions = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
 }
 
-const getFirebaseConfig = (): FirebaseOptions => {
+function getFirebaseConfig(): FirebaseOptions {
   if (!config || !config.apiKey) {
     throw new Error(
       'No Firebase configuration object provided.\n' +
@@ -25,11 +25,11 @@ const getFirebaseConfig = (): FirebaseOptions => {
   }
 }
 
-export const getFirebaseClient = () => {
+export function getFirebaseClient() {
   return getApps().length > 0 ? getApp() : initializeApp(getFirebaseConfig())
 }
 
-export const useFirebaseClient = (): FirebaseApp => {
+export function useFirebaseClient(): FirebaseApp {
   const client = useMemo(() => getFirebaseClient(), [])
   return client
 }

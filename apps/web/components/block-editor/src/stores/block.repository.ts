@@ -81,6 +81,9 @@ export function getBlockChildren(uid: string): Block[] {
   return children
 }
 
+// export function getBlockAndChildren(uid: string): Block {
+// }
+
 class BlockRepository {
   undo() {
     blocksStateHistory.undo()
@@ -94,6 +97,10 @@ class BlockRepository {
     blocksStateHistory.clear()
   }
 
+  getBlockWithChildren(uid: string) {
+    return getBlock(uid)
+  }
+
   getBlock$(uid: string) {
     return blocksStore.pipe(
       selectEntity(uid),
@@ -101,7 +108,7 @@ class BlockRepository {
     )
   }
 
-  getBlockChildren$(uid?: string): Observable<Block[]> {
+  getBlockChildren$(uid: string): Observable<Block[]> {
     // const children$ = blocksStore.pipe(selectManyByPredicate(e => e.parentUid === uid))
     // return this.getBlock$(uid).pipe(
     //   combineLatestWith(children$),
@@ -109,9 +116,9 @@ class BlockRepository {
     //     return block ? { ...block, children } : undefined
     //   }),
     // )
-    if (uid === undefined) {
-      return of([])
-    }
+    // if (uid === undefined) {
+    //   return of([])
+    // }
     return blocksStore.pipe(
       selectManyByPredicate(e => e.parentUid === uid),
       map(e => {

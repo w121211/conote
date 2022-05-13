@@ -235,7 +235,7 @@ function updateQuery(
       term = termStartIdx !== null && head.substring(termStartIdx) + key
 
     if (term) {
-      searchFn(term).then((hits) => {
+      searchFn(term).then(hits => {
         if (type === 'slash' && hits.length === 0) {
           setSearch(nullSearch)
         } else {
@@ -356,8 +356,6 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
     isSelection = selection.length > 0,
     isStart = start === 0,
     isEnd = end === value.length,
-    // { results, type, index } = state.search,
-    // { caretPosition } = state,
     { top, height } = caret,
     textareaHeight = target.offsetHeight, // this height is accurate, but caret-position height is not updating
     rows = Math.round(textareaHeight / height),
@@ -376,9 +374,14 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
       return
     } else if (right) {
       return
-      // } else if ((up && topRow) || (down && bottomRow)) {
-      //   //
-      // }
+    } else if (up && topRow) {
+      e.stopPropagation()
+      target.blur()
+      events.selectionAddItem(uid, 'first')
+    } else if (down && bottomRow) {
+      e.stopPropagation()
+      target.blur()
+      events.selectionAddItem(uid, 'last')
     }
   }
 
@@ -403,7 +406,7 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
   // }
 
   //
-  else if (selection) {
+  else if (isSelection) {
     return
   }
 
@@ -413,14 +416,19 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
   //   ;; going LEFT at **0th index** should always go to **last index** of block **above**
   //   ;; last index is special - always go to last index when going up or down
   else if ((left && isStart) || (up && isEnd)) {
+    e.preventDefault()
     events.up(uid, 'end')
   } else if (down && isEnd) {
+    e.preventDefault()
     events.down(uid, 'end')
   } else if (right && isEnd) {
+    e.preventDefault()
     events.down(uid, 0)
   } else if (up && topRow) {
+    e.preventDefault()
     events.up(uid, charOffset)
   } else if (down && bottomRow) {
+    e.preventDefault()
     events.down(uid, charOffset)
   }
 }
@@ -566,7 +574,7 @@ function handlePairChar({ e, setSearch, localStr }: TextareaKeyDownArgs) {
         doubleBrackets = fourChar === '[[]]',
         type = doubleBrackets ? 'page' : null
 
-      searchService.searchNote(selection).then((v) => {
+      searchService.searchNote(selection).then(v => {
         if (type) setSearch({ type, term: selection, hits: v, hitIndex: null })
       })
     }
@@ -685,11 +693,10 @@ export function textareaKeyDown(args: TextareaKeyDownArgs) {
         caretPosition = getCaretCoordinates(
           currentTarget,
           currentTarget.selectionEnd,
-          {
-            debug: true,
-          },
+          { debug: true },
         )
       setCaret(caretPosition)
+      args.caret = caretPosition
     }
 
     // ;; dispatch center

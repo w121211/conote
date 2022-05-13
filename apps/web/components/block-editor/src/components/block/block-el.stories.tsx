@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react'
 import { setEntities } from '@ngneat/elf-entities'
-import { ComponentStory, ComponentMeta } from '@storybook/react'
-import { blockRepo } from '../../stores/block.repository'
+import { ComponentMeta } from '@storybook/react'
+import { blockRepo, blocksStore } from '../../stores/block.repository'
 import { BlockEl } from './block-el'
-import { mockLocalDoc } from '../../../test/__mocks__/mock-data'
 import { mockBlocks } from '../../../test/__mocks__/mock-block'
 import { TooltipProvider } from '../../../../../layout/tooltip/tooltip-provider'
+import { writeBlocks } from '../../utils'
+
+// Need to place outside of the component
+const basicBlocks = writeBlocks(['a', ['b', 'c']])
 
 export default {
   title: 'BlockEditor/BlockEl',
@@ -22,6 +25,17 @@ export default {
 // }
 
 export const Basic = () => {
+  blockRepo.clearHistory()
+  blockRepo.update([setEntities(basicBlocks)])
+
+  return (
+    // <TooltipProvider>
+    <BlockEl uid={basicBlocks[0].uid} isEditable />
+    // </TooltipProvider>
+  )
+}
+
+export const Demo = () => {
   // (BUG) useEffect throws error, possibly caused by storybook
   // useEffect(() => {
   //   blockRepo.clearHistory()
@@ -35,5 +49,33 @@ export const Basic = () => {
     <TooltipProvider>
       <BlockEl uid={mockBlocks[0].uid} isEditable />
     </TooltipProvider>
+  )
+}
+
+export const Textarea = () => {
+  const value = '012345678\n012345678\n012345678\n'
+  return (
+    <textarea
+      rows={4}
+      value={value}
+      onKeyUp={e => {
+        const { currentTarget, target } = e
+        const t = target as HTMLTextAreaElement
+        console.log(
+          'keyup',
+          currentTarget.selectionStart,
+          currentTarget.selectionDirection,
+        )
+      }}
+      onKeyDown={e => {
+        const { currentTarget, target } = e
+        const t = target as HTMLTextAreaElement
+        console.log(
+          'keydown',
+          currentTarget.selectionStart,
+          currentTarget.selectionDirection,
+        )
+      }}
+    ></textarea>
   )
 }

@@ -60,7 +60,7 @@ describe('blockMergeWithUpdatedChainOp()', () => {
   it('merge with previous sibling', () => {
     const remove = getBlock('c4'),
       merge = getBlock('c3')
-    blockRepo.updateInChain(
+    blockRepo.updateChain(
       blockMergeWithUpdatedChainOp(remove, merge, remove.str, merge.str),
     )
     expect(() =>
@@ -107,7 +107,7 @@ describe('blockMergeWithUpdatedChainOp()', () => {
   it('merge with next sibling', () => {
     const remove = getBlock('c3'),
       merge = getBlock('c4')
-    blockRepo.updateInChain(
+    blockRepo.updateChain(
       blockMergeWithUpdatedChainOp(remove, merge, remove.str, merge.str),
     )
     expect(() =>
@@ -154,7 +154,7 @@ describe('blockMergeWithUpdatedChainOp()', () => {
   it('merge with parent', () => {
     const remove = getBlock('d5'),
       merge = getBlock('c3')
-    blockRepo.updateInChain(
+    blockRepo.updateChain(
       blockMergeWithUpdatedChainOp(remove, merge, remove.str, merge.str),
     )
     expect(() =>

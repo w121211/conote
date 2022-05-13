@@ -69,7 +69,9 @@ type Query {
   myNoteDraftEntries: [NoteDraftEntry!]!
 
   # throws error if not found
-  note(id: ID!): Note!
+  noteById(id: ID!): Note!
+
+  noteByBranchSymbol(branch: String!, symbol: String!): Note
 
   # get noteDoc and throws error if not found
   noteDoc(id: ID!): NoteDoc!
@@ -224,9 +226,14 @@ type Mutation {
   commitNoteDrafts(draftIds: [ID!]!): NoteDraftCommitResponse!
 
   # not sure about the type of meta, which is for creating from existing note
-  createNoteDraft(symbol: String!, draftInput: NoteDraftInput!): NoteDraft!
+  createNoteDraft(
+    branch: String!
+    symbol: String!
+    draftInput: NoteDraftInput!
+  ): NoteDraft!
 
   createNoteDraftByLink(
+    branch: String!
     linkId: String!
     draftInput: NoteDraftInput!
   ): NoteDraft!
@@ -494,10 +501,18 @@ type Commit {
 
 type Note {
   id: ID!
+
+  # branch name
+  branch: String!
+
   sym: Sym!
   link: Link
-  meta: NoteDocMeta!
-  doc: NoteDoc! # the latest merged NoteDoc, throw error if there is none (it's impossible to be null because first NoteDoc will auto-merge to the newly-built Note)
+
+  # meta: NoteDocMeta!
+
+  # the latest merged NoteDoc, throw error if there is none (it's impossible to be null because first NoteDoc will auto-merge to the newly-built Note)
+  doc: NoteDoc!
+
   updatedAt: DateTime!
 }
 
@@ -509,7 +524,10 @@ type NoteDoc {
   userId: String!
   status: NoteDocStatus!
   domain: String!
-  meta: NoteDocMeta # not sure about this type
+
+  # meta is updated through commiting the note-doc
+  meta: NoteDocMeta!
+
   content: NoteDocContent!
   updatedAt: DateTime!
 }
@@ -527,9 +545,15 @@ type NoteDocEntry {
 }
 
 type NoteDocMeta {
-  duplicatedSymbols: [String] # store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
-  keywords: [String] # note keywords
-  redirectFroms: [String] # used when duplicate symbol exists
+  # store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
+  duplicatedSymbols: [String]
+
+  # note keywords
+  keywords: [String]
+
+  # used when duplicate symbol exists
+  redirectFroms: [String]
+
   redirectTo: String
   webpage: NoteDocMetaWebpage
 }
@@ -537,8 +561,12 @@ type NoteDocMeta {
 type NoteDocMetaWebpage {
   authors: [String]
   title: String
-  publishedAt: DateTime # when the webpage content publish at
-  tickers: [String] # tickers mentioned in the webpage content
+
+  # when the webpage content publish at
+  publishedAt: DateTime
+
+  # tickers mentioned in the webpage content
+  tickers: [String]
 }
 
 type NoteDraft {

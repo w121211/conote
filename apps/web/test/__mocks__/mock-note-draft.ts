@@ -22,7 +22,7 @@ export const mockNoteDrafts: Omit<
     meta: {},
     content: {
       discussIds: [],
-      symbols: [
+      symbolIdMap: [
         { symbol: '[[Google]]', symId: null },
         { symbol: '$BA', symId: null },
       ],
@@ -48,7 +48,7 @@ export const mockNoteDrafts: Omit<
         { blockUid: 'uid-1', discussId: mockDiscusses[1].id },
         { blockUid: 'uid-1', discussId: mockDiscusses[2].id },
       ],
-      symbols: [],
+      symbolIdMap: [],
       blocks: mockBlocks,
     },
     createdAt: new Date(),
@@ -67,14 +67,14 @@ export const mockNoteDrafts: Omit<
     meta: {},
     content: {
       discussIds: [],
-      symbols: [],
+      symbolIdMap: [],
       blocks: mockBlocks,
     },
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
-    id: 'mock-draft-1_got-discusses',
+    id: 'mock-draft-3_got-discusses-with-commitId',
     symbol: mockSyms[1].symbol,
     userId: mockUsers[1].id,
 
@@ -98,18 +98,15 @@ export const mockNoteDrafts: Omit<
           commitId: 'commit-id-1',
         },
       ],
-      symbols: [],
+      symbolIdMap: [],
       blocks: mockBlocks,
     },
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
-    id: 'mock-draft-3_got-linkId-but-no-from-doc',
-
-    // web-note use url as symbol
+    id: 'mock-draft-4_got-linkId',
     symbol: mockLinks[0].url,
-
     userId: mockUsers[1].id,
     fromDocId: null,
     linkId: mockLinks[0].id,
@@ -118,7 +115,7 @@ export const mockNoteDrafts: Omit<
     meta: {},
     content: {
       discussIds: [],
-      symbols: [],
+      symbolIdMap: [],
       blocks: mockBlocks,
     },
     createdAt: new Date(),

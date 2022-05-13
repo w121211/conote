@@ -1,12 +1,12 @@
 import {
   Block,
-  Doc,
+  GQLNote,
+  GQLNoteDraft,
   InlineDiscuss,
-  Note,
-  NoteDraft,
   SearchHit,
 } from '../../src/interfaces'
 import { writeBlocks } from '../../src/utils'
+import { mockBlocks } from './mock-block'
 
 //
 // Mock note, note-draft
@@ -19,27 +19,27 @@ import { writeBlocks } from '../../src/utils'
 
 type MockQuerySymbolResult = {
   title: string
-  note?: Note
-  draft?: NoteDraft
+  note?: GQLNote
+  draft?: GQLNoteDraft
 }
 
-const mockBlocks: Block[] = [
-  {
-    uid: '8YKgEDhlUX',
-    str: '[[Hello Note]]',
-    docTitle: '[[Hello Note]]',
-    order: 0,
-    parentUid: null,
-    childrenUids: ['15aO4YfzgD'],
-  },
-  {
-    uid: '15aO4YfzgD',
-    str: 'a [[Hello Note]] child block',
-    order: 0,
-    parentUid: '8YKgEDhlUX',
-    childrenUids: [],
-  },
-]
+// const mockBlocks: Block[] = [
+//   {
+//     uid: '8YKgEDhlUX',
+//     str: '[[Hello Note]]',
+//     docTitle: '[[Hello Note]]',
+//     order: 0,
+//     parentUid: null,
+//     childrenUids: ['15aO4YfzgD'],
+//   },
+//   {
+//     uid: '15aO4YfzgD',
+//     str: 'a [[Hello Note]] child block',
+//     order: 0,
+//     parentUid: '8YKgEDhlUX',
+//     childrenUids: [],
+//   },
+// ]
 
 const mockDraftFromNoteBlocks: Block[] = [
   {
@@ -149,22 +149,50 @@ const gotNoteAndDraftBlocks = writeBlocks([
     ['child 3', ['child-child 1', 'child-child 2']],
   ],
 ])
+
 export const mockGotNoteAndDraft: MockQuerySymbolResult = {
   title: '[[Got Note And Draft]]',
   note: {
-    symbol: '[[Got Note And Draft]]',
+    __typename: 'Note',
     id: 'ttsZotJMy9',
     branch: 'playground',
+    updatedAt: '',
+    sym: {
+      __typename: 'Sym',
+      id: '',
+      type: 'TOPIC',
+      symbol: '[[Got Note And Draft]]',
+    },
     doc: {
+      __typename: 'NoteDoc',
       id: 'isy9ApWV0c',
+      commitId: 'string',
+      fromDocId: undefined,
       userId: 'nESCpMF5lg',
-      noteMeta: {},
-      content: gotNoteAndDraftBlocks,
+      status: 'MERGE',
+      domain: '',
+      meta: {},
+      content: {
+        discussIds: [],
+        diff: {},
+        symbolIdDict: {},
+        blocks: gotNoteAndDraftBlocks,
+      },
+      updatedAt: '',
     },
   },
   draft: {
+    __typename: 'NoteDraft',
     id: 'afxAdVY2U',
-    content: gotNoteAndDraftBlocks,
+    userId: '',
+    updatedAt: '',
+    status: 'EDIT',
+    content: {
+      discussIds: [],
+      diff: {},
+      symbolIdDict: {},
+      blocks: gotNoteAndDraftBlocks,
+    },
   },
 }
 
@@ -206,46 +234,9 @@ export const mockSearchHit = {
 export const mockLocalDoc = {
   doc: {
     title: '[[Mock Local Doc]]',
-    blockUid: 'Nu9RRlYtUm',
+    blockUid: mockBlocks[0].uid,
   },
-  blocks: [
-    {
-      uid: 'Nu9RRlYtUm',
-      docTitle: '[[Mock Local Doc]]',
-      parentUid: null,
-      order: 0,
-      childrenUids: ['v3HRC2gEyq1', 'v3HRC2gEyq2', 'v3HRC2gEyq3'],
-      str: '[[Mock Local Doc]]',
-    },
-    {
-      uid: 'v3HRC2gEyq1',
-      parentUid: 'Nu9RRlYtUm',
-      order: 0,
-      childrenUids: [],
-      str: 'child block 1',
-    },
-    {
-      uid: 'v3HRC2gEyq2',
-      parentUid: 'Nu9RRlYtUm',
-      order: 1,
-      childrenUids: [],
-      str: 'child block 2',
-    },
-    {
-      uid: 'v3HRC2gEyq3',
-      parentUid: 'Nu9RRlYtUm',
-      order: 2,
-      childrenUids: [],
-      str: 'child block 3',
-    },
-    {
-      uid: 'ttsZotJMy91',
-      parentUid: 'v3HRC2gEyq1',
-      order: 0,
-      childrenUids: [],
-      str: 'child of child block 1',
-    },
-  ],
+  blocks: mockBlocks,
 }
 
 //

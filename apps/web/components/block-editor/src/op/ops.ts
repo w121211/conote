@@ -549,7 +549,9 @@ export function docLoadOp(
 /**
  * Create a new doc
  * - if note is given, use note-doc as start
- * - if note is null, a blank doc is created
+ * - if note is null
+ *   - if title is url, query url & create a blank web-note doc
+ *   - others, create a blank doc
  */
 export function docNewOp(
   title: string,
@@ -656,3 +658,50 @@ export function docSaveOp(doc: Doc, draft: NoteDraft): DocReducer[] {
 // export function shortcutRemoveOp() {}
 
 // export function shortcutMoveOp() {}
+
+//
+// Common Ops
+//
+//
+//
+//
+//
+//
+
+// /**
+//  * "Convert internal representation to the vector of atomic operations that would create it.
+//   :block/save operations are grouped at the end so that any ref'd entities are already created."
+//  */
+// function internalRepresentation_atomicOps(db, internalRepresentation defaultPosition) {
+//   enhanceInternalRepresentation(internalRepresentation)
+
+// }
+
+// /**
+//  *   "For blocks creates `:block/new` and `:block/save` event and for page creates `:page/new`
+//    Arguments:
+//    - `db` db value
+//    - `uid` uid of the block where the internal representation needs to be pasted
+//    - `internal-representation` of the pages/blocks selected"
+
+//    ;; The parent of block depends on:
+//          ;; - if the current block is open and has chidren : if this is the case then we want the blocks to be pasted
+//          ;;   under the current block as its first children
+//          ;; - else the parent is the current block's parent
+
+//     ;; - If the block is empty then we delete the empty block and add new blocks. So in this case
+//          ;;   the block order for the new blocks is the same as deleted blocks order.
+//          ;; - If the block is parent then we want the blocks to be pasted as this blocks first children
+//          ;; - If the block is not empty then add the new blocks after the current one.
+//  */
+// export function pasteOp(db, uid, localStr, internalRepresentation) {
+//   const currentBlockParentUid = getParent(uid),
+//     { order, childrenUids, str, open } = getBlock(uid),
+//     isCurrentBlockParent = children && open,
+//     isEmptyBlock = localStr.length === 0 && childrenUids.length === 0,
+//     isNewBlockStr = localStr !== str,
+//     blockSaveOp = isNewBlockStr && blockSaveOp()
+
+//     // newBlockOrder = isEmptyBlock ?
+
+// }

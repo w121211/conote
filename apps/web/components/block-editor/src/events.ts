@@ -20,9 +20,12 @@ import { genBlockUid, isDocBlock, writeBlocks } from './utils'
 import { isInteger } from 'lodash'
 import { nextBlock, nthSiblingBlock, prevBlock } from './op/queries'
 import { docRepo, getDoc } from './stores/doc.repository'
-import { draftService } from './services/draft.service'
+import { getNoteDraftService } from './services/note-draft.service'
 import { editorRepo } from './stores/editor.repository'
-import { noteService } from './services/note.service'
+import { getNoteService } from './services/note.service'
+
+const noteService = getNoteService(),
+  noteDraftService = getNoteDraftService()
 
 //
 // History Events
@@ -89,8 +92,6 @@ export function backspace(
   value: string,
   maybeLocalUpdates?: string,
 ) {
-  // const rootEmbed = false,
-  // [uid, embedId] = uidAndEmbedId(_uid),
   const block = getBlock(uid),
     { order, parentUid } = block,
     children = getBlockChildren(uid),
@@ -166,7 +167,7 @@ export function enter(uid: string, dKeyDown: DestructTextareaKeyEvent) {
   } else if (start === 0 && value) {
     enterBumpUp(block, newUid)
   } else {
-    console.debug('[enter]', { uid, dKeyDown, block, parent })
+    console.error('[enter]', { uid, dKeyDown, block, parent })
     throw new Error('[enter]')
   }
 }
@@ -301,7 +302,6 @@ export function backspaceDeleteMergeBlock(
 
 export function backspaceDeleteMergeBlockWithSave(
   block: Block,
-  // uid: string,
   value: string,
   prevBlock: Block,
   localUpdate?: string,
@@ -332,6 +332,7 @@ export function blockMove(
   targetRel: BlockPositionRelation,
 ) {
   const block = getBlock(sourceUid)
+
   blockRepo.update(
     ops.blockMoveOp(block, { refBlockUid: targetUid, relation: targetRel }),
   )
@@ -342,13 +343,10 @@ export function blockOpen(uid: string, open: boolean) {
 }
 
 export function blockSave(uid: string, str: string) {
-  console.debug('save', str)
+  // console.debug('save', str)
 
   const block = getBlock(uid),
     doNothing = block.str === str
-
-  console.log(block.str, str)
-  console.log(block.str === str)
 
   if (block.docTitle) {
     throw new Error('[blockSave] doc-block not allow to change string')
@@ -491,6 +489,22 @@ export function mouseDownUnset() {
 }
 
 //
+// Paste Events
+//
+//
+//
+//
+//
+//
+// export function pasteInternal(
+//   uid: string,
+//   localStr: string,
+//   internalRepresentation,
+// ) {
+//   // ops.
+// }
+
+//
 // Selction Events
 //
 //
@@ -568,8 +582,8 @@ function selectUp(selectedItems: string[]): string[] {
     // ;; if prev block is parent, replace editing/uid and first item w parent; remove children
   } else if (parent && prev && parent.uid === prev.uid) {
     const parentChildren = parent.childrenUids,
-      toKeep = selectedItems.filter(e => !parentChildren.includes(e)),
-      newItems = [prev.uid, ...toKeep]
+      toKeep = selectedItems.filter(e => !parentChildren.includes(e))
+    newItems = [prev.uid, ...toKeep]
   } else if (prev) {
     newItems = [prev.uid, ...selectedItems]
   }
@@ -620,6 +634,11 @@ export function selectedDown(selectedItems: string[]) {
 // }
 
 /**
+ * Doc's title is set as 'symbol' and acts as 'uid'
+ * If doc is found in repository (local memory), no need to query,
+ * otherwise, query 'note', 'draft' from server and store in local
+ * doc-el-component will update the doc by title through rxjs
+ *
  * If local-doc found, do nothing
  * If local-doc not found, find remote-note-draft
  * If remote-note-draft not found, create local-doc from note-doc
@@ -628,13 +647,13 @@ export function selectedDown(selectedItems: string[]) {
  */
 export async function docOpen(title: string) {
   if (docRepo.findDoc(title)) {
-    console.debug('found local-doc, return ' + title)
+    // console.debug('found local-doc, return ' + title)
     return
   }
 
   const [note, draft] = await Promise.all([
     noteService.queryNote(title),
-    draftService.queryDraft(title),
+    noteDraftService.queryDraft(title),
   ])
   const op = draft
     ? ops.docLoadOp(title, draft, note)
@@ -657,7 +676,7 @@ export async function docSave(doc: Doc) {
  */
 export async function docRemove(doc: Doc) {
   if (doc.noteDraftCopy) {
-    const resp = await draftService.removeDraft(doc.noteDraftCopy.id)
+    const resp = await noteDraftService.removeDraft(doc.noteDraftCopy.id)
   }
   const { blockReducers, docReducers } = ops.docRemoveOp(doc)
 
@@ -770,7 +789,7 @@ export async function editorRouteUpdate({
   } else {
     // unexpected case
   }
-  // console.debug(mainSymbol, modalSymbol, mainSymbolChanged, modalSymbolChanged)
+  console.debug(mainSymbol, modalSymbol, mainSymbolChanged, modalSymbolChanged)
 }
 
 //

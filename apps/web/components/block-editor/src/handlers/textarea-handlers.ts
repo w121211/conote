@@ -1,5 +1,6 @@
 import { difference, intersection, union } from 'lodash'
 import * as events from '../events'
+import { DestructTextareaKeyEvent } from '../interfaces'
 import { rfdbRepo } from '../stores/rfdb.repository'
 import { getDatasetChildrenUid, getDatasetUid } from '../utils'
 
@@ -96,37 +97,65 @@ export function findSelectedItems(
   }
 }
 
-// const textareaPaste = (e, _uid, state) => {
-//   const data = e.clipboardData,
-//     textData = data.getData('text/plain'),
-//     internalPresentation = data.getData('application/athens-representation'),
-//     // internal representation
-//     internal = seq(internalPresentation),
-//     newUids = newUidsMap(internalPresentation),
-//     reprWithNewUids = updateUids(internalPresentation, newUids),
-//     // images in clipboard
-//     items = arraySeq(e.clipboardData.items),
-//     { head, tail } = destructTarget(e.target),
-//     imgRegex = /#"(?i)^image\/(p?jpeg|gif|png)$"/,
-//     callback = () => {},
-//     // external to internal representation
-//     textToInter = textData !== '' && textToInternalPresentation(textData),
-//     lineBreaks = reFind(/\r?\n/, textData),
-//     noShift = state.lastKeydown !== 'shift'
+/**
+ * "Clipboard data can only be accessed if user triggers JavaScript paste event.
+  Uses previous keydown event to determine if shift was held, since the paste event has no knowledge of shift key.
 
-//   if (internal) {
-//     e.preventDefaul()
-//     dispatchEvent('paste-internal', uid, state.string.local, reprWithNewUids)
-//   } else if (seq(filter())) {
-//     // For images
-//   } else if (lineBreaks && noShift) {
-//     e.preventDefaul()
-//     dispatchEvent('paste-internal', uid, state.string.local, textToInter)
-//   } else if (noShift) {
-//     e.preventDefaul()
-//     dispatchEvent('paste-verbatim', uid, textData)
-//   }
-// }
+  Image Cases:
+  - items N=1, image/png
+  - items N=2, text/html and image/png
+  For both of these, just write image to filesystem. Roam behavior is to copy the <img> src and alt of the copied picture.
+  Roam's approach is useful to preserve the original source url and description, but is unsafe in case the link breaks.
+  Writing to filesystem (or to Firebase a la Roam) is useful, but has storage costs.
+  Writing to filesystem each time for now until get feedback otherwise that user doesn't want to save the image.
+  Can eventually become a setting.
+
+  Plaintext cases:
+  - User pastes and last keydown has shift -> default
+  - User pastes and clipboard data doesn't have new lines -> default
+  - User pastes without shift and clipboard data has new line characters -> PREVENT default and convert to outliner blocks"
+ */
+export function textareaPaste(
+  e: React.ClipboardEvent<HTMLTextAreaElement>,
+  lastKeyDown: DestructTextareaKeyEvent | null,
+) {
+  const data = e.clipboardData
+
+  if (data) {
+    const textData = data.getData('text/plain'),
+      internalRepresentation = JSON.parse(
+        data.getData('application/athens-representation'),
+      ),
+      lineBreaks = reFind(/\r?\n/, textData)
+
+    if (internalRepresentation && Array.isArray(internalRepresentation)) {
+      // With internal representation
+      // internal = internalRepresentation ,
+      // newUids = newUidsMap(internalPresentation),
+      // reprWithNewUids = updateUids(internalPresentation, newUids),
+      e.preventDefault()
+      // dispatchEvent('paste-internal', uid, state.string.local, reprWithNewUids)
+      events.pasteInternal()
+    } else if (seq(filter())) {
+      // images in clipboard
+      // items = arraySeq(e.clipboardData.items),
+      // { head, tail } = destructTarget(e.target),
+      // imgRegex = /#"(?i)^image\/(p?jpeg|gif|png)$"/,
+      // callback = () => {},
+      // For images
+    } else if (lineBreaks && !lastKeyDown.shift) {
+      // external to internal representation
+      // textToInter = textData !== '' && textToInternalPresentation(textData),
+      // lineBreaks = reFind(/\r?\n/, textData),
+      // noShift = state.lastKeydown !== 'shift'
+      e.preventDefault()
+      dispatchEvent('paste-internal', uid, state.string.local, textToInter)
+    } else if (noShift) {
+      e.preventDefaul()
+      dispatchEvent('paste-verbatim', uid, textData)
+    }
+  }
+}
 
 export function textareaBlur(
   event: React.ChangeEvent<HTMLTextAreaElement>,

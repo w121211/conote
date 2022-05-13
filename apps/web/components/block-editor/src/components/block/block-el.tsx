@@ -19,8 +19,6 @@ import { blockRepo, blocksStore } from '../../stores/block.repository'
 import { rfdbRepo } from '../../stores/rfdb.repository'
 import { InlineSearchEl } from '../autocomplete-search/autocomplete-search'
 import { Anchor } from './anchor'
-import { BlockBody } from './_block-body'
-import { BlockContainer } from './_block-container'
 import { BlockContent } from './block-content'
 import { DropAreaIndicator } from './drop-area-indicator'
 import { Toggle } from './toggle'
@@ -181,33 +179,23 @@ export const BlockEl = ({
     [dragTarget, setDragTarget] = useState<DragTarget | null>(null),
     [lastKeyDown, setLastKeyDown] =
       useState<DestructTextareaKeyEvent | null>(null),
-    [showEditableDom, setShowEditableDom] = useState(false)
-
-  //   const [avatarAnchorEl, setAvatarAnchorEl] =
-  //     React.useState<HTMLDivElement | null>(null)
-
-  // useEffect(() => {
-  //   console.log('isEditing ' + uid, isEditing)
-  // }, [isEditing])
-
-  if (block === undefined) {
-    // console.debug('<Block> block === undefined', uid)
-    // console.debug(blocksStore.getValue())
-    return null
-  }
-
-  // useEffect(() => {
-  //   console.log(uid, children)
-  // }, [uid, children])
-
-  const { open, str: defaultLocalStr } = block,
-    isOpen = open ?? true,
+    [showEditableDom, setShowEditableDom] = useState(false),
     childrenBlockEls = useMemo(() => {
-      // console.log('childrenBlockEls')
       return children.map(e => (
         <BlockEl key={e.uid} uid={e.uid} isEditable={isEditable} isChild />
       ))
     }, [children])
+
+  // useEffect(() => {
+  //   console.log(uid, block, children)
+  // }, [block, children])
+
+  if (block === undefined) {
+    return null
+  }
+
+  const { open, str: defaultLocalStr } = block,
+    isOpen = open ?? true
 
   return (
     <div
@@ -243,10 +231,10 @@ export const BlockEl = ({
 
       <div
         className='
-          relative 
-          grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"] 
-          grid-cols-[1em_1em_1fr_auto] 
-          grid-rows-[0_1fr_0] 
+          relative
+          grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"]
+          grid-cols-[1em_1em_1fr_auto]
+          grid-rows-[0_1fr_0]
           rounded-lg
           leading-normal
           my-1
@@ -297,6 +285,7 @@ export const BlockEl = ({
             setCaret,
             search,
             setSearch,
+            lastKeyDown,
             setLastKeyDown,
           }}
         />

@@ -257,6 +257,7 @@ v0.2.1
   - consider switch to https://typegraphql.com/
 - auth
   - [x] improve login, logout stablility -> useMe()
+  - [working@chi] update login page
   - [next] switch to next-firebase-auth once it is upport for firebase v9 (token-based)
     - for now, use firebase official example, cookie-based, no csrf
     - require both server (useMe) & firebase to logged-in, if server-side not logged in, should also revoke client-side firebase token so client-side check not remained logged-in
@@ -265,7 +266,7 @@ v0.2.1
       - token based apollo (similar to JWT?)
         - https://github.com/gladly-team/next-firebase-auth/discussions/100#discussioncomment-1215068
 - user
-  - [prior] (req) user-page, include user's notes, rates, interested fields
+  - [prior@lisa] (req) user-page, include user's notes, rates, interested fields
   - (?) anonymous user
 - link
   - try to exclude url search-params by comparing html page @ref
@@ -323,14 +324,14 @@ v0.2.1
 - give & take
   - share cards
   - credit
-- testing
+- [pending] testing
   - assign leader
   - testin user experience, max 10 users, free note writing -> [[conote dev]], feedbacks/improves
 - prisma
-  - add a short id and not use cuid in front-end
-- doc
-  - check note-copy is in sync with the latest note
-    - update note-meta should first check is the latest card
+  - [-] add a short id and not use cuid in front-end
+- [-] doc
+  - [-] check note-copy is in sync with the latest note
+    - [-] update note-meta should first check is the latest card
 - [@hsuan] invite code
 - [@lisa] i18n https://react.i18next.com/
 - [@lisa] storybook
@@ -339,7 +340,7 @@ v0.2.1
     - [] gray-bg
   - block-editor
     - block
-      - [] selected block
+      - [x] selected block
       - [] block drag-drop indicator
     - doc
       - [] doc-template (easy test bed for parse-render), include inline-items: discuss, symbol, url, comment
@@ -351,9 +352,11 @@ v0.2.1
   - global search
   - user page gray
 - [@chi] block-editor
+  - block
+    - [x] (bug) unexpected behavior on block merge, split
   - modal editor
     - [x] basic
-    - [] switch between titles or close
+    - [x] switch between titles or close
   - template
     - [] create a template
   - inline items
@@ -362,13 +365,20 @@ v0.2.1
   - [x] auto complete
   - redo/undo
     - [x] basic redo/undo through elf/history
+    - [urgent] (issue) unable to redo while editing
     - [] (issue) caret lost after undo
     - [] textarea value undo, redo
     - [] textarea value lost after undo
   - select
     - [x] mouse select
+      - [] (bug) not works on firefox
     - [x] keyboard select
-    - [] rewrite findSelectedItems
+      - [x] left, right arrow key can trigger deselect
+      - [x] (bug) select + bksp/delete -> error
+      - [pending] (bug) cursor on second line + shift + up-key, won't trigger to select the whole block when hit the top line (vice versa is working normally)
+        => it is caused by onKeyDownEvent.currentTarget.selectionEnd not reflect the real caret position, need to use onKeyUp event to tackle this special case
+      - [] (issue) select + delete -> cursor lost
+    - [pending] rewrite findSelectedItems
   - [x] drag and drop (not fully tested)
   - copy and paste
     - [] external
@@ -376,8 +386,9 @@ v0.2.1
   - doc store
     - [] seperated blocks store for each doc
   - doc save
+  - [] (bug) key-down 'enter' on block-start unexpected behavior
 - check
-  - seed
+  - [working@chi] seed
   - [x] discuss emoji, note emoji test add-with-auto-remove -> backend like unlinke return mutations
   - [x] discuss post
   - discuss -> inline-discuss

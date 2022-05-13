@@ -1,15 +1,14 @@
 import { AppProps } from 'next/app'
 import { ApolloProvider } from '@apollo/client'
-import { useApollo } from '../apollo/apollo-client'
+import { useApolloClientSSR } from '../apollo/apollo-client-ssr'
 import '../style/global.css'
 import ModalProvider from '../components/modal/modal-context'
 import Script from 'next/script'
-import ChannelProvider from '../components/domain/domain-context'
+import ChannelProvider from '../components/channel/channel-context'
 import { TooltipProvider } from '../layout/tooltip/tooltip-provider'
-import { ThemeProvider } from '../components/theme/theme-provider'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
-  const apolloClient = useApollo(pageProps.initialApolloState)
+  const apolloClient = useApolloClientSSR(pageProps.initialApolloState)
 
   return (
     // <UserProvider>
@@ -37,15 +36,11 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         }}
       /> */}
       <ApolloProvider client={apolloClient}>
-        {/* <ChannelProvider> */}
-        <ThemeProvider>
-          <TooltipProvider>
-            <ModalProvider>
-              <Component {...pageProps} />
-            </ModalProvider>
-          </TooltipProvider>
-        </ThemeProvider>
-        {/* </ChannelProvider> */}
+        <TooltipProvider>
+          <ModalProvider>
+            <Component {...pageProps} />
+          </ModalProvider>
+        </TooltipProvider>
       </ApolloProvider>
     </>
   )

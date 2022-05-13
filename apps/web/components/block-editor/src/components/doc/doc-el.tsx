@@ -225,8 +225,8 @@ export const DocEl = ({
 
   // const [docBlock] = useObservable(blockRepo.getBlock$(doc.blockUid))
 
-  // (BUG) `useObservable` set docBlock as `null` initially if default value is `undefined`
-  //   however, the return type will not include `null`
+  // (BUG) useObservable set docBlock as null initially if default value is undefined
+  // however, the return type will not include null
   const docBlock = useObservable<Block | undefined, [Doc]>(
     (_, inputs$) =>
       inputs$.pipe(

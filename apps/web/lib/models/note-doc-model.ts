@@ -1,4 +1,5 @@
 import { NoteDoc, Prisma, PrismaPromise } from '@prisma/client'
+import { NoteDocMetaWebpageFragmentDoc } from '../../apollo/query.graphql'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
 
@@ -55,16 +56,41 @@ function mergePeriodical() {
 //
 
 export class NoteDocMetaModel {
-  static fromJSON(json: Prisma.JsonValue): NoteDocMeta {
-    // TODO
-  }
-
+  // static fromJSON(json: Prisma.JsonValue | undefined): NoteDocMeta {
+  //   // TODO
+  //   if (json === undefined) {
+  //     return {}
+  //   }
+  //   const jsonParsed = json as object
+  //   // const parsed = JSON.parse(jsonString)
+  //   return {
+  //     keywords: ,
+  //     // duplicatedSymbols: parsed.duplicatedSymbols,
+  //     // keywords: parsed.keywords,
+  //     // redirectFroms: parsed.redirectFroms,
+  //     // redirectTo: parsed.redirectTo,
+  //     webpage: {
+  //       ...parsed.webpage,
+  //       // authors: parsed.webpage.authors,
+  //       // title: parsed.webpage.title,
+  //       publishedAt: new Date(parsed.webpage.publishedAt),
+  //       // tickers: parsed.webpage.tickers,
+  //     },
+  //   }
+  // }
   /**
    * @returns JSON, cannot return native JSON due to prisma's bug: https://github.com/prisma/prisma/issues/9247
    */
-  static toJSON(meta: NoteDocMeta): Prisma.InputJsonValue {
-    // TODO
-  }
+  // static toJSON(meta: NoteDocMeta): Prisma.InputJsonValue {
+  //   // TODO
+  //   return {
+  //     ...meta,
+  //     webpage: {
+  //       ...meta.webpage,
+  //       publishedAt: meta.webpage?.publishedAt?.toISOString(),
+  //     },
+  //   }
+  // }
 }
 
 class NoteDocModel {
@@ -108,7 +134,8 @@ class NoteDocModel {
           },
         },
         domain,
-        meta: NoteDocMetaModel.toJSON(meta),
+        // meta: NoteDocMetaModel.toJSON(meta),
+        meta: meta as object,
         content: content_,
       },
     })
