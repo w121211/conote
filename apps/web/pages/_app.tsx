@@ -4,7 +4,7 @@ import { useApollo } from '../apollo/apollo-client'
 import '../style/global.css'
 import ModalProvider from '../components/modal/modal-context'
 import Script from 'next/script'
-import ChannelProvider from '../components/channel/channel-context'
+import ChannelProvider from '../components/domain/domain-context'
 import { TooltipProvider } from '../layout/tooltip/tooltip-provider'
 import { ThemeProvider } from '../components/theme/theme-provider'
 

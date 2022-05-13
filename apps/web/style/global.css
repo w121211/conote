@@ -13,7 +13,7 @@
     overflow: hidden;
   }
   h1 {
-    @apply text-3xl font-bold text-gray-800;
+    @apply text-4xl font-bold text-gray-800;
   }
   h2 {
     @apply font-bold;

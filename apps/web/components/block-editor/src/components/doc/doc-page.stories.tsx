@@ -7,9 +7,10 @@ import { docRepo } from '../../stores/doc.repository'
 import { DocEl } from './doc-el'
 import { TooltipProvider } from '../../../../../layout/tooltip/tooltip-provider'
 import DomainProvider from '../../../../domain/domain-context'
+import { Layout } from '../../../../../layout/layout'
 
 export default {
-  title: 'BlockEditor/DocEl',
+  title: 'BlockEditor/DocPage',
   component: DocEl,
   decorators: [
     Story => {
@@ -28,7 +29,9 @@ export default {
 const Template: ComponentStory<typeof DocEl> = args => (
   <TooltipProvider>
     <DomainProvider>
-      <DocEl {...args} />
+      <Layout>
+        <DocEl {...args} />
+      </Layout>
     </DomainProvider>
   </TooltipProvider>
 )

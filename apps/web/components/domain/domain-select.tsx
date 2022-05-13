@@ -1,11 +1,18 @@
 import React, { Children, useContext, useEffect, useState } from 'react'
-import Select, { ControlProps, components, SingleValueProps, GroupBase, SingleValue, OptionProps } from 'react-select'
-import { ChannelType } from './channel'
-import { ChannelContext } from './channel-context'
+import Select, {
+  ControlProps,
+  components,
+  SingleValueProps,
+  GroupBase,
+  SingleValue,
+  OptionProps,
+} from 'react-select'
+import { DomainType } from './domain'
+import { DomainContext } from './domain-context'
 
 type BranchOption = {
   label: string
-  value: ChannelType
+  value: DomainType
 }
 
 const branchOptions: BranchOption[] = [
@@ -16,7 +23,10 @@ const branchOptions: BranchOption[] = [
 const ControlComponent = (props: ControlProps<BranchOption, false>) => {
   const { children, ...rest } = props
   return (
-    <components.Control {...rest} className="!border-none rounded !cursor-pointer !bg-blue-600 text-xs">
+    <components.Control
+      {...rest}
+      className="!border-none px-2 rounded !cursor-pointer !bg-orange-200/60 text-gray-900 font-bold text-xl font-[Consolas] select-none"
+    >
       {children}
     </components.Control>
   )
@@ -25,7 +35,7 @@ const ControlComponent = (props: ControlProps<BranchOption, false>) => {
 const SingleValueComponent = (props: SingleValueProps<BranchOption, false>) => {
   const { children, ...rest } = props
   return (
-    <components.SingleValue {...rest} className="!text-white">
+    <components.SingleValue {...rest} className="!text-gray-900">
       {children}
     </components.SingleValue>
   )
@@ -40,22 +50,25 @@ const SingleValueComponent = (props: SingleValueProps<BranchOption, false>) => {
 //   )
 // }
 
-const ChannelSelect = () => {
-  const { channel, setChannel } = useContext(ChannelContext)
-  const [value, setValue] = useState<BranchOption>({ label: 'dev/', value: 'dev' })
+const DomainSelect = () => {
+  const { domain, setDomain } = useContext(DomainContext)
+  const [value, setValue] = useState<BranchOption>({
+    label: 'dev/',
+    value: 'dev',
+  })
 
   useEffect(() => {
-    const foundChannel = branchOptions.find(({ value }) => {
-      return value === channel
+    const foundDomain = branchOptions.find(({ value }) => {
+      return value === domain
     })
-    if (foundChannel) {
-      setValue(foundChannel)
+    if (foundDomain) {
+      setValue(foundDomain)
     }
-  }, [channel])
+  }, [domain])
 
   const onChange = (newValue: SingleValue<BranchOption>) => {
     if (newValue) {
-      setChannel(newValue.value)
+      setDomain(newValue.value)
     }
   }
   return (
@@ -66,7 +79,7 @@ const ChannelSelect = () => {
       isSearchable={false}
       //   menuIsOpen
       styles={{
-        container: base => ({ ...base, flexGrow: 1 }),
+        // container: base => ({ ...base, flexGrow: 1 }),
         control: base => ({
           ...base,
           width: 'fit-content',
@@ -77,29 +90,38 @@ const ChannelSelect = () => {
         menu: base => ({
           ...base,
           width: 'fit-content',
-          fontSize: '12px',
+          // fontSize: '12px',
         }),
-        option: base => ({ ...base, paddingTop: '2px', paddingBottom: '2px', cursor: 'pointer' }),
-        // singleValue: base => ({ ...base, color: 'rgb(107 114 128)' }),
-        valueContainer: base => ({ ...base, paddingRight: 0, paddingLeft: '2px' }),
-        dropdownIndicator: (base, state) => ({
+        option: base => ({
           ...base,
-          display: 'flex',
-          padding: '0px ',
-          color: 'white',
-          ':hover': { color: 'white' },
-          // transform: 'scale(0.7)',
+          paddingTop: '2px',
+          paddingBottom: '2px',
+          cursor: 'pointer',
         }),
-        indicatorsContainer: base => ({ ...base, transform: 'scale(0.6)' }),
+        // singleValue: base => ({ ...base, color: 'rgb(107 114 128)' }),
+        valueContainer: base => ({
+          ...base,
+          padding: 0,
+        }),
+        // dropdownIndicator: (base, state) => ({
+        //   ...base,
+        //   display: 'flex',
+        //   padding: '0px ',
+        //   color: 'white',
+        //   ':hover': { color: 'white' },
+        //   // transform: 'scale(0.7)',
+        // }),
+        // indicatorsContainer: base => ({ ...base, transform: 'scale(0.6)' }),
       }}
       components={{
         IndicatorSeparator: null,
         Control: ControlComponent,
         SingleValue: SingleValueComponent,
+        DropdownIndicator: null,
         // Option: OptionComponent,
       }}
     />
   )
 }
 
-export default ChannelSelect
+export default DomainSelect
