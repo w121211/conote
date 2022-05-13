@@ -49,7 +49,7 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
           setShowMetaForm(true)
         }}
       >
-        <h1 className=" line-clamp-2 break-words text-gray-800 leading-tight">
+        <h1 className=" line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
           {link && (
             <span className="material-icons text-blue-400 text-4xl align-bottom">
               language
@@ -67,7 +67,7 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
       >
         <div className="w-full px-4 md:py-6 md:px-12">
           <h2 className="text-lg mb-4 sm:mb-6 sm:text-2xl font-bold text-gray-800">
-            卡片資訊
+            Card meta
           </h2>
           <NoteMetaForm
             type={'TICKER'}
@@ -162,15 +162,15 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
       )} */}
 
       {/* ---notification block--- */}
-      <div className="flex flex-col gap-2 mt-4 text-gray-800 text-sm">
-        <p className="py-2 px-1 bg-gray-200/70">
+      <div className="flex flex-col gap-2 mt-4 text-gray-800 dark:text-gray-100 text-sm">
+        <p className="py-2 px-1 bg-gray-200/70 dark:bg-gray-600">
           ❗️ <span className="font-bold">[merg]</span>A new commit 9031jd2 is
           waiting to merge (5 hours ago)
         </p>
-        <p className="py-2 px-1 bg-gray-200/70">
+        <p className="py-2 px-1 bg-gray-200/70 dark:bg-gray-600">
           ❗️ <span className="font-bold">[rename]</span>Agree rename this note
           to{' '}
-          <span className="text-blue-500">
+          <span className="text-blue-500 dark:text-blue-300">
             {styleSymbol('[[Awesome Tailwind css]]', '')}
           </span>{' '}
           ? (16 hours ago)

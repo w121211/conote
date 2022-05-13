@@ -350,7 +350,11 @@ export function renderToken(token: Token | string): JSX.Element {
       case 'discuss-bracket-end':
       case 'topic-bracket-head':
       case 'topic-bracket-tail':
-        return el('span', { className: 'text-gray-300' }, token.content)
+        return el(
+          'span',
+          { className: 'text-gray-300 dark:text-gray-500' },
+          token.content,
+        )
       default:
         return el('span', null, token.content)
     }

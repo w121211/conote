@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid'
 import React, { useEffect, useState } from 'react'
 import { useObservable } from 'rxjs-hooks'
+import { styleSymbol } from '../layout/style-fc/style-symbol'
 import { BulletEditor } from './editor/editor'
 import { LiElement } from './editor/slate-custom-types'
 import { Doc } from './workspace/doc'
@@ -44,19 +45,41 @@ export const NoteTemplate = ({
   // console.log(doc.editorValue)
 
   return (
-    <div className="inline-flex flex-col ml-9 gap-4">
-      <button
-        className=" px-3 py-2 rounded bg-gray-100  text-gray-500 hover:text-gray-800 hover:bg-gray-200"
-        onClick={() => onTemplateChoose(templateContent)}
-      >
-        使用模版頁面
-      </button>
-      <button
-        className=" px-3 py-2 rounded bg-gray-100  text-gray-500 hover:text-gray-800 hover:bg-gray-200"
-        onClick={() => onTemplateChoose(null)}
-      >
-        使用空白頁面
-      </button>
+    <div className="inline-flex flex-col ml-9 ">
+      <h5 className="text-gray-700 dark:text-gray-200">Similar notes</h5>
+      {['[[Hello world]]', '[[Hello world (computer science)]]'].map(
+        (title, i) => {
+          return (
+            <button
+              key={i}
+              className="flex items-center gap-1 mt-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+              // onClick={() => onTemplateChoose(templateContent)}
+            >
+              <span className="material-icons-outlined text-xl leading-none text-gray-400">
+                description
+              </span>
+              {styleSymbol(title, '')}
+            </button>
+          )
+        },
+      )}
+      <h5 className="mt-8 text-gray-700 dark:text-gray-200">Template</h5>
+      {['General', 'Company', 'Research', 'Thing', 'Person', 'Empty'].map(
+        (title, i) => {
+          return (
+            <button
+              key={i}
+              className="flex items-center gap-1 mt-2  text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+              // onClick={() => onTemplateChoose(templateContent)}
+            >
+              <span className="material-icons-outlined text-xl leading-none text-gray-400">
+                description
+              </span>
+              {styleSymbol(title, '')}
+            </button>
+          )
+        },
+      )}
     </div>
   )
 }

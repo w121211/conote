@@ -96,7 +96,7 @@ const InlineDiscussEl = ({
           <span
             // relative 為必要 才可點擊到 和 hover 效果
 
-            className="relative text-red-600 bg-red-50 hover:bg-red-100 "
+            className="relative text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
             onClick={() => setShowModal(true)}
             // onMouseEnter={() => {
             //   setShowWarnTooltip(true)

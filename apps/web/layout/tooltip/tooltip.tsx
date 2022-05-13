@@ -171,11 +171,16 @@ export const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> =
         let topOffset = el.getBoundingClientRect().top
         while (el !== null && el !== document.documentElement) {
           el = el.parentElement
+          // console.log(el, topOffset, el.scrollTop)
+
           if (el) {
-            topOffset += el.scrollTop
+            if (el === document.documentElement) {
+              topOffset += el.scrollTop
+            }
           }
           // console.log(topOffset, el)
         }
+        // console.log(topOffset)
         return topOffset
       }
       return 0
@@ -222,7 +227,7 @@ export const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> =
       }, 300)
     }
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (visible !== undefined) {
         if (visible) {
           // rendered.current = 1

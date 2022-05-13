@@ -8,6 +8,7 @@ import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/new-hot-list'
 import UserRateTable from '../components/user/user-rate-table'
 import { mockRateData } from './user/[userId]'
+import { Tooltip } from '../layout/tooltip/tooltip'
 
 export function HomePage(): JSX.Element {
   const [showAnnounce, setAnnounce] = useState(false)
@@ -24,7 +25,11 @@ export function HomePage(): JSX.Element {
   if (loading)
     return (
       <div className="flex flex-col items-center justify-center w-screen h-screen">
-        <svg className="origin-center animate-loadingSpinner" width="100" height="100">
+        <svg
+          className="origin-center animate-loadingSpinner"
+          width="100"
+          height="100"
+        >
           <circle
             className="stroke-blue-500 origin-center [stroke-dasharray:187] [stroke-dashoffset:0] animate-loadingCircle"
             cx="50"
@@ -72,6 +77,7 @@ export function HomePage(): JSX.Element {
             <div className="flex flex-col items-center md:items-start md:flex-row ms:justify-between  md:w-3/4 md:ml-[calc(4rem+96px)] gap-6">
               <NewHotList />
               <UserRateTable data={mockRateData} />
+
               {/* <div className=" flex-shrink-0 flex-grow w-screen sm:w-1/3 h-fit px-4 rounded border border-gray-300">
                 <h3>自選股</h3>
                 <div>

@@ -5,10 +5,10 @@ export function styleSymbol(
 ) {
   if (symbol.startsWith('[[')) {
     return (
-      <span>
-        <span className={`text-gray-400/50 `}>[[</span>
+      <span className="text-blue-500 dark:text-blue-400 ">
+        <span className={`text-gray-400/50 dark:text-gray-400`}>[[</span>
         {symbol.substring(2, symbol.length - 2)}
-        <span className={`text-gray-400/50 `}>]]</span>
+        <span className={`text-gray-400/50 dark:text-gray-400`}>]]</span>
       </span>
     )
   }

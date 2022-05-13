@@ -11,7 +11,7 @@ const InlineSymbolEl = ({
 }): JSX.Element => {
   return (
     <span
-      className="relative text-blue-500 hover:bg-gray-100"
+      className="relative text-blue-500 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-600"
       onClick={e => editorRouteUpdate({ modalSymbol: inline.symbol })}
       role="button"
     >

@@ -113,7 +113,7 @@ export function Layout({
       />
       <div
         className={`flex-grow  mt-11 pb-[20vh]  
-        overflow-y-scroll scroll-smooth scrollbar
+        overflow-auto scroll-smooth scrollbar
         bg-white dark:bg-gray-700`}
       >
         {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}

@@ -4,29 +4,23 @@ import Theme, { ThemeType } from './theme-storage'
 type ThemeState = { theme: 'light' | 'dark' }
 
 const getInitialTheme = (): ThemeState => {
+  // console.log('getInitialTheme')
   const localTheme = Theme.getInstance()
   if (localTheme) {
     const value = localTheme.getTheme() as ThemeType
     return { theme: value }
   } else {
     const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    console.log(window.matchMedia('(prefers-color-scheme: dark)'))
+    // console.log(window.matchMedia('(prefers-color-scheme: dark)'))
     if (isDark) {
       return { theme: 'dark' }
     }
     return { theme: 'light' } //light theme as the default
-  } // // On page load or when changing themes, best to add inline in "head" to avoid FOUC
-  // if ((localTheme&&localTheme.getTheme() === 'dark' )|| (!localTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-  //     if(localTheme){
-  //         return
-  //     }
-  //     document.documentElement.classList.add('dark')
-  //   } else {
-  //     document.documentElement.classList.remove('dark')
-  //   }
+  }
 }
 
 const getIsSystem = (): boolean => {
+  // console.log('getIsSystem')
   const localTheme = Theme.getInstance()
   if (localTheme) {
     return false
@@ -56,32 +50,38 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [isSystem, setIsSystem] = useState(getIsSystem())
 
   useEffect(() => {
+    // console.log('theme useeffect')
     const localTheme = Theme.getInstance()
     if (theme.theme === 'dark') {
-      if (!localTheme) {
-        const newLocalTheme = Theme.newInstance()
-        newLocalTheme.setTheme('dark')
-      } else {
-        localTheme.setTheme('dark')
+      if (!isSystem) {
+        if (!localTheme) {
+          const newLocalTheme = Theme.newInstance()
+          newLocalTheme.setTheme('dark')
+        } else {
+          localTheme.setTheme('dark')
+        }
       }
       document.documentElement.classList.add('dark')
     } else {
-      if (!localTheme) {
-        const newLocalTheme = Theme.newInstance()
-        newLocalTheme.setTheme('light')
-      } else {
-        localTheme.setTheme('light')
+      if (!isSystem) {
+        if (!localTheme) {
+          const newLocalTheme = Theme.newInstance()
+          newLocalTheme.setTheme('light')
+        } else {
+          localTheme.setTheme('light')
+        }
       }
       document.documentElement.classList.remove('dark')
     }
   }, [theme])
 
   useEffect(() => {
+    // console.log('isSystem useEffect')
     const localTheme = Theme.getInstance()
     if (isSystem) {
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
       if (isDark) {
-        console.log(window.matchMedia('(prefers-color-scheme: dark)'))
+        // console.log(window.matchMedia('(prefers-color-scheme: dark)'))
         localTheme?.clear()
         setTheme({ theme: 'dark' })
         // document.documentElement.classList.add('dark')
