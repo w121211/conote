@@ -137,10 +137,16 @@ describe('mergeAutomatical()', () => {
 describe('mergePeriodical()', () => {
   it('merge if the time is up and ups are more than downs', async () => {
     await testHelper.createCandidateCommit(prisma)
-    const docMerged = mergePeriodical(mockNoteDocs[0])
+    // set the time and Poll to be able to merge successfully
+    const docMerged = await mergePeriodical(mockNoteDocs[0])
     expect(docMerged.status).toMatchInlineSnapshot()
   })
-  it('reject if the time is up and downs are more than ups', () => {})
+  it('reject if the time is up and downs are more than ups', async () => {
+    await testHelper.createCandidateCommit(prisma)
+    // set the time and Poll to be able to reject
+    const docMerged = await mergePeriodical(mockNoteDocs[0])
+    expect(docMerged.status).toMatchInlineSnapshot()
+  })
 })
 
 // describe('NoteDocMetaModel', () => {

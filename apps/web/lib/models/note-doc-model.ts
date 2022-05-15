@@ -1,4 +1,4 @@
-import { NoteDoc, Prisma, PrismaPromise } from '@prisma/client'
+import { NoteDoc, Poll, PollCount, Prisma, PrismaPromise } from '@prisma/client'
 import { NoteDocMetaWebpageFragmentDoc } from '../../apollo/query.graphql'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
@@ -21,8 +21,38 @@ import { createMergePoll } from './poll-model'
  * Is reject the same as merge?
  *
  */
-function merge() {
-  throw 'Not implemented'
+async function merge(
+  doc: NoteDoc,
+  poll?: Poll & {
+    count: PollCount | null
+  },
+) {
+  if (poll === undefined) {
+    return await prisma.noteDoc.update({
+      data: { status: 'MERGE' },
+      where: { id: doc.id },
+    })
+  }
+  await prisma.poll.update({
+    data: { status: 'CLOSE_SUCCESS' },
+    where: { id: poll.id },
+  })
+
+  const upIdx = poll?.choices.indexOf('UP')
+  const downIdx = poll?.choices.indexOf('DOWN')
+  const ups = poll.count!.nVotes[upIdx]
+  const downs = poll.count!.nVotes[downIdx]
+  if (ups < downs) {
+    return await prisma.noteDoc.update({
+      data: { status: 'REJECT' },
+      where: { id: doc.id },
+    })
+  } else {
+    return await prisma.noteDoc.update({
+      data: { status: 'MERGE' },
+      where: { id: doc.id },
+    })
+  }
 }
 
 /**
@@ -56,10 +86,7 @@ export async function mergeAutomatical(doc: NoteDoc): Promise<NoteDoc | null> {
   // no deletions, changes to the previous-doc's content, but addition
   // TODO: compare meta and content
   if (doc.domain === fromDoc?.domain && !metaChanged && contentDiff.change) {
-    return await prisma.noteDoc.update({
-      data: { status: 'MERGE' },
-      where: { id: doc.id },
-    })
+    return merge(doc)
   }
   return null
 }
@@ -71,8 +98,19 @@ export async function mergeAutomatical(doc: NoteDoc): Promise<NoteDoc | null> {
  * Reject on periodical checks:
  * - poll is open for a specific time && ups is lower than downs
  */
-export function mergePeriodical() {
-  throw 'Not implemented'
+export async function mergePeriodical(doc: NoteDoc): Promise<NoteDoc> {
+  // get poll and check the ups and downs
+  const poll = await prisma.poll.findUnique({
+    where: { id: doc.mergePollId },
+    include: { count: true },
+  })
+  if (poll === null) {
+    throw new Error('[MergePeriodical] Poll not found.')
+  }
+  if (poll.count === null) {
+    throw new Error('[MergePeriodical] pollCount not found.')
+  }
+  return await merge(doc, poll)
 }
 
 //
