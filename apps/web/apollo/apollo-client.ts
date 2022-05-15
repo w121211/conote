@@ -1,21 +1,26 @@
-import { NextApiRequest, NextApiResponse } from 'next'
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 import { createCache } from './cache'
 
 let apolloClient: ApolloClient<NormalizedCacheObject> | undefined
 
-export type ResolverContext = {
-  req: NextApiRequest
-  res: NextApiResponse
-}
-
 function createApolloClient() {
-  const client = new ApolloClient({
+  if (
+    process.env.NODE_ENV === 'development' &&
+    typeof window !== 'undefined' &&
+    (window as any).IS_STORYBOOK
+  ) {
+    return new ApolloClient({
+      cache: createCache(),
+      uri: 'http://localhost:3000/api/graphql',
+    })
+  }
+
+  // Default behavior
+  return new ApolloClient({
     cache: createCache(),
     uri: '/api/graphql',
     credentials: 'same-origin',
   })
-  return client
 }
 
 /**

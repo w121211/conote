@@ -1,6 +1,6 @@
 import { BlockInput, writeBlocks } from '../../src/utils'
 
-const input: BlockInput = [
+export const mockBlockInput: BlockInput = [
   '[[Firefox]]',
   [
     [
@@ -45,4 +45,4 @@ const input: BlockInput = [
   ],
 ]
 
-export const mockBlocks = writeBlocks(input)
+export const mockBlocks = writeBlocks(mockBlockInput)

@@ -1,7 +1,5 @@
 import React, { useMemo, useState } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-
-import * as events from '../../events'
 import {
   blockDragLeave,
   blockDragOver,
@@ -15,16 +13,15 @@ import {
   DragTarget,
   Search,
 } from '../../interfaces'
-import { blockRepo, blocksStore } from '../../stores/block.repository'
+import { blockRepo } from '../../stores/block.repository'
 import { rfdbRepo } from '../../stores/rfdb.repository'
 import { InlineSearchEl } from '../autocomplete-search/autocomplete-search'
 import { Anchor } from './anchor'
 import { BlockContent } from './block-content'
 import { DropAreaIndicator } from './drop-area-indicator'
 import { Toggle } from './toggle'
-import { throttle } from 'lodash'
-import { useEffect } from 'react'
 import './block-container.module.css'
+import { blockOpen } from '../../events'
 
 // export const BlockContainer = ({
 //   uid,
@@ -177,8 +174,9 @@ export const BlockEl = ({
     [contextMenu, setContextMenu] = useState({ x: null, y: null, show: false }),
     [dragging, setDragging] = useState(false),
     [dragTarget, setDragTarget] = useState<DragTarget | null>(null),
-    [lastKeyDown, setLastKeyDown] =
-      useState<DestructTextareaKeyEvent | null>(null),
+    [lastKeyDown, setLastKeyDown] = useState<DestructTextareaKeyEvent | null>(
+      null,
+    ),
     [showEditableDom, setShowEditableDom] = useState(false),
     childrenBlockEls = useMemo(() => {
       return children.map(e => (
@@ -259,7 +257,7 @@ export const BlockEl = ({
             isOpen={isOpen}
             onClick={e => {
               e.stopPropagation()
-              events.blockOpen(uid, !isOpen)
+              blockOpen(uid, !isOpen)
             }}
           />
         )}
@@ -309,13 +307,3 @@ export const BlockEl = ({
     </div>
   )
 }
-
-// Block.Anchor = Anchor
-// Block.Container = Container
-// Block.Toggle = Toggle
-// Block.Body = Body
-// Block.Content = Content
-// BlockEl.ListContainer = styled.div`
-//   display: flex;
-//   flex-direction: column;
-// `

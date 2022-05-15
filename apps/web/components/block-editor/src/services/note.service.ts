@@ -4,9 +4,9 @@ import {
   mockGotNoteOnly,
 } from '../../test/__mocks__/mock-data'
 import {
-  NoteBySymbolDocument,
-  NoteBySymbolQuery,
-  NoteBySymbolQueryVariables,
+  NoteByBranchSymbolDocument,
+  NoteByBranchSymbolQuery,
+  NoteByBranchSymbolQueryVariables,
 } from '../../../../apollo/query.graphql'
 import { getApolloClient } from '../../../../apollo/apollo-client'
 
@@ -34,19 +34,21 @@ class NoteService implements INoteService {
 
   async queryNote(symbol: string): Promise<GQLNote | null> {
     const { data, errors } = await this.apolloClient.query<
-      NoteBySymbolQuery,
-      NoteBySymbolQueryVariables
+      NoteByBranchSymbolQuery,
+      NoteByBranchSymbolQueryVariables
     >({
-      query: NoteBySymbolDocument,
-      variables: { symbol },
+      query: NoteByBranchSymbolDocument,
+      variables: { branch: 'branch', symbol },
     })
 
+    console.log(data)
+
     if (errors) {
-      console.debug('[NoteBySymbolQuery] error', errors)
+      // console.debug('[NoteBySymbolQuery] error', errors)
       return null
     }
-    if (data.note) {
-      return data.note
+    if (data.noteByBranchSymbol) {
+      return data.noteByBranchSymbol
     }
     return null
   }

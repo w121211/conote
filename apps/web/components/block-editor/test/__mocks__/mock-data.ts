@@ -1,10 +1,8 @@
 import {
-  Block,
-  GQLNote,
-  GQLNoteDraft,
-  InlineDiscuss,
-  SearchHit,
-} from '../../src/interfaces'
+  NoteDraftFragment,
+  NoteFragment,
+} from '../../../../apollo/query.graphql'
+import { Block, Doc, InlineDiscuss, SearchHit } from '../../src/interfaces'
 import { writeBlocks } from '../../src/utils'
 import { mockBlocks } from './mock-block'
 
@@ -19,8 +17,8 @@ import { mockBlocks } from './mock-block'
 
 type MockQuerySymbolResult = {
   title: string
-  note?: GQLNote
-  draft?: GQLNoteDraft
+  note?: NoteFragment
+  draft?: NoteDraftFragment
 }
 
 // const mockBlocks: Block[] = [
@@ -231,9 +229,12 @@ export const mockSearchHit = {
 //
 //
 
-export const mockLocalDoc = {
+export const mockLocalDoc: { doc: Doc; blocks: Block[] } = {
   doc: {
+    branch: 'branch',
+    domain: 'domain',
     title: '[[Mock Local Doc]]',
+    meta: {},
     blockUid: mockBlocks[0].uid,
   },
   blocks: mockBlocks,

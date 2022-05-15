@@ -1,7 +1,9 @@
 /**
- * @reference
- * https://github.com/vercel/next.js/blob/canary/examples/api-routes-graphql/pages/api/graphql.js
+ * References
+ * - https://github.com/vercel/next.js/blob/canary/examples/api-routes-graphql/pages/api/graphql.js
  *
+ * Playground
+ * `yarn run dev` & open http://localhost:3000/api/graphql
  */
 
 import { ApolloServer } from 'apollo-server-micro'
@@ -22,12 +24,18 @@ const apolloServer = new ApolloServer({
 
 const startServer = apolloServer.start()
 
-const handler = async (req: IncomingMessage, res: ServerResponse): Promise<void | false> => {
+async function handler(
+  req: IncomingMessage,
+  res: ServerResponse,
+): Promise<void | false> {
   res.setHeader('Access-Control-Allow-Credentials', 'true')
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept',
+  )
   if (process.env.NODE_ENV === 'development') {
-    // allow graphql sandbox in development
-    res.setHeader('Access-Control-Allow-Origin', 'https://studio.apollographql.com')
+    // Allow apollo studio (studio.apollographql.com), storybook (localhost:6006) in development
+    res.setHeader('Access-Control-Allow-Origin', '*')
 
     // allow browser extension to access, ie avoid CORS error when extension query api
     // res.setHeader('Access-Control-Allow-Origin', '*')
@@ -36,6 +44,7 @@ const handler = async (req: IncomingMessage, res: ServerResponse): Promise<void 
     res.end()
     return false
   }
+
   await startServer
   await apolloServer.createHandler({
     path: '/api/graphql',
@@ -44,7 +53,9 @@ const handler = async (req: IncomingMessage, res: ServerResponse): Promise<void 
 
 export default handler
 
-// @see https://nextjs.org/docs/api-routes/api-middlewares
+/**
+ * @see https://nextjs.org/docs/api-routes/api-middlewares
+ */
 export const config = {
   api: {
     bodyParser: false,

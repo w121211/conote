@@ -1,46 +1,46 @@
-import React, {
-  forwardRef,
-  ReactPropTypes,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import Link from 'next/link'
-import { SearchAllForm } from '../search-all-form'
-import DocIndexSection from './doc-index-section'
-import { workspace } from '../workspace/workspace'
-import { useObservable } from 'rxjs-hooks'
-import { TreeNode, TreeService } from '@conote/docdiff'
-import { DocIndex } from '../workspace/doc-index'
-import { Doc } from '../workspace/doc'
-import { useApolloClient } from '@apollo/client'
-// import { useMeQuery } from '../../apollo/query.graphql'
-import { useRouter } from 'next/router'
-import AuthItem from './auth-Item'
-import Select from 'react-select'
-import ChannelSelect from '../channel/channel-select'
+import { useObservable } from '@ngneat/react-rxjs'
+import React, { useEffect, useRef } from 'react'
+import { editorLeftSidebarMount } from '../../events'
+import { editorRepo } from '../../stores/editor.repository'
+import SidebarSection from './sidebar-section'
 
-const SideBar = ({
+/**
+ * When the component mount, call sidebr-load event when first enter the component
+ *
+ * TODOS:
+ * [] draft-entries sort by ?
+ */
+const SidebarEl = ({
   showMenuHandler,
   pinMenuHandler,
   isPined,
   showSider,
 }: {
-  showMenuHandler: (boo?: boolean) => void
-  pinMenuHandler: (boo?: boolean) => void
+  showMenuHandler: (bool?: boolean) => void
+  pinMenuHandler: (bool?: boolean) => void
   isPined: boolean
   showSider: boolean
 }): JSX.Element | null => {
-  const editingdDocIndicies = useObservable(() => workspace.editingDocIndicies$)
-  const ref = useRef<HTMLDivElement>(null)
-  // const committedDocIndicies = useObservable(() => workspace.committedDocIndicies$)
+  const [sidebar] = useObservable(editorRepo.leftSidebar$, {
+      initialValue: null,
+    }),
+    ref = useRef<HTMLDivElement>(null)
+
+  function hideSidebarWhenResize() {
+    if (window && window.innerWidth < 769) {
+      pinMenuHandler(false)
+      showMenuHandler(false)
+    }
+  }
+
   useEffect(() => {
-    window.addEventListener('resize', () => {
-      if (window && window.innerWidth < 769) {
-        pinMenuHandler(false)
-        showMenuHandler(false)
-      }
-    })
+    editorLeftSidebarMount()
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener('resize', hideSidebarWhenResize)
+
+    // TODO: Remove listener when component unmount
     window.addEventListener(
       'touchstart',
       e => {
@@ -50,8 +50,13 @@ const SideBar = ({
       },
       false,
     )
+
+    return () => {
+      window.removeEventListener('resize', hideSidebarWhenResize)
+    }
   }, [])
-  if (editingdDocIndicies === null) {
+
+  if (sidebar === null) {
     return null
   }
   return (
@@ -107,11 +112,13 @@ const SideBar = ({
           </div>
         </div>
         <div className="mt-2 mb-3 mx-4">{/* <SearchAllForm small /> */}</div>
-        {/* <DocIndexSection title="最近同步的筆記" indexArray={committedDocIndicies} /> */}
-        <DocIndexSection title="暫存區" docIndicies={editingdDocIndicies} />
+
+        {/* <DocIndexSection title="Committed" indexArray={committedDocIndicies} /> */}
+
+        <SidebarSection title="EDIT" items={sidebar.items} />
       </div>
     </>
   )
 }
 
-export default SideBar
+export default SidebarEl

@@ -2,6 +2,7 @@ import React from 'react'
 import { nanoid } from 'nanoid'
 import { Block } from './interfaces'
 import { validateChildrenUids } from './op/helpers'
+import { cloneDeepWith } from 'lodash'
 
 //
 // OS
@@ -101,7 +102,9 @@ export function verticalCenter(el: Element) {
 /**
  * Take a string and escape all regex special characters in it
  */
-export function escapeStr() {}
+export function escapeStr() {
+  throw new Error('Not implemented')
+}
 
 //
 // Block helpers
@@ -128,10 +131,17 @@ export function genBlockUid(): string {
 export type BlockInput = [string, BlockInput[]] | string
 
 /**
- * @param docBlock if given, use it to replace input's root
+ * @param opts.docBlock if given, use it to replace input's root
+ * @param opts.docTitle if given, use it to replace input's root title
  * @returns block array, the first block is doc-block
  */
-export function writeBlocks(input: BlockInput, docBlock?: Block): Block[] {
+export function writeBlocks(
+  input: BlockInput,
+  opts: {
+    docBlock?: Block
+    docTitle?: string
+  } = {},
+): Block[] {
   function f(input: BlockInput, order = 0, parentUid: string | null = null) {
     const [str, children] = typeof input === 'string' ? [input, []] : input
     return {
@@ -143,14 +153,22 @@ export function writeBlocks(input: BlockInput, docBlock?: Block): Block[] {
     }
   }
 
-  const rootInput = f(input),
-    rootInput_ = docBlock
-      ? {
-          ...rootInput,
-          uid: docBlock.uid,
-          str: docBlock.str,
-        }
-      : rootInput
+  const { docBlock, docTitle } = opts,
+    rootInput = f(input)
+
+  let rootInput_ = rootInput
+  if (docBlock) {
+    rootInput_ = {
+      ...rootInput,
+      uid: docBlock.uid,
+      str: docBlock.str,
+    }
+  } else if (docTitle) {
+    rootInput_ = {
+      ...rootInput,
+      str: docTitle,
+    }
+  }
 
   const blocks: Block[] = [],
     stack: {
@@ -186,4 +204,29 @@ export function writeBlocks(input: BlockInput, docBlock?: Block): Block[] {
   validateChildrenUids(Object.fromEntries(blocks.map(e => [e.uid, e])))
 
   return blocks
+}
+
+//
+// Graphql
+//
+//
+//
+//
+//
+//
+//
+
+/**
+ * Recursively omit '__typename' of the given value
+ */
+export function omitTypenameDeep(
+  value: Record<string, unknown>,
+): Record<string, unknown> {
+  return cloneDeepWith(value, v => {
+    if (v?.__typename) {
+      const { __typename, ...rest } = v
+      return omitTypenameDeep(rest)
+    }
+    return undefined
+  })
 }

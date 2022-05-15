@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import React from 'react'
 import { editorRouteUpdate } from '../../../events'
 import { InlineSymbol } from '../../../interfaces'
@@ -9,10 +10,12 @@ const InlineSymbolEl = ({
 }: InlineElProps & {
   inline: InlineSymbol
 }): JSX.Element => {
+  const router = useRouter()
+
   return (
     <span
       className="relative text-blue-500 hover:bg-gray-100"
-      onClick={e => editorRouteUpdate({ modalSymbol: inline.symbol })}
+      onClick={e => editorRouteUpdate({ modalSymbol: inline.symbol, router })}
       role="button"
     >
       {children}

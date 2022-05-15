@@ -14,6 +14,9 @@
 ;; - uid sometimes nil
 */
 
+import { NextRouter } from 'next/router'
+import { UrlObject } from 'url'
+
 // import { uidAndEmbedId } from './db'
 
 /**
@@ -79,6 +82,10 @@ export function setCursorPosition(uid: string, start: number, end: number) {
 //
 //
 
-export function navigate() {
-  // TODO
+/**
+ * Shallow update
+ */
+export async function routerUpdateShallow(router: NextRouter, url: UrlObject) {
+  console.log(url)
+  await router.push(url, undefined, { shallow: true })
 }

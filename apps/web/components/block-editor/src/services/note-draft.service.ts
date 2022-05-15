@@ -1,69 +1,127 @@
-import { NoteDraftInput as GQLNoteDraftInput } from 'graphql-let/__generated__/__types__'
-import { GQLNoteDraft, GQLNoteDraftEntry } from '../interfaces'
+import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
+import { Block, Doc } from '../interfaces'
 import {
-  mockGotDraftOnly,
-  mockGotNoteAndDraft,
-  mockMyAllDrafts,
-} from '../../test/__mocks__/mock-data'
-import {
+  BlockFragment,
+  CreateNoteDraftDocument,
+  CreateNoteDraftMutation,
+  CreateNoteDraftMutationVariables,
+  DropNoteDraftDocument,
+  DropNoteDraftMutation,
+  DropNoteDraftMutationVariables,
   MyNoteDraftEntriesDocument,
   MyNoteDraftEntriesQuery,
   MyNoteDraftEntriesQueryVariables,
   NoteDraftDocument,
+  NoteDraftDropResponseFragment,
+  NoteDraftFragment,
   NoteDraftQuery,
   NoteDraftQueryVariables,
+  NoteFragment,
+  UpdateNoteDraftDocument,
+  UpdateNoteDraftMutation,
+  UpdateNoteDraftMutationVariables,
 } from '../../../../apollo/query.graphql'
 import { getApolloClient } from '../../../../apollo/apollo-client'
+import { docRepo } from '../stores/doc.repository'
+import { TreeNodeBody, treeUtil } from '@conote/docdiff'
+import { cloneDeep } from 'lodash'
+import { omitTypenameDeep } from '../utils'
 
-interface INoteDraftService {
-  queryDraft(symbol: string): Promise<GQLNoteDraft | null>
+// interface INoteDraftService {
+//   // Queries
 
-  queryMyAllDrafts(): Promise<Partial<GQLNoteDraftEntry>[] | null>
+//   queryDraft(symbol: string): Promise<GQLNoteDraft | null>
 
-  saveDraft(draftInput: GQLNoteDraftInput, id?: string): Promise<GQLNoteDraft>
+//   queryMyAllDrafts(): Promise<MyNoteDraftEntriesQuery['myNoteDraftEntries']>
 
-  removeDraft(id: string): Promise<{ success: true }>
-}
+//   // Mutations
 
-class MockNoteDraftService implements INoteDraftService {
-  async queryDraft(symbol: string): Promise<GQLNoteDraft | null> {
-    // throw new Error('not implemented')
-    let draft: GQLNoteDraft | undefined
-    switch (symbol) {
-      case mockGotDraftOnly.title:
-        draft = mockGotDraftOnly.draft
-        break
-      case mockGotNoteAndDraft.title:
-        draft = mockGotNoteAndDraft.draft
-        break
-    }
-    return draft ?? null
+//   createDraft(
+//     branch: string,
+//     symbol: string,
+//     draftInput: NoteDraftInput,
+//   ): Promise<GQLNoteDraft>
+
+//   dropDraft(id: string): Promise<NoteDraftDropResponseFragment>
+
+//   saveDraft(id: string, draftInput: NoteDraftInput): Promise<GQLNoteDraft>
+
+//   // Helpers
+
+//   toNoteDraftInput(doc: Doc): NoteDraftInput
+// }
+
+/**
+ * Convert gql-blocks to blocks by
+ * - validate root-block
+ * - add children uids
+ * - validate children uids
+ * - validate is any orphan block
+ *
+ * @returns
+ * - blocks: includes doc-block
+ * - docBlock
+ */
+export function convertGQLBlocks(gqlBlocks: BlockFragment[]): {
+  blocks: Block[]
+  docBlock: Block
+} {
+  const nodes: TreeNodeBody<BlockFragment>[] = gqlBlocks.map(e => ({
+    uid: e.uid,
+    parentUid: e.parentUid ?? null,
+    order: e.order,
+    data: e,
+  }))
+
+  const root = treeUtil.buildFromList(nodes),
+    nodes_ = treeUtil.toList(root),
+    blocks: Block[] = nodes_.map(e => {
+      const {
+        data: { str, open, order, docTitle },
+        uid,
+        parentUid,
+        childrenUids,
+      } = e
+      return {
+        uid,
+        str,
+        open: open ?? undefined,
+        order,
+        docTitle: docTitle ?? undefined,
+        parentUid,
+        childrenUids,
+
+        // TODO:
+        // editTime?: number // TBC, consider to drop
+      }
+    }),
+    docBlock = blocks.find(e => e.uid === root.uid)
+
+  if (docBlock === undefined) {
+    throw new Error('[convertGQLBlocks] docBlock === undefined')
   }
 
-  async queryMyAllDrafts(): Promise<Partial<GQLNoteDraftEntry>[] | null> {
-    // throw new Error('not implemented')
-    return mockMyAllDrafts
-  }
-
-  async saveDraft(
-    draftInput: GQLNoteDraftInput,
-    id?: string,
-  ): Promise<GQLNoteDraft> {
-    throw new Error('not implemented')
-  }
-
-  async removeDraft(id: string): Promise<{ success: true }> {
-    throw new Error('not implemented')
-  }
+  treeUtil.validateList(nodes_)
+  return { blocks, docBlock }
 }
 
 /**
  *
  */
-class NoteDraftService implements INoteDraftService {
+class NoteDraftService {
   private apolloClient = getApolloClient()
 
-  async queryDraft(symbol: string): Promise<GQLNoteDraft | null> {
+  //
+  // Queries
+  //
+  //
+  //
+  //
+
+  /**
+   *
+   */
+  async queryDraft(symbol: string): Promise<NoteDraftFragment | null> {
     const { data, errors } = await this.apolloClient.query<
       NoteDraftQuery,
       NoteDraftQueryVariables
@@ -82,42 +140,170 @@ class NoteDraftService implements INoteDraftService {
     return null
   }
 
-  async queryMyAllDrafts(): Promise<Partial<GQLNoteDraftEntry>[] | null> {
+  /**
+   *
+   */
+  async queryMyAllDraftEntries(): Promise<
+    MyNoteDraftEntriesQuery['myNoteDraftEntries']
+  > {
     const { data, errors } = await this.apolloClient.query<
       MyNoteDraftEntriesQuery,
       MyNoteDraftEntriesQueryVariables
     >({
       query: MyNoteDraftEntriesDocument,
     })
-
-    if (errors) {
-      console.debug('[NoteDraftQuery] error', errors)
-      return null
-    }
     if (data.myNoteDraftEntries) {
       return data.myNoteDraftEntries
     }
-    return null
+    if (errors) {
+      console.debug(errors)
+      throw new Error('[queryMyAllDrafts] Graphql error')
+    }
+    throw new Error('[queryMyAllDrafts] No return data')
   }
 
+  //
+  // Mutations
+  //
+  //
+  //
+  //
+
+  /**
+   *
+   */
+  async createDraft(
+    branch: string,
+    symbol: string,
+    draftInput: NoteDraftInput,
+  ): Promise<NoteDraftFragment> {
+    const { data, errors } = await this.apolloClient.mutate<
+      CreateNoteDraftMutation,
+      CreateNoteDraftMutationVariables
+    >({
+      mutation: CreateNoteDraftDocument,
+      variables: {
+        branch,
+        symbol,
+        draftInput,
+      },
+    })
+    if (data?.createNoteDraft) {
+      return data.createNoteDraft
+    }
+    if (errors) {
+      console.error(errors)
+      throw new Error('[createDraft] mutation error')
+    }
+    throw new Error('[createDraft] no return data')
+  }
+
+  /**
+   *
+   */
+  async dropDraft(id: string): Promise<NoteDraftDropResponseFragment> {
+    const { data, errors } = await this.apolloClient.mutate<
+      DropNoteDraftMutation,
+      DropNoteDraftMutationVariables
+    >({
+      mutation: DropNoteDraftDocument,
+      variables: { id },
+    })
+    if (data?.dropNoteDraft) {
+      return data.dropNoteDraft
+    }
+    if (errors) {
+      console.error(errors)
+      throw new Error('[dropDraft] mutation error')
+    }
+    throw new Error('[dropDraft] no return data')
+  }
+
+  /**
+   *
+   */
   async saveDraft(
-    draftInput: GQLNoteDraftInput,
-    id?: string,
-  ): Promise<GQLNoteDraft> {
-    throw new Error('not implemented')
+    id: string,
+    draftInput: NoteDraftInput,
+  ): Promise<NoteDraftFragment> {
+    const { data, errors } = await this.apolloClient.mutate<
+      UpdateNoteDraftMutation,
+      UpdateNoteDraftMutationVariables
+    >({
+      mutation: UpdateNoteDraftDocument,
+      variables: {
+        id,
+        data: draftInput,
+      },
+    })
+    if (data?.updateNoteDraft) {
+      return data.updateNoteDraft
+    }
+    if (errors) {
+      console.error(errors)
+      throw new Error('[saveDraft] mutation error')
+    }
+    throw new Error('[saveDraft] no return data')
   }
 
-  async removeDraft(id: string): Promise<{ success: true }> {
-    throw new Error('not implemented')
+  //
+  // Helpers
+  //
+  //
+  //
+  //
+
+  /**
+   * Remove '__typename' from query data
+   */
+  toDoc(
+    branch: string,
+    noteDraft: NoteDraftFragment,
+    note: NoteFragment | null,
+  ): { doc: Doc; blocks: Block[]; docBlock: Block } {
+    const { content, domain, meta, symbol } = noteDraft,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      { blocks, docBlock } = convertGQLBlocks(content.blocks),
+      doc: Doc = {
+        branch,
+        domain,
+        title: symbol,
+        meta: omitTypenameDeep(meta),
+        blockUid: docBlock.uid,
+        noteCopy: note ?? undefined,
+        noteDraftCopy: noteDraft,
+      }
+
+    return { doc, blocks, docBlock }
+  }
+
+  /**
+   *
+   */
+  toNoteDraftInput(doc: Doc): NoteDraftInput {
+    const { domain, noteCopy, meta } = doc,
+      blocks = docRepo.getContentBlocks(doc),
+      blocksWithoutChildrenUids = blocks.map(e => {
+        const { childrenUids, editTime, ...rest } = e
+        return { ...rest }
+      }),
+      input: NoteDraftInput = {
+        content: {
+          blocks: blocksWithoutChildrenUids,
+          discussIds: [],
+          symbols: [],
+        },
+        domain,
+        fromDocId: noteCopy?.noteDoc.id,
+        meta,
+      }
+    return input
   }
 }
 
 /**
  *
  */
-export function getNoteDraftService(mock?: true): INoteDraftService {
-  if (mock) {
-    return new MockNoteDraftService()
-  }
+export function getNoteDraftService(): NoteDraftService {
   return new NoteDraftService()
 }

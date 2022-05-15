@@ -1,22 +1,20 @@
+import React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useState } from 'react'
-import { useMeQuery } from '../../apollo/query.graphql'
 import ToggleMenu from '../../layout/toggle-menu'
-import Tooltip from '../../layout/tooltip/popup'
+import { useMe } from './use-me'
 
 const AuthItem = () => {
-  const { data, loading } = useMeQuery({ fetchPolicy: 'network-only' })
-  const router = useRouter()
+  const router = useRouter(),
+    { me, loading } = useMe()
 
   if (loading) {
     return null
   }
-
   return (
     <React.Fragment>
       <div className=" relative">
-        {data?.me ? (
+        {me ? (
           <ToggleMenu
             className="max-w-[120px] py-1 -translate-x-full left-full"
             summary={
@@ -31,27 +29,28 @@ const AuthItem = () => {
             }
           >
             <span className="block px-2  truncate  text-gray-600 text-sm font-medium cursor-default">
-              {data.me.id}
+              {me.id}
             </span>
             <div className="h-[1px] my-2 bg-gray-200"></div>
             <Link
               href={{
                 pathname: '/user/[userId]',
-                query: { userId: data.me.id },
+                query: { userId: me.id },
               }}
             >
               <a className="block px-2 py-1 text-sm text-gray-600 hover:bg-blue-500 hover:text-white">
-                個人頁面
+                Profile
               </a>
             </Link>
             <div className="h-[1px] my-2 bg-gray-200"></div>
             <Link href="/login">
               <a className="block px-2 py-1 text-sm text-gray-600 hover:bg-blue-500 hover:text-white">
-                登出
+                Logout
               </a>
             </Link>
           </ToggleMenu>
         ) : (
+          // TODO: Change to button-like-link
           <div className="">
             <button
               className="btn-primary px-2 py-[3px] text-sm"
@@ -59,7 +58,7 @@ const AuthItem = () => {
                 router.push('/login')
               }}
             >
-              登入
+              Login
             </button>
           </div>
         )}

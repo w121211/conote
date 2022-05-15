@@ -28,12 +28,16 @@ async function main() {
 
   await testHelper.createDiscusses(prisma)
 
-  console.log('Creating mock commits...')
+  // console.log('Creating mock commits...')
 
-  mockNoteDrafts.slice(0, 2).forEach(async e => {
-    await testHelper.createNoteDrafts(prisma, [e])
-    await commitNoteDrafts([e.id], e.userId)
-  })
+  // mockNoteDrafts.slice(0, 2).forEach(async e => {
+  //   await testHelper.createNoteDrafts(prisma, [e])
+  //   await commitNoteDrafts([e.id], e.userId)
+  // })
+
+  console.log('Creating mock note-drafts...')
+  await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
+  await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(5))
 }
 
 main()

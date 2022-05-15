@@ -1,5 +1,6 @@
 import { createStore, select, setProp, withProps } from '@ngneat/elf'
 import { filter, of, switchMap } from 'rxjs'
+import { NoteDraftEntryFragment } from '../../../../apollo/query.graphql'
 import { EditorProps } from '../interfaces'
 import { docRepo } from './doc.repository'
 
@@ -9,7 +10,7 @@ export const editorStore = createStore(
     alert: {},
     leftSidebar: {
       show: true,
-      entries: [],
+      items: [],
     },
     modal: {},
     route: {
@@ -36,12 +37,23 @@ class EditorRepository {
     switchMap(symbol => (symbol ? docRepo.getDoc$(symbol) : of(null))),
   )
 
+  route$ = editorStore.pipe(select(state => state.route))
+
   getValue() {
     return editorStore.getValue()
   }
 
   updateRoute(route: EditorProps['route']) {
     editorStore.update(setProp('route', route))
+  }
+
+  updateLeftSidebarItems(items: NoteDraftEntryFragment[]) {
+    editorStore.update(
+      setProp('leftSidebar', leftSidebar => ({
+        ...leftSidebar,
+        items,
+      })),
+    )
   }
 }
 

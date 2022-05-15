@@ -1,4 +1,4 @@
-import { editingFocus, setCursorPosition } from './effects'
+import { editingFocus, routerUpdateShallow, setCursorPosition } from './effects'
 import {
   Block,
   DestructTextareaKeyEvent,
@@ -23,9 +23,12 @@ import { docRepo, getDoc } from './stores/doc.repository'
 import { getNoteDraftService } from './services/note-draft.service'
 import { editorRepo } from './stores/editor.repository'
 import { getNoteService } from './services/note.service'
+import { getCommitService } from './services/commit.service'
+import { NextRouter } from 'next/router'
 
 const noteService = getNoteService(),
-  noteDraftService = getNoteDraftService()
+  noteDraftService = getNoteDraftService(),
+  commitService = getCommitService()
 
 //
 // History Events
@@ -645,30 +648,42 @@ export function selectedDown(selectedItems: string[]) {
  * If note-doc not found, create new local-doc
  *
  */
-export async function docOpen(title: string) {
-  if (docRepo.findDoc(title)) {
-    // console.debug('found local-doc, return ' + title)
-    return
-  }
+export async function docOpen(
+  title: string,
+  branch = 'mock-branch-0',
+  domain = 'domain',
+) {
+  if (docRepo.findDoc(title)) throw new Error('[docOpen] Doc is existed')
 
   const [note, draft] = await Promise.all([
-    noteService.queryNote(title),
-    noteDraftService.queryDraft(title),
-  ])
-  const op = draft
-    ? ops.docLoadOp(title, draft, note)
-    : ops.docNewOp(title, note)
+      noteService.queryNote(title),
+      noteDraftService.queryDraft(title),
+    ]),
+    { blockReducers, docReducers } = draft
+      ? ops.docLoadOp(branch, title, draft, note)
+      : ops.docNewOp(branch, title, domain, note)
 
-  blockRepo.update(op.blockReducers)
-  docRepo.update(op.docReducers)
+  blockRepo.update(blockReducers)
+  docRepo.update(docReducers)
+
+  // console.debug(note, draft)
 }
 
 /**
- * Save doc on remote
+ * Save doc on remote, use doc's title as 'symbol'
+ *
+ * Because local repositories already have the content (blocks, meta),
+ * only update the note-draft-copy
  */
 export async function docSave(doc: Doc) {
-  // draftService.saveDraft()
-  const removeOp = ops.docRemoveOp(doc)
+  const { branch, title } = doc,
+    input = noteDraftService.toNoteDraftInput(doc),
+    noteDraft = doc.noteDraftCopy
+      ? await noteDraftService.saveDraft(doc.noteDraftCopy.id, input)
+      : await noteDraftService.createDraft(branch, title, input),
+    op = ops.docSaveOp(doc, noteDraft)
+
+  docRepo.update(op)
 }
 
 /**
@@ -676,7 +691,7 @@ export async function docSave(doc: Doc) {
  */
 export async function docRemove(doc: Doc) {
   if (doc.noteDraftCopy) {
-    const resp = await noteDraftService.removeDraft(doc.noteDraftCopy.id)
+    const resp = await noteDraftService.dropDraft(doc.noteDraftCopy.id)
   }
   const { blockReducers, docReducers } = ops.docRemoveOp(doc)
 
@@ -687,13 +702,14 @@ export async function docRemove(doc: Doc) {
 /**
  * If note not existed, rename directly
  * If note existed, update note-meta without rename
+ *
+ * TODO:
  */
 export async function docRename(doc: Doc, newTitle: string) {
   if (doc.noteCopy) {
     // do nothing
   } else {
     const { blockReducers, docReducers } = ops.docRenameOp(doc, newTitle)
-
     blockRepo.update(blockReducers)
     docRepo.update(docReducers)
   }
@@ -713,6 +729,7 @@ export async function docRename(doc: Doc, newTitle: string) {
  * If current doc has draft, save it
  * If current doc does not have draft and has updated, show warnning
  * If current doc does not have draft and not update, remove doc
+ *
  */
 async function editorChangeSymbolMain(symbol: string) {
   const { route } = editorRepo.getValue(),
@@ -761,14 +778,17 @@ async function editorChangeSymbolModal(symbol: string | null) {
  * - If got draft, save doc
  * - If no draft, remove doc
  *
- * TODO: route side-effect
+ * Side-effect: shallow update current route url through nextjs router
+ *
  */
 export async function editorRouteUpdate({
   mainSymbol,
   modalSymbol,
+  router,
 }: {
   mainSymbol?: string
   modalSymbol?: string | null
+  router?: NextRouter
 }) {
   const { route } = editorRepo.getValue(),
     { symbolMain, symbolModal } = route,
@@ -781,15 +801,34 @@ export async function editorRouteUpdate({
       modalSymbol_ !== undefined && modalSymbol_ !== symbolModal
 
   if (mainSymbolChanged) {
-    editorChangeSymbolMain(mainSymbol)
+    await editorChangeSymbolMain(mainSymbol)
+    if (router) {
+      await routerUpdateShallow(router, {
+        pathname: router.pathname,
+        query: { symbol: mainSymbol },
+      })
+    }
   } else if (modalSymbolChanged) {
     editorChangeSymbolModal(modalSymbol_)
+    if (router) {
+      await routerUpdateShallow(router, {
+        pathname: router.pathname,
+        query: modalSymbol_
+          ? { symbol: symbolMain, pop: modalSymbol_ }
+          : { symbol: symbolMain },
+      })
+    }
   } else if (!mainSymbolChanged && !modalSymbolChanged) {
-    // do nothing
+    // Do nothing
   } else {
-    // unexpected case
+    // Unexpected case
   }
-  console.debug(mainSymbol, modalSymbol, mainSymbolChanged, modalSymbolChanged)
+  // console.debug(mainSymbol, modalSymbol, mainSymbolChanged, modalSymbolChanged)
+}
+
+export async function editorLeftSidebarMount() {
+  const entries = await noteDraftService.queryMyAllDraftEntries()
+  editorRepo.updateLeftSidebarItems(entries)
 }
 
 //
@@ -802,7 +841,9 @@ export async function editorRouteUpdate({
 //
 
 export async function templateSet(docBlock: Block) {
-  if (!isDocBlock(docBlock)) throw new Error('Given block is not doc-block')
+  if (!isDocBlock(docBlock)) {
+    throw new Error('Given block is not doc-block')
+  }
 
   const blocks = writeBlocks(['__DUMMY_ROOT__', ['hello', 'world']], docBlock),
     [, ...children] = blocks
@@ -810,4 +851,28 @@ export async function templateSet(docBlock: Block) {
   const op = ops.blocksInsertOp(docBlock, children)
 
   blockRepo.update(op)
+}
+
+//
+// Commit Events
+//
+//
+//
+//
+//
+//
+
+/**
+ * If commit success, marked docs as committed
+ */
+export async function commitDocs(docs: Doc[]) {
+  // const { branch, title } = doc,
+  //   input = noteDraftService.toNoteDraftInput(doc),
+  //   noteDraft = doc.noteDraftCopy
+  //     ? await noteDraftService.saveDraft(doc.noteDraftCopy.id, input)
+  //     : await noteDraftService.createDraft(branch, title, input),
+  //   op = ops.docSaveOp(doc, noteDraft)
+
+  // docRepo.update(op)
+  commitService.commitDocs(docs)
 }

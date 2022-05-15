@@ -445,6 +445,11 @@ type Sym {
   symbol: String! # this is mutable
 }
 
+type Symbol_SymId {
+  symbol: String!
+  symId: String
+}
+
 type User {
   id: ID!
   email: String!
@@ -481,6 +486,8 @@ type UpsertNoteEmojiLikeResult {
 type Block {
   uid: ID!
   str: String!
+  open: Boolean
+  order: Int!
   parentUid: String
   docTitle: String
 }
@@ -494,8 +501,8 @@ type BlockUid_DiscussId {
 type Commit {
   id: String!
   userId: String!
-  drafts: [NoteDraft!]!
-  docs: [NoteDoc!]!
+  noteDocs: [NoteDoc!]!
+  noteDrafts: [NoteDraft!]!
   updatedAt: DateTime!
 }
 
@@ -508,10 +515,8 @@ type Note {
   sym: Sym!
   link: Link
 
-  # meta: NoteDocMeta!
-
   # the latest merged NoteDoc, throw error if there is none (it's impossible to be null because first NoteDoc will auto-merge to the newly-built Note)
-  doc: NoteDoc!
+  noteDoc: NoteDoc!
 
   updatedAt: DateTime!
 }
@@ -534,8 +539,8 @@ type NoteDoc {
 
 type NoteDocContent {
   discussIds: [BlockUid_DiscussId!]!
+  symbols: [Symbol_SymId!]!
   diff: JSON
-  symbolIdDict: JSON
   blocks: [Block!]!
   # a symbol-noteId map, so later the cahnge of symbol name won't affect
 }
@@ -545,39 +550,53 @@ type NoteDocEntry {
 }
 
 type NoteDocMeta {
-  # store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
-  duplicatedSymbols: [String]
+  # Use for ticker, webpage symbols to display a title aside with symbol
+  title: String
 
-  # note keywords
-  keywords: [String]
+  # To store Sym.symbols refering to the same note, e.g $BA, [[Boeing]] both to Boeing
+  duplicatedSymbols: [String!]
 
-  # used when duplicate symbol exists
-  redirectFroms: [String]
+  # Note keywords
+  keywords: [String!]
+
+  # Used when duplicate symbol exists
+  redirectFroms: [String!]
 
   redirectTo: String
+
   webpage: NoteDocMetaWebpage
 }
 
+# Meta-data extracted from the webpage
 type NoteDocMetaWebpage {
-  authors: [String]
+  authors: [String!]
+
+  # Webpage's title
   title: String
 
-  # when the webpage content publish at
+  # When the webpage content publish at
   publishedAt: DateTime
 
-  # tickers mentioned in the webpage content
-  tickers: [String]
+  # Tickers mentioned in the webpage content
+  tickers: [String!]
 }
 
 type NoteDraft {
   id: ID!
+
+  # Use as id for front-end (equals to doc-title)
+  symbol: String!
+
   # noteId: String  # not using for creating a draft and not this field in db
   userId: String!
+
   commitId: String
   fromDocId: String
-  domain: String
-  symbol: String
-  meta: NoteDocMeta # not sure about this type
+  domain: String!
+
+  # Editing note-doc-meta stores here
+  meta: NoteDocMeta!
+
   content: NoteDocContent!
   updatedAt: DateTime!
   status: NoteDraftStatus!
@@ -594,6 +613,10 @@ type NoteDraftDropResponse {
 
 type NoteDraftEntry {
   id: ID!
+  symbol: String!
+
+  # Retrived from 'noteDocMeta.title', use for ticker, webpage
+  title: String
 }
 
 # ------------------End-------------------
@@ -648,6 +671,8 @@ input VoteInput {
 input BlockInput {
   uid: ID!
   str: String!
+  open: Boolean
+  order: Int!
   parentUid: String
   docTitle: String
 }
@@ -672,26 +697,31 @@ input NoteDraftInput {
 
 input NoteDocContentInput {
   discussIds: [BlockUid_DiscussIdInput!]!
-  diff: JSON
-  symbolIdMap: JSON
+  symbols: [Symbol_SymIdInput!]!
   blocks: [BlockInput!]!
+  diff: JSON
 }
 
-# similar to NoteDocMeta
+# Same as NoteDocMeta
 input NoteDocMetaInput {
-  duplicatedSymbols: [String]! # to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
-  keywords: [String]! # note keywords
-  redirectFroms: [String]! # used when duplicate symbol exists
+  title: String
+  duplicatedSymbols: [String!]
+  keywords: [String!]
+  redirectFroms: [String!]
   redirectTo: String
   webpage: NoteDocMetaWebpageInput
 }
 
-# data extracted from the webpage
 input NoteDocMetaWebpageInput {
-  authors: [String]!
+  authors: [String!]
   title: String
-  publishedAt: DateTime # when the webpage content publish at
-  tickers: [String]! # tickers mentioned in the webpage content
+  publishedAt: DateTime
+  tickers: [String!]
+}
+
+input Symbol_SymIdInput {
+  symbol: String!
+  symId: String
 }
 
 #---------------End-----------------

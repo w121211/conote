@@ -1,4 +1,4 @@
-import { ChangeType } from '.'
+import { ChangeType } from './interfaces'
 
 export type NodeBody<T> = {
   cid: string
@@ -15,7 +15,9 @@ export type TreeNode<T> = NodeBody<T> & {
 
 export type Match<T> = (node: NodeBody<T>) => boolean
 
-export const isTreeNode = <T>(node: TreeNode<T> | NodeBody<T>): node is TreeNode<T> => {
+export const isTreeNode = <T>(
+  node: TreeNode<T> | NodeBody<T>,
+): node is TreeNode<T> => {
   return (node as TreeNode<T>).children !== undefined
 }
 
@@ -64,7 +66,9 @@ export const TreeService = {
    * Use the given parent-children dict to construct a tree.
    * P.S. Node's index is followed by the given array, not by the node's index
    */
-  fromParentChildrenDict<T>(dict: Record<string, NodeBody<T>[]>): TreeNode<T>[] {
+  fromParentChildrenDict<T>(
+    dict: Record<string, NodeBody<T>[]>,
+  ): TreeNode<T>[] {
     if (!(this.tempRootCid in dict)) {
       return [] // temp-root has no children, return an empty array
     }
@@ -95,7 +99,12 @@ export const TreeService = {
     return tempRoot.children
   },
 
-  insert<T>(value: TreeNode<T>[], item: NodeBody<T>, toParentCid: string, toIndex: number): TreeNode<T>[] {
+  insert<T>(
+    value: TreeNode<T>[],
+    item: NodeBody<T>,
+    toParentCid: string,
+    toIndex: number,
+  ): TreeNode<T>[] {
     const dict = this.toParentChildrenDict(value)
     const arr = dict[toParentCid]
     item.parentCid = toParentCid
@@ -117,7 +126,11 @@ export const TreeService = {
     // root.index = 0
     const tempRoot: TreeNode<T> = {
       cid: this.tempRootCid,
-      children: children.map((e, i) => ({ ...e, parentCid: this.tempRootCid, index: i })),
+      children: children.map((e, i) => ({
+        ...e,
+        parentCid: this.tempRootCid,
+        index: i,
+      })),
     }
     const stack: TreeNode<T>[] = [tempRoot]
     while (stack.length > 0) {
@@ -142,7 +155,10 @@ export const TreeService = {
    * BFS search
    *
    */
-  searchBreadthFirst<T>(children: TreeNode<T>[], cid: string): TreeNode<T> | null {
+  searchBreadthFirst<T>(
+    children: TreeNode<T>[],
+    cid: string,
+  ): TreeNode<T> | null {
     const parents: TreeNode<T>[] = children
     while (parents.length > 0) {
       const p = parents.shift()
@@ -206,7 +222,9 @@ export const TreeService = {
     return dict
   },
 
-  toParentChildrenDict<T>(children: TreeNode<T>[]): Record<string, NodeBody<T>[]> {
+  toParentChildrenDict<T>(
+    children: TreeNode<T>[],
+  ): Record<string, NodeBody<T>[]> {
     const nodeDict = this.toDict(children)
     const dict: Record<string, NodeBody<T>[]> = Object.fromEntries(
       Object.entries(nodeDict).map(([k]): [string, NodeBody<T>[]] => [k, []]),

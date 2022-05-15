@@ -88,14 +88,17 @@ export async function getLoggedInUser(
     return { id: me.id, email }
   }
   if (me === null && firebaseUser === null) {
+    console.debug('me === null && firebaseUser === null')
     return null
   }
   if (me && firebaseUser === null) {
+    console.debug('me && firebaseUser === null')
     await logout(firebaseAuth, apolloClient)
     return null
   }
   if (me === null && firebaseUser) {
-    await logout(firebaseAuth, apolloClient)
+    console.debug('me === null && firebaseUser')
+    // await logout(firebaseAuth, apolloClient)
     return null
   }
 

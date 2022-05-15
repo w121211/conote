@@ -1,46 +1,46 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useNoteLazyQuery } from '../../apollo/query.graphql'
+import { Layout } from '../../layout/layout'
+// import { useNoteLazyQuery } from '../../apollo/query.graphql'
 
-export function NoteIndexPage(): JSX.Element | null {
-  const router = useRouter()
-  const [url, setUrl] = useState<string | null>()
-  const [queryNote, { data, loading, error }] = useNoteLazyQuery()
+export function NoteIndexPage(): JSX.Element {
+  return (
+    <Layout
+      buttonRight={
+        <>
+          {/* {mainDoc?.doc && <NoteMetaModal doc={mainDoc.doc} />}
+            {mainDoc?.doc?.noteCopy && (
+              <div className="inline-block z-20">
+                <HeaderNoteEmojis noteId={mainDoc.doc.noteCopy.id} />
+              </div>
+            )} */}
 
-  useEffect(() => {
-    const { query, isReady } = router
-    if (isReady) {
-      const { url } = query
-      if (url && typeof url === 'string') {
-        setUrl(url)
-        queryNote({
-          variables: { url },
-        })
-      } else {
-        setUrl(null)
+          {/* <button
+              className=" p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
+              onClick={() => {
+                if (mainDoc?.doc) {
+                  workspace.save(mainDoc.doc)
+                }
+              }}
+            >
+              <span className="material-icons-outlined text-xl leading-none ">
+                save
+              </span>
+            </button>
+            
+            <button className=" p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+              <span className="material-icons-outlined text-xl leading-none ">
+                more_horiz
+              </span>
+            </button> */}
+
+          {/* <AuthItem /> */}
+        </>
       }
-    }
-  }, [router])
-
-  if (url === null) {
-    return <div>Give a url or symbol to query a note</div>
-  }
-  if (loading) {
-    return null
-  }
-  if (data && data.note) {
-    // router.push(`/note/${encodeURIComponent(data.note.sym.symbol)}`)
-    router.push({
-      pathname: '/note/[symbol]',
-      query: { symbol: data.note.sym.symbol },
-    })
-    return null
-  }
-  if (error) {
-    console.error(error)
-    return <div>Given url: {url} is not supported yet.</div>
-  }
-  return null
+    >
+      <h1>Note index</h1>
+    </Layout>
+  )
 }
 
 export default NoteIndexPage

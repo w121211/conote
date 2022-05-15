@@ -25,6 +25,3 @@ export function createCache(): InMemoryCache {
     },
   })
 }
-
-// SSR does not have localStorage
-// export const isLoggedInVar = makeVar<boolean>(!!localStorage.getItem('token'))

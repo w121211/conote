@@ -4,21 +4,33 @@ import { serialize } from 'cookie'
 import { auth } from 'firebase-admin'
 import { DecodedIdToken } from 'firebase-admin/auth'
 import { getFirebaseAdmin } from './firebase-admin'
+import { mockUsers } from '../../test/__mocks__/mock-user'
 
 const TOKEN_NAME = 'session'
 
 /**
  * Init firebase admin
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const firebaseAdmin = getFirebaseAdmin()
+getFirebaseAdmin()
 
 /**
+ * If DEV_WITH_STORYBOOK is set 'true', use mock-user as a pretended logged-in user
  *
  */
 export async function isAuthenticated(
   req: NextApiRequest,
 ): Promise<{ userId: string; email: string }> {
+  if (
+    process.env.NODE_ENV === 'development' &&
+    process.env.DEV_WITH_STORYBOOK === 'true'
+  ) {
+    // Mock authenticated user
+    return {
+      email: mockUsers[0].email,
+      userId: mockUsers[0].id,
+    }
+  }
+
   try {
     const sessionCookie = req.cookies[TOKEN_NAME] || ''
     const decodedClaims = await auth().verifySessionCookie(sessionCookie, true)

@@ -281,14 +281,14 @@ describe('commitNoteDrafts()', () => {
             "userId": "testuser0",
           },
           Object {
-            "id": "mock-discuss-1_draft",
-            "status": "ACTIVE",
-            "userId": "testuser1",
-          },
-          Object {
             "id": "mock-discuss-2_archive",
             "status": "ARCHIVE",
             "userId": "testuser2",
+          },
+          Object {
+            "id": "mock-discuss-1_draft",
+            "status": "ACTIVE",
+            "userId": "testuser1",
           },
         ],
       ]

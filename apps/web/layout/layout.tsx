@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import SideBar from '../components/sidebar/sidebar'
+import SidebarEl from '../components/block-editor/src/components/sidebar/sidebar-el'
 import LoginModal from '../components/login-modal'
 import Navbar from '../components/navbar'
 
@@ -102,7 +102,7 @@ export function Layout({
 
   return (
     <div className="flex w-screen h-screen  ">
-      <SideBar
+      <SidebarEl
         showMenuHandler={triggerMenuHandler}
         pinMenuHandler={pinMenuHandler}
         showSider={showSider}

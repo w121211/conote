@@ -1,5 +1,4 @@
-import { NoteDoc, Prisma, PrismaPromise } from '@prisma/client'
-import { NoteDocMetaWebpageFragmentDoc } from '../../apollo/query.graphql'
+import { Note, NoteDoc, PrismaPromise } from '@prisma/client'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
 
@@ -55,44 +54,6 @@ function mergePeriodical() {
 //
 //
 
-export class NoteDocMetaModel {
-  // static fromJSON(json: Prisma.JsonValue | undefined): NoteDocMeta {
-  //   // TODO
-  //   if (json === undefined) {
-  //     return {}
-  //   }
-  //   const jsonParsed = json as object
-  //   // const parsed = JSON.parse(jsonString)
-  //   return {
-  //     keywords: ,
-  //     // duplicatedSymbols: parsed.duplicatedSymbols,
-  //     // keywords: parsed.keywords,
-  //     // redirectFroms: parsed.redirectFroms,
-  //     // redirectTo: parsed.redirectTo,
-  //     webpage: {
-  //       ...parsed.webpage,
-  //       // authors: parsed.webpage.authors,
-  //       // title: parsed.webpage.title,
-  //       publishedAt: new Date(parsed.webpage.publishedAt),
-  //       // tickers: parsed.webpage.tickers,
-  //     },
-  //   }
-  // }
-  /**
-   * @returns JSON, cannot return native JSON due to prisma's bug: https://github.com/prisma/prisma/issues/9247
-   */
-  // static toJSON(meta: NoteDocMeta): Prisma.InputJsonValue {
-  //   // TODO
-  //   return {
-  //     ...meta,
-  //     webpage: {
-  //       ...meta.webpage,
-  //       publishedAt: meta.webpage?.publishedAt?.toISOString(),
-  //     },
-  //   }
-  // }
-}
-
 class NoteDocModel {
   /**
    * throws if:
@@ -139,6 +100,38 @@ class NoteDocModel {
         content: content_,
       },
     })
+  }
+
+  /**
+   *
+   */
+  async getLatestMergedNoteDoc(note: Note) {
+    const doc = await prisma.noteDoc.findFirst({
+      where: {
+        branchId: note.branchId,
+        symId: note.symId,
+        status: 'MERGE',
+      },
+      orderBy: { updatedAt: 'desc' },
+      include: { branch: true },
+    })
+    if (doc) {
+      return this.parse(doc)
+    }
+    throw new Error(
+      '[getLatestMergedNoteDoc] not found latest-merged-note-doc, unexpected error',
+    )
+  }
+
+  /**
+   *
+   */
+  parse(doc: NoteDoc) {
+    return {
+      ...doc,
+      meta: doc.meta as unknown as NoteDocMeta,
+      content: doc.content as unknown as NoteDocContent,
+    }
   }
 
   /**

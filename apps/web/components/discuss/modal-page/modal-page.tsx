@@ -5,7 +5,7 @@ import { useDiscussQuery } from '../../../apollo/query.graphql'
 import DiscussBody from '../post/discuss-posts'
 import DiscussEmojis from '../discuss-emojis'
 import DiscussHeader from '../discuss-header'
-import CreatePostForm from '../post/create-post-form'
+import { CreatePostForm } from '../post/create-post-form'
 
 const dummyData = [
   '測試測試大家好',
@@ -15,7 +15,13 @@ const dummyData = [
   '好尷尬唷嗚嗚嗚',
 ]
 
-export const DiscussModalPage = ({ id, title }: { id: string; title: string }) => {
+export const DiscussModalPage = ({
+  id,
+  title,
+}: {
+  id: string
+  title: string
+}) => {
   const { data } = useDiscussQuery({ variables: { id } })
   if (!data?.discuss) {
     return null

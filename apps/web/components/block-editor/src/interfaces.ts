@@ -1,28 +1,10 @@
 import { Token } from 'prismjs'
-import { NoteDocMetaInput as GQLNoteDocMetaInput } from 'graphql-let/__generated__/__types__'
+import { NoteDocMetaInput } from 'graphql-let/__generated__/__types__'
 import {
-  DiscussFragment,
   NoteDraftEntryFragment,
   NoteDraftFragment,
   NoteFragment,
 } from '../../../apollo/query.graphql'
-
-//
-// GraphQL datatypes (server-side)
-//
-//
-//
-//
-//
-//
-
-export type GQLDiscuss = DiscussFragment
-
-export type GQLNote = NoteFragment
-
-export type GQLNoteDraft = NoteDraftFragment
-
-export type GQLNoteDraftEntry = NoteDraftEntryFragment
 
 //
 // Component State - commonly used in various components & handlers
@@ -172,22 +154,38 @@ export type BlockWithChildren = Block & { children: BlockWithChildren[] }
  * alone with a concept of node-block (node-page-block), ndoe-title, page-title, page-block (or context-block)
  */
 export type Doc = {
-  // use as id, no duplicated titles area allowed
+  branch: string
+
+  domain: string
+
+  // Use as id, no duplicated titles area allowed,
+  // also represent as 'symbol' for server-side
   title: string
 
-  // corresponding root block
+  // Note-doc-meta is editable and stores here
+  meta: NoteDocMetaInput
+
+  // Refer to root-block-uid
   blockUid: string
 
-  // the latest note by query
-  noteCopy?: GQLNote
+  // The latest note by query
+  noteCopy?: NoteFragment
 
-  // the latest note-draft
-  noteDraftCopy?: GQLNoteDraft
-
-  // updates in note meta
-  noteMeta?: GQLNoteDocMetaInput
+  // The latest note-draft
+  noteDraftCopy?: NoteDraftFragment
 }
 
+/**
+ * The final single stop to store all required info for the editor
+ *
+ * One browser window can only have one editor, an editor includes
+ * - route
+ * - one main-doc
+ * - one modal-doc (optional)
+ * - one sidebar
+ *   - all editing draft-entries
+ * - alert
+ */
 export type EditorProps = {
   alert: {
     show?: null
@@ -197,7 +195,7 @@ export type EditorProps = {
   }
   leftSidebar: {
     show: boolean
-    entries: string[]
+    items: NoteDraftEntryFragment[]
   }
   modal: {
     discuss?: {

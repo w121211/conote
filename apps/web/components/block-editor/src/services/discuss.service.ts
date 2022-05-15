@@ -1,10 +1,3 @@
-import { NoteDraft } from '../interfaces'
-import {
-  mockGotDraftOnly,
-  mockGotNoteAndDraft,
-  mockMyAllDrafts,
-} from '../../test/__mocks__/mock-data'
-
 type DiscussInput = {
   title: string
   content?: string

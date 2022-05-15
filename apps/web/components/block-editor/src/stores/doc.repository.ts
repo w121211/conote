@@ -5,9 +5,8 @@ import {
   selectEntity,
   withEntities,
 } from '@ngneat/elf-entities'
-import { Block, Doc, NoteDraft } from '../interfaces'
+import { Block, Doc } from '../interfaces'
 import { allDescendants } from '../op/queries'
-import { genBlockUid } from '../utils'
 import { getBlock } from './block.repository'
 
 type DocStoreState = {
@@ -36,6 +35,15 @@ class DocRepository {
     return docsStore.query(getEntity(title))
   }
 
+  /**
+   * Get doc's root block and all kids
+   */
+  getContentBlocks(doc: Doc): Block[] {
+    const docBlock = getBlock(doc.blockUid),
+      kids = allDescendants(docBlock)
+    return [docBlock, ...kids]
+  }
+
   getDoc$(title: string) {
     return docsStore.pipe(
       selectEntity(title),
@@ -45,12 +53,6 @@ class DocRepository {
 
   update(reducers: DocReducer[]) {
     docsStore.update(...reducers)
-  }
-
-  getContent(doc: Doc): Block[] {
-    const docBlock = getBlock(doc.blockUid),
-      kids = allDescendants(docBlock)
-    return [docBlock, ...kids]
   }
 }
 

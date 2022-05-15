@@ -12,6 +12,5 @@ export const mockLinks: (Omit<Link, 'scraped'> & { scraped: FetchResult })[] = [
         'https://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url',
       srcType: 'OTHER',
     },
-    authorId: null,
   },
 ]

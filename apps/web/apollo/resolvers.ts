@@ -7,7 +7,6 @@ import {
   NoteDraft,
   NoteEmoji,
   NoteEmojiCount,
-  SymType,
 } from '@prisma/client'
 import {
   QueryResolvers,
@@ -20,7 +19,6 @@ import { PollMeta } from '../lib/models/poll-model'
 import { rateModel } from '../lib/models/rate-model'
 import { getOrCreateUser } from '../lib/models/user-model'
 import { createVote } from '../lib/models/vote-model'
-import { symModel } from '../lib/models/sym-model'
 import prisma from '../lib/prisma'
 import {
   SearchAuthorService,
@@ -36,6 +34,7 @@ import {
 import { NoteDocContent, NoteDocMeta } from '../lib/interfaces'
 import { commitNoteDrafts } from '../lib/models/commit-model'
 import { noteDraftModel } from '../lib/models/note-draft-model'
+import { noteModel } from '../lib/models/note-model'
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
   async author(_parent, { id, name }, _context, _info) {
@@ -282,19 +281,19 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req)
     const commits = await prisma.commit.findMany({
       where: { userId: userId },
-      include: { drafts: true, docs: true },
+      include: { noteDrafts: true, noteDocs: true },
       take: 10,
       orderBy: { createdAt: 'desc' },
     })
     return commits.map(e => {
       return {
         ...e,
-        drafts: e.drafts.map(d => ({
+        noteDocs: e.noteDocs.map(d => ({
           ...d,
           meta: d.meta as unknown as NoteDocMeta,
           content: d.content as unknown as NoteDocContent,
         })),
-        docs: e.docs.map(d => ({
+        noteDrafts: e.noteDrafts.map(d => ({
           ...d,
           meta: d.meta as unknown as NoteDocMeta,
           content: d.content as unknown as NoteDocContent,
@@ -308,85 +307,34 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   // myNoteDraftEntries: [NoteDraftEntry!]!
   // can use select filter to only get id field
   async myNoteDraftEntries(_parent, _args, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const drafts = await prisma.noteDraft.findMany({
-      where: {
-        AND: {
-          userId: userId,
-          status: 'EDIT',
+    const { userId } = await isAuthenticated(req),
+      drafts = await prisma.noteDraft.findMany({
+        where: {
+          AND: {
+            userId: userId,
+            status: 'EDIT',
+          },
         },
-      },
-      select: { id: true },
-    })
-    return drafts
+        // select: { id: true },
+      }),
+      parsed = drafts.map(e => noteDraftModel.parse(e)),
+      entries = parsed.map(e => {
+        const {
+          id,
+          symbol,
+          meta: { title },
+        } = e
+        return { id, symbol, title }
+      })
+    return entries
   },
 
   async noteById(_parent, { id }, _context, _info) {
-    const note = await prisma.note.findUnique({
-      where: { id },
-      include: { sym: true, link: true },
-    })
-    const doc =
-      note &&
-      (await prisma.noteDoc.findFirst({
-        where: {
-          branchId: note.branchId,
-          symId: note.symId,
-          status: 'MERGE',
-        },
-        orderBy: { updatedAt: 'desc' },
-      }))
-    if (doc) {
-      return {
-        ...note,
-        meta: doc.meta as unknown as NoteDocMeta,
-        doc: {
-          ...doc,
-          meta: doc.meta as unknown as NoteDocMeta,
-          content: doc.content as unknown as NoteDocContent,
-        },
-      }
-    }
-    throw new Error('Note not found.')
+    return noteModel.getById(id)
   },
 
   async noteByBranchSymbol(_parent, { branch, symbol }, _context, _info) {
-    const branchPrisma = await prisma.branch.findUnique({
-      where: { name: branch },
-    })
-    const sym = await prisma.sym.findUnique({ where: { symbol } })
-    if (branchPrisma === null) {
-      throw new Error('Branch not found.')
-    }
-    if (sym === null) {
-      throw new Error('Sym not found.')
-    }
-    const note = await prisma.note.findUnique({
-      where: { branchId_symId: { branchId: branchPrisma!.id, symId: sym!.id } },
-      include: { sym: true, link: true },
-    })
-    const doc =
-      note &&
-      (await prisma.noteDoc.findFirst({
-        where: {
-          branchId: note.branchId,
-          symId: note.symId,
-          status: 'MERGE',
-        },
-        orderBy: { updatedAt: 'desc' },
-      }))
-    if (doc) {
-      return {
-        ...note,
-        meta: doc.meta as unknown as NoteDocMeta,
-        doc: {
-          ...doc,
-          meta: doc.meta as unknown as NoteDocMeta,
-          content: doc.content as unknown as NoteDocContent,
-        },
-      }
-    }
-    throw null
+    return noteModel.getByBranchSymbol(branch, symbol)
   },
 
   async noteDoc(_parent, { id }, _context, _info) {

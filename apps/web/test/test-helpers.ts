@@ -1,6 +1,4 @@
 import { PrismaClient } from '@prisma/client'
-import { NodeChange, TreeChangeService, TreeNode } from '@conote/docdiff'
-import { Bullet } from '../components/bullet/bullet'
 import { getBotEmail } from '../lib/models/user-model'
 import { mockDiscusses, mockDiscussPosts } from './__mocks__/mock-discuss'
 import { mockUsers } from './__mocks__/mock-user'
@@ -11,7 +9,6 @@ import { mockSyms } from './__mocks__/mock-sym'
 import { mockNotes } from './__mocks__/mock-note'
 import { mockCommits } from './__mocks__/mock-commit'
 import { mockNoteDocs } from './__mocks__/mock-note-doc'
-import { NoteDocMetaModel, noteDocModel } from '../lib/models/note-doc-model'
 import { mockLinks } from './__mocks__/mock-link'
 
 // fake incremental id
@@ -23,26 +20,22 @@ const fid = () => {
 
 export const BOT = { id: 'bot', email: getBotEmail() }
 
-export const TEST_AUTHORS = [{ name: 'test-author-1' }]
-
-export const TEST_COMMIT = [{ id: 'commit0', userId: 'testuser0' }]
-
 // --- Tree values ---
 
-export const bt = (
-  cid: number,
-  children: TreeNode<Bullet>[] = [],
-): TreeNode<Bullet> => {
-  return {
-    cid: cid.toString(),
-    data: {
-      id: cid.toString(),
-      cid: cid.toString(),
-      head: `${cid}${cid}${cid}`,
-    },
-    children,
-  }
-}
+// export const bt = (
+//   cid: number,
+//   children: TreeNode<Bullet>[] = [],
+// ): TreeNode<Bullet> => {
+//   return {
+//     cid: cid.toString(),
+//     data: {
+//       id: cid.toString(),
+//       cid: cid.toString(),
+//       head: `${cid}${cid}${cid}`,
+//     },
+//     children,
+//   }
+// }
 
 /**
  * Recursively remove keys from an object
@@ -99,7 +92,7 @@ export const clean = (
 }
 
 /**
- *
+ * Test helper for creating mock data
  */
 class TestHelper {
   async createBranches(prisma: PrismaClient): Promise<void> {
@@ -129,6 +122,7 @@ class TestHelper {
           meta: {},
         },
       })
+    return { sym, note, commit, noteDoc }
   }
 
   async createDiscusses(prisma: PrismaClient): Promise<void> {
@@ -192,32 +186,6 @@ class TestHelper {
     )
   }
 
-  // async createNoteDrafts(
-  //   prisma: PrismaClient,
-  //   drafts: Omit<
-  //     NoteDraftParsed,
-  //     'symId' | 'branchId' | 'commitId'
-  //   >[] = mockNoteDrafts,
-  // ): Promise<void> {
-  //   await prisma.$transaction(
-  //     drafts.map(e => {
-  //       // TODO: fromDoc
-  //       const { id, symbol, userId, domain, meta, content, fromDocId } = e
-  //       return prisma.noteDraft.create({
-  //         data: {
-  //           id,
-  //           symbol,
-  //           branch: { connect: { name: mockBranches[0].name } },
-  //           user: { connect: { id: userId } },
-  //           fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
-  //           domain,
-  //           meta,
-  //           content,
-  //         },
-  //       })
-  //     }),
-  //   )
-  // }
   async createLink(prisma: PrismaClient): Promise<void> {
     const { id, url, domain } = mockLinks[0]
     await prisma.link.create({ data: { id, url, domain } })

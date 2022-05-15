@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { DiscussFragment } from '../../../../../../apollo/query.graphql'
 import CreateDiscussForm from '../../../../../discuss/create-discuss-form'
 import { DiscussModalPage } from '../../../../../discuss/modal-page/modal-page'
-import Modal from '../../../../../modal/modal'
-import { Discuss, InlineDiscuss } from '../../../interfaces'
-import { InlineElProps } from '../inline-el'
-import { blockStrReplace } from '../../../events'
-import { inlineService } from '../../../services/inline.service'
 import { Tooltip } from '../../../../../../layout/tooltip/tooltip'
+import Modal from '../../../../../modal/modal'
+import { blockStrReplace } from '../../../events'
+import { InlineDiscuss } from '../../../interfaces'
+import { inlineService } from '../../../services/inline.service'
+import { InlineElProps } from '../inline-el'
 
 /**
  * Update block string when discuss is created
@@ -15,7 +16,7 @@ import { Tooltip } from '../../../../../../layout/tooltip/tooltip'
 function discussOnCreate(
   blockUid: string,
   inlineDiscuss: InlineDiscuss,
-  discuss: Discuss,
+  discuss: DiscussFragment,
 ): void {
   blockStrReplace(
     blockUid,

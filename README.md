@@ -8,11 +8,10 @@ Adopt monorepo style through yarn workspace, see https://github.com/vercel/next.
   - /k8s --- deployment configs
 
 ```sh
-# from project-root, sync packages versions in order to share dependencies
-# @see https://github.com/JamieMason/syncpack/
+# From project-root, sync packages versions in order to share dependencies
+# see https://github.com/JamieMason/syncpack/
 npx syncpack list-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
 npx syncpack fix-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
-
 
 # install all packages
 yarn install
@@ -257,7 +256,7 @@ v0.2.1
   - consider switch to https://typegraphql.com/
 - auth
   - [x] improve login, logout stablility -> useMe()
-  - [working@chi] update login page
+  - [x] update login page
   - [next] switch to next-firebase-auth once it is upport for firebase v9 (token-based)
     - for now, use firebase official example, cookie-based, no csrf
     - require both server (useMe) & firebase to logged-in, if server-side not logged in, should also revoke client-side firebase token so client-side check not remained logged-in
@@ -265,8 +264,9 @@ v0.2.1
       - CSRF, if use auth token in header, no need to consider this, also in line with firebase
       - token based apollo (similar to JWT?)
         - https://github.com/gladly-team/next-firebase-auth/discussions/100#discussioncomment-1215068
+  - [] web-based token (jwt)
 - user
-  - [prior@lisa] (req) user-page, include user's notes, rates, interested fields
+  - [x] (req) user-page, include user's notes, rates, interested fields
   - (?) anonymous user
 - link
   - try to exclude url search-params by comparing html page @ref
@@ -354,6 +354,7 @@ v0.2.1
 - [@chi] block-editor
   - block
     - [x] (bug) unexpected behavior on block merge, split
+    - [x] (bug) key-down 'enter' on block-start unexpected behavior
   - modal editor
     - [x] basic
     - [x] switch between titles or close
@@ -369,6 +370,9 @@ v0.2.1
     - [] (issue) caret lost after undo
     - [] textarea value undo, redo
     - [] textarea value lost after undo
+  - copy and paste
+    - [] external
+    - [] internal -> really need this?
   - select
     - [x] mouse select
       - [] (bug) not works on firefox
@@ -379,14 +383,15 @@ v0.2.1
         => it is caused by onKeyDownEvent.currentTarget.selectionEnd not reflect the real caret position, need to use onKeyUp event to tackle this special case
       - [] (issue) select + delete -> cursor lost
     - [pending] rewrite findSelectedItems
-  - [x] drag and drop (not fully tested)
-  - copy and paste
-    - [] external
-    - [] internal -> really need this?
+  - drag and drop
+    - [x] basic drag & drop (not fully tested, not works on firefox)
   - doc store
     - [] seperated blocks store for each doc
   - doc save
-  - [] (bug) key-down 'enter' on block-start unexpected behavior
+    - [x] save note-draft
+    - [] periodically save
+    - [] jump warnning if not saved yet (?)
+  - commit docs
 - check
   - [working@chi] seed
   - [x] discuss emoji, note emoji test add-with-auto-remove -> backend like unlinke return mutations

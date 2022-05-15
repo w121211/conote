@@ -44,7 +44,7 @@
 // (Server) 更新 my-card
  */
 import { cloneDeep } from 'lodash'
-import { CardLabel, DBLinker, Markerheader, Markerline, ExtToken, Section } from './typing'
+import { CardLabel, DBLinker, Markerline, Section } from './typing'
 import { filterTokens, toStampMarkerlinesDict } from './helper'
 import { tokenizeSection } from './parser'
 import { updateMarkerlines, insertMarkerlinesToText } from './markerline'
@@ -63,7 +63,12 @@ export class Editor {
   private _src: string | undefined
   private _oauthor: string | undefined
 
-  constructor(fromText = '', fromMarkerlines: Markerline[] = [], src?: string, oauthor?: string) {
+  constructor(
+    fromText = '',
+    fromMarkerlines: Markerline[] = [],
+    src?: string,
+    oauthor?: string,
+  ) {
     // if (fromText === undefined) {
     //   fromText = Editor._toStoredText('', [])
     // }
@@ -152,7 +157,12 @@ export class Editor {
     }
 
     this._sects = tokenizeSection(this._text)
-    const { markerlines } = updateMarkerlines(this._markerlines, this._sects, this._src, this._oauthor)
+    const { markerlines } = updateMarkerlines(
+      this._markerlines,
+      this._sects,
+      this._src,
+      this._oauthor,
+    )
     this._markerlines = markerlines
 
     // 依照line-number對還沒有stamp的line插入stamp

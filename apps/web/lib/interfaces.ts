@@ -32,6 +32,9 @@ export type NoteDocParsed = Omit<NoteDoc, 'meta' | 'content'> & {
 }
 
 export type NoteDocMeta = {
+  // Use for ticker, webpage symbols to display a title aside with symbol
+  title?: string
+
   // to store Sym.symbols refering to the same note (e.g $BA, [[Boeing]] both to Boeing)
   duplicatedSymbols?: string[]
 
@@ -53,7 +56,7 @@ export type NoteDocMeta = {
 
 export type NoteDocContent = {
   discussIds: BlockUid_DiscussId[]
-  symbolIdMap: Symbol_SymId[]
+  symbols: Symbol_SymId[]
   diff?: any
   blocks: Block[]
 }

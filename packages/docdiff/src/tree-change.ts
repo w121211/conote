@@ -1,27 +1,17 @@
 import { cloneDeep } from 'lodash'
+import { NodeChange } from './interfaces'
 import { NodeBody, TreeService, TreeNode } from './tree-service'
 
-export type ChangeType =
-  | 'insert'
-  | 'update'
-  | 'move' // TODO: 若又改回來了的情況？
-  | 'move-update'
-  | 'delete'
-  | 'change-parent' // TODO: 若又改回來了的情況？
-  | 'change-parent-update'
-
-export type NodeChange<T> = {
-  type: ChangeType
-  cid: string
-  toParentCid: string // refers to final state id
-  toIndex: number | null // for insert only, others set to null
-  data?: T
-}
-
 interface ITreeChangeService {
-  _applyArrayChanges: <T>(arr: NodeBody<T>[], changes: NodeChange<T>[]) => NodeBody<T>[]
+  _applyArrayChanges: <T>(
+    arr: NodeBody<T>[],
+    changes: NodeChange<T>[],
+  ) => NodeBody<T>[]
 
-  applyChanges: <T>(value: TreeNode<T>[] | null, changes: NodeChange<T>[]) => TreeNode<T>[]
+  applyChanges: <T>(
+    value: TreeNode<T>[] | null,
+    changes: NodeChange<T>[],
+  ) => TreeNode<T>[]
 
   getChnages: <T>(
     finalValue: TreeNode<T>[],
@@ -31,8 +21,14 @@ interface ITreeChangeService {
 }
 
 export const TreeChangeService: ITreeChangeService = {
-  _applyArrayChanges<T>(arr: NodeBody<T>[], changes: NodeChange<T>[]): NodeBody<T>[] {
-    const _apply = (arr: NodeBody<T>[], change: NodeChange<T>): NodeBody<T>[] => {
+  _applyArrayChanges<T>(
+    arr: NodeBody<T>[],
+    changes: NodeChange<T>[],
+  ): NodeBody<T>[] {
+    const _apply = (
+      arr: NodeBody<T>[],
+      change: NodeChange<T>,
+    ): NodeBody<T>[] => {
       switch (change.type) {
         case 'delete': {
           const keeps = arr.filter(e => e.cid !== change.cid)
@@ -72,14 +68,19 @@ export const TreeChangeService: ITreeChangeService = {
       }
       return name in score ? score[name] : 0
     }
-    const sortedChanges = changes.sort((a, b) => _score(a.type) - _score(b.type))
+    const sortedChanges = changes.sort(
+      (a, b) => _score(a.type) - _score(b.type),
+    )
     for (const e of sortedChanges) {
       applied = _apply(applied, e)
     }
     return applied
   },
 
-  applyChanges<T>(value: TreeNode<T>[] | null, changes: NodeChange<T>[]): TreeNode<T>[] {
+  applyChanges<T>(
+    value: TreeNode<T>[] | null,
+    changes: NodeChange<T>[],
+  ): TreeNode<T>[] {
     // const tempRoot: NestedNode<T> = {
     //   id: rootParentId,
     //   children: [],
@@ -117,8 +118,16 @@ export const TreeChangeService: ITreeChangeService = {
 
     // 以 start-value 為基礎比較 final
     Object.entries(startDict).forEach(([startCid, start]) => {
-      const { parentCid: startParentCid, index: startIndex, data: startData } = start
-      if (startParentCid === undefined || startIndex === undefined || startData === undefined) {
+      const {
+        parentCid: startParentCid,
+        index: startIndex,
+        data: startData,
+      } = start
+      if (
+        startParentCid === undefined ||
+        startIndex === undefined ||
+        startData === undefined
+      ) {
         throw '[bullet-doc] start node data error'
       }
 
@@ -135,8 +144,16 @@ export const TreeChangeService: ITreeChangeService = {
       }
 
       // final 中有該 node -> 更新、移動、無變動
-      const { parentCid: finalParentCid, index: finalIndex, data: finalData } = final
-      if (finalParentCid === undefined || finalIndex === undefined || finalData === undefined) {
+      const {
+        parentCid: finalParentCid,
+        index: finalIndex,
+        data: finalData,
+      } = final
+      if (
+        finalParentCid === undefined ||
+        finalIndex === undefined ||
+        finalData === undefined
+      ) {
         throw '[bullet-doc] final node data error'
       }
 

@@ -74,15 +74,25 @@ fragment author on Author {
 # #   updatedAt
 # # }
 
+fragment block on Block {
+  __typename
+  uid
+  str
+  open
+  order
+  parentUid
+  docTitle
+}
+
 fragment commit on Commit {
   __typename
   id
   userId
-  drafts {
-    ...noteDraft
-  }
-  docs {
+  noteDocs {
     ...noteDoc
+  }
+  noteDrafts {
+    ...noteDraft
   }
   updatedAt
 }
@@ -251,7 +261,7 @@ fragment note on Note {
   link {
     ...link
   }
-  doc {
+  noteDoc {
     ...noteDoc
   }
   updatedAt
@@ -275,19 +285,20 @@ fragment noteDoc on NoteDoc {
 }
 
 fragment noteDocContent on NoteDocContent {
+  __typename
   discussIds {
     blockUid
     discussId
     commitId
   }
-  diff
-  symbolIdDict
-  blocks {
-    uid
-    str
-    parentUid
-    docTitle
+  symbols {
+    symbol
+    symId
   }
+  blocks {
+    ...block
+  }
+  diff
 }
 
 fragment noteDocEntry on NoteDocEntry {
@@ -296,6 +307,8 @@ fragment noteDocEntry on NoteDocEntry {
 }
 
 fragment noteDocMeta on NoteDocMeta {
+  __typename
+  title
   duplicatedSymbols
   keywords
   redirectFroms
@@ -306,6 +319,7 @@ fragment noteDocMeta on NoteDocMeta {
 }
 
 fragment noteDocMetaWebpage on NoteDocMetaWebpage {
+  __typename
   authors
   title
   publishedAt
@@ -346,6 +360,8 @@ fragment noteDraftDropResponse on NoteDraftDropResponse {
 fragment noteDraftEntry on NoteDraftEntry {
   __typename
   id
+  symbol
+  title
 }
 
 #--------------END------------------

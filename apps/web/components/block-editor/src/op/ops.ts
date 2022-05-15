@@ -12,13 +12,14 @@ import {
 } from '@ngneat/elf-entities'
 import assert from 'assert'
 import {
-  Block,
-  BlockPosition,
-  BlockPositionRelation,
-  Doc,
-  Note,
-  NoteDraft,
-} from '../interfaces'
+  NoteDraftFragment,
+  NoteFragment,
+} from '../../../../apollo/query.graphql'
+import { Block, BlockPosition, BlockPositionRelation, Doc } from '../interfaces'
+import {
+  convertGQLBlocks,
+  getNoteDraftService,
+} from '../services/note-draft.service'
 import {
   BlockReducer,
   BlockReducerFn,
@@ -36,6 +37,8 @@ import {
 } from './helpers'
 import { insert, moveBetween, moveWithin, remove, reorder } from './order'
 import { allDescendants } from './queries'
+
+const noteDraftService = getNoteDraftService()
 
 //
 // Helpers
@@ -496,53 +499,36 @@ export function blockSplitChainOp(
 //
 //
 //
-// export function docNewOp(title: string, blockUid: string): DocReducer[] {
-//   // draftExists
-//   // const block = blocksStore.query(searchEntity)
-//   // // const pageExists = eByAv('node/title', title)
-//   // if (pageExists) {
-//   //   const pageUid = genBlockUid(),
-//   //     page: Block = {
-//   //       ndoeTitle: title,
-//   //       uid: pageUid,
-//   //       childrenUids: [],
-//   //     }
-//   //   return [addEntities(page)]
-//   // }
-//   // return []
-// }
 
 /**
- * Create a doc from note-draft, will also add blocks
+ * Create a doc from note-draft and also add blocks
  */
 export function docLoadOp(
+  branch: string,
   title: string,
-  noteDraft: NoteDraft,
-  note: Note | null,
+  noteDraft: NoteDraftFragment,
+  note: NoteFragment | null,
 ): {
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
 } {
-  if (docRepo.findDoc(title) !== undefined) throw new Error('Doc is existed')
+  if (docRepo.findDoc(title))
+    throw new Error('[docLoadOp] Doc is already existed')
+  if (title !== noteDraft.symbol)
+    throw new Error('[docLoadOp] title !== noteDraft.symbol')
 
-  const { content } = noteDraft
-  const docBlock = content.find(e => e.docTitle === title)
+  const { doc, blocks, docBlock } = noteDraftService.toDoc(
+    branch,
+    noteDraft,
+    note,
+  )
 
-  if (docBlock === undefined)
-    throw new Error(
-      '[docLoadOp] corresponding doc-block not found in noteDraft.blocks',
-    )
+  if (title !== docBlock.docTitle)
+    throw new Error('[docLoadOp] title !== docBlock.docTitle')
 
   return {
-    blockReducers: [addEntities(content)],
-    docReducers: [
-      addEntities({
-        title,
-        blockUid: docBlock.uid,
-        noteCopy: note ?? undefined,
-        noteDraftCopy: noteDraft,
-      }),
-    ],
+    blockReducers: [addEntities(blocks)],
+    docReducers: [addEntities(doc)],
   }
 }
 
@@ -554,30 +540,29 @@ export function docLoadOp(
  *   - others, create a blank doc
  */
 export function docNewOp(
+  branch: string,
   title: string,
-  note: Note | null,
+  domain: string,
+  note: NoteFragment | null,
 ): {
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
 } {
-  if (docRepo.findDoc(title) !== undefined) throw new Error('Doc is existed')
+  if (docRepo.findDoc(title))
+    throw new Error('[docNewOp] Doc is already existed')
 
   if (note) {
-    const { doc: noteDoc } = note,
-      docBlock = noteDoc.content.find(e => e.docTitle === title)
-
-    if (docBlock === undefined)
-      throw new Error(
-        '[docNewOp] corresponding doc-block not found in note.doc.content',
-      )
-
-    const newDoc = {
-      title,
-      blockUid: docBlock.uid,
-      note,
-    }
+    const { blocks, docBlock } = convertGQLBlocks(note.noteDoc.content.blocks),
+      newDoc: Doc = {
+        branch,
+        domain,
+        title,
+        meta: {},
+        blockUid: docBlock.uid,
+        noteCopy: note ?? undefined,
+      }
     return {
-      blockReducers: [addEntities(noteDoc.content)],
+      blockReducers: [addEntities(blocks)],
       docReducers: [addEntities(newDoc)],
     }
   } else {
@@ -591,7 +576,10 @@ export function docNewOp(
         childrenUids: [],
       },
       newDoc = {
+        branch,
+        domain,
         title,
+        meta: {},
         blockUid: newDocBlock.uid,
       }
     return {
@@ -638,10 +626,14 @@ export function docRemoveOp(doc: Doc): {
 }
 
 /**
- *
+ * Because local repositories already have the content (blocks, meta),
+ * only update the note-draft-copy
  */
-export function docSaveOp(doc: Doc, draft: NoteDraft): DocReducer[] {
-  return [updateEntities(doc.title, { noteDraftCopy: draft })]
+export function docSaveOp(
+  doc: Doc,
+  savedDraft: NoteDraftFragment,
+): DocReducer[] {
+  return [updateEntities(doc.title, { noteDraftCopy: savedDraft })]
 }
 
 //
