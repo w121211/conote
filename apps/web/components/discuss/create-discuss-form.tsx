@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import {
   DiscussFragment,
@@ -19,10 +19,13 @@ const CreateDiscussForm = ({
   title: string
   onCreate: (data: DiscussFragment) => void
 }) => {
-  const { handleSubmit, register, setValue } = useForm<FormInput>({
+  const { handleSubmit, register, setValue, watch } = useForm<FormInput>({
     defaultValues: { title },
   })
-  const contentRef = useRef<HTMLDivElement>(null)
+  const watchContent = watch('content')
+  const maxTextareaHeight = 300
+  const contentRef = register('content').ref
+
   const [createDiscuss] = useCreateDiscussMutation({
     onCompleted(data) {
       if (data.createDiscuss) {
@@ -30,15 +33,7 @@ const CreateDiscussForm = ({
       }
     },
   })
-  const deleteEmptyChild = () => {
-    if (
-      contentRef.current &&
-      (contentRef.current.innerHTML === '<br>' ||
-        contentRef.current?.innerHTML === '<div><br></div>')
-    ) {
-      contentRef.current.innerHTML = ''
-    }
-  }
+
   const onSubmit = (v: FormInput) => {
     // console.log(v, noteId)
     createDiscuss({
@@ -52,6 +47,21 @@ const CreateDiscussForm = ({
       },
     })
   }
+
+  let textareaTest: HTMLTextAreaElement | null = null
+
+  useLayoutEffect(() => {
+    if (textareaTest) {
+      // Reset height - important to shrink on delete
+      textareaTest.style.height = 'inherit'
+      // Set height
+      textareaTest.style.height = `${Math.min(
+        textareaTest.scrollHeight,
+        maxTextareaHeight,
+      )}px`
+    }
+  }, [watchContent])
+
   return (
     <form
       id="create-discuss-form"
@@ -67,14 +77,29 @@ const CreateDiscussForm = ({
         placeholder="Title"
         autoFocus
       />
-      <div
-        contentEditable={true}
-        onInput={e => {
-          deleteEmptyChild()
-          setValue('content', e.currentTarget.textContent ?? '')
+      <textarea
+        {...register('content')}
+        className={`
+              w-full 
+              min-h-[18px]
+              max-h-${'[' + maxTextareaHeight + ']'}px] 
+              resize-none 
+              p-2 
+              border border-gray-300 
+              rounded 
+              text-gray-700
+              align-top 
+              bg-gray-100 
+              
+              outline-offset-2 
+              focus:border-blue-400
+              focus:outline-blue-300
+            `}
+        placeholder="Leave a comment"
+        ref={e => {
+          contentRef(e)
+          textareaTest = e
         }}
-        className="min-h-[80px] bg-gray-100 rounded px-2 py-1 outline-none focus:outline-none empty:before:content-['description(optional)'] before:text-gray-400 before:text-sm "
-        ref={contentRef}
       />
       {/* <textarea {...register('content')} className="text-sm" placeholder="詳述(選填)" rows={4} /> */}
     </form>

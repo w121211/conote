@@ -43,40 +43,56 @@ export const mockRateData: TableData[] = [
 ]
 
 const mockList: ListElement[] = [
-  { title: '原油 vs 天然氣，哪個比較適合投資？', href: '#', source: '[[原油]]', hashtags: ['#討論'] },
   {
-    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    title: '原油 vs 天然氣，哪個比較適合投資？',
+    href: '#',
+    source: '[[原油]]',
+    hashtags: ['#討論'],
+  },
+  {
+    title:
+      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
     href: '#',
     source: '[[原油]]',
     hashtags: ['#討論', '#機會'],
   },
   {
-    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    title:
+      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
     href: '#',
     source: '[[原油]]',
     hashtags: ['#Battle'],
   },
   {
-    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    title:
+      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
     href: '#',
     source: '[[原油]]',
     hashtags: ['#Battle', '#事件'],
   },
-  { title: '原油 vs 天然氣，哪個比較適合投資？', href: '#', source: '[[原油]]', hashtags: ['#討論'] },
   {
-    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    title: '原油 vs 天然氣，哪個比較適合投資？',
+    href: '#',
+    source: '[[原油]]',
+    hashtags: ['#討論'],
+  },
+  {
+    title:
+      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
     href: '#',
     source: '[[原油]]',
     hashtags: ['#討論', '#機會'],
   },
   {
-    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    title:
+      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
     href: '#',
     source: '[[原油]]',
     hashtags: ['#Battle'],
   },
   {
-    title: '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
+    title:
+      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
     href: '#',
     source: '[[原油]]',
     hashtags: ['#Battle', '#事件'],
@@ -132,26 +148,35 @@ export const UserPage = (): JSX.Element | null => {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 ">
         <div className="flex">
-          <span className="material-icons mr-2 text-[120px] leading-none text-gray-300 mix-blend-multiply">
+          <span className="material-icons mr-2 text-[120px] leading-none text-gray-300 dark:text-gray-400">
             account_circle
           </span>
           <div className="">
-            <h1 className="mb-2 font-medium">@{router.query.userId}</h1>
-            <div className="mb-2 text-lg text-gray-500">建築師</div>
+            <h1 className="mb-2 font-medium text-gray-800 dark:text-gray-100">
+              @{router.query.userId}
+            </h1>
+            <div className="mb-2 text-lg text-gray-500 dark:text-gray-400">
+              建築師
+            </div>
             {/* <div> */}
-            <p className="flex text-sm text-gray-500">
-              <span className="material-icons text-base leading-none">cake</span>10年會員
+            <p className="flex text-sm text-gray-500 dark:text-gray-400">
+              <span className="material-icons text-base leading-none">
+                cake
+              </span>
+              10年會員
             </p>
             {/* </div> */}
           </div>
         </div>
         <div>
-          <h2 className="mb-2 text-sm text-gray-500 font-medium tracking-widest">關於我</h2>
-          <p className="text-sm text-gray-800">
-            日本鳥取縣出身的男性聲優，於2019年4月1日加入由好友立花慎之介及福山潤所創立的BLACK SHIP，以前是AIR
-            AGENCY所屬。身高173cm，體重65kg，血型是A型。
+          <h2 className="mb-2 text-sm text-gray-500 dark:text-gray-400 font-medium tracking-widest">
+            關於我
+          </h2>
+          <p className="text-sm text-gray-800 dark:text-gray-100">
+            日本鳥取縣出身的男性聲優，於2019年4月1日加入由好友立花慎之介及福山潤所創立的BLACK
+            SHIP，以前是AIR AGENCY所屬。身高173cm，體重65kg，血型是A型。
           </p>
         </div>
 

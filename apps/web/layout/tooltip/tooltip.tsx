@@ -9,6 +9,7 @@ import React, {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { TooltipContext } from './tooltip-provider'
+import './tooltip.module.css'
 
 export interface Tooltip {
   title: string | React.ReactNode
@@ -73,7 +74,7 @@ export const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> =
         
         whitespace-nowrap 
         border rounded 
-        transition-[transform,opacity] ease-[cubic-bezier(0.21,0.02,0.28,1.58)] 
+        transition
         pointer-events-none
 
         before:content-['']
@@ -170,11 +171,16 @@ export const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> =
         let topOffset = el.getBoundingClientRect().top
         while (el !== null && el !== document.documentElement) {
           el = el.parentElement
+          // console.log(el, topOffset, el.scrollTop)
+
           if (el) {
-            topOffset += el.scrollTop
+            if (el === document.documentElement) {
+              topOffset += el.scrollTop
+            }
           }
           // console.log(topOffset, el)
         }
+        // console.log(topOffset)
         return topOffset
       }
       return 0
@@ -184,98 +190,47 @@ export const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> =
       if (childrenRef.length > 0 && tooltipRef.current) {
         let top = 0
         let left = 0
-        // let childrenRectTop = 0
-        // let top = position.top
-        // let left = position.left
         let childrenHeight = 0
-        const scrollTop = Math.round(document.documentElement.scrollTop)
 
         childrenRef.forEach((child, idx) => {
-          const childTop = child.getBoundingClientRect().top
-          // const rectTop = child.getBoundingClientRect().top
           const childrenLeft = child.getBoundingClientRect().left
           const childHeight = child.getBoundingClientRect().height
           if (idx === 0) {
-            // top = childTop
             left = childrenLeft
             childrenHeight = childHeight
             top = getPageOffset(child)
-            // childrenRectTop = rectTop
-            // console.log('child height', childHeight)
             return
           }
-          // if (childTop < top) {
-          //   top = childTop
-          // }
-          // if (childrenLeft < left) {
-          //   left = childrenLeft
-          // }
-          if (childHeight > childrenHeight) {
-            childrenHeight = childHeight
-          }
-          // if (rectTop < childrenRectTop) {
-          //   childrenRectTop = rectTop
-          // }
         })
-        // top = Math.round(top)
-        // childrenHeight = Math.round(childrenHeight)
+
         const tooltipElement = tooltipRef.current
         const height = tooltipElement.clientHeight
-        // const width = tooltipElement.getBoundingClientRect().width
-        // const tooltipRectTop = tooltipElement.getBoundingClientRect().top
-        // const tooltipRectBottom = tooltipElement.getBoundingClientRect().bottom
         const padding = 14
         const topDistance = height + padding
         const bottomDistance = childrenHeight + padding
 
-        console.log()
-        top = checkOutOfViewport(
-          top,
-          topDistance,
-          // scrollTop,
-          bottomDistance,
-          height,
-        )
-
+        top = checkOutOfViewport(top, topDistance, bottomDistance, height)
         setPosition({ top: top, left: left })
       }
     }
 
-    // useEffect(() => {
-    //   if (visible) {
-    //     setOpen(true)
-    //   }
-    // }, [position])
-    const onScroll = () => {
-      // console.log('scroll', open)
-      if (open) {
-        handlePosition()
-      }
-    }
     const onMouseEnter = () => {
+      clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => {
         setMouseEnter(true)
       }, 300)
     }
     const onMouseLeave = () => {
       clearTimeout(timerRef.current)
-      // timerRef.current = setTimeout(() => {
-      setMouseEnter(false)
-      // }, 300)
+      timerRef.current = setTimeout(() => {
+        setMouseEnter(false)
+      }, 300)
     }
-    // useEffect(() => {
-    //   // tooltipRoot.appendChild(tooltipRoot)
-    //   document.addEventListener('scroll', onScroll)
-    //   return () => {
-    //     // tooltipRoot.removeChild(tooltipRoot)
-    //     document.removeEventListener('scroll', onScroll)
-    //   }
-    // }, [open])
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (visible !== undefined) {
         if (visible) {
-          rendered.current = 1
+          // rendered.current = 1
           handlePosition()
           setOpen(true)
         } else {
@@ -283,7 +238,7 @@ export const Tooltip: React.FC<Tooltip & React.HTMLAttributes<HTMLDivElement>> =
         }
       } else {
         if (mouseEnter) {
-          rendered.current = 1
+          // rendered.current = 1
           handlePosition()
           setOpen(true)
         } else {

@@ -73,14 +73,14 @@ module.exports = {
     require('precss'),
     require('autoprefixer'),
     require('@tailwindcss/line-clamp'),
-    plugin(function ({ addComponents }) {
-      addComponents({
-        '.text-shadow': {
-          textShadow: '1px 1px 0 white',
-        },
-      })
-    }),
+    // plugin(function ({ addComponents }) {
+    //   addComponents({
+    //     '.text-shadow': {
+
+    //     },
+    //   })
+    // }),
   ],
 
-  darkMode: false, // or 'media' or 'class'
+  darkMode: 'class', // 'false' or 'media' or 'class'
 }

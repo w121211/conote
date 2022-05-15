@@ -22,7 +22,17 @@ export const parameters = {
   // layout: 'centered',
   options: {
     storySort: {
-      order: ['Intro', 'Pages', ['Home', 'Login', 'Admin'], 'Components', '*', 'WIP'],
+      order: [
+        'Intro',
+        'Pages',
+        ['Home', 'Login', 'Admin'],
+        'Components',
+        '*',
+        'WIP',
+      ],
     },
   },
+}
+export const globalTypes = {
+  darkMode: true,
 }

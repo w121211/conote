@@ -4,15 +4,6 @@ import { Tooltip } from '../../layout/tooltip/tooltip'
 // import classes from './my-tooltip.module.scss'
 import { TooltipProvider } from '../../layout/tooltip/tooltip-provider'
 
-// interface Tooltip {
-//   children: React.ReactNode
-//   visible?: boolean
-//   handleVisibleState?: (state: boolean) => void
-//   width?: number
-//   top?: number
-//   className?: string
-// }
-
 export default {
   component: Tooltip,
   argTypes: {

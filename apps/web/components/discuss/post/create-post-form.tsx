@@ -93,7 +93,7 @@ export const CreatePostForm = ({
     // }
   }, [watchContent])
 
-  console.log(watchContent.length === 0, isSubmitSuccessful)
+  // console.log(watchContent.length === 0, isSubmitSuccessful)
 
   return (
     <form

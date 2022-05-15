@@ -1,12 +1,11 @@
 import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import LoginModal from '../components/login-modal'
+import LoginModal from '../../components/login-modal'
 import { MockedProvider } from '@apollo/client/testing'
-import { MeDocument } from '../apollo/query.graphql'
+import { MeDocument } from '../../apollo/query.graphql'
 import gql from 'graphql-tag'
 
 export default {
-  title: 'component/Login Modal',
   component: LoginModal,
 } as ComponentMeta<typeof LoginModal>
 

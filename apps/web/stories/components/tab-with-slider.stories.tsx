@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import userEvent from '@testing-library/user-event'
 import React, { useState } from 'react'
-import TabsWithSlider from '../layout/tabs-with-slider'
+import TabsWithSlider from '../../layout/tabs-with-slider'
 
 export default {
   title: 'layout/Tabs With Slider',
@@ -10,7 +10,13 @@ export default {
 
 const Template: ComponentStory<typeof TabsWithSlider> = args => {
   const [currentTab, setCurrenTab] = useState('全部')
-  return <TabsWithSlider {...args} handleClickTab={tab => setCurrenTab(tab)} currentTab={currentTab} />
+  return (
+    <TabsWithSlider
+      {...args}
+      handleClickTab={tab => setCurrenTab(tab)}
+      currentTab={currentTab}
+    />
+  )
 }
 
 export const Default = Template.bind({})

@@ -1,0 +1,4 @@
+.transition {
+  transition: opacity 0.15s ease,
+    transform 0.15s cubic-bezier(0.21, 0.02, 0.28, 1.58);
+}

@@ -3,6 +3,31 @@ import React, { useEffect, useRef } from 'react'
 import { editorLeftSidebarMount } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
+import React, {
+  forwardRef,
+  ReactPropTypes,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import Link from 'next/link'
+import { SearchAllForm } from '../search-all-form'
+import DocIndexSection from './doc-index-section'
+import { workspace } from '../workspace/workspace'
+import { useObservable } from 'rxjs-hooks'
+import { TreeNode, TreeService } from '@conote/docdiff'
+import { DocIndex } from '../workspace/doc-index'
+import { Doc } from '../workspace/doc'
+import { useApolloClient } from '@apollo/client'
+// import { useMeQuery } from '../../apollo/query.graphql'
+import { useRouter } from 'next/router'
+import AuthItem from './_auth-Item'
+import Select from 'react-select'
+// import ChannelSelect from '../channel/channel-select'
+import { ThemeType } from './theme-storage'
+import { ThemeContext } from '../theme/theme-provider'
+import { ThemeToggle } from '../theme/theme-toggle'
 
 /**
  * When the component mount, call sidebr-load event when first enter the component
@@ -33,6 +58,12 @@ const SidebarEl = ({
     }
   }
 
+  const { theme, setTheme, isSystem, setIsSystem } = useContext(ThemeContext)
+  const editingdDocIndicies = useObservable(() => workspace.editingDocIndicies$)
+  const ref = useRef<HTMLDivElement>(null)
+  // const [theme, setTheme] = useState<ThemeType>('light')
+  const [themeBtn, setThemeBtn] = useState<ThemeType | 'system'>('light')
+  // const committedDocIndicies = useObservable(() => workspace.committedDocIndicies$)
   useEffect(() => {
     editorLeftSidebarMount()
   }, [])
@@ -57,19 +88,55 @@ const SidebarEl = ({
   }, [])
 
   if (sidebar === null) {
+  // useEffect(() => {
+
+  // }, [])
+
+  // useEffect(() => {
+  //   const localTheme = Theme.getInstance()
+  //   if (themeBtn === 'light' || themeBtn === 'dark') {
+  //     if (localTheme) {
+  //       localTheme.setTheme(themeBtn)
+  //     } else {
+  //       const newLocalTheme = Theme.newInstance()
+  //       newLocalTheme.setTheme(themeBtn)
+  //     }
+  //   } else {
+  //     if (localTheme) {
+  //       if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  //         setTheme('dark')
+  //       } else {
+  //         setTheme('light')
+  //       }
+  //       localTheme.clear()
+  //     }
+  //   }
+  // }, [themeBtn])
+
+  if (editingdDocIndicies === null) {
     return null
   }
   return (
     <>
       <div
-        className={`absolute left-0 w-72 h-screen pt-0  border-gray-200 flex flex-col flex-shrink-0  transition-all shadow-l2xl
-      ${
-        showSider
-          ? ' translate-x-0 translate-y-0 '
-          : '-translate-x-full translate-y-0 '
-      } ${isPined ? 'sm:relative bg-gray-100' : 'z-50 bg-white'} ${
-          isPined || !showSider ? 'shadow-transparent' : ''
-        }
+        className={`absolute left-0 
+          flex flex-col flex-shrink-0  
+          w-72 h-screen 
+          pt-0 
+          border-gray-200 
+          transition-all 
+          shadow-l2xl
+          ${
+            showSider
+              ? ' translate-x-0 translate-y-0 '
+              : '-translate-x-full translate-y-0 '
+          } 
+          ${
+            isPined
+              ? 'sm:relative bg-gray-100 dark:bg-gray-800'
+              : 'z-50 bg-white dark:bg-gray-700'
+          } 
+          ${isPined || !showSider ? 'shadow-transparent' : ''}
       `}
         onMouseLeave={() => {
           if (isPined) {
@@ -83,17 +150,25 @@ const SidebarEl = ({
       >
         <div className="group flex-shrink-0 px-4">
           <div className="flex items-center justify-between h-11">
-            <div className="flex items-center gap-1">
-              <a href="/" className="py-1  rounded mix-blend-multiply ">
+            <div className="flex items-center gap-1 ">
+              <a href="/" className="py-1 rounded dark:text-gray-200  ">
                 Konote
               </a>
+              <ThemeToggle />
+
               {/* <ChannelSelect /> */}
             </div>
             <span
-              className={`hidden md:block ${
-                isPined ? 'material-icons' : 'material-icons-outlined'
-              } text-gray-500 opacity-0 rounded-full bg-transparent hover:text-gray-600 
-            cursor-pointer group-hover:opacity-100 rotate-45 select-none`}
+              className={`hidden md:block 
+                ${isPined ? 'material-icons' : 'material-icons-outlined'} 
+                rounded-full 
+                bg-transparent 
+                text-gray-500 dark:text-gray-500 
+                cursor-pointer 
+                hover:text-gray-600 dark:hover:text-gray-400
+                opacity-0 group-hover:opacity-100 
+                rotate-45 
+                select-none`}
               onClick={() => {
                 pinMenuHandler()
               }}

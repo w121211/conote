@@ -21,7 +21,7 @@ const Navbar = ({
         flex items-center justify-between 
         top-0 
         h-11 
-        ${backgroundColor ? backgroundColor : 'bg-white'}  
+        ${backgroundColor ? backgroundColor : 'bg-white dark:bg-gray-700'}  
         ${pinedSider ? 'left-72 right-0' : 'w-screen'}
       `}
     >
@@ -31,7 +31,7 @@ const Navbar = ({
         className={`flex items-center ml-2 ${pinedSider ? 'invisible' : ''}`}
       >
         <span
-          className="material-icons p-1 rounded leading-none hover:bg-gray-100 hover:cursor-pointer"
+          className="material-icons p-1 rounded leading-none text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer"
           onClick={() => {
             onClickMenu(true)
           }}
@@ -39,7 +39,7 @@ const Navbar = ({
           menu
         </span>
         <Link href="/">
-          <a className="ml-2">Konote</a>
+          <a className="ml-2 text-gray-800 dark:text-gray-200">Konote</a>
         </Link>
       </div>
       {/* </div> */}

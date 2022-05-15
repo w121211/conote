@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { RateTable, TableData } from '../layout/rate-table'
+import { RateTable, TableData } from '../../layout/rate-table'
 
 const mockRateData: TableData[] = [
   {
@@ -47,7 +47,9 @@ export default {
   ],
 } as ComponentMeta<typeof RateTable>
 
-const Template: ComponentStory<typeof RateTable> = args => <RateTable {...args} />
+const Template: ComponentStory<typeof RateTable> = args => (
+  <RateTable {...args} />
+)
 
 export const Default = Template.bind({})
 Default.args = {
