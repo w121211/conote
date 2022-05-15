@@ -21,7 +21,7 @@ export async function createPoll({
       user: { connect: { id: userId } },
       meta,
       choices,
-      count: { create: {} },
+      count: { create: { nVotes: choices.map(e => 0) } },
     },
     include: { count: true },
   })
@@ -45,7 +45,7 @@ export async function createMergePoll({
       user: { connect: { id: userId } },
       meta,
       choices,
-      count: { create: {} },
+      count: { create: { nVotes: choices.map(e => 0) } },
     },
     include: { count: true },
   })

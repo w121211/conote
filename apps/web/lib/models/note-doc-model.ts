@@ -21,22 +21,18 @@ import { createMergePoll } from './poll-model'
  * Is reject the same as merge?
  *
  */
-async function merge(
-  doc: NoteDoc,
-  poll?: Poll & {
-    count: PollCount | null
-  },
-) {
-  if (poll === undefined) {
-    return await prisma.noteDoc.update({
-      data: { status: 'MERGE' },
-      where: { id: doc.id },
-    })
-  }
-  await prisma.poll.update({
+async function merge(doc: NoteDoc) {
+  const poll = await prisma.poll.update({
     data: { status: 'CLOSE_SUCCESS' },
-    where: { id: poll.id },
+    where: { id: doc.mergePollId },
+    include: { count: true },
   })
+  if (poll === null) {
+    throw new Error('[Merge] Poll not found.')
+  }
+  if (poll.count === null) {
+    throw new Error('[Merge] pollCount not found.')
+  }
 
   const upIdx = poll?.choices.indexOf('UP')
   const downIdx = poll?.choices.indexOf('DOWN')
@@ -85,6 +81,10 @@ export async function mergeAutomatical(doc: NoteDoc): Promise<NoteDoc | null> {
   )
   // no deletions, changes to the previous-doc's content, but addition
   // TODO: compare meta and content
+  const poll = await prisma.poll.findUnique({
+    where: { id: doc.mergePollId },
+    include: { count: true },
+  })
   if (doc.domain === fromDoc?.domain && !metaChanged && contentDiff.change) {
     return merge(doc)
   }
@@ -99,18 +99,7 @@ export async function mergeAutomatical(doc: NoteDoc): Promise<NoteDoc | null> {
  * - poll is open for a specific time && ups is lower than downs
  */
 export async function mergePeriodical(doc: NoteDoc): Promise<NoteDoc> {
-  // get poll and check the ups and downs
-  const poll = await prisma.poll.findUnique({
-    where: { id: doc.mergePollId },
-    include: { count: true },
-  })
-  if (poll === null) {
-    throw new Error('[MergePeriodical] Poll not found.')
-  }
-  if (poll.count === null) {
-    throw new Error('[MergePeriodical] pollCount not found.')
-  }
-  return await merge(doc, poll)
+  return await merge(doc)
 }
 
 //
