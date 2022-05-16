@@ -13,6 +13,7 @@ import { mockCommits } from './__mocks__/mock-commit'
 import { mockNoteDocs } from './__mocks__/mock-note-doc'
 import { NoteDocMetaModel, noteDocModel } from '../lib/models/note-doc-model'
 import { mockLinks } from './__mocks__/mock-link'
+import { mockPolls } from './__mocks__/mock-poll'
 
 // fake incremental id
 let i = 0
@@ -122,13 +123,20 @@ class TestHelper {
       commit = await prisma.commit.create({
         data: mockCommits[0],
       }),
-      noteDoc = await prisma.noteDoc.create({
+      poll = await prisma.poll.create({
         data: {
-          ...mockNoteDocs[1],
-          // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
+          id: mockNoteDocs[1].mergePollId,
           meta: {},
+          user: { connect: { id: mockNoteDocs[1].userId } },
         },
       })
+    const noteDoc = await prisma.noteDoc.create({
+      data: {
+        ...mockNoteDocs[1],
+        // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
+        meta: {},
+      },
+    })
   }
 
   async createCandidateCommit(prisma: PrismaClient) {
@@ -142,13 +150,22 @@ class TestHelper {
       commit = await prisma.commit.create({
         data: mockCommits[0],
       }),
-      noteDoc = await prisma.noteDoc.create({
+      poll = await prisma.poll.create({
         data: {
-          ...mockNoteDocs[0],
-          // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
-          meta: {},
+          ...mockPolls[0],
+          // id: mockPolls[0].id,
+          // user: {connect: {id: mockPolls[0].userId}},
+          // choices: mockPolls[0].choices,
+          meta: mockPolls[0].meta as unknown as object,
+          count: { create: { nVotes: mockPolls[0].choices.map(e => 0) } },
         },
       })
+    const noteDoc = await prisma.noteDoc.create({
+      data: {
+        ...mockNoteDocs[0],
+        meta: {},
+      },
+    })
   }
 
   async createDiscusses(prisma: PrismaClient): Promise<void> {

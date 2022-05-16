@@ -192,11 +192,8 @@ model NoteDoc {
 }
 
 model NoteDraft {
-  id String @id @default(cuid())
-
-  // use as an identifier
-  symbol String
-
+  id        String          @id @default(cuid())
+  symbol    String
   branchId  String
   symId     String?
   commitId  String?
@@ -212,13 +209,10 @@ model NoteDraft {
   branch    Branch          @relation(fields: [branchId], references: [id])
   commit    Commit?         @relation(fields: [commitId], references: [id])
   fromDoc   NoteDoc?        @relation(fields: [fromDocId], references: [id])
-
-  // TODO: consider to remove?
-  link Link? @relation(fields: [linkId], references: [id])
-
-  note Note? @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym  Sym?  @relation(fields: [symId], references: [id])
-  user User  @relation(fields: [userId], references: [id])
+  link      Link?           @relation(fields: [linkId], references: [id])
+  note      Note?           @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym       Sym?            @relation(fields: [symId], references: [id])
+  user      User            @relation(fields: [userId], references: [id])
 }
 
 model NoteEmoji {

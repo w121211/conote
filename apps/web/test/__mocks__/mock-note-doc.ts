@@ -7,6 +7,7 @@ import {
 } from '../../lib/interfaces'
 import { mockBranches } from './mock-branch'
 import { mockCommits } from './mock-commit'
+import { mockPolls } from './mock-poll'
 import { mockSyms } from './mock-sym'
 import { mockUsers } from './mock-user'
 
@@ -15,6 +16,7 @@ const base = {
   symId: mockSyms[0].id,
   commitId: mockCommits[0].id,
   fromDocId: null,
+  mergePollId: mockPolls[0].id,
   userId: mockUsers[0].id,
   domain: 'domain0',
   meta: {},

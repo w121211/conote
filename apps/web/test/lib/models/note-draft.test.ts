@@ -43,7 +43,7 @@ afterAll(async () => {
 })
 
 afterEach(async () => {
-  await prisma.$queryRaw`TRUNCATE "Note", "NoteDoc", "NoteDraft", "Sym", "Commit" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Note", "NoteDoc", "NoteDraft", "Sym", "Commit", "Link", "Poll" CASCADE;`
 })
 
 /**

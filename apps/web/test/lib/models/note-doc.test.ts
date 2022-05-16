@@ -32,7 +32,7 @@ afterAll(async () => {
 })
 
 afterEach(async () => {
-  await prisma.$queryRaw`TRUNCATE "Note", "NoteDoc", "NoteDraft", "Link", "Poll", "Sym" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Note", "NoteDoc", "NoteDraft", "Sym", "Commit", "Link", "Poll"  CASCADE;`
 })
 
 /**
@@ -46,68 +46,94 @@ describe('mergeAutomatical()', () => {
   it('no fromDocId', async () => {
     await testHelper.createCandidateCommit(prisma)
     const doc = await prisma.noteDoc.findUnique({
-      where: { id: mockNoteDocs[1].id },
+      where: { id: mockNoteDocs[0].id },
     })
     const afterDoc = await mergeAutomatical(doc!)
     // const afterDoc = await prisma.noteDoc.findUnique({ where: { id: doc!.id } })
-    expect(afterDoc!.status).toMatchInlineSnapshot()
+    expect(afterDoc!.status).toMatchInlineSnapshot(`"MERGE"`)
   })
 
-  it("no deletions and changes to the previous-doc's content except for addition", async () => {
-    await testHelper.createMergeCommit
-    // const docMerged = await prisma.noteDoc.findUnique({
-    //   where: { id: mockNoteDocs[1].id },
-    // })
-    const newCommit = await prisma.commit.create({
-      data: { ...mockCommits[0], id: 'mock-commit-test' },
-    })
-    const newContent = {
-      ...mockNoteDocs[1].content,
-      symbol_symId: { ...mockNoteDocs[1].content.symbolIdMap, $AA: null },
-    }
-    const docToMerge = await prisma.noteDoc.create({
-      data: {
-        ...mockNoteDocs[1],
-        id: 'mock-note-test',
-        status: 'CANDIDATE',
-        commitId: newCommit.id,
-        content: newContent,
-      },
-    })
-    const afterDoc = await mergeAutomatical(docToMerge)
-    // const afterDoc = await prisma.noteDoc.findUnique({
-    //   where: { id: docToMerge.id },
-    // })
-    expect(afterDoc!.status).toMatchInlineSnapshot()
-  })
-  it("deletions or changes to the previous-doc's content", async () => {
-    await testHelper.createMergeCommit
-    // const docMerged = await prisma.noteDoc.findUnique({
-    //   where: { id: mockNoteDocs[1].id },
-    // })
-    const newCommit = await prisma.commit.create({
-      data: { ...mockCommits[0], id: 'mock-commit-test' },
-    })
-    const newContent = {
-      ...mockNoteDocs[1].content,
-      symbol_symId: { $AA: null },
-      blocks: mockBlocks[1],
-    }
-    const docToMerge = await prisma.noteDoc.create({
-      data: {
-        ...mockNoteDocs[1],
-        id: 'mock-note-test',
-        status: 'CANDIDATE',
-        commitId: newCommit.id,
-        content: newContent,
-      },
-    })
-    const afterDoc = await mergeAutomatical(docToMerge)
-    // const afterDoc = await prisma.noteDoc.findUnique({
-    //   where: { id: docToMerge.id },
-    // })
-    expect(afterDoc!.status).toMatchInlineSnapshot()
-  })
+  // it("no deletions and changes to the previous-doc's content except for addition", async () => {
+  //   await testHelper.createMergeCommit(prisma)
+
+  //   // const docMerged = await prisma.noteDoc.findUnique({
+  //   //   where: { id: mockNoteDocs[1].id },
+  //   // })
+  //   const newCommit = await prisma.commit.create({
+  //     data: { ...mockCommits[0], id: 'mock-commit-test' },
+  //   })
+  //   const newContent = {
+  //       ...mockNoteDocs[1].content,
+  //       symbol_symId: { ...mockNoteDocs[1].content.symbolIdMap, $AA: null },
+  //     },
+  //     poll = await prisma.poll.create({
+  //       data: {
+  //         id: 'mock-poll-test-1',
+  //         meta: {},
+  //         user: { connect: { id: mockNoteDocs[1].userId } },
+  //       },
+  //     })
+  //   const docToMerge = await prisma.noteDoc.create({
+  //     data: {
+  //       // ...mockNoteDocs[1],
+  //       id: 'mock-note-test',
+  //       // branchId_symId: {
+  //       //   branchId: mockNoteDocs[1].branchId,
+  //       //   symId: mockNoteDocs[1].symId,
+  //       // },
+  //       branch: { connect: { id: mockNoteDocs[1].branchId } },
+  //       sym: { connect: { id: mockNoteDocs[1].symId } },
+  //       note: {
+  //         connect: {
+  //           branchId_symId: {
+  //             branchId: mockNoteDocs[1].branchId,
+  //             symId: mockNoteDocs[1].symId,
+  //           },
+  //         },
+  //       },
+  //       domain: 'domain0',
+  //       fromDoc: { connect: { id: mockNoteDocs[1].id } },
+  //       mergePoll: { connect: { id: poll.id } },
+  //       status: 'CANDIDATE',
+  //       commit: { connect: { id: newCommit.id } },
+  //       content: newContent,
+  //       user: { connect: { id: mockNoteDocs[1].userId } },
+  //     },
+  //   })
+  //   const afterDoc = await mergeAutomatical(docToMerge)
+  //   // const afterDoc = await prisma.noteDoc.findUnique({
+  //   //   where: { id: docToMerge.id },
+  //   // })
+  //   expect(afterDoc!.status).toMatchInlineSnapshot()
+  // })
+  // it("deletions or changes to the previous-doc's content", async () => {
+  //   await testHelper.createMergeCommit
+  //   // const docMerged = await prisma.noteDoc.findUnique({
+  //   //   where: { id: mockNoteDocs[1].id },
+  //   // })
+  //   const newCommit = await prisma.commit.create({
+  //     data: { ...mockCommits[0], id: 'mock-commit-test' },
+  //   })
+  //   const newContent = {
+  //     ...mockNoteDocs[1].content,
+  //     symbol_symId: { $AA: null },
+  //     blocks: mockBlocks[1],
+  //   }
+  //   const docToMerge = await prisma.noteDoc.create({
+  //     data: {
+  //       ...mockNoteDocs[1],
+  //       id: 'mock-note-test',
+  //       status: 'CANDIDATE',
+  //       commitId: newCommit.id,
+  //       content: newContent,
+  //     },
+  //   })
+  //   const afterDoc = await mergeAutomatical(docToMerge)
+  //   // const afterDoc = await prisma.noteDoc.findUnique({
+  //   //   where: { id: docToMerge.id },
+  //   // })
+  //   expect(afterDoc!.status).toMatchInlineSnapshot()
+  // })
   // Move to ValidateCommit
   // it('no change', async () => {
   //   await testHelper.createMergeCommit(prisma)
@@ -138,14 +164,30 @@ describe('mergePeriodical()', () => {
   it('merge if the time is up and ups are more than downs', async () => {
     await testHelper.createCandidateCommit(prisma)
     // set the time and Poll to be able to merge successfully
+    const poll = await prisma.poll.findUnique({
+      where: { id: mockNoteDocs[0].mergePollId },
+      include: { count: true },
+    })
+    await prisma.pollCount.update({
+      data: { nVotes: [5, 3] },
+      where: { id: poll?.count?.id },
+    })
     const docMerged = await mergePeriodical(mockNoteDocs[0])
-    expect(docMerged.status).toMatchInlineSnapshot()
+    expect(docMerged.status).toMatchInlineSnapshot(`"MERGE"`)
   })
   it('reject if the time is up and downs are more than ups', async () => {
     await testHelper.createCandidateCommit(prisma)
     // set the time and Poll to be able to reject
+    const poll = await prisma.poll.findUnique({
+      where: { id: mockNoteDocs[0].mergePollId },
+      include: { count: true },
+    })
+    await prisma.pollCount.update({
+      data: { nVotes: [1, 9] },
+      where: { id: poll?.count?.id },
+    })
     const docMerged = await mergePeriodical(mockNoteDocs[0])
-    expect(docMerged.status).toMatchInlineSnapshot()
+    expect(docMerged.status).toMatchInlineSnapshot(`"REJECT"`)
   })
 })
 
