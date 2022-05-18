@@ -1,6 +1,6 @@
 import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import { UserPage } from '../../pages/user/[userId]'
+import { UserPage } from '../../pages/user/[userid]'
 
 export default {
   component: UserPage,
@@ -16,7 +16,7 @@ Default.story = {
       // path: "/profile/[id]",
       // asPath: "/profile/lifeiscontent",
       query: {
-        userId: 'fieowjelcij123',
+        userid: 'fieowjelcij123',
       },
     },
   },
