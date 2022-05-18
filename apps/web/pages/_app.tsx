@@ -19,8 +19,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         document.getElementById('sidebar').classList.remove('open')
       }`
     }}/> */}
-    // <UserProvider>
-    <>
+
       {/* <Script
         id="theme"
         strategy="afterInteractive"
@@ -43,6 +42,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
           // localStorage.removeItem('theme')`,
         }}
       /> */}
+
       <ApolloProvider client={apolloClient}>
         <TooltipProvider>
           <ModalProvider>
@@ -51,7 +51,6 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         </TooltipProvider>
       </ApolloProvider>
     </ErrorBoundary>
-    </>
   )
 }
 

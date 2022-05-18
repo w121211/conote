@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { setEntities } from '@ngneat/elf-entities'
 import { ComponentMeta } from '@storybook/react'
-import { blockRepo } from '../../stores/block.repository'
-import { BlockEl } from './block-el'
-import { mockBlocks } from '../../../test/__mocks__/mock-block'
-import { TooltipProvider } from '../../../../../layout/tooltip/tooltip-provider'
-import { writeBlocks } from '../../utils'
+import { blockRepo } from '../../components/block-editor/src/stores/block.repository'
+import { BlockEl } from '../../components/block-editor/src/components/block/block-el'
+import { mockBlocks } from '../../components/block-editor/test/__mocks__/mock-block'
+import { TooltipProvider } from '../../layout/tooltip/tooltip-provider'
+import { writeBlocks } from '../../components/block-editor/src/utils'
 
 // Need to place outside, otherwise the storybook result weird behavior
 const basicBlocks = writeBlocks(['a', ['b', 'c']])

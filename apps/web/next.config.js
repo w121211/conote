@@ -19,10 +19,6 @@ module.exports = withReactSvg({
   //   }
   //   return config
   // },
-  // sassOptions: {
-  //   includePaths: ['./src'],
-  //   // prependData: `@import "style/variables.scss";`,
-  // },
   webpack(config, options) {
     config.module.rules.push({
       test: /\.graphql$/,

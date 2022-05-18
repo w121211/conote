@@ -21,8 +21,6 @@ module.exports = {
     '@storybook/addon-measure',
     '@storybook/addon-outline',
     '@storybook/addon-actions',
-    'storybook-addon-apollo-client',
-    'storybook-addon-next-router',
     {
       /**
        * Fix Storybook issue with PostCSS@8
@@ -41,6 +39,7 @@ module.exports = {
       },
     },
     'storybook-tailwind-dark-mode',
+    'storybook-addon-next-router',
   ],
   framework: '@storybook/react',
 

@@ -1,4 +1,5 @@
-import { BlockInput, writeBlocks } from '../../src/utils'
+import { Block } from '../../src/interfaces'
+import { BlockInput, genBlockUid, writeBlocks } from '../../src/utils'
 
 export const mockBlockInput: BlockInput = [
   '[[Firefox]]',
@@ -32,17 +33,34 @@ export const mockBlockInput: BlockInput = [
             //     'A great internet browser should have the functionality you need, portability across devices, and the privacy you deserve.',
           ],
         ],
-        // [
-        //   '#Which browser is best at keeping things confidential?#',
-        //   [
-        //     'Its not unreasonable to expect a high level of data protection and privacy from the products we regularly use to get online.',
-        //     'At a minimum, a browser should offer some version of “private browsing mode” that automatically deletes your history and search history so other users on the same computer cant access it.',
-        //     'In this area, all seven of the browsers compared here score points.',
-        //   ],
-        // ],
+        [
+          '#Which browser is best at keeping things confidential?-mock_discuss_0_active#',
+          [
+            'Its not unreasonable to expect a high level of data protection and privacy from the products we regularly use to get online.',
+            'At a minimum, a browser should offer some version of “private browsing mode” that automatically deletes your history and search history so other users on the same computer cant access it.',
+            'In this area, all seven of the browsers compared here score points.',
+          ],
+        ],
       ],
     ],
   ],
 ]
 
-export const mockBlocks = writeBlocks(mockBlockInput)
+/**
+ * The first block is doc-block, ie [doc-block, ...content-blocks]
+ */
+export const mockDocBlockAndContentBlocks: Block[] = writeBlocks(mockBlockInput)
+
+export const mockDocBlockHasNoContent: Block = {
+  uid: genBlockUid(),
+  str: '[[Mock Doc Block Without Content]]',
+  order: 0,
+  docTitle: '[[Mock Doc Block Without Content]]',
+  parentUid: null,
+  childrenUids: [],
+}
+
+export const mockBlocks = [
+  ...mockDocBlockAndContentBlocks,
+  mockDocBlockHasNoContent,
+]

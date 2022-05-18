@@ -1,10 +1,7 @@
 import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import { setEntities } from '@ngneat/elf-entities'
-import { mockLocalDoc } from '../../../test/__mocks__/mock-data'
-import { blockRepo } from '../../stores/block.repository'
-import { docRepo } from '../../stores/doc.repository'
-import { DocTemplate } from './doc-template'
+import { DocTemplate } from '../../components/block-editor/src/components/doc/doc-template'
+import { mockDocs } from '../../components/block-editor/test/__mocks__/mock-doc'
 
 export default {
   title: 'BlockEditor/DocTemplate',
@@ -15,5 +12,5 @@ const Template: ComponentStory<typeof DocTemplate> = args => <DocTemplate />
 
 export const Basic = Template.bind({})
 Basic.args = {
-  doc: mockLocalDoc.doc,
+  doc: mockDocs[1],
 }

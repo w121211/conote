@@ -19,11 +19,6 @@ const InlineSymbolEl = ({
       role="button"
     >
       {children}
-      {/* <button
-       
-        
-      >
-      </button> */}
     </span>
   )
 }

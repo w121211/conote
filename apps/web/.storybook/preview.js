@@ -1,13 +1,7 @@
-// import '!style-loader!css-loader!sass-loader!../src/globalStyles/global.scss'
-import { MockedProvider } from '@apollo/client/testing'
 import { RouterContext } from 'next/dist/shared/lib/router-context'
 import '../style/global.css'
 
 export const parameters = {
-  apolloClient: {
-    MockedProvider,
-    // any props you want to pass to MockedProvider on every story
-  },
   nextRouter: {
     Provider: RouterContext.Provider,
   },
@@ -19,7 +13,6 @@ export const parameters = {
       date: /Date$/,
     },
   },
-  // layout: 'centered',
   options: {
     storySort: {
       order: [

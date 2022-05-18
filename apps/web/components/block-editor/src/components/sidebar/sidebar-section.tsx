@@ -46,8 +46,6 @@ const SidebarSection = ({
       {items.length > 0
         ? !folded && items.map(e => <SidebarItem key={e.id} item={e} />)
         : !folded && (
-            <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow">
-              Empty
             <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow ">
               no note :{'('}
             </span>

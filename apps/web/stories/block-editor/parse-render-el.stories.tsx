@@ -1,17 +1,10 @@
-import React, { useState } from 'react'
-import { setEntities } from '@ngneat/elf-entities'
+import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import { blockRepo } from '../../stores/block.repository'
-import { mockBlockStrDict } from '../../../test/__mocks__/mock-data'
-import ParseRenderEl from './parse-render-el'
-
-/**
- * Setup data
- */
-// blockRepo.update([setEntities(mockLocalDoc.blocks)])
+import ParseRenderEl from '../../components/block-editor/src/components/inline/parse-render-el'
+import { mockBlockStr } from '../../components/block-editor/test/__mocks__/mock-block-str'
 
 export default {
-  title: 'BlockEditor/parse-renderer',
+  title: 'BlockEditor/ParseRenderEl',
   component: ParseRenderEl,
 } as ComponentMeta<typeof ParseRenderEl>
 
@@ -20,7 +13,7 @@ const Template: ComponentStory<typeof ParseRenderEl> = args => (
 )
 
 export const Basic = Template.bind({})
-Basic.args = { str: mockBlockStrDict.symbolTitle }
+Basic.args = { str: mockBlockStr.symbolTitle }
 
 // export const WithDocContainerMock = () => (
 //   <div className="doc-container">

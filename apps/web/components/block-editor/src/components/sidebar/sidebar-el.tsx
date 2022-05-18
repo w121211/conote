@@ -1,33 +1,11 @@
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import React, { useEffect, useRef } from 'react'
 import { editorLeftSidebarMount } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
-import React, {
-  forwardRef,
-  ReactPropTypes,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import Link from 'next/link'
-import { SearchAllForm } from '../search-all-form'
-import DocIndexSection from './doc-index-section'
-import { workspace } from '../workspace/workspace'
-import { useObservable } from 'rxjs-hooks'
-import { TreeNode, TreeService } from '@conote/docdiff'
-import { DocIndex } from '../workspace/doc-index'
-import { Doc } from '../workspace/doc'
-import { useApolloClient } from '@apollo/client'
-// import { useMeQuery } from '../../apollo/query.graphql'
-import { useRouter } from 'next/router'
-import AuthItem from './_auth-Item'
-import Select from 'react-select'
-// import ChannelSelect from '../channel/channel-select'
-import { ThemeType } from './theme-storage'
-import { ThemeContext } from '../theme/theme-provider'
-import { ThemeToggle } from '../theme/theme-toggle'
+import { ThemeContext } from '../../../../theme/theme-provider'
+import { ThemeType } from '../../../../theme/theme-storage'
+import { ThemeToggle } from '../../../../theme/theme-toggle'
 
 /**
  * When the component mount, call sidebr-load event when first enter the component
@@ -59,11 +37,12 @@ const SidebarEl = ({
   }
 
   const { theme, setTheme, isSystem, setIsSystem } = useContext(ThemeContext)
-  const editingdDocIndicies = useObservable(() => workspace.editingDocIndicies$)
-  const ref = useRef<HTMLDivElement>(null)
+
+  // const ref = useRef<HTMLDivElement>(null)
+
   // const [theme, setTheme] = useState<ThemeType>('light')
   const [themeBtn, setThemeBtn] = useState<ThemeType | 'system'>('light')
-  // const committedDocIndicies = useObservable(() => workspace.committedDocIndicies$)
+
   useEffect(() => {
     editorLeftSidebarMount()
   }, [])
@@ -88,9 +67,8 @@ const SidebarEl = ({
   }, [])
 
   if (sidebar === null) {
-  // useEffect(() => {
-
-  // }, [])
+    return null
+  }
 
   // useEffect(() => {
   //   const localTheme = Theme.getInstance()
@@ -113,9 +91,6 @@ const SidebarEl = ({
   //   }
   // }, [themeBtn])
 
-  if (editingdDocIndicies === null) {
-    return null
-  }
   return (
     <>
       <div
@@ -154,6 +129,7 @@ const SidebarEl = ({
               <a href="/" className="py-1 rounded dark:text-gray-200  ">
                 Konote
               </a>
+
               <ThemeToggle />
 
               {/* <ChannelSelect /> */}

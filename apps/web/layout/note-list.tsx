@@ -14,7 +14,7 @@ export const NoteList = ({ data }: { data: NoteData[] }) => {
     <Tile>
       {/* <div className="p-3 border border-gray-200 rounded text-sm shadow-sm"> */}
       <h4 className="  mb-2 text-base tracking-widest text-gray-700 dark:text-gray-200">
-        筆記
+        NOTES
       </h4>
       {data.map(({ symbol, title, updatedAt }, i) => {
         const styledSymbol = styleSymbol(symbol, title)

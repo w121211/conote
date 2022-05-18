@@ -2,9 +2,6 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import { Observable, switchMap, tap } from 'rxjs'
 // import { useObservable } from '@ngneat/react-rxjs'
 import { useObservable } from 'rxjs-hooks'
-import styled from 'styled-components'
-// import { MoreHoriz } from '@material-ui/icons'
-// import PopperUnstyled from '@mui/base/PopperUnstyled'
 
 // import { mockPeople } from '@/Avatar/mockData'
 // import { DOMRoot } from '@/utils/config'
@@ -27,21 +24,12 @@ import {
   docSave,
   historyClear,
   historyUndo,
-  templateSet,
+  docTemplateSet,
 } from '../../events'
 import { hotkey, multiBlockSelection } from '../../listeners'
 import { NoteHead } from '../../../../note-head'
 import moment from 'moment'
 
-// const PageWrap = styled.article`
-//   padding: 1rem;
-//   flex-basis: 100%;
-//   align-self: stretch;
-//   width: 100%;
-//   max-width: 60em;
-//   margin-left: auto;
-//   margin-right: auto;
-// `
 const PageWrap = ({ children }: { children: ReactNode }) => {
   return (
     <article
@@ -57,63 +45,63 @@ const PageWrap = ({ children }: { children: ReactNode }) => {
   )
 }
 
-const PageHeader = styled.header`
-  position: relative;
-  padding: 0 3rem;
-`
+// const PageHeader = styled.header`
+//   position: relative;
+//   padding: 0 3rem;
+// `
 
-const Title = styled.h1`
-  font-size: 2.5rem;
-  position: relative;
-  overflow: visible;
-  flex-grow: 1;
-  margin: 0.1em 0;
-  white-space: pre-line;
-  word-break: break-word;
-  line-height: 1.1em;
+// const Title = styled.h1`
+//   font-size: 2.5rem;
+//   position: relative;
+//   overflow: visible;
+//   flex-grow: 1;
+//   margin: 0.1em 0;
+//   white-space: pre-line;
+//   word-break: break-word;
+//   line-height: 1.1em;
 
-  textarea {
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    min-height: 100%;
-    font-weight: inherit;
-    letter-spacing: inherit;
-    font-size: inherit;
-    appearance: none;
-    cursor: text;
-    resize: none;
-    transform: translate3d(0, 0, 0);
-    color: inherit;
-    caret-color: var(--link-color);
-    background: transparent;
-    line-height: inherit;
-    border: 0;
-    font-family: inherit;
-    visibility: hidden;
-    position: absolute;
+//   textarea {
+//     padding: 0;
+//     margin: 0;
+//     width: 100%;
+//     min-height: 100%;
+//     font-weight: inherit;
+//     letter-spacing: inherit;
+//     font-size: inherit;
+//     appearance: none;
+//     cursor: text;
+//     resize: none;
+//     transform: translate3d(0, 0, 0);
+//     color: inherit;
+//     caret-color: var(--link-color);
+//     background: transparent;
+//     line-height: inherit;
+//     border: 0;
+//     font-family: inherit;
+//     visibility: hidden;
+//     position: absolute;
 
-    &::webkit-scrollbar {
-      display: none;
-    }
+//     &::webkit-scrollbar {
+//       display: none;
+//     }
 
-    &:focus,
-    &.is-editing {
-      outline: none;
-      visibility: visible;
-      position: relative;
-    }
+//     &:focus,
+//     &.is-editing {
+//       outline: none;
+//       visibility: visible;
+//       position: relative;
+//     }
 
-    abbr {
-      z-index: 4;
-    }
+//     abbr {
+//       z-index: 4;
+//     }
 
-    &.is-editing + span {
-      visibility: hidden;
-      position: absolute;
-    }
-  }
-`
+//     &.is-editing + span {
+//       visibility: hidden;
+//       position: absolute;
+//     }
+//   }
+// `
 
 // const PageMenuToggle = styled.button`
 //   float: left;
@@ -149,12 +137,12 @@ const Title = styled.h1`
 //   )
 // }
 
-const BlocksContainer = styled(BlockListContainer)`
-  padding-left: 1rem;
-  padding-right: 1rem;
-  display: flex;
-  flex-direction: column;
-`
+// const BlocksContainer = styled(BlockListContainer)`
+//   padding-left: 1rem;
+//   padding-right: 1rem;
+//   display: flex;
+//   flex-direction: column;
+// `
 
 interface DocProps {
   // assume to be block-els, if given, use it and ignore doc-block's children
@@ -230,7 +218,7 @@ export const DocEl = ({
   const docBlock = useObservable<Block | undefined, [Doc]>(
     (_, inputs$) =>
       inputs$.pipe(
-        // tap(console.log),
+        tap(console.log),
         switchMap(([v]) => blockRepo.getBlock$(v.blockUid)),
       ),
     undefined,
@@ -398,7 +386,7 @@ export const DocEl = ({
           </div>
         ) : (
           // <DocPlaceholder />
-          <button onClick={e => templateSet(docBlock)}>demo-template</button>
+          <button onClick={e => docTemplateSet(docBlock)}>demo-template</button>
         )
       }
     </article>

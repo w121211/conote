@@ -97,7 +97,7 @@ type DiscussParsed = Omit<Discuss, 'meta'> & {
 
 export const mockDiscusses: DiscussParsed[] = [
   {
-    id: 'mock-discuss-0_active',
+    id: 'mock_discuss_0_active',
     userId: mockUsers[0].id,
     status: 'ACTIVE',
     meta: {},

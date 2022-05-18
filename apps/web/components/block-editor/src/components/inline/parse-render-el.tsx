@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { parse } from '../../parse-renderer'
+import { parse } from '../../parse-render'
 import InlineEl from './inline-el'
 
 const ParseRenderEl = ({

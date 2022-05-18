@@ -715,6 +715,24 @@ export async function docRename(doc: Doc, newTitle: string) {
   }
 }
 
+/**
+ * Set doc template
+ */
+export async function docTemplateSet(docBlock: Block) {
+  if (!isDocBlock(docBlock)) {
+    throw new Error('Given block is not doc-block')
+  }
+
+  const blocks = writeBlocks(['__DUMMY_ROOT__', ['hello', 'world']], {
+      docBlock,
+    }),
+    [, ...children] = blocks
+
+  const op = ops.blocksInsertOp(docBlock, children)
+
+  blockRepo.update(op)
+}
+
 //
 // Editor Events
 //
@@ -832,28 +850,6 @@ export async function editorLeftSidebarMount() {
 }
 
 //
-// Template Events
-//
-//
-//
-//
-//
-//
-
-export async function templateSet(docBlock: Block) {
-  if (!isDocBlock(docBlock)) {
-    throw new Error('Given block is not doc-block')
-  }
-
-  const blocks = writeBlocks(['__DUMMY_ROOT__', ['hello', 'world']], docBlock),
-    [, ...children] = blocks
-
-  const op = ops.blocksInsertOp(docBlock, children)
-
-  blockRepo.update(op)
-}
-
-//
 // Commit Events
 //
 //
@@ -863,7 +859,7 @@ export async function templateSet(docBlock: Block) {
 //
 
 /**
- * If commit success, marked docs as committed
+ * If commit success, mark docs as committed
  */
 export async function commitDocs(docs: Doc[]) {
   // const { branch, title } = doc,

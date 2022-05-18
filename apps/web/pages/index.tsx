@@ -8,7 +8,6 @@ import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/new-hot-list'
 import UserRateTable from '../components/user/user-rate-table'
 import { mockRateData } from './user/[userId]'
-import { Tooltip } from '../layout/tooltip/tooltip'
 
 export function HomePage(): JSX.Element {
   const [showAnnounce, setAnnounce] = useState(false)

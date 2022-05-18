@@ -1,4 +1,3 @@
-import { EmojiCode, LikeChoice } from '@prisma/client'
 import React from 'react'
 import {
   DiscussPostEmojiFragment,
@@ -25,23 +24,43 @@ const UpdateDiscussPostEmoji = ({
       })
       // TODO: 這裡忽略了更新 count
       if (res && data?.upsertDiscussPostEmojiLike) {
-        cache.writeQuery<MyDiscussPostEmojiLikeQuery, MyDiscussPostEmojiLikeQueryVariables>({
+        cache.writeQuery<
+          MyDiscussPostEmojiLikeQuery,
+          MyDiscussPostEmojiLikeQueryVariables
+        >({
           query: MyDiscussPostEmojiLikeDocument,
-          variables: { discussPostEmojiId: data.upsertDiscussPostEmojiLike.like.id },
-          data: { myDiscussPostEmojiLike: data.upsertDiscussPostEmojiLike.like },
+          variables: {
+            discussPostEmojiId: data.upsertDiscussPostEmojiLike.like.id,
+          },
+          data: {
+            myDiscussPostEmojiLike: data.upsertDiscussPostEmojiLike.like,
+          },
         })
       }
     },
   })
-  const { data } = useMyDiscussPostEmojiLikeQuery({ variables: { discussPostEmojiId: discussPostEmoji.id } })
+  const { data } = useMyDiscussPostEmojiLikeQuery({
+    variables: { discussPostEmojiId: discussPostEmoji.id },
+  })
   const onClick = () => {
     if (data?.myDiscussPostEmojiLike) {
-      upsertEmoji({ variables: { discussPostEmojiId: discussPostEmoji.id, liked: !data.myDiscussPostEmojiLike.liked } })
+      upsertEmoji({
+        variables: {
+          discussPostEmojiId: discussPostEmoji.id,
+          liked: !data.myDiscussPostEmojiLike.liked,
+        },
+      })
     }
   }
 
   if (type === 'panel') {
-    return <EmojiBtn onClick={onClick} emojiCode={discussPostEmoji.code} liked={data?.myDiscussPostEmojiLike?.liked} />
+    return (
+      <EmojiBtn
+        onClick={onClick}
+        emojiCode={discussPostEmoji.code}
+        liked={data?.myDiscussPostEmojiLike?.liked}
+      />
+    )
   }
   return (
     <EmojiBtn

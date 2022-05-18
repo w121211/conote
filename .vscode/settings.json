@@ -31,7 +31,12 @@
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
   "eslint.options": { "cache": true },
   "eslint.workingDirectories": [
     {

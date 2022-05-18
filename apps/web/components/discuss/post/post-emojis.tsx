@@ -1,4 +1,3 @@
-import { EmojiCode, LikeChoice } from '@prisma/client'
 import React, { useState } from 'react'
 import {
   DiscussPostEmojiFragment,
@@ -20,22 +19,45 @@ const DiscussPostEmojis = ({
   disable?: boolean
 }): JSX.Element | null => {
   const [liked, setLiked] = useState('')
-  const { data: emojisData } = useDiscussPostEmojisQuery({ variables: { discussPostId } })
-  const [queryMyEmoji, { data: myEmojiLikeData }] = useMyDiscussPostEmojiLikeLazyQuery()
+  const { data: emojisData } = useDiscussPostEmojisQuery({
+    variables: { discussPostId },
+  })
+  const [queryMyEmoji, { data: myEmojiLikeData }] =
+    useMyDiscussPostEmojiLikeLazyQuery()
   const emojis: EmojiCode[] = ['UP', 'DOWN']
 
-  const shouldShowEmojiIcons = (data: DiscussPostEmojiFragment[] | undefined) => {
+  const shouldShowEmojiIcons = (
+    data: DiscussPostEmojiFragment[] | undefined,
+  ) => {
     return data && data.length > 0 && data.some(e => e.count.nUps > 0)
   }
   return (
     <div className="flex items-center">
-      <ToggleMenu className="flex  p-1" summary={<EmojisSwitch disable={disable} />} disabled={disable}>
+      <ToggleMenu
+        className="flex  p-1"
+        summary={<EmojisSwitch disable={disable} />}
+        disabled={disable}
+      >
         {emojis.map((code, i) => {
-          const data = emojisData?.discussPostEmojis.find(el => el.code === code)
+          const data = emojisData?.discussPostEmojis.find(
+            el => el.code === code,
+          )
           if (data) {
-            return <UpdateDiscussPostEmoji key={i} discussPostEmoji={data} type="panel" />
+            return (
+              <UpdateDiscussPostEmoji
+                key={i}
+                discussPostEmoji={data}
+                type="panel"
+              />
+            )
           }
-          return <CreateDiscussPostEmoji key={i} discussPostId={discussPostId} emojiCode={code} />
+          return (
+            <CreateDiscussPostEmoji
+              key={i}
+              discussPostId={discussPostId}
+              emojiCode={code}
+            />
+          )
         })}
       </ToggleMenu>
       {shouldShowEmojiIcons(emojisData?.discussPostEmojis) &&
@@ -44,7 +66,13 @@ const DiscussPostEmojis = ({
           if (data?.count.nUps === 0 || !data) {
             return null
           }
-          return <UpdateDiscussPostEmoji key={i} discussPostEmoji={data} type="normal" />
+          return (
+            <UpdateDiscussPostEmoji
+              key={i}
+              discussPostEmoji={data}
+              type="normal"
+            />
+          )
         })}
     </div>
   )

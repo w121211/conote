@@ -140,11 +140,17 @@ export type Block = {
   str: string
   open?: boolean
   order: number
-  docTitle?: string // only for doc-block
-  parentUid: string | null // null for doc-block
+
+  // Doc block only, equals to doc.str
+  docTitle?: string
+
+  // Null for doc-block
+  parentUid: string | null
+
   childrenUids: string[]
 
-  editTime?: number // TBC, consider to drop
+  // TBC, consider to drop
+  editTime?: number
 }
 
 export type BlockWithChildren = Block & { children: BlockWithChildren[] }

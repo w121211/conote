@@ -33,7 +33,10 @@ module.exports = {
     'background-script': path.resolve(__dirname, 'src/chrome/background.ts'),
     // 'content-script': path.resolve(__dirname, 'src/scripts/content-script.ts'),
     // 'content-script': path.resolve(__dirname, 'src/annotate/content-script.ts'),
-    'content-script-menu': path.resolve(__dirname, 'src/scripts/content-script-menu.ts'),
+    'content-script-menu': path.resolve(
+      __dirname,
+      'src/scripts/content-script-menu.ts',
+    ),
     // popup: path.resolve(__dirname, 'src/popup/index.tsx'),
     // main: path.resolve(__dirname, 'src/index.tsx'),
   },
@@ -99,12 +102,6 @@ module.exports = {
           {
             loader: 'css-loader', // Translates CSS into CommonJS
           },
-          // {
-          //   loader: 'sass-loader', // Compiles Sass to CSS
-          //   options: {
-          //     additionalData: `@import "../web/style/variables.scss";`,
-          //   },
-          // },
         ],
       },
       {

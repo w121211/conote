@@ -14,7 +14,7 @@ export const RateTable = ({ data }: { data: TableData[] }): JSX.Element => {
   return (
     <Tile className="flex-1 min-w-[300px] w-full p-3 overflow-hidden  text-sm">
       <h4 className="  mb-2 text-base tracking-widest text-gray-700 dark:text-gray-200">
-        預測
+        RATES
       </h4>
       {data.map(({ ticker, title, rate, srcSym }, i) => {
         return (

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
 import Modal from '../../../../modal/modal'
-import { docRemove, docSave, editorRouteUpdate } from '../../events'
+import { editorRouteUpdate } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import { DocEl } from '../doc/doc-el'
 import { useRouter } from 'next/router'
@@ -37,27 +37,6 @@ export const EditorEl = (): JSX.Element | null => {
 
   return (
     <>
-      <button
-        onClick={() => {
-          if (mainDoc) {
-            docSave(mainDoc)
-          }
-        }}
-      >
-        Save
-      </button>
-      <button
-        onClick={() => {
-          if (mainDoc) {
-            docRemove(mainDoc)
-          }
-        }}
-      >
-        Drop
-      </button>
-
-      <hr />
-
       {alert && <div>{alert.message}</div>}
 
       {mainDoc && <DocEl doc={mainDoc} />}

@@ -335,22 +335,57 @@ v0.2.1
 - [@hsuan] invite code
 - [@lisa] i18n https://react.i18next.com/
 - [@lisa] storybook
-  - [] discuss-modal -> input should not fixed in the bottom
-  - user-page
-    - [] gray-bg
+  - pages
+    - home page
+      - [x] ui
+      - gql
+    - note page: with side-bar
+      - ui, doc-page need to change to editor-page
+      - gql
+    - discuss page
+    - user page
+      - [x] ui, gray background
+    - login page
+    - profile/setting page
+  - basic components (build blocks)
+    - badge
+    - tag
+    - button
+    - link
+    - alert
+    - tile
+    - list
+    - symbol-link (button), eg [[Hello world]]
+  - components
+    - [x] global search
+    - loading -> static icon
+  - discuss
+    - [] gql
+    - [] discuss-modal -> input should not fixed in the bottom
   - block-editor
-    - block
+    - block-el
       - [x] selected block
-      - [] block drag-drop indicator
-    - doc
-      - [] doc-template (easy test bed for parse-render), include inline-items: discuss, symbol, url, comment
-    - [x] modal editor
+      - [] block drag-drop
+      - [] textarea decorate: similar to code highlight
+      - inline item: create, view in modal, alert if not created
+        - [x] inline-symbol
+        - [] inline-discuss
+        - [] inline-url
+    - doc-el
+      - [] doc-placeholder, doc-template
+    - editor-el
+      - [x] modal editor
+      - save
+      - drop
+    - [x] parse-render-el
     - [] search-panel
-    - [x] inline-symbol
-    - [] inline-discuss
-  - loading -> static icon
-  - global search
-  - user page gray
+    - [working@chi] gql
+    - sidebar-el
+      - theme button -> move to profile page
+      - smaller arrow @see https://docs.google.com/document/d/1jvREEWUAgH0HUX_u0vEDQoaA9P7SpnR4SqswnKFJAj4/edit
+    - commit
+      - commit panel
+      - commit result
 - [@chi] block-editor
   - block
     - [x] (bug) unexpected behavior on block merge, split

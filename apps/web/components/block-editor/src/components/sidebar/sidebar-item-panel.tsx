@@ -1,9 +1,6 @@
 import { useApolloClient } from '@apollo/client'
-import { isTreeNode, NodeBody, TreeNode, TreeService } from '@conote/docdiff'
+import { isTreeNode, TreeNode } from '@conote/docdiff'
 import { useRouter } from 'next/router'
-import { Doc } from '../workspace/doc'
-import { DocIndex } from '../workspace/doc-index'
-import { workspace } from '../workspace/workspace'
 
 const DocIndexPanel = ({
   node,

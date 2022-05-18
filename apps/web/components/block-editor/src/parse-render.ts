@@ -1,8 +1,7 @@
-import { Grammar, Token, tokenize, TokenStream } from 'prismjs'
 import React from 'react'
-import { inspect } from 'util'
+import { Grammar, Token, tokenize, TokenStream } from 'prismjs'
+import { RateChoice } from 'graphql-let/__generated__/__types__'
 import { InlineItem } from './interfaces'
-// import { InlineItemService } from '../inline/inline-item-service'
 
 //
 // Token Helpers
@@ -99,8 +98,10 @@ const reTicker = /\$[A-Z-=]+/
 
 const reTopic = /\[\[[^\]\n]+\]\]/u
 
+// const reDiscuss =
+//   /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-(c[a-z0-9]{24,29})#(?=\s|$)/u
 const reDiscuss =
-  /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-(c[a-z0-9]{24,29})#(?=\s|$)/u
+  /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-([a-z0-9_]{12,29})#(?=\s|$)/u
 
 const reDiscussNew =
   /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+[\d\p{Letter}\p{Terminal_Punctuation}]#(?=\s|$)/u
@@ -316,9 +317,8 @@ function tokenToInlineItem(token: string | Token): InlineItem {
       return { type: 'inline-comment', str, token }
     }
   }
-  // tokens not catched
   console.error(token)
-  throw 'Parse error'
+  throw new Error('[tokenToInlineItem] Token not catched')
 }
 
 /**
@@ -330,6 +330,8 @@ function tokenToInlineItem(token: string | Token): InlineItem {
 export function parse(str: string): InlineItem[] {
   const tokens = tokenize(str, grammar),
     inlineItems = tokens.map(e => tokenToInlineItem(e))
+
+  console.log(tokens)
   return inlineItems
 }
 

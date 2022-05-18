@@ -1,9 +1,6 @@
-import React, { useState } from 'react'
-import { setEntities } from '@ngneat/elf-entities'
+import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import { blockRepo } from '../../stores/block.repository'
-import { mockLocalDoc } from '../../../test/__mocks__/mock-data'
-import InlineEl from './inline-el'
+import InlineEl from '../../components/block-editor/src/components/inline/inline-el'
 
 /**
  * Setup data
@@ -11,7 +8,7 @@ import InlineEl from './inline-el'
 // blockRepo.update([setEntities(mockLocalDoc.blocks)])
 
 export default {
-  title: 'BlockEditor/inline-el',
+  title: 'BlockEditor/InlineEl',
   component: InlineEl,
 } as ComponentMeta<typeof InlineEl>
 

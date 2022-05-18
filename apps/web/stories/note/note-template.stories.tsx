@@ -3,7 +3,7 @@ import React from 'react'
 import { NoteTemplate } from '../../components/note-template'
 
 export default {
-  title: 'component/Note Template',
+  title: 'components/Note Template',
   component: NoteTemplate,
 } as ComponentMeta<typeof NoteTemplate>
 

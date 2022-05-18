@@ -60,6 +60,8 @@ const InlineDiscussEl = ({
       </Link>
     )
 
+  console.log(id)
+
   return (
     <>
       <Modal
@@ -87,7 +89,7 @@ const InlineDiscussEl = ({
         </span>
       ) : (
         <Tooltip
-          title="⚠ 尚未創建"
+          title="⚠ Discuss is not created yet"
           // visible={showWarnTooltip}
           // visible={showWarnTooltip}
           // onClose={() => setShowWarnTooltip(false)}
@@ -95,8 +97,7 @@ const InlineDiscussEl = ({
           state="warn"
         >
           <span
-            // relative 為必要 才可點擊到 和 hover 效果
-
+            // 'relative' is required for clickable and hover effect
             className="relative text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
             onClick={() => setShowModal(true)}
             // onMouseEnter={() => {

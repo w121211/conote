@@ -1,17 +1,24 @@
 import { Doc } from '../../src/interfaces'
-import { mockBlocks } from './mock-block'
+import {
+  mockDocBlockAndContentBlocks,
+  mockDocBlockHasNoContent,
+} from './mock-block'
 
-const titleBlock = mockBlocks[0]
-
-const doc: Doc = {
-  title: titleBlock.str,
-  blockUid: titleBlock.uid,
-  // noteCopy?: Note // the latest note by query
-  // noteDraftCopy?: NoteDraft // the latest note-draft
-  // noteMeta?: NoteMeta // updates in note meta
+const base = {
+  branch: 'branch',
+  domain: 'domain',
+  meta: {},
 }
 
-export const mockDoc = {
-  doc,
-  blocks: mockBlocks,
-}
+export const mockDocs: Doc[] = [
+  {
+    ...base,
+    title: mockDocBlockAndContentBlocks[0].str,
+    blockUid: mockDocBlockAndContentBlocks[0].uid,
+  },
+  {
+    ...base,
+    title: mockDocBlockHasNoContent.str,
+    blockUid: mockDocBlockHasNoContent.uid,
+  },
+]

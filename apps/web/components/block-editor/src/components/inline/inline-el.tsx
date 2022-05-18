@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { InlineItem } from '../../interfaces'
-import { renderToken } from '../../parse-renderer'
-import InlineDiscussEl from './components/inline-discuss'
+import { renderToken } from '../../parse-render'
+import InlineDiscussEl from './components/inline-discuss-el'
 import InlineSymbolEl from './components/inline-symbol-el'
 
 export type InlineElProps = {
@@ -18,7 +18,7 @@ const InlineEl = ({
 }: {
   blockUid: string
   inline: InlineItem
-}) => {
+}): JSX.Element => {
   const { type, str } = inline,
     token = useMemo(() => renderToken(inline.token), [inline]),
     el = React.createElement
@@ -31,7 +31,9 @@ const InlineEl = ({
     case 'text':
       return <span>{str}</span>
   }
-  return null
+  // return null
+
+  throw new Error('[InlineEl] Unexpected case')
 }
 
 export default InlineEl
