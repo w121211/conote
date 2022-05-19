@@ -222,8 +222,8 @@ type Mutation {
 
   #-------- New -------------
 
-  # commit must be created first -> createCommit ->
-  commitNoteDrafts(draftIds: [ID!]!): NoteDraftCommitResponse!
+  # commit must be created first
+  createCommit(noteDraftIds: [ID!]!): Commit!
 
   # not sure about the type of meta, which is for creating from existing note
   createNoteDraft(
@@ -335,7 +335,7 @@ type DiscussEmojiLike {
 }
 
 type DiscussPost {
-  id: String!
+  id: ID!
   userId: String!
   status: DiscussPostStatus!
   content: String!
@@ -502,20 +502,24 @@ type Commit {
   id: String!
   userId: String!
   noteDocs: [NoteDoc!]!
-  noteDrafts: [NoteDraft!]!
+
+  # Consdier to remove
+  # noteDrafts: [NoteDraft!]!
+
   updatedAt: DateTime!
 }
 
 type Note {
   id: ID!
 
-  # branch name
+  # Branch name
   branch: String!
 
   sym: Sym!
   link: Link
 
-  # the latest merged NoteDoc, throw error if there is none (it's impossible to be null because first NoteDoc will auto-merge to the newly-built Note)
+  # The latest merged NoteDoc, throw error if there is none
+  # it is impossible to be null because first NoteDoc will auto-merge to the newly-built Note
   noteDoc: NoteDoc!
 
   updatedAt: DateTime!
@@ -523,14 +527,19 @@ type Note {
 
 type NoteDoc {
   id: ID!
-  # noteId: String!
+
+  # Require bracnh and symbol in cases query note-doc without note
+  # (TBC) Set to must have?
+  branch: String
+  symbol: String
+
   commitId: String!
   fromDocId: String
   userId: String!
   status: NoteDocStatus!
   domain: String!
 
-  # meta is updated through commiting the note-doc
+  # To update meta require through commit
   meta: NoteDocMeta!
 
   content: NoteDocContent!
@@ -602,10 +611,10 @@ type NoteDraft {
   status: NoteDraftStatus!
 }
 
-type NoteDraftCommitResponse {
-  commitId: String!
-  docs: [NoteDoc!]! # corresponding to the noteDraft, for the purpose of merge status display
-}
+# type NoteDraftCommitResponse {
+#   commitId: String!
+#   docs: [NoteDoc!]! # corresponding to the noteDraft, for the purpose of merge status display
+# }
 
 type NoteDraftDropResponse {
   response: String!

@@ -91,9 +91,6 @@ fragment commit on Commit {
   noteDocs {
     ...noteDoc
   }
-  noteDrafts {
-    ...noteDraft
-  }
   updatedAt
 }
 
@@ -251,6 +248,7 @@ fragment vote on Vote {
 }
 
 # -----------NEW-----------
+
 fragment note on Note {
   __typename
   id
@@ -270,6 +268,8 @@ fragment note on Note {
 fragment noteDoc on NoteDoc {
   __typename
   id
+  branch
+  symbol
   commitId
   fromDocId
   userId
@@ -342,14 +342,6 @@ fragment noteDraft on NoteDraft {
   }
   updatedAt
   status
-}
-
-fragment noteDraftCommitResponse on NoteDraftCommitResponse {
-  __typename
-  commitId
-  docs {
-    ...noteDoc
-  }
 }
 
 fragment noteDraftDropResponse on NoteDraftDropResponse {
@@ -686,9 +678,9 @@ mutation SessionLogout {
 
 # ------------- NEW ------------
 
-mutation CommitNoteDrafts($draftIds: [ID!]!) {
-  commitNoteDrafts(draftIds: $draftIds) {
-    ...noteDraftCommitResponse
+mutation CreateCommit($noteDraftIds: [ID!]!) {
+  createCommit(noteDraftIds: $noteDraftIds) {
+    ...commit
   }
 }
 
