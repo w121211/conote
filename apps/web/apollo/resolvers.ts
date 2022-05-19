@@ -278,13 +278,13 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   // process to form Commit of type-defs version (DictEntryArray)
   // myCommits: [Commit!]!
   async myCommits(_parent, _args, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const commits = await prisma.commit.findMany({
-      where: { userId: userId },
-      include: { noteDrafts: true, noteDocs: true },
-      take: 10,
-      orderBy: { createdAt: 'desc' },
-    })
+    const { userId } = await isAuthenticated(req),
+      commits = await prisma.commit.findMany({
+        where: { userId: userId },
+        include: { noteDrafts: true, noteDocs: true },
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+      })
     return commits.map(e => {
       return {
         ...e,
@@ -293,11 +293,8 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
           meta: d.meta as unknown as NoteDocMeta,
           content: d.content as unknown as NoteDocContent,
         })),
-        noteDrafts: e.noteDrafts.map(d => ({
-          ...d,
-          meta: d.meta as unknown as NoteDocMeta,
-          content: d.content as unknown as NoteDocContent,
-        })),
+        // noteDocs: e.noteDocs.map(d => noteDocModel.parse(d))
+        // noteDrafts: e.noteDrafts.map(d => noteDraftModel.parse(d)),
       }
     })
   },
@@ -711,20 +708,19 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   // -------------New---------------
 
-  async commitNoteDrafts(_parent, { draftIds }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const { commit, noteDocs } = await commitNoteDrafts(draftIds, userId)
-    if (commit && draftIds.length === noteDocs.length) {
-      return {
-        commitId: commit.id,
-        docs: noteDocs.map(e => ({
-          ...e,
-          meta: e.meta as unknown as NoteDocMeta,
-          content: e.content as unknown as NoteDocContent,
-        })),
-      }
+  async createCommit(_parent, { noteDraftIds }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      { commit, noteDocs } = await commitNoteDrafts(noteDraftIds, userId)
+    return {
+      ...commit,
+      noteDocs: noteDocs.map(e => ({
+        ...e,
+        branch: e.branch.name,
+        symbol: e.sym.symbol,
+        meta: e.meta as unknown as NoteDocMeta,
+        content: e.content as unknown as NoteDocContent,
+      })),
     }
-    throw new Error('Commit failed')
   },
 
   async createNoteDraft(
