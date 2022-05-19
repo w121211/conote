@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react'
 import { useDiscussQuery } from '../../apollo/query.graphql'
 import DiscussBody from './post/discuss-posts'
 import { DiscussTile } from './layout-components/discuss-tile'
+import { CreatePostForm } from './post/create-post-form'
+import { PostTileList } from './layout-components/post-tile-list'
 
 const dummyData = [
   '測試測試大家好',
@@ -11,7 +13,7 @@ const dummyData = [
   '好尷尬唷嗚嗚嗚',
 ]
 
-const DiscussPage = ({ id }: { id: string }) => {
+export const DiscussPageComponent = ({ id }: { id: string }) => {
   const { data } = useDiscussQuery({ variables: { id } })
 
   // console.log(id)
@@ -24,10 +26,8 @@ const DiscussPage = ({ id }: { id: string }) => {
     <div className="flex flex-col gap-3 w-full">
       {/* <DiscussHeader data={data.discuss} /> */}
       <DiscussTile data={data.discuss} />
-      <DiscussBody discussId={data.discuss.id} />
+      <PostTileList discussId={data.discuss.id} />
       <CreatePostForm discussId={data.discuss.id} />
     </div>
   )
 }
-
-export default DiscussPage

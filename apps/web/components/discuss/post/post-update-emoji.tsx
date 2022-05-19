@@ -23,20 +23,20 @@ const UpdateDiscussPostEmoji = ({
         query: MyDiscussPostEmojiLikeDocument,
       })
       // TODO: 這裡忽略了更新 count
-      if (res && data?.upsertDiscussPostEmojiLike) {
-        cache.writeQuery<
-          MyDiscussPostEmojiLikeQuery,
-          MyDiscussPostEmojiLikeQueryVariables
-        >({
-          query: MyDiscussPostEmojiLikeDocument,
-          variables: {
-            discussPostEmojiId: data.upsertDiscussPostEmojiLik.like,
-          },
-          data: {
-            myDiscussPostEmojiLike: data.upsertDiscussPostEmojiLike.like,
-          },
-        })
-      }
+      // if (res && data?.upsertDiscussPostEmojiLike) {
+      //   cache.writeQuery<
+      //     MyDiscussPostEmojiLikeQuery,
+      //     MyDiscussPostEmojiLikeQueryVariables
+      //   >({
+      //     query: MyDiscussPostEmojiLikeDocument,
+      //     variables: {
+      //       discussPostEmojiId: data.upsertDiscussPostEmojiLike,
+      //     },
+      //     data: {
+      //       myDiscussPostEmojiLike: data.upsertDiscussPostEmojiLike.like,
+      //     },
+      //   })
+      // }
     },
   })
   const { data } = useMyDiscussPostEmojiLikeQuery({

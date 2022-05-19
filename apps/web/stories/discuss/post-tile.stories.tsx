@@ -1,21 +1,16 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { DiscussPostFragment } from '../../apollo/query.graphql'
+import {
+  DiscussPostFragment,
+  useDiscussPostsQuery,
+} from '../../apollo/query.graphql'
 import DiscussPostEmojis from '../../components/discuss/post/post-emojis'
 import PostOptionsMenu from '../../components/discuss/post/post-options-menu'
 import { PostTile } from '../../components/discuss/layout-components/post-tile'
-const date = new Date()
+import { getApolloClient } from '../../apollo/apollo-client'
+import { ApolloProvider } from '@apollo/client'
 
-const mockPost: DiscussPostFragment = {
-  __typename: 'DiscussPost',
-  id: '1',
-  userId: 'ajsdlkjflkj',
-
-  status: 'ACTIVE',
-  content: '測試一下，寫一些東西，這個東西為啥呢? 不能斷航?',
-  createdAt: date,
-  updatedAt: date,
-}
+const apolloClient = getApolloClient()
 
 export default {
   // title: 'layout/Post Tile',
@@ -33,9 +28,16 @@ export default {
   ],
 } as ComponentMeta<typeof PostTile>
 
-const Template: ComponentStory<typeof PostTile> = args => <PostTile {...args} />
+const Template: ComponentStory<typeof PostTile> = args => {
+  const { data } = useDiscussPostsQuery({ variables: { discussId: '' } })
+  return (
+    <ApolloProvider client={apolloClient}>
+      <PostTile {...args} />
+    </ApolloProvider>
+  )
+}
 
 export const Origin = Template.bind({})
 Origin.args = {
-  post: mockPost,
+  userId: 'testuser0',
 }

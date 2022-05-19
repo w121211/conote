@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import DiscussPage from '../../components/discuss/discuss-page'
+import { DiscussPageComponent } from '../../components/discuss/discuss-page'
 import { CreatePostForm } from '../../components/discuss/post/create-post-form'
 import { DiscussTile } from '../../components/discuss/layout-components/discuss-tile'
 import { PostTileList } from '../../components/discuss/layout-components/post-tile-list'
@@ -13,7 +13,7 @@ const apolloClient = getApolloClient()
 
 export default {
   // title: 'pages/Discss Full Page',
-  component: DiscussPage,
+  component: DiscussPageComponent,
   decorators: [
     Story => (
       <div>
@@ -29,16 +29,17 @@ export default {
       ],
     },
   },
-} as ComponentMeta<typeof DiscussPage>
+} as ComponentMeta<typeof DiscussPageComponent>
 
-const Template: ComponentStory<typeof DiscussPage> = args => {
+const Template: ComponentStory<typeof DiscussPageComponent> = args => {
   // const paramState = useParameter<string>('backgroundColor')
   return (
     <ApolloProvider client={apolloClient}>
       <Layout>
-        <DiscussTile data={mockData} />
-        <PostTileList postList={mockPostList} />
-        <CreatePostForm discussId="fajioejf" />
+        <DiscussPageComponent id="mockdiscuss0active" />
+        {/* <DiscussTile data={mockData} />
+        <PostTileList discussId={mockPostList} />
+        <CreatePostForm discussId="fajioejf" /> */}
       </Layout>
     </ApolloProvider>
   )

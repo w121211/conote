@@ -50,7 +50,7 @@ export const PostTile = ({
           <div className="flex pt-1 border-t border-gray-200">
             <div className="flex-grow">
               <DiscussPostEmojis
-                discussPostId={post.id}
+                discussPostId={parseInt(post.id)}
                 disable={userId === post.userId}
               />
             </div>
