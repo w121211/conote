@@ -26,12 +26,6 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
     <div className="ml-6 mb-5">
       <div className="flex items-center gap-2 mb-4">
         <DomainSelect />
-        {/* <span
-          className="h-fit bg-orange-200/60 text-gray-900 px-2 rounded
-             font-[Consolas] select-none font-bold text-xl"
-        >
-          dev
-        </span> */}
 
         {isNew && (
           <span

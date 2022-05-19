@@ -1,6 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import SidebarEl from '../../components/block-editor/src/components/sidebar/sidebar-el'
+import { ThemeProvider } from '../../components/theme/theme-provider'
 
 export default {
   title: 'BlockEditor/SidebarEl',
@@ -8,7 +9,9 @@ export default {
 } as ComponentMeta<typeof SidebarEl>
 
 const Template: ComponentStory<typeof SidebarEl> = args => (
-  <SidebarEl {...args} />
+  <ThemeProvider>
+    <SidebarEl {...args} />
+  </ThemeProvider>
 )
 
 export const Default = Template.bind({})

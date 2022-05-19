@@ -10,12 +10,13 @@ import CreateDiscussPostEmoji from './post-create-emoji'
 import UpdateDiscussPostEmoji from './post-update-emoji'
 import EmojisSwitch from '../emojis-switch'
 import ToggleMenu from '../../../layout/toggle-menu'
+import { EmojiCode } from '@prisma/client'
 
 const DiscussPostEmojis = ({
   discussPostId,
   disable,
 }: {
-  discussPostId: string
+  discussPostId: number
   disable?: boolean
 }): JSX.Element | null => {
   const [liked, setLiked] = useState('')

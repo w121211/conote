@@ -6,6 +6,10 @@ import { DiscussTile } from '../../components/discuss/layout-components/discuss-
 import { PostTileList } from '../../components/discuss/layout-components/post-tile-list'
 import { mockData, mockPostList } from './mock-discuss-data'
 import { Layout } from '../../layout/layout'
+import { ApolloProvider } from '@apollo/client'
+import { getApolloClient } from '../../apollo/apollo-client'
+
+const apolloClient = getApolloClient()
 
 export default {
   // title: 'pages/Discss Full Page',
@@ -30,13 +34,13 @@ export default {
 const Template: ComponentStory<typeof DiscussPage> = args => {
   // const paramState = useParameter<string>('backgroundColor')
   return (
-    <div>
+    <ApolloProvider client={apolloClient}>
       <Layout>
         <DiscussTile data={mockData} />
         <PostTileList postList={mockPostList} />
         <CreatePostForm discussId="fajioejf" />
       </Layout>
-    </div>
+    </ApolloProvider>
   )
 }
 

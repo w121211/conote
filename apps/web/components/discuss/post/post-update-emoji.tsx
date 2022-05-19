@@ -30,7 +30,7 @@ const UpdateDiscussPostEmoji = ({
         >({
           query: MyDiscussPostEmojiLikeDocument,
           variables: {
-            discussPostEmojiId: data.upsertDiscussPostEmojiLike.like.id,
+            discussPostEmojiId: data.upsertDiscussPostEmojiLik.like,
           },
           data: {
             myDiscussPostEmojiLike: data.upsertDiscussPostEmojiLike.like,
@@ -46,7 +46,7 @@ const UpdateDiscussPostEmoji = ({
     if (data?.myDiscussPostEmojiLike) {
       upsertEmoji({
         variables: {
-          discussPostEmojiId: discussPostEmoji.id,
+          emojiId: parseInt(discussPostEmoji.id),
           liked: !data.myDiscussPostEmojiLike.liked,
         },
       })
