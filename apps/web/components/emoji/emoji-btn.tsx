@@ -1,6 +1,6 @@
 import { EmojiCode } from '@prisma/client'
-import Reactg from 'react'
-import { EmojiIcon } from '../../emoji-up-down/emoji-icon'
+import React from 'react'
+import { EmojiIcon } from './emoji-icon'
 
 export const EmojiBtn = ({
   onClick,
@@ -15,16 +15,19 @@ export const EmojiBtn = ({
 }) => {
   return (
     <button
-      className={` p-1 rounded  ${
-        liked ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
-      }
-                        `}
+      className={` group p-1 rounded ${
+        emojiCode === 'PIN'
+          ? 'hover:bg-red-50'
+          : liked
+          ? 'bg-blue-50 hover:bg-blue-100'
+          : 'hover:bg-gray-100'
+      }`}
       onClick={onClick}
     >
       <EmojiIcon code={emojiCode} />
       {counts !== undefined && (
         <span
-          className={`ml-1 text-xs ${
+          className={`ml-1 text-xs  ${
             liked ? 'text-blue-500' : 'text-gray-500'
           }`}
         >

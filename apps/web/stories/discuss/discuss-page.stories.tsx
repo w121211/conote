@@ -1,10 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { DiscussPageComponent } from '../../components/discuss/discuss-page'
-import { CreatePostForm } from '../../components/discuss/post/create-post-form'
-import { DiscussTile } from '../../components/discuss/layout-components/discuss-tile'
-import { PostTileList } from '../../components/discuss/layout-components/post-tile-list'
-import { mockData, mockPostList } from './mock-discuss-data'
 import { Layout } from '../../layout/layout'
 import { ApolloProvider } from '@apollo/client'
 import { getApolloClient } from '../../apollo/apollo-client'
@@ -36,10 +32,7 @@ const Template: ComponentStory<typeof DiscussPageComponent> = args => {
   return (
     <ApolloProvider client={apolloClient}>
       <Layout>
-        <DiscussPageComponent id="mockdiscuss0active" />
-        {/* <DiscussTile data={mockData} />
-        <PostTileList discussId={mockPostList} />
-        <CreatePostForm discussId="fajioejf" /> */}
+        <DiscussPageComponent {...args} />
       </Layout>
     </ApolloProvider>
   )
@@ -47,7 +40,7 @@ const Template: ComponentStory<typeof DiscussPageComponent> = args => {
 
 export const Default = Template.bind({})
 Default.args = {
-  id: 'ejfowejfoiwej',
+  id: 'mock_discuss_0_active',
 }
 // Default.parameters = {
 //   backgrounds: {

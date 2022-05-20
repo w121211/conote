@@ -2,13 +2,10 @@ import React, { useState } from 'react'
 import {
   DiscussPostEmojiFragment,
   useDiscussPostEmojisQuery,
-  useMeQuery,
-  useMyDiscussPostEmojiLikeLazyQuery,
-  useMyDiscussPostEmojiLikeQuery,
 } from '../../../apollo/query.graphql'
 import CreateDiscussPostEmoji from './post-create-emoji'
 import UpdateDiscussPostEmoji from './post-update-emoji'
-import EmojisSwitch from '../emojis-switch'
+import { EmojisDropdownBtn } from '../../emoji/emojis-dropdown-btn'
 import ToggleMenu from '../../../layout/toggle-menu'
 import { EmojiCode } from '@prisma/client'
 
@@ -16,15 +13,13 @@ const DiscussPostEmojis = ({
   discussPostId,
   disable,
 }: {
-  discussPostId: number
+  discussPostId: string
   disable?: boolean
 }): JSX.Element | null => {
-  const [liked, setLiked] = useState('')
   const { data: emojisData } = useDiscussPostEmojisQuery({
     variables: { discussPostId },
   })
-  const [queryMyEmoji, { data: myEmojiLikeData }] =
-    useMyDiscussPostEmojiLikeLazyQuery()
+
   const emojis: EmojiCode[] = ['UP', 'DOWN']
 
   const shouldShowEmojiIcons = (
@@ -35,8 +30,8 @@ const DiscussPostEmojis = ({
   return (
     <div className="flex items-center">
       <ToggleMenu
-        className="flex  p-1"
-        summary={<EmojisSwitch disable={disable} />}
+        className="flex p-1"
+        summary={<EmojisDropdownBtn disable={disable} />}
         disabled={disable}
       >
         {emojis.map((code, i) => {

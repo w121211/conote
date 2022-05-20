@@ -1,7 +1,24 @@
 import { useApolloClient } from '@apollo/client'
-import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react'
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  CSSProperties,
+} from 'react'
 // import { cloneDeep } from 'lodash'
-import { Editor, Transforms, createEditor, Node, NodeEntry, Range, Text, Path, Element, Point } from 'slate'
+import {
+  Editor,
+  Transforms,
+  createEditor,
+  Node,
+  NodeEntry,
+  Range,
+  Text,
+  Path,
+  Element,
+  Point,
+} from 'slate'
 import {
   Editable,
   ReactEditor,
@@ -26,10 +43,16 @@ import { decorate } from './decorate'
 // import ArrowUpIcon from '../../assets/svg/arrow-up.svg'
 import BulletPanel from '../bullet-panel/bullet-panel'
 // import BulletSvg from '../bullet-svg'
-import BulletEmojiButtonGroup from '../emoji-up-down/bullet-emoji-button-group'
+import BulletEmojiButtonGroup from '../emoji/bullet-emoji-button-group'
 import { Doc } from '../workspace/doc'
 import { LcElement, LiElement, UlElement } from './slate-custom-types'
-import { isLiArray, isUl, onKeyDown as onKeyDownWithList, ulPath, withList } from './with-list'
+import {
+  isLiArray,
+  isUl,
+  onKeyDown as onKeyDownWithList,
+  ulPath,
+  withList,
+} from './with-list'
 import { withAutoComplete } from './with-auto-complete'
 // import InlineDiscuss from '../inline/inline-discuss'
 import InlineDiscuss from '../inline/inline-discuss'
@@ -120,7 +143,11 @@ const Lc = ({
       if (undos.length >= 2) {
         const lastBatch = undos[undos.length - 1]
         // looks like wrap lc just happened, merge undos
-        if (lastBatch.length >= 2 && lastBatch[0].type === 'remove_node' && lastBatch[1].type === 'insert_node') {
+        if (
+          lastBatch.length >= 2 &&
+          lastBatch[0].type === 'remove_node' &&
+          lastBatch[1].type === 'insert_node'
+        ) {
           const _lastBatch = undos.pop()
           if (_lastBatch) {
             undos[undos.length - 1] = undos[undos.length - 1].concat(_lastBatch)
@@ -146,7 +173,8 @@ const Lc = ({
       className="py-1"
       onMouseEnter={e => {
         // console.log(
-        const arrow = e.currentTarget.parentElement?.parentElement?.firstElementChild?.firstElementChild as HTMLElement
+        const arrow = e.currentTarget.parentElement?.parentElement
+          ?.firstElementChild?.firstElementChild as HTMLElement
         if (arrow) {
           arrow.style.visibility = 'visible'
         }
@@ -154,7 +182,8 @@ const Lc = ({
         // )
       }}
       onMouseLeave={e => {
-        const arrow = e.currentTarget.parentElement?.parentElement?.firstElementChild?.firstElementChild as HTMLElement
+        const arrow = e.currentTarget.parentElement?.parentElement
+          ?.firstElementChild?.firstElementChild as HTMLElement
         if (arrow) {
           arrow.style.removeProperty('visibility')
         }
@@ -174,7 +203,11 @@ const Lc = ({
   )
 }
 
-const Li = ({ attributes, children, element }: RenderElementProps & { element: LiElement }): JSX.Element => {
+const Li = ({
+  attributes,
+  children,
+  element,
+}: RenderElementProps & { element: LiElement }): JSX.Element => {
   const editor = useSlateStatic()
   // const [hasUl, setHasUl] = useState(false)
   const [ulFolded, setUlFolded] = useState<true | undefined>()
@@ -206,9 +239,15 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   const hasUl = ul !== undefined
 
   return (
-    <div {...attributes} className="relative break-words flex items-start w-full ">
+    <div
+      {...attributes}
+      className="relative break-words flex items-start w-full "
+    >
       {/* <div contentEditable={false}></div> */}
-      <div className="group h-8 inline-flex items-center select-none" contentEditable={false}>
+      <div
+        className="group h-8 inline-flex items-center select-none"
+        contentEditable={false}
+      >
         <span
           className={`flex-shrink-0 flex-grow-0 flex items-center invisible group-hover:visible  ${
             hasUl ? 'opacity-100 group-hover:cursor-pointer' : 'opacity-0 '
@@ -221,7 +260,11 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
               const ul = Editor.node(editor, ulPath(path))
               if (isUl(ul[0])) {
                 Transforms.deselect(editor)
-                Transforms.setNodes<UlElement>(editor, { folded: ul[0].folded ? undefined : true }, { at: ul[1] })
+                Transforms.setNodes<UlElement>(
+                  editor,
+                  { folded: ul[0].folded ? undefined : true },
+                  { at: ul[1] },
+                )
                 setUlFolded(ul[0].folded ? undefined : true)
               }
             } catch (err) {
@@ -243,7 +286,11 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
           <span
             className={`material-icons text-xs scale-[.65] text-gray-600 
             before:content-['']  before:w-5 before:h-5 before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:absolute before:rounded-full before:-z-10 
-            ${ulFolded === undefined ? 'before:bg-transparent' : 'before:bg-gray-300'}`}
+            ${
+              ulFolded === undefined
+                ? 'before:bg-transparent'
+                : 'before:bg-gray-300'
+            }`}
           >
             fiber_manual_record
           </span>
@@ -261,7 +308,11 @@ const Li = ({ attributes, children, element }: RenderElementProps & { element: L
   )
 }
 
-const Ul = ({ attributes, children, element }: RenderElementProps & { element: UlElement }): JSX.Element => {
+const Ul = ({
+  attributes,
+  children,
+  element,
+}: RenderElementProps & { element: UlElement }): JSX.Element => {
   return (
     <div {...attributes} className={`${element.folded ? 'hidden' : 'block'}`}>
       {children}
@@ -277,11 +328,19 @@ const CustomElement = ({
 }: RenderElementProps & { note: NoteFragment | null }): JSX.Element => {
   switch (element.type) {
     case 'inline-discuss':
-      return <InlineDiscuss {...{ attributes, children, element, noteId: note?.id }} />
+      return (
+        <InlineDiscuss
+          {...{ attributes, children, element, noteId: note?.id }}
+        />
+      )
     case 'inline-filtertag':
       return <InlineFiltertag {...{ attributes, children, element }} />
     case 'inline-mirror':
-      return <InlineMirror {...{ attributes, children, element, sourceNoteId: note?.id }} />
+      return (
+        <InlineMirror
+          {...{ attributes, children, element, sourceNoteId: note?.id }}
+        />
+      )
     case 'inline-poll':
       return <InlinePoll {...{ attributes, children, element }} />
     case 'inline-rate':
@@ -301,11 +360,25 @@ const CustomElement = ({
   }
 }
 
-export const BulletEditor = ({ doc, readOnly }: { doc: Doc; readOnly?: boolean }): JSX.Element => {
-  const editor = useMemo(() => withInline(withList(withAutoComplete(withHistory(withReact(createEditor()))))), [])
+export const BulletEditor = ({
+  doc,
+  readOnly,
+}: {
+  doc: Doc
+  readOnly?: boolean
+}): JSX.Element => {
+  const editor = useMemo(
+    () =>
+      withInline(
+        withList(withAutoComplete(withHistory(withReact(createEditor())))),
+      ),
+    [],
+  )
   const client = useApolloClient()
   const renderElement = useCallback(
-    (props: RenderElementProps) => <CustomElement {...{ ...props, note: doc.noteCopy }} />,
+    (props: RenderElementProps) => (
+      <CustomElement {...{ ...props, note: doc.noteCopy }} />
+    ),
     [doc],
   )
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
@@ -325,7 +398,10 @@ export const BulletEditor = ({ doc, readOnly }: { doc: Doc; readOnly?: boolean }
     }
   }, [])
 
-  const { searchPanel, onKeyUp: onKeyUpBindSearchPanel } = useSearchPanel(editor, client)
+  const { searchPanel, onKeyUp: onKeyUpBindSearchPanel } = useSearchPanel(
+    editor,
+    client,
+  )
   // useEffect(() => {
   //   if (searchAllResult.data) {
   //     setSuggestions(searchAllResult.data.searchAll)

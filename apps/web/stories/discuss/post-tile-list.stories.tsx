@@ -1,14 +1,14 @@
+import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
+import { getApolloClient } from '../../apollo/apollo-client'
 import { DiscussPostFragment } from '../../apollo/query.graphql'
-import { PostTileList } from '../../components/discuss/layout-components/post-tile-list'
-import { mockPostList } from './mock-discuss-data'
+import { PostList } from '../../components/discuss/post/post-list'
 
-// const date = new Date()
+const apolloClient = getApolloClient()
 
 export default {
-  // title: 'component/Post Tile List',
-  component: PostTileList,
+  component: PostList,
   decorators: [
     Story => (
       <div className="bg-gray-200" style={{ padding: '3rem' }}>
@@ -16,13 +16,15 @@ export default {
       </div>
     ),
   ],
-} as ComponentMeta<typeof PostTileList>
+} as ComponentMeta<typeof PostList>
 
-const Template: ComponentStory<typeof PostTileList> = args => (
-  <PostTileList {...args} />
+const Template: ComponentStory<typeof PostList> = args => (
+  <ApolloProvider client={apolloClient}>
+    <PostList {...args} />
+  </ApolloProvider>
 )
 
 export const Default = Template.bind({})
 Default.args = {
-  postList: mockPostList,
+  discussId: 'mock_discuss_0_active',
 }

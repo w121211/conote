@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import EmojiIcon from '../emoji-up-down/emoji-icon'
+import EmojiIcon from '../emoji/emoji-icon'
 
 const AuthorArticleList = ({
   href,
@@ -23,8 +23,14 @@ const AuthorArticleList = ({
         {/* <a className="flex items-center justify-between "> */}
         {/* <div className="text-sm text-gray-500"> */}
         <div className="flex-shrink min-w-0 flex flex-col">
-          <h3 className="truncate text-base text-gray-700 font-medium">{title}</h3>
-          {summary && <p className="truncate  text-gray-500 text-sm font-normal">{summary}</p>}
+          <h3 className="truncate text-base text-gray-700 font-medium">
+            {title}
+          </h3>
+          {summary && (
+            <p className="truncate  text-gray-500 text-sm font-normal">
+              {summary}
+            </p>
+          )}
         </div>
 
         {/* {author ? <div className="text-blue-500">{author}</div> : ''} */}

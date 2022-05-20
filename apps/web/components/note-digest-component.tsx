@@ -2,9 +2,13 @@ import React from 'react'
 import Link from 'next/link'
 import { NoteDigestFragment } from '../apollo/query.graphql'
 import { SymbolHelper } from '../common/symbol-helper'
-import NoteEmojis from './emoji-up-down/_note-emojis-display'
+import NoteEmojis from './emoji/_note-emojis-display'
 
-const NoteDigestComponent = ({ digest }: { digest: NoteDigestFragment }): JSX.Element => {
+const NoteDigestComponent = ({
+  digest,
+}: {
+  digest: NoteDigestFragment
+}): JSX.Element => {
   const {
     // commitId,
     noteId,
@@ -30,7 +34,12 @@ const NoteDigestComponent = ({ digest }: { digest: NoteDigestFragment }): JSX.El
 
         {author && url && <span className="h-4 mx-1 border-gray-300"></span>}
         {url && (
-          <a href={url} className="truncate text-gray-500" rel="noreferrer" target="_blank">
+          <a
+            href={url}
+            className="truncate text-gray-500"
+            rel="noreferrer"
+            target="_blank"
+          >
             <span className="flex-shrink min-w-0 overflow-hidden whitespace-nowrap text-ellipsis hover:underline hover:underline-offset-2">
               {url}
             </span>
@@ -38,7 +47,9 @@ const NoteDigestComponent = ({ digest }: { digest: NoteDigestFragment }): JSX.El
         )}
         {/* <div className={classes.lcElementHashtag}>$MU $TXN #up(10) </div> */}
       </div>
-      <Link href={{ pathname: '/note/[symbol]', query: { symbol: sym.symbol } }}>
+      <Link
+        href={{ pathname: '/note/[symbol]', query: { symbol: sym.symbol } }}
+      >
         <a className="  text-gray-700 hover:underline hover:underline-offset-2 ">
           <h3 className="truncate my-2 text-xl">
             {title ??
@@ -81,8 +92,12 @@ const NoteDigestComponent = ({ digest }: { digest: NoteDigestFragment }): JSX.El
             <a
               className={`my-0 last:mr-0 rounded text-sm text-blue-500 cursor-pointer hover:underline hover:underline-offset-2`}
             >
-              {i > 0 && <span className="inline-block mx-1 font-[Arial]">·</span>}
-              {e.type === 'TOPIC' ? SymbolHelper.removeTopicPrefixSuffix(e.symbol) : e.symbol}
+              {i > 0 && (
+                <span className="inline-block mx-1 font-[Arial]">·</span>
+              )}
+              {e.type === 'TOPIC'
+                ? SymbolHelper.removeTopicPrefixSuffix(e.symbol)
+                : e.symbol}
             </a>
           </Link>
         ))}

@@ -1,19 +1,14 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import {
-  DiscussPostFragment,
-  useDiscussPostsQuery,
-} from '../../apollo/query.graphql'
-import DiscussPostEmojis from '../../components/discuss/post/post-emojis'
-import PostOptionsMenu from '../../components/discuss/post/post-options-menu'
-import { PostTile } from '../../components/discuss/layout-components/post-tile'
+import { PostTile } from '../../components/discuss/post/post-tile'
 import { getApolloClient } from '../../apollo/apollo-client'
 import { ApolloProvider } from '@apollo/client'
+import { mockDiscussPosts } from '../../test/__mocks__/mock-discuss'
 
 const apolloClient = getApolloClient()
+const post = mockDiscussPosts
 
 export default {
-  // title: 'layout/Post Tile',
   component: PostTile,
 
   argTypes: {
@@ -29,15 +24,16 @@ export default {
 } as ComponentMeta<typeof PostTile>
 
 const Template: ComponentStory<typeof PostTile> = args => {
-  const { data } = useDiscussPostsQuery({ variables: { discussId: '' } })
   return (
     <ApolloProvider client={apolloClient}>
-      <PostTile {...args} />
+      {post.map((e, i) => {
+        return <PostTile {...args} key={i} post={e} />
+      })}
     </ApolloProvider>
   )
 }
 
-export const Origin = Template.bind({})
-Origin.args = {
+export const Default = Template.bind({})
+Default.args = {
   userId: 'testuser0',
 }

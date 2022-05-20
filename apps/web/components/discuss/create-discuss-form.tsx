@@ -101,7 +101,6 @@ const CreateDiscussForm = ({
           textareaTest = e
         }}
       />
-      {/* <textarea {...register('content')} className="text-sm" placeholder="詳述(選填)" rows={4} /> */}
     </form>
   )
 }

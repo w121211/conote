@@ -4,18 +4,21 @@ import {
   DiscussPostEmojisDocument,
   useUpsertDiscussPostEmojiLikeMutation,
 } from '../../../apollo/query.graphql'
-// import { EmojiIcon } from '../../emoji-up-down/emoji-icon'
-import { EmojiBtn } from '../layout-components/emoji-btn'
+import { EmojiBtn } from '../../emoji/emoji-btn'
 
 const CreateDiscussPostEmoji = ({
   discussPostId,
   emojiCode,
 }: {
-  discussPostId: number
+  discussPostId: string
   emojiCode: EmojiCode
 }) => {
   const [createEmoji, { error }] = useUpsertDiscussPostEmojiLikeMutation({
-    variables: { discussPostId, emojiCode: emojiCode, liked: true },
+    variables: {
+      discussPostId: parseInt(discussPostId),
+      emojiCode: emojiCode,
+      liked: true,
+    },
     refetchQueries: [
       { query: DiscussPostEmojisDocument, variables: { discussPostId } },
     ],

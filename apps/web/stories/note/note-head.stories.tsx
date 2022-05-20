@@ -7,15 +7,21 @@ import { NoteHead } from '../../components/note-head'
 import { Doc } from '../../components/workspace/doc'
 import { mockDate, mockLink } from '../mock-data'
 import ModalProvider from '../../components/modal/modal-context'
+import { ApolloProvider } from '@apollo/client'
+import { getApolloClient } from '../../apollo/apollo-client'
+
+const apolloClient = getApolloClient()
 
 export default {
   component: NoteHead,
 } as ComponentMeta<typeof NoteHead>
 
 const Template: ComponentStory<typeof NoteHead> = args => (
-  <ModalProvider>
-    <NoteHead {...args} />
-  </ModalProvider>
+  <ApolloProvider client={apolloClient}>
+    <ModalProvider>
+      <NoteHead {...args} />
+    </ModalProvider>
+  </ApolloProvider>
 )
 
 export const Symbol = Template.bind({})

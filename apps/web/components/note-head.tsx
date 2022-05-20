@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import Link from 'next/link'
 import NoteMetaForm from './note-meta-form/note-meta-form'
-import HeaderNoteEmojis from './emoji-up-down/header-note-emojis'
+import NoteEmojis from './emoji/note-emojis'
 import Modal from './modal/modal'
 import { Doc } from './workspace/doc'
 import Select from 'react-select'
@@ -109,7 +109,7 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
         </div>
       )}
 
-      {/* <HeaderNoteEmojis noteId={nodeId} /> */}
+      <NoteEmojis noteId={nodeId} />
 
       {/* {noteMetaData?.noteMeta.keywords && (
         <div className={classes.headerKw}>

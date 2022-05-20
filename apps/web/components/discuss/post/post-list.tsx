@@ -1,12 +1,8 @@
 import React from 'react'
-import {
-  DiscussPostFragment,
-  useDiscussPostsQuery,
-  useMeQuery,
-} from '../../../apollo/query.graphql'
+import { useDiscussPostsQuery, useMeQuery } from '../../../apollo/query.graphql'
 import { PostTile } from './post-tile'
 
-export const PostTileList = ({ discussId }: { discussId: string }) => {
+export const PostList = ({ discussId }: { discussId: string }) => {
   const { data: meData } = useMeQuery()
   const { data } = useDiscussPostsQuery({ variables: { discussId } })
   return (

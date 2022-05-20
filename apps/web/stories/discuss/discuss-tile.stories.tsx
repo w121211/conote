@@ -1,27 +1,13 @@
+import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
+import { getApolloClient } from '../../apollo/apollo-client'
 import { DiscussFragment } from '../../apollo/query.graphql'
-import { DiscussTile } from '../../components/discuss/layout-components/discuss-tile'
+import { DiscussTile } from '../../components/discuss/discuss-tile'
+import { mockDiscusses } from '../../test/__mocks__/mock-discuss'
 import { Default } from './post-tile-list.stories'
 
-const date = new Date()
-
-const mockData: DiscussFragment = {
-  __typename: 'Discuss',
-  id: 'fjalsjoijfef',
-  userId: '',
-  status: 'ACTIVE',
-  meta: {},
-  title: '標題哈哈 測試',
-  content: `測試一下，寫一些東西，這個東西為啥呢? 不能斷航?
-哈哈哈哈哈 給我 內容`,
-  createdAt: date,
-  updatedAt: date,
-  count: {
-    __typename: 'DiscussCount',
-    nPosts: 10,
-  },
-}
+const apolloClient = getApolloClient()
 
 export default {
   // title: 'layout/Discuss Tile',
@@ -35,9 +21,12 @@ export default {
   ],
 } as ComponentMeta<typeof DiscussTile>
 
-const Template: ComponentStory<typeof DiscussTile> = args => <DiscussTile {...args} />
+const Template: ComponentStory<typeof DiscussTile> = args => (
+  <ApolloProvider client={apolloClient}>
+    {mockDiscusses.map((e, i) => {
+      return <DiscussTile {...args} key={i} data={e} />
+    })}
+  </ApolloProvider>
+)
 
 export const Origin = Template.bind({})
-Origin.args = {
-  data: mockData,
-}

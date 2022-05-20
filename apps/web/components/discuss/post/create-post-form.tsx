@@ -1,23 +1,11 @@
-import moment from 'moment'
-import React, {
-  ReactEventHandler,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react'
-import ReactMarkdown from 'react-markdown'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-// import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { githubGist } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import {
   DiscussPostsDocument,
   useCreateDiscussPostMutation,
 } from '../../../apollo/query.graphql'
-// import 'github-markdown-css/github-markdown-light.css'
-// import SyntaxHighlighter from 'react-syntax-highlighter'
 import './github-markdown-light.module.css'
+import { MarkDownParser } from '../mark-down-parser'
 
 interface FormInput {
   content: string
@@ -31,13 +19,11 @@ export const CreatePostForm = ({
   isModal?: boolean
 }) => {
   const [showTextarea, setShowTextarea] = useState(true)
-  const [preview, setPreview] = useState('')
   const { register, handleSubmit, getValues, watch, reset, formState } =
     useForm<FormInput>({
       defaultValues: { content: '' },
     })
   const { isSubmitSuccessful } = formState
-  const commentRef = useRef<HTMLDivElement>(null)
   const submitRef = useRef<HTMLButtonElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -46,23 +32,18 @@ export const CreatePostForm = ({
     onCompleted(data) {
       if (submitRef.current && data.createDiscussPost) {
         reset({ content: '' })
-        // commentRef.current.blur()
         submitRef.current.blur()
       }
     },
   })
-
-  useEffect(() => {
-    register('content')
-  }, [])
-
-  const watchContent = watch('content')
 
   const onSubmit = (d: FormInput) => {
     createPost({
       variables: { discussId, data: { content: d.content.trim() } },
     })
   }
+
+  const watchContent = watch('content')
 
   const formClassName = isModal
     ? `sticky group bg-white bottom-0 text-sm `
@@ -77,23 +58,16 @@ export const CreatePostForm = ({
   let textareaTest: HTMLTextAreaElement | null = null
 
   useLayoutEffect(() => {
-    console.log(watchContent)
     if (textareaTest) {
-      // Reset height - important to shrink on delete
+      /* Reset height - important to shrink on delete */
       textareaTest.style.height = isModal ? '44px' : 'inherit'
-      //   // Set height
+      /* set height */
       textareaTest.style.height = `${Math.min(
         textareaTest.scrollHeight,
         maxTextareaHeight,
       )}px`
-      //
     }
-    // const converMd=async () => {
-    //   await octokit.
-    // }
   }, [watchContent])
-
-  // console.log(watchContent.length === 0, isSubmitSuccessful)
 
   return (
     <form
@@ -102,11 +76,6 @@ export const CreatePostForm = ({
       autoComplete="off"
       ref={formRef}
     >
-      {/* <div
-        className="absolute  w-full h-10 group-focus-within:h-32 left-0 top-0 flex-grow flex items-center rounded 
-          border border-gray-200
-        bg-gray-100 "
-      /> */}
       <div className="pt-2 border-x border-t border-gray-300 rounded-t bg-gray-100">
         <div className="relative z-[1] mb-[-1px] ml-2 text-sm " role="tablist">
           <button
@@ -185,44 +154,9 @@ export const CreatePostForm = ({
             p-2
             border-b
             border-gray-300
-            
               `}
           >
-            <ReactMarkdown
-              className="markdown-body "
-              components={{
-                code({ node, inline, className, children, ...props }) {
-                  const match = /language-(\w+)/.exec(className || '')
-                  return !inline && match ? (
-                    <SyntaxHighlighter
-                      language={match[1]}
-                      // style={prism}
-                      {...props}
-                    >
-                      {String(children).replace(/\n$/, '')}
-                    </SyntaxHighlighter>
-                  ) : (
-                    <code className={className} {...props}>
-                      {children}
-                    </code>
-                  )
-                  // return !inline && match ? (
-                  //   <code className={className} {...props}>
-                  //     {children}
-                  //   </code>
-                  // ) : (
-                  //   // <SyntaxHighlighter language={match[1]} style={githubGist} PreTag="div" {...props}>
-                  //   //   {String(children).replace(/\n$/, '')}
-                  //   // </SyntaxHighlighter>
-                  //   <code className={className} {...props}>
-                  //     {children}
-                  //   </code>
-                  // )
-                },
-              }}
-            >
-              {getValues('content')}
-            </ReactMarkdown>
+            <MarkDownParser text={getValues('content')} />
           </div>
         )}
         <div className={btnClassName}>
@@ -236,19 +170,6 @@ export const CreatePostForm = ({
           </button>
         </div>
       </div>
-      {/* <div
-        contentEditable={true}
-        ref={commentRef}
-        onInput={e => {
-          deleteEmptyChild()
-          setValue('content', e.currentTarget.innerText ?? '')
-        }}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        className={contentClassName}
-        // style={formRef.current ? { width: formRef.current.clientWidth } : undefined}
-        spellCheck="false"
-      /> */}
     </form>
   )
 }

@@ -1,13 +1,14 @@
+import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { DiscussTile } from '../../components/discuss/layout-components/discuss-tile'
-import { PostTileList } from '../../components/discuss/layout-components/post-tile-list'
-import { DiscussModalPage } from '../../components/discuss/modal-page/modal-page'
-import { CreatePostForm } from '../../components/discuss/post/create-post-form'
-import { mockData, mockPostList } from './mock-discuss-data'
+import { getApolloClient } from '../../apollo/apollo-client'
+import DiscussModal from '../../components/discuss/_modal-page/_discuss-modal'
+import ModalProvider from '../../components/modal/modal-context'
+
+const apolloClient = getApolloClient()
 
 export default {
-  component: DiscussModalPage,
+  component: DiscussModal,
   decorators: [
     Story => (
       <div style={{ margin: '3rem' }}>
@@ -15,17 +16,23 @@ export default {
       </div>
     ),
   ],
-} as ComponentMeta<typeof DiscussModalPage>
+} as ComponentMeta<typeof DiscussModal>
 
-const Template: ComponentStory<typeof DiscussModalPage> = args => (
-  <>
-    <DiscussTile data={mockData} />
-    <PostTileList postList={mockPostList} />
-    <CreatePostForm discussId="fajioejf" isModal />
-  </>
+const Template: ComponentStory<typeof DiscussModal> = args => (
+  <ApolloProvider client={apolloClient}>
+    <ModalProvider>
+      <DiscussModal />
+    </ModalProvider>
+  </ApolloProvider>
 )
 
 export const Default = Template.bind({})
-Default.args = {
-  id: 'ejfowejfoiwej',
+Default.story = {
+  parameters: {
+    nextRouter: {
+      query: {
+        discuss: 'mock_discuss_0_active',
+      },
+    },
+  },
 }

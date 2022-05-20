@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import EmojiIcon from '../emoji-up-down/emoji-icon'
+import EmojiIcon from '../emoji/emoji-icon'
 
 export type TableData = {
   title?: string
@@ -17,9 +17,17 @@ const AuthorRateTable = ({ data }: { data: TableData[] }): JSX.Element => {
         <tbody>
           {data.map(({ ticker, title, rate, srcSym }, i) => {
             return (
-              <tr key={i} className="border-b border-gray-200 last:border-none ">
+              <tr
+                key={i}
+                className="border-b border-gray-200 last:border-none "
+              >
                 <td className="px-4 py-3 text-gray-900 font-medium ">
-                  <Link href={{ pathname: '/card/[symbol]', query: { symbol: ticker } }}>
+                  <Link
+                    href={{
+                      pathname: '/card/[symbol]',
+                      query: { symbol: ticker },
+                    }}
+                  >
                     <a className="inline-flex flex-col underline-offset-2 hover:underline cursor-pointer">
                       {ticker}
 
@@ -39,12 +47,23 @@ const AuthorRateTable = ({ data }: { data: TableData[] }): JSX.Element => {
                         : 'text-blue-700 bg-blue-100'
                     }`}
                   >
-                    {rate === 'LONG' ? '看多' : rate === 'SHORT' ? '看空' : '觀望'}
+                    {rate === 'LONG'
+                      ? '看多'
+                      : rate === 'SHORT'
+                      ? '看空'
+                      : '觀望'}
                   </span>
                 </td>
                 <td className="py-3 px-4 truncate text-gray-500 ">
-                  <Link href={{ pathname: '/card/[symbol]', query: { symbol: srcSym } }}>
-                    <a className="inline-flex truncate hover:underline underline-offset-2 cursor-pointer">{srcSym}</a>
+                  <Link
+                    href={{
+                      pathname: '/card/[symbol]',
+                      query: { symbol: srcSym },
+                    }}
+                  >
+                    <a className="inline-flex truncate hover:underline underline-offset-2 cursor-pointer">
+                      {srcSym}
+                    </a>
                   </Link>
                 </td>
               </tr>

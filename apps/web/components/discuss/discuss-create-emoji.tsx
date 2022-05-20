@@ -5,7 +5,7 @@ import {
   MyDiscussEmojiLikeDocument,
   useUpsertDiscussEmojiLikeMutation,
 } from '../../apollo/query.graphql'
-import { EmojiBtn } from './layout-components/emoji-btn'
+import { EmojiBtn } from '../emoji/emoji-btn'
 
 const CreateDiscussEmoji = ({
   discussId,

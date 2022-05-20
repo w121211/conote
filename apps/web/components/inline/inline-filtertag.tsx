@@ -10,7 +10,7 @@ import React, {
 } from 'react'
 import { useObservable } from 'rxjs-hooks'
 import { RenderElementProps } from 'slate-react'
-import Discuss from '../discuss/modal-page/modal-page'
+import Discuss from '../discuss/_modal-page/modal-page'
 import { InlineFiltertagElement } from '../editor/slate-custom-types'
 import Modal from '../modal/modal'
 import { Doc } from '../workspace/doc'

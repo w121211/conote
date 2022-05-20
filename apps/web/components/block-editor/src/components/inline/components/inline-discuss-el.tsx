@@ -2,13 +2,14 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { DiscussFragment } from '../../../../../../apollo/query.graphql'
 import CreateDiscussForm from '../../../../../discuss/create-discuss-form'
-import { DiscussModalPage } from '../../../../../discuss/modal-page/modal-page'
+// import { DiscussModalPage } from '../../../../../discuss/modal-page/modal-page'
 import { Tooltip } from '../../../../../../layout/tooltip/tooltip'
 import Modal from '../../../../../modal/modal'
 import { blockStrReplace } from '../../../events'
 import { InlineDiscuss } from '../../../interfaces'
 import { inlineService } from '../../../services/inline.service'
 import { InlineElProps } from '../inline-el'
+import { DiscussPageComponent } from '../../../../../discuss/discuss-page'
 
 /**
  * Update block string when discuss is created
@@ -71,7 +72,9 @@ const InlineDiscussEl = ({
         buttons={modalButtons}
       >
         {id ? (
-          <DiscussModalPage id={id} title={title} />
+          <div className="px-10">
+            <DiscussPageComponent id={id} />
+          </div>
         ) : (
           <CreateDiscussForm
             title={title}

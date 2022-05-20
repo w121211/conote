@@ -1,7 +1,7 @@
 import React, { ReactNode, useState } from 'react'
 import Tooltip from '../../layout/tooltip/popup'
 
-const EmojisSwitch = ({ disable }: { disable?: boolean }) => {
+export const EmojisDropdownBtn = ({ disable }: { disable?: boolean }) => {
   const [showDisable, setShowDisable] = useState(false)
   return (
     <div
@@ -50,4 +50,4 @@ const EmojisSwitch = ({ disable }: { disable?: boolean }) => {
   )
 }
 
-export default EmojisSwitch
+// export default EmojisDropdownBtn

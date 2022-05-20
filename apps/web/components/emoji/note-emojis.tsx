@@ -4,12 +4,9 @@ import CreateNoteEmojiBtn from './create-note-emoji-btn'
 import NoteEmojiBtn from './note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
 import ToggleMenu from '../../layout/toggle-menu'
+import EmojisDropdownBtn from './emojis-dropdown-btn'
 
-const HeaderNoteEmojis = ({
-  noteId,
-}: {
-  noteId: string
-}): JSX.Element | null => {
+const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)
   const [likedChoice, setLikedChoice] = useState<'UP' | 'DOWN' | null>(null)
   const [hoverEmoji, setHoverEmoji] = useState<number | undefined>()
@@ -48,14 +45,7 @@ const HeaderNoteEmojis = ({
       )}
       <ToggleMenu
         className="-translate-x-full left-full"
-        summary={
-          <span
-            className="material-icons  flex items-center justify-center p-1 rounded
-        cursor-pointer select-none text-xl leading-none text-gray-500 mix-blend-multiply hover:bg-gray-100 hover:text-gray-700"
-          >
-            sentiment_satisfied_alt
-          </span>
-        }
+        summary={<EmojisDropdownBtn />}
       >
         <div className="block w-[150px] ">
           <p className="block p-1 border-b border-gray-200 text-sm text-gray-500 capitalize">
@@ -117,4 +107,4 @@ const HeaderNoteEmojis = ({
     </div>
   )
 }
-export default HeaderNoteEmojis
+export default NoteEmojis

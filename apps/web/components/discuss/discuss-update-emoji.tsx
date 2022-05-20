@@ -1,15 +1,12 @@
 import React from 'react'
 import {
   DiscussEmojiFragment,
-  MyDiscussEmojiLikeDocument,
-  MyDiscussEmojiLikeQuery,
-  MyDiscussEmojiLikeQueryVariables,
   useMyDiscussEmojiLikeQuery,
   useUpsertDiscussEmojiLikeMutation,
 } from '../../apollo/query.graphql'
+import { EmojiBtn } from '../emoji/emoji-btn'
 // import { DiscussEmoji } from 'graphql-let/__generated__/__types__'
-import { EmojiIcon } from '../emoji-up-down/emoji-icon'
-import { EmojiBtn } from './layout-components/emoji-btn'
+import { EmojiIcon } from '../emoji/emoji-icon'
 
 const UpdateDiscussEmoji = ({
   discussEmoji,
@@ -21,30 +18,13 @@ const UpdateDiscussEmoji = ({
   const { data } = useMyDiscussEmojiLikeQuery({
     variables: { discussEmojiId: discussEmoji.id },
   })
-  const [upsertEmoji] = useUpsertDiscussEmojiLikeMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<MyDiscussEmojiLikeQuery>({
-        query: MyDiscussEmojiLikeDocument,
-      })
-      // TODO: 這裡忽略了更新 count
-      if (res && data?.upsertDiscussEmojiLike) {
-        cache.writeQuery<
-          MyDiscussEmojiLikeQuery,
-          MyDiscussEmojiLikeQueryVariables
-        >({
-          query: MyDiscussEmojiLikeDocument,
-          variables: { discussEmojiId: data.upsertDiscussEmojiLike.like.id },
-          data: { myDiscussEmojiLike: data.upsertDiscussEmojiLike.like },
-        })
-      }
-    },
-  })
+  const [upsertEmoji] = useUpsertDiscussEmojiLikeMutation()
 
   const onClick = () => {
     if (data?.myDiscussEmojiLike) {
       upsertEmoji({
         variables: {
-          discussEmojiId: discussEmoji.id,
+          emojiId: parseInt(discussEmoji.id),
           liked: !data.myDiscussEmojiLike.liked,
         },
       })

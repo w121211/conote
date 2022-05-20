@@ -7,7 +7,7 @@ import Modal from '../modal/modal'
 import { InlineItemService } from './inline-item-service'
 import CreateDiscussForm from '../discuss/create-discuss-form'
 import Link from 'next/link'
-import { DiscussModalPage } from '../discuss/modal-page/modal-page'
+import { DiscussModalPage } from '../discuss/_modal-page/modal-page'
 
 const InlineDiscuss = ({
   children,
