@@ -1,46 +1,43 @@
 import {
-  CommitNoteDraftsDocument,
-  CommitNoteDraftsMutation,
-  CommitNoteDraftsMutationVariables,
+  NoteDocFragment,
+  NoteDraftEntryFragment,
 } from '../../../../apollo/query.graphql'
-import { getApolloClient } from '../../../../apollo/apollo-client'
-import { Doc } from '../interfaces'
 
 let commitService: CommitService | undefined
 
 class CommitService {
-  private apolloClient = getApolloClient()
+  // private apolloClient = getApolloClient()
 
-  async commitDocs(docs: Doc[]): Promise<CommitNoteDraftsMutation | null> {
-    const draftIds = docs.map(e => {
-        if (e.noteDraftCopy) return e.noteDraftCopy.id
+  /**
+   * After commit, pair input-note-draft and result-note-doc together
+   */
+  pairNoteDraft_noteDoc(
+    inputDrafts: NoteDraftEntryFragment[],
+    resultNoteDocs: NoteDocFragment[],
+  ): [NoteDraftEntryFragment, NoteDocFragment][] {
+    return inputDrafts.map(e => {
+      const found = resultNoteDocs.find(d => {
+        const { branch, symbol } = d
+        if (branch && symbol) {
+          return e.symbol === symbol
+        }
         throw new Error(
-          '[commitDocs] all docs require to have noteDraftCopy to get draft-id',
+          "[pairNoteDraft_noteDoc] Note-doc miss the required properties 'branch', 'symbol' to pair",
         )
-      }),
-      { data, errors } = await this.apolloClient.mutate<
-        CommitNoteDraftsMutation,
-        CommitNoteDraftsMutationVariables
-      >({
-        mutation: CommitNoteDraftsDocument,
-        variables: { draftIds },
       })
-
-    if (data) {
-      return data
-    }
-    if (errors) {
-      console.error(errors)
-      throw new Error('[commitDocs] Graphql mutation error')
-    }
-    throw new Error('[commitDocs] no return data')
+      if (found) {
+        return [e, found]
+      }
+      throw new Error(
+        '[pairNoteDraft_noteDoc] Not found paired note-doc of input-note-draft',
+      )
+    })
   }
 }
 
 export function getCommitService(): CommitService {
-  if (commitService) {
-    return commitService
-  }
+  if (commitService) return commitService
+
   commitService = new CommitService()
   return commitService
 }
