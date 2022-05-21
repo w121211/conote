@@ -6,8 +6,8 @@ import {
 import CreateDiscussPostEmoji from './post-create-emoji'
 import UpdateDiscussPostEmoji from './post-update-emoji'
 import { EmojisDropdownBtn } from '../../emoji/emojis-dropdown-btn'
-import ToggleMenu from '../../../layout/toggle-menu'
 import { EmojiCode } from '@prisma/client'
+import ToggleMenu from '../../ui-component/toggle-menu'
 
 const DiscussPostEmojis = ({
   discussPostId,

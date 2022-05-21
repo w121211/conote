@@ -4,6 +4,7 @@ import { PostTile } from '../../components/discuss/post/post-tile'
 import { getApolloClient } from '../../apollo/apollo-client'
 import { ApolloProvider } from '@apollo/client'
 import { mockDiscussPosts } from '../../test/__mocks__/mock-discuss'
+import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
 
 const apolloClient = getApolloClient()
 const post = mockDiscussPosts
@@ -26,9 +27,11 @@ export default {
 const Template: ComponentStory<typeof PostTile> = args => {
   return (
     <ApolloProvider client={apolloClient}>
-      {post.map((e, i) => {
-        return <PostTile {...args} key={i} post={e} />
-      })}
+      <TooltipProvider>
+        {post.map((e, i) => {
+          return <PostTile {...args} key={i} post={e} />
+        })}
+      </TooltipProvider>
     </ApolloProvider>
   )
 }

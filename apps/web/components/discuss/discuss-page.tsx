@@ -7,9 +7,6 @@ import { PostList } from './post/post-list'
 export const DiscussPageComponent = ({ id }: { id: string }) => {
   const { data } = useDiscussQuery({ variables: { id } })
 
-  // console.log(id)
-  // console.log(data)
-
   if (!data?.discuss) {
     return null
   }

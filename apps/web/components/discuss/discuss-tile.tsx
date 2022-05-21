@@ -1,17 +1,15 @@
 import moment from 'moment'
 import React from 'react'
 import { DiscussFragment, useMeQuery } from '../../apollo/query.graphql'
+import { Tile } from '../ui-component/tile'
 import DiscussEmojis from './discuss-emojis'
 import OptionsMenu from './options-menu'
-import { Tile } from '../../layout/tile'
 
 const hashtags = ['時間旅行', 'Vtuber']
 
 const currentTab = ''
 
 const quote = '這則討論和其他重複了!'
-
-const date = new Date()
 
 export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
   const { data: meData } = useMeQuery()
@@ -63,11 +61,11 @@ export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
             disable={meData?.me.id === data.userId}
           />
         </div>
-        <button className=" p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
+        <button className="flex p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
           <span className="material-icons-outlined text-base leading-none">
             reply
           </span>
-          回覆
+          Reply
         </button>
         <OptionsMenu isMyPost={meData?.me.id === data.userId ?? false} />
       </div>

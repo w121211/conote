@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { Layout } from '../../layout/layout'
+import { Layout } from '../../components/ui-component/layout'
 
 export default {
   component: Layout,

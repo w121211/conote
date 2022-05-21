@@ -3,8 +3,8 @@ import { ApolloProvider } from '@apollo/client'
 import { useApolloClientSSR } from '../apollo/apollo-client-ssr'
 import ErrorBoundary from '../components/error-boundary'
 import ModalProvider from '../components/modal/modal-context'
-import { TooltipProvider } from '../layout/tooltip/tooltip-provider'
 import '../style/global.css'
+import { TooltipProvider } from '../components/ui-component/tooltip/tooltip-provider'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApolloClientSSR(pageProps.initialApolloState)

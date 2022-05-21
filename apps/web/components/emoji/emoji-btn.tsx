@@ -15,7 +15,7 @@ export const EmojiBtn = ({
 }) => {
   return (
     <button
-      className={` group p-1 rounded ${
+      className={` group flex h-fit p-1 rounded ${
         emojiCode === 'PIN'
           ? 'hover:bg-red-50'
           : liked

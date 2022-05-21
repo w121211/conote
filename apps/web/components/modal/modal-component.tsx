@@ -1,7 +1,7 @@
 import React from 'react'
 import CancelIcon from '../../assets/svg/cancel.svg'
 
-export interface PopoverProps {
+export interface ModalComponentProps {
   children: React.ReactNode
   onClose: () => void
   subTitle?: string | React.ReactNode
@@ -12,7 +12,7 @@ export interface PopoverProps {
   sectionClassName?: string
 }
 
-const Popover = ({
+const ModalComponent: React.FC<ModalComponentProps> = ({
   children,
   onClose,
   subTitle,
@@ -21,9 +21,7 @@ const Popover = ({
   topRightBtn,
   topLeftBtn,
   sectionClassName,
-}: PopoverProps): JSX.Element | null => {
-  // console.log(mask)
-
+}) => {
   return (
     <div
       className="fixed flex justify-center top-0 left-0 w-screen h-screen z-50"
@@ -86,9 +84,8 @@ const Popover = ({
   )
 }
 
-Popover.defaultProps = {
+ModalComponent.defaultProps = {
   mask: true,
-  center: false,
 }
 
-export default Popover
+export default ModalComponent

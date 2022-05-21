@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Story, Meta, ComponentMeta, ComponentStory } from '@storybook/react'
-import { Tooltip } from '../../layout/tooltip/tooltip'
-// import classes from './my-tooltip.module.scss'
-import { TooltipProvider } from '../../layout/tooltip/tooltip-provider'
+import React, { useState } from 'react'
+import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Tooltip } from '../../components/ui-component/tooltip/tooltip'
+import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
 
 export default {
   component: Tooltip,
@@ -28,7 +27,6 @@ export default {
 } as ComponentMeta<typeof Tooltip>
 
 const Template: ComponentStory<typeof Tooltip> = args => {
-  const [open, setOpen] = useState(false)
   return (
     <TooltipProvider>
       <Tooltip
@@ -64,12 +62,3 @@ Default.args = {
   state: undefined,
   // warn:false
 }
-// Default.parameters = {
-//   backgrounds: {
-//     values: [
-//       { name: 'red', value: '#f00' },
-//       { name: 'green', value: '#0f0' },
-//       { name: 'blue', value: '#00f' },
-//     ],
-//   },
-// }

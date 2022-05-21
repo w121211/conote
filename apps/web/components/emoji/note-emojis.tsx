@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useMeQuery, useNoteEmojisQuery } from '../../apollo/query.graphql'
 import CreateNoteEmojiBtn from './create-note-emoji-btn'
-import NoteEmojiBtn from './note-emoji-btn'
+import UpdateNoteEmojiBtn from './update-note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
-import ToggleMenu from '../../layout/toggle-menu'
-import EmojisDropdownBtn from './emojis-dropdown-btn'
+import { EmojisDropdownBtn } from './emojis-dropdown-btn'
+import ToggleMenu from '../ui-component/toggle-menu'
 
 const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)
@@ -21,7 +21,7 @@ const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
         const foundData = emojiData?.noteEmojis.find(el => el.code === e)
         return foundData !== undefined && foundData.count.nUps > 0 ? (
           <div key={i} className="flex items-center">
-            <NoteEmojiBtn
+            <UpdateNoteEmojiBtn
               noteEmoji={foundData}
               showCounts
               onLiked={code => {
@@ -33,7 +33,7 @@ const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
         ) : null
       })}
       {pinEmojiData ? (
-        <NoteEmojiBtn
+        <UpdateNoteEmojiBtn
           noteEmoji={pinEmojiData}
           onLiked={code => {
             setLikedChoice(code)
@@ -63,7 +63,7 @@ const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
                   onMouseLeave={() => setHoverEmoji(undefined)}
                 >
                   {foundData !== undefined ? (
-                    <NoteEmojiBtn
+                    <UpdateNoteEmojiBtn
                       key={i}
                       noteEmoji={foundData}
                       onLiked={code => {
@@ -95,15 +95,7 @@ const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
           e.stopPropagation()
           setShowTooltip(!showTooltip)
         }}
-      >
-        {/* <Tooltip
-          className="!block w-[150px] px-0 py-0 left-full -translate-x-full"
-          visible={showTooltip}
-          onClose={() => setShowTooltip(false)}
-        >
-          
-        </Tooltip> */}
-      </div>
+      ></div>
     </div>
   )
 }

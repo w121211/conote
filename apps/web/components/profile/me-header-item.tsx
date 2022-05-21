@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { useMeQuery } from '../../apollo/query.graphql'
-import ToggleMenu from '../../layout/toggle-menu'
-import Tooltip from '../../layout/tooltip/popup'
+import ToggleMenu from '../ui-component/toggle-menu'
 
 const MeHeaderItem = ({ className }: { className?: string }) => {
   const [showToolTip, setShowToolTip] = useState(false)

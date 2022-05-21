@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
 import MeHeaderItem from '../components/profile/me-header-item'
-import NewHotList from '../components/new-hot-list'
+import NewHotList from '../components/_new-hot-list'
 import UserRateTable from '../components/user/user-rate-table'
 import { mockRateData } from './user/[userid]'
 

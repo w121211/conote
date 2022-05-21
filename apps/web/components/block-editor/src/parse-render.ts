@@ -92,11 +92,11 @@ function inlineItemsToStr(inlines: InlineItem[]): string {
  * hashtag  https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
  */
 
-export const reAuthor = /\B@[\p{L}\d_]+\b/u
+const reAuthor = /\B@[\p{L}\d_]+\b/u
 
-export const reTicker = /\$[A-Z-=]+/
+const reTicker = /\$[A-Z-=]+/
 
-export const reTopic = /\[\[[^\]\n]+\]\]/u
+const reTopic = /\[\[[^\]\n]+\]\]/u
 
 // const reDiscuss =
 //   /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-(c[a-z0-9]{24,29})#(?=\s|$)/u
@@ -122,7 +122,7 @@ const reURL =
 
 const reComment = /\/\/ .+$/m
 
-const grammar: Grammar = {
+export const grammar: Grammar = {
   comment: { pattern: reComment },
 
   poll: { pattern: rePoll },

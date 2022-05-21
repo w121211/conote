@@ -1,9 +1,9 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { DiscussPageComponent } from '../../components/discuss/discuss-page'
-import { Layout } from '../../layout/layout'
 import { ApolloProvider } from '@apollo/client'
 import { getApolloClient } from '../../apollo/apollo-client'
+import { Layout } from '../../components/ui-component/layout'
 
 const apolloClient = getApolloClient()
 

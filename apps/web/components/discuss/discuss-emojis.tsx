@@ -6,8 +6,8 @@ import {
 } from '../../apollo/query.graphql'
 import CreateDiscussEmoji from './discuss-create-emoji'
 import UpdateDiscussEmoji from './discuss-update-emoji'
-import ToggleMenu from '../../layout/toggle-menu'
 import { EmojisDropdownBtn } from '../emoji/emojis-dropdown-btn'
+import ToggleMenu from '../ui-component/toggle-menu'
 
 const DiscussEmojis = ({
   discussId,

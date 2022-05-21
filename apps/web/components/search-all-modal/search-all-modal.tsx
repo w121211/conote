@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { styleSymbol } from '../layout/style-fc/style-symbol'
-import Modal from './modal/modal'
+import Modal from '../modal/modal'
 import './search-all-modal.module.css'
+import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 
 const mockList = [
   {

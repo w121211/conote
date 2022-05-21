@@ -4,13 +4,13 @@ import { setEntities } from '@ngneat/elf-entities'
 import { blockRepo } from '../../components/block-editor/src/stores/block.repository'
 import { docRepo } from '../../components/block-editor/src/stores/doc.repository'
 import { DocEl } from '../../components/block-editor/src/components/doc/doc-el'
-import { TooltipProvider } from '../../layout/tooltip/tooltip-provider'
 import DomainProvider from '../../components/domain/domain-context'
 import { mockBlocks } from '../../components/block-editor/test/__mocks__/mock-block'
 import { mockDocs } from '../../components/block-editor/test/__mocks__/mock-doc'
 import ModalProvider from '../../components/modal/modal-context'
 import { ApolloProvider } from '@apollo/client'
 import { getApolloClient } from '../../apollo/apollo-client'
+import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
 
 export default {
   title: 'BlockEditor/DocEl',

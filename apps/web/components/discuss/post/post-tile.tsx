@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react'
 import { DiscussPostFragment } from '../../../apollo/query.graphql'
 import DiscussPostEmojis from './post-emojis'
 import PostOptionsMenu from '../options-menu'
-import { Tile } from '../../../layout/tile'
+import { Tile } from '../../ui-component/tile'
 
 export const PostTile = ({
   post,

@@ -1,9 +1,8 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { Tile } from '../../layout/tile'
+import { Tile } from '../../components/ui-component/tile'
 
 export default {
-  title: 'layout/Tile',
   component: Tile,
   decorators: [
     Story => (

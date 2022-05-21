@@ -2,10 +2,10 @@ import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
 import { DocEl } from '../../components/block-editor/src/components/doc/doc-el'
 import { ThemeProvider } from '../../components/theme/theme-provider'
-import { TooltipProvider } from '../../layout/tooltip/tooltip-provider'
 import DomainProvider from '../../components/domain/domain-context'
-import { Layout } from '../../layout/layout'
 import { mockDocs } from '../../components/block-editor/test/__mocks__/mock-doc'
+import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
+import { Layout } from '../../components/ui-component/layout'
 
 export default {
   title: 'BlockEditor/DocPage',

@@ -1,15 +1,12 @@
 import React, { useEffect } from 'react'
 import {
   NoteEmojiFragment,
-  MyNoteEmojiLikeDocument,
-  MyNoteEmojiLikeQuery,
-  MyNoteEmojiLikeQueryVariables,
   useMyNoteEmojiLikeQuery,
   useUpsertNoteEmojiLikeMutation,
 } from '../../apollo/query.graphql'
 import { EmojiBtn } from './emoji-btn'
 
-const NoteEmojiBtn = ({
+const UpdateNoteEmojiBtn = ({
   noteEmoji,
   showCounts,
   onLiked,
@@ -119,4 +116,4 @@ const NoteEmojiBtn = ({
     />
   )
 }
-export default NoteEmojiBtn
+export default UpdateNoteEmojiBtn

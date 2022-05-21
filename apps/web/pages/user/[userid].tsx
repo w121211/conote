@@ -1,13 +1,13 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Layout } from '../../layout/layout'
 import Popup from '../../components/popup/popup'
 import AuthorArticleList from '../../components/author/author-article-list'
 import AuthorMetaModal from '../../components/author/author-meta-modal'
 import UserRateTable, { TableData } from '../../components/user/user-rate-table'
 import UserNoteTable from '../../components/user/user-note-table'
-import { List, ListElement } from '../../layout/list'
-import { NoteData } from '../../layout/note-list'
+import { NoteData } from '../../components/ui-component/note-list'
+import { Layout } from '../../components/ui-component/layout'
+import { List } from '../../components/ui-component/list'
 
 export const mockRateData: TableData[] = [
   {
