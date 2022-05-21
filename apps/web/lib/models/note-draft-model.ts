@@ -39,6 +39,7 @@ class NoteDraftModel {
       link,
     }
   }
+
   async create(
     branch: string,
     symbol: string,
@@ -46,23 +47,22 @@ class NoteDraftModel {
     { fromDocId, domain, meta, content }: NoteDraftInput,
   ): Promise<NoteDraftParsed> {
     const { prismaBranch, fromDoc } = await this.validateCreateInput(
-      branch,
-      symbol,
-      fromDocId ?? undefined,
-    )
-
-    const draft = await prisma.noteDraft.create({
-      data: {
+        branch,
         symbol,
-        branch: { connect: { id: prismaBranch.id } },
-        sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
-        user: { connect: { id: userId } },
-        domain,
-        meta: meta as unknown as NoteDocMeta,
-        content,
-      },
-    })
+        fromDocId ?? undefined,
+      ),
+      draft = await prisma.noteDraft.create({
+        data: {
+          symbol,
+          branch: { connect: { id: prismaBranch.id } },
+          sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+          fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+          user: { connect: { id: userId } },
+          domain,
+          meta: meta as unknown as NoteDocMeta,
+          content,
+        },
+      })
     // convert JSON to GQL type
     return {
       ...draft,

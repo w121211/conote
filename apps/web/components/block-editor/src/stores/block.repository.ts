@@ -1,42 +1,12 @@
+import { createStore, Reducer } from '@ngneat/elf'
 import {
-  createStore,
-  withProps,
-  select,
-  setProp,
-  setProps,
-  emitOnce,
-  Reducer,
-} from '@ngneat/elf'
-import {
-  addEntities,
-  deleteEntities,
-  EntitiesState,
-  getAllEntities,
-  getAllEntitiesApply,
   getEntity,
-  selectAllEntities,
-  selectEntities,
   selectEntity,
   selectManyByPredicate,
-  setEntities,
-  updateEntities,
-  upsertEntities,
   withEntities,
 } from '@ngneat/elf-entities'
 import { stateHistory } from '@ngneat/elf-state-history'
-import { title } from 'process'
-import {
-  combineLatest,
-  combineLatestWith,
-  concat,
-  distinctUntilChanged,
-  forkJoin,
-  map,
-  Observable,
-  of,
-  switchMap,
-  tap,
-} from 'rxjs'
+import { map, Observable } from 'rxjs'
 import { Block } from '../interfaces'
 
 type BlocksStoreState = {

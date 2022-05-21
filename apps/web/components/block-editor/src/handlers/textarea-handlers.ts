@@ -1,5 +1,12 @@
 import { difference, intersection, union } from 'lodash'
-import * as events from '../events'
+import {
+  blockSave,
+  editingTarget,
+  mouseDownSet,
+  mouseDownUnset,
+  selectionClear,
+  selectionSetItems,
+} from '../events'
 import { DestructTextareaKeyEvent } from '../interfaces'
 import { rfdbRepo } from '../stores/rfdb.repository'
 import { getDatasetChildrenUid, getDatasetUid } from '../utils'
@@ -91,7 +98,7 @@ export function findSelectedItems(
       // )
 
       if (selectionOrder) {
-        events.selectionSetItems(selectionOrder)
+        selectionSetItems(selectionOrder)
       }
     }
   }
@@ -161,7 +168,7 @@ export function textareaBlur(
   event: React.ChangeEvent<HTMLTextAreaElement>,
   uid: string,
 ) {
-  events.blockSave(uid, event.currentTarget.value)
+  blockSave(uid, event.currentTarget.value)
 }
 
 export function textareaChange(
@@ -184,7 +191,6 @@ export function textareaChange(
 
   // setStr(event.currentTarget.value)
   // events.blockSave(uid, event.currentTarget.value)
-
   setLocalStr(event.currentTarget.value)
 }
 
@@ -201,13 +207,13 @@ export function textareaClick(
   if (shift && sourceUid && sourceUid !== targetUid) {
     findSelectedItems(e, sourceUid, targetUid)
   } else {
-    events.selectionClear()
+    selectionClear()
   }
 }
 
 function globalMouseup() {
   document.removeEventListener('mouseup', globalMouseup)
-  events.mouseDownUnset()
+  mouseDownUnset()
 }
 
 /**
@@ -219,11 +225,11 @@ export function textareaMouseDown(e: React.MouseEvent<HTMLTextAreaElement>) {
   e.stopPropagation()
 
   if (!e.shiftKey) {
-    events.editingTarget(e.currentTarget)
+    editingTarget(e.currentTarget)
 
     const { mouseDown } = rfdbRepo.getValue()
     if (!mouseDown) {
-      events.mouseDownSet()
+      mouseDownSet()
       document.addEventListener('mouseup', globalMouseup)
     }
   }
@@ -246,7 +252,7 @@ export function textareaMouseEnter(
   } = rfdbRepo.getValue()
 
   if (mouseDown && sourceUid) {
-    events.selectionClear()
+    selectionClear()
     findSelectedItems(e, sourceUid, targetUid)
   }
 }
@@ -256,5 +262,5 @@ export function textareaMouseEnter(
  */
 export function textareaUnmount(uid: string, localStr: string) {
   // console.debug('textareaUnmount')
-  events.blockSave(uid, localStr)
+  blockSave(uid, localStr)
 }

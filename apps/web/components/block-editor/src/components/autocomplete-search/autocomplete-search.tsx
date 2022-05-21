@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react'
-import { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import {
   autoCompleteHashtag,
   autoCompleteInline,
   nullSearch,
 } from '../../handlers/textarea-keydown'
-import { CaretPosition, Search, SearchHit } from '../../interfaces'
+import type { CaretPosition, Search, SearchHit } from '../../interfaces'
 import { searchService } from '../../services/search.service'
 
 function clickHit(

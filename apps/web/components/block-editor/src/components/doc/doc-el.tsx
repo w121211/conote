@@ -1,34 +1,13 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { Observable, switchMap, tap } from 'rxjs'
-// import { useObservable } from '@ngneat/react-rxjs'
-import { useObservable } from 'rxjs-hooks'
-
-// import { mockPeople } from '@/Avatar/mockData'
-// import { DOMRoot } from '@/utils/config'
-// import { Button } from '@/Button'
-// import { Overlay } from '@/Overlay'
-// import { Menu } from '@/Menu'
-// import { Block } from '@/concept/Block'
-// import { EmptyMessage } from './components/EmptyMessage'
-// import { References, ReferencesProps } from './components/References'
-// import { usePresenceProvider } from '@/concept/Block/hooks/usePresenceProvider'
-
+import { useObservable } from '@ngneat/react-rxjs'
+import { NoteHead } from '../../../../note-head'
 import { BlockEl } from '../block/block-el'
 import { DocPlaceholder } from './doc-placeholder'
-import { DOMRoot } from '../utils'
-import { BlockListContainer } from '../block/block-list'
 import { blockRepo, getBlock } from '../../stores/block.repository'
 import { Block, Doc } from '../../interfaces'
-import {
-  docRemove,
-  docSave,
-  historyClear,
-  historyUndo,
-  docTemplateSet,
-} from '../../events'
+import { docTemplateSet } from '../../events'
 import { hotkey, multiBlockSelection } from '../../listeners'
-import { NoteHead } from '../../../../note-head'
-import moment from 'moment'
 
 const PageWrap = ({ children }: { children: ReactNode }) => {
   return (
@@ -198,32 +177,22 @@ export const DocEl = ({
   const [pageMenuAnchor, setPageMenuAnchor] =
     React.useState<HTMLButtonElement | null>(null)
 
-  // const { PresenceProvider, clearPresence } = usePresenceProvider({
-  //   presentPeople: mockPresence,
-  // })
-
-  // const { title } = doc,
-  //   block = getBlock(doc.blockUid)
-
-  // const [block$, setBlock$] = useState<Observable<Block | undefined>>(
-  //     blockRepo.getBlock$(doc.blockUid),
-  //   ),
-  //   [docBlock] = useObservable(block$)
-  // const [docBlock] = useObservable(blockRepo.getBlock$(docBlockUid))
-
-  // const [docBlock] = useObservable(blockRepo.getBlock$(doc.blockUid))
+  const [docBlock] = useObservable(blockRepo.getBlock$(doc.blockUid), {
+    deps: [doc],
+    initialValue: null,
+  })
 
   // (BUG) useObservable set docBlock as null initially if default value is undefined
   // however, the return type will not include null
-  const docBlock = useObservable<Block | undefined, [Doc]>(
-    (_, inputs$) =>
-      inputs$.pipe(
-        tap(console.log),
-        switchMap(([v]) => blockRepo.getBlock$(v.blockUid)),
-      ),
-    undefined,
-    [doc],
-  )
+  // const docBlock = useObservable<Block | undefined, [Doc]>(
+  //   (_, inputs$) =>
+  //     inputs$.pipe(
+  //       tap(console.log),
+  //       switchMap(([v]) => blockRepo.getBlock$(v.blockUid)),
+  //     ),
+  //   undefined,
+  //   [doc],
+  // )
 
   // useEffect(() => {
   //   console.log(docBlockUid, docBlock)
@@ -244,6 +213,7 @@ export const DocEl = ({
     setPageMenuAnchor(e.currentTarget)
     setIsPageMenuOpen(true)
   }
+
   // const handleClosePageMenu = () => {
   //   setPageMenuAnchor(null)
   //   setIsPageMenuOpen(false)

@@ -1,17 +1,25 @@
-import * as events from '../events'
-import { nextBlock } from '../op/queries'
-import { searchService } from '../services/search.service'
-import { getBlock } from '../stores/block.repository'
-import { rfdbRepo } from '../stores/rfdb.repository'
-import { isShortcutKey } from '../utils'
+import { throttle } from 'lodash'
+import {
+  indent,
+  keyArrowDown,
+  keyArrowUp,
+  keyBackspace,
+  keyEnter,
+  selectionAddItem,
+  unindent,
+} from '../events'
 import {
   CaretPosition,
   DestructTextareaKeyEvent,
   Search,
   SearchHit,
 } from '../interfaces'
+import { nextBlock } from '../op/queries'
+import { searchService } from '../services/search.service'
+import { getBlock } from '../stores/block.repository'
+import { rfdbRepo } from '../stores/rfdb.repository'
+import { isShortcutKey } from '../utils'
 import { getCaretCoordinates } from './textarea-caret'
-import { throttle } from 'lodash'
 
 const pairChars = ['()', '[]', '{}', '""']
 
@@ -377,11 +385,11 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
     } else if (up && topRow) {
       e.stopPropagation()
       target.blur()
-      events.selectionAddItem(uid, 'first')
+      selectionAddItem(uid, 'first')
     } else if (down && bottomRow) {
       e.stopPropagation()
       target.blur()
-      events.selectionAddItem(uid, 'last')
+      selectionAddItem(uid, 'last')
     }
   }
 
@@ -417,19 +425,19 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
   //   ;; last index is special - always go to last index when going up or down
   else if ((left && isStart) || (up && isEnd)) {
     e.preventDefault()
-    events.up(uid, 'end')
+    keyArrowUp(uid, 'end')
   } else if (down && isEnd) {
     e.preventDefault()
-    events.down(uid, 'end')
+    keyArrowDown(uid, 'end')
   } else if (right && isEnd) {
     e.preventDefault()
-    events.down(uid, 0)
+    keyArrowDown(uid, 0)
   } else if (up && topRow) {
     e.preventDefault()
-    events.up(uid, charOffset)
+    keyArrowUp(uid, charOffset)
   } else if (down && bottomRow) {
     e.preventDefault()
-    events.down(uid, charOffset)
+    keyArrowDown(uid, charOffset)
   }
 }
 
@@ -452,7 +460,7 @@ function handleBackspace({ e, uid, search, setSearch }: TextareaKeyDownArgs) {
     lookBehindChar = value.charAt(start - 1) ?? null
 
   if (isBlockStart(e) && noSelection) {
-    events.backspace(uid, value)
+    keyBackspace(uid, value)
   } else if (possiblePair) {
     // ;; pair char: hide inline search and auto-balance
     e.preventDefault()
@@ -521,7 +529,7 @@ function handleEnter({ e, uid, search, setSearch }: TextareaKeyDownArgs) {
     //   events.enter(uid, dKeyDown)
     // })
 
-    throttle(() => events.enter(uid, dKeyDown), 100, { trailing: false })()
+    throttle(() => keyEnter(uid, dKeyDown), 100, { trailing: false })()
   }
 }
 
@@ -620,14 +628,9 @@ function handleTab({ e, localStr }: TextareaKeyDownArgs): void {
 
   if (selection.items.length === 0) {
     if (shift) {
-      events.unindent(
-        editing.uid,
-        dKeyDown,
-        localStr,
-        currentRoute?.uid ?? undefined,
-      )
+      unindent(editing.uid, dKeyDown, localStr, currentRoute?.uid ?? undefined)
     } else {
-      events.indent(editing.uid, dKeyDown, localStr)
+      indent(editing.uid, dKeyDown, localStr)
     }
   }
 }
@@ -671,6 +674,7 @@ type TextareaKeyDownArgs = {
   setCaret: React.Dispatch<React.SetStateAction<CaretPosition>>
   search: Search
   setSearch: React.Dispatch<React.SetStateAction<Search>>
+  lastKeyDown: DestructTextareaKeyEvent | null
   setLastKeyDown: React.Dispatch<
     React.SetStateAction<DestructTextareaKeyEvent | null>
   >

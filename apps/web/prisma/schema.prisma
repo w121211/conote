@@ -192,7 +192,7 @@ model NoteDoc {
 model NoteDraft {
   id String @id @default(cuid())
 
-  // use as an identifier
+  // Use as an identifier
   symbol String
 
   branchId  String

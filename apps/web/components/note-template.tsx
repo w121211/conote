@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid'
 import React, { useEffect, useState } from 'react'
-import { useObservable } from 'rxjs-hooks'
 import { styleSymbol } from '../layout/style-fc/style-symbol'
 import { BulletEditor } from './editor/editor'
 import { LiElement } from './editor/slate-custom-types'

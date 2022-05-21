@@ -26,7 +26,7 @@ import {
   getBlock,
   getBlockChildren,
 } from '../stores/block.repository'
-import { DocReducer, docRepo, getDoc } from '../stores/doc.repository'
+import { DocReducer, docRepo } from '../stores/doc.repository'
 import { genBlockUid } from '../utils'
 import {
   getRefBlockOfPosition,

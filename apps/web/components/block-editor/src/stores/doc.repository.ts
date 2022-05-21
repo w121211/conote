@@ -1,10 +1,5 @@
 import { createStore, Reducer } from '@ngneat/elf'
-import {
-  addEntities,
-  getEntity,
-  selectEntity,
-  withEntities,
-} from '@ngneat/elf-entities'
+import { getEntity, selectEntity, withEntities } from '@ngneat/elf-entities'
 import { Block, Doc } from '../interfaces'
 import { allDescendants } from '../op/queries'
 import { getBlock } from './block.repository'

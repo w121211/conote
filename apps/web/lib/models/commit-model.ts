@@ -1,4 +1,5 @@
 import {
+  Branch,
   Commit,
   Discuss,
   Note,
@@ -95,6 +96,12 @@ async function validateDraft(id: string, userId: string) {
 
 /**
  *
+ * After commit, how to known the note-doc's corresponding note-draft?
+ * - If draft has sym, use sym.id (both exist on draft and doc)
+ * - If draft has symbol, use symbol to match doc.sym.symbol
+ *
+ * TODO:
+ * - [ ] For each commit, input note-draft should have unique symbol/sym
  */
 export async function commitNoteDrafts(
   draftIds: string[],
@@ -106,7 +113,10 @@ export async function commitNoteDrafts(
     discusses: Discuss[]
     sym: Sym
   })[]
-  noteDocs: NoteDoc[]
+  noteDocs: (NoteDoc & {
+    sym: Sym
+    branch: Branch
+  })[]
 }> {
   const drafts: NoteDraft[] = [],
     symbol_symId: Record<string, string> = {},
@@ -212,6 +222,10 @@ export async function commitNoteDrafts(
 
   const noteDocs = await prisma.noteDoc.findMany({
     where: { commitId: commit.id },
+    include: {
+      sym: true,
+      branch: true,
+    },
   })
 
   const notes = (
@@ -239,6 +253,13 @@ export async function commitNoteDrafts(
       sym: Sym
     } => e !== null,
   )
+
+  // TODO: remove ?
+  if (draftIds.length !== noteDocs.length) {
+    throw new Error(
+      '[commitNoteDrafts] Unexpected error, draftIds.length !== noteDocs.length',
+    )
+  }
 
   return { symbol_symId, commit, notes, noteDocs }
 }

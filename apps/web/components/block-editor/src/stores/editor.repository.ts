@@ -47,7 +47,7 @@ class EditorRepository {
     editorStore.update(setProp('route', route))
   }
 
-  updateLeftSidebarItems(items: NoteDraftEntryFragment[]) {
+  setLeftSidebarItems(items: NoteDraftEntryFragment[]) {
     editorStore.update(
       setProp('leftSidebar', leftSidebar => ({
         ...leftSidebar,

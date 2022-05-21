@@ -1,4 +1,16 @@
-import * as events from './events'
+import {
+  editingUid,
+  historyRedo,
+  historyUndo,
+  indentMulti,
+  keyArrowDown,
+  keyArrowUp,
+  selectedDown,
+  selectedUp,
+  selectionClear,
+  selectionDelete,
+  unindentMulti,
+} from './events'
 import { Block, BlockWithChildren } from './interfaces'
 import { blockRepo } from './stores/block.repository'
 import { rfdbRepo, rfdbStore } from './stores/rfdb.repository'
@@ -70,40 +82,40 @@ export function multiBlockSelection(e: KeyboardEvent) {
       right = key === 'ArrowRight'
 
     if (enter) {
-      events.editingUid(selectedItems[0])
-      events.selectionClear()
+      editingUid(selectedItems[0])
+      selectionClear()
     } else if (bksp || dlt) {
-      events.selectionDelete()
-      events.selectionClear()
+      selectionDelete()
+      selectionClear()
     } else if (tab) {
       e.preventDefault()
 
       if (shift) {
-        events.unindentMulti(selectedItems)
+        unindentMulti(selectedItems)
       } else {
-        events.indentMulti(selectedItems)
+        indentMulti(selectedItems)
       }
     } else if (shift && up) {
-      events.selectedUp(selectedItems)
+      selectedUp(selectedItems)
     } else if (shift && down) {
-      events.selectedDown(selectedItems)
+      selectedDown(selectedItems)
     } else if (up || down) {
       e.preventDefault()
-      events.selectionClear()
+      selectionClear()
 
       if (up) {
-        events.up(selectedItems[0], 'end')
+        keyArrowUp(selectedItems[0], 'end')
       } else {
-        events.down(selectedItems[selectedItems.length - 1], 'end')
+        keyArrowDown(selectedItems[selectedItems.length - 1], 'end')
       }
     } else if (left || right) {
       e.preventDefault()
-      events.selectionClear()
+      selectionClear()
 
       if (left) {
-        events.editingUid(selectedItems[0], 0)
+        editingUid(selectedItems[0], 0)
       } else {
-        events.editingUid(selectedItems[selectedItems.length - 1], 'end')
+        editingUid(selectedItems[selectedItems.length - 1], 'end')
       }
     }
   }
@@ -123,19 +135,22 @@ export function hotkey(event: KeyboardEvent) {
 
   if (isShortcutKey(meta, ctrl)) {
     switch (key) {
+      // Save
       case 's':
-        // save
         break
+
+      // Open search-all panel
       case 'k':
-        // open search-all panel
         break
+
+      // Reado/undo
       case 'z':
-        // reado/undo
+        // console.log('redo/undo')
         if (shift) {
-          events.historyRedo()
+          historyRedo()
         } else {
           console.debug('editor undo()')
-          events.historyUndo()
+          historyUndo()
         }
         break
     }

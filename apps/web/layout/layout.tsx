@@ -3,7 +3,7 @@ import SidebarEl from '../components/block-editor/src/components/sidebar/sidebar
 import LoginModal from '../components/login-modal'
 import Navbar from '../components/navbar'
 
-export function Layout({
+const Layout = ({
   children,
   buttonRight,
   backgroundColor,
@@ -11,7 +11,7 @@ export function Layout({
   children: React.ReactNode
   buttonRight?: React.ReactNode
   backgroundColor?: string
-}): JSX.Element {
+}): JSX.Element => {
   const [showSider, setShowSider] = useState(true)
   const [pinSider, setPinMenu] = useState(true)
   // const [scroll, setScroll] = useState(0)
@@ -134,3 +134,5 @@ export function Layout({
     </div>
   )
 }
+
+export default Layout

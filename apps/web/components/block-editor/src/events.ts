@@ -25,6 +25,10 @@ import { editorRepo } from './stores/editor.repository'
 import { getNoteService } from './services/note.service'
 import { getCommitService } from './services/commit.service'
 import { NextRouter } from 'next/router'
+import {
+  NoteDocFragment,
+  NoteDraftEntryFragment,
+} from '../../../apollo/query.graphql'
 
 const noteService = getNoteService(),
   noteDraftService = getNoteDraftService(),
@@ -66,7 +70,7 @@ export function historyRedo() {
 //
 //
 
-export function up(uid: string, targetPos: number | 'end') {
+export function keyArrowUp(uid: string, targetPos: number | 'end') {
   const block = getBlock(uid),
     parent = block.parentUid && getBlock(block.parentUid),
     prev = parent && prevBlock(block, parent),
@@ -74,7 +78,7 @@ export function up(uid: string, targetPos: number | 'end') {
   editingUid(_editingUid, targetPos)
 }
 
-export function down(uid: string, targetPos: number | 'end') {
+export function keyArrowDown(uid: string, targetPos: number | 'end') {
   const block = getBlock(uid),
     next = block && nextBlock(block),
     _editingUid = next ? next.uid : uid
@@ -90,7 +94,7 @@ Otherwise delete block and join with previous block
 If prev-block has children"
  * 
  */
-export function backspace(
+export function keyBackspace(
   uid: string,
   value: string,
   maybeLocalUpdates?: string,
@@ -143,7 +147,7 @@ export function backspace(
 - If value is empty, unindent.
 - If caret is at start and there is a value, create new block below but keep same block index."
  */
-export function enter(uid: string, dKeyDown: DestructTextareaKeyEvent) {
+export function keyEnter(uid: string, dKeyDown: DestructTextareaKeyEvent) {
   const block = getBlock(uid),
     hasChildren = block.childrenUids.length > 0,
     parent = block.parentUid && getBlock(block.parentUid),
@@ -844,9 +848,12 @@ export async function editorRouteUpdate({
   // console.debug(mainSymbol, modalSymbol, mainSymbolChanged, modalSymbolChanged)
 }
 
-export async function editorLeftSidebarMount() {
+/**
+ * Reset left sidebar
+ */
+export async function editorLeftSidebarReset() {
   const entries = await noteDraftService.queryMyAllDraftEntries()
-  editorRepo.updateLeftSidebarItems(entries)
+  editorRepo.setLeftSidebarItems(entries)
 }
 
 //
@@ -859,16 +866,29 @@ export async function editorLeftSidebarMount() {
 //
 
 /**
- * If commit success, mark docs as committed
+ * Commit is called directly through the apollo-client,
+ * here only taking cares of repository mutations after the commit.
+ *
+ * If commit success
+ * - remove local docs from doc-repo, sidebar
+ *
  */
-export async function commitDocs(docs: Doc[]) {
-  // const { branch, title } = doc,
-  //   input = noteDraftService.toNoteDraftInput(doc),
-  //   noteDraft = doc.noteDraftCopy
-  //     ? await noteDraftService.saveDraft(doc.noteDraftCopy.id, input)
-  //     : await noteDraftService.createDraft(branch, title, input),
-  //   op = ops.docSaveOp(doc, noteDraft)
+export async function commitOnCompleted(
+  inputDrafts: NoteDraftEntryFragment[],
+  resultNoteDocs: NoteDocFragment[],
+) {
+  const pairs = await commitService.pairNoteDraft_noteDoc(
+    inputDrafts,
+    resultNoteDocs,
+  )
+  await editorLeftSidebarReset()
 
-  // docRepo.update(op)
-  commitService.commitDocs(docs)
+  pairs.forEach(([noteDraft, noteDoc]) => {
+    const doc = docRepo.findDoc(noteDraft.symbol)
+    if (doc) {
+      const { blockReducers, docReducers } = ops.docRemoveOp(doc)
+      blockRepo.update(blockReducers)
+      docRepo.update(docReducers)
+    }
+  })
 }

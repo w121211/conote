@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import { editorLeftSidebarMount } from '../../events'
+import { editorLeftSidebarReset } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
 import { ThemeContext } from '../../../../theme/theme-provider'
@@ -8,7 +8,7 @@ import { ThemeType } from '../../../../theme/theme-storage'
 import { ThemeToggle } from '../../../../theme/theme-toggle'
 
 /**
- * When the component mount, call sidebr-load event when first enter the component
+ * Call 'editorLeftSidebarMount' event on component mount to query required data.
  *
  * TODOS:
  * [] draft-entries sort by ?
@@ -44,7 +44,7 @@ const SidebarEl = ({
   const [themeBtn, setThemeBtn] = useState<ThemeType | 'system'>('light')
 
   useEffect(() => {
-    editorLeftSidebarMount()
+    editorLeftSidebarReset()
   }, [])
 
   useEffect(() => {

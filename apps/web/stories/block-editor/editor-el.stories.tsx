@@ -19,6 +19,12 @@ import { getLoggedInUser } from '../../components/auth/auth.service'
 import { getNoteDraftService } from '../../components/block-editor/src/services/note-draft.service'
 import { EditorEl } from '../../components/block-editor/src/components/editor/editor-el'
 import { EditorToolbar } from '../../components/block-editor/src/components/editor/editor-toolbar'
+import {
+  ErrorBoundary,
+  FallbackProps,
+  useErrorHandler,
+} from 'react-error-boundary'
+import ErrorFallback from '../../components/error-fallback'
 
 export default {
   title: 'BlockEditor/EditorEl',
@@ -161,31 +167,6 @@ export const QueryNoteAAPL = () => {
   useEffect(() => {
     editorRouteUpdate({ mainSymbol: '$AAPL' })
   }, [])
-  return (
-    <ModalProvider>
-      <EditorEl />
-    </ModalProvider>
-  )
-}
-
-/**
- * The 'https://storybook.js.org/' draft  is an intentional error data
- */
-export const HandleError = () => {
-  const [error, setError] = useState(false)
-
-  useEffect(() => {
-    editorRouteUpdate({ mainSymbol: 'https://storybook.js.org/' }).catch(
-      err => {
-        console.error(err)
-        setError(true)
-      },
-    )
-  }, [])
-
-  if (error) {
-    return <div>Error!</div>
-  }
   return (
     <ModalProvider>
       <EditorEl />
