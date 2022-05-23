@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Layout } from '../../layout/layout'
+import Layout from '../../layout/layout'
 // import { useNoteLazyQuery } from '../../apollo/query.graphql'
 
 export function NoteIndexPage(): JSX.Element {
@@ -38,7 +38,7 @@ export function NoteIndexPage(): JSX.Element {
         </>
       }
     >
-      <h1>Note index</h1>
+      <h1>Start a new note!</h1>
     </Layout>
   )
 }

@@ -1,15 +1,15 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { DiscussPageComponent } from '../../components/discuss/discuss-page'
-import { Layout } from '../../layout/layout'
 import { ApolloProvider } from '@apollo/client'
+import { ComponentMeta, ComponentStory } from '@storybook/react'
 import { getApolloClient } from '../../apollo/apollo-client'
+import DiscussPageEl from '../../components/discuss/discuss-page-el'
+import Layout from '../../layout/layout'
 
 const apolloClient = getApolloClient()
 
 export default {
   // title: 'pages/Discss Full Page',
-  component: DiscussPageComponent,
+  component: DiscussPageEl,
   decorators: [
     Story => (
       <div>
@@ -25,14 +25,14 @@ export default {
       ],
     },
   },
-} as ComponentMeta<typeof DiscussPageComponent>
+} as ComponentMeta<typeof DiscussPageEl>
 
-const Template: ComponentStory<typeof DiscussPageComponent> = args => {
+const Template: ComponentStory<typeof DiscussPageEl> = args => {
   // const paramState = useParameter<string>('backgroundColor')
   return (
     <ApolloProvider client={apolloClient}>
       <Layout>
-        <DiscussPageComponent {...args} />
+        <DiscussPageEl {...args} />
       </Layout>
     </ApolloProvider>
   )

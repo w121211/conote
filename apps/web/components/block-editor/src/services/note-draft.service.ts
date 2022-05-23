@@ -1,3 +1,4 @@
+import { TreeNodeBody, treeUtil } from '@conote/docdiff'
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
 import { Block, Doc } from '../interfaces'
 import {
@@ -23,8 +24,6 @@ import {
 } from '../../../../apollo/query.graphql'
 import { getApolloClient } from '../../../../apollo/apollo-client'
 import { docRepo } from '../stores/doc.repository'
-import { TreeNodeBody, treeUtil } from '@conote/docdiff'
-import { cloneDeep } from 'lodash'
 import { omitTypenameDeep } from '../utils'
 
 // interface INoteDraftService {

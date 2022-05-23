@@ -4,6 +4,7 @@ import {
   NoteDraftEntryFragment,
   NoteDraftFragment,
   NoteFragment,
+  SearchHitFragment,
 } from '../../../apollo/query.graphql'
 
 //
@@ -33,19 +34,19 @@ export type Search = {
   type: SearchType | null
   term: string | null
   hitIndex: number | null
-  hits: SearchHit[]
+  // hits: SearchHit[]
+  hits: SearchHitFragment[]
 }
 
-export type SearchHit = {
-  id: string
-  discussTitle?: string
-  note?: {
-    symbol: string
-    webpageTitle?: string
-  }
-}
+// export type SearchHit = Omit<SearchHitFragment, '__typename'> & {
+//   discussTitle?: string
+//   note?: {
+//     symbol: string
+//     webpageTitle?: string
+//   }
+// }
 
-export type SearchType = 'page' | 'slash' | 'hashtag' | 'template'
+export type SearchType = 'topic' | 'discuss' // | 'slash' | 'hashtag' | 'template'
 
 //
 // Events & Dom events

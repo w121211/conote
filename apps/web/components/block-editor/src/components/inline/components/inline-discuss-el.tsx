@@ -9,7 +9,7 @@ import { blockStrReplace } from '../../../events'
 import { InlineDiscuss } from '../../../interfaces'
 import { inlineService } from '../../../services/inline.service'
 import { InlineElProps } from '../inline-el'
-import { DiscussPageComponent } from '../../../../../discuss/discuss-page'
+import DiscussPageEl from '../../../../../discuss/discuss-page-el'
 
 /**
  * Update block string when discuss is created
@@ -61,10 +61,9 @@ const InlineDiscussEl = ({
       </Link>
     )
 
-  console.log(id)
-
   return (
     <>
+      <span>ajdoiaj oisja</span>
       <Modal
         visible={showModal}
         onClose={() => setShowModal(false)}
@@ -73,7 +72,7 @@ const InlineDiscussEl = ({
       >
         {id ? (
           <div className="px-10">
-            <DiscussPageComponent id={id} />
+            <DiscussPageEl id={id} />
           </div>
         ) : (
           <CreateDiscussForm

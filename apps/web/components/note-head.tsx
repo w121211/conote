@@ -1,13 +1,10 @@
-import { useRef, useState } from 'react'
-import Link from 'next/link'
-import NoteMetaForm from './note-meta-form/note-meta-form'
+import React, { useState } from 'react'
+import moment from 'moment'
+import { styleSymbol } from '../layout/style-fc/style-symbol'
+import DomainSelect from './domain/domain-select'
 import NoteEmojis from './emoji/note-emojis'
 import Modal from './modal/modal'
-import { Doc } from './workspace/doc'
-import Select from 'react-select'
-import { styleSymbol } from '../layout/style-fc/style-symbol'
-import moment from 'moment'
-import DomainSelect from './domain/domain-select'
+import NoteMetaForm from './note-meta-form/note-meta-form'
 
 interface NoteHeadProps {
   isNew: boolean

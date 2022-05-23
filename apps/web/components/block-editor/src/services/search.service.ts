@@ -1,36 +1,64 @@
-import { mockSearchHit } from '../../test/__mocks__/mock-search'
-import { Search, SearchHit } from '../interfaces'
+import { SymType } from 'graphql-let/__generated__/__types__'
+import { getApolloClient } from '../../../../apollo/apollo-client'
+import {
+  SearchDiscussDocument,
+  SearchDiscussQuery,
+  SearchDiscussQueryVariables,
+  SearchHitFragment,
+  SearchSymbolDocument,
+  SearchSymbolQuery,
+  SearchSymbolQueryVariables,
+} from '../../../../apollo/query.graphql'
+import { Search } from '../interfaces'
 
-interface ISearchService {
-  searchAuthor(term: string): Promise<SearchHit[]>
+let searchService: SearchService | undefined
 
-  searchDiscuss(term: string): Promise<SearchHit[]>
+class SearchService {
+  private apolloClient = getApolloClient()
 
-  /**
-   * Fuzzy search on all notes which include web-note
-   * for basic notes, search by their symbols
-   * for web-notes, search by their webpage-titles
-   */
-  searchNote(term: string): Promise<SearchHit[]>
-
-  /**
-   * Client-side helpers
-   */
-
-  getAutoCompleteStr(search: Search): string | null
-}
-
-class MockSearchService implements ISearchService {
-  async searchAuthor(term: string): Promise<SearchHit[]> {
+  async searchAuthor(term: string): Promise<SearchHitFragment[]> {
     throw new Error('not implemented')
   }
 
-  async searchDiscuss(term: string): Promise<SearchHit[]> {
-    throw new Error('not implemented')
+  async searchDiscuss(term: string): Promise<SearchHitFragment[]> {
+    const { data, errors } = await this.apolloClient.query<
+      SearchDiscussQuery,
+      SearchDiscussQueryVariables
+    >({
+      query: SearchDiscussDocument,
+      variables: { term },
+    })
+
+    if (errors) {
+      console.error('[SearchDiscussQuery] error', errors)
+      throw new Error('[SearchDiscussQuery] error')
+    }
+    if (data.searchDiscuss) {
+      return data.searchDiscuss
+    }
+    return []
   }
 
-  async searchNote(term: string): Promise<SearchHit[]> {
-    return mockSearchHit.symbols
+  async searchSymbol(
+    term: string,
+    type: SymType,
+  ): Promise<SearchHitFragment[]> {
+    const { data, errors } = await this.apolloClient.query<
+      SearchSymbolQuery,
+      SearchSymbolQueryVariables
+    >({
+      query: SearchSymbolDocument,
+      variables: { term, type },
+    })
+
+    if (errors) {
+      console.error('[SearchSymbolQuery] error', errors)
+      throw new Error('[SearchSymbolQuery] error')
+    }
+    if (data.searchSymbol) {
+      return data.searchSymbol
+    }
+    return []
   }
 
   /**
@@ -40,56 +68,36 @@ class MockSearchService implements ISearchService {
    *
    * @param hitClicked hit clicked by mouse
    */
-  getAutoCompleteStr(search: Search, hitClicked?: SearchHit): string | null {
-    const { hits, hitIndex } = search,
+  getAutoCompleteStr(
+    search: Search,
+    hitClicked?: SearchHitFragment,
+  ): string | null {
+    const { hits, hitIndex, type } = search,
       hit = hitClicked ?? (hitIndex !== null ? hits[hitIndex] : undefined)
 
     if (hit) {
-      const { note, discussTitle } = hit
-      if (note) {
-        return note.symbol
-      } else if (discussTitle) {
-        return discussTitle
+      switch (type) {
+        case 'discuss':
+          return hit.str
+        case 'topic':
+          // Remove '[[' and ']]'
+          return hit.str.substring(2, hit.str.length - 2)
       }
+
+      // const { note, discussTitle } = hit
+      // if (note) {
+      //   return note.symbol
+      // } else if (discussTitle) {
+      //   return discussTitle
+      // }
     }
     return null
   }
 }
 
-class SearchService implements ISearchService {
-  async searchAuthor(term: string): Promise<SearchHit[]> {
-    throw new Error('not implemented')
+export function getSearchService(): SearchService {
+  if (searchService === undefined) {
+    searchService = new SearchService()
   }
-
-  async searchDiscuss(term: string): Promise<SearchHit[]> {
-    throw new Error('not implemented')
-  }
-
-  async searchNote(term: string): Promise<SearchHit[]> {
-    return mockSearchHit.symbols
-  }
-
-  /**
-   * Get hit by index, transforms to corresponding inline-str
-   * If `hitClicked` is given, use it
-   * If index is out of bound, return null
-   *
-   * @param hitClicked hit clicked by mouse
-   */
-  getAutoCompleteStr(search: Search, hitClicked?: SearchHit): string | null {
-    const { hits, hitIndex } = search,
-      hit = hitClicked ?? (hitIndex !== null ? hits[hitIndex] : undefined)
-
-    if (hit) {
-      const { note, discussTitle } = hit
-      if (note) {
-        return note.symbol
-      } else if (discussTitle) {
-        return discussTitle
-      }
-    }
-    return null
-  }
+  return searchService
 }
-
-export const searchService = new MockSearchService()

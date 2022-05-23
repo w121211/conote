@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import DiscussPageEl from '../../components/discuss/discuss-page-el'
 import Layout from '../../layout/layout'
 
-const DiscussPage = () => {
+const CommitPage = () => {
   const router = useRouter()
   return (
     <Layout>
@@ -14,4 +14,4 @@ const DiscussPage = () => {
   )
 }
 
-export default DiscussPage
+export default CommitPage

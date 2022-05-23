@@ -88,6 +88,7 @@ type Query {
   # get all docs from note pull request records including candidates (like Github pr history)
   noteHistory(noteId: ID!, status: NoteDocStatus): [NoteDocEntry!]!
 
+  # TODO: Duplicated with searchSymbol ?
   # search note by sym or title, using domain for filtering
   searchNote(symbol: String, title: String, domain: String): [Note!]!
 

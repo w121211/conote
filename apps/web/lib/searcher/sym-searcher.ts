@@ -8,7 +8,7 @@ type FuseDict = {
   topic: Fuse<Sym>
 }
 
-export class SearchSymServiceClass {
+export class SymSearcher {
   private fuseDict: FuseDict | null = null // TODO: store in redis instead
 
   private _add(sym: Sym, fuse: Fuse<Sym>): void {
@@ -38,23 +38,24 @@ export class SearchSymServiceClass {
   }
 
   async initFuse(): Promise<FuseDict> {
-    console.log('init fuse dict...')
+    console.log('Init fuse dict...')
+
     if (this.fuseDict === null) {
-      const syms = await symModel.getAll()
-      const fuseDict: FuseDict = {
-        all: new Fuse(
-          syms.filter(e => ['TICKER', 'TOPIC'].includes(e.type)),
-          { keys: ['symbol'] },
-        ),
-        ticker: new Fuse(
-          syms.filter(e => e.type === 'TICKER'),
-          { keys: ['symbol'] },
-        ),
-        topic: new Fuse(
-          syms.filter(e => e.type === 'TOPIC'),
-          { keys: ['symbol'] },
-        ),
-      }
+      const syms = await symModel.getAll(),
+        fuseDict: FuseDict = {
+          all: new Fuse(
+            syms.filter(e => ['TICKER', 'TOPIC'].includes(e.type)),
+            { keys: ['symbol'] },
+          ),
+          ticker: new Fuse(
+            syms.filter(e => e.type === 'TICKER'),
+            { keys: ['symbol'] },
+          ),
+          topic: new Fuse(
+            syms.filter(e => e.type === 'TOPIC'),
+            { keys: ['symbol'] },
+          ),
+        }
       this.fuseDict = fuseDict
       return fuseDict
     }
@@ -66,6 +67,7 @@ export class SearchSymServiceClass {
 
   async search(term: string, type?: SymType): Promise<Sym[]> {
     const fuseDict = this.fuseDict ?? (await this.initFuse())
+
     let fuse: Fuse<Sym>
     if (type === 'TICKER') {
       fuse = fuseDict['ticker']
@@ -74,6 +76,7 @@ export class SearchSymServiceClass {
     } else {
       fuse = fuseDict['all']
     }
+
     return fuse.search(term).map(e => e.item)
   }
 }

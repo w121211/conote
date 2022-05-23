@@ -33,6 +33,7 @@ export default {
 export const Basic = () => {
   blockRepo.clearHistory()
   blockRepo.update([setEntities(basicBlocks)])
+
   return <BlockEl uid={basicBlocks[0].uid} isEditable />
 }
 

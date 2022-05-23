@@ -71,3 +71,31 @@ export default {
 const Template: ComponentStory<typeof Playground> = args => <Playground />
 
 export const Undo = Template.bind({})
+
+export const Textarea = () => {
+  const value = '012345678\n012345678\n012345678\n'
+  return (
+    <textarea
+      rows={4}
+      value={value}
+      onKeyUp={e => {
+        const { currentTarget, target } = e
+        const t = target as HTMLTextAreaElement
+        console.log(
+          'keyup',
+          currentTarget.selectionStart,
+          currentTarget.selectionDirection,
+        )
+      }}
+      onKeyDown={e => {
+        const { currentTarget, target } = e
+        const t = target as HTMLTextAreaElement
+        console.log(
+          'keydown',
+          currentTarget.selectionStart,
+          currentTarget.selectionDirection,
+        )
+      }}
+    ></textarea>
+  )
+}

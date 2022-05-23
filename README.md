@@ -279,7 +279,7 @@ v0.2.1
   - [x] inline-comment `- some input // here is a comment, ignores using '...' when exceeding one line`
   - [?] root li without bullet icon?
   - [pending] 中文全形對輸入 symbol 不方便，eg 「「xxx」」（（xxx）） -> 自動轉換
-  - [v@lisa] labels @eg #new-note #fisrt-commit
+  - [x] labels @eg #new-note #fisrt-commit
   - (req) show doc diff
   - (req) easy to reference sourc url -> eg copy url button, @url
   - (req) show keyword as hints (optional disable by setting)
@@ -339,9 +339,12 @@ v0.2.1
     - home page
       - [x] ui
       - gql
-    - note page: with side-bar
+    - note page, include side-bar
       - ui, doc-page need to change to editor-page
       - gql
+      - doc diff
+      - alerts
+    - commit page, /commit/id
     - discuss page
     - user page
       - [x] ui, gray background
@@ -360,8 +363,8 @@ v0.2.1
     - [x] global search
     - loading -> static icon
   - discuss
-    - [] gql
-    - [] discuss-modal -> input should not fixed in the bottom
+    - [x] gql
+    - [x] discuss-modal -> input should not fixed in the bottom
   - block-editor
     - block-el
       - [x] selected block
@@ -375,17 +378,13 @@ v0.2.1
       - [] doc-placeholder, doc-template
     - editor-el
       - [x] modal editor
-      - save
-      - drop
+      - [x] save & drop
     - [x] parse-render-el
-    - [] search-panel
-    - [working@chi] gql
+    - [x] search-panel
     - sidebar-el
       - theme button -> move to profile page
       - smaller arrow @see https://docs.google.com/document/d/1jvREEWUAgH0HUX_u0vEDQoaA9P7SpnR4SqswnKFJAj4/edit
-    - commit
-      - commit panel
-      - commit result
+    - commit panel
 - [@chi] block-editor
   - block
     - [x] (bug) unexpected behavior on block merge, split
@@ -398,12 +397,16 @@ v0.2.1
   - inline items
     - [x] decorate (render-token)
     - [x] inline-symbol
-  - [x] auto complete
+  - auto complete / inline search
+    - [x] inline search topic
+    - [x] inline search discuss
+    - [prior] inline search with key-down support
+    - [] if search-hits returns empty array, need also got some feed-back
   - redo/undo
     - [x] basic redo/undo through elf/history
     - [urgent] (issue) unable to redo while editing
     - [] (issue) caret lost after undo
-    - [] textarea value undo, redo
+    - [50%] textarea value undo, redo -> undo manager
     - [] textarea value lost after undo
   - copy and paste
     - [] external
@@ -427,6 +430,7 @@ v0.2.1
     - [] periodically save
     - [] jump warnning if not saved yet (?)
   - commit docs
+  - remove 'ts-closure-library' dependency
 - check
   - [working@chi] seed
   - [x] discuss emoji, note emoji test add-with-auto-remove -> backend like unlinke return mutations

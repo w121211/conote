@@ -46,7 +46,7 @@ const HomePage = (): JSX.Element => {
         <div className="sticky top-0 w-screen z-10 flex items-center justify-between p-1 capitalize text-sm text-gray-900 bg-yellow-400 text-center">
           <div className="flex-grow flex items-center justify-center  gap-2 ">
             <span className="material-icons">campaign</span>
-            <span className=" truncate">new announcement!</span>
+            <span className="truncate">new announcement!</span>
           </div>
           <span
             className="material-icons relative inline-block items-center right-0 text-base 

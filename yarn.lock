@@ -17920,6 +17920,11 @@ test-exclude@^6.0.0:
     glob "^7.1.4"
     minimatch "^3.0.4"
 
+text-field-edit@^3.1.9001:
+  version "3.1.9001"
+  resolved "https://registry.yarnpkg.com/text-field-edit/-/text-field-edit-3.1.9001.tgz#479bbc6ed4c5a1dd721118daf9b13fd785cda257"
+  integrity sha512-5xSqH9HMiW4r/YDoz/DMX895elwenTCV/xwjGSmhVol62YFTHivbZi3T0jKm0Oyzj63RA2C0XAnWMQSC0SO/JA==
+
 text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"

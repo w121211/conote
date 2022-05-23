@@ -21,10 +21,10 @@ import { getOrCreateUser } from '../lib/models/user-model'
 import { createVote } from '../lib/models/vote-model'
 import prisma from '../lib/prisma'
 import {
-  SearchAuthorService,
-  SearchDiscussService,
-  SearchSymService,
-} from '../lib/search/search'
+  authorSearcher,
+  discussSearcher,
+  symSearcher,
+} from '../lib/searcher/searchers'
 import { ResolverContext } from './apollo-client-ssr'
 import {
   discussEmojiModel,
@@ -257,17 +257,17 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async searchAuthor(_parent, { term }, _context, _info) {
-    const hits = await SearchAuthorService.search(term)
+    const hits = await authorSearcher.search(term)
     return hits.map(e => ({ id: e.id, str: e.name }))
   },
 
   async searchDiscuss(_parent, { term }, _context, _info) {
-    const hits = await SearchDiscussService.search(term)
+    const hits = await discussSearcher.search(term)
     return hits.map(e => ({ id: e.id, str: e.title }))
   },
 
   async searchSymbol(_parent, { term, type }, _context, _info) {
-    const hits = await SearchSymService.search(term, type ?? undefined)
+    const hits = await symSearcher.search(term, type ?? undefined)
     return hits.map(e => ({ id: e.id, str: e.symbol }))
   },
 
@@ -451,14 +451,17 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   async createAuthor(_parent, { data }, { req }, _info) {
     await isAuthenticated(req)
     const author = await AuthorModel.create(data)
-    await SearchAuthorService.add(author)
+    await authorSearcher.add(author)
     return AuthorModel.toGQLAuthor(author)
   },
 
   async updateAuthor(_parent, { id, data }, { req }, _info) {
     await isAuthenticated(req)
     const author = await AuthorModel.update(id, data)
-    await SearchAuthorService.add(author)
+
+    // TODO: Remove previous author
+    await authorSearcher.add(author)
+
     return AuthorModel.toGQLAuthor(author)
   },
 
