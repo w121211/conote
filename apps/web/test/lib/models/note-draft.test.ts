@@ -43,17 +43,17 @@ afterAll(async () => {
 })
 
 afterEach(async () => {
-  await prisma.$queryRaw`TRUNCATE "Note", "NoteDoc", "NoteDraft", "Sym", "Commit" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Note", "NoteDoc", "NoteDraft", "Sym", "Commit", "Link", "Poll" CASCADE;`
 })
 
 /**
  * Cases
- * - [] create without link and symId
- * - [] create without link but with symId and fromDoc
- * - [] create by link if the link exists
- * - [] create by link if the link does not exist
- * - [] update (save)
- * - [] drop
+ * - [x] create without link and symId
+ * - [x] create without link but with symId and fromDoc
+ * - [x] create by link if the link exists
+ * - [x] create by link if the link does not exist
+ * - [x] update (save)
+ * - [x] drop
  */
 describe('noteDraftModel.validateCreateInput()', () => {
   it('branch not found', async () => {
@@ -141,7 +141,7 @@ describe('noteDraftModel.create()', () => {
   })
 
   it('create without link but with symId and fromDoc', async () => {
-    await testHelper.createCommit(prisma)
+    await testHelper.createMergeCommit(prisma)
     const { symbol, userId, domain, meta, content } = mockNoteDrafts[0]
     const fromDocId = mockNoteDocs[1].id
     const noteDraft = await noteDraftModel.create(
@@ -243,7 +243,7 @@ describe('noteDraftModel.create()', () => {
 
 it('noteDraftModel.update()', async () => {
   await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-  await testHelper.createCommit(prisma)
+  await testHelper.createMergeCommit(prisma)
   const draftId = mockNoteDrafts[0].id
   const update: NoteDraftInput = {
     domain: 'new_domain',

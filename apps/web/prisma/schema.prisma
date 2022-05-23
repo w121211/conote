@@ -167,26 +167,28 @@ model Note {
 }
 
 model NoteDoc {
-  id         String        @id @default(cuid())
-  branchId   String
-  symId      String
-  commitId   String
-  fromDocId  String?       @unique
-  userId     String
-  status     NoteDocStatus @default(CANDIDATE)
-  domain     String
-  meta       Json          @default("{}")
-  content    Json
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  branch     Branch        @relation(fields: [branchId], references: [id])
-  commit     Commit        @relation(fields: [commitId], references: [id])
-  fromDoc    NoteDoc?      @relation("DocHistory", fields: [fromDocId], references: [id])
-  nextDoc    NoteDoc?      @relation("DocHistory")
-  note       Note          @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym        Sym           @relation(fields: [symId], references: [id])
-  user       User          @relation(fields: [userId], references: [id])
-  noteDrafts NoteDraft[]
+  id          String        @id @default(cuid())
+  branchId    String
+  symId       String
+  commitId    String
+  fromDocId   String?       @unique
+  mergePollId String        @unique
+  userId      String
+  status      NoteDocStatus @default(CANDIDATE)
+  domain      String
+  meta        Json          @default("{}")
+  content     Json
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  branch      Branch        @relation(fields: [branchId], references: [id])
+  commit      Commit        @relation(fields: [commitId], references: [id])
+  fromDoc     NoteDoc?      @relation("DocHistory", fields: [fromDocId], references: [id])
+  nextDoc     NoteDoc?      @relation("DocHistory")
+  mergePoll   Poll          @relation(fields: [mergePollId], references: [id])
+  note        Note          @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym         Sym           @relation(fields: [symId], references: [id])
+  user        User          @relation(fields: [userId], references: [id])
+  noteDrafts  NoteDraft[]
 }
 
 model NoteDraft {
@@ -210,13 +212,10 @@ model NoteDraft {
   branch    Branch          @relation(fields: [branchId], references: [id])
   commit    Commit?         @relation(fields: [commitId], references: [id])
   fromDoc   NoteDoc?        @relation(fields: [fromDocId], references: [id])
-
-  // TODO: consider to remove?
-  link Link? @relation(fields: [linkId], references: [id])
-
-  note Note? @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym  Sym?  @relation(fields: [symId], references: [id])
-  user User  @relation(fields: [userId], references: [id])
+  link      Link?           @relation(fields: [linkId], references: [id])
+  note      Note?           @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym       Sym?            @relation(fields: [symId], references: [id])
+  user      User            @relation(fields: [userId], references: [id])
 }
 
 model NoteEmoji {
@@ -272,17 +271,18 @@ model Link {
 }
 
 model Poll {
-  id        String     @id @default(cuid())
-  userId    String
-  type      PollType   @default(FIXED)
-  status    PollStatus @default(OPEN)
-  meta      Json       @default("{}")
-  choices   String[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  user      User       @relation(fields: [userId], references: [id])
-  count     PollCount?
-  votes     Vote[]
+  id         String     @id @default(cuid())
+  userId     String
+  type       PollType   @default(FIXED)
+  status     PollStatus @default(OPEN)
+  meta       Json       @default("{}")
+  choices    String[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  user       User       @relation(fields: [userId], references: [id])
+  docToMerge NoteDoc?
+  count      PollCount?
+  votes      Vote[]
 }
 
 model PollCount {
