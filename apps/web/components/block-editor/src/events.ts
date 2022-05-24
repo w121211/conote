@@ -657,7 +657,7 @@ export async function docOpen(
   branch = 'mock-branch-0',
   domain = 'domain',
 ) {
-  if (docRepo.findDoc(title)) throw new Error('[docOpen] Doc is existed')
+  if (docRepo.getDoc(title)) throw new Error('[docOpen] Doc is existed')
 
   const [note, draft] = await Promise.all([
       noteService.queryNote(title),
@@ -849,11 +849,34 @@ export async function editorRouteUpdate({
 }
 
 /**
- * Reset left sidebar
+ * Refresh left sidebar by query and load my-all-draft-entries
  */
-export async function editorLeftSidebarReset() {
+export async function editorLeftSidebarRefresh() {
   const entries = await noteDraftService.queryMyAllDraftEntries()
   editorRepo.setLeftSidebarItems(entries)
+}
+
+/**
+ * Remove the item from left sidebar
+ * - If draft is existed in doc-repo, remove both doc and remote-draft
+ *   If not, remove remote-draft only
+ * - Refresh sidebar
+ *
+ * TODOS
+ * - [] After remove the item, show items in the recycle bin
+ */
+export async function editorLeftSidebarItemRemove(
+  item: NoteDraftEntryFragment,
+) {
+  const { id, symbol } = item,
+    doc = docRepo.getDoc(symbol)
+
+  if (doc) {
+    await docRemove(doc)
+  } else {
+    await noteDraftService.dropDraft(id)
+  }
+  await editorLeftSidebarRefresh()
 }
 
 //
@@ -881,10 +904,10 @@ export async function commitOnCompleted(
     inputDrafts,
     resultNoteDocs,
   )
-  await editorLeftSidebarReset()
+  await editorLeftSidebarRefresh()
 
   pairs.forEach(([noteDraft, noteDoc]) => {
-    const doc = docRepo.findDoc(noteDraft.symbol)
+    const doc = docRepo.getDoc(noteDraft.symbol)
     if (doc) {
       const { blockReducers, docReducers } = ops.docRemoveOp(doc)
       blockRepo.update(blockReducers)

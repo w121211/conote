@@ -213,7 +213,7 @@ class NoteDraftService {
     }
     if (errors) {
       console.error(errors)
-      throw new Error('[dropDraft] mutation error')
+      throw new Error('[dropDraft] DropNoteDraftMutation error')
     }
     throw new Error('[dropDraft] no return data')
   }

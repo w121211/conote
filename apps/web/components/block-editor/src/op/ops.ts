@@ -512,7 +512,7 @@ export function docLoadOp(
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
 } {
-  if (docRepo.findDoc(title))
+  if (docRepo.getDoc(title))
     throw new Error('[docLoadOp] Doc is already existed')
   if (title !== noteDraft.symbol)
     throw new Error('[docLoadOp] title !== noteDraft.symbol')
@@ -548,7 +548,7 @@ export function docNewOp(
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
 } {
-  if (docRepo.findDoc(title))
+  if (docRepo.getDoc(title))
     throw new Error('[docNewOp] Doc is already existed')
 
   if (note) {

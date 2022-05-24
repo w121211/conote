@@ -43,6 +43,7 @@ model Commit {
 model Discuss {
   id        String         @id @default(cuid())
   userId    String
+  type      DiscussType    @default(DISCUSS)
   status    DiscussStatus  @default(ACTIVE)
   meta      Json           @default("{}")
   title     String
@@ -54,6 +55,7 @@ model Discuss {
   emojis    DiscussEmoji[]
   posts     DiscussPost[]
   notes     Note[]
+  polls     Poll[]
 }
 
 model DiscussCount {
@@ -111,6 +113,7 @@ model DiscussPost {
   discuss   Discuss            @relation(fields: [discussId], references: [id])
   user      User               @relation(fields: [userId], references: [id])
   emojis    DiscussPostEmoji[]
+  vote      Vote?
 }
 
 model DiscussPostEmoji {
@@ -172,7 +175,7 @@ model NoteDoc {
   symId       String
   commitId    String
   fromDocId   String?       @unique
-  mergePollId String        @unique
+  mergePollId String?       @unique
   userId      String
   status      NoteDocStatus @default(CANDIDATE)
   domain      String
@@ -184,11 +187,15 @@ model NoteDoc {
   commit      Commit        @relation(fields: [commitId], references: [id])
   fromDoc     NoteDoc?      @relation("DocHistory", fields: [fromDocId], references: [id])
   nextDoc     NoteDoc?      @relation("DocHistory")
-  mergePoll   Poll          @relation(fields: [mergePollId], references: [id])
-  note        Note          @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym         Sym           @relation(fields: [symId], references: [id])
-  user        User          @relation(fields: [userId], references: [id])
-  noteDrafts  NoteDraft[]
+
+  // To judge the doc can merge or not
+  // Is optional because auto-merge not require a poll
+  mergePoll Poll? @relation(fields: [mergePollId], references: [id])
+
+  note       Note        @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym        Sym         @relation(fields: [symId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+  noteDrafts NoteDraft[]
 }
 
 model NoteDraft {
@@ -271,18 +278,26 @@ model Link {
 }
 
 model Poll {
-  id         String     @id @default(cuid())
-  userId     String
-  type       PollType   @default(FIXED)
-  status     PollStatus @default(OPEN)
-  meta       Json       @default("{}")
-  choices    String[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  user       User       @relation(fields: [userId], references: [id])
-  docToMerge NoteDoc?
-  count      PollCount?
-  votes      Vote[]
+  id        String     @id @default(cuid())
+  discussId String?
+  userId    String
+  type      PollType   @default(FIXED)
+  status    PollStatus @default(OPEN)
+  meta      Json       @default("{}")
+  choices   String[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // A poll can connect to a discuss
+  discuss Discuss? @relation(fields: [discussId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+
+  // This poll is for merge request of the note-doc
+  noteDocToMerge NoteDoc?
+
+  count PollCount?
+  votes Vote[]
 }
 
 model PollCount {
@@ -312,7 +327,7 @@ model Rate {
 }
 
 //
-// Q: Why not naming "Symbol"? "Symbol" is a preserved keyword in javascript
+// Why not naming "Symbol"? "Symbol" is a preserved keyword in javascript
 //
 model Sym {
   id        String      @id @default(cuid())
@@ -345,14 +360,19 @@ model User {
 }
 
 model Vote {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  pollId    String
-  choiceIdx Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  poll      Poll     @relation(fields: [pollId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  id            Int      @id @default(autoincrement())
+  discussPostId Int?     @unique
+  pollId        String
+  userId        String
+  choiceIdx     Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 1-1, A vote can connect to a post to enable 'comment' while voting
+  discussPost DiscussPost? @relation(fields: [discussPostId], references: [id])
+
+  poll Poll @relation(fields: [pollId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 enum DiscussStatus {
@@ -362,6 +382,14 @@ enum DiscussStatus {
   DELETE
   ARCHIVE
   REPORTED
+}
+
+enum DiscussType {
+  // For discuss
+  DISCUSS
+
+  // For note-doc merge request
+  MERGE
 }
 
 enum DiscussPostStatus {

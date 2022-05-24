@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import { editorLeftSidebarReset } from '../../events'
+import { editorLeftSidebarRefresh } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
 import { ThemeContext } from '../../../../theme/theme-provider'
@@ -44,7 +44,7 @@ const SidebarEl = ({
   const [themeBtn, setThemeBtn] = useState<ThemeType | 'system'>('light')
 
   useEffect(() => {
-    editorLeftSidebarReset()
+    editorLeftSidebarRefresh()
   }, [])
 
   useEffect(() => {

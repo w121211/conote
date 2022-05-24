@@ -26,10 +26,6 @@ export function getDoc(title: string): Doc {
 }
 
 class DocRepository {
-  findDoc(title: string): Doc | undefined {
-    return docsStore.query(getEntity(title))
-  }
-
   /**
    * Get doc's root block and all kids
    */
@@ -37,6 +33,10 @@ class DocRepository {
     const docBlock = getBlock(doc.blockUid),
       kids = allDescendants(docBlock)
     return [docBlock, ...kids]
+  }
+
+  getDoc(title: string): Doc | undefined {
+    return docsStore.query(getEntity(title))
   }
 
   getDoc$(title: string) {

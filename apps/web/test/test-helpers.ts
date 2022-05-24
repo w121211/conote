@@ -88,8 +88,8 @@ export const clean = (
   return obj === null
     ? obj
     : omitUndefined(
-      omitDeep(obj, ['createdAt', 'updatedAt', 'id', 'symId', 'noteId']),
-    )
+        omitDeep(obj, ['createdAt', 'updatedAt', 'id', 'symId', 'noteId']),
+      )
 }
 
 /**
@@ -107,8 +107,8 @@ class TestHelper {
    */
   async createMergeCommit(prisma: PrismaClient) {
     const sym = await prisma.sym.create({
-      data: mockSyms[0],
-    }),
+        data: mockSyms[0],
+      }),
       note = await prisma.note.create({
         data: mockNotes[0],
       }),
@@ -116,27 +116,35 @@ class TestHelper {
       commit = await prisma.commit.create({
         data: mockCommits[0],
       }),
-      poll = await prisma.poll.create({
+      // poll = await prisma.poll.create({
+      //   data: {
+      //     id: mockNoteDocs[1].mergePollId,
+      //     meta: {},
+      //     user: { connect: { id: mockNoteDocs[1].userId } },
+      //   },
+      // }),
+      noteDoc = await prisma.noteDoc.create({
         data: {
-          id: mockNoteDocs[1].mergePollId,
+          ...mockNoteDocs[1],
+          // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
           meta: {},
-          user: { connect: { id: mockNoteDocs[1].userId } },
         },
       })
     return { sym, note, commit, noteDoc }
-    const noteDoc = await prisma.noteDoc.create({
-      data: {
-        ...mockNoteDocs[1],
-        // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
-        meta: {},
-      },
-    })
+
+    // const noteDoc = await prisma.noteDoc.create({
+    //   data: {
+    //     ...mockNoteDocs[1],
+    //     // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
+    //     meta: {},
+    //   },
+    // })
   }
 
   async createCandidateCommit(prisma: PrismaClient) {
     const sym = await prisma.sym.create({
-      data: mockSyms[0],
-    }),
+        data: mockSyms[0],
+      }),
       note = await prisma.note.create({
         data: mockNotes[0],
       }),

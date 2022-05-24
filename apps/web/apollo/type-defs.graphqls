@@ -8,8 +8,6 @@ type Query {
   # NEXT:
   author(id: ID, name: String): Author
 
-  # notesByAuthor(authorId: ID!): [Note!]!
-
   discuss(id: ID!): Discuss
 
   discussEmojis(discussId: ID!): [DiscussEmoji!]!
@@ -61,11 +59,11 @@ type Query {
 
   #-----New-----
 
-  # to know all latest commit docs
+  # To know all latest commit docs
   myCommits: [Commit!]!
 
-  # get user's all drafts for draft-sidebar
-  # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
+  # Get user's all drafts for draft-sidebar
+  # Provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
   myNoteDraftEntries: [NoteDraftEntry!]!
 
   # throws error if not found
@@ -73,24 +71,28 @@ type Query {
 
   noteByBranchSymbol(branch: String!, symbol: String!): Note
 
-  # get noteDoc and throws error if not found
+  # Get noteDoc and throws error if not found
   noteDoc(id: ID!): NoteDoc!
 
-  # get all notes with merged docs for homepage
-  noteDocsJustMerged: [NoteDoc!]!
+  # Get all note-docs wait to merge (ie, candidate) of a note
+  noteDocsToMerge(noteId: ID!): [NoteDoc!]!
 
-  # get all candidate docs for verdict
-  noteDocsToMerge: [NoteDoc!]!
-
-  # get user's draft
+  # Get user's draft
+  # Query either by id, symbol or url
   noteDraft(id: ID, symbol: String, url: String): NoteDraft
 
-  # get all docs from note pull request records including candidates (like Github pr history)
+  # Get all docs from note pull request records including candidates (like Github pr history)
   noteHistory(noteId: ID!, status: NoteDocStatus): [NoteDocEntry!]!
 
   # TODO: Duplicated with searchSymbol ?
-  # search note by sym or title, using domain for filtering
+  # Search note by sym or title, using domain for filtering
   searchNote(symbol: String, title: String, domain: String): [Note!]!
+
+  # Get all just merged note-docs (for homepage)
+  latestNoteDocsMerged: [NoteDoc!]!
+
+  # Get all waiit to merge note-docs for verdict (for homepage)
+  latestNoteDocsToMerge: [NoteDoc!]!
 
   # -------------End--------------
 

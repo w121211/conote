@@ -1,7 +1,6 @@
 import prisma from '../../../lib/prisma'
 import {
   noteDocModel,
-  NoteDocMetaModel,
   mergeAutomatical,
   mergePeriodical,
 } from '../../../lib/models/note-doc-model'

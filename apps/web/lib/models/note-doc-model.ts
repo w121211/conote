@@ -1,8 +1,7 @@
-import { NoteDoc, Poll, PollCount, Prisma, PrismaPromise } from '@prisma/client'
-import { NoteDocMetaWebpageFragmentDoc } from '../../apollo/query.graphql'
+import { NoteDoc } from '@prisma/client'
 import { NoteDocContent, NoteDocMeta, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
-import { getContentDiff, isMetaChanged, metaDiff } from './change-model'
+import { getContentDiff, isMetaChanged } from './change-model'
 import { createMergePoll } from './poll-model'
 
 //
@@ -79,12 +78,13 @@ export async function mergeAutomatical(doc: NoteDoc): Promise<NoteDoc | null> {
     fromDoc?.content as unknown as NoteDocContent,
     doc.content as unknown as NoteDocContent,
   )
-  // no deletions, changes to the previous-doc's content, but addition
+
   // TODO: compare meta and content
   const poll = await prisma.poll.findUnique({
     where: { id: doc.mergePollId },
     include: { count: true },
   })
+
   if (doc.domain === fromDoc?.domain && !metaChanged && contentDiff.change) {
     return merge(doc)
   }
