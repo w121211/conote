@@ -21,7 +21,7 @@ const SidebarSection = ({
             text-gray-700 dark:text-gray-300 
             tracking-wide leading-7 
             cursor-pointer select-none  
-            hover:bg-gray-200/70 dark:hover:bg-gray-600/70
+            hover:bg-gray-200/60 dark:hover:bg-gray-600/70
           `}
           onClick={() => {
             setFolded(!folded)

@@ -4,10 +4,11 @@
 import { useEffect, useState } from 'react'
 import { useMeQuery } from '../apollo/query.graphql'
 import { SearchAllForm } from '../components/search-all-form'
-import MeHeaderItem from '../components/profile/me-header-item'
 import NewHotList from '../components/_new-hot-list'
 import UserRateTable from '../components/user/user-rate-table'
 import { mockRateData } from './user/[userid]'
+import AuthItem from '../components/auth/auth-Item'
+import { useMe } from '../components/auth/use-me'
 
 export function HomePage(): JSX.Element {
   const [showAnnounce, setAnnounce] = useState(false)
@@ -19,7 +20,8 @@ export function HomePage(): JSX.Element {
       window.sessionStorage.setItem('announce', showAnnounce ? 'true' : 'false')
     }
   }, [showAnnounce])
-  const { data, loading } = useMeQuery()
+  // const { data, loading } = useMeQuery()
+  const { me, loading } = useMe()
 
   if (loading)
     return (
@@ -69,7 +71,7 @@ export function HomePage(): JSX.Element {
               <SearchAllForm />
             </div>
           </div>
-          <MeHeaderItem className="ml-4 sm:ml-0 flex-2 text-right" />
+          <AuthItem />
         </div>
         <>
           <div className=" flex pb-[9vh] pt-6 bg-gray-100">

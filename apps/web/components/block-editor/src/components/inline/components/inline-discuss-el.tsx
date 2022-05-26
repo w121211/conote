@@ -43,7 +43,7 @@ const InlineDiscussEl = ({
         className={`btn-primary h-10 w-24 `}
         type="submit"
       >
-        提交
+        Submint
       </button>
     ),
     modalTopRightBtn = isDiscussCreated && (
@@ -97,18 +97,12 @@ const InlineDiscussEl = ({
           // visible={showWarnTooltip}
           // onClose={() => setShowWarnTooltip(false)}
           size="sm"
-          state="warn"
+          type="warning"
         >
           <span
             // 'relative' is required for clickable and hover effect
             className="relative text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
             onClick={() => setShowModal(true)}
-            // onMouseEnter={() => {
-            //   setShowWarnTooltip(true)
-            // }}
-            // onMouseLeave={() => {
-            //   setShowWarnTooltip(false)
-            // }}
             role="button"
           >
             {children}

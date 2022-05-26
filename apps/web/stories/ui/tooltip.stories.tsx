@@ -59,6 +59,6 @@ Default.args = {
   visible: true,
   title: 'test',
   size: 'sm',
-  state: undefined,
+  type: undefined,
   // warn:false
 }

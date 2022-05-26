@@ -1,12 +1,4 @@
-import React, {
-  ReactChild,
-  ReactNode,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, { useContext, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { TooltipContext } from './tooltip-provider'
 import './tooltip.module.css'
@@ -18,7 +10,6 @@ export interface TooltipProps {
     | React.ReactPortal
     | string
   visible?: boolean
-  // onClose?: () => void
   width?: number
   top?: number
   className?: string
@@ -26,7 +17,7 @@ export interface TooltipProps {
   // direction?: 'top' | 'bottom' | 'left' | 'right'
   size?: 'sm' | 'md'
   darkMode?: boolean
-  state?: 'warn'
+  type?: 'warning'
 }
 
 /* size */
@@ -36,7 +27,7 @@ const md = `px-3 py-2 text-sm `
 /* theme */
 const dark = `border-gray-700 bg-gray-600 text-gray-50`
 const light = `border-gray-200 bg-gray-100 text-gray-500`
-const warn = `border-red-600 bg-red-600 text-white`
+const warning = `border-red-600 bg-red-600 text-white`
 
 function getPageTopOffset(el: HTMLElement | null) {
   if (el !== null) {
@@ -90,7 +81,7 @@ export const Tooltip: React.FC<
   className,
   size,
   darkMode,
-  state,
+  type,
   align,
 }) => {
   const { current: childrenRef } = useRef<HTMLElement[]>([])
@@ -100,7 +91,7 @@ export const Tooltip: React.FC<
   const [position, setPosition] = useState({ top: 0, left: 0 })
   const [mouseEnter, setMouseEnter] = useState(false)
   const [open, setOpen] = useState(false)
-  const theme = state === 'warn' ? warn : darkMode ? dark : dark
+  const theme = type === 'warning' ? warning : darkMode ? dark : dark
 
   const tooltipRoot = useContext(TooltipContext)
 
@@ -137,12 +128,12 @@ export const Tooltip: React.FC<
         ${
           direction === 'top'
             ? `after:top-full ${
-                state === 'warn'
+                type === 'warning'
                   ? 'after:border-t-inherit'
                   : 'after:border-t-gray-600'
               } `
             : `after:-top-3  ${
-                state === 'warn'
+                type === 'warning'
                   ? 'after:border-b-inherit'
                   : 'after:border-b-gray-600'
               }`
@@ -168,7 +159,6 @@ export const Tooltip: React.FC<
   const checkOutOfViewport = (
     top: number,
     topDistance: number,
-    // scrollTop: number,
     bottomDistance: number,
     height: number,
   ) => {
@@ -177,7 +167,6 @@ export const Tooltip: React.FC<
     if (top - topDistance <= window.scrollY) {
       newTop = top + bottomDistance
       setDirection('bottom')
-      // console.log('first if', top)
     } else if (top + bottomDistance + height >= window.innerHeight) {
       newTop = top - topDistance
       setDirection('top')
@@ -238,7 +227,6 @@ export const Tooltip: React.FC<
   useLayoutEffect(() => {
     if (visible !== undefined) {
       if (visible) {
-        // rendered.current = 1
         handlePosition()
         setOpen(true)
       } else {
@@ -246,7 +234,6 @@ export const Tooltip: React.FC<
       }
     } else {
       if (mouseEnter) {
-        // rendered.current = 1
         handlePosition()
         setOpen(true)
       } else {
@@ -305,5 +292,3 @@ export const Tooltip: React.FC<
     </>
   )
 }
-
-// export default Tooltip

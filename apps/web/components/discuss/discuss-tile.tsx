@@ -1,6 +1,7 @@
 import moment from 'moment'
 import React from 'react'
 import { DiscussFragment, useMeQuery } from '../../apollo/query.graphql'
+import { useMe } from '../auth/use-me'
 import { Tile } from '../ui-component/tile'
 import DiscussEmojis from './discuss-emojis'
 import OptionsMenu from './options-menu'
@@ -12,7 +13,8 @@ const currentTab = ''
 const quote = '這則討論和其他重複了!'
 
 export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
-  const { data: meData } = useMeQuery()
+  // const { data: meData } = useMeQuery()
+  const { me } = useMe()
   return (
     <Tile className="mb-3 pl-10 pt-4 pb-1">
       <div className="flex gap-1">
@@ -56,10 +58,7 @@ export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
 
       <div className="flex pt-1 border-t border-gray-200">
         <div className="flex-grow">
-          <DiscussEmojis
-            discussId={data.id}
-            disable={meData?.me.id === data.userId}
-          />
+          <DiscussEmojis discussId={data.id} disable={me?.id === data.userId} />
         </div>
         <button className="flex p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
           <span className="material-icons-outlined text-base leading-none">
@@ -67,7 +66,7 @@ export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
           </span>
           Reply
         </button>
-        <OptionsMenu isMyPost={meData?.me.id === data.userId ?? false} />
+        <OptionsMenu isMyPost={me?.id === data.userId ?? false} />
       </div>
     </Tile>
   )

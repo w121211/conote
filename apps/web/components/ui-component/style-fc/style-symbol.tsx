@@ -8,7 +8,7 @@ const blueHighlight = `text-blue-500 dark:text-blue-300`
 
 export function styleSymbol(
   str: string,
-  title: string | undefined,
+  title?: string,
   // lightBracket?: boolean,
 ) {
   const tokens = tokenize(str, grammar)

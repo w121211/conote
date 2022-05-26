@@ -53,6 +53,9 @@ export function Layout({
   }, [])
 
   useEffect(() => {
+    if (showSider === false) {
+      setPinMenu(false)
+    }
     localStorage.setItem('showSider', `${showSider}`)
   }, [showSider])
 
@@ -103,7 +106,7 @@ export function Layout({
   // }
 
   return (
-    <div className="flex w-screen h-screen  ">
+    <div className="relative flex w-screen h-screen ">
       <SidebarEl
         showMenuHandler={triggerMenuHandler}
         pinMenuHandler={pinMenuHandler}
@@ -111,21 +114,16 @@ export function Layout({
         isPined={pinSider}
       />
       <div
-        className={`flex-grow  mt-11 pb-[20vh]  
+        className={`flex-grow mt-11 pb-[20vh]  
         overflow-auto scroll-smooth scrollbar
         bg-white dark:bg-gray-700`}
       >
-        {/* <div className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl scroll-smooth"> */}
-        <div
-          className=" mx-auto px-2 w-[425px] md:max-w-[720px] md:w-full lg:max-w-[900px] lg:px-24
-                        "
-        >
+        <div className=" mx-auto px-2 w-[425px] md:max-w-[720px] md:w-full lg:max-w-[900px] lg:px-24">
           {children}
           {/* <LoginModal>{children}</LoginModal> */}
         </div>
       </div>
       <Navbar
-        pinedSider={pinSider}
         rbtn={buttonRight}
         backgroundColor={backgroundColor}
         onClickMenu={triggerMenuHandler}

@@ -6,10 +6,11 @@ export const ThemeToggle = () => {
   const { theme, setTheme, isSystem, setIsSystem } = useContext(ThemeContext)
   return (
     <ToggleMenu
+      className="-translate-x-full left-full"
       summary={
         theme.theme === 'light' ? (
           <span
-            className={`material-icons-outlined text-xl leading-none ${
+            className={`material-icons-outlined p-1 text-xl hover:bg-gray-100 rounded leading-none ${
               isSystem ? 'text-gray-400 ' : 'text-blue-400'
             } `}
           >
@@ -17,7 +18,7 @@ export const ThemeToggle = () => {
           </span>
         ) : (
           <span
-            className={`material-icons-outlined text-xl leading-none ${
+            className={`material-icons-outlined p-1 text-xl hover:bg-gray-100 rounded leading-none ${
               isSystem ? 'dark:text-gray-500' : ' dark:text-blue-300'
             }`}
           >

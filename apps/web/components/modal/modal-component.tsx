@@ -38,11 +38,19 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
       ></div>
 
       <div
-        className={`relative  flex flex-col h-fit py-2 rounded  shadow-2xl 
-        w-[80vw] max-h-[80vh] sm:min-w-[20vw] sm:max-w-[80vw] sm:max-h-[90vh] mt-[5vh] 
-      md:max-w-[65vw] lg:max-w-[55vw] ${
-        sectionClassName ? sectionClassName : 'bg-white'
-      }`}
+        className={`
+        relative  
+        flex flex-col 
+        bg-white 
+        w-[80vw] sm:w-fit
+        sm:min-w-[20vw] 
+        sm:max-w-[80vw] md:max-w-[65vw] lg:max-w-[55vw]
+        h-fit 
+        max-h-[80vh] sm:max-h-[90vh]
+        mt-[5vh] 
+        rounded  
+        shadow-2xl 
+       ${sectionClassName ? sectionClassName : ''}`}
       >
         {(topLeftBtn || subTitle || topRightBtn) && (
           <div
@@ -71,10 +79,8 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
             {topRightBtn}
           </div>
         )}
-        <section className={`scrollbar flex overflow-auto `}>
-          {/* <div className="flex-1 min-w-0 min-h-0"> */}
-          {children}
-          {/* </div> */}
+        <section className={`flex scrollbar overflow-y-auto `}>
+          <div className="flex-1 min-w-0 min-h-0">{children}</div>
         </section>
         {buttons && (
           <div className="flex items-center justify-center mb-4">{buttons}</div>

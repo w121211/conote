@@ -12,26 +12,29 @@ import {
   useForm,
   useFormContext,
 } from 'react-hook-form'
-import { components, ControlProps, GroupBase, InputProps, OptionsOrGroups, StylesConfig } from 'react-select'
+import {
+  components,
+  ControlProps,
+  GroupBase,
+  InputProps,
+  OptionsOrGroups,
+  StylesConfig,
+} from 'react-select'
 import AsyncCreatableSelect from 'react-select/async-creatable'
 import Creatable from 'react-select/creatable'
 import { FilterOptionOption } from 'react-select/dist/declarations/src/filters'
 import {
-  AuthorDocument,
-  AuthorQuery,
-  AuthorQueryVariables,
   RateDocument,
   RateFragment,
   RateQuery,
   useAuthorLazyQuery,
-  useNoteLazyQuery,
-  useNoteQuery,
   useCreateRateMutation,
   useLinkLazyQuery,
   useMeQuery,
   useSearchAuthorLazyQuery,
   useSearchSymbolLazyQuery,
 } from '../../apollo/query.graphql'
+import { useMe } from '../auth/use-me'
 import Modal from '../modal/modal'
 import CreateAuthorForm from './create-author-form'
 import CreateSymbolForm from './create-symbol-form'
@@ -64,7 +67,8 @@ export const customStyle: StylesConfig<Option, false, GroupBase<Option>> = {
   menu: base => ({
     ...base,
     maxHeight: '100px',
-    boxShadow: '0 0 0 1px hsl(0deg 0% 0% / 8%), 0 4px 11px hsl(0deg 0% 0% / 10%)',
+    boxShadow:
+      '0 0 0 1px hsl(0deg 0% 0% / 8%), 0 4px 11px hsl(0deg 0% 0% / 10%)',
   }),
   menuList: base => ({ ...base, maxHeight: '100px' }),
   singleValue: base => ({ ...base, fontSize: '14px' }),
@@ -84,9 +88,10 @@ const AuthorControl = ({ children, ...props }: ControlProps<Option, false>) => {
 
 const AsyncAuthorConsumer = ({ name }: { name: string }) => {
   const [searchAuthor, { data, refetch }] = useSearchAuthorLazyQuery()
-  const { data: meData } = useMeQuery()
+  // const { data: meData } = useMeQuery()
+  const { me } = useMe()
 
-  const defaultOptions = [{ value: meData?.me.id ?? '', label: '我' }]
+  const defaultOptions = [{ value: me?.id ?? '', label: '我' }]
   const { control, setValue } = useFormContext()
   const [openMenu, setOpenMenu] = useState(false)
   const [options, setOptions] = useState<Option[]>([])
@@ -95,7 +100,11 @@ const AsyncAuthorConsumer = ({ name }: { name: string }) => {
 
   useEffect(() => {
     if (data?.searchAuthor) {
-      setOptions(defaultOptions.concat(data.searchAuthor.map(({ id, str }) => ({ value: id, label: str }))))
+      setOptions(
+        defaultOptions.concat(
+          data.searchAuthor.map(({ id, str }) => ({ value: id, label: str })),
+        ),
+      )
     }
   }, [data])
 
@@ -108,7 +117,11 @@ const AsyncAuthorConsumer = ({ name }: { name: string }) => {
     }
   }
 
-  const onShowCreate = (inputValue: string, _: any, options: OptionsOrGroups<Option, GroupBase<Option>>) => {
+  const onShowCreate = (
+    inputValue: string,
+    _: any,
+    options: OptionsOrGroups<Option, GroupBase<Option>>,
+  ) => {
     if (options.find(e => e.label === inputValue)) {
       return false
     }
@@ -174,7 +187,11 @@ const AsyncAuthorConsumer = ({ name }: { name: string }) => {
         visible={showModal}
         onClose={() => setShowModal(false)}
         buttons={
-          <button form="create-author-form" className="btn-primary h-10 w-24 " type="submit">
+          <button
+            form="create-author-form"
+            className="btn-primary h-10 w-24 "
+            type="submit"
+          >
             提交
           </button>
         }
@@ -182,7 +199,11 @@ const AsyncAuthorConsumer = ({ name }: { name: string }) => {
       >
         <h2 className="mb-6 text-2xl font-bold text-gray-800">新增作者</h2>
         <CreateAuthorForm
-          defaultValues={{ name: selectValue, type: { value: 'PERSON', label: '人' }, sites: [{ name: '', url: '' }] }}
+          defaultValues={{
+            name: selectValue,
+            type: { value: 'PERSON', label: '人' },
+            sites: [{ name: '', url: '' }],
+          }}
           onCreated={createdData => {
             refetch()
             setValue(name, { value: createdData.id, label: createdData.name })
@@ -208,7 +229,9 @@ const TickerInput = ({ children, ...props }: InputProps<Option, false>) => {
     <components.Input
       {...props}
       inputClassName={`${
-        typeof props.value === 'string' && props.value.length > 0 && props.value.startsWith('$')
+        typeof props.value === 'string' &&
+        props.value.length > 0 &&
+        props.value.startsWith('$')
           ? 'uppercase'
           : 'normal-case'
       }`}
@@ -226,11 +249,12 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
   const [showModal, setShowModal] = useState(false)
   const [selectValue, setSelectValue] = useState('')
   const [searchSymbol, { data }] = useSearchSymbolLazyQuery()
-  const [queryNote, { data: cardData }] = useNoteLazyQuery()
 
   useEffect(() => {
     if (data && data.searchSymbol) {
-      setOptions(data.searchSymbol.map(({ id, str }) => ({ value: id, label: str })))
+      setOptions(
+        data.searchSymbol.map(({ id, str }) => ({ value: id, label: str })),
+      )
     }
   }, [data])
   const onInputChange = (inputValue: string) => {
@@ -243,7 +267,11 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
     }
     //query symbol
   }
-  const onShowCreate = (inputValue: string, _: any, options: OptionsOrGroups<Option, GroupBase<Option>>) => {
+  const onShowCreate = (
+    inputValue: string,
+    _: any,
+    options: OptionsOrGroups<Option, GroupBase<Option>>,
+  ) => {
     if (
       options.find(e => e.label === `$${inputValue.toUpperCase()}`) ||
       options.find(e => e.label === `[[${inputValue}]]`) ||
@@ -330,7 +358,9 @@ export const AsyncTickerConsumer = ({ name }: { name: string }) => {
       <Modal visible={showModal} onClose={() => setShowModal(false)}>
         <CreateSymbolForm
           defaultValues={{
-            target: selectValue.startsWith('$') ? selectValue.toUpperCase() : selectValue,
+            target: selectValue.startsWith('$')
+              ? selectValue.toUpperCase()
+              : selectValue,
             description: '',
           }}
           onSubmitted={(value: Option) => {
@@ -482,7 +512,9 @@ const CreateRateForm = ({
             type="text"
           /> */}
           {/* <div className="flex items-center select-none"> */}
-          <label className="text-right text-sm text-gray-700 font-normal ">預測</label>
+          <label className="text-right text-sm text-gray-700 font-normal ">
+            預測
+          </label>
           <div className="flex gap-3">
             {[
               ['LONG', '看多'],
@@ -504,19 +536,29 @@ const CreateRateForm = ({
                     type="radio"
                     value={value}
                   />
-                  <h5 className={`font-normal ${watchChoice === value ? 'text-white' : 'text-gray-900'}`}>{label}</h5>
+                  <h5
+                    className={`font-normal ${
+                      watchChoice === value ? 'text-white' : 'text-gray-900'
+                    }`}
+                  >
+                    {label}
+                  </h5>
                 </label>
               )
             })}
           </div>
           {/* </div> */}
 
-          <label className="text-right text-sm text-gray-700 font-normal ">標的</label>
+          <label className="text-right text-sm text-gray-700 font-normal ">
+            標的
+          </label>
 
           <AsyncTickerConsumer name="target" />
           {/* <input {...register('target')} className="input flex-grow" type="text" placeholder="例如:$GOOG" /> */}
 
-          <label className="text-right text-sm text-gray-700 font-normal ">來源網址</label>
+          <label className="text-right text-sm text-gray-700 font-normal ">
+            來源網址
+          </label>
           <input
             {...methods.register('link')}
             className="input flex-grow"

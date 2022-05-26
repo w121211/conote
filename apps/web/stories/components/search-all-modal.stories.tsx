@@ -1,7 +1,11 @@
+import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
+import { getApolloClient } from '../../apollo/apollo-client'
 import ModalProvider from '../../components/modal/modal-context'
 import { SearchAll } from '../../components/search-all-modal/search-all-modal'
+
+const apolloClient = getApolloClient()
 
 export default {
   component: SearchAll,
@@ -24,9 +28,11 @@ export default {
 } as ComponentMeta<typeof SearchAll>
 
 const Template: ComponentStory<typeof SearchAll> = _ => (
-  <ModalProvider>
-    <SearchAll />
-  </ModalProvider>
+  <ApolloProvider client={apolloClient}>
+    <ModalProvider>
+      <SearchAll />
+    </ModalProvider>
+  </ApolloProvider>
 )
 
 export const Default = Template.bind({})

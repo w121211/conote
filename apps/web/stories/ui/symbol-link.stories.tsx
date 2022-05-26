@@ -3,7 +3,7 @@ import React from 'react'
 
 const Link = () => {
   return (
-    <a className="text-blue-500 cursor-pointer dark:text-blue-300 hover:underline hover:underline-offset-2 ">
+    <a className="text-blue-500 cursor-pointer dark:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-600">
       test
     </a>
   )
