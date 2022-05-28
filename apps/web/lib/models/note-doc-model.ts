@@ -66,6 +66,9 @@ export class NoteDocModel {
         commitId,
         incomingSymbolsDict,
       ),
+      meta: NoteDocMeta = {
+        mergeState: 'before_merge',
+      },
       doc = prisma.noteDoc.create({
         data: {
           branch: { connect: { id: branchId } },
@@ -85,6 +88,7 @@ export class NoteDocModel {
               },
             },
           },
+          meta,
           domain,
           contentHead,
           contentBody: contentBody_,

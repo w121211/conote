@@ -227,6 +227,7 @@ export async function commitNoteDrafts(
       sym: true,
       branch: true,
       fromDoc: true,
+      mergePoll: true,
     },
   })
 

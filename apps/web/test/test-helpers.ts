@@ -99,10 +99,14 @@ class TestHelper {
   }
 
   /**
-   * Create Commit and also create Sym, Note, NoteDoc
+   * Simulating a commit created, which includes creating
+   * the note-draft, sym, note, note-doc
    */
   async createMergeCommit(prisma: PrismaClient) {
-    const sym = await prisma.sym.create({
+    const noteDraft = await prisma.noteDraft.create({
+        data: mockNoteDrafts[0],
+      }),
+      sym = await prisma.sym.create({
         data: mockSyms[0],
       }),
       note = await prisma.note.create({
@@ -121,12 +125,11 @@ class TestHelper {
       // }),
       noteDoc = await prisma.noteDoc.create({
         data: {
-          ...mockNoteDocs[1],
-          // meta: NoteDocMetaModel.toJSON(mockNoteDocs[1].meta),
-          meta: {},
+          ...mockNoteDocs[0],
+          status: 'MERGED',
         },
       })
-    return { sym, note, commit, noteDoc }
+    return { commit, sym, note, noteDoc, noteDraft }
 
     // const noteDoc = await prisma.noteDoc.create({
     //   data: {
@@ -178,32 +181,18 @@ class TestHelper {
     ])
   }
 
-  async createLinks(prisma: PrismaClient): Promise<void> {
-    await prisma.$transaction(
+  async createLinks(prisma: PrismaClient) {
+    return await prisma.$transaction(
       mockLinks.map(e => prisma.link.create({ data: e })),
     )
   }
 
   async createNoteDrafts(
     prisma: PrismaClient,
-    drafts: Omit<
-      NoteDraftParsed,
-      'symId' | 'branchId' | 'commitId'
-    >[] = mockNoteDrafts,
-  ): Promise<void> {
-    await prisma.$transaction(
-      drafts.map(e => {
-        const { userId, fromDocId, linkId, ...rest } = e
-        return prisma.noteDraft.create({
-          data: {
-            ...rest,
-            branch: { connect: { name: mockBranches[0].name } },
-            user: { connect: { id: userId } },
-            fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
-            link: linkId ? { connect: { id: linkId } } : undefined,
-          },
-        })
-      }),
+    drafts: NoteDraftParsed[] = mockNoteDrafts,
+  ) {
+    return await prisma.$transaction(
+      drafts.map(e => prisma.noteDraft.create({ data: e })),
     )
   }
 
