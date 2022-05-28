@@ -1,4 +1,3 @@
-import { diff } from 'deep-object-diff'
 import { Block } from '../../src/interfaces'
 import { insert, moveBetween, moveWithin, reorder } from '../../src/op/order'
 import { blocks } from '../helpers'
@@ -120,7 +119,7 @@ it('moveWithin()', () => {
 
 it('reorder()', () => {
   function print(blocks: Block[]) {
-    return blocks.map((e) => `${e.uid}_${e.order}`).join(', ')
+    return blocks.map(e => `${e.uid}_${e.order}`).join(', ')
   }
 
   /**

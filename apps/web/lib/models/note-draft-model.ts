@@ -18,6 +18,10 @@ class NoteDraftModel {
     throw 'Not implemented'
   }
 
+  /**
+   * Throws
+   * - [] If not made any changes compare to the from-doc
+   */
   async validateCreateInput(
     branchName: string,
     symbol?: string,
@@ -51,6 +55,10 @@ class NoteDraftModel {
     }
   }
 
+  /**
+   * TODO
+   * - [] Swap block-uid for new inserted blocks to prevent directly using the client generated uids
+   */
   async create(
     branchName: string,
     symbol: string,
@@ -122,6 +130,7 @@ class NoteDraftModel {
 
   /**
    * 'Save' the note-draft by updating its value
+   * No needs to check the content here, check on commit
    */
   async update(
     draftId: string,
@@ -131,7 +140,7 @@ class NoteDraftModel {
     if (draft === null) {
       throw new Error('NoteDraft not found.')
     }
-    const updatedDraft = await prisma.noteDraft.update({
+    const draft_ = await prisma.noteDraft.update({
       data: {
         // TODO: Check
         fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
@@ -141,7 +150,7 @@ class NoteDraftModel {
       },
       where: { id: draftId },
     })
-    return this.parse(draft)
+    return this.parse(draft_)
   }
 
   /**

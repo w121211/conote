@@ -552,7 +552,9 @@ export function docNewOp(
     throw new Error('[docNewOp] Doc is already existed')
 
   if (note) {
-    const { blocks, docBlock } = convertGQLBlocks(note.noteDoc.content.blocks),
+    const { blocks, docBlock } = convertGQLBlocks(
+        note.noteDoc.contentBody.blocks,
+      ),
       newDoc: Doc = {
         branch,
         domain,

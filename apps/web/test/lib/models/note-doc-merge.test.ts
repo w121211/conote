@@ -1,4 +1,4 @@
-import { Note, NoteDoc, Poll, PrismaClient } from '@prisma/client'
+import { NoteDoc } from '@prisma/client'
 import { cloneDeep } from 'lodash'
 import { mockDiffBlocks } from '../../../components/block-editor/test/__mocks__/mock-diff-blocks'
 import { NoteDocParsed } from '../../../lib/interfaces'
@@ -21,7 +21,7 @@ import { createMockMergePolls, createMockVotes } from './poll-merge.test'
  *  and should only be used for testing merge functions. The correct way is through
  *  commit process and create all related data there.
  */
-async function createMockNoteDocs(mockDocs: NoteDocParsed<NoteDoc>[]) {
+async function createMockNoteDocs(docs: NoteDocParsed<NoteDoc>[]) {
   await prisma.$transaction(mockLinks.map(e => prisma.link.create({ data: e })))
   await prisma.$transaction(mockSyms.map(e => prisma.sym.create({ data: e })))
   await prisma.$transaction(
@@ -30,8 +30,8 @@ async function createMockNoteDocs(mockDocs: NoteDocParsed<NoteDoc>[]) {
   await createMockMergePolls()
   await prisma.$transaction(mockNotes.map(e => prisma.note.create({ data: e })))
 
-  const docs = await prisma.$transaction(
-    mockDocs.map(e => {
+  const docs_ = await prisma.$transaction(
+    docs.map(e => {
       return prisma.noteDoc.create({
         data: e,
         include: {
@@ -42,7 +42,7 @@ async function createMockNoteDocs(mockDocs: NoteDocParsed<NoteDoc>[]) {
       })
     }),
   )
-  return docs
+  return docs_
 }
 
 function c<T extends NoteDoc>(doc: T) {

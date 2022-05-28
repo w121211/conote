@@ -73,7 +73,7 @@ export type NoteDocContentHead = {
     title?: string
 
     // when the webpage content publish at
-    publishedAt?: string
+    publishedAt?: number
 
     // tickers mentioned in the webpage content
     tickers?: string[]
@@ -84,7 +84,7 @@ export type NoteDocContentBody = {
   discussIds: BlockUid_DiscussId[]
   symbols: Symbol_SymId[]
   diff?: any
-  blocks: Block[]
+  blocks: Omit<Block, 'childrenUids'>[]
 }
 
 export type NoteDraftParsed = Omit<NoteDraft, 'contentHead' | 'contentBody'> & {
@@ -93,7 +93,7 @@ export type NoteDraftParsed = Omit<NoteDraft, 'contentHead' | 'contentBody'> & {
 }
 
 export type PollMeta = {
-  // eg: merge_poll-v1
+  // Consider to include, eg 'merge_poll-v1'
   // spec?: string
 
   // Clase the poll after the given period

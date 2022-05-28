@@ -213,15 +213,15 @@ fragment noteDoc on NoteDoc {
   userId
   status
   domain
-  # meta {
-  #   ...noteDocMeta
-  # }
-  # contentHead {
-  #   ...noteDocContentHead
-  # }
-  # contentBody {
-  #   ...noteDocContentBody
-  # }
+  meta {
+    ...noteDocMeta
+  }
+  contentHead {
+    ...noteDocContentHead
+  }
+  contentBody {
+    ...noteDocContentBody
+  }
   updatedAt
 }
 

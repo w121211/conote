@@ -260,14 +260,14 @@ class NoteDraftService {
     noteDraft: NoteDraftFragment,
     note: NoteFragment | null,
   ): { doc: Doc; blocks: Block[]; docBlock: Block } {
-    const { content, domain, meta, symbol } = noteDraft,
+    const { symbol, domain, contentBody, contentHead } = noteDraft,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      { blocks, docBlock } = convertGQLBlocks(content.blocks),
+      { blocks, docBlock } = convertGQLBlocks(contentBody.blocks),
       doc: Doc = {
         branch,
         domain,
         title: symbol,
-        meta: omitTypenameDeep(meta),
+        contentHead: omitTypenameDeep(contentHead),
         blockUid: docBlock.uid,
         noteCopy: note ?? undefined,
         noteDraftCopy: noteDraft,
@@ -280,21 +280,21 @@ class NoteDraftService {
    *
    */
   toNoteDraftInput(doc: Doc): NoteDraftInput {
-    const { domain, noteCopy, meta } = doc,
+    const { noteCopy, domain, contentHead } = doc,
       blocks = docRepo.getContentBlocks(doc),
       blocksWithoutChildrenUids = blocks.map(e => {
         const { childrenUids, editTime, ...rest } = e
         return { ...rest }
       }),
       input: NoteDraftInput = {
-        content: {
+        fromDocId: noteCopy?.noteDoc.id,
+        domain,
+        contentHead,
+        contentBody: {
           blocks: blocksWithoutChildrenUids,
           discussIds: [],
           symbols: [],
         },
-        domain,
-        fromDocId: noteCopy?.noteDoc.id,
-        meta,
       }
     return input
   }

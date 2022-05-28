@@ -37,8 +37,6 @@ class NoteService implements INoteService {
       variables: { branch: 'branch', symbol },
     })
 
-    console.log(data)
-
     if (errors) {
       // console.debug('[NoteBySymbolQuery] error', errors)
       return null
