@@ -39,12 +39,11 @@ type Query {
 
   myDiscussPostEmojiLike(discussPostEmojiId: ID!): DiscussPostEmojiLike
 
+  # allow vote multiple times on the same poll
+  myPollVotes(pollId: ID!): [PollVote!]!
+
   # NEXT:
   myRates(symId: ID!): [Rate!]!
-
-  # allow vote multiple times on the same poll
-  # NEXT: Priority, will be used for merge request
-  myVotes(pollId: ID!): [Vote!]!
 
   # throws error if not found
   noteById(id: ID!): Note!
@@ -97,7 +96,6 @@ type Query {
   # 以 note symbol 找該 note 所有的 active hashtags
   # hashtags(symbol: String!): [Hashtag!]
 
-  # myVotes(after: String): [Vote!]!
   # myCommentLikes(after: String): [CommentLike!]!
   # myBoardLikes(after: String): [BoardLike!]!
   # myBulletLikes(after: String): [BulletLike!]!
@@ -237,7 +235,9 @@ type Mutation {
 
   # also used for merge verdict
   #  NEXT:
-  createVote(pollId: ID!, data: VoteInput!): Vote!
+  createPollVote(pollId: ID!, data: PollVoteInput!): PollVote!
+
+  # updatePollVote(pollId: ID!, data: VoteInput!): PollVote!
 
   # csrf token not support yet
   sessionLogin(idToken: String!): User!
@@ -255,9 +255,6 @@ type Mutation {
   # updatePost(id: ID!, data: PostInput!): Post!
   # createPostLike(postId: ID!, data: LikeInput!): PostLikeResonse!
   # updatePostLike(id: ID!, data: LikeInput!): PostLikeResonse!
-
-  # 允許更新postVote？
-  # updatePollVote(pollId: ID!, data: VoteInput!): PollVote!
 
   # createCommit(data: CommitInput!): Commit!
   # updateCommit(id: ID!, data: CommitInput!): Commit!
@@ -570,6 +567,15 @@ type PollCount {
   # failedMsg: String
 }
 
+type PollVote {
+  id: ID!
+  pollId: String!
+  choiceIdx: Int!
+  # reward: Float
+  # createdAt: DateTime!
+  # updatedAt: DateTime!
+}
+
 type Rate {
   id: ID!
   userId: String!
@@ -603,15 +609,6 @@ type User {
   email: String!
   # profileImage: String
   # trips: [Launch]!
-}
-
-type Vote {
-  id: ID!
-  pollId: String!
-  choiceIdx: Int!
-  # reward: Float
-  # createdAt: DateTime!
-  # updatedAt: DateTime!
 }
 
 type UpsertDiscussEmojiLikeResult {
@@ -716,6 +713,10 @@ input PollInput {
   choices: [String!]!
 }
 
+input PollVoteInput {
+  choiceIdx: Int!
+}
+
 input RateInput {
   choice: RateChoice!
   targetId: ID! # target note id
@@ -726,10 +727,6 @@ input RateInput {
 input Symbol_SymIdInput {
   symbol: String!
   symId: String
-}
-
-input VoteInput {
-  choiceIdx: Int!
 }
 
 # ------ NEXT ------

@@ -148,6 +148,13 @@ fragment poll on Poll {
   updatedAt
 }
 
+fragment pollVote on PollVote {
+  __typename
+  id
+  pollId
+  choiceIdx
+}
+
 fragment rate on Rate {
   __typename
   id
@@ -176,13 +183,6 @@ fragment user on User {
   __typename
   id
   email
-}
-
-fragment vote on Vote {
-  __typename
-  id
-  pollId
-  choiceIdx
 }
 
 # -----------NEW-----------
@@ -370,9 +370,9 @@ query MyRates($symId: ID!) {
   }
 }
 
-query MyVotes($pollId: ID!) {
-  myVotes(pollId: $pollId) {
-    ...vote
+query MyPollVotes($pollId: ID!) {
+  myPollVotes(pollId: $pollId) {
+    ...pollVote
   }
 }
 
@@ -612,9 +612,9 @@ mutation UpdateRate($id: ID!, $data: RateInput!) {
   }
 }
 
-mutation CreateVote($pollId: ID!, $data: VoteInput!) {
-  createVote(pollId: $pollId, data: $data) {
-    ...vote
+mutation CreatePollVote($pollId: ID!, $data: PollVoteInput!) {
+  createPollVote(pollId: $pollId, data: $data) {
+    ...pollVote
   }
 }
 

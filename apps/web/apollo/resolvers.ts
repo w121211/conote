@@ -173,6 +173,16 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return like ? toStringId(like) : null
   },
 
+  async myPollVotes(_parent, { pollId }, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const votes = await prisma.pollVote.findMany({
+      where: {
+        AND: { pollId, userId },
+      },
+    })
+    return votes.map(e => ({ ...toStringId(e) }))
+  },
+
   async myRates(_parent, { symId }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const rates = await prisma.rate.findMany({
@@ -182,16 +192,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       orderBy: { updatedAt: 'desc' },
     })
     return rates
-  },
-
-  async myVotes(_parent, { pollId }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const votes = await prisma.pollVote.findMany({
-      where: {
-        AND: { pollId, userId },
-      },
-    })
-    return votes.map(e => ({ ...toStringId(e) }))
   },
 
   async noteEmojis(_parent, { noteId }, _context, _info) {
@@ -621,6 +621,16 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
+  async createPollVote(_parent, { pollId, data }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      vote = await pollVoteModel.create({
+        choiceIdx: data.choiceIdx,
+        pollId,
+        userId,
+      })
+    return toStringId(vote)
+  },
+
   async createRate(_parent, { data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { choice, targetId, authorId, linkId } = data
@@ -643,16 +653,6 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
 
   async updateRate(_parent, { id, data }, { req }, _info) {
     throw 'Not implemented yet.'
-  },
-
-  async createVote(_parent, { pollId, data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      vote = await pollVoteModel.create({
-        choiceIdx: data.choiceIdx,
-        pollId,
-        userId,
-      })
-    return toStringId(vote)
   },
 
   async sessionLogin(_parent, { idToken }, { req, res }, _info) {
