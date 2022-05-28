@@ -2,7 +2,7 @@ fragment author on Author {
   __typename
   id
   name
-  meta {
+  content {
     type
     job
     org
@@ -12,67 +12,6 @@ fragment author on Author {
     }
   }
 }
-
-# # fragment note on Note {
-# #   __typename
-# #   id
-# #   link {
-# #     ...link
-# #   }
-# #   meta {
-# #     ...noteMeta
-# #   }
-# #   sym {
-# #     ...sym
-# #   }
-# #   updatedAt
-# # }
-
-# # fragment noteDigest on NoteDigest {
-# #   __typename
-# #   commitId
-# #   noteId
-# #   noteMeta {
-# #     ...noteMeta
-# #   }
-# #   fromNoteId
-# #   sym {
-# #     ...sym
-# #   }
-# #   subSyms {
-# #     ...sym
-# #   }
-# #   picks
-# #   updatedAt
-# # }
-
-# # fragment noteMeta on NoteMeta {
-# #   __typename
-# #   author
-# #   duplicates
-# #   keywords
-# #   publishedAt
-# #   redirect
-# #   tickers
-# #   title
-# #   url
-# # }
-
-# # fragment noteState on NoteState {
-# #   __typename
-# #   id
-# #   noteId
-# #   userId
-# #   commitId
-# #   prevId
-# #   body {
-# #     prevStateId
-# #     sourceNoteId
-# #     changes
-# #     value
-# #   }
-# #   updatedAt
-# # }
 
 fragment block on Block {
   __typename
@@ -99,7 +38,6 @@ fragment discuss on Discuss {
   id
   userId
   status
-  meta
   title
   content
   createdAt
@@ -275,16 +213,19 @@ fragment noteDoc on NoteDoc {
   userId
   status
   domain
-  meta {
-    ...noteDocMeta
-  }
-  content {
-    ...noteDocContent
-  }
+  # meta {
+  #   ...noteDocMeta
+  # }
+  # contentHead {
+  #   ...noteDocContentHead
+  # }
+  # contentBody {
+  #   ...noteDocContentBody
+  # }
   updatedAt
 }
 
-fragment noteDocContent on NoteDocContent {
+fragment noteDocContentBody on NoteDocContentBody {
   __typename
   discussIds {
     blockUid
@@ -301,12 +242,7 @@ fragment noteDocContent on NoteDocContent {
   diff
 }
 
-fragment noteDocEntry on NoteDocEntry {
-  __typename
-  id
-}
-
-fragment noteDocMeta on NoteDocMeta {
+fragment noteDocContentHead on NoteDocContentHead {
   __typename
   title
   duplicatedSymbols
@@ -314,16 +250,26 @@ fragment noteDocMeta on NoteDocMeta {
   redirectFroms
   redirectTo
   webpage {
-    ...noteDocMetaWebpage
+    ...noteDocContentHeadWebpage
   }
 }
 
-fragment noteDocMetaWebpage on NoteDocMetaWebpage {
+fragment noteDocContentHeadWebpage on NoteDocContentHeadWebpage {
   __typename
   authors
   title
   publishedAt
   tickers
+}
+
+fragment noteDocEntry on NoteDocEntry {
+  __typename
+  id
+}
+
+fragment noteDocMeta on NoteDocMeta {
+  __typename
+  mergeState
 }
 
 fragment noteDraft on NoteDraft {
@@ -334,11 +280,11 @@ fragment noteDraft on NoteDraft {
   fromDocId
   domain
   symbol
-  meta {
-    ...noteDocMeta
+  contentHead {
+    ...noteDocContentHead
   }
-  content {
-    ...noteDocContent
+  contentBody {
+    ...noteDocContentBody
   }
   updatedAt
   status
@@ -509,14 +455,20 @@ query NoteDoc($id: ID!) {
   }
 }
 
-query NoteDocsJustMerged {
-  noteDocsJustMerged {
+query NoteDocsToMerge($noteId: ID!) {
+  noteDocsToMerge(noteId: $noteId) {
     ...noteDoc
   }
 }
 
-query NoteDocsToMerge {
-  noteDocsToMerge {
+query LatestNoteDocsMerged {
+  latestNoteDocsMerged {
+    ...noteDoc
+  }
+}
+
+query LatestNoteDocsToMerge {
+  latestNoteDocsToMerge {
     ...noteDoc
   }
 }
@@ -533,11 +485,11 @@ query NoteHistory($noteId: ID!, $status: NoteDocStatus) {
   }
 }
 
-query SearchNote($symbol: String, $title: String, $domain: String) {
-  searchNote(symbol: $symbol, title: $title, domain: $domain) {
-    ...note
-  }
-}
+# query SearchNote($symbol: String, $title: String, $domain: String) {
+#   searchNote(symbol: $symbol, title: $title, domain: $domain) {
+#     ...note
+#   }
+# }
 
 # #-----------END----------------
 

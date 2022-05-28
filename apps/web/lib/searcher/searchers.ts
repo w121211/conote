@@ -1,5 +1,5 @@
 import { Author, Discuss } from '@prisma/client'
-import { AuthorModel } from '../models/author-model'
+import { authorModel } from '../models/author-model'
 import { discussModel } from '../models/discuss-model'
 import { BaseSearcher } from './base-searcher'
 import { SymSearcher } from './sym-searcher'
@@ -18,14 +18,14 @@ type GlobalThisWithSearchServices = typeof globalThis & {
 
 const getAuthorSearcher = (): BaseSearcher<Author> => {
   if (process.env.NODE_ENV === 'production') {
-    return new BaseSearcher<Author>({ keys: ['name'] }, AuthorModel.getAll)
+    return new BaseSearcher<Author>({ keys: ['name'] }, authorModel.getAll)
   } else {
     const newGlobalThis = globalThis as GlobalThisWithSearchServices
     if (!newGlobalThis[searchAuthorPropertyName]) {
       console.log('Creating global search-author-service')
       newGlobalThis[searchAuthorPropertyName] = new BaseSearcher<Author>(
         { keys: ['name'] },
-        AuthorModel.getAll,
+        authorModel.getAll,
       )
     }
     return newGlobalThis[searchAuthorPropertyName]

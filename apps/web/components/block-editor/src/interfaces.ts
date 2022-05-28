@@ -1,6 +1,6 @@
-import { Token } from 'prismjs'
-import { NoteDocMetaInput } from 'graphql-let/__generated__/__types__'
-import {
+import type { Token } from 'prismjs'
+import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
+import type {
   NoteDraftEntryFragment,
   NoteDraftFragment,
   NoteFragment,
@@ -138,17 +138,17 @@ export type BlockPositionRelation = 'first' | 'last' | 'before' | 'after'
 
 export type Block = {
   uid: string
-  str: string
-  open?: boolean
+
+  // Null for doc-block
+  parentUid: string | null
+  childrenUids: string[]
   order: number
 
   // Doc block only, equals to doc.str
   docTitle?: string
 
-  // Null for doc-block
-  parentUid: string | null
-
-  childrenUids: string[]
+  str: string
+  open?: boolean
 
   // TBC, consider to drop
   editTime?: number
@@ -165,12 +165,12 @@ export type Doc = {
 
   domain: string
 
-  // Use as id, no duplicated titles area allowed,
+  // Use as the id, no duplicated titles area allowed,
   // also represent as 'symbol' for server-side
   title: string
 
-  // Note-doc-meta is editable and stores here
-  meta: NoteDocMetaInput
+  // Note-doc-content-head is editable and stores here
+  contentHead: NoteDocContentHeadInput
 
   // Refer to root-block-uid
   blockUid: string

@@ -9,10 +9,8 @@ import {
   Sym,
 } from '@prisma/client'
 import cuid from 'cuid'
-import { isNumber } from 'lodash'
-import { NoteDocContent, NoteDocMeta } from '../interfaces'
 import prisma from '../prisma'
-import { getContentDiff, isMetaChanged } from './change-model'
+import { noteDocMergeModel } from './note-doc-merge-model'
 import { noteDocModel } from './note-doc-model'
 import { noteDraftModel } from './note-draft-model'
 import { symModel } from './sym-model'
@@ -36,7 +34,7 @@ async function validateDraft(id: string, userId: string) {
         where: {
           branchId: draft.branchId,
           symId: sym.id,
-          status: 'MERGE',
+          status: 'MERGED',
         },
         orderBy: { updatedAt: 'desc' },
       })),
@@ -54,7 +52,7 @@ async function validateDraft(id: string, userId: string) {
     draftParsed = draft && noteDraftModel.parse(draft),
     newJoinedDiscussIds =
       draftParsed &&
-      draftParsed.content.discussIds.filter(e => e.commitId === undefined),
+      draftParsed.contentBody.discussIds.filter(e => e.commitId === undefined),
     newJoinedDiscusses =
       newJoinedDiscussIds &&
       (await prisma.$transaction(
@@ -203,13 +201,7 @@ export async function commitNoteDrafts(
 
     promises.push(
       // Also update symbol_symId in this function
-      noteDocModel.createDoc(
-        draftParsed,
-        commitId,
-        symId,
-        userId,
-        symbol_symId,
-      ),
+      noteDocModel.create(draftParsed, commitId, symId, userId, symbol_symId),
     )
 
     // For each draft, connect draft to commit and update its status to commit
@@ -234,6 +226,7 @@ export async function commitNoteDrafts(
     include: {
       sym: true,
       branch: true,
+      fromDoc: true,
     },
   })
 
@@ -263,12 +256,10 @@ export async function commitNoteDrafts(
     } => e !== null,
   )
 
-  // TODO: remove ?
-  if (draftIds.length !== noteDocs.length) {
-    throw new Error(
-      '[commitNoteDrafts] Unexpected error, draftIds.length !== noteDocs.length',
-    )
-  }
+  // For each note-doc, try auto merge or create a merge-poll
+  const noteDocs_ = await Promise.all(
+    noteDocs.map(e => noteDocMergeModel.mergeOnCreate(e)),
+  )
 
-  return { symbol_symId, commit, notes, noteDocs }
+  return { symbol_symId, commit, notes, noteDocs: noteDocs_ }
 }

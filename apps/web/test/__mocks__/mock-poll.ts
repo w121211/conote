@@ -1,14 +1,26 @@
-import { Poll } from '@prisma/client'
-import { mockUsers } from './mock-user'
+import { Poll, PollStatus, PollType } from '@prisma/client'
+import { PollMeta, PollParsed } from '../../lib/interfaces'
+import { mockBotUser } from './mock-user'
 
-export const mockPolls: Omit<
-  Poll,
-  'type' | 'status' | 'createdAt' | 'updatedAt'
->[] = [
+const mergePollBase: Omit<PollParsed, 'count'> = {
+  id: '',
+  discussId: null,
+  userId: mockBotUser.id,
+  type: PollType.FIXED,
+  status: PollStatus.OPEN,
+  meta: { openInDays: 5 },
+  choices: ['accpet', 'reject-abuse', 'reject-hateful', 'reject-others'],
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
+export const mockMergePolls: Omit<PollParsed, 'count'>[] = [
   {
-    id: 'mock-merge-poll-0',
-    userId: mockUsers[0].id,
-    choices: ['UP', 'DOWN'],
-    meta: {},
+    ...mergePollBase,
+    id: '0-merge_poll',
+  },
+  {
+    ...mergePollBase,
+    id: '1-merge_poll__another',
   },
 ]

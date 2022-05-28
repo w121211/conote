@@ -49,9 +49,9 @@ export const mockBlockInput: BlockInput = [
 /**
  * The first block is doc-block, ie [doc-block, ...content-blocks]
  */
-export const mockDocBlockAndContentBlocks: Block[] = writeBlocks(mockBlockInput)
+export const mockDocBlock_contentBlocks: Block[] = writeBlocks(mockBlockInput)
 
-export const mockDocBlockHasNoContent: Block = {
+export const mockDocBlockWithoutContent: Block = {
   uid: genBlockUid(),
   str: '[[Mock Doc Block Without Content]]',
   order: 0,
@@ -61,6 +61,6 @@ export const mockDocBlockHasNoContent: Block = {
 }
 
 export const mockBlocks = [
-  ...mockDocBlockAndContentBlocks,
-  mockDocBlockHasNoContent,
+  ...mockDocBlock_contentBlocks,
+  mockDocBlockWithoutContent,
 ]

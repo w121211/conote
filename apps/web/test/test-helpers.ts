@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client'
-import { getBotEmail } from '../lib/models/user-model'
 import { mockDiscusses, mockDiscussPosts } from './__mocks__/mock-discuss'
-import { mockUsers } from './__mocks__/mock-user'
+import { mockBotUser, mockUsers } from './__mocks__/mock-user'
 import { mockBranches } from './__mocks__/mock-branch'
 import { mockNoteDrafts } from './__mocks__/mock-note-draft'
 import { NoteDraftParsed } from '../lib/interfaces'
@@ -10,7 +9,6 @@ import { mockNotes } from './__mocks__/mock-note'
 import { mockCommits } from './__mocks__/mock-commit'
 import { mockNoteDocs } from './__mocks__/mock-note-doc'
 import { mockLinks } from './__mocks__/mock-link'
-import { mockPolls } from './__mocks__/mock-poll'
 
 // fake incremental id
 let i = 0
@@ -18,8 +16,6 @@ const fid = () => {
   i++
   return i.toString()
 }
-
-export const BOT = { id: 'bot', email: getBotEmail() }
 
 // --- Tree values ---
 
@@ -152,32 +148,30 @@ class TestHelper {
       commit = await prisma.commit.create({
         data: mockCommits[0],
       }),
-      poll = await prisma.poll.create({
+      // poll = await prisma.poll.create({
+      //   data: {
+      //     ...mockPolls[0],
+      //     // id: mockPolls[0].id,
+      //     // user: {connect: {id: mockPolls[0].userId}},
+      //     // choices: mockPolls[0].choices,
+      //     meta: mockPolls[0].meta as unknown as object,
+      //     count: { create: { nVotes: mockPolls[0].choices.map(e => 0) } },
+      //   },
+      // }),
+      noteDoc = await prisma.noteDoc.create({
         data: {
-          ...mockPolls[0],
-          // id: mockPolls[0].id,
-          // user: {connect: {id: mockPolls[0].userId}},
-          // choices: mockPolls[0].choices,
-          meta: mockPolls[0].meta as unknown as object,
-          count: { create: { nVotes: mockPolls[0].choices.map(e => 0) } },
+          ...mockNoteDocs[0],
+          meta: {},
         },
       })
-    const noteDoc = await prisma.noteDoc.create({
-      data: {
-        ...mockNoteDocs[0],
-        meta: {},
-      },
-    })
+    return { sym, note, commit, noteDoc }
   }
 
   async createDiscusses(prisma: PrismaClient): Promise<void> {
     await prisma.$transaction([
       ...mockDiscusses.map(e =>
         prisma.discuss.create({
-          data: {
-            ...e,
-            count: { create: {} },
-          },
+          data: { ...e, count: { create: {} } },
         }),
       ),
       ...mockDiscussPosts.map(e => prisma.discussPost.create({ data: e })),
@@ -198,42 +192,32 @@ class TestHelper {
     >[] = mockNoteDrafts,
   ): Promise<void> {
     await prisma.$transaction(
-      drafts.map(
-        ({ id, symbol, userId, domain, meta, content, fromDocId, linkId }) => {
-          return prisma.noteDraft.create({
-            data: {
-              id,
-              symbol,
-              branch: { connect: { name: mockBranches[0].name } },
-              user: { connect: { id: userId } },
-              fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
-              link: linkId ? { connect: { id: linkId } } : undefined,
-              domain,
-              meta,
-              content,
-            },
-          })
-        },
-      ),
+      drafts.map(e => {
+        const { userId, fromDocId, linkId, ...rest } = e
+        return prisma.noteDraft.create({
+          data: {
+            ...rest,
+            branch: { connect: { name: mockBranches[0].name } },
+            user: { connect: { id: userId } },
+            fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+            link: linkId ? { connect: { id: linkId } } : undefined,
+          },
+        })
+      }),
     )
   }
 
-  async createUsers(prisma: PrismaClient): Promise<void> {
-    await prisma.user.create({
-      data: { id: BOT.id, email: BOT.email },
-    })
-    await prisma.$transaction(
-      mockUsers.map(e =>
-        prisma.user.create({
-          data: { id: e.id, email: e.email },
-        }),
-      ),
+  async createUsers(prisma: PrismaClient) {
+    await prisma.user.create({ data: mockBotUser })
+    return await prisma.$transaction(
+      mockUsers.map(e => prisma.user.create({ data: e })),
     )
   }
 
-  async createLink(prisma: PrismaClient): Promise<void> {
-    const { id, url, domain } = mockLinks[0]
-    await prisma.link.create({ data: { id, url, domain } })
+  async createLink(prisma: PrismaClient) {
+    return await prisma.$transaction(
+      mockLinks.map(e => prisma.link.create({ data: e })),
+    )
   }
 }
 

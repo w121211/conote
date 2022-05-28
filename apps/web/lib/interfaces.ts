@@ -1,4 +1,4 @@
-import { NoteDoc, NoteDraft } from '@prisma/client'
+import { NoteDoc, NoteDraft, Poll, PollCount } from '@prisma/client'
 import { Block } from '../components/block-editor/src/interfaces'
 
 /**
@@ -26,12 +26,34 @@ export type BlockUid_DiscussId = {
   commitId?: string
 }
 
-export type NoteDocParsed = Omit<NoteDoc, 'meta' | 'content'> & {
+export type NoteDocParsed<T extends NoteDoc> = Omit<
+  T,
+  'meta' | 'contentHead' | 'contentBody'
+> & {
   meta: NoteDocMeta
-  content: NoteDocContent
+  contentHead: NoteDocContentHead
+  contentBody: NoteDocContentBody
 }
 
 export type NoteDocMeta = {
+  mergeState: NoteDocMetaMergeState
+}
+
+export type NoteDocMetaMergeState =
+  // Not apply the merge yet, happens when doc is just created
+  | 'before_merge'
+  // A merge poll is open and waiting to merge by poll
+  | 'wait_to_merge-by_poll'
+  | 'merged_auto-same_user'
+  | 'merged_auto-initial_commit'
+  | 'merged_auto-only_insertions'
+  | 'merged_poll'
+  | 'rejected_auto-no_changes'
+  | 'rejected_poll'
+  // Merge poll is paused because the from-doc is not the current's head
+  | 'paused-from_doc_not_head'
+
+export type NoteDocContentHead = {
   // Use for ticker, webpage symbols to display a title aside with symbol
   title?: string
 
@@ -49,19 +71,35 @@ export type NoteDocMeta = {
   webpage?: {
     authors?: string[]
     title?: string
-    publishedAt?: string // when the webpage content publish at
-    tickers?: string[] // tickers mentioned in the webpage content
+
+    // when the webpage content publish at
+    publishedAt?: string
+
+    // tickers mentioned in the webpage content
+    tickers?: string[]
   }
 }
 
-export type NoteDocContent = {
+export type NoteDocContentBody = {
   discussIds: BlockUid_DiscussId[]
   symbols: Symbol_SymId[]
   diff?: any
   blocks: Block[]
 }
 
-export type NoteDraftParsed = Omit<NoteDraft, 'meta' | 'content'> & {
-  meta: NoteDocMeta
-  content: NoteDocContent
+export type NoteDraftParsed = Omit<NoteDraft, 'contentHead' | 'contentBody'> & {
+  contentHead: NoteDocContentHead
+  contentBody: NoteDocContentBody
+}
+
+export type PollMeta = {
+  // eg: merge_poll-v1
+  // spec?: string
+
+  // Clase the poll after the given period
+  openInDays: number
+}
+
+export type PollParsed = Omit<Poll & { count: PollCount }, 'meta'> & {
+  meta: PollMeta
 }

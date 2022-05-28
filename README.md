@@ -348,8 +348,8 @@ v0.2.1
     - discuss page
     - user page
       - [x] ui, gray background
+    - setting page
     - login page
-    - profile/setting page
   - basic components (build blocks)
     - badge
     - tag

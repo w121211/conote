@@ -1,12 +1,12 @@
 import { cloneDeep } from 'lodash'
 import { TreeNodeBody } from '../interfaces'
 import { treeUtil } from '../tree-util'
-import { mockTreeNodeBodies } from '../__mocks__/mock-nodes'
+import { mockTreeNodes } from '../__mocks__/mock-nodes'
 
 let bodies: Required<TreeNodeBody<object>>[] = []
 
 beforeEach(() => {
-  bodies = cloneDeep(mockTreeNodeBodies)
+  bodies = cloneDeep(mockTreeNodes)
 })
 
 describe('treeUtil', () => {

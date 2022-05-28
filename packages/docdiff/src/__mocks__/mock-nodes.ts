@@ -10,7 +10,7 @@ import { TreeNodeBody } from '../interfaces'
  * - 3
  *   - 7
  */
-export const mockTreeNodeBodies: Required<TreeNodeBody<object>>[] = [
+export const mockTreeNodes: Required<TreeNodeBody<object>>[] = [
   {
     uid: 'mock-tree-node-body-0',
     parentUid: null,

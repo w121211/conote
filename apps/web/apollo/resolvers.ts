@@ -14,11 +14,9 @@ import {
 } from 'graphql-let/__generated__/__types__'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import { hasCount, toStringId } from '../lib/helpers'
-import { AuthorModel } from '../lib/models/author-model'
-import { PollMeta } from '../lib/models/poll-model'
+import { authorModel } from '../lib/models/author-model'
 import { rateModel } from '../lib/models/rate-model'
 import { getOrCreateUser } from '../lib/models/user-model'
-import { createVote } from '../lib/models/vote-model'
 import prisma from '../lib/prisma'
 import {
   authorSearcher,
@@ -31,14 +29,16 @@ import {
   discussPostEmojiModel,
   noteEmojiModel,
 } from '../lib/models/emoji-model'
-import { NoteDocContent, NoteDocMeta } from '../lib/interfaces'
 import { commitNoteDrafts } from '../lib/models/commit-model'
 import { noteDraftModel } from '../lib/models/note-draft-model'
 import { noteModel } from '../lib/models/note-model'
+import { pollModel } from '../lib/models/poll-model'
+import { noteDocModel } from '../lib/models/note-doc-model'
+import { pollVoteModel } from '../lib/models/poll-vote-model'
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
   async author(_parent, { id, name }, _context, _info) {
-    return await AuthorModel.get(id ?? undefined, name ?? undefined)
+    return await authorModel.get(id ?? undefined, name ?? undefined)
   },
 
   async discuss(_parent, { id }, _context, _info) {
@@ -186,7 +186,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 
   async myVotes(_parent, { pollId }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    const votes = await prisma.vote.findMany({
+    const votes = await prisma.pollVote.findMany({
       where: {
         AND: { pollId, userId },
       },
@@ -217,18 +217,14 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async poll(_parent, { id }, _context, _info) {
-    const poll = await prisma.poll.findUnique({
-      include: { count: true },
-      where: { id },
-    })
-    if (poll && hasCount(poll)) {
+    const poll = await pollModel.find(id)
+    if (poll) {
       return {
         ...poll,
-        meta: poll.meta as unknown as PollMeta,
         count: { ...toStringId(poll.count) },
       }
     }
-    return null
+    throw new Error('Poll not found')
   },
 
   async rate(_parent, { id }, _context, _info) {
@@ -288,13 +284,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return commits.map(e => {
       return {
         ...e,
-        noteDocs: e.noteDocs.map(d => ({
-          ...d,
-          meta: d.meta as unknown as NoteDocMeta,
-          content: d.content as unknown as NoteDocContent,
-        })),
-        // noteDocs: e.noteDocs.map(d => noteDocModel.parse(d))
-        // noteDrafts: e.noteDrafts.map(d => noteDraftModel.parse(d)),
+        noteDocs: e.noteDocs.map(d => noteDocModel.parse(d)),
       }
     })
   },
@@ -319,7 +309,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         const {
           id,
           symbol,
-          meta: { title },
+          contentHead: { title },
         } = e
         return { id, symbol, title }
       })
@@ -335,58 +325,43 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async noteDoc(_parent, { id }, _context, _info) {
-    const noteDoc = await prisma.noteDoc.findUnique({ where: { id } })
-    if (noteDoc) {
-      return {
-        ...noteDoc,
-        meta: noteDoc.meta as unknown as NoteDocMeta,
-        content: noteDoc.content as unknown as NoteDocContent,
-      }
+    const doc = await prisma.noteDoc.findUnique({ where: { id } })
+    if (doc) {
+      return noteDocModel.parse(doc)
     }
     throw new Error('NoteDoc not found.')
   },
 
-  // # get all notes for homepage
-  // noteDocsJustMerged: [NoteDoc!]!
-  // process to comply with NoteDoc of type-defs version
-  async noteDocsJustMerged(_parent, _args, _context, _info) {
+  async noteDocsToMerge(_parent, { noteId }, _context, _info) {
     const docs = await prisma.noteDoc.findMany({
-      where: { status: 'MERGE' },
-      orderBy: { updatedAt: 'desc' },
+      where: {
+        AND: [{ note: { id: noteId } }, { status: 'CANDIDATE' }],
+      },
+      orderBy: { createdAt: 'asc' },
     })
-    return docs.map(e => {
-      return {
-        ...e,
-        meta: e.meta as unknown as NoteDocMeta,
-        content: e.content as unknown as NoteDocContent,
-      }
-    })
+    return docs.map(e => noteDocModel.parse(e))
   },
 
-  // # get all candidate docs for verdict
-  // filter: status = CANDIDATE
-  // time??
-  // id input is optional in order to query some specific note
-  // noteDocsToMerge(noteId:ID): [NoteDoc!]!
-  async noteDocsToMerge(_parent, _args, _context, _info) {
-    const candidates = await prisma.noteDoc.findMany({
+  async latestNoteDocsMerged(_parent, _args, _context, _info) {
+    const docs = await prisma.noteDoc.findMany({
+      where: { status: 'MERGED' },
+      orderBy: { createdAt: 'desc' },
+    })
+    return docs.map(e => noteDocModel.parse(e))
+  },
+
+  async latestNoteDocsToMerge(_parent, _args, _context, _info) {
+    const docs = await prisma.noteDoc.findMany({
       where: { status: 'CANDIDATE' },
+      orderBy: { createdAt: 'desc' },
     })
-    return candidates.map(e => {
-      return {
-        ...e,
-        meta: e.meta as unknown as NoteDocMeta,
-        content: e.content as unknown as NoteDocContent,
-      }
-    })
+    return docs.map(e => noteDocModel.parse(e))
   },
 
-  // noteDraft(id: ID!): NoteDraft
-  // process to comply with NoteDraft of type-defs version
   async noteDraft(_parent, { id, symbol, url }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
-    let draft: NoteDraft | null = null
 
+    let draft: NoteDraft | null = null
     if (id) {
       draft = await prisma.noteDraft.findUnique({
         where: { id },
@@ -404,13 +379,8 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         where: { userId, symbol: url, status: 'EDIT' },
       })
     }
-
     if (draft) {
-      return {
-        ...draft,
-        meta: draft.meta as unknown as NoteDocMeta,
-        content: draft.content as unknown as NoteDocContent,
-      }
+      return noteDraftModel.parse(draft)
     }
     return null
   },
@@ -433,16 +403,16 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   // searchNote(symbol: String, title: String): [Note!]!
-  async searchNote(_parent, { symbol, title, domain }, _context, _info) {
-    // TODO
-    // if (symbol && title === undefined) {
-    //   return await SearchNoteService.searchBySymbol(symbol)
-    // }
-    // if (symbol === undefined && title) {
-    //   return await SearchNoteService.searchByTitle(title)
-    // }
-    return []
-  },
+  // async searchNote(_parent, { symbol, title, domain }, _context, _info) {
+  //   // TODO
+  //   // if (symbol && title === undefined) {
+  //   //   return await SearchNoteService.searchBySymbol(symbol)
+  //   // }
+  //   // if (symbol === undefined && title) {
+  //   //   return await SearchNoteService.searchByTitle(title)
+  //   // }
+  //   return []
+  // },
 
   // ------------New End---------------
 }
@@ -450,19 +420,19 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
   async createAuthor(_parent, { data }, { req }, _info) {
     await isAuthenticated(req)
-    const author = await AuthorModel.create(data)
+    const author = await authorModel.create(data)
     await authorSearcher.add(author)
-    return AuthorModel.toGQLAuthor(author)
+    return authorModel.toGQLAuthor(author)
   },
 
   async updateAuthor(_parent, { id, data }, { req }, _info) {
     await isAuthenticated(req)
-    const author = await AuthorModel.update(id, data)
+    const author = await authorModel.update(id, data)
 
     // TODO: Remove previous author
     await authorSearcher.add(author)
 
-    return AuthorModel.toGQLAuthor(author)
+    return authorModel.toGQLAuthor(author)
   },
 
   async createDiscuss(_parent, { noteId, data }, { req }, _info) {
@@ -643,22 +613,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createPoll(_parent, { data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const poll = await prisma.poll.create({
-      data: {
-        user: { connect: { id: userId } },
-        choices: data.choices,
-        count: { create: {} },
-      },
-      include: { count: true },
-    })
-    if (hasCount(poll)) {
-      return {
-        ...poll,
-        count: toStringId(poll.count),
-      }
+    const { userId } = await isAuthenticated(req),
+      poll = await pollModel.create({ userId, choices: data.choices })
+    return {
+      ...poll,
+      count: toStringId(poll.count),
     }
-    throw 'Database internal error'
   },
 
   async createRate(_parent, { data }, { req }, _info) {
@@ -686,12 +646,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createVote(_parent, { pollId, data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const vote = await createVote({
-      choiceIdx: data.choiceIdx,
-      pollId,
-      userId,
-    })
+    const { userId } = await isAuthenticated(req),
+      vote = await pollVoteModel.create({
+        choiceIdx: data.choiceIdx,
+        pollId,
+        userId,
+      })
     return toStringId(vote)
   },
 
@@ -717,11 +677,8 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return {
       ...commit,
       noteDocs: noteDocs.map(e => ({
-        ...e,
+        ...noteDocModel.parse(e),
         branch: e.branch.name,
-        symbol: e.sym.symbol,
-        meta: e.meta as unknown as NoteDocMeta,
-        content: e.content as unknown as NoteDocContent,
       })),
     }
   },
@@ -749,20 +706,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   // # input not yet decided
   // updateNotepDraft(data: DraftInput): NoteDraft!
   async updateNoteDraft(_parent, { id, data }, _context, _info) {
-    const { domain, meta, content } = data
-    const draft = await prisma.noteDraft.update({
-      where: { id },
-      data: {
-        domain,
-        meta: meta as object,
-        content,
-      },
-    })
-    return {
-      ...draft,
-      meta: draft.meta as unknown as NoteDocMeta,
-      content: draft.content as unknown as NoteDocContent,
-    }
+    return noteDraftModel.update(id, data)
   },
 
   // dropNoteDraft(id: ID!): DraftDropResponse!

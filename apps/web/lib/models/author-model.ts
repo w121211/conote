@@ -1,12 +1,12 @@
 import { Author } from '@prisma/client'
 import {
   Author as GQLAuthor,
-  AuthorMeta as GQLAuthorMeta,
+  AuthorContent as GQLAuthorContent,
   AuthorInput as GQLAuthorInput,
 } from 'graphql-let/__generated__/__types__'
 import prisma from '../prisma'
 
-type AuthorMeta = {
+type AuthorContent = {
   type: 'ORG' | 'PERSON'
   job?: string // eg youtuber, analylist
   org?: string
@@ -28,7 +28,20 @@ const toAuthorName = (domain: string, domainAuthorName: string) => {
   return author
 }
 
-export const AuthorModel = {
+class AuthorModel {
+  async create(input: GQLAuthorInput): Promise<Author> {
+    const { name, type, job, org, sites } = input,
+      content: AuthorContent = {
+        type,
+        job: job ?? undefined,
+        org: org ?? undefined,
+        sites: sites.map(e => [e.url, e.name]),
+      }
+    return prisma.author.create({
+      data: { name, content },
+    })
+  }
+
   async get(id?: string, name?: string): Promise<GQLAuthor | null> {
     let author: Author | null
     if (id) {
@@ -46,7 +59,7 @@ export const AuthorModel = {
       return this.toGQLAuthor(author)
     }
     return null
-  },
+  }
 
   async getAll(): Promise<Author[]> {
     console.log('Retreiving all authors from database...')
@@ -70,33 +83,21 @@ export const AuthorModel = {
       cursor = res[res.length - 1].id
     }
     return authors
-  },
+  }
 
-  async create(input: GQLAuthorInput): Promise<Author> {
-    const { name, type, job, org, sites } = input
-    const meta: AuthorMeta = {
-      type,
-      job: job ?? undefined,
-      org: org ?? undefined,
-      sites: sites.map(e => [e.url, e.name]),
-    }
-    return prisma.author.create({
-      data: {
-        name,
-        meta,
-      },
-    })
-  },
+  parse() {
+    // TODO
+  }
 
   toGQLAuthor(author: Author): GQLAuthor {
-    const { meta } = author
+    const { content } = author
     return {
       ...author,
-      meta: this.toGQLAuthorMeta(meta as unknown as AuthorMeta),
+      content: this.toGQLAuthorMeta(content as unknown as AuthorContent),
     }
-  },
+  }
 
-  toGQLAuthorMeta(meta: AuthorMeta): GQLAuthorMeta {
+  toGQLAuthorMeta(meta: AuthorContent): GQLAuthorContent {
     const { sites } = meta
     return {
       ...meta,
@@ -104,22 +105,21 @@ export const AuthorModel = {
         return { url, name }
       }),
     }
-  },
+  }
 
   async update(id: string, input: GQLAuthorInput): Promise<Author> {
-    const { name, type, job, org, sites } = input
-    const meta: AuthorMeta = {
-      type,
-      job: job ?? undefined,
-      org: org ?? undefined,
-      sites: sites.map(e => [e.url, e.name]),
-    }
+    const { name, type, job, org, sites } = input,
+      content: AuthorContent = {
+        type,
+        job: job ?? undefined,
+        org: org ?? undefined,
+        sites: sites.map(e => [e.url, e.name]),
+      }
     return prisma.author.update({
-      data: {
-        name,
-        meta,
-      },
+      data: { name, content },
       where: { id },
     })
-  },
+  }
 }
+
+export const authorModel = new AuthorModel()

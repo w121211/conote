@@ -11,9 +11,13 @@ datasource db {
 }
 
 model Author {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  meta      Json     @default("{}")
+  id   String @id @default(cuid())
+  name String @unique
+  meta Json   @default("{}")
+
+  // Editable by the user
+  content Json
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   rates     Rate[]
@@ -113,7 +117,9 @@ model DiscussPost {
   discuss   Discuss            @relation(fields: [discussId], references: [id])
   user      User               @relation(fields: [userId], references: [id])
   emojis    DiscussPostEmoji[]
-  vote      Vote?
+
+  // A vote with comment
+  vote PollVote?
 }
 
 model DiscussPostEmoji {
@@ -174,21 +180,29 @@ model NoteDoc {
   branchId    String
   symId       String
   commitId    String
-  fromDocId   String?       @unique
+  fromDocId   String?
   mergePollId String?       @unique
   userId      String
   status      NoteDocStatus @default(CANDIDATE)
-  domain      String
-  meta        Json          @default("{}")
-  content     Json
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  branch      Branch        @relation(fields: [branchId], references: [id])
-  commit      Commit        @relation(fields: [commitId], references: [id])
-  fromDoc     NoteDoc?      @relation("DocHistory", fields: [fromDocId], references: [id])
-  nextDoc     NoteDoc?      @relation("DocHistory")
 
-  // To judge the doc can merge or not
+  // Seperated column to enhance searching
+  domain String
+
+  // Used to store meta info of the system, not editable by the user
+  meta Json @default("{}")
+
+  // User created content, editable by the user
+  contentHead Json
+  contentBody Json
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  branch    Branch    @relation(fields: [branchId], references: [id])
+  commit    Commit    @relation(fields: [commitId], references: [id])
+  fromDoc   NoteDoc?  @relation("DocHistory", fields: [fromDocId], references: [id])
+  nextDocs  NoteDoc[] @relation("DocHistory")
+
+  // To determine can the doc merge
   // Is optional because auto-merge not require a poll
   mergePoll Poll? @relation(fields: [mergePollId], references: [id])
 
@@ -204,25 +218,25 @@ model NoteDraft {
   // Use as an identifier
   symbol String
 
-  branchId  String
-  symId     String?
-  commitId  String?
-  fromDocId String?
-  linkId    String?
-  userId    String
-  status    NoteDraftStatus @default(EDIT)
-  domain    String
-  meta      Json            @default("{}")
-  content   Json
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  branch    Branch          @relation(fields: [branchId], references: [id])
-  commit    Commit?         @relation(fields: [commitId], references: [id])
-  fromDoc   NoteDoc?        @relation(fields: [fromDocId], references: [id])
-  link      Link?           @relation(fields: [linkId], references: [id])
-  note      Note?           @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym       Sym?            @relation(fields: [symId], references: [id])
-  user      User            @relation(fields: [userId], references: [id])
+  branchId    String
+  symId       String?
+  commitId    String?
+  fromDocId   String?
+  linkId      String?
+  userId      String
+  status      NoteDraftStatus @default(EDIT)
+  domain      String
+  contentHead Json
+  contentBody Json
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  branch      Branch          @relation(fields: [branchId], references: [id])
+  commit      Commit?         @relation(fields: [commitId], references: [id])
+  fromDoc     NoteDoc?        @relation(fields: [fromDocId], references: [id])
+  link        Link?           @relation(fields: [linkId], references: [id])
+  note        Note?           @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym         Sym?            @relation(fields: [symId], references: [id])
+  user        User            @relation(fields: [userId], references: [id])
 }
 
 model NoteEmoji {
@@ -297,7 +311,7 @@ model Poll {
   noteDocToMerge NoteDoc?
 
   count PollCount?
-  votes Vote[]
+  votes PollVote[]
 }
 
 model PollCount {
@@ -308,6 +322,22 @@ model PollCount {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   poll       Poll     @relation(fields: [pollId], references: [id])
+}
+
+model PollVote {
+  id            Int      @id @default(autoincrement())
+  discussPostId Int?     @unique
+  pollId        String
+  userId        String
+  choiceIdx     Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 1-1, A vote can connect to a post to enable 'comment' while voting
+  discussPost DiscussPost? @relation(fields: [discussPostId], references: [id])
+
+  poll Poll @relation(fields: [pollId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Rate {
@@ -356,23 +386,7 @@ model User {
   noteDrafts            NoteDraft[]
   polls                 Poll[]
   rates                 Rate[]
-  votes                 Vote[]
-}
-
-model Vote {
-  id            Int      @id @default(autoincrement())
-  discussPostId Int?     @unique
-  pollId        String
-  userId        String
-  choiceIdx     Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // 1-1, A vote can connect to a post to enable 'comment' while voting
-  discussPost DiscussPost? @relation(fields: [discussPostId], references: [id])
-
-  poll Poll @relation(fields: [pollId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+  votes                 PollVote[]
 }
 
 enum DiscussStatus {
@@ -413,9 +427,11 @@ enum LikeChoice {
 }
 
 enum NoteDocStatus {
+  // Wait to merge
   CANDIDATE
-  MERGE
-  REJECT
+  PAUSE
+  MERGED
+  REJECTED
 }
 
 enum NoteDraftStatus {
@@ -433,10 +449,18 @@ enum PollFailReason {
 }
 
 enum PollStatus {
-  OPEN
-  JUDGE
   CLOSE_SUCCESS
   CLOSE_FAIL
+
+  OPEN
+
+  // If paused, the poll cannot vote
+  PAUSE
+
+  JUDGE
+
+  // In case the poll data is broken and cannot perform jobs, wait for manual checking
+  ABNORMAL
 }
 
 enum PollType {
