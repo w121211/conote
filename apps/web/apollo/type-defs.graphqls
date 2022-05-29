@@ -8,7 +8,14 @@ type Query {
   # NEXT:
   author(id: ID, name: String): Author
 
-  discuss(id: ID!): Discuss
+  # Throw error if not found
+  commit(id: ID!): Commit!
+
+  # Get a user's latest commits, used in user's profile page
+  commitsByUser(userId: ID!, afterId: ID): [Commit!]!
+
+  # Throw error if not found
+  discuss(id: ID!): Discuss!
 
   discussEmojis(discussId: ID!): [DiscussEmoji!]!
 
@@ -16,18 +23,10 @@ type Query {
 
   discussPostEmojis(discussPostId: ID!): [DiscussPostEmoji!]!
 
-  # Get all just merged note-docs (for homepage)
-  latestNoteDocsMerged: [NoteDoc!]!
-
-  # Get all waiit to merge note-docs for verdict (for homepage)
-  latestNoteDocsToMerge: [NoteDoc!]!
-
+  # Returns null if not found. This is in favor of using 'url' for searching
   link(id: ID, url: String): Link
 
   me: User!
-
-  # To know all latest commit docs
-  myCommits: [Commit!]!
 
   myNoteEmojiLike(noteEmojiId: ID!): NoteEmojiLike
 
@@ -39,35 +38,41 @@ type Query {
 
   myDiscussPostEmojiLike(discussPostEmojiId: ID!): DiscussPostEmojiLike
 
-  # allow vote multiple times on the same poll
+  # Allow vote multiple times on the same poll
   myPollVotes(pollId: ID!): [PollVote!]!
 
   # NEXT:
   myRates(symId: ID!): [Rate!]!
 
-  # throws error if not found
+  # Throw error if not found
   noteById(id: ID!): Note!
 
   noteByBranchSymbol(branch: String!, symbol: String!): Note
 
-  # need to modify the input (confirm the prisma)
+  # Need to modify the input (confirm the prisma)
   noteEmojis(noteId: ID!): [NoteEmoji!]!
 
-  # Get noteDoc and throws error if not found
+  # Throws error if not found
   noteDoc(id: ID!): NoteDoc!
 
-  # Get all note-docs wait to merge (ie, candidate) of a note
-  noteDocsToMerge(noteId: ID!): [NoteDoc!]!
+  # All note-docs wait to merge of a note, ie candidates
+  noteDocsToMergeByNote(noteId: ID!): [NoteDoc!]!
+
+  # Latest just merged note-docs
+  noteDocsMergedLatest: [NoteDoc!]!
+
+  # Latest waiting to merge note-docs
+  noteDocsToMergeLatest: [NoteDoc!]!
 
   # Get user's draft
   # Query either by id, symbol or url
   noteDraft(id: ID, symbol: String, url: String): NoteDraft
 
-  # Get all docs from note pull request records including candidates (like Github pr history)
+  # Get all docs from note pull request records including candidates (like Github PR history)
   noteHistory(noteId: ID!, status: NoteDocStatus): [NoteDocEntry!]!
 
-  # NEXT: Priority, same as Votes
-  poll(id: ID!): Poll
+  # Throws error if not found
+  poll(id: ID!): Poll!
 
   # NEXT:
   rate(id: ID!): Rate
@@ -81,10 +86,10 @@ type Query {
   # NEXT:
   searchAuthor(term: String!): [SearchHit!]!
 
-  # fuzzy search discuss title by given term
+  # Fuzzy search discuss title by given term
   searchDiscuss(term: String!): [SearchHit!]!
 
-  # fuzzy search symbol name, if 'type' not given, search both ticker & topic
+  # Fuzzy search symbol name, if 'type' not given, search both ticker & topic
   searchSymbol(term: String!, type: SymType): [SearchHit!]!
 
   # TODO: Duplicated with searchSymbol ?
@@ -234,7 +239,6 @@ type Mutation {
   updateRate(id: ID!, data: RateInput!): Rate!
 
   # also used for merge verdict
-  #  NEXT:
   createPollVote(pollId: ID!, data: PollVoteInput!): PollVote!
 
   # updatePollVote(pollId: ID!, data: VoteInput!): PollVote!
@@ -247,21 +251,6 @@ type Mutation {
   # --- NEXT ---
 
   # createPoll(data: PollInput!): Poll!
-  # createPollLike(pollId: ID!, data: LikeInput!): PollLikeResonse!
-  # updatePollLike(id: ID!, data: LikeInput!): PollLikeResonse!
-
-  # createVotePost(pollId: ID!, choiceId: ID!, data: PostInput!): Post!
-  # createPost(data: PostInput!, pollId: ID): Post!
-  # updatePost(id: ID!, data: PostInput!): Post!
-  # createPostLike(postId: ID!, data: LikeInput!): PostLikeResonse!
-  # updatePostLike(id: ID!, data: LikeInput!): PostLikeResonse!
-
-  # createCommit(data: CommitInput!): Commit!
-  # updateCommit(id: ID!, data: CommitInput!): Commit!
-  # applyCommitReview(commitId: ID!): ApplyCommitReviewResult!
-  # applyCommitReview(commitId: ID!): CommitReview!
-  # updateCommitReview(id: ID!, data: CommitReviewInput!): CommitReview!
-
   # createFollow(symbolId: ID!, data: FollowInput!): Follow!
   # updateFollow(symbolId: ID!, data: FollowInput!): Follow!
 
@@ -325,7 +314,10 @@ type Discuss {
   id: ID!
   userId: String!
   status: DiscussStatus!
-  # meta: JSON! # TODO: define the content of meta
+
+  # TODO: define the content of meta
+  # meta: JSON!
+
   title: String!
   content: String
   createdAt: DateTime!
@@ -477,8 +469,8 @@ type NoteDocContentHeadWebpage {
   # Webpage's title
   title: String
 
-  # When the webpage content publish at
-  publishedAt: DateTime
+  # When the webpage content publish at, in millisecond
+  publishedAt: Int
 
   # Tickers mentioned in the webpage content
   tickers: [String!]
@@ -531,22 +523,11 @@ type NoteDraftEntry {
 type Poll {
   id: ID!
   userId: String!
+  status: PollStatus!
   meta: PollMeta!
-  # type: PollType!
-  # status: PollStatus!
   choices: [String!]!
-  # nVotes: [Int!]!
   count: PollCount!
-  # title: String!
-  # text: String
-  # start: DateTime!
-  # end: DateTime!
-  # nDays: Int!
-  # minVotes: Int!
-  # nDaysJudge: Int!
-  # minJudgments: Int!
-  # count: PollCount!
-  # posts: [Post!]!
+  discuss: Discuss
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -795,10 +776,17 @@ enum PollType {
 }
 
 enum PollStatus {
-  OPEN
-  JUDGE
   CLOSE_SUCCESS
   CLOSE_FAIL
+  OPEN
+
+  # If paused, the poll cannot vote
+  PAUSE
+
+  JUDGE
+
+  # In case the poll data is broken and cannot perform jobs, wait for manual checking
+  ABNORMAL
 }
 
 enum RateChoice {

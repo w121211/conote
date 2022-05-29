@@ -94,8 +94,9 @@ class PollVoteModel {
       include: { count: true },
     })
 
-    if (poll === null || poll.count === null)
-      throw new Error('[create] Poll not found')
+    if (poll === null) throw new Error('[create] Poll not found')
+    if (poll.count === null) throw new Error('[create] poll.count === null')
+    if (poll.status !== 'OPEN') throw new Error('[create] poll.status !== OPEN')
     if (choiceIdx < 0 || choiceIdx >= poll.choices.length)
       throw new Error('[create] Choice index is out of range')
 
@@ -121,6 +122,18 @@ class PollVoteModel {
     // console.debug(choiceIdx, pollId, userId, count)
 
     return vote
+  }
+
+  async validateBeforeCreate({
+    choiceIdx,
+    pollId,
+    userId,
+  }: {
+    choiceIdx: number
+    pollId: string
+    userId: string
+  }) {
+    // TODO:
   }
 }
 

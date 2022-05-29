@@ -297,10 +297,13 @@ model Poll {
   userId    String
   type      PollType   @default(FIXED)
   status    PollStatus @default(OPEN)
-  meta      Json       @default("{}")
-  choices   String[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  meta      Json
+
+  // User input content
+  choices String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // A poll can connect to a discuss
   discuss Discuss? @relation(fields: [discussId], references: [id])
@@ -440,14 +443,6 @@ enum NoteDraftStatus {
   DROP
 }
 
-enum PollFailReason {
-  MIN_VOTES
-  MIN_JUDGMENTS
-  MAJOR_VERDICT
-  VERDICT_AS_FAIL
-  OTHER
-}
-
 enum PollStatus {
   CLOSE_SUCCESS
   CLOSE_FAIL
@@ -464,6 +459,7 @@ enum PollStatus {
 }
 
 enum PollType {
+  // Poll choices are fixed and not changable after create
   FIXED
   ADD
   ADD_BY_POST

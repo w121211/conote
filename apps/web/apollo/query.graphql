@@ -144,6 +144,9 @@ fragment poll on Poll {
     id
     nVotes
   }
+  discuss {
+    ...discuss
+  }
   createdAt
   updatedAt
 }
@@ -310,6 +313,18 @@ query Author($id: ID, $name: String) {
   }
 }
 
+query Commit($id: ID!) {
+  commit(id: $id) {
+    ...commit
+  }
+}
+
+query CommitsByUser($userId: ID!, $afterId: ID) {
+  commitsByUser(userId: $userId, afterId: $afterId) {
+    ...commit
+  }
+}
+
 query Discuss($id: ID!) {
   discuss(id: $id) {
     ...discuss
@@ -424,12 +439,7 @@ query SearchSymbol($term: String!, $type: SymType) {
   }
 }
 
-# # --------NEW--------
-query MyCommits {
-  myCommits {
-    ...commit
-  }
-}
+# --------NEW--------
 
 query MyNoteDraftEntries {
   myNoteDraftEntries {
@@ -455,20 +465,20 @@ query NoteDoc($id: ID!) {
   }
 }
 
-query NoteDocsToMerge($noteId: ID!) {
-  noteDocsToMerge(noteId: $noteId) {
+query NoteDocsToMergeByNote($noteId: ID!) {
+  noteDocsToMergeByNote(noteId: $noteId) {
     ...noteDoc
   }
 }
 
-query LatestNoteDocsMerged {
-  latestNoteDocsMerged {
+query NoteDocsMergedLatest {
+  noteDocsMergedLatest {
     ...noteDoc
   }
 }
 
-query LatestNoteDocsToMerge {
-  latestNoteDocsToMerge {
+query NoteDocsToMergeLatest {
+  noteDocsToMergeLatest {
     ...noteDoc
   }
 }

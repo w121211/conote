@@ -41,6 +41,37 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return await authorModel.get(id ?? undefined, name ?? undefined)
   },
 
+  async commit(_parent, { id }, _context, _info) {
+    const commit = await prisma.commit.findUnique({
+      where: { id },
+      include: { noteDocs: true },
+    })
+    if (commit) {
+      return {
+        ...commit,
+        noteDocs: commit.noteDocs.map(d => noteDocModel.parse(d)),
+      }
+    }
+    throw new Error('Commit not found')
+  },
+
+  async commitsByUser(_parent, { userId, afterId }, _context, _info) {
+    const commits = await prisma.commit.findMany({
+      where: { userId },
+      include: { noteDocs: true },
+      orderBy: { createdAt: 'desc' },
+      cursor: afterId ? { id: afterId } : undefined,
+      take: 10,
+      skip: afterId ? 1 : 0,
+    })
+    return commits.map(e => {
+      return {
+        ...e,
+        noteDocs: e.noteDocs.map(d => noteDocModel.parse(d)),
+      }
+    })
+  },
+
   async discuss(_parent, { id }, _context, _info) {
     const discuss = await prisma.discuss.findUnique({
       where: { id },
@@ -50,11 +81,12 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       return {
         ...discuss,
         id: discuss.id.toString(),
+        // TODO:
         meta: discuss.meta as unknown as object,
         count: toStringId(discuss.count),
       }
     }
-    return null
+    throw new Error('Discuss not found')
   },
 
   async discussEmojis(_parent, { discussId }, _context, _info) {
@@ -111,12 +143,12 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 
   async link(_parent, { id, url }, _context, _info) {
     if (id) {
-      return await prisma.link.findUnique({ where: { id } })
+      await prisma.link.findUnique({ where: { id } })
     }
     if (url) {
       return await prisma.link.findUnique({ where: { url } })
     }
-    throw 'Param requires either id or url'
+    throw new Error('Param requires either id or url')
   },
 
   async me(_parent, _args, { req }, _info) {
@@ -127,7 +159,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       where: { id: userId },
     })
     if (user === null) {
-      throw 'Unexpected error'
+      throw new Error('Unexpected error')
     }
     return user
   },
@@ -269,26 +301,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 
   // -------------New------------------
 
-  // # to know all latest commit docs
-  // how latest?? take 10
-  // process to form Commit of type-defs version (DictEntryArray)
-  // myCommits: [Commit!]!
-  async myCommits(_parent, _args, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      commits = await prisma.commit.findMany({
-        where: { userId: userId },
-        include: { noteDrafts: true, noteDocs: true },
-        take: 10,
-        orderBy: { createdAt: 'desc' },
-      })
-    return commits.map(e => {
-      return {
-        ...e,
-        noteDocs: e.noteDocs.map(d => noteDocModel.parse(d)),
-      }
-    })
-  },
-
   // # get user's all drafts for draft-sidebar
   // # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
   // myNoteDraftEntries: [NoteDraftEntry!]!
@@ -332,7 +344,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     throw new Error('NoteDoc not found.')
   },
 
-  async noteDocsToMerge(_parent, { noteId }, _context, _info) {
+  async noteDocsToMergeByNote(_parent, { noteId }, _context, _info) {
     const docs = await prisma.noteDoc.findMany({
       where: {
         AND: [{ note: { id: noteId } }, { status: 'CANDIDATE' }],
@@ -342,7 +354,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return docs.map(e => noteDocModel.parse(e))
   },
 
-  async latestNoteDocsMerged(_parent, _args, _context, _info) {
+  async noteDocsMergedLatest(_parent, _args, _context, _info) {
     const docs = await prisma.noteDoc.findMany({
       where: { status: 'MERGED' },
       orderBy: { createdAt: 'desc' },
@@ -350,7 +362,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return docs.map(e => noteDocModel.parse(e))
   },
 
-  async latestNoteDocsToMerge(_parent, _args, _context, _info) {
+  async noteDocsToMergeLatest(_parent, _args, _context, _info) {
     const docs = await prisma.noteDoc.findMany({
       where: { status: 'CANDIDATE' },
       orderBy: { createdAt: 'desc' },
@@ -380,6 +392,9 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       })
     }
     if (draft) {
+      if (draft.userId !== userId) {
+        throw new Error('Not the draft owner')
+      }
       return noteDraftModel.parse(draft)
     }
     return null
