@@ -1,8 +1,5 @@
-/**
- * @see https://github.com/vercel/next.js/tree/canary/examples/with-typescript-graphql
- */
-import { useEffect, useState } from 'react'
-import { useMeQuery } from '../apollo/query.graphql'
+import React, { useEffect, useState } from 'react'
+import { useMe } from '../components/auth/use-me'
 import { SearchAllForm } from '../components/search-all-form'
 import NewHotList from '../components/_new-hot-list'
 import UserRateTable from '../components/user/user-rate-table'
@@ -10,8 +7,10 @@ import { mockRateData } from './user/[userid]'
 import AuthItem from '../components/auth/auth-Item'
 import { useMe } from '../components/auth/use-me'
 
-export function HomePage(): JSX.Element {
-  const [showAnnounce, setAnnounce] = useState(false)
+const HomePage = (): JSX.Element => {
+  const [showAnnounce, setAnnounce] = useState(false),
+    { me, loading } = useMe()
+
   useEffect(() => {
     if (window.sessionStorage.getItem('announce') === null) {
       window.sessionStorage.setItem('announce', 'true')
@@ -50,7 +49,7 @@ export function HomePage(): JSX.Element {
         <div className="sticky top-0 w-screen z-10 flex items-center justify-between p-1 capitalize text-sm text-gray-900 bg-yellow-400 text-center">
           <div className="flex-grow flex items-center justify-center  gap-2 ">
             <span className="material-icons">campaign</span>
-            <span className=" truncate">new announcement!</span>
+            <span className="truncate">new announcement!</span>
           </div>
           <span
             className="material-icons relative inline-block items-center right-0 text-base 

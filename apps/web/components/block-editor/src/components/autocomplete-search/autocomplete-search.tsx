@@ -1,16 +1,14 @@
-import React, { useEffect } from 'react'
-import { useRef } from 'react'
-import {
-  autoCompleteHashtag,
-  autoCompleteInline,
-  nullSearch,
-} from '../../handlers/textarea-keydown'
-import { CaretPosition, Search, SearchHit } from '../../interfaces'
-import { searchService } from '../../services/search.service'
+import React, { useEffect, useRef } from 'react'
+import { SearchHitFragment } from '../../../../../apollo/query.graphql'
+import { autoCompleteInline, nullSearch } from '../../handlers/textarea-keydown'
+import type { CaretPosition, Search } from '../../interfaces'
+import { getSearchService } from '../../services/search.service'
+
+const searchService = getSearchService()
 
 function clickHit(
   uid: string,
-  hitClicked: SearchHit,
+  hitClicked: SearchHitFragment,
   search: Search,
   setSearch: React.Dispatch<React.SetStateAction<Search>>,
 ) {
@@ -20,9 +18,9 @@ function clickHit(
 
   if (target) {
     switch (search.type) {
-      case 'hashtag':
-        // autoCompleteHashtag(target, expansion, setSearch)
-        break
+      // case 'hashtag':
+      // autoCompleteHashtag(target, expansion, setSearch)
+      //   break
       // case 'template':
       //   fn = autoCompleteTemplate
       default:
@@ -45,16 +43,13 @@ export const InlineSearchEl = ({
   const { type, term, hits } = search,
     searchPanel = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        type &&
-        e.target &&
-        !searchPanel.current?.contains(e.target as Node)
-      ) {
-        setSearch(nullSearch)
-      }
+  function handleClickOutside(e: MouseEvent) {
+    if (type && e.target && !searchPanel.current?.contains(e.target as Node)) {
+      setSearch(nullSearch)
     }
+  }
+
+  useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside)
 
     return () => {
@@ -85,7 +80,7 @@ export const InlineSearchEl = ({
         ) : (
           hits.map((e, i) => {
             // const { nodeTitle, blockStr, blockUid } = e
-            const { id, note } = e
+            const { id, str } = e
             return (
               <button
                 className="px-4 py-1 text-left hover:bg-gray-200 dark:hover:bg-gray-600/50"
@@ -93,11 +88,9 @@ export const InlineSearchEl = ({
                 id={'dropdown-item-' + i}
                 // isPressed={index === i}
                 // ;; if page link, expand to title. otherwise expand to uid for a block ref
-                onClick={() => {
-                  clickHit(blockUid, e, search, setSearch)
-                }}
+                onClick={() => clickHit(blockUid, e, search, setSearch)}
               >
-                {note?.symbol}
+                {str}
               </button>
             )
           })

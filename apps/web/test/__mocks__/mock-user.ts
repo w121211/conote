@@ -1,4 +1,10 @@
 import { User } from '@prisma/client'
+import { getBotEmail } from '../../lib/models/user-model'
+
+export const mockBotUser: User = {
+  id: 'bot',
+  email: getBotEmail(),
+}
 
 export const mockUsers: User[] = [
   { id: 'testuser0', email: 'aaa@aaa.com' },

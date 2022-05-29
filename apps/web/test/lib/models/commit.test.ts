@@ -17,7 +17,7 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-  await prisma.$queryRaw`TRUNCATE "Commit", "Discuss", "Note", "NoteDoc", "NoteDraft", "Link", "Sym" CASCADE;`
+  await prisma.$queryRaw`TRUNCATE "Commit", "Discuss", "Note", "NoteDoc", "NoteDraft", "Link", "Sym", "Poll" CASCADE;`
   await testHelper.createDiscusses(prisma)
 })
 
@@ -31,11 +31,12 @@ describe('commitNoteDrafts()', () => {
   /**
    * Validations
    *
-   * Cases which throws error:
+   * Cases which throws
    * - [x] user is not the owner of draft
    * - [x] draftId cannot be found
    * - [x] fromDoc is empty but there is a latest doc
    * - [x] fromDoc does not match
+   * - [] the draft content is the same as from-doc
    *
    */
 
@@ -66,14 +67,25 @@ describe('commitNoteDrafts()', () => {
     )
   })
 
-  it('throws if fromDoc is empty but there is a latest doc ', async () => {
-    await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-    await testHelper.createCommit(prisma)
-    await expect(async () => {
-      await commitNoteDrafts([mockNoteDrafts[0].id], mockUsers[0].id)
-    }).rejects.toThrowErrorMatchingInlineSnapshot(
+  it('throws if from-doc is empty but there is a latest doc ', async () => {
+    await testHelper.createMergeCommit(prisma)
+    await expect(
+      commitNoteDrafts([mockNoteDrafts[0].id], mockUsers[0].id),
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"FromDoc is not the latest doc of this note."`,
     )
+  })
+
+  it('throws if the draft content is the same as from-doc', async () => {
+    // await testHelper.createMergeCommit(prisma)
+    // const draft = {
+    //   ...mockNoteDrafts[0],
+    //   fromDocId: mockNoteDocs[1].id,
+    // }
+    // await testHelper.createNoteDrafts(prisma, [draft])
+    // await expect(
+    //   commitNoteDrafts([draft.id], mockUsers[0].id),
+    // ).rejects.toThrowErrorMatchingInlineSnapshot()
   })
 
   /**
@@ -103,62 +115,73 @@ describe('commitNoteDrafts()', () => {
       mockUsers[0].id,
     )
     expect(Object.keys(symbol_symId)).toMatchInlineSnapshot(`
-      Array [
-        "[[Apple]]",
-        "[[Google]]",
-      ]
-    `)
+        Array [
+          "[[Apple]]",
+          "[[Google]]",
+        ]
+      `)
     expect(notes.map(e => e.sym.symbol)).toMatchInlineSnapshot(`
+        Array [
+          "[[Apple]]",
+          "[[Google]]",
+        ]
+      `)
+    expect(
+      noteDocs.map(({ status, meta }) => ({
+        status,
+        mergeState: (meta as any).mergeState,
+      })),
+    ).toMatchInlineSnapshot(`
       Array [
-        "[[Apple]]",
-        "[[Google]]",
-      ]
-    `)
-    expect(noteDocs.map(e => e.status)).toMatchInlineSnapshot(`
-      Array [
-        "CANDIDATE",
-        "CANDIDATE",
+        Object {
+          "mergeState": "merged_auto-initial_commit",
+          "status": "MERGED",
+        },
+        Object {
+          "mergeState": "merged_auto-initial_commit",
+          "status": "MERGED",
+        },
       ]
     `)
     const updatedDrafts = await prisma.noteDraft.findMany({
       where: { commit: { id: commit.id } },
     })
     expect(updatedDrafts.map(e => [e.symbol, e.status])).toMatchInlineSnapshot(`
-      Array [
         Array [
-          "[[Google]]",
-          "COMMIT",
-        ],
-        Array [
-          "[[Apple]]",
-          "COMMIT",
-        ],
-      ]
-    `)
+          Array [
+            "[[Google]]",
+            "COMMIT",
+          ],
+          Array [
+            "[[Apple]]",
+            "COMMIT",
+          ],
+        ]
+      `)
     const noteDocHistory = await prisma.noteDoc.findMany({
       where: { note: { id: notes[0].id } },
       take: 3,
     })
     expect(noteDocHistory.map(e => e.domain)).toMatchInlineSnapshot(`
-      Array [
-        "domain0",
-      ]
-    `)
+        Array [
+          "domain0",
+        ]
+      `)
   })
 
   it('create noteDoc if from-doc exists', async () => {
-    // Start with a draft without from-doc and simulate the first-commit to get the note-doc as from-doc
-    // This way removes the hassle of caring the commit process
-    await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-    const { sym, noteDoc } = await testHelper.createCommit(prisma)
+    // Start with a draft without from-doc and simulate the first-commit to get the note-doc as from-doc.
+    //  This way removes the hassle of caring the commit process
+    //  await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
+    await testHelper.createMergeCommit(prisma)
+    // const fromDoc = await prisma.noteDoc.findUnique({where:{}})
     await testHelper.createNoteDrafts(prisma, [
       {
         ...mockNoteDrafts[0],
         id: 'mock-draft-0-1_from-empty',
-        symbol: sym.symbol,
+        // symbol: sym.symbol,
         userId: mockUsers[1].id,
-        fromDocId: noteDoc.id,
-        domain: noteDoc.domain,
+        fromDocId: mockNoteDocs[0].id,
       },
     ])
 
@@ -169,7 +192,7 @@ describe('commitNoteDrafts()', () => {
       }),
     ).toMatchInlineSnapshot(`
       Object {
-        "fromDocId": "mock-doc-1_merge",
+        "fromDocId": "0-candidate_initial_commit",
       }
     `)
 
@@ -178,18 +201,26 @@ describe('commitNoteDrafts()', () => {
       mockUsers[1].id,
     )
     expect(Object.keys(symbol_symId)).toMatchInlineSnapshot(`
-      Array [
-        "[[Apple]]",
-      ]
-    `)
+        Array [
+          "[[Apple]]",
+        ]
+      `)
     expect(notes.map(e => e.sym.symbol)).toMatchInlineSnapshot(`
+        Array [
+          "[[Apple]]",
+        ]
+      `)
+    expect(
+      noteDocs.map(({ status, meta }) => ({
+        status,
+        mergeState: (meta as any).mergeState,
+      })),
+    ).toMatchInlineSnapshot(`
       Array [
-        "[[Apple]]",
-      ]
-    `)
-    expect(noteDocs.map(e => e.status)).toMatchInlineSnapshot(`
-      Array [
-        "CANDIDATE",
+        Object {
+          "mergeState": "wait_to_merge-by_poll",
+          "status": "CANDIDATE",
+        },
       ]
     `)
 
@@ -197,17 +228,17 @@ describe('commitNoteDrafts()', () => {
       where: { commit: { id: commit.id } },
     })
     expect(updatedDrafts.map(e => [e.symbol, e.status])).toMatchInlineSnapshot(`
-      Array [
         Array [
-          "[[Apple]]",
-          "COMMIT",
-        ],
-      ]
-    `)
+          Array [
+            "[[Apple]]",
+            "COMMIT",
+          ],
+        ]
+      `)
 
     const noteDocHistory = await prisma.noteDoc.findMany({
       where: { note: { id: notes[0].id } },
-      take: 3,
+      take: 10,
       orderBy: { createdAt: 'asc' },
     })
     expect(
@@ -221,11 +252,11 @@ describe('commitNoteDrafts()', () => {
         Object {
           "domain": "domain0",
           "fromDocId": null,
-          "status": "MERGE",
+          "status": "MERGED",
         },
         Object {
           "domain": "domain0",
-          "fromDocId": "mock-doc-1_merge",
+          "fromDocId": "0-candidate_initial_commit",
           "status": "CANDIDATE",
         },
       ]
@@ -234,7 +265,6 @@ describe('commitNoteDrafts()', () => {
 
   it('got discuss ids, should only set this-draft-created-discusses to "ACTIVE"', async () => {
     await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[1]])
-
     expect(
       (await prisma.discuss.findMany()).map(e => ({
         id: e.id,
@@ -244,7 +274,7 @@ describe('commitNoteDrafts()', () => {
     ).toMatchInlineSnapshot(`
       Array [
         Object {
-          "id": "mock-discuss-0_active",
+          "id": "mock_discuss_0_active",
           "status": "ACTIVE",
           "userId": "testuser0",
         },
@@ -276,7 +306,7 @@ describe('commitNoteDrafts()', () => {
       Array [
         Array [
           Object {
-            "id": "mock-discuss-0_active",
+            "id": "mock_discuss_0_active",
             "status": "ACTIVE",
             "userId": "testuser0",
           },
@@ -295,15 +325,14 @@ describe('commitNoteDrafts()', () => {
     `)
   })
 
-  it('create multiple noteDocs if one from-doc exists and the other does not', async () => {
-    await testHelper.createNoteDrafts(prisma, [mockNoteDrafts[0]])
-    await testHelper.createCommit(prisma)
+  it('create multiple note-docs given multiple draft-ids', async () => {
+    await testHelper.createMergeCommit(prisma)
     await testHelper.createNoteDrafts(prisma, [
       {
         ...mockNoteDrafts[0],
         id: 'mock-draft-0-1_from-empty',
         userId: mockUsers[1].id,
-        fromDocId: mockNoteDocs[1].id,
+        fromDocId: mockNoteDocs[0].id,
       },
       mockNoteDrafts[1],
     ])
@@ -312,27 +341,34 @@ describe('commitNoteDrafts()', () => {
       mockUsers[1].id,
     )
     expect(Object.keys(symbol_symId)).toMatchInlineSnapshot(`
-      Array [
-        "[[Apple]]",
-        "[[Google]]",
-      ]
-    `)
+        Array [
+          "[[Apple]]",
+          "[[Google]]",
+        ]
+      `)
     expect(notes.map(e => e.sym.symbol)).toMatchInlineSnapshot(`
-      Array [
-        "[[Apple]]",
-        "[[Google]]",
-      ]
-    `)
-    expect(noteDocs.map(e => ({ fromDocId: e.fromDocId, status: e.status })))
-      .toMatchInlineSnapshot(`
+        Array [
+          "[[Apple]]",
+          "[[Google]]",
+        ]
+      `)
+    expect(
+      noteDocs.map(({ fromDocId, status, meta }) => ({
+        fromDocId,
+        status,
+        mergeState: (meta as any).mergeState,
+      })),
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
-          "fromDocId": "mock-doc-1_merge",
+          "fromDocId": "0-candidate_initial_commit",
+          "mergeState": "wait_to_merge-by_poll",
           "status": "CANDIDATE",
         },
         Object {
           "fromDocId": null,
-          "status": "CANDIDATE",
+          "mergeState": "merged_auto-initial_commit",
+          "status": "MERGED",
         },
       ]
     `)
@@ -340,16 +376,16 @@ describe('commitNoteDrafts()', () => {
       where: { commit: { id: commit.id } },
     })
     expect(updatedDrafts.map(e => [e.symbol, e.status])).toMatchInlineSnapshot(`
-      Array [
         Array [
-          "[[Google]]",
-          "COMMIT",
-        ],
-        Array [
-          "[[Apple]]",
-          "COMMIT",
-        ],
-      ]
-    `)
+          Array [
+            "[[Google]]",
+            "COMMIT",
+          ],
+          Array [
+            "[[Apple]]",
+            "COMMIT",
+          ],
+        ]
+      `)
   })
 })

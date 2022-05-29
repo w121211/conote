@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
+import Layout from '../../layout/layout'
 import Popup from '../../components/popup/popup'
 import AuthorArticleList from '../../components/author/author-article-list'
 import AuthorMetaModal from '../../components/author/author-meta-modal'

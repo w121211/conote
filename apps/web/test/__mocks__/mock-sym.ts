@@ -18,7 +18,7 @@ import { mockLinks } from './mock-link'
 
 export const mockSyms: Sym[] = [
   {
-    id: 'mock-sym-0',
+    id: '0-topic',
     symbol: '[[Apple]]',
     type: 'TOPIC',
     linkId: null,
@@ -26,7 +26,7 @@ export const mockSyms: Sym[] = [
     updatedAt: new Date(),
   },
   {
-    id: 'mock-sym-1',
+    id: '1-topic',
     symbol: '[[Google]]',
     type: 'TOPIC',
     linkId: null,
@@ -34,7 +34,7 @@ export const mockSyms: Sym[] = [
     updatedAt: new Date(),
   },
   {
-    id: 'mock-sym-2_ticker',
+    id: '2-ticker',
     symbol: '$BA',
     type: 'TICKER',
     linkId: null,
@@ -42,7 +42,7 @@ export const mockSyms: Sym[] = [
     updatedAt: new Date(),
   },
   {
-    id: 'mock-sym-3_link',
+    id: '3-url',
     symbol: mockLinks[0].url,
     type: 'URL',
     linkId: mockLinks[0].id,

@@ -330,8 +330,6 @@ function tokenToInlineItem(token: string | Token): InlineItem {
 export function parse(str: string): InlineItem[] {
   const tokens = tokenize(str, grammar),
     inlineItems = tokens.map(e => tokenToInlineItem(e))
-
-  console.log(tokens)
   return inlineItems
 }
 

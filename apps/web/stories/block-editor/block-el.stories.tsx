@@ -1,14 +1,20 @@
 import React from 'react'
+import { ApolloProvider } from '@apollo/client'
 import { setEntities } from '@ngneat/elf-entities'
 import { ComponentMeta } from '@storybook/react'
+import { getApolloClient } from '../../apollo/apollo-client'
 import { blockRepo } from '../../components/block-editor/src/stores/block.repository'
 import { BlockEl } from '../../components/block-editor/src/components/block/block-el'
 import { mockBlocks } from '../../components/block-editor/test/__mocks__/mock-block'
 import { writeBlocks } from '../../components/block-editor/src/utils'
+import ModalProvider from '../../components/modal/modal-context'
+import { InitStoreForStorybook } from './helper-components/init-store-for-storybook'
 import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
 
 // Need to place outside, otherwise the storybook result weird behavior
 const basicBlocks = writeBlocks(['a', ['b', 'c']])
+
+const apolloClient = getApolloClient()
 
 export default {
   title: 'BlockEditor/BlockEl',
@@ -27,55 +33,19 @@ export default {
 export const Basic = () => {
   blockRepo.clearHistory()
   blockRepo.update([setEntities(basicBlocks)])
-
-  return (
-    // <TooltipProvider>
-    <BlockEl uid={basicBlocks[0].uid} isEditable />
-    // </TooltipProvider>
-  )
+  return <BlockEl uid={basicBlocks[0].uid} isEditable />
 }
 
 export const Demo = () => {
-  // (BUG) useEffect throws error, possibly caused by storybook
-  // useEffect(() => {
-  //   blockRepo.clearHistory()
-  //   blockRepo.update([setEntities(mockBlocks)])
-  // }, [])
-
-  blockRepo.clearHistory()
-  blockRepo.update([setEntities(mockBlocks)])
-
   return (
-    <TooltipProvider>
-      <BlockEl uid={mockBlocks[0].uid} isEditable />
-    </TooltipProvider>
-  )
-}
-
-export const Textarea = () => {
-  const value = '012345678\n012345678\n012345678\n'
-  return (
-    <textarea
-      rows={4}
-      value={value}
-      onKeyUp={e => {
-        const { currentTarget, target } = e
-        const t = target as HTMLTextAreaElement
-        console.log(
-          'keyup',
-          currentTarget.selectionStart,
-          currentTarget.selectionDirection,
-        )
-      }}
-      onKeyDown={e => {
-        const { currentTarget, target } = e
-        const t = target as HTMLTextAreaElement
-        console.log(
-          'keydown',
-          currentTarget.selectionStart,
-          currentTarget.selectionDirection,
-        )
-      }}
-    ></textarea>
+    <InitStoreForStorybook>
+      <ApolloProvider client={apolloClient}>
+        <ModalProvider>
+          <TooltipProvider>
+            <BlockEl uid={mockBlocks[0].uid} isEditable />
+          </TooltipProvider>
+        </ModalProvider>
+      </ApolloProvider>
+    </InitStoreForStorybook>
   )
 }

@@ -201,7 +201,6 @@ class TreeUtil {
 
   /**
    * BFS search
-   *
    */
   searchBreadthFirst<T>(
     root: TreeNode<T>,
@@ -224,6 +223,16 @@ class TreeUtil {
     return null
   }
 
+  /**
+   * Turn node-bodies into a dict `{ [uid]: node-body }`
+   */
+  toDict<T>(nodes: TreeNodeBody<T>[]): Record<string, TreeNodeBody<T>> {
+    return Object.fromEntries(nodes.map(e => [e.uid, e]))
+  }
+
+  /**
+   *
+   */
   toPreOrderList<T>(root: TreeNode<T>): Required<TreeNodeBody<T>>[] {
     const traversed: Required<TreeNodeBody<T>>[] = [],
       parents = [root]
@@ -246,20 +255,31 @@ class TreeUtil {
   }
 
   /**
-   * Alias
+   *
+   */
+  toTreeNodeBodyList<
+    T extends {
+      uid: string
+      parentUid: string | null
+      childrenUids: string[]
+      order: number
+    },
+  >(items: T[]): Required<TreeNodeBody<T>>[] {
+    const nodes: Required<TreeNodeBody<T>>[] = items.map(e => {
+      const { uid, parentUid, childrenUids, order } = e
+      return { uid, parentUid, childrenUids, order, data: e }
+    })
+
+    this.validateList(nodes)
+    return nodes
+  }
+
+  /**
+   * Alias of toPreOrderList()
    */
   toList<T>(root: TreeNode<T>): Required<TreeNodeBody<T>>[] {
     return this.toPreOrderList(root)
   }
-
-  // toDict<T>(children: TreeNode<T>[]): Record<string, TreeNodeBody<T>> {
-  //   // const nd = cloneDeep(node)
-  //   const dict: Record<string, TreeNodeBody<T>> = {}
-  //   for (const e of this.toList(children)) {
-  //     dict[e.cid] = e
-  //   }
-  //   return dict
-  // }
 
   // toParentChildrenDict<T>(
   //   children: TreeNode<T>[],
@@ -272,7 +292,6 @@ class TreeUtil {
   //     ]),
   //   )
   //   dict[this.tempRootCid] = []
-
   //   Object.entries(nodeDict).forEach(([, node]) => {
   //     const { parentCid } = node
   //     if (parentCid === undefined) {

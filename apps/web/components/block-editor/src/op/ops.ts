@@ -26,7 +26,7 @@ import {
   getBlock,
   getBlockChildren,
 } from '../stores/block.repository'
-import { DocReducer, docRepo, getDoc } from '../stores/doc.repository'
+import { DocReducer, docRepo } from '../stores/doc.repository'
 import { genBlockUid } from '../utils'
 import {
   getRefBlockOfPosition,
@@ -512,7 +512,7 @@ export function docLoadOp(
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
 } {
-  if (docRepo.findDoc(title))
+  if (docRepo.getDoc(title))
     throw new Error('[docLoadOp] Doc is already existed')
   if (title !== noteDraft.symbol)
     throw new Error('[docLoadOp] title !== noteDraft.symbol')
@@ -548,11 +548,13 @@ export function docNewOp(
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
 } {
-  if (docRepo.findDoc(title))
+  if (docRepo.getDoc(title))
     throw new Error('[docNewOp] Doc is already existed')
 
   if (note) {
-    const { blocks, docBlock } = convertGQLBlocks(note.noteDoc.content.blocks),
+    const { blocks, docBlock } = convertGQLBlocks(
+        note.noteDoc.contentBody.blocks,
+      ),
       newDoc: Doc = {
         branch,
         domain,

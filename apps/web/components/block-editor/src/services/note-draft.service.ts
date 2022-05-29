@@ -1,3 +1,4 @@
+import { TreeNodeBody, treeUtil } from '@conote/docdiff'
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
 import { Block, Doc } from '../interfaces'
 import {
@@ -23,8 +24,6 @@ import {
 } from '../../../../apollo/query.graphql'
 import { getApolloClient } from '../../../../apollo/apollo-client'
 import { docRepo } from '../stores/doc.repository'
-import { TreeNodeBody, treeUtil } from '@conote/docdiff'
-import { cloneDeep } from 'lodash'
 import { omitTypenameDeep } from '../utils'
 
 // interface INoteDraftService {
@@ -214,7 +213,7 @@ class NoteDraftService {
     }
     if (errors) {
       console.error(errors)
-      throw new Error('[dropDraft] mutation error')
+      throw new Error('[dropDraft] DropNoteDraftMutation error')
     }
     throw new Error('[dropDraft] no return data')
   }
@@ -261,14 +260,14 @@ class NoteDraftService {
     noteDraft: NoteDraftFragment,
     note: NoteFragment | null,
   ): { doc: Doc; blocks: Block[]; docBlock: Block } {
-    const { content, domain, meta, symbol } = noteDraft,
+    const { symbol, domain, contentBody, contentHead } = noteDraft,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      { blocks, docBlock } = convertGQLBlocks(content.blocks),
+      { blocks, docBlock } = convertGQLBlocks(contentBody.blocks),
       doc: Doc = {
         branch,
         domain,
         title: symbol,
-        meta: omitTypenameDeep(meta),
+        contentHead: omitTypenameDeep(contentHead),
         blockUid: docBlock.uid,
         noteCopy: note ?? undefined,
         noteDraftCopy: noteDraft,
@@ -281,21 +280,21 @@ class NoteDraftService {
    *
    */
   toNoteDraftInput(doc: Doc): NoteDraftInput {
-    const { domain, noteCopy, meta } = doc,
+    const { noteCopy, domain, contentHead } = doc,
       blocks = docRepo.getContentBlocks(doc),
       blocksWithoutChildrenUids = blocks.map(e => {
         const { childrenUids, editTime, ...rest } = e
         return { ...rest }
       }),
       input: NoteDraftInput = {
-        content: {
+        fromDocId: noteCopy?.noteDoc.id,
+        domain,
+        contentHead,
+        contentBody: {
           blocks: blocksWithoutChildrenUids,
           discussIds: [],
           symbols: [],
         },
-        domain,
-        fromDocId: noteCopy?.noteDoc.id,
-        meta,
       }
     return input
   }

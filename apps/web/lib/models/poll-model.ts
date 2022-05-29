@@ -1,32 +1,60 @@
-import { Poll, PollCount } from '@prisma/client'
+import type { NoteDoc, Poll, PollCount } from '@prisma/client'
 import { hasCount } from '../helpers'
+import { PollMeta, PollParsed } from '../interfaces'
 import prisma from '../prisma'
 
-export type PollMeta = {
-  text?: string
-  code?: 'buysell'
+const defaultPollMeta: PollMeta = {
+  openInDays: 180,
 }
 
-export async function createPoll({
-  choices,
-  meta,
-  userId,
-}: {
-  choices: string[]
-  meta?: PollMeta
-  userId: string
-}): Promise<Poll & { count: PollCount }> {
-  const poll = await prisma.poll.create({
-    data: {
-      user: { connect: { id: userId } },
-      meta,
-      choices,
-      count: { create: {} },
-    },
-    include: { count: true },
-  })
-  if (hasCount(poll)) {
-    return poll
+export class PollModel {
+  async create({
+    userId,
+    choices,
+    meta,
+    noteDocToMerge,
+  }: {
+    userId: string
+    choices: string[]
+    meta?: PollMeta
+    noteDocToMerge?: NoteDoc
+  }): Promise<PollParsed> {
+    const poll = await prisma.poll.create({
+      data: {
+        user: { connect: { id: userId } },
+        meta: meta ?? defaultPollMeta,
+        choices,
+        count: { create: { nVotes: choices.map(_ => 0) } },
+        noteDocToMerge: noteDocToMerge
+          ? { connect: { id: noteDocToMerge.id } }
+          : undefined,
+      },
+      include: { count: true },
+    })
+    return this.parse(poll)
   }
-  throw 'Prisma internal error'
+
+  async find(id: string): Promise<PollParsed | null> {
+    const poll = await prisma.poll.findUnique({
+      include: { count: true },
+      where: { id },
+    })
+    if (poll) {
+      return this.parse(poll)
+    }
+    return null
+  }
+
+  parse(poll: Poll & { count: PollCount | null }): PollParsed {
+    if (hasCount(poll)) {
+      return {
+        ...poll,
+        // TODO
+        meta: poll.meta as unknown as PollMeta,
+      }
+    }
+    throw new Error('[parse] Poll has no count')
+  }
 }
+
+export const pollModel = new PollModel()

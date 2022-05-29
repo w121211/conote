@@ -36,16 +36,15 @@
     "jestsetup.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.js",
-    // "babel.config.js",
-    "components/discuss/full-page/.create-post-form.tsx"
+    "**/*.js"
   ],
   "ts-node": {
-    // options are overrides used only by ts-node
+    // Options are overrides when use ts-node
     "compilerOptions": {
       "module": "commonjs",
       "allowJs": false
     },
-    "files": true // to load custom .d.ts
+    // To load custom .d.ts
+    "files": true
   }
 }

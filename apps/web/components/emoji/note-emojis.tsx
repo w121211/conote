@@ -1,4 +1,10 @@
 import React, { useEffect, useState } from 'react'
+import { EmojiCode } from '@prisma/client'
+import { useNoteEmojisQuery } from '../../apollo/query.graphql'
+import ToggleMenu from '../../layout/toggle-menu'
+import { EmojisDropdownBtn } from './emojis-dropdown-btn'
+import NoteEmojiBtn from './note-emoji-btn'
+import NoteEmojiCreateBtn from './note-emoji-create-btn'
 import { useNoteEmojisQuery } from '../../apollo/query.graphql'
 import CreateNoteEmojiBtn from './create-note-emoji-btn'
 import UpdateNoteEmojiBtn from './update-note-emoji-btn'
@@ -41,7 +47,7 @@ const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
           likedChoice={likedChoice}
         />
       ) : (
-        <CreateNoteEmojiBtn noteId={noteId} emojiCode="PIN" />
+        <NoteEmojiCreateBtn noteId={noteId} emojiCode="PIN" />
       )}
       <ToggleMenu
         className="-translate-x-full left-full"
@@ -72,7 +78,7 @@ const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
                       likedChoice={likedChoice}
                     />
                   ) : (
-                    <CreateNoteEmojiBtn key={i} noteId={noteId} emojiCode={e} />
+                    <NoteEmojiCreateBtn key={i} noteId={noteId} emojiCode={e} />
                   )}
                 </span>
               )

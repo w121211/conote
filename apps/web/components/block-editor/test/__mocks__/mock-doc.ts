@@ -1,24 +1,24 @@
 import { Doc } from '../../src/interfaces'
 import {
-  mockDocBlockAndContentBlocks,
-  mockDocBlockHasNoContent,
+  mockDocBlock_contentBlocks,
+  mockDocBlockWithoutContent,
 } from './mock-block'
 
 const base = {
   branch: 'branch',
   domain: 'domain',
-  meta: {},
+  contentHead: {},
 }
 
 export const mockDocs: Doc[] = [
   {
     ...base,
-    title: mockDocBlockAndContentBlocks[0].str,
-    blockUid: mockDocBlockAndContentBlocks[0].uid,
+    title: mockDocBlock_contentBlocks[0].str,
+    blockUid: mockDocBlock_contentBlocks[0].uid,
   },
   {
     ...base,
-    title: mockDocBlockHasNoContent.str,
-    blockUid: mockDocBlockHasNoContent.uid,
+    title: mockDocBlockWithoutContent.str,
+    blockUid: mockDocBlockWithoutContent.uid,
   },
 ]

@@ -22,10 +22,10 @@ beforeAll(async () => {
   "Note", "NoteDoc", "NoteDraft", "NoteEmoji", 
   "Link", "Poll", "Sym", "User" CASCADE;`
 
-  await testHelper.createBranch(prisma)
+  await testHelper.createBranches(prisma)
   await testHelper.createUsers(prisma)
   await testHelper.createDiscusses(prisma)
-  await testHelper.createCommit(prisma)
+  await testHelper.createMergeCommit(prisma)
 })
 
 afterAll(async () => {

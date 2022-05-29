@@ -22,22 +22,28 @@ export type TreeNodeBody<T> = {
   data: T
 
   // Record change-event lively
-  // change?: ChangeType
+  // TODO: If 'a' move to 'b' and move to 'a', should it detect as not moved?
+  // change?: TreeNodeChangeType
 }
 
-export type ChangeType =
-  | 'insert'
-  | 'update'
-  | 'move' // TODO: 若又改回來了的情況？
-  | 'move-update'
-  | 'delete'
-  | 'change-parent' // TODO: 若又改回來了的情況？
-  | 'change-parent-update'
+export type TreeNodeChange = {
+  type: TreeNodeChangeType
+  uid: string
 
-export type NodeChange<T> = {
-  type: ChangeType
-  cid: string
-  toParentCid: string // refers to final state id
-  toIndex: number | null // for insert only, others set to null
-  data?: T
+  // Refers to final state id
+  // toParentUid: string
+
+  // For insert only, others set to null
+  // toOrder: number | null
+
+  // data?: T
 }
+
+export type TreeNodeChangeType =
+  | 'change-parent' // Move a node under a different parent
+  | 'change-parent-update' // Move a node under a different parent & update the value
+  | 'delete' // Delete a node
+  | 'insert' // Insert a node
+  | 'move' // Move a node between siblings, TODO: if node move back to its original place?
+  | 'move-update' // Move a node between siblings & update the value
+  | 'update' // Update the data value

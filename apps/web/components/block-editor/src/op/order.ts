@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { Block, PositionRelation } from '../interfaces'
+import { Block, BlockPositionRelation } from '../interfaces'
 import { isSiblingRelation } from './helpers'
 
 export function remove(v: Block[], x: Block): Block[] {
@@ -17,7 +17,7 @@ See athens.common-events.graph.schema for position values."
 export function insert(
   v: Block[],
   x: Block,
-  relation: PositionRelation,
+  relation: BlockPositionRelation,
   ref: Block,
 ): Block[] {
   // use if-else because index=0 is interpretated as 'false'
@@ -47,7 +47,7 @@ export function moveBetween(
   src: Block[],
   dest: Block[],
   x: Block,
-  relation: PositionRelation,
+  relation: BlockPositionRelation,
   ref: Block,
 ) {
   // console.debug(src, dest, x, relation, ref)
@@ -76,7 +76,7 @@ export function moveBetween(
 export function moveWithin(
   v: Block[],
   x: Block,
-  relation: PositionRelation,
+  relation: BlockPositionRelation,
   ref: Block,
 ): Block[] {
   // console.debug(v, x, relation, ref)

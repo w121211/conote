@@ -1,8 +1,24 @@
+import { Branch, Link, Note, Sym } from '@prisma/client'
 import { Note as GQLNote } from 'graphql-let/__generated__/__types__'
 import prisma from '../prisma'
 import { noteDocModel } from './note-doc-model'
 
 class NoteModel {
+  async _attachHeadDoc<
+    T extends Note & { branch: Branch; sym: Sym; link: Link | null },
+  >(note: T): Promise<GQLNote> {
+    const doc = await noteDocModel.getHeadDoc(note.branchId, note.symId),
+      note_: GQLNote = {
+        ...note,
+        branch: note.branch.name,
+        noteDoc: {
+          ...doc,
+          branch: doc.branch.name,
+        },
+      }
+    return note_
+  }
+
   async getByBranchSymbol(
     branchName: string,
     symbol: string,
@@ -16,15 +32,10 @@ class NoteModel {
 
     const note = await prisma.note.findUnique({
       where: { branchId_symId: { branchId: branch.id, symId: sym.id } },
-      include: { sym: true, link: true },
+      include: { branch: true, sym: true, link: true },
     })
     if (note) {
-      const doc = await noteDocModel.getLatestMergedNoteDoc(note)
-      return {
-        ...note,
-        branch: branch.name,
-        noteDoc: doc,
-      }
+      return this._attachHeadDoc(note)
     }
     return null
   }
@@ -32,15 +43,10 @@ class NoteModel {
   async getById(id: string): Promise<GQLNote> {
     const note = await prisma.note.findUnique({
       where: { id },
-      include: { sym: true, link: true, branch: true },
+      include: { branch: true, sym: true, link: true },
     })
     if (note) {
-      const doc = await noteDocModel.getLatestMergedNoteDoc(note)
-      return {
-        ...note,
-        branch: note.branch.name,
-        noteDoc: doc,
-      }
+      return this._attachHeadDoc(note)
     }
     throw new Error('Note not found.')
   }

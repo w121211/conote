@@ -1,148 +1,11 @@
-import React, { ReactNode, useEffect, useState } from 'react'
-import { Observable, switchMap, tap } from 'rxjs'
-// import { useObservable } from '@ngneat/react-rxjs'
-import { useObservable } from 'rxjs-hooks'
-
-// import { mockPeople } from '@/Avatar/mockData'
-// import { DOMRoot } from '@/utils/config'
-// import { Button } from '@/Button'
-// import { Overlay } from '@/Overlay'
-// import { Menu } from '@/Menu'
-// import { Block } from '@/concept/Block'
-// import { EmptyMessage } from './components/EmptyMessage'
-// import { References, ReferencesProps } from './components/References'
-// import { usePresenceProvider } from '@/concept/Block/hooks/usePresenceProvider'
-
-import { BlockEl } from '../block/block-el'
-import { DocPlaceholder } from './doc-placeholder'
-import { DOMRoot } from '../utils'
-import { BlockListContainer } from '../block/block-list'
-import { blockRepo, getBlock } from '../../stores/block.repository'
-import { Block, Doc } from '../../interfaces'
-import {
-  docRemove,
-  docSave,
-  historyClear,
-  historyUndo,
-  docTemplateSet,
-} from '../../events'
-import { hotkey, multiBlockSelection } from '../../listeners'
+import React, { useEffect } from 'react'
+import { useObservable } from '@ngneat/react-rxjs'
 import { NoteHead } from '../../../../note-head'
-import moment from 'moment'
-
-const PageWrap = ({ children }: { children: ReactNode }) => {
-  return (
-    <article
-      className="
-    basis-full 
-    self-stretch 
-    w-full max-w-[60em] 
-    mx-auto 
-    p-4"
-    >
-      {children}
-    </article>
-  )
-}
-
-// const PageHeader = styled.header`
-//   position: relative;
-//   padding: 0 3rem;
-// `
-
-// const Title = styled.h1`
-//   font-size: 2.5rem;
-//   position: relative;
-//   overflow: visible;
-//   flex-grow: 1;
-//   margin: 0.1em 0;
-//   white-space: pre-line;
-//   word-break: break-word;
-//   line-height: 1.1em;
-
-//   textarea {
-//     padding: 0;
-//     margin: 0;
-//     width: 100%;
-//     min-height: 100%;
-//     font-weight: inherit;
-//     letter-spacing: inherit;
-//     font-size: inherit;
-//     appearance: none;
-//     cursor: text;
-//     resize: none;
-//     transform: translate3d(0, 0, 0);
-//     color: inherit;
-//     caret-color: var(--link-color);
-//     background: transparent;
-//     line-height: inherit;
-//     border: 0;
-//     font-family: inherit;
-//     visibility: hidden;
-//     position: absolute;
-
-//     &::webkit-scrollbar {
-//       display: none;
-//     }
-
-//     &:focus,
-//     &.is-editing {
-//       outline: none;
-//       visibility: visible;
-//       position: relative;
-//     }
-
-//     abbr {
-//       z-index: 4;
-//     }
-
-//     &.is-editing + span {
-//       visibility: hidden;
-//       position: absolute;
-//     }
-//   }
-// `
-
-// const PageMenuToggle = styled.button`
-//   float: left;
-//   border-radius: 1000px;
-//   margin-left: -2.5rem;
-//   margin-top: 0.5rem;
-//   width: 2rem;
-//   height: 2rem;
-//   color: var(--body-text-color---opacity-high);
-//   vertical-align: bottom;
-// `
-
-// const PageMenuToggle = ({
-//   onClick,
-//   children,
-// }: {
-//   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
-//   children: ReactNode
-// }) => {
-//   return (
-//     <button
-//       className="
-//       float-left
-//       w-8 h-8
-//       rounded-full
-//       -ml-10 mt-2
-//       align-bottom
-//       text-[#AAA]/75"
-//       onClick={onClick}
-//     >
-//       {children}
-//     </button>
-//   )
-// }
-
-// const BlocksContainer = styled(BlockListContainer)`
-//   padding-left: 1rem;
-//   padding-right: 1rem;
-//   display: flex;
-//   flex-direction: column;
-// `
+import { docTemplateSet } from '../../events'
+import type { Doc } from '../../interfaces'
+import { hotkey, multiBlockSelection } from '../../listeners'
+import { blockRepo, getBlock } from '../../stores/block.repository'
+import { BlockEl } from '../block/block-el'
 
 interface DocProps {
   // assume to be block-els, if given, use it and ignore doc-block's children
@@ -198,32 +61,22 @@ export const DocEl = ({
   const [pageMenuAnchor, setPageMenuAnchor] =
     React.useState<HTMLButtonElement | null>(null)
 
-  // const { PresenceProvider, clearPresence } = usePresenceProvider({
-  //   presentPeople: mockPresence,
-  // })
-
-  // const { title } = doc,
-  //   block = getBlock(doc.blockUid)
-
-  // const [block$, setBlock$] = useState<Observable<Block | undefined>>(
-  //     blockRepo.getBlock$(doc.blockUid),
-  //   ),
-  //   [docBlock] = useObservable(block$)
-  // const [docBlock] = useObservable(blockRepo.getBlock$(docBlockUid))
-
-  // const [docBlock] = useObservable(blockRepo.getBlock$(doc.blockUid))
+  const [docBlock] = useObservable(blockRepo.getBlock$(doc.blockUid), {
+    deps: [doc],
+    initialValue: null,
+  })
 
   // (BUG) useObservable set docBlock as null initially if default value is undefined
   // however, the return type will not include null
-  const docBlock = useObservable<Block | undefined, [Doc]>(
-    (_, inputs$) =>
-      inputs$.pipe(
-        tap(console.log),
-        switchMap(([v]) => blockRepo.getBlock$(v.blockUid)),
-      ),
-    undefined,
-    [doc],
-  )
+  // const docBlock = useObservable<Block | undefined, [Doc]>(
+  //   (_, inputs$) =>
+  //     inputs$.pipe(
+  //       tap(console.log),
+  //       switchMap(([v]) => blockRepo.getBlock$(v.blockUid)),
+  //     ),
+  //   undefined,
+  //   [doc],
+  // )
 
   // useEffect(() => {
   //   console.log(docBlockUid, docBlock)
@@ -244,6 +97,7 @@ export const DocEl = ({
     setPageMenuAnchor(e.currentTarget)
     setIsPageMenuOpen(true)
   }
+
   // const handleClosePageMenu = () => {
   //   setPageMenuAnchor(null)
   //   setIsPageMenuOpen(false)

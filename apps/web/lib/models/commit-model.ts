@@ -1,4 +1,5 @@
 import {
+  Branch,
   Commit,
   Discuss,
   Note,
@@ -8,8 +9,8 @@ import {
   Sym,
 } from '@prisma/client'
 import cuid from 'cuid'
-import { isNumber } from 'lodash'
 import prisma from '../prisma'
+import { noteDocMergeModel } from './note-doc-merge-model'
 import { noteDocModel } from './note-doc-model'
 import { noteDraftModel } from './note-draft-model'
 import { symModel } from './sym-model'
@@ -33,7 +34,7 @@ async function validateDraft(id: string, userId: string) {
         where: {
           branchId: draft.branchId,
           symId: sym.id,
-          status: 'MERGE',
+          status: 'MERGED',
         },
         orderBy: { updatedAt: 'desc' },
       })),
@@ -51,7 +52,7 @@ async function validateDraft(id: string, userId: string) {
     draftParsed = draft && noteDraftModel.parse(draft),
     newJoinedDiscussIds =
       draftParsed &&
-      draftParsed.content.discussIds.filter(e => e.commitId === undefined),
+      draftParsed.contentBody.discussIds.filter(e => e.commitId === undefined),
     newJoinedDiscusses =
       newJoinedDiscussIds &&
       (await prisma.$transaction(
@@ -82,6 +83,13 @@ async function validateDraft(id: string, userId: string) {
   if (draft.userId !== userId) {
     throw new Error('User is not the owner of the draft')
   }
+  // TODO: check if the draft is the same as curDoc
+  // if(draft.fromDocId) {
+  //   const domainChanged = draft.domain === curDoc!.domain
+  //   const metaChanged = metaDiff(curDoc!.meta as unknown as NoteDocMeta, draftParsed.meta)
+  //   const contentChanged = getContentDiff(curDoc!.content as unknown as NoteDocContent, draftParsed.content)
+  //   if (!domainChanged && !metaChange && !contentChange)
+  // }
 
   return {
     draft,
@@ -95,6 +103,12 @@ async function validateDraft(id: string, userId: string) {
 
 /**
  *
+ * After commit, how to known the note-doc's corresponding note-draft?
+ * - If draft has sym, use sym.id (both exist on draft and doc)
+ * - If draft has symbol, use symbol to match doc.sym.symbol
+ *
+ * TODO:
+ * - [ ] For each commit, input note-draft should have unique symbol/sym
  */
 export async function commitNoteDrafts(
   draftIds: string[],
@@ -106,7 +120,10 @@ export async function commitNoteDrafts(
     discusses: Discuss[]
     sym: Sym
   })[]
-  noteDocs: NoteDoc[]
+  noteDocs: (NoteDoc & {
+    sym: Sym
+    branch: Branch
+  })[]
 }> {
   const drafts: NoteDraft[] = [],
     symbol_symId: Record<string, string> = {},
@@ -184,13 +201,7 @@ export async function commitNoteDrafts(
 
     promises.push(
       // Also update symbol_symId in this function
-      noteDocModel.createDoc(
-        draftParsed,
-        commitId,
-        symId,
-        userId,
-        symbol_symId,
-      ),
+      noteDocModel.create(draftParsed, commitId, symId, userId, symbol_symId),
     )
 
     // For each draft, connect draft to commit and update its status to commit
@@ -212,6 +223,12 @@ export async function commitNoteDrafts(
 
   const noteDocs = await prisma.noteDoc.findMany({
     where: { commitId: commit.id },
+    include: {
+      sym: true,
+      branch: true,
+      fromDoc: true,
+      mergePoll: true,
+    },
   })
 
   const notes = (
@@ -240,5 +257,10 @@ export async function commitNoteDrafts(
     } => e !== null,
   )
 
-  return { symbol_symId, commit, notes, noteDocs }
+  // For each note-doc, try auto merge or create a merge-poll
+  const noteDocs_ = await Promise.all(
+    noteDocs.map(e => noteDocMergeModel.mergeOnCreate(e)),
+  )
+
+  return { symbol_symId, commit, notes, noteDocs: noteDocs_ }
 }

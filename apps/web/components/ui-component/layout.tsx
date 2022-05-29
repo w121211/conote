@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import SidebarEl from '../block-editor/src/components/sidebar/sidebar-el'
 import Navbar from '../navbar'
 
-export function Layout({
+const Layout = ({
   children,
   buttonRight,
   backgroundColor,
@@ -133,3 +133,5 @@ export function Layout({
     </div>
   )
 }
+
+export default Layout

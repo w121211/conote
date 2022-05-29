@@ -1,38 +1,18 @@
 import React from 'react'
+import { ApolloProvider } from '@apollo/client'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import { setEntities } from '@ngneat/elf-entities'
-import { blockRepo } from '../../components/block-editor/src/stores/block.repository'
-import { docRepo } from '../../components/block-editor/src/stores/doc.repository'
 import { DocEl } from '../../components/block-editor/src/components/doc/doc-el'
 import DomainProvider from '../../components/domain/domain-context'
-import { mockBlocks } from '../../components/block-editor/test/__mocks__/mock-block'
 import { mockDocs } from '../../components/block-editor/test/__mocks__/mock-doc'
 import ModalProvider from '../../components/modal/modal-context'
-import { ApolloProvider } from '@apollo/client'
 import { getApolloClient } from '../../apollo/apollo-client'
+import { InitStoreForStorybook } from './helper-components/init-store-for-storybook'
 import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
 
 export default {
   title: 'BlockEditor/DocEl',
   component: DocEl,
 } as ComponentMeta<typeof DocEl>
-
-const InitStoreForStorybook = ({
-  children,
-}: {
-  children: React.ReactNode
-}): JSX.Element => {
-  // useEffect(() => {
-  //   blockRepo.clearHistory()
-  //   blockRepo.update([setEntities(mockBlocks)])
-  //   docRepo.update([setEntities(mockDocs)])
-  // }, [])
-  blockRepo.clearHistory()
-  blockRepo.update([setEntities(mockBlocks)])
-  docRepo.update([setEntities(mockDocs)])
-
-  return <>{children}</>
-}
 
 const apolloClient = getApolloClient()
 

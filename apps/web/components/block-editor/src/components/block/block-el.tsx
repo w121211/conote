@@ -7,7 +7,7 @@ import {
   bulletDragEnd,
   bulletDragStart,
 } from '../../handlers/drag-handlers'
-import {
+import type {
   CaretPosition,
   DestructTextareaKeyEvent,
   DragTarget,

@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import { editorLeftSidebarMount } from '../../events'
+import { editorLeftSidebarRefresh } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
 
 /**
- * When the component mount, call sidebr-load event when first enter the component
+ * Call 'editorLeftSidebarMount' event on component mount to query required data.
  *
  * TODOS:
  * [] draft-entries sort by ?
@@ -41,7 +41,7 @@ const SidebarEl = ({
   }
 
   useEffect(() => {
-    editorLeftSidebarMount()
+    editorLeftSidebarRefresh()
   }, [])
 
   useEffect(() => {

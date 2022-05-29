@@ -1,9 +1,8 @@
-import { resolve } from 'path'
 import { PrismaClient } from '@prisma/client'
-import { FetchClient } from '../../lib/fetcher/fetch-client'
 import { commitNoteDrafts } from '../../lib/models/commit-model'
 import { testHelper } from '../../test/test-helpers'
 import { mockNoteDrafts } from '../../test/__mocks__/mock-note-draft'
+import { mockUsers } from '../../test/__mocks__/mock-user'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),
@@ -28,16 +27,17 @@ async function main() {
 
   await testHelper.createDiscusses(prisma)
 
-  // console.log('Creating mock commits...')
-
-  // mockNoteDrafts.slice(0, 2).forEach(async e => {
-  //   await testHelper.createNoteDrafts(prisma, [e])
-  //   await commitNoteDrafts([e.id], e.userId)
-  // })
-
   console.log('Creating mock note-drafts...')
   await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
   await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(5))
+
+  console.log('Creating mock commits...')
+  await commitNoteDrafts([mockNoteDrafts[0].id], mockNoteDrafts[0].userId)
+  await commitNoteDrafts([mockNoteDrafts[1].id], mockNoteDrafts[1].userId)
+
+  // mockNoteDrafts.slice(0, 2).forEach(async e => {
+  //   await commitNoteDrafts([e.id], e.userId)
+  // })
 }
 
 main()

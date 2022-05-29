@@ -1,25 +1,37 @@
-import * as events from '../events'
-import { nextBlock } from '../op/queries'
-import { searchService } from '../services/search.service'
-import { getBlock } from '../stores/block.repository'
-import { rfdbRepo } from '../stores/rfdb.repository'
-import { isShortcutKey } from '../utils'
+import { throttle } from 'lodash'
+import { insert } from 'text-field-edit'
+import {
+  indent,
+  keyArrowDown,
+  keyArrowUp,
+  keyBackspace,
+  keyEnter,
+  selectionAddItem,
+  unindent,
+} from '../events'
 import {
   CaretPosition,
   DestructTextareaKeyEvent,
   Search,
-  SearchHit,
+  SearchType,
 } from '../interfaces'
+import { nextBlock } from '../op/queries'
+import { getSearchService } from '../services/search.service'
+import { getBlock } from '../stores/block.repository'
+import { rfdbRepo } from '../stores/rfdb.repository'
+import { isShortcutKey } from '../utils'
 import { getCaretCoordinates } from './textarea-caret'
-import { throttle } from 'lodash'
 
-const pairChars = ['()', '[]', '{}', '""']
+const searchService = getSearchService()
 
-const pairCharDict: Record<string, string> = {
+const pairChars = ['()', '[]', '{}', '""', '##']
+
+const pairCharDict = {
   '(': ')',
   '[': ']',
   '{': '}',
   '"': '"',
+  '#': '#',
 }
 
 export const nullSearch: Search = {
@@ -33,10 +45,18 @@ export const nullSearch: Search = {
 const reHashtag = /.*#/s
 
 /** Match the last '[[' */
-const reDoc = /.*\[\[/s
+const reTopic = /.*\[\[/s
 
 /** Match the last '/' */
 const reSlash = /.*\//s
+
+const reDict: Record<string, RegExp> = {
+  // reHashtag: /.*#/s,
+  // reDoc: /.*\[\[/s,
+  // reSlash: /.*\//s,
+  topic: reTopic,
+  discuss: reHashtag,
+}
 
 //
 // Closure Library
@@ -136,6 +156,7 @@ function isCharacterKey({
   alt,
   keyCode,
 }: DestructTextareaKeyEvent): boolean {
+  // TODO: Possibly cause a performance issue by importing the moudule every time
   const { KeyCodes } = require('ts-closure-library/lib/events/keycodes')
   if (!meta && !ctrl && !alt) {
     return KeyCodes.isCharacterKey(keyCode)
@@ -143,7 +164,7 @@ function isCharacterKey({
   return false
 }
 
-function isPairChar(key: string): boolean {
+function isPairChar(key: string): key is keyof typeof pairCharDict {
   return key in pairCharDict
 }
 
@@ -161,9 +182,9 @@ function modifierKeys(e: React.KeyboardEvent<HTMLTextAreaElement>) {
 ;; electron 11 - uses chromium < 90(latest) which supports execCommand
  * 
  */
-function replaceSelectionWith(newText: string) {
-  // TODO
-  document.execCommand('insertText', false, newText)
+function replaceSelectionWith(target: HTMLTextAreaElement, newText: string) {
+  // document.execCommand('insertText', false, newText)
+  insert(target, newText)
 }
 
 function setCursorPosition(target: HTMLTextAreaElement, idx: number) {
@@ -181,7 +202,7 @@ function setSelection(target: HTMLTextAreaElement, start: number, end: number) {
 /**
  * https://github.com/tpope/vim-surround
  */
-function surround(selection: string, around: string) {
+function surround(selection: string, around: keyof typeof pairCharDict) {
   const complement = pairCharDict[around]
   return complement
     ? around + selection + complement
@@ -208,40 +229,27 @@ function updateQuery(
   head: string,
   key: string,
 ) {
-  const { type } = search
+  const { type } = search,
+    re = type && type in reDict && reDict[type]
 
-  let re: RegExp | undefined,
-    searchFn: ((term: string) => Promise<SearchHit[]>) | undefined
-  switch (type) {
-    // case 'block':
-    //   break
-    case 'hashtag':
-      re = reHashtag
-      break
-    case 'page':
-      re = reDoc
-      searchFn = searchService.searchNote
-      break
-    case 'slash':
-      re = reSlash
-      break
-    // case 'template':
-    //   break
-  }
-
-  if (re && searchFn) {
+  if (re && type) {
     const match = head.match(re),
       termStartIdx = match ? match[0].length : null,
       term = termStartIdx !== null && head.substring(termStartIdx) + key
 
     if (term) {
-      searchFn(term).then(hits => {
-        if (type === 'slash' && hits.length === 0) {
-          setSearch(nullSearch)
-        } else {
-          setSearch({ type, term, hitIndex: 0, hits })
-        }
-      })
+      switch (type) {
+        case 'discuss':
+          searchService.searchDiscuss(term).then(hits => {
+            setSearch({ type, term, hitIndex: 0, hits })
+          })
+          break
+        case 'topic':
+          searchService.searchSymbol(term, 'TOPIC').then(hits => {
+            setSearch({ type, term, hitIndex: 0, hits })
+          })
+          break
+      }
     }
   }
 }
@@ -284,7 +292,7 @@ export function autoCompleteHashtag(
     setSearch(nullSearch)
   } else if (startIdx) {
     setSelection(target, startIdx, start)
-    replaceSelectionWith(`[[${expansion}]]`)
+    replaceSelectionWith(target, `[[${expansion}]]`)
     setSearch(nullSearch)
   } else {
     console.error('[autoCompleteHashtag] unexpected case, startIdx === null')
@@ -308,7 +316,7 @@ function _autoCompleteInline(
 }
 
 /**
- * assumption: cursor or selection is immediately before the closing brackets
+ * Assumption: cursor or selection is immediately before the closing brackets
  */
 export function autoCompleteInline(
   el: HTMLTextAreaElement,
@@ -322,7 +330,7 @@ export function autoCompleteInline(
   if (term) {
     if (hitStr !== null) {
       setSelection(el, end - term.length, end)
-      replaceSelectionWith(hitStr)
+      replaceSelectionWith(el, hitStr)
     }
 
     // ;; Add the expansion count if we have it, but if we
@@ -377,11 +385,11 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
     } else if (up && topRow) {
       e.stopPropagation()
       target.blur()
-      events.selectionAddItem(uid, 'first')
+      selectionAddItem(uid, 'first')
     } else if (down && bottomRow) {
       e.stopPropagation()
       target.blur()
-      events.selectionAddItem(uid, 'last')
+      selectionAddItem(uid, 'last')
     }
   }
 
@@ -417,19 +425,19 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
   //   ;; last index is special - always go to last index when going up or down
   else if ((left && isStart) || (up && isEnd)) {
     e.preventDefault()
-    events.up(uid, 'end')
+    keyArrowUp(uid, 'end')
   } else if (down && isEnd) {
     e.preventDefault()
-    events.down(uid, 'end')
+    keyArrowDown(uid, 'end')
   } else if (right && isEnd) {
     e.preventDefault()
-    events.down(uid, 0)
+    keyArrowDown(uid, 0)
   } else if (up && topRow) {
     e.preventDefault()
-    events.up(uid, charOffset)
+    keyArrowUp(uid, charOffset)
   } else if (down && bottomRow) {
     e.preventDefault()
-    events.down(uid, charOffset)
+    keyArrowDown(uid, charOffset)
   }
 }
 
@@ -452,22 +460,22 @@ function handleBackspace({ e, uid, search, setSearch }: TextareaKeyDownArgs) {
     lookBehindChar = value.charAt(start - 1) ?? null
 
   if (isBlockStart(e) && noSelection) {
-    events.backspace(uid, value)
+    keyBackspace(uid, value)
   } else if (possiblePair) {
     // ;; pair char: hide inline search and auto-balance
     e.preventDefault()
     setSearch(nullSearch)
     setSelection(target, start - 1, start + 1)
-    replaceSelectionWith('')
-  } else if ('/' === lookBehindChar && type === 'slash') {
-    // ;; slash: close dropdown
-    setSearch(nullSearch)
-  } else if ('#' === lookBehindChar && type === 'hashtag') {
-    // ;; hashtag: close dropdown
-    setSearch(nullSearch)
-  } else if (';' === lookBehindChar && type === 'template') {
-    // ;; semicolon: close dropdown
-    setSearch(nullSearch)
+    replaceSelectionWith(e.currentTarget, '')
+    // } else if ('/' === lookBehindChar && type === 'slash') {
+    //   // ;; slash: close dropdown
+    //   setSearch(nullSearch)
+    // } else if ('#' === lookBehindChar && type === 'hashtag') {
+    //   // ;; hashtag: close dropdown
+    //   setSearch(nullSearch)
+    // } else if (';' === lookBehindChar && type === 'template') {
+    //   // ;; semicolon: close dropdown
+    //   setSearch(nullSearch)
   } else if (type !== null) {
     // ;; dropdown is open: update query
     updateQuery(search, setSearch, head, '')
@@ -501,27 +509,28 @@ function handleEnter({ e, uid, search, setSearch }: TextareaKeyDownArgs) {
 
   if (searchType) {
     switch (searchType) {
-      case 'slash':
-        break
-      case 'page':
+      case 'discuss':
+      case 'topic':
         _autoCompleteInline(e, search, setSearch)
         break
-      case 'hashtag':
-        _autoCompleteHashtag(e, search, setSearch)
-        break
-      case 'template':
-        break
+      // case 'slash':
+      //   break
+      // case 'hashtag':
+      //   _autoCompleteHashtag(e, search, setSearch)
+      //   break
+      // case 'template':
+      //   break
     }
   } else if (shift) {
     // ;; shift-enter: add line break to textarea and move cursor to the next line.
-    replaceSelectionWith('\n')
+    replaceSelectionWith(e.currentTarget, '\n')
   } else {
     // ;; default: may mutate blocks, important action, no delay on 1st event, then throttled
     // throttledDispatchSync(() => {
     //   events.enter(uid, dKeyDown)
     // })
 
-    throttle(() => events.enter(uid, dKeyDown), 100, { trailing: false })()
+    throttle(() => keyEnter(uid, dKeyDown), 100, { trailing: false })()
   }
 }
 
@@ -534,13 +543,14 @@ function handleEscape({ e, setSearch }: TextareaKeyDownArgs) {
   // events.editingUid(null)
 }
 
-function handlePairChar({ e, setSearch, localStr }: TextareaKeyDownArgs) {
+function handlePairChar(
+  { e, setSearch, localStr }: TextareaKeyDownArgs,
+  key: keyof typeof pairCharDict,
+) {
   const dKeyDown = destructKeyDown(e),
-    { key, target, start, end, selection, value } = dKeyDown,
+    { target, start, end, selection } = dKeyDown,
     closePair = pairCharDict[key]
   // ,lookbehindChar = value.charAt(start) ?? null
-
-  if (closePair === undefined) return
 
   e.preventDefault()
 
@@ -550,21 +560,28 @@ function handlePairChar({ e, setSearch, localStr }: TextareaKeyDownArgs) {
   //   setState({ ...state, search: { ...state.search, type: null } })
   // } else
   if (selection === '') {
-    replaceSelectionWith(key + closePair)
+    replaceSelectionWith(e.currentTarget, key + closePair)
     setCursorPosition(target, start + 1)
 
     // need to get current-value because the value is changed by the replace selection event
     const value = e.currentTarget.value
-    if (value && value.length >= 4) {
-      const fourChar = value.substring(start - 1, start + 3),
-        type = fourChar === '[[]]' ? 'page' : null
+    if (value && value.length >= 2) {
+      const twoChar = value.substring(start, start + 2),
+        fourChar = value.substring(start - 1, start + 3)
+
+      let type: SearchType | null = null
+      if (twoChar === '##') {
+        type = 'discuss'
+      } else if (fourChar === '[[]]') {
+        type = 'topic'
+      }
 
       // console.debug(fourChar, type)
       if (type) setSearch({ type, term: '', hits: [], hitIndex: null })
     }
   } else if (selection !== '') {
     const surroundSelection = surround(selection, key)
-    replaceSelectionWith(surroundSelection)
+    replaceSelectionWith(e.currentTarget, surroundSelection)
     setSelection(target, start + 1, end + 1)
 
     if (localStr.length >= 4) {
@@ -574,9 +591,9 @@ function handlePairChar({ e, setSearch, localStr }: TextareaKeyDownArgs) {
         doubleBrackets = fourChar === '[[]]',
         type = doubleBrackets ? 'page' : null
 
-      searchService.searchNote(selection).then(v => {
-        if (type) setSearch({ type, term: selection, hits: v, hitIndex: null })
-      })
+      // searchService.searchNote(selection).then(v => {
+      //   if (type) setSearch({ type, term: selection, hits: v, hitIndex: null })
+      // })
     }
   }
 }
@@ -620,14 +637,9 @@ function handleTab({ e, localStr }: TextareaKeyDownArgs): void {
 
   if (selection.items.length === 0) {
     if (shift) {
-      events.unindent(
-        editing.uid,
-        dKeyDown,
-        localStr,
-        currentRoute?.uid ?? undefined,
-      )
+      unindent(editing.uid, dKeyDown, localStr, currentRoute?.uid ?? undefined)
     } else {
-      events.indent(editing.uid, dKeyDown, localStr)
+      indent(editing.uid, dKeyDown, localStr)
     }
   }
 }
@@ -641,23 +653,24 @@ function writeChar({ e, search, setSearch }: TextareaKeyDownArgs): void {
     { type } = search,
     lookBehindChar = value.charAt(start - 1) ?? null
 
-  if (key === ' ' && type === 'hashtag') {
-    setSearch(nullSearch)
-  } else if (key === '/' && type === null) {
-    // setState({
-    //   ...state,
-    //   search: {
-    //     type: 'slash',
-    //     query: '',
-    //     results: slashOptions,
-    //     index: 0,
-    //   },
-    // })
-  } else if (key === '#' && type === null) {
-    setSearch({ type: 'hashtag', term: '', hits: [], hitIndex: null })
-  } else if (key === ';' && lookBehindChar === ';' && type === null) {
-    setSearch({ type: 'template', term: '', hits: [], hitIndex: null })
-  } else if (type) {
+  // if (key === ' ' && type === 'hashtag') {
+  //   setSearch(nullSearch)
+  // } else if (key === '/' && type === null) {
+  // setState({
+  //   ...state,
+  //   search: {
+  //     type: 'slash',
+  //     query: '',
+  //     results: slashOptions,
+  //     index: 0,
+  //   },
+  // })
+  // } else if (key === '#' && type === null) {
+  //   setSearch({ type: 'hashtag', term: '', hits: [], hitIndex: null })
+  // } else if (key === ';' && lookBehindChar === ';' && type === null) {
+  //   setSearch({ type: 'template', term: '', hits: [], hitIndex: null })
+  // } else
+  if (type) {
     updateQuery(search, setSearch, head, key)
   }
 }
@@ -671,6 +684,7 @@ type TextareaKeyDownArgs = {
   setCaret: React.Dispatch<React.SetStateAction<CaretPosition>>
   search: Search
   setSearch: React.Dispatch<React.SetStateAction<Search>>
+  lastKeyDown: DestructTextareaKeyEvent | null
   setLastKeyDown: React.Dispatch<
     React.SetStateAction<DestructTextareaKeyEvent | null>
   >
@@ -706,7 +720,7 @@ export function textareaKeyDown(args: TextareaKeyDownArgs) {
       if (arrowKeyDirection(e)) {
         handleArrowKey(args)
       } else if (isPairChar(key)) {
-        handlePairChar(args)
+        handlePairChar(args, key)
       } else if (key === 'Tab') {
         handleTab(args)
       } else if (key === 'Enter') {

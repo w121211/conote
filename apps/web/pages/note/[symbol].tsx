@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import Layout from '../../layout/layout'
 import Modal from '../../components/modal/modal'
 
 import { Doc } from '../../components/workspace/doc'

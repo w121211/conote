@@ -1,7 +1,13 @@
+import {
+  blockMove,
+  dropMultiChild,
+  dropMultiSiblings,
+  mouseDownUnset,
+  selectionClear,
+} from '../events'
+import type { Block, DragTarget } from '../interfaces'
 import { rfdbRepo } from '../stores/rfdb.repository'
 import { getDatasetUid, mouseOffset, verticalCenter } from '../utils'
-import type { Block, DragTarget } from '../interfaces'
-import * as events from '../events'
 
 type ActionAllowed = 'link' | 'move'
 
@@ -24,7 +30,7 @@ function dropBullet(
   actionAllowed: ActionAllowed,
 ) {
   if (actionAllowed === 'move') {
-    events.blockMove(sourceUid, targetUid, dragTarget)
+    blockMove(sourceUid, targetUid, dragTarget)
   }
 }
 
@@ -39,11 +45,11 @@ function dropBulletMulti(
   dragTarget: DragTarget,
 ) {
   if (dragTarget === 'first') {
-    events.selectionClear()
-    events.dropMultiChild(sourceUids, targetUid)
+    selectionClear()
+    dropMultiChild(sourceUids, targetUid)
   } else {
-    events.selectionClear()
-    events.dropMultiSiblings(sourceUids, targetUid, dragTarget)
+    selectionClear()
+    dropMultiSiblings(sourceUids, targetUid, dragTarget)
   }
 }
 
@@ -144,7 +150,7 @@ export function blockDrop(
     }
   }
 
-  events.mouseDownUnset()
+  mouseDownUnset()
   setDragTarget(null)
 }
 
