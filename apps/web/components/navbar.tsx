@@ -62,7 +62,14 @@ const Navbar = ({
         ) : (
           <AuthItem me={me} />
         )}
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
+        <Link href="/setting">
+          <a>
+            <span className="material-icons text-xl leading-none p-1 rounded hover:bg-gray-100 text-gray-500 dark:text-gray-300">
+              settings
+            </span>
+          </a>
+        </Link>
       </div>
     </nav>
   )

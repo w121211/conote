@@ -53,3 +53,10 @@ Default.args = {
     </div>
   ),
 }
+Default.story = {
+  parameters: {
+    nextRouter: {
+      path: '/setting',
+    },
+  },
+}

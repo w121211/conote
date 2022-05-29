@@ -7,24 +7,24 @@ import { useSearchSymbolLazyQuery } from '../../apollo/query.graphql'
 const mockList = [
   {
     title: '[[Awesome Tailwind Css]]',
-    keywords: ['[[technology]]', '[[front end]]'],
+    domain: 'web',
   },
-  { title: '[[Typescript]]', keywords: ['[[Javascript]]', '[[front end]]'] },
+  { title: '[[Typescript]]', domain: 'web' },
   {
     title: '[[Awesome Tailwind Css]]',
-    keywords: ['[[technology]]', '[[front end]]'],
-  },
-  {
-    title: '[[Awesome Tailwind Css]]',
-    keywords: ['[[technology]]', '[[front end]]'],
+    domain: 'dev',
   },
   {
     title: '[[Awesome Tailwind Css]]',
-    keywords: ['[[technology]]', '[[front end]]'],
+    domain: 'web',
   },
   {
     title: '[[Awesome Tailwind Css]]',
-    keywords: ['[[technology]]', '[[front end]]'],
+    domain: 'dev',
+  },
+  {
+    title: '[[Awesome Tailwind Css]]',
+    domain: 'web',
   },
 ]
 
@@ -143,7 +143,7 @@ export const SearchAll = () => {
       <button
         className="
           flex items-center 
-          w-full 
+          w-full
           p-1
            border-gray-200 dark:border-gray-500
           rounded
@@ -159,7 +159,7 @@ export const SearchAll = () => {
           search
         </span>
         <div className="flex-1 flex">
-          <p className="flex-grow text-left text-gray-400">search</p>
+          <p className="flex-grow mr-10 text-left text-gray-400">search</p>
           <span className="text-gray-500 dark:text-gray-300">
             <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
               {modifierKeyPrefix}
@@ -173,7 +173,7 @@ export const SearchAll = () => {
 
       {/* --- search modal --- */}
       <Modal
-        sectionClassName="!bg-gray-100 dark:bg-gray-700 !w-[500px] "
+        sectionClassName="!bg-gray-100 dark:bg-gray-700 !w-[600px] "
         visible={showModal}
         onClose={() => {
           setShowModal(false)
@@ -236,7 +236,7 @@ export const SearchAll = () => {
                             {styleSymbol(str, '')}
                           </h4>
                           <p className="flex text-xs text-blue-500/80 dark:text-blue-300/80 gap-1 ">
-                            {/* {keywords.map(keyword => {
+                            {/* {domain.map(keyword => {
                               return styleSymbol(keyword, '')
                             })} */}
                           </p>
@@ -252,25 +252,23 @@ export const SearchAll = () => {
                     <h2 className=" font-semibold capitalize ">recent</h2>
                   </header>
                   <ul className="text-gray-700/80 dark:text-gray-200/70">
-                    {mockList.map(({ title, keywords }, i) => {
+                    {mockList.map(({ title, domain }, i) => {
                       return (
                         <li
                           key={i}
-                          className="flex flex-col gap-1 px-2 py-3 rounded hover:cursor-pointer"
+                          className="flex items-center gap-4 px-2 py-3 rounded hover:cursor-pointer"
                           // onMouseEnter={e => onMouseEnter(e, i)}
                           onMouseLeave={e => onMouseLeave(e, i)}
                           onMouseMove={e => onMouseMove(e, i)}
                           role="option"
                           aria-selected={i === selectedIdx}
                         >
+                          <p className="p-1 rounded text-xs text-gray-500/80 dark:text-gray-300/80 bg-gray-200">
+                            {styleSymbol(domain, '')}
+                          </p>
                           <h4 className="font-medium leading-relaxed ">
                             {styleSymbol(title, '')}
                           </h4>
-                          <p className="flex text-xs text-blue-500/80 dark:text-blue-300/80 gap-1 ">
-                            {keywords.map(keyword => {
-                              return styleSymbol(keyword, '')
-                            })}
-                          </p>
                         </li>
                       )
                     })}

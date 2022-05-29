@@ -6,10 +6,12 @@ export function Layout({
   children,
   buttonRight,
   backgroundColor,
+  navColor,
 }: {
   children: React.ReactNode
   buttonRight?: React.ReactNode
   backgroundColor?: string
+  navColor?: string
 }): JSX.Element {
   const [showSider, setShowSider] = useState(true)
   const [pinSider, setPinMenu] = useState(true)
@@ -116,7 +118,7 @@ export function Layout({
       <div
         className={`flex-grow mt-11 pb-[20vh]  
         overflow-auto scroll-smooth scrollbar
-        bg-white dark:bg-gray-700`}
+         ${backgroundColor ? backgroundColor : 'bg-white dark:bg-gray-700'}`}
       >
         <div className=" mx-auto px-2 w-[425px] md:max-w-[720px] md:w-full lg:max-w-[900px] lg:px-24">
           {children}
@@ -125,7 +127,7 @@ export function Layout({
       </div>
       <Navbar
         rbtn={buttonRight}
-        backgroundColor={backgroundColor}
+        backgroundColor={navColor}
         onClickMenu={triggerMenuHandler}
       />
     </div>
