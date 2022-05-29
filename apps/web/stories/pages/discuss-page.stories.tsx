@@ -1,9 +1,11 @@
 import React from 'react'
+import { DiscussPageComponent } from '../../components/discuss/discuss-page'
 import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import { getApolloClient } from '../../apollo/apollo-client'
 import DiscussPageEl from '../../components/discuss/discuss-page-el'
 import Layout from '../../layout/layout'
+import { Layout } from '../../components/ui-component/layout'
 
 const apolloClient = getApolloClient()
 

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 // import { Nav } from '../../pages/note/[symbol]'
-import MyTooltip from '../../layout/tooltip/popup'
 import RightArrow from '../../assets/svg/right-arrow.svg'
 import {
   getNavLocation,

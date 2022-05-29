@@ -2,12 +2,12 @@ import React from 'react'
 import { ApolloProvider } from '@apollo/client'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
 import { DocEl } from '../../components/block-editor/src/components/doc/doc-el'
-import { TooltipProvider } from '../../layout/tooltip/tooltip-provider'
 import DomainProvider from '../../components/domain/domain-context'
 import { mockDocs } from '../../components/block-editor/test/__mocks__/mock-doc'
 import ModalProvider from '../../components/modal/modal-context'
 import { getApolloClient } from '../../apollo/apollo-client'
 import { InitStoreForStorybook } from './helper-components/init-store-for-storybook'
+import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
 
 export default {
   title: 'BlockEditor/DocEl',

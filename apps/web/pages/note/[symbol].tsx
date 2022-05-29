@@ -1,8 +1,16 @@
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../layout/layout'
+import Modal from '../../components/modal/modal'
+
+import { Doc } from '../../components/workspace/doc'
+import { workspace } from '../../components/workspace/workspace'
+import LoginModal from '../../components/login-modal'
+import NoteMetaModal from '../../components/note-meta-modal'
+import { NoteTemplate } from '../../components/note-template'
 import { EditorEl } from '../../components/block-editor/src/components/editor/editor-el'
 import { editorRouteUpdate } from '../../components/block-editor/src/events'
+import { Layout } from '../../components/ui-component/layout'
 
 const NoteSymbolPage = (): JSX.Element | null => {
   const router = useRouter(),

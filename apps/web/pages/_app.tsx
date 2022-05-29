@@ -2,10 +2,10 @@ import { AppProps } from 'next/app'
 import { ApolloProvider } from '@apollo/client'
 import { useApolloClientSSR } from '../apollo/apollo-client-ssr'
 import ModalProvider from '../components/modal/modal-context'
-import { TooltipProvider } from '../layout/tooltip/tooltip-provider'
 import '../style/global.css'
 import { ErrorBoundary } from 'react-error-boundary'
 import ErrorFallback from '../components/error-fallback'
+import { TooltipProvider } from '../components/ui-component/tooltip/tooltip-provider'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApolloClientSSR(pageProps.initialApolloState)

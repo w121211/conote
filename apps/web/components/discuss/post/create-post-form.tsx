@@ -45,9 +45,7 @@ export const CreatePostForm = ({
 
   const watchContent = watch('content')
 
-  const formClassName = isModal
-    ? `sticky group bg-white bottom-0 text-sm `
-    : `relative bottom-0 text-sm scroll-mb-10 shadow-sm`
+  const formClassName = `relative w-full text-sm scroll-mb-10 shadow-sm`
 
   const btnClassName = isModal
     ? `hidden group-focus-within:block focus:block w-full text-right mt-2`

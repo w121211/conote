@@ -1,5 +1,5 @@
 import React from 'react'
-import ToggleMenu from '../../layout/toggle-menu'
+import ToggleMenu from '../ui-component/toggle-menu'
 
 const OptionsMenu = ({ isMyPost }: { isMyPost: boolean }) => {
   return (

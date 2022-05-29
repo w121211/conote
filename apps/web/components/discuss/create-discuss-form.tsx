@@ -65,7 +65,7 @@ const CreateDiscussForm = ({
   return (
     <form
       id="create-discuss-form"
-      className="grid auto-rows-min min-w-[40vw] gap-4"
+      className=" grid auto-rows-min w-full px-10 py-5 gap-4"
       onSubmit={handleSubmit(onSubmit)}
       autoComplete="off"
       spellCheck="false"

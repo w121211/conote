@@ -1,6 +1,6 @@
 import React from 'react'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import { List, ListElement } from '../../layout/list'
+import { List, ListElement } from '../../components/ui-component/list'
 
 const dummyList: ListElement[] = [
   {

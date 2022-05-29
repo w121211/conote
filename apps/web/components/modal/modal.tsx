@@ -1,9 +1,14 @@
-import React, { ReactNode, useContext } from 'react'
+import React, { useContext } from 'react'
 import { createPortal } from 'react-dom'
-import Popover, { PopoverProps } from '../popover'
+import ModalComponent, { ModalComponentProps } from './modal-component'
 import { ModalContext } from './modal-context'
 
-const Modal = ({
+interface ModalProps extends ModalComponentProps {
+  visible: boolean
+  onClose: () => void
+}
+
+const Modal: React.FC<ModalProps> = ({
   children,
   visible,
   onClose,
@@ -13,16 +18,13 @@ const Modal = ({
   mask,
   topLeftBtn,
   sectionClassName,
-}: {
-  children: ReactNode
-  visible: boolean
-  onClose: () => void
-} & Omit<PopoverProps, 'hideBoard'>): JSX.Element | null => {
+}) => {
   // const el= document.createElement('div')
   const modalRoot = useContext(ModalContext)
+
   if (modalRoot && visible) {
     return createPortal(
-      <Popover
+      <ModalComponent
         onClose={onClose}
         subTitle={subTitle}
         buttons={buttons}
@@ -32,7 +34,7 @@ const Modal = ({
         sectionClassName={sectionClassName}
       >
         {children}
-      </Popover>,
+      </ModalComponent>,
       modalRoot,
     )
   } else {

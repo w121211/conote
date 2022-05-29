@@ -1,20 +1,23 @@
 import React, { ReactNode, useState } from 'react'
-import { useMeQuery } from '../apollo/query.graphql'
+import { useMe } from './auth/use-me'
 import Modal from './modal/modal'
 
 const LoginModal = ({ children }: { children: ReactNode }) => {
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const { data: meData, error, loading } = useMeQuery()
+  const { me, loading } = useMe()
+  // const { data: meData, error, loading } = useMeQuery()
   return (
     <>
       <div
         onClick={() => {
-          if (!meData) {
+          if (!me) {
             setShowLoginModal(true)
           }
         }}
       >
-        <div className={meData ? 'pointer-events-auto' : 'pointer-events-none'}>{children}</div>
+        <div className={me ? 'pointer-events-auto' : 'pointer-events-none'}>
+          {children}
+        </div>
       </div>
       <Modal
         visible={showLoginModal}

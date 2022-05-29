@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useMe } from '../components/auth/use-me'
 import { SearchAllForm } from '../components/search-all-form'
-import MeHeaderItem from '../components/profile/me-header-item'
-import NewHotList from '../components/new-hot-list'
+import NewHotList from '../components/_new-hot-list'
 import UserRateTable from '../components/user/user-rate-table'
 import { mockRateData } from './user/[userid]'
+import AuthItem from '../components/auth/auth-Item'
+import { useMe } from '../components/auth/use-me'
 
 const HomePage = (): JSX.Element => {
   const [showAnnounce, setAnnounce] = useState(false),
@@ -18,6 +19,8 @@ const HomePage = (): JSX.Element => {
       window.sessionStorage.setItem('announce', showAnnounce ? 'true' : 'false')
     }
   }, [showAnnounce])
+  // const { data, loading } = useMeQuery()
+  const { me, loading } = useMe()
 
   if (loading)
     return (
@@ -67,7 +70,7 @@ const HomePage = (): JSX.Element => {
               <SearchAllForm />
             </div>
           </div>
-          <MeHeaderItem className="ml-4 sm:ml-0 flex-2 text-right" />
+          <AuthItem />
         </div>
         <>
           <div className=" flex pb-[9vh] pt-6 bg-gray-100">

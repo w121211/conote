@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { NoteDigestFragment } from '../apollo/query.graphql'
+// import { NoteDigestFragment } from '../apollo/query.graphql'
 import { SymbolHelper } from '../common/symbol-helper'
 import NoteEmojis from './emoji/_note-emojis-display'
 

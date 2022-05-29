@@ -3,13 +3,14 @@ import Link from 'next/link'
 import { DiscussFragment } from '../../../../../../apollo/query.graphql'
 import CreateDiscussForm from '../../../../../discuss/create-discuss-form'
 // import { DiscussModalPage } from '../../../../../discuss/modal-page/modal-page'
-import { Tooltip } from '../../../../../../layout/tooltip/tooltip'
 import Modal from '../../../../../modal/modal'
 import { blockStrReplace } from '../../../events'
 import { InlineDiscuss } from '../../../interfaces'
 import { inlineService } from '../../../services/inline.service'
 import { InlineElProps } from '../inline-el'
 import DiscussPageEl from '../../../../../discuss/discuss-page-el'
+import { DiscussPageComponent } from '../../../../../discuss/discuss-page'
+import { Tooltip } from '../../../../../ui-component/tooltip/tooltip'
 
 /**
  * Update block string when discuss is created
@@ -43,7 +44,7 @@ const InlineDiscussEl = ({
         className={`btn-primary h-10 w-24 `}
         type="submit"
       >
-        提交
+        Submint
       </button>
     ),
     modalTopRightBtn = isDiscussCreated && (
@@ -96,18 +97,12 @@ const InlineDiscussEl = ({
           // visible={showWarnTooltip}
           // onClose={() => setShowWarnTooltip(false)}
           size="sm"
-          state="warn"
+          type="warning"
         >
           <span
             // 'relative' is required for clickable and hover effect
             className="relative text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
             onClick={() => setShowModal(true)}
-            // onMouseEnter={() => {
-            //   setShowWarnTooltip(true)
-            // }}
-            // onMouseLeave={() => {
-            //   setShowWarnTooltip(false)
-            // }}
             role="button"
           >
             {children}

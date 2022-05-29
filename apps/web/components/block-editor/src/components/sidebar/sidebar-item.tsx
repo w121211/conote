@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { NoteDraftEntryFragment } from '../../../../../apollo/query.graphql'
 import { useObservable } from '@ngneat/react-rxjs'
 import { editorRepo } from '../../stores/editor.repository'
+import SidebarItemPanel from './sidebar-item-panel'
 // import { DocEntryPack } from '../workspace/doc'
 // import ContentPanel from './doc-index-panel'
 
@@ -106,7 +107,7 @@ const SidebarItem = ({
     return null
   }
   return (
-    <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-500 mix-blend-multiply">
+    <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-500 ">
       <Link
         href={{
           pathname: '/note/[symbol]',
@@ -116,59 +117,20 @@ const SidebarItem = ({
         <a
           className={`group flex items-center gap-1 pl-4 pr-4 leading-relax ${
             route.symbolMain == symbol
-              ? 'bg-gray-200/70 hover:bg-gray-300/70'
+              ? 'bg-gray-200/60 hover:bg-gray-300/70'
               : 'bg-transparent hover:bg-gray-200/70'
           } `}
         >
           <span className="material-icons text-lg text-[20px] text-gray-300 mix-blend-multiply">
             {symbol.startsWith('@') ? 'language' : 'notes'}
           </span>
-          <span className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">
+          <span className="inline-block min-w-0 flex-1 truncate ">
             <ItemLabel symbol={symbol} title={title ?? undefined} />
           </span>
 
-          {/* <SidebarItemPanel node={node} /> */}
+          {/* <SidebarItemPanel item={item} /> */}
         </a>
       </Link>
-
-      {/* {children.length > 0 && (
-        <ul className="p-0">
-          {children.map((e, idx) => {
-            if (e.data === undefined) {
-              throw 'e.data === undefined'
-            }
-            return (
-              <Link
-                key={idx}
-                href={{
-                  pathname: '/note/[symbol]',
-                  query: { symbol: e.data.symbol },
-                }}
-              >
-                <a
-                  className={`group flex items-center gap-1 pl-14 pr-4  ${
-                    router.query.symbol == e.data.symbol
-                      ? 'bg-gray-200/70 hover:bg-gray-300/70'
-                      : 'bg-transparent hover:bg-gray-200/70'
-                  } `}
-                >
-                  <span
-                    className={`material-icons text-lg text-gray-300 mix-blend-multiply`}
-                  >
-                    insert_drive_file
-                  </span>
-
-                  <span className="inline-block min-w-0 flex-1 truncate mix-blend-multiply">
-                    {changeTitle(e.data)}
-                  </span>
-
-                  <DocIndexPanel node={e} />
-                </a>
-              </Link>
-            )
-          })}
-        </ul>
-      )} */}
     </div>
   )
 }

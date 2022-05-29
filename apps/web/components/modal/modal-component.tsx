@@ -1,7 +1,7 @@
 import React from 'react'
 import CancelIcon from '../../assets/svg/cancel.svg'
 
-export interface PopoverProps {
+export interface ModalComponentProps {
   children: React.ReactNode
   onClose: () => void
   subTitle?: string | React.ReactNode
@@ -12,7 +12,7 @@ export interface PopoverProps {
   sectionClassName?: string
 }
 
-const Popover = ({
+const ModalComponent: React.FC<ModalComponentProps> = ({
   children,
   onClose,
   subTitle,
@@ -21,9 +21,7 @@ const Popover = ({
   topRightBtn,
   topLeftBtn,
   sectionClassName,
-}: PopoverProps): JSX.Element | null => {
-  // console.log(mask)
-
+}) => {
   return (
     <div
       className="fixed flex justify-center top-0 left-0 w-screen h-screen z-50"
@@ -40,11 +38,19 @@ const Popover = ({
       ></div>
 
       <div
-        className={`relative  flex flex-col h-fit py-2 rounded  shadow-2xl 
-        w-[80vw] max-h-[80vh] sm:min-w-[20vw] sm:max-w-[80vw] sm:max-h-[90vh] mt-[5vh] 
-      md:max-w-[65vw] lg:max-w-[55vw] ${
-        sectionClassName ? sectionClassName : 'bg-white'
-      }`}
+        className={`
+        relative  
+        flex flex-col 
+        bg-white 
+        w-[80vw] sm:w-fit
+        sm:min-w-[20vw] 
+        sm:max-w-[80vw] md:max-w-[65vw] lg:max-w-[55vw]
+        h-fit 
+        max-h-[80vh] sm:max-h-[90vh]
+        mt-[5vh] 
+        rounded  
+        shadow-2xl 
+       ${sectionClassName ? sectionClassName : ''}`}
       >
         {(topLeftBtn || subTitle || topRightBtn) && (
           <div
@@ -73,10 +79,8 @@ const Popover = ({
             {topRightBtn}
           </div>
         )}
-        <section className={`scrollbar flex overflow-auto `}>
-          {/* <div className="flex-1 min-w-0 min-h-0"> */}
-          {children}
-          {/* </div> */}
+        <section className={`flex scrollbar overflow-y-auto `}>
+          <div className="flex-1 min-w-0 min-h-0">{children}</div>
         </section>
         {buttons && (
           <div className="flex items-center justify-center mb-4">{buttons}</div>
@@ -86,9 +90,8 @@ const Popover = ({
   )
 }
 
-Popover.defaultProps = {
+ModalComponent.defaultProps = {
   mask: true,
-  center: false,
 }
 
-export default Popover
+export default ModalComponent

@@ -33,7 +33,7 @@ Symbol.args = {
 
 export const Web = Template.bind({})
 Web.args = {
-  symbol: '@' + mockLink,
+  symbol: mockLink,
   isNew: true,
   fetchTime: mockDate,
   link: mockLink,

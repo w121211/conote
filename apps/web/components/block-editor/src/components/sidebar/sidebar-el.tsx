@@ -1,11 +1,8 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
 import { editorLeftSidebarRefresh } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
-import { ThemeContext } from '../../../../theme/theme-provider'
-import { ThemeType } from '../../../../theme/theme-storage'
-import { ThemeToggle } from '../../../../theme/theme-toggle'
 
 /**
  * Call 'editorLeftSidebarMount' event on component mount to query required data.
@@ -25,9 +22,10 @@ const SidebarEl = ({
   showSider: boolean
 }): JSX.Element | null => {
   const [sidebar] = useObservable(editorRepo.leftSidebar$, {
-      initialValue: null,
-    }),
-    ref = useRef<HTMLDivElement>(null)
+    initialValue: null,
+  })
+  const ref = useRef<HTMLDivElement>(null)
+  const timeoutRef = useRef<any>(null)
 
   function hideSidebarWhenResize() {
     if (window && window.innerWidth < 769) {
@@ -36,12 +34,11 @@ const SidebarEl = ({
     }
   }
 
-  const { theme, setTheme, isSystem, setIsSystem } = useContext(ThemeContext)
-
-  // const ref = useRef<HTMLDivElement>(null)
-
-  // const [theme, setTheme] = useState<ThemeType>('light')
-  const [themeBtn, setThemeBtn] = useState<ThemeType | 'system'>('light')
+  function onTouchStart(e: TouchEvent) {
+    if (showSider && !ref.current?.contains(e.target as HTMLElement)) {
+      showMenuHandler(false)
+    }
+  }
 
   useEffect(() => {
     editorLeftSidebarRefresh()
@@ -49,20 +46,11 @@ const SidebarEl = ({
 
   useEffect(() => {
     window.addEventListener('resize', hideSidebarWhenResize)
-
-    // TODO: Remove listener when component unmount
-    window.addEventListener(
-      'touchstart',
-      e => {
-        if (showSider && !ref.current?.contains(e.target as HTMLElement)) {
-          showMenuHandler(false)
-        }
-      },
-      false,
-    )
+    window.addEventListener('touchstart', onTouchStart, false)
 
     return () => {
       window.removeEventListener('resize', hideSidebarWhenResize)
+      window.removeEventListener('touchstart', onTouchStart)
     }
   }, [])
 
@@ -70,37 +58,17 @@ const SidebarEl = ({
     return null
   }
 
-  // useEffect(() => {
-  //   const localTheme = Theme.getInstance()
-  //   if (themeBtn === 'light' || themeBtn === 'dark') {
-  //     if (localTheme) {
-  //       localTheme.setTheme(themeBtn)
-  //     } else {
-  //       const newLocalTheme = Theme.newInstance()
-  //       newLocalTheme.setTheme(themeBtn)
-  //     }
-  //   } else {
-  //     if (localTheme) {
-  //       if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-  //         setTheme('dark')
-  //       } else {
-  //         setTheme('light')
-  //       }
-  //       localTheme.clear()
-  //     }
-  //   }
-  // }, [themeBtn])
-
   return (
     <>
       <div
-        className={`absolute left-0 
+        className={`
+          group
+          absolute left-0 
           flex flex-col flex-shrink-0  
-          w-72 h-screen 
-          pt-0 
-          border-gray-200 
+          w-72 
+          pt-8
+          border-r 
           transition-all 
-          shadow-l2xl
           ${
             showSider
               ? ' translate-x-0 translate-y-0 '
@@ -108,61 +76,55 @@ const SidebarEl = ({
           } 
           ${
             isPined
-              ? 'sm:relative bg-gray-100 dark:bg-gray-800'
-              : 'z-50 bg-white dark:bg-gray-700'
+              ? 'top-11 h-[calc(100vh_-_44px)] sm:relative  border-gray-200  bg-gray-50 dark:bg-gray-800'
+              : 'top-14 h-[calc(100vh_-_68px)]  border-t rounded-r border-gray-100 bg-white '
           } 
-          ${isPined || !showSider ? 'shadow-transparent' : ''}
-      `}
+          ${isPined || !showSider ? 'shadow-transparent' : 'shadow-2xl'}
+            `}
+        onMouseEnter={() => {
+          if (!isPined) {
+            clearTimeout(timeoutRef.current)
+          }
+        }}
         onMouseLeave={() => {
-          if (isPined) {
-            return
-          } else {
-            showMenuHandler(false)
-            pinMenuHandler(false)
+          if (!isPined) {
+            clearTimeout(timeoutRef.current)
+            timeoutRef.current = setTimeout(() => {
+              showMenuHandler(false)
+              pinMenuHandler(false)
+            }, 500)
           }
         }}
         ref={ref}
       >
-        <div className="group flex-shrink-0 px-4">
-          <div className="flex items-center justify-between h-11">
-            <div className="flex items-center gap-1 ">
-              <a href="/" className="py-1 rounded dark:text-gray-200  ">
-                Konote
-              </a>
-
-              <ThemeToggle />
-
-              {/* <ChannelSelect /> */}
-            </div>
-            <span
-              className={`hidden md:block 
-                ${isPined ? 'material-icons' : 'material-icons-outlined'} 
-                rounded-full 
-                bg-transparent 
-                text-gray-500 dark:text-gray-500 
-                cursor-pointer 
-                hover:text-gray-600 dark:hover:text-gray-400
-                opacity-0 group-hover:opacity-100 
-                rotate-45 
-                select-none`}
-              onClick={() => {
-                pinMenuHandler()
-              }}
-            >
-              push_pin
-            </span>
-            <span
-              className={`material-icons md:hidden text-gray-6  00 rounded-full bg-transparent
+        <div className="absolute justify-end flex-shrink-0 top-0 right-0 mr-2 mt-2">
+          <span
+            className={`
+              hidden md:inline-block 
+              ${isPined ? 'material-icons' : 'material-icons-outlined'} 
+              bg-transparent 
+              text-gray-400 dark:text-gray-500 
+              cursor-pointer 
+              hover:text-gray-600 dark:hover:text-gray-400
+              opacity-0 group-hover:opacity-100 
+              rotate-45 
+              select-none`}
+            onClick={() => {
+              pinMenuHandler()
+            }}
+          >
+            push_pin
+          </span>
+          <span
+            className={`material-icons md:hidden text-gray-6  00 rounded-full bg-transparent
             cursor-pointer select-none`}
-              onClick={() => {
-                showMenuHandler(false)
-              }}
-            >
-              close
-            </span>
-          </div>
+            onClick={() => {
+              showMenuHandler(false)
+            }}
+          >
+            close
+          </span>
         </div>
-        <div className="mt-2 mb-3 mx-4">{/* <SearchAllForm small /> */}</div>
 
         {/* <DocIndexSection title="Committed" indexArray={committedDocIndicies} /> */}
 

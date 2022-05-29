@@ -1,10 +1,9 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import userEvent from '@testing-library/user-event'
 import React, { useState } from 'react'
-import TabsWithSlider from '../../layout/tabs-with-slider'
+import TabsWithSlider from '../../components/ui-component/tabs-with-slider'
 
 export default {
-  title: 'layout/Tabs With Slider',
   component: TabsWithSlider,
 } as ComponentMeta<typeof TabsWithSlider>
 

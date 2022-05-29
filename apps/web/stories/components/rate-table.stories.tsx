@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { RateTable, TableData } from '../../layout/rate-table'
+import { RateTable, TableData } from '../../components/ui-component/rate-table'
 
 const mockRateData: TableData[] = [
   {
@@ -36,7 +36,6 @@ const mockRateData: TableData[] = [
 ]
 
 export default {
-  title: 'layout/Rate Table',
   component: RateTable,
   decorators: [
     Story => (

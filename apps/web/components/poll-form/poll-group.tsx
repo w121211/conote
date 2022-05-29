@@ -1,8 +1,18 @@
-import React, { HtmlHTMLAttributes, useContext, useEffect, useState } from 'react'
+import React, {
+  HtmlHTMLAttributes,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 // import PinIcon from '../../assets/svg/like.svg'
 // import UpIcon from '../../assets/svg/arrow-up.svg'
-import Popover from '../popover'
-import { PollDocument, PollFragment, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'
+import Popover from '../modal/modal-component'
+import {
+  PollDocument,
+  PollFragment,
+  PollQuery,
+  useCreatePollMutation,
+} from '../../apollo/query.graphql'
 import Modal from '../modal/modal'
 // import { Context } from '../../pages/card/[symbol]'
 
@@ -31,25 +41,26 @@ const PollGroup = ({
   const [clickedIdx, setClickedIdx] = useState<number | undefined>()
   // const context = useContext(Context)
 
-  const [createPoll, { data: pollData, called: pollMutationCalled }] = useCreatePollMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<PollQuery>({
-        query: PollDocument,
-      })
-      if (data?.createPoll && res?.poll) {
-        cache.writeQuery({
+  const [createPoll, { data: pollData, called: pollMutationCalled }] =
+    useCreatePollMutation({
+      update(cache, { data }) {
+        const res = cache.readQuery<PollQuery>({
           query: PollDocument,
-          data: { board: data.createPoll },
         })
-      }
-    },
-    onCompleted(data) {
-      handlePollId && handlePollId(data.createPoll.id)
+        if (data?.createPoll && res?.poll) {
+          cache.writeQuery({
+            query: PollDocument,
+            data: { board: data.createPoll },
+          })
+        }
+      },
+      onCompleted(data) {
+        handlePollId && handlePollId(data.createPoll.id)
 
-      // handlePollData && handlePollData(data.createPoll)
-      // setPollId(data.createPoll.id)
-    },
-  })
+        // handlePollData && handlePollData(data.createPoll)
+        // setPollId(data.createPoll.id)
+      },
+    })
 
   const handleHideBoard = () => {
     setClickedIdx(undefined)

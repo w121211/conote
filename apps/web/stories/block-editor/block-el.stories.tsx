@@ -6,10 +6,10 @@ import { getApolloClient } from '../../apollo/apollo-client'
 import { blockRepo } from '../../components/block-editor/src/stores/block.repository'
 import { BlockEl } from '../../components/block-editor/src/components/block/block-el'
 import { mockBlocks } from '../../components/block-editor/test/__mocks__/mock-block'
-import { TooltipProvider } from '../../layout/tooltip/tooltip-provider'
 import { writeBlocks } from '../../components/block-editor/src/utils'
 import ModalProvider from '../../components/modal/modal-context'
 import { InitStoreForStorybook } from './helper-components/init-store-for-storybook'
+import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
 
 // Need to place outside, otherwise the storybook result weird behavior
 const basicBlocks = writeBlocks(['a', ['b', 'c']])

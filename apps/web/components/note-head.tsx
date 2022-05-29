@@ -5,6 +5,17 @@ import DomainSelect from './domain/domain-select'
 import NoteEmojis from './emoji/note-emojis'
 import Modal from './modal/modal'
 import NoteMetaForm from './note-meta-form/note-meta-form'
+import { useState } from 'react'
+import NoteMetaForm from './note-meta-form/note-meta-form'
+import NoteEmojis from './emoji/note-emojis'
+import Modal from './modal/modal'
+import moment from 'moment'
+import DomainSelect from './domain/domain-select'
+import { Badge } from './ui-component/badge'
+import { styleSymbol } from './ui-component/style-fc/style-symbol'
+import { workspace } from './workspace/workspace'
+import { useObservable } from 'rxjs-hooks'
+import { Alert } from './ui-component/alert'
 
 interface NoteHeadProps {
   isNew: boolean
@@ -18,6 +29,7 @@ interface NoteHeadProps {
 export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
   const { isNew, symbol, title, link, fetchTime, nodeId } = props
   const [showMetaForm, setShowMetaForm] = useState(false)
+  const [showAlert, setShowAlert] = useState({ 0: true, 1: true })
 
   return (
     <div className="ml-6 mb-5">
@@ -25,12 +37,11 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
         <DomainSelect />
 
         {isNew && (
-          <span
-            className="h-fit bg-yellow-200/60 text-gray-900 px-2 rounded
-             font-[Consolas] select-none font-bold text-xl"
-          >
-            new
-          </span>
+          <Badge
+            content="new"
+            bgClassName="bg-yellow-200/60"
+            textClassName="font-bold text-xl"
+          />
         )}
       </div>
 
@@ -64,6 +75,7 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
             type={'TICKER'}
             // metaInput={metaInput}
             onSubmit={input => {
+              // if(doc)
               // const { isUpdated } = doc.updateNoteMetaInput(input)
               // if (isUpdated) {
               //   doc.save()
@@ -78,13 +90,6 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
 
       {(fetchTime || link) && (
         <div className="flex flex-col text-gray-400 text-sm italic">
-          {/* {(doc.noteCopy?.sym.type === 'TICKER' || (doc.noteCopy === null && doc.getSymbol().startsWith('$'))) &&
-            metaInput.title && <span className="text-sm ">{metaInput.title}</span>} */}
-          {/* {metaInput.author && (
-            <Link href={{ pathname: '/author/[author]', query: { author: metaInput.author } }}>
-              <a className="flex-shrink-0 text-sm  hover:underline hover:underline-offset-2">@{metaInput.author}</a>
-            </Link>
-          )} */}
           {link && (
             <p className="truncate first-letter:capitalize">
               link:<span> </span>
@@ -154,18 +159,26 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
 
       {/* ---notification block--- */}
       <div className="flex flex-col gap-2 mt-4 text-gray-800 dark:text-gray-100 text-sm">
-        <p className="py-2 px-1 bg-gray-200/70 dark:bg-gray-600">
-          ❗️ <span className="font-bold">[merg]</span>A new commit 9031jd2 is
-          waiting to merge (5 hours ago)
-        </p>
-        <p className="py-2 px-1 bg-gray-200/70 dark:bg-gray-600">
-          ❗️ <span className="font-bold">[rename]</span>Agree rename this note
-          to{' '}
-          <span className="text-blue-500 dark:text-blue-300">
-            {styleSymbol('[[Awesome Tailwind css]]', '')}
-          </span>{' '}
-          ? (16 hours ago)
-        </p>
+        <Alert
+          type="warning"
+          action="merg"
+          str="A new commit 9031jd2 is waiting to merge "
+          time="(5 hours ago)"
+          visible={showAlert[0]}
+          onClose={() => {
+            setShowAlert({ ...showAlert, 0: false })
+          }}
+        />
+        <Alert
+          type="success"
+          action="rename"
+          str="Agree rename this note to [[Awesome Tailwind css]] ? "
+          time="(16 hours ago)"
+          visible={showAlert[1]}
+          onClose={() => {
+            setShowAlert({ ...showAlert, 1: false })
+          }}
+        />
       </div>
     </div>
   )
