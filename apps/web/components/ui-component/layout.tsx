@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import SidebarEl from '../block-editor/src/components/sidebar/sidebar-el'
 import Navbar from '../navbar'
 
-const Layout = ({
+export const Layout = ({
   children,
   buttonRight,
   backgroundColor,
@@ -12,7 +12,7 @@ const Layout = ({
   buttonRight?: React.ReactNode
   backgroundColor?: string
   navColor?: string
-}): JSX.Element {
+}): JSX.Element => {
   const [showSider, setShowSider] = useState(true)
   const [pinSider, setPinMenu] = useState(true)
   // const [scroll, setScroll] = useState(0)
@@ -108,7 +108,7 @@ const Layout = ({
   // }
 
   return (
-    <div className="relative flex w-screen h-screen ">
+    <div className="relative grid grid-cols-[auto_1fr] [grid-template-areas:'nav_nav'_'sider_children'] w-screen h-screen ">
       <SidebarEl
         showMenuHandler={triggerMenuHandler}
         pinMenuHandler={pinMenuHandler}
@@ -116,7 +116,7 @@ const Layout = ({
         isPined={pinSider}
       />
       <div
-        className={`flex-grow mt-11 pb-[20vh]  
+        className={`[grid-area:children] flex-grow pb-[20vh]  
         overflow-auto scroll-smooth scrollbar
          ${backgroundColor ? backgroundColor : 'bg-white dark:bg-gray-700'}`}
       >
@@ -133,5 +133,3 @@ const Layout = ({
     </div>
   )
 }
-
-export default Layout

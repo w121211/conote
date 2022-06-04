@@ -28,7 +28,7 @@ const Template: ComponentStory<typeof PostTile> = args => {
   return (
     <ApolloProvider client={apolloClient}>
       <TooltipProvider>
-        {post.map((e, i) => {
+        {post?.map((e, i) => {
           return <PostTile {...args} key={i} post={e} />
         })}
       </TooltipProvider>

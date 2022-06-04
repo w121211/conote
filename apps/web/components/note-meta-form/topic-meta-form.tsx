@@ -108,13 +108,13 @@ export const TopicMetaForm = ({
             </React.Fragment>
           )
         })}
-        <div className=" text-center sm:col-span-2">
+        <div className=" text-right sm:col-span-2">
           <button
-            className="btn-primary mt-6 sm:h-10 sm:w-24 sm:mt-4"
+            className="btn-primary mt-6 sm:mt-4"
             type="submit"
             disabled={!isDirty || isSubmitSuccessful || isSubmitted}
           >
-            {isSubmitted ? (isDirty ? '送出' : '已送出') : '送出'}
+            {isSubmitted ? (isDirty ? 'Submit' : 'Submitted') : 'Submit'}
           </button>
         </div>
       </form>

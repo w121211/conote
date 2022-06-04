@@ -5,7 +5,6 @@ import { nanoid } from 'nanoid'
 import { LiElement } from '../../components/editor/slate-custom-types'
 import { NoteHead } from '../../components/note-head'
 import { Doc } from '../../components/workspace/doc'
-import { mockDate, mockLink } from '../mock-data'
 import ModalProvider from '../../components/modal/modal-context'
 import { ApolloProvider } from '@apollo/client'
 import { getApolloClient } from '../../apollo/apollo-client'
@@ -33,10 +32,10 @@ Symbol.args = {
 
 export const Web = Template.bind({})
 Web.args = {
-  symbol: mockLink,
+  symbol: ' mockLink',
   isNew: true,
-  fetchTime: mockDate,
-  link: mockLink,
+  fetchTime: undefined,
+  link: 'http://www.xxxx.com',
   title: 'First Microsoft, then Okta: New ransomware gang posts data from both',
   nodeId: '12345',
 }

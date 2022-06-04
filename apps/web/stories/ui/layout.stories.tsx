@@ -15,9 +15,9 @@ export default {
 const Template: ComponentStory<typeof Layout> = args => (
   <ApolloProvider client={apolloClient}>
     <ModalProvider>
-      <ThemeProvider>
-        <Layout {...args} />
-      </ThemeProvider>
+      {/* <ThemeProvider> */}
+      <Layout {...args} />
+      {/* </ThemeProvider> */}
     </ModalProvider>
   </ApolloProvider>
 )

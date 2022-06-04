@@ -8,8 +8,8 @@ import {
 import { InlinePollElement } from '../editor/slate-custom-types'
 import { Transforms } from 'slate'
 import { PollFragment, usePollLazyQuery } from '../../apollo/query.graphql'
-import PollGroup from '../emoji-up-down/poll-group'
 import { InlineItemService } from '../../services/inline.service'
+import PollGroup from '../../../../../poll-form/poll-group'
 
 const InlinePoll = (
   props: RenderElementProps & { element: InlinePollElement },

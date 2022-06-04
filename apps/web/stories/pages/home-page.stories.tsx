@@ -3,9 +3,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react'
 import HomePage from '../../pages/index'
 import { ApolloProvider } from '@apollo/client'
 import { getApolloClient } from '../../apollo/apollo-client'
-import { HomePage } from '../../pages/index'
-import { ApolloProvider } from '@apollo/client'
-import { getApolloClient } from '../../apollo/apollo-client'
 
 const apolloClient = getApolloClient()
 

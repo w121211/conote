@@ -1,14 +1,11 @@
-import React, { createContext, useEffect, useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/router'
-import Layout from '../../layout/layout'
-import Popup from '../../components/popup/popup'
-import AuthorArticleList from '../../components/author/author-article-list'
-import AuthorMetaModal from '../../components/author/author-meta-modal'
+
 import UserRateTable, { TableData } from '../../components/user/user-rate-table'
 import UserNoteTable from '../../components/user/user-note-table'
 import { NoteData } from '../../components/ui-component/note-list'
 import { Layout } from '../../components/ui-component/layout'
-import { List } from '../../components/ui-component/list'
+import { List, ListElement } from '../../components/ui-component/list'
 
 export const mockRateData: TableData[] = [
   {
@@ -195,31 +192,7 @@ export const UserPage = (): JSX.Element | null => {
           <h2 className="mb-2 text-lg font-medium text-gray-700 ">DISCUSSES</h2>
           <List listData={mockList} />
         </div>
-        {/* <h2>Mention in</h2>
-        <ul>
-          <li
-            className="relative block"
-            onMouseOver={e => {
-              e.stopPropagation()
-              setShowMentionedPopup(true)
-            }}
-          >
-            @ARK OOOOOOO
-          </li>
-          <li>xxxxxxx @ARK OOOOOOO</li>
-        </ul> */}
       </div>
-      {/* {showMentionedPopup && (
-        <Popup
-          visible={showMentionedPopup}
-          hideBoard={() => {
-            setShowMentionedPopup(false)
-          }}
-          noMask={true}
-        >
-          文章peek
-        </Popup>
-      )} */}
     </Layout>
   )
 }

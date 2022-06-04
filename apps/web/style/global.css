@@ -11,10 +11,11 @@
 @layer base {
   body {
     overflow: hidden;
+    @apply prose prose-a:no-underline prose-ul:p-0 prose-p:m-0;
   }
-  h1 {
+  /* h1 {
     @apply text-4xl font-bold text-gray-800;
-  }
+  } */
   h2 {
     @apply font-bold;
   }
@@ -24,9 +25,9 @@
   h4 {
     @apply font-bold;
   }
-  h5 {
+  /* h5 {
     @apply text-sm font-bold text-gray-700;
-  }
+  } */
   button {
     @apply appearance-none;
   }
@@ -34,16 +35,16 @@
 
 @layer components {
   .input {
-    @apply px-2 py-2 border-gray-300 rounded text-sm text-gray-800 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none;
+    @apply px-2 py-2 border border-gray-300 rounded text-sm text-gray-800 hover:bg-gray-50 focus:bg-gray-50 focus:outline-blue-400;
   }
   .btn-normal {
-    @apply px-2 py-1 rounded text-gray-600 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+    @apply px-3 py-1 rounded text-gray-600 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
   }
   .btn-primary {
-    @apply px-2 py-1 rounded text-white bg-blue-600 hover:bg-blue-500 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+    @apply px-3 py-1 rounded text-white bg-blue-600 hover:bg-blue-500 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
   }
   .btn-secondary {
-    @apply px-2 py-1 rounded text-blue-600 bg-blue-100/70 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+    @apply px-3 py-1 rounded text-blue-600 bg-blue-100/70 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
   }
   .details-menu {
     @apply absolute top-full border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 shadow-lg z-50 opacity-0 scale-75 transition-all ease-[cubic-bezier(0.21,0.02,0.28,1.58)];

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
-import { Tile } from './tile'
+import { Box } from './box'
 
 export type TableData = {
   title?: string
@@ -12,8 +12,11 @@ export type TableData = {
 
 export const RateTable = ({ data }: { data: TableData[] }): JSX.Element => {
   return (
-    <Tile className="flex-1 min-w-[300px] w-full p-3 overflow-hidden  text-sm">
-      <h4 className="  mb-2 text-base tracking-widest text-gray-700 dark:text-gray-200">
+    <Box
+      className="flex-1 min-w-[300px] w-full overflow-hidden text-sm"
+      padding="sm"
+    >
+      <h4 className="my-0  mb-2 text-base tracking-widest text-gray-700 dark:text-gray-200">
         RATES
       </h4>
       {data.map(({ ticker, title, rate, srcSym }, i) => {
@@ -55,6 +58,6 @@ export const RateTable = ({ data }: { data: TableData[] }): JSX.Element => {
           </div>
         )
       })}
-    </Tile>
+    </Box>
   )
 }

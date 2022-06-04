@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { useMe } from '../components/auth/use-me'
 import { SearchAllForm } from '../components/search-all-form'
 import NewHotList from '../components/_new-hot-list'
 import UserRateTable from '../components/user/user-rate-table'
 import { mockRateData } from './user/[userid]'
 import AuthItem from '../components/auth/auth-Item'
 import { useMe } from '../components/auth/use-me'
+import HotDisplay from '../components/hot-display/hot-display'
 
 const HomePage = (): JSX.Element => {
-  const [showAnnounce, setAnnounce] = useState(false),
-    { me, loading } = useMe()
+  const [showAnnounce, setAnnounce] = useState(false)
+  const { me, loading } = useMe()
 
   useEffect(() => {
     if (window.sessionStorage.getItem('announce') === null) {
@@ -20,7 +20,6 @@ const HomePage = (): JSX.Element => {
     }
   }, [showAnnounce])
   // const { data, loading } = useMeQuery()
-  const { me, loading } = useMe()
 
   if (loading)
     return (
@@ -65,30 +64,18 @@ const HomePage = (): JSX.Element => {
       <div className="flex flex-col">
         <div className="flex items-center justify-between   border-slate-200 px-4 md:px-10 pt-6 pb-6 ">
           <div className="flex-3 flex items-center max-w-2xl">
-            <h3 className="mr-4 md:mr-10 text-2xl">Konote</h3>
+            <h2 className="my-0 mr-4 md:mr-10 ">Konote</h2>
             <div className="w-5/6">
               <SearchAllForm />
             </div>
           </div>
-          <AuthItem />
+          {/* <AuthItem me={me} /> */}
         </div>
         <>
           <div className=" flex pb-[9vh] pt-6 bg-gray-100">
             <div className="flex flex-col items-center md:items-start md:flex-row ms:justify-between  md:w-3/4 md:ml-[calc(4rem+96px)] gap-6">
-              <NewHotList />
+              <HotDisplay />
               <UserRateTable data={mockRateData} />
-
-              {/* <div className=" flex-shrink-0 flex-grow w-screen sm:w-1/3 h-fit px-4 rounded border border-gray-300">
-                <h3>自選股</h3>
-                <div>
-                  <div className="flex mb-3 pb-3 border-b border-gray-300 text-gray-700">
-                    <div className="flex justify-between w-full">
-                      <h4 className="text-blue-800">$BA</h4>
-                      <span>221.39 +0.29 (+0.13%)</span>
-                    </div>
-                  </div>
-                </div>
-              </div> */}
             </div>
           </div>
         </>

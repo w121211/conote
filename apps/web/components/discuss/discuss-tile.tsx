@@ -2,7 +2,7 @@ import moment from 'moment'
 import React from 'react'
 import { DiscussFragment, useMeQuery } from '../../apollo/query.graphql'
 import { useMe } from '../auth/use-me'
-import { Tile } from '../ui-component/tile'
+import { Box } from '../ui-component/box'
 import DiscussEmojis from './discuss-emojis'
 import OptionsMenu from './options-menu'
 
@@ -16,7 +16,7 @@ export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
   // const { data: meData } = useMeQuery()
   const { me } = useMe()
   return (
-    <Tile className="mb-3 pl-10 pt-4 pb-1">
+    <Box className="mb-3 pl-10 pt-4 pb-1">
       <div className="flex gap-1">
         {hashtags.map((tag, i) => {
           return (
@@ -68,6 +68,6 @@ export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
         </button>
         <OptionsMenu isMyPost={me?.id === data.userId ?? false} />
       </div>
-    </Tile>
+    </Box>
   )
 }

@@ -76,6 +76,7 @@
     "@storybook/addon-links": "^6.5.0-beta.8",
     "@storybook/addon-postcss": "^2.0.0",
     "@storybook/react": "^6.5.0-beta.8",
+    "@tailwindcss/typography": "^0.5.2",
     "@testing-library/dom": "^8.11.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",

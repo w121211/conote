@@ -73,6 +73,7 @@ module.exports = {
     require('precss'),
     require('autoprefixer'),
     require('@tailwindcss/line-clamp'),
+    require('@tailwindcss/typography'),
     // plugin(function ({ addComponents }) {
     //   addComponents({
     //     '.text-shadow': {

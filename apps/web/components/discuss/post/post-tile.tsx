@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react'
 import { DiscussPostFragment } from '../../../apollo/query.graphql'
 import DiscussPostEmojis from './post-emojis'
 import PostOptionsMenu from '../options-menu'
-import { Tile } from '../../ui-component/tile'
+import { Box } from '../../ui-component/box'
 
 export const PostTile = ({
   post,
@@ -14,7 +14,7 @@ export const PostTile = ({
   userId: string
 }) => {
   return (
-    <Tile className="pb-1">
+    <Box padding="sm">
       <div className="flex gap-2">
         <div>
           <span className="text-lg font-medium text-gray-400 leading-none">
@@ -64,6 +64,6 @@ export const PostTile = ({
           </div>
         </div>
       </div>
-    </Tile>
+    </Box>
   )
 }

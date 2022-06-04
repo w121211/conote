@@ -1,7 +1,7 @@
 import moment from 'moment'
 import React from 'react'
 import { styleSymbol } from './style-fc/style-symbol'
-import { Tile } from './tile'
+import { Box } from './box'
 
 export interface NoteData {
   title: string
@@ -11,7 +11,7 @@ export interface NoteData {
 
 export const NoteList = ({ data }: { data: NoteData[] }) => {
   return (
-    <Tile>
+    <Box>
       {/* <div className="p-3 border border-gray-200 rounded text-sm shadow-sm"> */}
       <h4 className="  mb-2 text-base tracking-widest text-gray-700 dark:text-gray-200">
         NOTES
@@ -36,6 +36,6 @@ export const NoteList = ({ data }: { data: NoteData[] }) => {
         )
       })}
       {/* </div> */}
-    </Tile>
+    </Box>
   )
 }

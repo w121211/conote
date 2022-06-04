@@ -6,23 +6,21 @@ import {
 } from '../../apollo/query.graphql'
 import { EmojiBtn } from './emoji-btn'
 
-const NoteEmojiCreateBtn = ({
+export const NoteEmojiBtn = ({
   noteId,
   emojiCode,
 }: {
   noteId: string
   emojiCode: EmojiCode
 }): JSX.Element => {
-  const [createNoteEmoji] = useUpsertNoteEmojiLikeMutation({
+  const [upserNoteEmoji] = useUpsertNoteEmojiLikeMutation({
     refetchQueries: [{ query: NoteEmojisDocument, variables: { noteId } }],
   })
   const onClick = () => {
-    createNoteEmoji({
-      variables: { noteId, emojiCode: emojiCode, liked: true },
+    upserNoteEmoji({
+      variables: { noteId, emojiCode: 'PIN', liked: true },
     })
   }
 
-  return <EmojiBtn onClick={onClick} emojiCode={emojiCode} />
+  return <EmojiBtn onClick={onClick} emojiCode="PIN" />
 }
-
-export default NoteEmojiCreateBtn

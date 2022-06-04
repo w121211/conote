@@ -2,7 +2,7 @@ import moment from 'moment'
 import Link from 'next/link'
 import React from 'react'
 import { styleSymbol } from './style-fc/style-symbol'
-import { Tile } from './tile'
+import { Box } from './box'
 
 type Hashtags = '#討論' | '#機會' | '#Battle' | '#事件'
 
@@ -20,7 +20,7 @@ export interface ListProps {
 
 export const List = ({ listData, currentTab }: ListProps) => {
   return (
-    <Tile>
+    <div>
       {listData.map(({ title, href, source, hashtags }, i) => {
         return (
           <div
@@ -99,6 +99,6 @@ export const List = ({ listData, currentTab }: ListProps) => {
           </div>
         )
       })}
-    </Tile>
+    </div>
   )
 }

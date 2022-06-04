@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { EmojiCode } from '@prisma/client'
+import NoteEmojiCreateBtn, { NoteEmojiBtn } from './note-emoji-create-btn'
 import { useNoteEmojisQuery } from '../../apollo/query.graphql'
-import ToggleMenu from '../../layout/toggle-menu'
-import { EmojisDropdownBtn } from './emojis-dropdown-btn'
-import NoteEmojiBtn from './note-emoji-btn'
-import NoteEmojiCreateBtn from './note-emoji-create-btn'
-import { useNoteEmojisQuery } from '../../apollo/query.graphql'
-import CreateNoteEmojiBtn from './create-note-emoji-btn'
-import UpdateNoteEmojiBtn from './update-note-emoji-btn'
+import UpdateNoteEmojiBtn from './_update-note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
 import { EmojisDropdownBtn } from './emojis-dropdown-btn'
 import ToggleMenu from '../ui-component/toggle-menu'
@@ -23,7 +17,7 @@ const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
 
   return (
     <div className={`flex`}>
-      {emojis.map((e, i) => {
+      {/* {emojis.map((e, i) => {
         const foundData = emojiData?.noteEmojis.find(el => el.code === e)
         return foundData !== undefined && foundData.count.nUps > 0 ? (
           <div key={i} className="flex items-center">
@@ -37,19 +31,11 @@ const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
             />
           </div>
         ) : null
-      })}
-      {pinEmojiData ? (
-        <UpdateNoteEmojiBtn
-          noteEmoji={pinEmojiData}
-          onLiked={code => {
-            setLikedChoice(code)
-          }}
-          likedChoice={likedChoice}
-        />
-      ) : (
-        <NoteEmojiCreateBtn noteId={noteId} emojiCode="PIN" />
-      )}
-      <ToggleMenu
+      })} */}
+
+      <NoteEmojiBtn noteId={noteId} emojiCode="PIN" />
+
+      {/* <ToggleMenu
         className="-translate-x-full left-full"
         summary={<EmojisDropdownBtn />}
       >
@@ -94,7 +80,7 @@ const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
             </button>
           </div>
         </div>
-      </ToggleMenu>
+      </ToggleMenu> */}
       <div
         className="relative"
         onClick={e => {

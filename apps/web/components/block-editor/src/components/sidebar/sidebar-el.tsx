@@ -62,10 +62,12 @@ const SidebarEl = ({
     <>
       <div
         className={`
+        [grid-area:sider]
           group
           absolute left-0 
           flex flex-col flex-shrink-0  
           w-72 
+          h-full
           pt-8
           border-r 
           transition-all 
@@ -76,8 +78,8 @@ const SidebarEl = ({
           } 
           ${
             isPined
-              ? 'top-11 h-[calc(100vh_-_44px)] sm:relative  border-gray-200  bg-gray-50 dark:bg-gray-800'
-              : 'top-14 h-[calc(100vh_-_68px)]  border-t rounded-r border-gray-100 bg-white '
+              ? ' sm:relative  border-gray-200  bg-gray-50 dark:bg-gray-800'
+              : ' my-2 h-[calc(100%_-_16px)] border-t rounded-r border-gray-100 bg-white '
           } 
           ${isPined || !showSider ? 'shadow-transparent' : 'shadow-2xl'}
             `}

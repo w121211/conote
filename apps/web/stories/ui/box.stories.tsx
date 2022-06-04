@@ -1,9 +1,9 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { Tile } from '../../components/ui-component/tile'
+import { Box } from '../../components/ui-component/box'
 
 export default {
-  component: Tile,
+  component: Box,
   decorators: [
     Story => (
       <div style={{ margin: '3em' }}>
@@ -11,9 +11,9 @@ export default {
       </div>
     ),
   ],
-} as ComponentMeta<typeof Tile>
+} as ComponentMeta<typeof Box>
 
-const Template: ComponentStory<typeof Tile> = args => <Tile {...args} />
+const Template: ComponentStory<typeof Box> = args => <Box {...args} />
 
 export const oneItem = Template.bind({})
 oneItem.args = {

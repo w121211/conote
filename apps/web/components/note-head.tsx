@@ -1,11 +1,4 @@
 import React, { useState } from 'react'
-import moment from 'moment'
-import { styleSymbol } from '../layout/style-fc/style-symbol'
-import DomainSelect from './domain/domain-select'
-import NoteEmojis from './emoji/note-emojis'
-import Modal from './modal/modal'
-import NoteMetaForm from './note-meta-form/note-meta-form'
-import { useState } from 'react'
 import NoteMetaForm from './note-meta-form/note-meta-form'
 import NoteEmojis from './emoji/note-emojis'
 import Modal from './modal/modal'
@@ -62,13 +55,14 @@ export const NoteHead = (props: NoteHeadProps): JSX.Element | null => {
       </div>
 
       <Modal
+        sectionClassName=""
         visible={showMetaForm}
         onClose={() => {
           setShowMetaForm(false)
         }}
       >
-        <div className="w-full px-4 md:py-6 md:px-12">
-          <h2 className="text-lg mb-4 sm:mb-6 sm:text-2xl font-bold text-gray-800">
+        <div className="w-full px-4 md:py-6 md:px-10">
+          <h2 className="mt-0 mb-4 sm:mb-6 font-bold text-gray-800">
             Card meta
           </h2>
           <NoteMetaForm

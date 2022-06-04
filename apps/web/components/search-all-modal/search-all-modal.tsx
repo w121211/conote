@@ -159,7 +159,9 @@ export const SearchAll = () => {
           search
         </span>
         <div className="flex-1 flex">
-          <p className="flex-grow mr-10 text-left text-gray-400">search</p>
+          <span className="flex-grow mr-10 text-left text-gray-400">
+            search
+          </span>
           <span className="text-gray-500 dark:text-gray-300">
             <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
               {modifierKeyPrefix}
@@ -173,7 +175,7 @@ export const SearchAll = () => {
 
       {/* --- search modal --- */}
       <Modal
-        sectionClassName="!bg-gray-100 dark:bg-gray-700 !w-[600px] "
+        sectionClassName=" dark:bg-gray-700 !w-[600px] "
         visible={showModal}
         onClose={() => {
           setShowModal(false)
@@ -248,8 +250,8 @@ export const SearchAll = () => {
               ) : (
                 // recent list
                 <>
-                  <header className="mt-6 mb-3 pl-2 pb-2 border-b border-inherit text-gray-700 dark:text-gray-200">
-                    <h2 className=" font-semibold capitalize ">recent</h2>
+                  <header className="mt-6 mb-3 pl-2 border-b border-inherit text-gray-700 dark:text-gray-200">
+                    <h4 className=" font-semibold capitalize ">recent</h4>
                   </header>
                   <ul className="text-gray-700/80 dark:text-gray-200/70">
                     {mockList.map(({ title, domain }, i) => {
@@ -263,10 +265,10 @@ export const SearchAll = () => {
                           role="option"
                           aria-selected={i === selectedIdx}
                         >
-                          <p className="p-1 rounded text-xs text-gray-500/80 dark:text-gray-300/80 bg-gray-200">
+                          <span className="p-1 rounded text-xs text-gray-500/80 dark:text-gray-300/80 bg-gray-200">
                             {styleSymbol(domain, '')}
-                          </p>
-                          <h4 className="font-medium leading-relaxed ">
+                          </span>
+                          <h4 className="my-0 font-medium leading-relaxed ">
                             {styleSymbol(title, '')}
                           </h4>
                         </li>
@@ -278,7 +280,8 @@ export const SearchAll = () => {
             </section>
           </div>
 
-          <footer className="px-4 py-2 shadow-footer dark:shadow-footer-dark">
+          {/* <footer className="px-4 py-2 shadow-footer dark:shadow-footer-dark"> */}
+          <footer className="px-4 py-2 border-t border-gray-200">
             <ul className="flex gap-4 text-xs leading-none text-gray-500 dark:text-gray-400">
               <li className=" ">
                 <kbd className="inline-block mr-[2px] py-[2px] px-1 rounded-sm font-sans bg-gray-300/50 dark:bg-gray-600 text-gray-600 dark:text-gray-300">

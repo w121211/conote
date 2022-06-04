@@ -128,7 +128,7 @@ const SidebarItem = ({
             <ItemLabel symbol={symbol} title={title ?? undefined} />
           </span>
 
-          {/* <SidebarItemPanel item={item} /> */}
+          <SidebarItemPanel item={item} />
         </a>
       </Link>
     </div>

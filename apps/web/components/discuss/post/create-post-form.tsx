@@ -4,7 +4,7 @@ import {
   DiscussPostsDocument,
   useCreateDiscussPostMutation,
 } from '../../../apollo/query.graphql'
-import './github-markdown-light.module.css'
+// import './github-markdown-light.module.css'
 import { MarkDownParser } from '../mark-down-parser'
 
 interface FormInput {
@@ -147,7 +147,6 @@ export const CreatePostForm = ({
             className={`
             block 
             ${isModal ? 'min-h-[18px]' : 'min-h-[120px]'} 
-            rounded
             m-2
             p-2
             border-b
