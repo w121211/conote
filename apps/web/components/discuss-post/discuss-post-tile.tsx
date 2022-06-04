@@ -1,18 +1,15 @@
 import moment from 'moment'
+import React from 'react'
 import Link from 'next/link'
-import React, { ReactNode } from 'react'
-import { DiscussPostFragment } from '../../../apollo/query.graphql'
-import DiscussPostEmojis from './post-emojis'
-import PostOptionsMenu from '../options-menu'
-import { Tile } from '../../ui-component/tile'
+import { DiscussPostFragment } from '../../apollo/query.graphql'
+import { useMe } from '../auth/use-me'
+import { Tile } from '../ui-component/tile'
+import OptionsMenu from '../discuss/options-menu'
+import DiscussPostEmojis from './discuss-post-emojis'
 
-export const PostTile = ({
-  post,
-  userId,
-}: {
-  post: DiscussPostFragment
-  userId: string
-}) => {
+const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {
+  const { me } = useMe()
+
   return (
     <Tile className="pb-1">
       <div className="flex gap-2">
@@ -51,7 +48,7 @@ export const PostTile = ({
             <div className="flex-grow">
               <DiscussPostEmojis
                 discussPostId={post.id}
-                disable={userId === post.userId}
+                disable={me?.id === post.userId}
               />
             </div>
             <button className="flex items-center p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
@@ -60,10 +57,12 @@ export const PostTile = ({
               </span>
               Reply
             </button>
-            <PostOptionsMenu isMyPost={userId === post.userId ?? false} />
+            <OptionsMenu isMyPost={me?.id === post.userId} />
           </div>
         </div>
       </div>
     </Tile>
   )
 }
+
+export default DiscussPostTile

@@ -334,26 +334,50 @@ v0.2.1
     - [-] update note-meta should first check is the latest card
 - [@hsuan] invite code
 - [@lisa] i18n https://react.i18next.com/
-- [@lisa] storybook
+- [@lisa] storybook & nextjs
+  - layout
+    - nav-bar
+      - ui: searchbox
+      - gql: searchSymbol
+    - side-bar
+      - gql: myNoteDraftEntries
   - pages
-    - home page
+    - home, /
       - [x] ui
-      - gql
-    - note page, include side-bar
-      - ui, doc-page need to change to editor-page
-      - gql
-      - doc diff
-      - alerts
-    - commit page, /commit/id
-    - discuss page
-    - user page
-      - [x] ui, gray background
-    - setting page
-    - login page
+      - gql: discussEntriesLatest, ratesLates (pending), noteDocsMergedLatest, noteDocsToMergeLatest
+    - note, /note/[symbol]?draft_id=OOO
+      - ui
+        - editor
+        - content-head-form
+        - doc-page need to change to editor-page
+        - don't create draft if not yet clicked
+        - view-only
+      - gql: noteEmojis, myNoteEmojiLike,
+    - doc-diff, /note/[symbol]/doc/[doc_id]
+      - gql: noteDoc
+    - commit, /commit/[commit_id]
+      - gql: commit, createCommit
+    - discuss, /discuss/[discuss_id]
+      - [x] ui
+      - gql: discuss, createDiscussPost
+    - poll for merge, /poll/[poll_id]
+      - ui: similar to discuss, add poll
+      - gql: poll, createVote
+    - user
+      - [x] ui
+      - [x] gql: commitsByUser, discussesByUser, ratesByUser@pending
+    - settings
+      - [] ui
+      - [] gql: ???
+    - login
+      - [] ui
+        - Logged in case
+      - gql:
   - basic components (build blocks)
     - badge
     - tag
     - button
+    - button-no-frame (text like button)
     - link
     - alert
     - tile

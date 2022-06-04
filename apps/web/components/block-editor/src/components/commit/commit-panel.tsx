@@ -4,7 +4,7 @@ import {
   useCreateCommitMutation,
   useMyNoteDraftEntriesQuery,
 } from '../../../../../apollo/query.graphql'
-import { commitOnCompleted } from '../../events'
+import { commitOnFinish } from '../../events'
 
 /**
  *
@@ -16,7 +16,7 @@ const CommitForm = ({
 }) => {
   const [createCommit, { data, loading, error }] = useCreateCommitMutation({
     onCompleted: data => {
-      commitOnCompleted(draftEntries, data.createCommit.noteDocs)
+      commitOnFinish(draftEntries, data.createCommit.noteDocs)
 
       // TODO: Redirect to commit page
     },

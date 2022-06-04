@@ -1,4 +1,3 @@
-import moment from 'moment'
 import React, { ReactNode } from 'react'
 
 export const Tile = ({

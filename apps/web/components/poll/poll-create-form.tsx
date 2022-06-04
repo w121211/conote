@@ -1,14 +1,26 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { title } from 'process'
 import React, { useEffect, useState, useContext } from 'react'
-import { useForm, useController, useFormContext, FormProvider, useWatch, Control, useFieldArray } from 'react-hook-form'
-import { PollDocument, PollQuery, useCreatePollMutation } from '../../apollo/query.graphql'
+import {
+  useForm,
+  useController,
+  useFormContext,
+  FormProvider,
+  useWatch,
+  Control,
+  useFieldArray,
+} from 'react-hook-form'
+import {
+  PollDocument,
+  PollQuery,
+  useCreatePollMutation,
+} from '../../apollo/query.graphql'
 
 export type PollFormInputs = {
   choices: { choice: string }[]
 }
 
-const CreatePollForm = ({
+const PollCreateForm = ({
   choices,
   handlePollId,
 }: {
@@ -67,29 +79,52 @@ const CreatePollForm = ({
 
   return (
     <div>
-      <form className="flex flex-col mt-4 mb-8" onSubmit={handleSubmit(myHandleSubmit)}>
+      <form
+        className="flex flex-col mt-4 mb-8"
+        onSubmit={handleSubmit(myHandleSubmit)}
+      >
         <ul>
           {fields.map((choice, idx) => {
             return (
               <li className="mb-2" key={choice.id}>
                 <input
-                  {...register(`choices.${idx}.choice`, { required: '請輸入選項!' })}
+                  {...register(`choices.${idx}.choice`, {
+                    required: '請輸入選項!',
+                  })}
                   type="text"
-                  style={{ boxShadow: `0 0 0 2px ${errors.choices && errors.choices[idx] ? 'red' : 'transparent'}` }}
+                  style={{
+                    boxShadow: `0 0 0 2px ${
+                      errors.choices && errors.choices[idx]
+                        ? 'red'
+                        : 'transparent'
+                    }`,
+                  }}
                   placeholder="新選項"
                 />
-                <button className="btn-secondary ml-2" type="button" onClick={() => remove(idx)}>
+                <button
+                  className="btn-secondary ml-2"
+                  type="button"
+                  onClick={() => remove(idx)}
+                >
                   刪除
                 </button>
                 <ErrorMessage
                   errors={errors}
                   name={`choices.${idx}.choice`}
-                  render={({ message }) => <span className="inline text-red-700 before:content-['⚠ ']">{message}</span>}
+                  render={({ message }) => (
+                    <span className="inline text-red-700 before:content-['⚠ ']">
+                      {message}
+                    </span>
+                  )}
                 />
               </li>
             )
           })}
-          <button className="btn-secondary" type="button" onClick={() => append({ choice: '' })}>
+          <button
+            className="btn-secondary"
+            type="button"
+            onClick={() => append({ choice: '' })}
+          >
             新增
           </button>
         </ul>
@@ -101,4 +136,4 @@ const CreatePollForm = ({
     </div>
   )
 }
-export default CreatePollForm
+export default PollCreateForm

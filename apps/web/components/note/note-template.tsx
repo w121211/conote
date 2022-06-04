@@ -1,12 +1,7 @@
 import { nanoid } from 'nanoid'
 import React, { useEffect, useState } from 'react'
-import { styleSymbol } from '../layout/style-fc/style-symbol'
 import { useObservable } from 'rxjs-hooks'
-import { BulletEditor } from './editor/editor'
-import { LiElement } from './editor/slate-custom-types'
-import { styleSymbol } from './ui-component/style-fc/style-symbol'
-import { Doc } from './workspace/doc'
-import { workspace } from './workspace/workspace'
+import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 
 const templateContent: LiElement[] = [
   {

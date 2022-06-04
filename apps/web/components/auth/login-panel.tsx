@@ -97,18 +97,17 @@ const LoginPanel = (): JSX.Element | null => {
         location.reload()
       } else {
         // console.error('session login fail')
-        setError('login fail')
+        setError('Login fail')
       }
     } catch (err) {
       console.debug(err)
-      setError('login fail')
+      setError('Login fail')
     }
   }
 
   if (error) {
     return <div>{error}</div>
   }
-
   return (
     <div className="flex justify-center w-screen h-screen bg-gray-100">
       <div className="h-fit mt-[20vh] p-10  rounded bg-white shadow-2xl">

@@ -1,5 +1,5 @@
-import { useApolloClient } from '@apollo/client'
 import { useEffect, useState } from 'react'
+import { getApolloClient } from '../../apollo/apollo-client'
 import { getLoggedInUser, LoggedInUser } from './auth.service'
 
 /**
@@ -11,7 +11,7 @@ export function useMe(): {
   me: LoggedInUser | null
   loading: boolean
 } {
-  const apolloClient = useApolloClient(),
+  const apolloClient = getApolloClient(),
     [me, setMe] = useState<LoggedInUser | null>(null),
     [loading, setLoading] = useState<boolean>(true)
 

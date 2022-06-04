@@ -10,7 +10,7 @@ interface FormInput {
   content?: string
 }
 
-const CreateDiscussForm = ({
+const DiscussForm = ({
   noteId,
   title,
   onCreate,
@@ -105,4 +105,4 @@ const CreateDiscussForm = ({
   )
 }
 
-export default CreateDiscussForm
+export default DiscussForm

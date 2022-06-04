@@ -1,8 +1,9 @@
 import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import { UserPage } from '../../pages/user/[userid]'
+import UserPage from '../../pages/user/[userid]'
 
 export default {
+  title: 'pages/UserPage',
   component: UserPage,
 } as ComponentMeta<typeof UserPage>
 

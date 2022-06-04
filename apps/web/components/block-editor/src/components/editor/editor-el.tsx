@@ -1,10 +1,10 @@
 import React from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
 import Modal from '../../../../modal/modal'
-import { editorRouteUpdate } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import { DocEl } from '../doc/doc-el'
 import { useRouter } from 'next/router'
+import { editorOpenSymbolInModal } from '../../events'
 
 /**
  * Open a modal-doc is triggered by 'editorRouteUpdate' event,
@@ -76,7 +76,7 @@ export const EditorEl = (): JSX.Element | null => {
         // }
 
         visible={modalDoc !== undefined && modalDoc !== null}
-        onClose={() => editorRouteUpdate({ modalSymbol: null, router })}
+        onClose={() => editorOpenSymbolInModal(null, router)}
 
         // visible={modalSymbol !== null}
         // onClose={async () => {

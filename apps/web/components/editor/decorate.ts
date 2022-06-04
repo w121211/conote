@@ -3,7 +3,7 @@
  * @see https://github.com/ianstormtaylor/slate/blob/main/site/examples/code-highlighting.tsx
  */
 import { NodeEntry, Text } from 'slate'
-import { TokenHelper } from '../../common/token-helper'
+import { TokenHelper } from '../../shared/token-helpers'
 import { tokenizeBulletString } from '../bullet/bullet-parser'
 import { CustomRange } from './slate-custom-types'
 

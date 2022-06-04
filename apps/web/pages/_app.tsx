@@ -1,14 +1,30 @@
 import { AppProps } from 'next/app'
 import { ApolloProvider } from '@apollo/client'
-import { useApolloClientSSR } from '../apollo/apollo-client-ssr'
 import ModalProvider from '../components/modal/modal-context'
 import '../style/global.css'
 import { ErrorBoundary } from 'react-error-boundary'
 import ErrorFallback from '../components/error-fallback'
 import { TooltipProvider } from '../components/ui-component/tooltip/tooltip-provider'
+import { useMe } from '../components/auth/use-me'
+import Link from 'next/link'
+import { useApolloClientInitial } from '../apollo/apollo-client'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
-  const apolloClient = useApolloClientSSR(pageProps.initialApolloState)
+  const apolloClient = useApolloClientInitial(pageProps.initialApolloState),
+    { me, loading } = useMe()
+
+  if (pageProps.protected && !loading && me === null) {
+    return (
+      <div>
+        <p>
+          <Link href="/login">
+            <a>Login</a>
+          </Link>{' '}
+          to continue
+        </p>
+      </div>
+    )
+  }
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>

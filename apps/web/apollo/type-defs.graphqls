@@ -1,7 +1,13 @@
-# Custom scalars, also need to modify ./apollo/schema.ts @see https://www.graphql-scalars.dev/docs/quick-start
-scalar BigInt
-scalar DateTime
+#
+# Custom scalars
+# Require to modify './apollo/schema.ts' too
+# @see https://www.graphql-scalars.dev/docs/quick-start
+#
 scalar JSON
+
+# Date use iso-date string instead
+# scalar DateTime
+# scalar BigInt
 
 type Query {
   # Get by id or name, returns null if not found
@@ -22,6 +28,9 @@ type Query {
   discussPosts(discussId: ID!): [DiscussPost!]!
 
   discussPostEmojis(discussPostId: ID!): [DiscussPostEmoji!]!
+
+  # Latest discuss-entries
+  discussesLatest(afterId: ID): [Discuss!]!
 
   # Returns null if not found. This is in favor of using 'url' for searching
   link(id: ID, url: String): Link
@@ -75,7 +84,7 @@ type Query {
   poll(id: ID!): Poll!
 
   # NEXT:
-  rate(id: ID!): Rate
+  rate(id: ID!): Rate!
 
   # NEXT:
   ratesByAuthor(authorId: ID!, symId: ID!): [Rate!]!
@@ -91,6 +100,8 @@ type Query {
 
   # Fuzzy search symbol name, if 'type' not given, search both ticker & topic
   searchSymbol(term: String!, type: SymType): [SearchHit!]!
+
+  # userProfile(userId: ID!): [UserProfile!]!
 
   # TODO: Duplicated with searchSymbol ?
   # Search note by sym or title, using domain for filtering
@@ -307,7 +318,7 @@ type Commit {
   # Consdier to remove
   # noteDrafts: [NoteDraft!]!
 
-  updatedAt: DateTime!
+  updatedAt: String!
 }
 
 type Discuss {
@@ -320,8 +331,8 @@ type Discuss {
 
   title: String!
   content: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: String!
+  updatedAt: String!
   count: DiscussCount!
 }
 
@@ -345,7 +356,7 @@ type DiscussEmojiLike {
   id: ID!
   discussEmojiId: Int!
   liked: Boolean!
-  updatedAt: DateTime!
+  updatedAt: String!
 }
 
 type DiscussPost {
@@ -353,8 +364,8 @@ type DiscussPost {
   userId: String!
   status: DiscussPostStatus!
   content: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type DiscussPostEmoji {
@@ -372,7 +383,7 @@ type DiscussPostEmojiLike {
   id: ID!
   discussPostEmojiId: Int!
   liked: Boolean!
-  updatedAt: DateTime!
+  updatedAt: String!
 }
 
 type Link {
@@ -384,18 +395,16 @@ type Link {
 
 type Note {
   id: ID!
-
-  # Branch name
-  branch: String!
+  branchName: String!
 
   sym: Sym!
   link: Link
 
   # The latest merged NoteDoc, throw error if there is none
   # it is impossible to be null because first NoteDoc will auto-merge to the newly-built Note
-  noteDoc: NoteDoc!
+  headDoc: NoteDoc!
 
-  updatedAt: DateTime!
+  updatedAt: String!
 }
 
 type NoteEmoji {
@@ -414,16 +423,15 @@ type NoteEmojiLike {
   id: ID!
   noteEmojiId: Int!
   liked: Boolean!
-  updatedAt: DateTime!
+  updatedAt: String!
 }
 
 type NoteDoc {
   id: ID!
 
   # Require bracnh and symbol in cases query note-doc without note
-  # (TBC) Set to must have?
-  branch: String
-  symbol: String
+  branchName: String!
+  symbol: String!
 
   commitId: String!
   fromDocId: String
@@ -433,15 +441,16 @@ type NoteDoc {
   domain: String!
   contentHead: NoteDocContentHead!
   contentBody: NoteDocContentBody!
-  updatedAt: DateTime!
+  updatedAt: String!
 }
 
 type NoteDocContentBody {
-  discussIds: [BlockUid_DiscussId!]!
-  symbols: [Symbol_SymId!]!
-  diff: JSON
   blocks: [Block!]!
-  # a symbol-noteId map, so later the cahnge of symbol name won't affect
+  diff: JSON
+  discussIds: [BlockUid_DiscussId!]!
+
+  # A symbol-noteId map, so later the cahnge of symbol name won't affect
+  symbols: [Symbol_SymId!]!
 }
 
 type NoteDocContentHead {
@@ -499,7 +508,7 @@ type NoteDraft {
 
   contentHead: NoteDocContentHead!
   contentBody: NoteDocContentBody!
-  updatedAt: DateTime!
+  updatedAt: String!
   status: NoteDraftStatus!
 }
 
@@ -528,8 +537,8 @@ type Poll {
   choices: [String!]!
   count: PollCount!
   discuss: Discuss
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type PollMeta {
@@ -565,8 +574,8 @@ type Rate {
   symId: String!
   choice: RateChoice!
   # body: ShotBody
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type SearchHit {
@@ -684,7 +693,7 @@ input NoteDocContentHeadWebpageInput {
   title: String
 
   # Datetime in milliseconds
-  publishedAt: Int
+  publishedAt: String
 
   tickers: [String!]
 }

@@ -255,23 +255,35 @@ class TreeUtil {
   }
 
   /**
-   *
+   * Reconstruct the list to get children-uids
    */
   toTreeNodeBodyList<
     T extends {
       uid: string
       parentUid: string | null
-      childrenUids: string[]
+      // childrenUids: string[]
       order: number
     },
   >(items: T[]): Required<TreeNodeBody<T>>[] {
-    const nodes: Required<TreeNodeBody<T>>[] = items.map(e => {
-      const { uid, parentUid, childrenUids, order } = e
-      return { uid, parentUid, childrenUids, order, data: e }
-    })
+    const nodes: TreeNodeBody<T>[] = items.map(e => {
+        const { uid, parentUid, order } = e
+        return { uid, parentUid, order, data: e }
+      }),
+      root = this.buildFromList(nodes),
+      nodes_ = this.toList(root)
 
-    this.validateList(nodes)
-    return nodes
+    if (nodes_.length !== items.length)
+      throw new Error('[toTreeNodeBodyList] list.length !== items.length')
+
+    this.validateList(nodes_)
+    return nodes_
+
+    // const nodes: Required<TreeNodeBody<T>>[] = items.map(e => {
+    //   const { uid, parentUid, childrenUids, order } = e
+    //   return { uid, parentUid, childrenUids, order, data: e }
+    // })
+    // this.validateList(nodes)
+    // return nodes
   }
 
   /**
@@ -309,9 +321,9 @@ class TreeUtil {
 
   /**
    * Should
-   * - have only one root
-   * - children-uids match its children
-   * - no orphans
+   * - Have only one root
+   * - Children-uids match its children
+   * - No orphans
    */
   validateList<T>(list: Required<TreeNodeBody<T>>[]): void {
     const cloned = cloneDeep(list),

@@ -1,17 +1,48 @@
 import React from 'react'
-import { useRouter } from 'next/router'
-import DiscussPageEl from '../../components/discuss/discuss-page-el'
-import Layout from '../../layout/layout'
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
+import {
+  CommitDocument,
+  CommitFragment,
+  CommitQuery,
+  CommitQueryVariables,
+} from '../../apollo/query.graphql'
+import Layout from '../../components/ui-component/layout'
 
-const CommitPage = () => {
-  const router = useRouter()
+interface Props {
+  commit: CommitFragment
+}
+
+const CommitPage = ({ commit }: Props) => {
   return (
     <Layout>
-      {router.query.discussId && typeof router.query.discussId === 'string' && (
-        <DiscussPageEl id={router.query.discussId} />
-      )}
+      <div></div>
     </Layout>
   )
 }
 
+export async function getServerSideProps({
+  res,
+  params,
+}: GetServerSidePropsContext<{ commitid: string }>): Promise<
+  GetServerSidePropsResult<Props>
+> {
+  if (params === undefined) throw new Error('params === undefined')
+
+  const client = getApolloClientSSR(),
+    qCommit = await client.query<CommitQuery, CommitQueryVariables>({
+      query: CommitDocument,
+      variables: { id: params.commitid },
+    })
+
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=200, stale-while-revalidate=259',
+  )
+  return {
+    props: {
+      commit: qCommit.data.commit,
+    },
+  }
+}
 export default CommitPage

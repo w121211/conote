@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
 import ModalProvider from '../../components/modal/modal-context'
-import { editorRouteUpdate } from '../../components/block-editor/src/events'
-import { getNoteService } from '../../components/block-editor/src/services/note.service'
 import { getFirebaseClient } from '../../components/auth/firebase-client'
 import {
   createUserWithEmailAndPassword,
@@ -16,23 +14,16 @@ import {
   SessionLoginMutationVariables,
 } from '../../apollo/query.graphql'
 import { getLoggedInUser } from '../../components/auth/auth.service'
-import { getNoteDraftService } from '../../components/block-editor/src/services/note-draft.service'
 import { EditorEl } from '../../components/block-editor/src/components/editor/editor-el'
 import { EditorToolbar } from '../../components/block-editor/src/components/editor/editor-toolbar'
-import {
-  ErrorBoundary,
-  FallbackProps,
-  useErrorHandler,
-} from 'react-error-boundary'
-import ErrorFallback from '../../components/error-fallback'
+import { noteService } from '../../components/block-editor/src/services/note.service'
+import { noteDraftService } from '../../components/block-editor/src/services/note-draft.service'
+import { editorOpenSymbolInMain } from '../../components/block-editor/src/events'
 
 export default {
   title: 'BlockEditor/EditorEl',
   component: EditorEl,
 } as ComponentMeta<typeof EditorEl>
-
-const noteService = getNoteService(),
-  noteDraftService = getNoteDraftService()
 
 const apolloClient = getApolloClient(),
   firebaseClient = getFirebaseClient(),
@@ -102,41 +93,14 @@ async function testUserSignIn() {
   }
 }
 
-// export const MockGotNothing = () => {
-//   useEffect(() => {
-//     editorRouteUpdate({ mainSymbol: mockGotNothing.title })
-//   }, [])
-//   return (
-//     <ModalProvider>
-//       <EditorEl />
-//     </ModalProvider>
-//   )
-// }
-
-// export const GotNoteOnly = () => {
-//   useEffect(() => {
-//     editorRouteUpdate({ mainSymbol: mockGotNoteOnly.title })
-//   })
-//   return (
-//     <ModalProvider>
-//       <EditorEl />
-//     </ModalProvider>
-//   )
-// }
-
-// export const GotDraftOnly = () => {
-//   useEffect(() => {
-//     editorRouteUpdate({ mainSymbol: mockGotDraftOnly.title })
-//   })
-//   return <EditorEl />
-// }
-
-// export const GotNoteAndDraft = () => {
-//   useEffect(() => {
-//     editorRouteUpdate({ mainSymbol: mockGotNoteAndDraft.title })
-//   })
-//   return <EditorEl />
-// }
+//
+//
+//
+//
+//
+//
+//
+//
 
 export const QueryServiceTesting = () => {
   useEffect(() => {
@@ -154,7 +118,7 @@ export const QueryServiceTesting = () => {
 
 export const QueryNoteNotExisted = () => {
   useEffect(() => {
-    editorRouteUpdate({ mainSymbol: '[[Note not existed]]' })
+    editorOpenSymbolInMain('[[Note not existed]]')
   }, [])
   return (
     <ModalProvider>
@@ -165,7 +129,7 @@ export const QueryNoteNotExisted = () => {
 
 export const QueryNoteAAPL = () => {
   useEffect(() => {
-    editorRouteUpdate({ mainSymbol: '$AAPL' })
+    editorOpenSymbolInMain('$AAPL')
   }, [])
   return (
     <ModalProvider>
@@ -176,7 +140,7 @@ export const QueryNoteAAPL = () => {
 
 export const Toolbar = () => {
   useEffect(() => {
-    editorRouteUpdate({ mainSymbol: '$AAPL' })
+    editorOpenSymbolInMain('$AAPL')
   }, [])
   return (
     <ModalProvider>

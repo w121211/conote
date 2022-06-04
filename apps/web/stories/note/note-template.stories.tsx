@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { NoteTemplate } from '../../components/note-template'
+import { NoteTemplate } from '../../components/note/note-template'
 
 export default {
   title: 'components/Note Template',

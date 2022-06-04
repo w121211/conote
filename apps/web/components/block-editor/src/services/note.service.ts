@@ -6,26 +6,7 @@ import {
 } from '../../../../apollo/query.graphql'
 import { getApolloClient } from '../../../../apollo/apollo-client'
 
-interface INoteService {
-  queryNote(symbol: string): Promise<NoteFragment | null>
-}
-
-// class MockNoteService implements INoteService {
-//   async queryNote(symbol: string): Promise<NoteFragment | null> {
-//     let note: NoteFragment | undefined
-//     switch (symbol) {
-//       case mockGotNoteOnly.title:
-//         note = mockGotNoteOnly.note
-//         break
-//       case mockGotNoteAndDraft.title:
-//         note = mockGotNoteAndDraft.note
-//         break
-//     }
-//     return note ?? null
-//   }
-// }
-
-class NoteService implements INoteService {
+class NoteService {
   private apolloClient = getApolloClient()
 
   async queryNote(symbol: string): Promise<NoteFragment | null> {
@@ -34,7 +15,7 @@ class NoteService implements INoteService {
       NoteByBranchSymbolQueryVariables
     >({
       query: NoteByBranchSymbolDocument,
-      variables: { branch: 'branch', symbol },
+      variables: { branch: 'default', symbol },
     })
 
     if (errors) {
@@ -48,9 +29,8 @@ class NoteService implements INoteService {
   }
 }
 
-export function getNoteService(mock?: true): INoteService {
-  // if (mock) {
-  //   return new MockNoteService()
-  // }
-  return new NoteService()
-}
+// export function getNoteService(): NoteService {
+//   return new NoteService()
+// }
+
+export const noteService = new NoteService()

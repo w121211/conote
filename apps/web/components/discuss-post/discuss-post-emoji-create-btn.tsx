@@ -3,10 +3,10 @@ import React from 'react'
 import {
   DiscussPostEmojisDocument,
   useUpsertDiscussPostEmojiLikeMutation,
-} from '../../../apollo/query.graphql'
-import { EmojiBtn } from '../../emoji/emoji-btn'
+} from '../../apollo/query.graphql'
+import { EmojiBtn } from '../emoji/emoji-btn'
 
-const CreateDiscussPostEmoji = ({
+const DiscussPostEmojiCreateBtn = ({
   discussPostId,
   emojiCode,
 }: {
@@ -33,4 +33,4 @@ const CreateDiscussPostEmoji = ({
   return <EmojiBtn onClick={onClick} emojiCode={emojiCode} />
 }
 
-export default CreateDiscussPostEmoji
+export default DiscussPostEmojiCreateBtn

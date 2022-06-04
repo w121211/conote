@@ -5,10 +5,8 @@ import {
   useUpsertDiscussEmojiLikeMutation,
 } from '../../apollo/query.graphql'
 import { EmojiBtn } from '../emoji/emoji-btn'
-// import { DiscussEmoji } from 'graphql-let/__generated__/__types__'
-import { EmojiIcon } from '../emoji/emoji-icon'
 
-const UpdateDiscussEmoji = ({
+const DiscussEmojiUpdateBtn = ({
   discussEmoji,
   type,
 }: {
@@ -50,4 +48,4 @@ const UpdateDiscussEmoji = ({
   )
 }
 
-export default UpdateDiscussEmoji
+export default DiscussEmojiUpdateBtn

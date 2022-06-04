@@ -1,5 +1,4 @@
 import { useReactiveVar } from '@apollo/client'
-import { testValue } from '../../apollo/cache'
 
 const TestPage = (): JSX.Element => {
   console.log('entry')

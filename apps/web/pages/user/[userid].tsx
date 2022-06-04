@@ -1,14 +1,10 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import Layout from '../../layout/layout'
-import Popup from '../../components/popup/popup'
-import AuthorArticleList from '../../components/author/author-article-list'
-import AuthorMetaModal from '../../components/author/author-meta-modal'
 import UserRateTable, { TableData } from '../../components/user/user-rate-table'
 import UserNoteTable from '../../components/user/user-note-table'
 import { NoteData } from '../../components/ui-component/note-list'
-import { Layout } from '../../components/ui-component/layout'
-import { List } from '../../components/ui-component/list'
+import Layout from '../../components/ui-component/layout'
+import { List, ListElement } from '../../components/ui-component/list'
 
 export const mockRateData: TableData[] = [
   {
@@ -128,10 +124,14 @@ const mockNoteList: NoteData[] = [
   },
 ]
 
-export const UserPage = (): JSX.Element | null => {
-  const [showMentionedPopup, setShowMentionedPopup] = useState(false)
+const UserPage = (): JSX.Element | null => {
+  // const [showMentionedPopup, setShowMentionedPopup] = useState(false)
   // const [queryUser, { data, loading, error }] = useUserLazyQuery()
-  const router = useRouter()
+  const router = useRouter(),
+    {
+      query: { userid: userId },
+    } = router
+  // ,qUser =
 
   // useEffect(() => {
   //   const { query, isReady } = router

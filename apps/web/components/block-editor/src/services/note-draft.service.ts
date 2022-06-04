@@ -145,7 +145,7 @@ class NoteDraftService {
   async queryMyAllDraftEntries(): Promise<
     MyNoteDraftEntriesQuery['myNoteDraftEntries']
   > {
-    const { data, errors } = await this.apolloClient.query<
+    const { data } = await this.apolloClient.query<
       MyNoteDraftEntriesQuery,
       MyNoteDraftEntriesQueryVariables
     >({
@@ -154,10 +154,10 @@ class NoteDraftService {
     if (data.myNoteDraftEntries) {
       return data.myNoteDraftEntries
     }
-    if (errors) {
-      console.debug(errors)
-      throw new Error('[queryMyAllDrafts] Graphql error')
-    }
+    // if (errors) {
+    //   console.debug(errors)
+    //   throw new Error('[queryMyAllDrafts] Graphql error')
+    // }
     throw new Error('[queryMyAllDrafts] No return data')
   }
 
@@ -287,7 +287,7 @@ class NoteDraftService {
         return { ...rest }
       }),
       input: NoteDraftInput = {
-        fromDocId: noteCopy?.noteDoc.id,
+        fromDocId: noteCopy?.headDoc.id,
         domain,
         contentHead,
         contentBody: {
@@ -300,9 +300,4 @@ class NoteDraftService {
   }
 }
 
-/**
- *
- */
-export function getNoteDraftService(): NoteDraftService {
-  return new NoteDraftService()
-}
+export const noteDraftService = new NoteDraftService()

@@ -1,0 +1,118 @@
+import React, { useMemo, useState } from 'react'
+import type { Block } from '../../interfaces'
+import '../block/block-container.module.css'
+import ParseRenderEl from '../inline/parse-render-el'
+
+const BlockViewerContent = ({
+  uid,
+  str,
+}: {
+  uid: string
+  str: string
+}): JSX.Element => {
+  return (
+    <div
+      className={`[grid-area:content]
+        grid [grid-template-areas:'main']
+        place-items-stretch place-content-stretch
+        relative z-[2]
+        overflow-visible
+        flex-grow
+        [word-break:break-word]
+        text-gray-700`}
+    >
+      <ParseRenderEl
+        className={`[grid-area:main]
+          text-inherit
+          font-[inherit]
+          cursor-text 
+          whitespace-pre-wrap [word-break:break-word]`}
+        blockUid={uid}
+        str={str}
+        isViewer
+      />
+    </div>
+  )
+}
+
+/**
+ * Refs:
+ * - block-el <- blocks/core.cljs
+ * - Block.tsx
+ */
+export const BlockViewerEl = ({
+  uid,
+  blocks,
+  isChild,
+}: {
+  uid: string
+  blocks: Block[]
+  isChild?: true
+}): JSX.Element | null => {
+  const block = blocks.find(e => e.uid === uid)
+
+  if (block === undefined) throw new Error('block === undefined')
+
+  const children = blocks.filter(e => e.parentUid === block.uid),
+    childrenBlockEls = useMemo(
+      () =>
+        children.map(e => (
+          <BlockViewerEl key={e.uid} uid={e.uid} blocks={blocks} isChild />
+        )),
+      [children],
+    )
+
+  const isOpen = true
+
+  return (
+    <div
+      data-uid={uid}
+      data-childrenuids={children.map(e => e.uid).join(',')}
+      className={
+        // [
+        `block-container
+        ${isChild ? 'ml-[1em] [grid-area:body]' : ''}
+        ${children.length > 0 && isOpen && 'show-tree-indicator'}
+        ${isOpen ? 'is-open' : 'is-closed'}
+        `
+      }
+    >
+      <div
+        className='
+          relative
+          grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"]
+          grid-cols-[1em_1em_1fr_auto]
+          grid-rows-[0_1fr_0]
+          rounded-lg
+          leading-normal
+          my-1
+         '
+      >
+        {/* {children.length > 0 && (
+          <Toggle
+            isShow={showEditableDom}
+            isOpen={isOpen}
+            onClick={e => {
+              e.stopPropagation()
+              blockOpen(uid, !isOpen)
+            }}
+          />
+        )} */}
+        {/* <Anchor
+          anchorElement="circle"
+          // handlePressAnchor={handlePressAnchor}
+          isClosedWithChildren={!isOpen && children.length > 0}
+          shouldShowDebugDetails={false}
+          // block,
+          // onClick={(e) => router.navigateUid(uid, e)}
+          // onContextMenu={(e) => bulletContextMenu(e, uid, state)}
+          onDragStart={e => bulletDragStart(e, uid, setDragging)}
+          onDragEnd={() => bulletDragEnd(setDragging)}
+        /> */}
+        <BlockViewerContent uid={block.uid} str={block.str} />
+      </div>
+
+      {isOpen && children.length > 0 && childrenBlockEls}
+    </div>
+  )
+}

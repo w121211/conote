@@ -1,4 +1,4 @@
-import { editingFocus, routerUpdateShallow, setCursorPosition } from './effects'
+import { editingFocus, routeUpdateShallow, setCursorPosition } from './effects'
 import {
   Block,
   DestructTextareaKeyEvent,
@@ -20,19 +20,21 @@ import { genBlockUid, isDocBlock, writeBlocks } from './utils'
 import { isInteger } from 'lodash'
 import { nextBlock, nthSiblingBlock, prevBlock } from './op/queries'
 import { docRepo, getDoc } from './stores/doc.repository'
-import { getNoteDraftService } from './services/note-draft.service'
 import { editorRepo } from './stores/editor.repository'
-import { getNoteService } from './services/note.service'
-import { getCommitService } from './services/commit.service'
 import { NextRouter } from 'next/router'
 import {
   NoteDocFragment,
   NoteDraftEntryFragment,
+  NoteDraftFragment,
 } from '../../../apollo/query.graphql'
+import { ApolloError } from '@apollo/client'
+import { noteService } from './services/note.service'
+import { noteDraftService } from './services/note-draft.service'
+import { commitService } from './services/commit.service'
 
-const noteService = getNoteService(),
-  noteDraftService = getNoteDraftService(),
-  commitService = getCommitService()
+// const noteService = getNoteService(),
+//   noteDraftService = getNoteDraftService(),
+//   commitService = getCommitService()
 
 //
 // History Events
@@ -642,14 +644,16 @@ export function selectedDown(selectedItems: string[]) {
 
 /**
  * Doc's title is set as 'symbol' and acts as 'uid'
- * If doc is found in repository (local memory), no need to query,
- * otherwise, query 'note', 'draft' from server and store in local
- * doc-el-component will update the doc by title through rxjs
+ * If doc is found in the repository (local memory), no need to query,
+ *  otherwise, query remote's note, note-draft and create a local-doc,
+ *  DocEl component will update the doc by title through rxjs.
  *
- * If local-doc found, do nothing
- * If local-doc not found, find remote-note-draft
- * If remote-note-draft not found, create local-doc from note-doc
- * If note-doc not found, create new local-doc
+ * If local-doc found, do nothing.
+ * If local-doc not found, find remote's note-draft.
+ * If remote-note-draft not found, create local-doc from note-doc.
+ *  But this doc is show in view mdode (not editable). Only when the user create
+ *  the note-draft (by click saving), the local-doc become editable.
+ * If note-doc not found, create new local-doc.
  *
  */
 export async function docOpen(
@@ -657,15 +661,20 @@ export async function docOpen(
   branch = 'mock-branch-0',
   domain = 'domain',
 ) {
-  if (docRepo.getDoc(title)) throw new Error('[docOpen] Doc is existed')
+  if (docRepo.getDoc(title)) {
+    // throw new Error('[docOpen] Doc is existed')
+    console.debug('[docOpen] Doc is existed')
+    return
+  }
 
   const [note, draft] = await Promise.all([
       noteService.queryNote(title),
       noteDraftService.queryDraft(title),
     ]),
-    { blockReducers, docReducers } = draft
+    op = draft
       ? ops.docLoadOp(branch, title, draft, note)
-      : ops.docNewOp(branch, title, domain, note)
+      : ops.docNewOp(branch, title, domain, note),
+    { blockReducers, docReducers } = op
 
   blockRepo.update(blockReducers)
   docRepo.update(docReducers)
@@ -747,113 +756,20 @@ export async function docTemplateSet(docBlock: Block) {
 //
 
 /**
- * Save or remove current doc, and open the next doc
- * If current doc has draft, save it
- * If current doc does not have draft and has updated, show warnning
- * If current doc does not have draft and not update, remove doc
- *
- */
-async function editorChangeSymbolMain(symbol: string) {
-  const { route } = editorRepo.getValue(),
-    curDoc = route.symbolMain ? getDoc(route.symbolMain) : null
-
-  if (curDoc) {
-    if (curDoc.noteDraftCopy) {
-      await docSave(curDoc)
-      // } else if (curDoc.noteCopy & diff(curDoc, )) {
-    } else {
-      // raise warnning?
-      await docRemove(curDoc)
-    }
-  }
-  await docOpen(symbol)
-  editorRepo.updateRoute({ ...route, symbolMain: symbol })
-}
-
-async function editorChangeSymbolModal(symbol: string | null) {
-  const { route } = editorRepo.getValue(),
-    curDoc = route.symbolModal ? getDoc(route.symbolModal) : null
-
-  if (curDoc) {
-    if (curDoc.noteDraftCopy) {
-      await docSave(curDoc)
-    } else {
-      await docRemove(curDoc)
-    }
-  }
-  if (symbol) {
-    await docOpen(symbol)
-  }
-  editorRepo.updateRoute({ ...route, symbolModal: symbol })
-}
-
-/**
- * Check is main-symbol or modal-symbol has changed by comparing with current value,
- * only one symbol can change at one time
- * - incoming modal symbol equals to current main symbol -> set modal symbol as null
- * - main symbol changed
- * - modal symbol added (from null)
- * - modal symbol removed (to null)
- * - modal symbol changed
- *
- * For current opened-doc
- * - If got draft, save doc
- * - If no draft, remove doc
- *
- * Side-effect: shallow update current route url through nextjs router
- *
- */
-export async function editorRouteUpdate({
-  mainSymbol,
-  modalSymbol,
-  router,
-}: {
-  mainSymbol?: string
-  modalSymbol?: string | null
-  router?: NextRouter
-}) {
-  const { route } = editorRepo.getValue(),
-    { symbolMain, symbolModal } = route,
-    modalSymbol_ =
-      modalSymbol !== undefined && modalSymbol === symbolMain
-        ? null
-        : modalSymbol,
-    mainSymbolChanged = mainSymbol !== undefined && mainSymbol !== symbolMain,
-    modalSymbolChanged =
-      modalSymbol_ !== undefined && modalSymbol_ !== symbolModal
-
-  if (mainSymbolChanged) {
-    await editorChangeSymbolMain(mainSymbol)
-    if (router) {
-      await routerUpdateShallow(router, {
-        pathname: router.pathname,
-        query: { symbol: mainSymbol },
-      })
-    }
-  } else if (modalSymbolChanged) {
-    editorChangeSymbolModal(modalSymbol_)
-    if (router) {
-      await routerUpdateShallow(router, {
-        pathname: router.pathname,
-        query: modalSymbol_
-          ? { symbol: symbolMain, pop: modalSymbol_ }
-          : { symbol: symbolMain },
-      })
-    }
-  } else if (!mainSymbolChanged && !modalSymbolChanged) {
-    // Do nothing
-  } else {
-    // Unexpected case
-  }
-  // console.debug(mainSymbol, modalSymbol, mainSymbolChanged, modalSymbolChanged)
-}
-
-/**
  * Refresh left sidebar by query and load my-all-draft-entries
  */
 export async function editorLeftSidebarRefresh() {
-  const entries = await noteDraftService.queryMyAllDraftEntries()
-  editorRepo.setLeftSidebarItems(entries)
+  try {
+    const entries = await noteDraftService.queryMyAllDraftEntries()
+    editorRepo.setLeftSidebarItems(entries)
+  } catch (err) {
+    if (err instanceof ApolloError) {
+      // TODO: Handle not authenticated case -> set auth status in editor repo
+      console.debug(err)
+    } else {
+      throw err
+    }
+  }
 }
 
 /**
@@ -879,6 +795,108 @@ export async function editorLeftSidebarItemRemove(
   await editorLeftSidebarRefresh()
 }
 
+async function saveCurDoc(curSymbol: string) {
+  const doc = curSymbol ? getDoc(curSymbol) : null
+
+  // const f_blocks = treeUtil.toTreeNodeBodyList(final.blocks),
+  //   s_blocks = treeUtil.toTreeNodeBodyList(start.blocks),
+  //   changes = treeNodeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
+
+  if (doc) {
+    if (doc.noteDraftCopy) {
+      await docSave(doc)
+      // } else if (curDoc.noteCopy & diff(curDoc)) {
+      // TODO: Show 'not save' warnning before remove
+    } else {
+      await docRemove(doc)
+    }
+  }
+}
+
+/**
+ * Opens a symbol in the modal editor.
+ * - If symbol is 'null', save previous and close the modal editor.
+ * - If the modal symbol is the same as main symbol, set modal symbol to 'null'.
+ * - If the new modal symbol is the same as current, do nothing.
+ * - If has cur modal doc, save it
+ * - Open the doc of given symbol so it will store into doc repo,
+ *   update opening modal symbol
+ * Side effect: shallow update route
+ */
+export async function editorOpenSymbolInModal(
+  symbol: string | null,
+  router?: NextRouter,
+) {
+  const { opening } = editorRepo.getValue(),
+    { symbolMain, symbolModal } = opening
+
+  if (symbolMain === null)
+    throw new Error('[editorOpenSymbolInModal] symbolMain === null')
+
+  if (symbolModal) saveCurDoc(symbolModal)
+
+  if (symbol === null || symbol === symbolMain) {
+    if (router) {
+      await routeUpdateShallow(router, {
+        pathname: '/note/[...slug]',
+        query: { slug: [symbolMain, 'edit'] },
+      })
+    }
+    editorRepo.updateOpening({ ...opening, symbolModal: null })
+  } else if (symbol === symbolModal) {
+    // Do nothing
+  } else {
+    if (router && symbolMain) {
+      await routeUpdateShallow(router, {
+        pathname: '/note/[...slug]',
+        query: { slug: [symbolMain, 'edit'], pop: symbol },
+      })
+    }
+
+    await docOpen(symbol)
+    editorRepo.updateOpening({
+      ...opening,
+      symbolModal: symbol,
+    })
+  }
+}
+
+/**
+ * Opens a symbol in the main editor and set modal-symbol to 'null' if any
+ * This method should be called when the editor component first render.
+ * - Save all the previous docs
+ * - Set new main-symbol
+ * - Set modal-symbol to 'null'
+ */
+export async function editorOpenSymbolInMain(
+  symbol: string,
+  router?: NextRouter,
+) {
+  const { opening } = editorRepo.getValue(),
+    { symbolMain, symbolModal } = opening
+
+  if (symbolMain) saveCurDoc(symbolMain)
+  if (symbolModal) saveCurDoc(symbolModal)
+
+  if (router) {
+    const { pop } = router.query
+    if (pop) {
+      // Remove query params
+      await routeUpdateShallow(router, {
+        pathname: '/note/[...slug]',
+        query: { slug: [symbol, 'edit'] },
+      })
+    }
+  }
+
+  await docOpen(symbol)
+  editorRepo.updateOpening({
+    ...opening,
+    symbolMain: symbol,
+    symbolModal: null,
+  })
+}
+
 //
 // Commit Events
 //
@@ -896,14 +914,11 @@ export async function editorLeftSidebarItemRemove(
  * - remove local docs from doc-repo, sidebar
  *
  */
-export async function commitOnCompleted(
+export async function commitOnFinish(
   inputDrafts: NoteDraftEntryFragment[],
   resultNoteDocs: NoteDocFragment[],
 ) {
-  const pairs = await commitService.pairNoteDraft_noteDoc(
-    inputDrafts,
-    resultNoteDocs,
-  )
+  const pairs = commitService.pairNoteDraft_noteDoc(inputDrafts, resultNoteDocs)
   await editorLeftSidebarRefresh()
 
   pairs.forEach(([noteDraft, noteDoc]) => {

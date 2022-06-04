@@ -12,7 +12,7 @@ import {
   SearchSymbolQuery,
   SearchSymbolQueryVariables,
 } from '../../apollo/query.graphql'
-import { TokenHelper } from '../../common/token-helper'
+import { TokenHelper } from '../../shared/token-helpers'
 import { reAuthor, reFiltertag, reTopic } from '../bullet/bullet-parser'
 // import { LcElement } from './slate-custom-types'
 // import { wrapToInlines } from './with-inline'
@@ -33,7 +33,9 @@ const SUGGESTS = {
 const reTicker = /\$[\w-=]+/ // allow lower case to be searchable
 
 const grammar: Grammar = {
-  discuss: { pattern: /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+#(?=\s|$)/u },
+  discuss: {
+    pattern: /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+#(?=\s|$)/u,
+  },
   topic: { pattern: reTopic },
   ticker: { pattern: reTicker },
   filtertag: { pattern: reFiltertag },
@@ -135,8 +137,14 @@ const grammar: Grammar = {
 //   return [selectedIdx, onKeyDown]
 // }
 
-const Portal = ({ children }: { children: React.ReactNode }): JSX.Element | null => {
-  return typeof document === 'object' ? createPortal(children, document.body) : null
+const Portal = ({
+  children,
+}: {
+  children: React.ReactNode
+}): JSX.Element | null => {
+  return typeof document === 'object'
+    ? createPortal(children, document.body)
+    : null
 }
 
 const SearchPanel = ({
@@ -151,7 +159,10 @@ const SearchPanel = ({
   searchTerm: string
   selectedIdx: number | null
   onChange: (selected: number) => void
-  onSelected: (event: React.KeyboardEvent | React.MouseEvent, selectedHit: string) => void
+  onSelected: (
+    event: React.KeyboardEvent | React.MouseEvent,
+    selectedHit: string,
+  ) => void
 }): JSX.Element => {
   let items: JSX.Element | null
   if (hits === null) {
@@ -166,7 +177,9 @@ const SearchPanel = ({
         {hits.map((e, i) => (
           <div
             key={i}
-            className={`rounded ${i === selectedIdx ? 'bg-gray-100' : 'bg-transparent'}`}
+            className={`rounded ${
+              i === selectedIdx ? 'bg-gray-100' : 'bg-transparent'
+            }`}
             style={{
               padding: '1px 3px',
             }}
@@ -225,12 +238,25 @@ const matchSearch = (editor: Editor): Search | null => {
       tokenStart = tokenEnd
     }
 
-    if (token && typeof token !== 'string' && searchTargets.includes(token.type)) {
-      const tokenStartPoint: BasePoint = { path: cursor.path, offset: tokenStart }
-      const tokenEndPoint: BasePoint = { path: cursor.path, offset: tokenStart + token.length }
+    if (
+      token &&
+      typeof token !== 'string' &&
+      searchTargets.includes(token.type)
+    ) {
+      const tokenStartPoint: BasePoint = {
+        path: cursor.path,
+        offset: tokenStart,
+      }
+      const tokenEndPoint: BasePoint = {
+        path: cursor.path,
+        offset: tokenStart + token.length,
+      }
       const tokenRange = Editor.range(editor, tokenStartPoint, tokenEndPoint)
       const tokenStr = TokenHelper.toString(token.content)
-      const tokenStartToCursorStr = tokenStr.substring(0, cursor.offset - tokenStart)
+      const tokenStartToCursorStr = tokenStr.substring(
+        0,
+        cursor.offset - tokenStart,
+      )
 
       let search: Search | null = null
       switch (token.type) {
@@ -333,7 +359,10 @@ export const useSearchPanel = (
               ticker: 'TICKER',
               topic: 'TOPIC',
             }
-            const { data } = await client.query<SearchSymbolQuery, SearchSymbolQueryVariables>({
+            const { data } = await client.query<
+              SearchSymbolQuery,
+              SearchSymbolQueryVariables
+            >({
               query: SearchSymbolDocument,
               variables: { term: search.term, type: _map[search.target] },
             })
@@ -343,7 +372,10 @@ export const useSearchPanel = (
             break
           }
           case 'discuss': {
-            const { data } = await client.query<SearchDiscussQuery, SearchDiscussQueryVariables>({
+            const { data } = await client.query<
+              SearchDiscussQuery,
+              SearchDiscussQueryVariables
+            >({
               query: SearchDiscussDocument,
               variables: { term: search.term },
             })
@@ -382,7 +414,11 @@ export const useSearchPanel = (
 
   const onKeyUp = (event: React.KeyboardEvent, editor: Editor) => {
     // console.log(event.key)
-    if (event.key.length === 1 || event.key === 'Enter' || event.key === 'Backspace') {
+    if (
+      event.key.length === 1 ||
+      event.key === 'Enter' ||
+      event.key === 'Backspace'
+    ) {
       const search = matchSearch(editor)
       // console.log(search)
       if (search === null) {

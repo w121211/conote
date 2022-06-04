@@ -1,6 +1,6 @@
 import moment from 'moment'
 import React from 'react'
-import { DiscussFragment, useMeQuery } from '../../apollo/query.graphql'
+import { DiscussFragment } from '../../apollo/query.graphql'
 import { useMe } from '../auth/use-me'
 import { Tile } from '../ui-component/tile'
 import DiscussEmojis from './discuss-emojis'
@@ -12,8 +12,7 @@ const currentTab = ''
 
 const quote = '這則討論和其他重複了!'
 
-export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
-  // const { data: meData } = useMeQuery()
+const DiscussTile = ({ data }: { data: DiscussFragment }) => {
   const { me } = useMe()
   return (
     <Tile className="mb-3 pl-10 pt-4 pb-1">
@@ -71,3 +70,5 @@ export const DiscussTile = ({ data }: { data: DiscussFragment }) => {
     </Tile>
   )
 }
+
+export default DiscussTile

@@ -19,7 +19,10 @@ import prisma from '../prisma'
 import { NoteDocModel } from './note-doc-model'
 import { pollMergeModel } from './poll-merge-model'
 
-function isBlockEqual(a: Block, b: Block) {
+function isBlockEqual(
+  a: Omit<Block, 'childrenUids'>,
+  b: Omit<Block, 'childrenUids'>,
+) {
   return a.str === b.str && a.docTitle === b.docTitle
 }
 

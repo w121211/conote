@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import { NoteHead } from '../../../../note-head'
+import { NoteHead } from '../../../../note/note-head'
 import { docTemplateSet } from '../../events'
 import type { Doc } from '../../interfaces'
 import { hotkey, multiBlockSelection } from '../../listeners'

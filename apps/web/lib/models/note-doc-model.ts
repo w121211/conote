@@ -1,4 +1,4 @@
-import { Branch, NoteDoc, PrismaPromise } from '@prisma/client'
+import { Branch, NoteDoc, PrismaPromise, Sym } from '@prisma/client'
 import {
   NoteDocContentBody,
   NoteDocContentHead,
@@ -46,6 +46,17 @@ export class NoteDocModel {
    */
   _validateOnCreate() {
     // TODO
+  }
+
+  attachBranchSymbol<T extends NoteDoc & { branch: Branch; sym: Sym }>(
+    doc: T,
+  ): Omit<T, 'branch' | 'sym'> & { branchName: string; symbol: string } {
+    const { branch, sym, ...rest } = doc
+    return {
+      ...rest,
+      branchName: branch.name,
+      symbol: sym.symbol,
+    }
   }
 
   /**
@@ -107,20 +118,23 @@ export class NoteDocModel {
           AND: [{ note: { symId, branchId } }, { status: 'CANDIDATE' }],
         },
         orderBy: { createdAt: 'asc' },
-        include: { branch: true },
+        include: { branch: true, sym: true },
       })
     return docs.map(e => noteDocModel.parse(e))
   }
 
   /**
-   * Get the head-doc of the note, hdad-note-doc is the same as the latest merged note-doc
+   * Get the head-doc of the note, it is the same as the latest merged note-doc
    *
    */
-  async getHeadDoc(branchId: string, symId: string) {
+  async getHeadDoc(
+    branchId: string,
+    symId: string,
+  ): Promise<NoteDocParsed<NoteDoc & { branch: Branch; sym: Sym }>> {
     const doc = await prisma.noteDoc.findFirst({
       where: { branchId, symId, status: 'MERGED' },
       orderBy: { updatedAt: 'desc' },
-      include: { branch: true },
+      include: { branch: true, sym: true },
     })
     if (doc) {
       return this.parse(doc)
@@ -133,7 +147,7 @@ export class NoteDocModel {
   /**
    *
    */
-  parse<T extends NoteDoc & { branch?: Branch }>(doc: T): NoteDocParsed<T> {
+  parse<T extends NoteDoc>(doc: T): NoteDocParsed<T> {
     const { meta, contentBody, contentHead, ...rest } = doc
     return {
       ...rest,

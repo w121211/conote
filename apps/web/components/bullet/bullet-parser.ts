@@ -1,7 +1,7 @@
 import { Grammar, Token, tokenize as prismTokenize } from 'prismjs'
 import { InlineItem } from '../inline/inline-item-types'
 import { InlineItemService } from '../inline/inline-item-service'
-import { TokenHelper } from '../../common/token-helper'
+import { TokenHelper } from '../../shared/token-helpers'
 
 /**
  * Regex references:
@@ -12,17 +12,20 @@ import { TokenHelper } from '../../common/token-helper'
 export const reAuthor = /\B@[\p{L}\d_]+\b/u
 export const reTicker = /\$[A-Z-=]+/
 export const reTopic = /\[\[[^\]\n]+\]\]/u
-const reDiscuss = /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-(c[a-z0-9]{24,29})#(?=\s|$)/u
+const reDiscuss =
+  /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-(c[a-z0-9]{24,29})#(?=\s|$)/u
 const reDiscussNew =
   /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+[\d\p{Letter}\p{Terminal_Punctuation}]#(?=\s|$)/u
 export const reFiltertag = /(?<=\s|^)#[\d\p{Letter}]+(?=\s|$)/
 // const reMirrorTicker = /^(::\$[A-Z-=]+)\b(?:\s@([\p{Letter}\d_]+))?/u
 // const reMirrorTopic = /^(::\[\[[\p{Letter}\d\s(),$%-]+\]\])\B(?:\s@([\p{Letter}\d_]+))?/u
-const rePoll = /\B!\(\(poll:(c[a-z0-9]{24,29})\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
+const rePoll =
+  /\B!\(\(poll:(c[a-z0-9]{24,29})\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const rePollNew = /\B!\(\(poll\)\)\(((?:#[a-zA-Z0-9]+\s)+#[a-zA-Z0-9]+)\)\B/
 const reRate = /\B!\(\(rate:(c[a-z0-9]{24,29})\)\)\(([^)]*)\)\B/
 const reRateNew = /\B!\(\(rate\)\)\(([^)]*)\)\B/
-const reURL = /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/
+const reURL =
+  /(?<=\s|^)@(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,})(?=\s|$)/
 const reComment = /\/\/ .+$/m
 
 const grammar: Grammar = {
@@ -198,7 +201,8 @@ export const BulletParser = {
           if (match) {
             // console.log(match[2])
             const params = match[2].split(' ')
-            const { authorName, targetSymbol, choice } = InlineItemService.parseInlineRateParams(params)
+            const { authorName, targetSymbol, choice } =
+              InlineItemService.parseInlineRateParams(params)
             return {
               type: 'inline-rate',
               id: match[1],
@@ -217,7 +221,8 @@ export const BulletParser = {
           const match = reRateNew.exec(str)
           if (match) {
             const params = match[1].split(' ')
-            const { authorName, targetSymbol, choice } = InlineItemService.parseInlineRateParams(params)
+            const { authorName, targetSymbol, choice } =
+              InlineItemService.parseInlineRateParams(params)
             return {
               type: 'inline-rate',
               str,
