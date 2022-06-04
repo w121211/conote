@@ -6,17 +6,8 @@ import { testHelper } from '../../test-helpers'
 import { mockMergePolls } from '../../__mocks__/mock-poll'
 import { mockMergePollVotes } from '../../__mocks__/mock-vote'
 
-export async function createMockMergePolls() {
-  return await prisma.$transaction(
-    mockMergePolls.map(e =>
-      prisma.poll.create({
-        data: {
-          ...e,
-          count: { create: { nVotes: e.choices.map(_ => 0) } },
-        },
-      }),
-    ),
-  )
+async function createMockMergePolls() {
+  return await testHelper.createMergePolls(prisma)
 }
 
 export async function createMockVotes(votes: PollVote[]) {

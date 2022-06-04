@@ -193,14 +193,14 @@ fragment user on User {
 fragment note on Note {
   __typename
   id
-  branch
+  branchName
   sym {
     ...sym
   }
   link {
     ...link
   }
-  noteDoc {
+  headDoc {
     ...noteDoc
   }
   updatedAt
@@ -209,7 +209,7 @@ fragment note on Note {
 fragment noteDoc on NoteDoc {
   __typename
   id
-  branch
+  branchName
   symbol
   commitId
   fromDocId
@@ -327,6 +327,12 @@ query CommitsByUser($userId: ID!, $afterId: ID) {
 
 query Discuss($id: ID!) {
   discuss(id: $id) {
+    ...discuss
+  }
+}
+
+query DiscussesLatest($afterId: ID) {
+  discussesLatest(afterId: $afterId) {
     ...discuss
   }
 }

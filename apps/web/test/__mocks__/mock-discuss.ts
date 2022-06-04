@@ -4,7 +4,7 @@
 // } from '../../apollo/query.graphql'
 
 import faker from '@faker-js/faker'
-import { Discuss, DiscussPost } from '@prisma/client'
+import type { Discuss, DiscussPost } from '@prisma/client'
 import { mockUsers } from './mock-user'
 
 // const discuss: DiscussFragment = {
@@ -95,31 +95,39 @@ type DiscussParsed = Omit<Discuss, 'meta'> & {
   meta: object
 }
 
+const base: DiscussParsed = {
+  id: '',
+  userId: mockUsers[0].id,
+  type: 'DISCUSS',
+  status: 'ACTIVE',
+  meta: {},
+  title: faker.lorem.lines(1),
+  content: faker.lorem.paragraph(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
 export const mockDiscusses: DiscussParsed[] = [
   {
+    ...base,
     id: 'mock_discuss_0_active',
     userId: mockUsers[0].id,
     status: 'ACTIVE',
-    meta: {},
     title: faker.lorem.lines(1),
     content: faker.lorem.paragraph(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
   },
   {
+    ...base,
     id: 'mock-discuss-1_draft',
     status: 'DRAFT',
-    meta: {},
     userId: mockUsers[1].id,
     title: faker.lorem.lines(1),
     content: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
   },
   {
+    ...base,
     id: 'mock-discuss-2_archive',
     status: 'ARCHIVE',
-    meta: {},
     userId: mockUsers[2].id,
     title: faker.lorem.lines(1),
     content: faker.lorem.paragraph(),

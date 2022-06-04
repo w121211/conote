@@ -3,10 +3,10 @@ import {
   DiscussPostEmojiFragment,
   useMyDiscussPostEmojiLikeQuery,
   useUpsertDiscussPostEmojiLikeMutation,
-} from '../../../apollo/query.graphql'
-import { EmojiBtn } from '../../emoji/emoji-btn'
+} from '../../apollo/query.graphql'
+import { EmojiBtn } from '../emoji/emoji-btn'
 
-const UpdateDiscussPostEmoji = ({
+const DiscussPostEmojiUpdateBtn = ({
   discussPostEmoji,
   type,
 }: {
@@ -47,4 +47,4 @@ const UpdateDiscussPostEmoji = ({
   )
 }
 
-export default UpdateDiscussPostEmoji
+export default DiscussPostEmojiUpdateBtn

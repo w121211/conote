@@ -1,13 +1,13 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { nanoid } from 'nanoid'
-// import { NoteFragment } from '../apollo/query.graphql'
-import { LiElement } from '../../components/editor/slate-custom-types'
-import { NoteHead } from '../../components/note-head'
-import { Doc } from '../../components/workspace/doc'
+import { NoteHead } from '../../components/note/note-head'
 import ModalProvider from '../../components/modal/modal-context'
 import { ApolloProvider } from '@apollo/client'
 import { getApolloClient } from '../../apollo/apollo-client'
+
+export const mockDate = new Date()
+export const mockLink =
+  'https://arstechnica.com/information-technology/2022/03/first-microsoft-then-okta-new-ransomware-gang-posts-data-from-both/'
 
 const apolloClient = getApolloClient()
 

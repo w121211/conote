@@ -1,8 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { commitNoteDrafts } from '../../lib/models/commit-model'
-import { testHelper } from '../../test/test-helpers'
 import { mockNoteDrafts } from '../../test/__mocks__/mock-note-draft'
-import { mockUsers } from '../../test/__mocks__/mock-user'
+import { testHelper } from '../../test/test-helpers'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),
@@ -15,25 +14,20 @@ const prisma = new PrismaClient({ errorFormat: 'pretty' })
  */
 async function main() {
   console.log('Truncating databse...')
-
-  await prisma.$queryRaw`TRUNCATE "Author", "Branch", "User", "Commit", "Discuss", "Note", "NoteDoc", "NoteDraft", "Link", "Sym" CASCADE;`
-
-  console.log('Creating mock users, branches...')
+  await prisma.$queryRaw`TRUNCATE "Author", "Branch", "User", "Commit", "Discuss", "DiscussPost", "Note", "NoteDoc", "NoteDraft", "Link", "Sym", "Poll", "PollVote" CASCADE;`
 
   await testHelper.createUsers(prisma)
   await testHelper.createBranches(prisma)
 
-  console.log('Creating mock discusses...')
-
   await testHelper.createDiscusses(prisma)
 
-  console.log('Creating mock note-drafts...')
   await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
   await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(5))
 
-  console.log('Creating mock commits...')
   await commitNoteDrafts([mockNoteDrafts[0].id], mockNoteDrafts[0].userId)
   await commitNoteDrafts([mockNoteDrafts[1].id], mockNoteDrafts[1].userId)
+
+  await testHelper.createMergePolls(prisma)
 
   // mockNoteDrafts.slice(0, 2).forEach(async e => {
   //   await commitNoteDrafts([e.id], e.userId)

@@ -9,9 +9,9 @@ export default {
 } as ComponentMeta<typeof SidebarEl>
 
 const Template: ComponentStory<typeof SidebarEl> = args => (
-  <ThemeProvider>
-    <SidebarEl {...args} />
-  </ThemeProvider>
+  // <ThemeProvider>
+  <SidebarEl {...args} />
+  // </ThemeProvider>
 )
 
 export const Default = Template.bind({})

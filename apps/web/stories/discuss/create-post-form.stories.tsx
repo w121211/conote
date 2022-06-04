@@ -2,14 +2,14 @@ import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
-import { CreatePostForm } from '../../components/discuss/post/create-post-form'
+import CreateDiscussPostForm from '../../components/discuss-post/discuss-post-form'
 import Modal from '../../components/modal/modal'
 import ModalProvider from '../../components/modal/modal-context'
 
 const apolloClient = getApolloClient()
 
 export default {
-  component: CreatePostForm,
+  component: CreateDiscussPostForm,
   decorators: [
     Story => (
       <div style={{ margin: '3rem' }}>
@@ -17,9 +17,9 @@ export default {
       </div>
     ),
   ],
-} as ComponentMeta<typeof CreatePostForm>
+} as ComponentMeta<typeof CreateDiscussPostForm>
 
-const Template: ComponentStory<typeof CreatePostForm> = args => (
+const Template: ComponentStory<typeof CreateDiscussPostForm> = args => (
   <ApolloProvider client={apolloClient}>
     <ModalProvider>
       <Modal
@@ -28,7 +28,7 @@ const Template: ComponentStory<typeof CreatePostForm> = args => (
           //
         }}
       >
-        <CreatePostForm {...args} />
+        <CreateDiscussPostForm {...args} />
       </Modal>
     </ModalProvider>
   </ApolloProvider>

@@ -2,13 +2,12 @@ import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
-import { DiscussPostFragment } from '../../apollo/query.graphql'
-import { PostList } from '../../components/discuss/post/post-list'
+import DiscussPostTiles from '../../components/discuss-post/discuss-post-tiles'
 
 const apolloClient = getApolloClient()
 
 export default {
-  component: PostList,
+  component: DiscussPostTiles,
   decorators: [
     Story => (
       <div className="bg-gray-200" style={{ padding: '3rem' }}>
@@ -16,11 +15,11 @@ export default {
       </div>
     ),
   ],
-} as ComponentMeta<typeof PostList>
+} as ComponentMeta<typeof DiscussPostTiles>
 
-const Template: ComponentStory<typeof PostList> = args => (
+const Template: ComponentStory<typeof DiscussPostTiles> = args => (
   <ApolloProvider client={apolloClient}>
-    <PostList {...args} />
+    <DiscussPostTiles {...args} />
   </ApolloProvider>
 )
 

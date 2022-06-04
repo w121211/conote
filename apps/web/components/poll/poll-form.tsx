@@ -1,14 +1,20 @@
-import { title } from 'process'
 import React, { useEffect, useState } from 'react'
-import { useForm, useController, useFormContext, FormProvider, useWatch, Control } from 'react-hook-form'
 import {
-  useCreateVoteMutation,
-  MyVotesDocument,
-  MyVotesQuery,
-  useMyVotesQuery,
+  useForm,
+  useController,
+  useFormContext,
+  FormProvider,
+  useWatch,
+  Control,
+} from 'react-hook-form'
+import {
+  MyPollVotesDocument,
+  MyPollVotesQuery,
   PollDocument,
+  PollVoteFragment,
+  useCreatePollVoteMutation,
+  useMyPollVotesQuery,
   usePollQuery,
-  VoteFragment,
 } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
 
@@ -36,7 +42,7 @@ export const RadioInput = ({
   content: string
   count?: number
   total?: number
-  myVote?: VoteFragment
+  myVote?: PollVoteFragment
 
   // filterComments: (i: number) => void
   choiceValue?: (i: string) => void
@@ -72,7 +78,6 @@ export const RadioInput = ({
 
 const PollForm = ({
   pollId,
-
   initialValue,
   clickedChoiceIdx,
 }: {
@@ -84,28 +89,46 @@ const PollForm = ({
   // refetch: () => void
   // filterComments: (i: number) => void
 }): JSX.Element | null => {
-  // const { field, fieldState } = useController({ name: 'choice' })
-  // const { data: boardData } = useBoardQuery({ variables: { id: boardId } })
-  const { data: myVotesData } = useMyVotesQuery({ variables: { pollId } })
-  const {
-    data: pollData,
-    loading,
-    error,
-  } = usePollQuery({
-    variables: { id: pollId },
-  })
+  const { data: myVotesData } = useMyPollVotesQuery({ variables: { pollId } }),
+    { data: pollData } = usePollQuery({ variables: { id: pollId } }),
+    [createVote] = useCreatePollVoteMutation({
+      update(cache, { data }) {
+        const res = cache.readQuery<MyPollVotesQuery>({
+          query: MyPollVotesDocument,
+        })
+        if (data?.createPollVote && res?.myPollVotes) {
+          cache.writeQuery({
+            query: MyPollVotesDocument,
+            data: { myVotes: res.myPollVotes.concat([data.createPollVote]) },
+          })
+        }
+      },
+      refetchQueries: [
+        { query: PollDocument, variables: { id: pollId } },
+        { query: MyPollVotesDocument, variables: { pollId } },
+      ],
+      // onCompleted(data) {
+      //   setMyVote(data.createVote)
+      // },
+      // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
+    })
+
   const methods = useForm<FormInputs>()
   const { register, handleSubmit, setValue, reset, getValues } = methods
   const [choiceValue, setChoiceValue] = useState<number | null | undefined>()
+
   const [check, setChecked] = useState<boolean[]>(Array(3).fill(false))
-  const [myVote, setMyVote] = useState<VoteFragment>()
+  const [myVote, setMyVote] = useState<PollVoteFragment>()
   // const [pollCount, setPollCount] = useState<number[] | undefined>(pollData?.poll.count.nVotes)
 
   useEffect(() => {
     if (myVotesData) {
-      setMyVote(myVotesData?.myVotes.find(e => e.pollId.toString() === pollId))
+      setMyVote(
+        myVotesData.myPollVotes.find(e => e.pollId.toString() === pollId),
+      )
     }
   }, [myVotesData, pollId, pollData])
+
   useEffect(() => {
     setChecked(prev => {
       const newCheck = [...prev]
@@ -123,30 +146,7 @@ const PollForm = ({
     initialValue.title && setValue('lines', initialValue.lines)
   }
 
-  const [createVote] = useCreateVoteMutation({
-    update(cache, { data }) {
-      const res = cache.readQuery<MyVotesQuery>({
-        query: MyVotesDocument,
-      })
-      if (data?.createVote && res?.myVotes) {
-        cache.writeQuery({
-          query: MyVotesDocument,
-          data: { myVotes: res.myVotes.concat([data.createVote]) },
-        })
-      }
-      // refetch()
-    },
-    refetchQueries: [
-      { query: PollDocument, variables: { id: pollId } },
-      { query: MyVotesDocument, variables: { pollId } },
-    ],
-    // onCompleted(data) {
-    //   setMyVote(data.createVote)
-    // },
-    // refetchQueries: [{ query: BoardDocument, variables: { id: boardId } }],
-  })
-
-  const myHandleSubmit = (d: FormInputs) => {
+  function onSubmit(d: FormInputs) {
     if (d.choice && pollId) {
       // setPollCount(prev => {
       //   if (prev) {
@@ -199,7 +199,10 @@ const PollForm = ({
     return (
       <FormProvider {...methods}>
         <div>
-          <form className="flex flex-col mt-4 mb-8" onSubmit={handleSubmit(myHandleSubmit)}>
+          <form
+            className="flex flex-col mt-4 mb-8"
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <div className="mb-4 last:mb-0">
               <div>
                 <div className="flex flex-col">
@@ -223,7 +226,8 @@ const PollForm = ({
                 </div>
                 <div className="text-right text-gray-400">
                   共
-                  {pollData.poll.count.nVotes && pollData.poll.count.nVotes.length > 0
+                  {pollData.poll.count.nVotes &&
+                  pollData.poll.count.nVotes.length > 0
                     ? pollData?.poll.count.nVotes.reduce((a, b) => a + b)
                     : 0}
                   人參與投票
@@ -240,4 +244,5 @@ const PollForm = ({
   }
   return null
 }
+
 export default PollForm

@@ -1,13 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import {
-  MyNoteDraftEntriesQuery,
   useCreateNoteDraftMutation,
   useMyNoteDraftEntriesQuery,
 } from '../../apollo/query.graphql'
-import DomainSelect from '../domain/domain-select'
 import Modal from '../modal/modal'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'
+import DomainSelect from '../domain/domain-select'
 import { LoadingSvg } from './loading-circle'
 
 /**
@@ -21,6 +20,26 @@ const mockData = [
     title: '5天就能記住1萬個單詞的方法,老師為什麽不教?',
     type: 'web',
   },
+  { symbol: '[[Tailwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailw]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Taiwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailwin]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailw]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Taiwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailwin]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailw]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Taiwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailwin]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailw]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Taiwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailwin]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailw]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Taiwind]]', title: '[[Tailwind]]', type: 'symbol' },
+  { symbol: '[[Tailwin]]', title: '[[Tailwind]]', type: 'symbol' },
   { symbol: '[[Tailwind]]', title: '[[Tailwind]]', type: 'symbol' },
   { symbol: '[[Tailw]]', title: '[[Tailwind]]', type: 'symbol' },
   { symbol: '[[Taiwind]]', title: '[[Tailwind]]', type: 'symbol' },
@@ -106,6 +125,7 @@ export const CommitPanel = (): JSX.Element | null => {
               </h2> */}
               <DomainSelect />
             </div>
+
             <form
               className="overflow-auto grid text-gray-700"
               // onSubmit={handleSubmit(onSubmit)}

@@ -4,6 +4,7 @@ import { NoteDraftEntryFragment } from '../../../../../apollo/query.graphql'
 import { useObservable } from '@ngneat/react-rxjs'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarItemPanel from './sidebar-item-panel'
+import { getNotePageURL } from '../../../../../shared/note-helpers'
 // import { DocEntryPack } from '../workspace/doc'
 // import ContentPanel from './doc-index-panel'
 
@@ -108,12 +109,7 @@ const SidebarItem = ({
   }
   return (
     <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-500 ">
-      <Link
-        href={{
-          pathname: '/note/[symbol]',
-          query: { symbol },
-        }}
-      >
+      <Link href={getNotePageURL('edit', item.symbol)}>
         <a
           className={`group flex items-center gap-1 pl-4 pr-4 leading-relax ${
             route.symbolMain == symbol

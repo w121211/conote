@@ -13,14 +13,13 @@ const typeDefs = readFileSync(
  * Use custom scalars, need also add custom-scalar type in '.../.graphql-let.yml'
  * @see https://www.apollographql.com/docs/apollo-server/schema/custom-scalars/
  *
- *
  */
 export const schema = makeExecutableSchema({
   typeDefs,
   resolvers: {
-    BigInt: BigIntResolver,
     JSON: JSONResolver,
-    DateTime: DateTimeResolver,
+    // BigInt: BigIntResolver,
+    // DateTime: DateTimeResolver,
     // JSONObject: JSONObjectResolver,
     ...resolvers,
   },

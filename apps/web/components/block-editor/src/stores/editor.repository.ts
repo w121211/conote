@@ -13,7 +13,7 @@ export const editorStore = createStore(
       items: [],
     },
     modal: {},
-    route: {
+    opening: {
       symbolMain: null,
       symbolModal: null,
     },
@@ -26,25 +26,25 @@ class EditorRepository {
   leftSidebar$ = editorStore.pipe(select(state => state.leftSidebar))
 
   mainDoc$ = editorStore.pipe(
-    select(state => state.route.symbolMain),
+    select(state => state.opening.symbolMain),
     filter((e): e is string => e !== null),
     switchMap(symbol => docRepo.getDoc$(symbol)),
   )
 
   modalDoc$ = editorStore.pipe(
-    select(state => state.route.symbolModal),
+    select(state => state.opening.symbolModal),
     // filter((e): e is string => e !== null),
     switchMap(symbol => (symbol ? docRepo.getDoc$(symbol) : of(null))),
   )
 
-  route$ = editorStore.pipe(select(state => state.route))
+  route$ = editorStore.pipe(select(state => state.opening))
 
   getValue() {
     return editorStore.getValue()
   }
 
-  updateRoute(route: EditorProps['route']) {
-    editorStore.update(setProp('route', route))
+  updateOpening(opening: EditorProps['opening']) {
+    editorStore.update(setProp('opening', opening))
   }
 
   setLeftSidebarItems(items: NoteDraftEntryFragment[]) {

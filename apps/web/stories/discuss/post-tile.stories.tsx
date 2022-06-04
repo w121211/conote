@@ -1,13 +1,13 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { PostTile } from '../../components/discuss/post/post-tile'
+import { PostTile } from '../../components/discuss-post/discuss-post-tile'
 import { getApolloClient } from '../../apollo/apollo-client'
 import { ApolloProvider } from '@apollo/client'
-import { mockDiscussPosts } from '../../test/__mocks__/mock-discuss'
+// import { mockDiscussPosts } from '../../test/__mocks__/mock-discuss'
 import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
 
 const apolloClient = getApolloClient()
-const post = mockDiscussPosts
+// const post = mockDiscussPosts
 
 export default {
   component: PostTile,
@@ -28,9 +28,9 @@ const Template: ComponentStory<typeof PostTile> = args => {
   return (
     <ApolloProvider client={apolloClient}>
       <TooltipProvider>
-        {post?.map((e, i) => {
+        {/* {post.map((e, i) => {
           return <PostTile {...args} key={i} post={e} />
-        })}
+        })} */}
       </TooltipProvider>
     </ApolloProvider>
   )

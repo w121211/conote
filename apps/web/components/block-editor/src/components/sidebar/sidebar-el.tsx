@@ -5,7 +5,7 @@ import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
 
 /**
- * Call 'editorLeftSidebarMount' event on component mount to query required data.
+ * Call 'editorLeftSidebarRefresh' event on component mount to query required data.
  *
  * TODOS:
  * [] draft-entries sort by ?

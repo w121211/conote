@@ -9,6 +9,7 @@ import { mockNotes } from './__mocks__/mock-note'
 import { mockCommits } from './__mocks__/mock-commit'
 import { mockNoteDocs } from './__mocks__/mock-note-doc'
 import { mockLinks } from './__mocks__/mock-link'
+import { mockMergePolls } from './__mocks__/mock-poll'
 
 // fake incremental id
 let i = 0
@@ -184,6 +185,24 @@ class TestHelper {
   async createLinks(prisma: PrismaClient) {
     return await prisma.$transaction(
       mockLinks.map(e => prisma.link.create({ data: e })),
+    )
+  }
+
+  /**
+   * Warnning! This method not follow the correct steps to create merge polls
+   *  and should only use for test only
+   *
+   */
+  async createMergePolls(prisma: PrismaClient) {
+    return await prisma.$transaction(
+      mockMergePolls.map(e =>
+        prisma.poll.create({
+          data: {
+            ...e,
+            count: { create: { nVotes: e.choices.map(_ => 0) } },
+          },
+        }),
+      ),
     )
   }
 

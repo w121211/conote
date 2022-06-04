@@ -1,12 +1,28 @@
 // import * as QT from './graphql/query-types'
 // import { SymbolCat, CardTemplate, CocardFragment } from '../apollo/query.graphql'
 
-export function hasCount<T, U>(v: T & { count: U | null }): v is T & { count: U } {
+export function hasCount<T, U>(
+  v: T & { count: U | null },
+): v is T & { count: U } {
   return v.count !== null
 }
 
-export function toStringId<T extends { id: number }>(obj: T): T & { id: string } {
-  return { ...obj, id: obj.id.toString() }
+export function toStringProps<
+  T extends { id: number | string; createdAt: Date; updatedAt: Date },
+>(
+  obj: T,
+): Omit<T, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: string
+  updatedAt: string
+} {
+  const { id, createdAt, updatedAt, ...rest } = obj
+  return {
+    ...rest,
+    id: id.toString(),
+    createdAt: createdAt.toISOString(),
+    updatedAt: updatedAt.toISOString(),
+  }
 }
 
 // export function toUrlParams(params: Record<string, string>): string {

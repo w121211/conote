@@ -1,11 +1,9 @@
+import React from 'react'
 import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
-import { DiscussFragment } from '../../apollo/query.graphql'
 import { DiscussTile } from '../../components/discuss/discuss-tile'
-import { mockDiscusses } from '../../test/__mocks__/mock-discuss'
-import { Default } from './post-tile-list.stories'
+// import { mockDiscusses } from '../../test/__mocks__/mock-discuss'
 
 const apolloClient = getApolloClient()
 
@@ -23,9 +21,9 @@ export default {
 
 const Template: ComponentStory<typeof DiscussTile> = args => (
   <ApolloProvider client={apolloClient}>
-    {mockDiscusses.map((e, i) => {
+    {/* {mockDiscusses.map((e, i) => {
       return <DiscussTile {...args} key={i} data={e} />
-    })}
+    })} */}
   </ApolloProvider>
 )
 

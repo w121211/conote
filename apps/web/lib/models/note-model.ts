@@ -1,28 +1,22 @@
-import { Branch, Link, Note, Sym } from '@prisma/client'
-import { Note as GQLNote } from 'graphql-let/__generated__/__types__'
+import { Branch, Link, Note, NoteDoc, Sym } from '@prisma/client'
+import { NoteDocParsed } from '../interfaces'
 import prisma from '../prisma'
 import { noteDocModel } from './note-doc-model'
 
 class NoteModel {
-  async _attachHeadDoc<
-    T extends Note & { branch: Branch; sym: Sym; link: Link | null },
-  >(note: T): Promise<GQLNote> {
-    const doc = await noteDocModel.getHeadDoc(note.branchId, note.symId),
-      note_: GQLNote = {
-        ...note,
-        branch: note.branch.name,
-        noteDoc: {
-          ...doc,
-          branch: doc.branch.name,
-        },
-      }
-    return note_
-  }
-
+  /**
+   * @returns [note, head-doc of note]
+   */
   async getByBranchSymbol(
     branchName: string,
     symbol: string,
-  ): Promise<GQLNote | null> {
+  ): Promise<
+    | [
+        Note & { branch: Branch; sym: Sym; link: Link | null },
+        NoteDocParsed<NoteDoc & { branch: Branch; sym: Sym }>,
+      ]
+    | null
+  > {
     const branch = await prisma.branch.findUnique({
         where: { name: branchName },
       }),
@@ -35,18 +29,30 @@ class NoteModel {
       include: { branch: true, sym: true, link: true },
     })
     if (note) {
-      return this._attachHeadDoc(note)
+      const doc = await noteDocModel.getHeadDoc(note.branchId, note.symId)
+      return [note, doc]
     }
     return null
   }
 
-  async getById(id: string): Promise<GQLNote> {
+  /**
+   * @returns [note, head-doc of note]
+   */
+  async getById(
+    id: string,
+  ): Promise<
+    [
+      Note & { branch: Branch; sym: Sym; link: Link | null },
+      NoteDocParsed<NoteDoc & { branch: Branch; sym: Sym }>,
+    ]
+  > {
     const note = await prisma.note.findUnique({
       where: { id },
       include: { branch: true, sym: true, link: true },
     })
     if (note) {
-      return this._attachHeadDoc(note)
+      const doc = await noteDocModel.getHeadDoc(note.branchId, note.symId)
+      return [note, doc]
     }
     throw new Error('Note not found.')
   }

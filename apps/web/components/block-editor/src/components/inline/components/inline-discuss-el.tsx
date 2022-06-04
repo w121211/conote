@@ -1,15 +1,14 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { DiscussFragment } from '../../../../../../apollo/query.graphql'
-import CreateDiscussForm from '../../../../../discuss/create-discuss-form'
+import CreateDiscussForm from '../../../../../discuss/discuss-form'
 // import { DiscussModalPage } from '../../../../../discuss/modal-page/modal-page'
 import Modal from '../../../../../modal/modal'
 import { blockStrReplace } from '../../../events'
 import { InlineDiscuss } from '../../../interfaces'
 import { inlineService } from '../../../services/inline.service'
 import { InlineElProps } from '../inline-el'
-import DiscussPageEl from '../../../../../discuss/discuss-page-el'
-import { DiscussPageComponent } from '../../../../../discuss/discuss-page'
+import DiscussModalPageEl from '../../../../../discuss/discuss-modal-page-el'
 import { Tooltip } from '../../../../../ui-component/tooltip/tooltip'
 
 /**
@@ -73,7 +72,7 @@ const InlineDiscussEl = ({
       >
         {id ? (
           <div className="px-10">
-            <DiscussPageEl id={id} />
+            <DiscussModalPageEl id={id} />
           </div>
         ) : (
           <CreateDiscussForm

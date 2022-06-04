@@ -85,7 +85,8 @@ export function setCursorPosition(uid: string, start: number, end: number) {
 /**
  * Shallow update
  */
-export async function routerUpdateShallow(router: NextRouter, url: UrlObject) {
-  console.log(url)
-  await router.push(url, undefined, { shallow: true })
+export async function routeUpdateShallow(router: NextRouter, url: UrlObject) {
+  console.debug(url)
+  await router.replace(url, undefined, { shallow: true })
+  // await router.replace(url, undefined, { shallow: true })
 }

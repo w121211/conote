@@ -1,14 +1,11 @@
 import React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useMe } from './use-me'
 import ToggleMenu from '../ui-component/toggle-menu'
-import { useMeQuery } from '../../apollo/query.graphql'
 import { LoggedInUser } from './auth.service'
 
-const AuthItem = ({ me }: { me: LoggedInUser | undefined }) => {
-  const router = useRouter()
-  // const { me, loading } = useMe()
+const AuthItem = () => {
+  const { me, loading } = useMe()
   // const { data: me, loading } = useMeQuery()
 
   // if (loading) {

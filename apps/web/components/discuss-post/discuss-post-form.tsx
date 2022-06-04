@@ -1,17 +1,20 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useLayoutEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { MarkDownParser } from '../discuss/mark-down-parser'
 import {
   DiscussPostsDocument,
   useCreateDiscussPostMutation,
 } from '../../../apollo/query.graphql'
 // import './github-markdown-light.module.css'
 import { MarkDownParser } from '../mark-down-parser'
+} from '../../apollo/query.graphql'
+import './github-markdown-light.module.css'
 
 interface FormInput {
   content: string
 }
 
-export const CreatePostForm = ({
+const DiscussPostForm = ({
   discussId,
   isModal,
 }: {
@@ -34,6 +37,7 @@ export const CreatePostForm = ({
         reset({ content: '' })
         submitRef.current.blur()
       }
+      window.location.reload()
     },
   })
 
@@ -170,3 +174,5 @@ export const CreatePostForm = ({
     </form>
   )
 }
+
+export default DiscussPostForm

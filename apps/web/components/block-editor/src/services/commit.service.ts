@@ -3,8 +3,6 @@ import {
   NoteDraftEntryFragment,
 } from '../../../../apollo/query.graphql'
 
-let commitService: CommitService | undefined
-
 class CommitService {
   // private apolloClient = getApolloClient()
 
@@ -16,15 +14,9 @@ class CommitService {
     resultNoteDocs: NoteDocFragment[],
   ): [NoteDraftEntryFragment, NoteDocFragment][] {
     return inputDrafts.map(e => {
-      const found = resultNoteDocs.find(d => {
-        const { branch, symbol } = d
-        if (branch && symbol) {
-          return e.symbol === symbol
-        }
-        throw new Error(
-          "[pairNoteDraft_noteDoc] Note-doc miss the required properties 'branch', 'symbol' to pair",
-        )
-      })
+      const found = resultNoteDocs.find(
+        ({ branchName, symbol }) => e.symbol === symbol,
+      )
       if (found) {
         return [e, found]
       }
@@ -35,9 +27,12 @@ class CommitService {
   }
 }
 
-export function getCommitService(): CommitService {
-  if (commitService) return commitService
+// let commitService: CommitService | undefined
 
-  commitService = new CommitService()
-  return commitService
-}
+// export function getCommitService(): CommitService {
+//   if (commitService) return commitService
+//   commitService = new CommitService()
+//   return commitService
+// }
+
+export const commitService = new CommitService()

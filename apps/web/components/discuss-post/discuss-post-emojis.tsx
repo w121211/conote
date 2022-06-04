@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
+import { EmojiCode } from 'graphql-let/__generated__/__types__'
 import {
   DiscussPostEmojiFragment,
   useDiscussPostEmojisQuery,
-} from '../../../apollo/query.graphql'
-import CreateDiscussPostEmoji from './post-create-emoji'
-import UpdateDiscussPostEmoji from './post-update-emoji'
-import { EmojisDropdownBtn } from '../../emoji/emojis-dropdown-btn'
-import { EmojiCode } from '@prisma/client'
-import ToggleMenu from '../../ui-component/toggle-menu'
+} from '../../apollo/query.graphql'
+import { EmojisDropdownBtn } from '../emoji/emojis-dropdown-btn'
+import ToggleMenu from '../ui-component/toggle-menu'
+import DiscussPostEmojiCreateBtn from './discuss-post-emoji-create-btn'
+import DiscussPostEmojiUpdateBtn from './discuss-post-emoji-update-btn'
 
 const DiscussPostEmojis = ({
   discussPostId,
@@ -34,22 +34,19 @@ const DiscussPostEmojis = ({
         summary={<EmojisDropdownBtn disable={disable} />}
         disabled={disable}
       >
-        {emojis.map((code, i) => {
+        {emojis.map(code => {
           const data = emojisData?.discussPostEmojis.find(
             el => el.code === code,
           )
-          if (data) {
-            return (
-              <UpdateDiscussPostEmoji
-                key={i}
-                discussPostEmoji={data}
-                type="panel"
-              />
-            )
-          }
-          return (
-            <CreateDiscussPostEmoji
-              key={i}
+          return data ? (
+            <DiscussPostEmojiUpdateBtn
+              key={code}
+              discussPostEmoji={data}
+              type="panel"
+            />
+          ) : (
+            <DiscussPostEmojiCreateBtn
+              key={code}
               discussPostId={discussPostId}
               emojiCode={code}
             />
@@ -57,14 +54,14 @@ const DiscussPostEmojis = ({
         })}
       </ToggleMenu>
       {shouldShowEmojiIcons(emojisData?.discussPostEmojis) &&
-        emojis.map((code, i) => {
+        emojis.map(code => {
           const data = emojisData?.discussPostEmojis.find(e => e.code === code)
           if (data?.count.nUps === 0 || !data) {
             return null
           }
           return (
-            <UpdateDiscussPostEmoji
-              key={i}
+            <DiscussPostEmojiUpdateBtn
+              key={code}
               discussPostEmoji={data}
               type="normal"
             />

@@ -1,6 +1,6 @@
 import { tokenize } from 'prismjs'
 import React, { ReactNode } from 'react'
-import { TokenHelper } from '../../../common/token-helper'
+import { TokenHelper } from '../../../shared/token-helpers'
 import { grammar } from '../../block-editor/src/parse-render'
 
 const bracketStyle = `text-gray-400/50 dark:text-gray-400`

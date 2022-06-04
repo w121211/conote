@@ -1,13 +1,13 @@
-import { EmojiCode } from '@prisma/client'
 import React from 'react'
+import { EmojiCode } from 'graphql-let/__generated__/__types__'
 import {
   DiscussEmojiFragment,
   useDiscussEmojisQuery,
 } from '../../apollo/query.graphql'
-import CreateDiscussEmoji from './discuss-create-emoji'
-import UpdateDiscussEmoji from './discuss-update-emoji'
 import { EmojisDropdownBtn } from '../emoji/emojis-dropdown-btn'
 import ToggleMenu from '../ui-component/toggle-menu'
+import DiscussEmojiCreateBtn from './discuss-emoji-create-btn'
+import DiscussEmojiUpdateBtn from './discuss-emoji-update-btn'
 
 const DiscussEmojis = ({
   discussId,
@@ -19,10 +19,10 @@ const DiscussEmojis = ({
   const { data: emojisData } = useDiscussEmojisQuery({
     variables: { discussId },
   })
-  const emojis: EmojiCode[] = ['UP', 'DOWN']
   const shouldShowEmojiIcons = (data: DiscussEmojiFragment[] | undefined) => {
     return data && data.length > 0 && data.some(e => e.count.nUps > 0)
   }
+  const emojis: EmojiCode[] = ['UP', 'DOWN']
 
   return (
     <div className="flex items-center">
@@ -35,11 +35,15 @@ const DiscussEmojis = ({
           const data = emojisData?.discussEmojis.find(el => el.code === e)
           if (data) {
             return (
-              <UpdateDiscussEmoji key={i} discussEmoji={data} type="panel" />
+              <DiscussEmojiUpdateBtn key={i} discussEmoji={data} type="panel" />
             )
           }
           return (
-            <CreateDiscussEmoji key={i} discussId={discussId} emojiCode={e} />
+            <DiscussEmojiCreateBtn
+              key={i}
+              discussId={discussId}
+              emojiCode={e}
+            />
           )
         })}
       </ToggleMenu>
@@ -51,7 +55,7 @@ const DiscussEmojis = ({
             return null
           }
           return (
-            <UpdateDiscussEmoji key={i} discussEmoji={data} type="normal" />
+            <DiscussEmojiUpdateBtn key={i} discussEmoji={data} type="normal" />
           )
         })}
     </div>

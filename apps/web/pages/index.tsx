@@ -1,15 +1,26 @@
 import React, { useEffect, useState } from 'react'
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { SearchAllForm } from '../components/search-all-form'
 import NewHotList from '../components/_new-hot-list'
 import UserRateTable from '../components/user/user-rate-table'
 import { mockRateData } from './user/[userid]'
-import AuthItem from '../components/auth/auth-Item'
-import { useMe } from '../components/auth/use-me'
-import HotDisplay from '../components/hot-display/hot-display'
+import AuthItem from '../components/auth/auth-item'
+import {
+  DiscussesLatestDocument,
+  DiscussesLatestQuery,
+  DiscussesLatestQueryVariables,
+  DiscussFragment,
+} from '../apollo/query.graphql'
+import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
 
-const HomePage = (): JSX.Element => {
+interface Props {
+  discussesLatest: DiscussFragment[]
+  // noteDocEntriesToMerge: NoteDocEntryFragment[]
+  // noteDocEntriesMerged: NoteDocEntryFragment[]
+}
+
+const HomePage = ({ discussesLatest }: Props): JSX.Element => {
   const [showAnnounce, setAnnounce] = useState(false)
-  const { me, loading } = useMe()
 
   useEffect(() => {
     if (window.sessionStorage.getItem('announce') === null) {
@@ -19,29 +30,29 @@ const HomePage = (): JSX.Element => {
       window.sessionStorage.setItem('announce', showAnnounce ? 'true' : 'false')
     }
   }, [showAnnounce])
-  // const { data, loading } = useMeQuery()
 
-  if (loading)
-    return (
-      <div className="flex flex-col items-center justify-center w-screen h-screen">
-        <svg
-          className="origin-center animate-loadingSpinner"
-          width="100"
-          height="100"
-        >
-          <circle
-            className="stroke-blue-500 origin-center [stroke-dasharray:187] [stroke-dashoffset:0] animate-loadingCircle"
-            cx="50"
-            cy="50"
-            r="25"
-            fill="none"
-            strokeWidth={5}
-            strokeLinecap="round"
-          />
-        </svg>
-        {/* <h1>Loading</h1> */}
-      </div>
-    )
+  // if (loading)
+  //   return (
+  //     <div className="flex flex-col items-center justify-center w-screen h-screen">
+  //       <svg
+  //         className="origin-center animate-loadingSpinner"
+  //         width="100"
+  //         height="100"
+  //       >
+  //         <circle
+  //           className="stroke-blue-500 origin-center [stroke-dasharray:187] [stroke-dashoffset:0] animate-loadingCircle"
+  //           cx="50"
+  //           cy="50"
+  //           r="25"
+  //           fill="none"
+  //           strokeWidth={5}
+  //           strokeLinecap="round"
+  //         />
+  //       </svg>
+  //       {/* <h1>Loading</h1> */}
+  //     </div>
+  //   )
+
   return (
     <div className="flex flex-col w-screen h-screen overflow-auto">
       {showAnnounce && (
@@ -82,6 +93,28 @@ const HomePage = (): JSX.Element => {
       </div>
     </div>
   )
+}
+
+export async function getServerSideProps({
+  res,
+}: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> {
+  const client = getApolloClientSSR(),
+    { data } = await client.query<
+      DiscussesLatestQuery,
+      DiscussesLatestQueryVariables
+    >({ query: DiscussesLatestDocument })
+
+  // Caching, see https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#caching-with-server-side-rendering-ssr
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=200, stale-while-revalidate=259',
+  )
+
+  return {
+    props: {
+      discussesLatest: data.discussesLatest,
+    },
+  }
 }
 
 export default HomePage

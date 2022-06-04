@@ -21,7 +21,7 @@ import { createMockMergePolls, createMockVotes } from './poll-merge.test'
  *  and should only be used for testing merge functions. The correct way is through
  *  commit process and create all related data there.
  */
-async function createMockNoteDocs(docs: NoteDocParsed<NoteDoc>[]) {
+async function createMockNoteDocs(docs: NoteDocParsed[]) {
   await prisma.$transaction(mockLinks.map(e => prisma.link.create({ data: e })))
   await prisma.$transaction(mockSyms.map(e => prisma.sym.create({ data: e })))
   await prisma.$transaction(
@@ -92,7 +92,7 @@ describe('_validateOnMerge()', () => {
   })
 
   it('throws if from-doc is not the head', async () => {
-    const cdt: NoteDocParsed<NoteDoc> = {
+    const cdt: NoteDocParsed = {
         // mockNoteDocs[2] is the head, so use it as the starter
         ...mockNoteDocs[2],
         id: '99-candidate__has_from_doc',
@@ -138,7 +138,7 @@ describe('_mergeAuto()', () => {
    * Base test variables
    */
   const fromDoc = mockNoteDocs[2],
-    baseCandidate: NoteDocParsed<NoteDoc> = {
+    baseCandidate: NoteDocParsed = {
       ...fromDoc,
       id: '99-candidate__has_from_doc',
       fromDocId: fromDoc.id,
@@ -249,7 +249,7 @@ describe('_createMergePoll()', () => {
 
 describe('_mergeByPoll()', () => {
   const fromDoc = mockNoteDocs[2],
-    baseCandidate: NoteDocParsed<NoteDoc> = {
+    baseCandidate: NoteDocParsed = {
       ...fromDoc,
       id: '99-candidate__has_from_doc',
       fromDocId: fromDoc.id,
@@ -297,7 +297,7 @@ describe('_mergeByPoll()', () => {
 
 describe('mergeOnCreate()', () => {
   const fromDoc = mockNoteDocs[2],
-    baseCandidate: NoteDocParsed<NoteDoc> = {
+    baseCandidate: NoteDocParsed = {
       ...fromDoc,
       id: '99-candidate__has_from_doc',
       fromDocId: fromDoc.id,

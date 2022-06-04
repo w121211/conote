@@ -5,7 +5,7 @@ import { DiscussFragment } from '../../apollo/query.graphql'
 import { InlineDiscussElement } from '../editor/slate-custom-types'
 import Modal from '../modal/modal'
 import { InlineItemService } from './inline-item-service'
-import CreateDiscussForm from '../discuss/create-discuss-form'
+import CreateDiscussForm from '../discuss/discuss-form'
 import Link from 'next/link'
 import { DiscussModalPage } from '../discuss/_modal-page/modal-page'
 

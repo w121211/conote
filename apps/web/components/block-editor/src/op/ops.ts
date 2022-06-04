@@ -18,7 +18,7 @@ import {
 import { Block, BlockPosition, BlockPositionRelation, Doc } from '../interfaces'
 import {
   convertGQLBlocks,
-  getNoteDraftService,
+  noteDraftService,
 } from '../services/note-draft.service'
 import {
   BlockReducer,
@@ -37,8 +37,6 @@ import {
 } from './helpers'
 import { insert, moveBetween, moveWithin, remove, reorder } from './order'
 import { allDescendants } from './queries'
-
-const noteDraftService = getNoteDraftService()
 
 //
 // Helpers
@@ -553,13 +551,13 @@ export function docNewOp(
 
   if (note) {
     const { blocks, docBlock } = convertGQLBlocks(
-        note.noteDoc.contentBody.blocks,
+        note.headDoc.contentBody.blocks,
       ),
       newDoc: Doc = {
         branch,
         domain,
         title,
-        meta: {},
+        contentHead: {},
         blockUid: docBlock.uid,
         noteCopy: note ?? undefined,
       }
@@ -568,7 +566,7 @@ export function docNewOp(
       docReducers: [addEntities(newDoc)],
     }
   } else {
-    const newDocBlock = {
+    const newDocBlock: Block = {
         uid: genBlockUid(),
         str: title,
         docTitle: title,
@@ -577,11 +575,11 @@ export function docNewOp(
         parentUid: null,
         childrenUids: [],
       },
-      newDoc = {
+      newDoc: Doc = {
         branch,
         domain,
         title,
-        meta: {},
+        contentHead: {},
         blockUid: newDocBlock.uid,
       }
     return {

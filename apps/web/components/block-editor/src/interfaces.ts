@@ -218,12 +218,12 @@ export type EditorProps = {
       offset: number
     }
   }
-  route: {
+  opening: {
     symbolMain: string | null
     symbolModal: string | null
 
     // (future) when open a block
-    blockUid?: string
+    // blockUid?: string
   }
 }
 

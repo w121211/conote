@@ -1,32 +1,40 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import {
-  DiscussDocument,
   DiscussFragment,
   DiscussPostFragment,
   DiscussPostsDocument,
   DiscussPostsQuery,
   DiscussPostsQueryVariables,
-  DiscussQuery,
-  DiscussQueryVariables,
+  PollDocument,
+  PollFragment,
+  PollQuery,
+  PollQueryVariables,
 } from '../../apollo/query.graphql'
-import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import DiscussTile from '../../components/discuss/discuss-tile'
-import DiscussPostTileList from '../../components/discuss-post/discuss-post-tiles'
+import DiscussPostTiles from '../../components/discuss-post/discuss-post-tiles'
 import DiscussPostForm from '../../components/discuss-post/discuss-post-form'
 import Layout from '../../components/ui-component/layout'
 
 interface Props {
+  poll: PollFragment
   discuss: DiscussFragment
   discussPosts: DiscussPostFragment[]
 }
 
-const DiscussPage = ({ discuss, discussPosts }: Props) => {
+const PollPage = ({
+  poll,
+  discuss,
+  discussPosts,
+}: Props): JSX.Element | null => {
+  const { choices } = poll
+
   return (
     <Layout>
       <div className="flex flex-col gap-3 w-full">
         <DiscussTile data={discuss} />
-        <DiscussPostTileList posts={discussPosts} />
+        <DiscussPostTiles posts={discussPosts} />
         <DiscussPostForm discussId={discuss.id} />
       </div>
     </Layout>
@@ -36,21 +44,28 @@ const DiscussPage = ({ discuss, discussPosts }: Props) => {
 export async function getServerSideProps({
   res,
   params,
-}: GetServerSidePropsContext<{ discussid: string }>): Promise<
+}: GetServerSidePropsContext<{ pollid: string }>): Promise<
   GetServerSidePropsResult<Props>
 > {
   if (params === undefined) throw new Error('params === undefined')
 
-  const id = params.discussid,
+  const id = params.pollid,
     client = getApolloClientSSR(),
-    qDiscuss = await client.query<DiscussQuery, DiscussQueryVariables>({
-      query: DiscussDocument,
+    qPoll = await client.query<PollQuery, PollQueryVariables>({
+      query: PollDocument,
       variables: { id },
-    }),
-    qPosts = await client.query<DiscussPostsQuery, DiscussPostsQueryVariables>({
-      query: DiscussPostsDocument,
-      variables: { discussId: id },
     })
+
+  if (qPoll.data.poll.discuss === null || qPoll.data.poll.discuss === undefined)
+    throw new Error('qPoll.data.poll.discuss === null')
+
+  const qPosts = await client.query<
+    DiscussPostsQuery,
+    DiscussPostsQueryVariables
+  >({
+    query: DiscussPostsDocument,
+    variables: { discussId: qPoll.data.poll.discuss.id },
+  })
 
   res.setHeader(
     'Cache-Control',
@@ -58,10 +73,11 @@ export async function getServerSideProps({
   )
   return {
     props: {
-      discuss: qDiscuss.data.discuss,
+      poll: qPoll.data.poll,
+      discuss: qPoll.data.poll.discuss,
       discussPosts: qPosts.data.discussPosts,
     },
   }
 }
 
-export default DiscussPage
+export default PollPage

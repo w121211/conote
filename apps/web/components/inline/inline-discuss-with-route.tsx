@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
 import { Transforms } from 'slate'
-import { ReactEditor, RenderElementProps, useSelected, useSlateStatic } from 'slate-react'
+import {
+  ReactEditor,
+  RenderElementProps,
+  useSelected,
+  useSlateStatic,
+} from 'slate-react'
 import { DiscussFragment } from '../../apollo/query.graphql'
 import { InlineDiscussElement } from '../editor/slate-custom-types'
 import Modal from '../modal/modal'
@@ -9,7 +14,7 @@ import Modal from '../modal/modal'
 // import UpdateRateForm from '../rate-form/update-rate-form'
 import { InlineItemService } from './inline-item-service'
 import { useRouter } from 'next/router'
-import CreateDiscussForm from '../discuss/create-discuss-form'
+import CreateDiscussForm from '../discuss/discuss-form'
 import { workspace } from '../workspace/workspace'
 import { useObservable } from 'rxjs-hooks'
 
@@ -46,7 +51,11 @@ const InlineDiscuss = ({
       id: data.id,
       title: data.title,
     })
-    Transforms.setNodes<InlineDiscussElement>(editor, { id: data.id }, { at: path })
+    Transforms.setNodes<InlineDiscussElement>(
+      editor,
+      { id: data.id },
+      { at: path },
+    )
     Transforms.insertText(editor, inlineDiscuss, { at: path })
     setShowModal(false)
   }
@@ -77,7 +86,10 @@ const InlineDiscuss = ({
           if (element.id) {
             router.push(
               // { pathname: '/discuss/[discussId]', query: { discussId: element.str } },
-              { pathname: router.pathname, query: { symbol: router.query.symbol, discuss: element.id } },
+              {
+                pathname: router.pathname,
+                query: { symbol: router.query.symbol, discuss: element.id },
+              },
               `/discuss/${encodeURIComponent(element.id)}`,
               {
                 shallow: true,
@@ -96,7 +108,11 @@ const InlineDiscuss = ({
           setShowModal(false)
         }}
         buttons={
-          <button form="create-discuss-form" className="btn-primary h-10 w-24 " type="submit">
+          <button
+            form="create-discuss-form"
+            className="btn-primary h-10 w-24 "
+            type="submit"
+          >
             提交
           </button>
         }
