@@ -4,10 +4,9 @@ import { MarkDownParser } from '../discuss/mark-down-parser'
 import {
   DiscussPostsDocument,
   useCreateDiscussPostMutation,
-} from '../../../apollo/query.graphql'
-// import './github-markdown-light.module.css'
-import { MarkDownParser } from '../mark-down-parser'
 } from '../../apollo/query.graphql'
+// import './github-markdown-light.module.css'
+
 import './github-markdown-light.module.css'
 
 interface FormInput {

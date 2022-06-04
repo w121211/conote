@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import UserRateTable, { TableData } from '../../components/user/user-rate-table'
 import UserNoteTable from '../../components/user/user-note-table'
 import { NoteData } from '../../components/ui-component/note-list'
-import Layout from '../../components/ui-component/layout'
+import { Layout } from '../../components/ui-component/layout'
 import { List, ListElement } from '../../components/ui-component/list'
 
 export const mockRateData: TableData[] = [

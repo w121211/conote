@@ -11,20 +11,17 @@ export default {
   component: HomePage,
 } as ComponentMeta<typeof HomePage>
 
-// const Template: ComponentStory<typeof HomePage> = () => HomePage
-// const Template: ComponentStory<typeof HomePage> = () => (
-//   <ApolloProvider client={apolloClient}>
-//     <HomePage />
-//   </ApolloProvider>
-// )
-
-const client = getApolloClient()
+export const Template: ComponentStory<typeof HomePage> = args => (
+  <ApolloProvider client={apolloClient}>
+    <HomePage {...args} />
+  </ApolloProvider>
+)
 
 // export const Default = Template.bind({})
-export const Default = () => {
-  return (
-    <ApolloProvider client={client}>
-      <HomePage />
-    </ApolloProvider>
-  )
-}
+// export const Default = () => {
+//   return (
+//     <ApolloProvider client={client}>
+//       <HomePage />
+//     </ApolloProvider>
+//   )
+// }

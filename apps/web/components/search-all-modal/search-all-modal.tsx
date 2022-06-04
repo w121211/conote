@@ -35,10 +35,10 @@ export const SearchAll = () => {
   const [keyArrow, setKeyArrow] = useState(false)
   const [selectedIdx, setSelectedIdx] = useState(0)
   let modifierKeyPrefix = 'Ctrl'
-  // const navApp = navigator?.userAgent.toLowerCase()
-  // if (navApp.indexOf('mac') !== -1) {
-  //   modifierKeyPrefix = '⌘'
-  // }
+  const navApp = navigator?.userAgent.toLowerCase()
+  if (navApp.indexOf('mac') !== -1) {
+    modifierKeyPrefix = '⌘'
+  }
   // const onMouseEnter = (e: React.MouseEvent, idx: number) => {
   //   if (keyArrow) {
   //     e.preventDefault()

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import NoteEmojiCreateBtn, { NoteEmojiBtn } from './note-emoji-create-btn'
+import { NoteEmojiBtn } from './note-emoji-create-btn'
 import { useNoteEmojisQuery } from '../../apollo/query.graphql'
 import UpdateNoteEmojiBtn from './_update-note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
