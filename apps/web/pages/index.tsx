@@ -12,6 +12,7 @@ import {
   DiscussFragment,
 } from '../apollo/query.graphql'
 import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
+import HotDisplay from '../components/hot-display/hot-display'
 
 interface Props {
   discussesLatest: DiscussFragment[]
@@ -80,13 +81,13 @@ const HomePage = ({ discussesLatest }: Props): JSX.Element => {
               <SearchAllForm />
             </div>
           </div>
-          {/* <AuthItem me={me} /> */}
+          <AuthItem />
         </div>
         <>
           <div className=" flex pb-[9vh] pt-6 bg-gray-100">
             <div className="flex flex-col items-center md:items-start md:flex-row ms:justify-between  md:w-3/4 md:ml-[calc(4rem+96px)] gap-6">
               <HotDisplay />
-              <UserRateTable data={mockRateData} />
+              {/* <UserRateTable data={mockRateData} /> */}
             </div>
           </div>
         </>

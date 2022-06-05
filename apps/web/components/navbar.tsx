@@ -50,7 +50,6 @@ const Navbar = ({
         </div>
       </div>
       {/* {navPath} */}
-
       {/* --- right area --- */}
       <div className="flex items-center gap-2 mr-4 right-0">
         {rbtn}
@@ -60,9 +59,11 @@ const Navbar = ({
             {/* <AuthItem me={me} /> */}
           </div>
         ) : (
-          <AuthItem me={me} />
+          <AuthItem />
         )}
+
         {/* <ThemeToggle /> */}
+
         <Link href="/setting">
           <a className="leading-none">
             <span className="material-icons text-xl leading-none p-1 rounded hover:bg-gray-100 text-gray-500 dark:text-gray-300">

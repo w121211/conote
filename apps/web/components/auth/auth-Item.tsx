@@ -12,7 +12,7 @@ const AuthItem = () => {
   //   return null
   // }
   return (
-    <React.Fragment>
+    <>
       {me ? (
         <ToggleMenu
           className=" py-1 -translate-x-full left-full"
@@ -53,7 +53,7 @@ const AuthItem = () => {
           Login
         </a>
       )}
-    </React.Fragment>
+    </>
   )
 }
 
