@@ -1,10 +1,22 @@
 import React, { useState } from 'react'
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
 import UserRateTable, { TableData } from '../../components/user/user-rate-table'
 import UserNoteTable from '../../components/user/user-note-table'
 import { NoteData } from '../../components/ui-component/note-list'
-import { Layout } from '../../components/ui-component/layout'
+import Layout from '../../components/ui-component/layout'
 import { List, ListElement } from '../../components/ui-component/list'
+import {
+  DiscussesByUserDocument,
+  DiscussesByUserQuery,
+  DiscussesByUserQueryVariables,
+  DiscussFragment,
+  NoteDocFragment,
+  NoteDocsByUserDocument,
+  NoteDocsByUserQuery,
+  NoteDocsByUserQueryVariables,
+} from '../../apollo/query.graphql'
+import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 
 export const mockRateData: TableData[] = [
   {
@@ -124,7 +136,17 @@ const mockNoteList: NoteData[] = [
   },
 ]
 
-const UserPage = (): JSX.Element | null => {
+interface Props {
+  noteDocsByUser: NoteDocFragment[]
+  discussesByUser: DiscussFragment[]
+}
+
+const UserPage = ({
+  noteDocsByUser,
+  discussesByUser,
+}: Props): JSX.Element | null => {
+  console.log(noteDocsByUser, discussesByUser)
+
   // const [showMentionedPopup, setShowMentionedPopup] = useState(false)
   // const [queryUser, { data, loading, error }] = useUserLazyQuery()
   const router = useRouter(),
@@ -198,6 +220,48 @@ const UserPage = (): JSX.Element | null => {
       </div>
     </Layout>
   )
+}
+
+/**
+ * TODO:
+ * - Currently draft is not able for server-side rendering
+ *   because apollo's schema-link does not have 'request' which session data stored in it
+ */
+export async function getServerSideProps({
+  params,
+  res,
+}: GetServerSidePropsContext<{ userid: string }>): Promise<
+  GetServerSidePropsResult<Props>
+> {
+  if (params === undefined) throw new Error('params === undefined')
+  const { userid: userId } = params
+
+  const client = getApolloClientSSR(),
+    qDocs = await client.query<
+      NoteDocsByUserQuery,
+      NoteDocsByUserQueryVariables
+    >({
+      query: NoteDocsByUserDocument,
+      variables: { userId },
+    }),
+    qDiscusses = await client.query<
+      DiscussesByUserQuery,
+      DiscussesByUserQueryVariables
+    >({
+      query: DiscussesByUserDocument,
+      variables: { userId },
+    })
+
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=200, stale-while-revalidate=259',
+  )
+  return {
+    props: {
+      noteDocsByUser: qDocs.data.noteDocsByUser,
+      discussesByUser: qDiscusses.data.discussesByUser,
+    },
+  }
 }
 
 export default UserPage

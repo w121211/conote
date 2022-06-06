@@ -23,14 +23,17 @@ type Query {
   # Throw error if not found
   discuss(id: ID!): Discuss!
 
+  # Latest discusses created by the user
+  discussesByUser(userId: ID!, afterId: ID): [Discuss!]!
+
+  # Latest discuss-entries
+  discussesLatest(afterId: ID): [Discuss!]!
+
   discussEmojis(discussId: ID!): [DiscussEmoji!]!
 
   discussPosts(discussId: ID!): [DiscussPost!]!
 
   discussPostEmojis(discussPostId: ID!): [DiscussPostEmoji!]!
-
-  # Latest discuss-entries
-  discussesLatest(afterId: ID): [Discuss!]!
 
   # Returns null if not found. This is in favor of using 'url' for searching
   link(id: ID, url: String): Link
@@ -64,14 +67,17 @@ type Query {
   # Throws error if not found
   noteDoc(id: ID!): NoteDoc!
 
+  # Latest note docs (merged and not-merged) created by the user
+  noteDocsByUser(userId: ID!, afterId: ID): [NoteDoc!]!
+
   # All note-docs wait to merge of a note, ie candidates
   noteDocsToMergeByNote(noteId: ID!): [NoteDoc!]!
 
   # Latest just merged note-docs
-  noteDocsMergedLatest: [NoteDoc!]!
+  noteDocsMergedLatest(afterId: ID): [NoteDoc!]!
 
   # Latest waiting to merge note-docs
-  noteDocsToMergeLatest: [NoteDoc!]!
+  noteDocsToMergeLatest(afterId: ID): [NoteDoc!]!
 
   # Get user's draft
   # Query either by id, symbol or url
@@ -334,6 +340,7 @@ type Discuss {
   createdAt: String!
   updatedAt: String!
   count: DiscussCount!
+  noteEntries: [NoteEntry!]!
 }
 
 type DiscussCount {
@@ -424,6 +431,13 @@ type NoteEmojiLike {
   noteEmojiId: Int!
   liked: Boolean!
   updatedAt: String!
+}
+
+type NoteEntry {
+  id: ID!
+  branchName: String!
+  sym: Sym!
+  link: Link
 }
 
 type NoteDoc {

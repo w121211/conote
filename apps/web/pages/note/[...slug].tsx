@@ -59,7 +59,7 @@ const NoteEditEl = ({
   const router = useRouter()
 
   useEffect(() => {
-    // Only open if symbol has changed
+    // Call this method only when symbol changed
     editorOpenSymbolInMain(symbol, router)
   }, [symbol])
 

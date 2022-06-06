@@ -7,8 +7,9 @@ import { useRouter } from 'next/router'
 import { editorOpenSymbolInModal } from '../../events'
 
 /**
- * Open a modal-doc is triggered by 'editorRouteUpdate' event,
- * while open a main-doc should be triggered outside this editor.
+ * When component mount, EditorEl loads the current main-doc in the repo.
+ *   Event 'editorOpenSymbolInMain' is provided to open the main-doc anywhere.
+ *   EditorEl will act as a canvas to show the current doc.
  *
  * Assign mainDoc/modalDoc as null initially
  * - if doc === 'null' -> is loading,
@@ -29,8 +30,8 @@ export const EditorEl = (): JSX.Element | null => {
   if (mainDoc === undefined) {
     return (
       <h1>
-        Editor-el without doc (happened when doc is dropped), search-panel goes
-        here
+        Editor-el without doc (happened when doc is dropped), Start a new doc
+        Search panel goes here
       </h1>
     )
   }

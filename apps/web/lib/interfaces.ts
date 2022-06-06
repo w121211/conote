@@ -1,6 +1,14 @@
 import { NoteDoc, NoteDraft, Poll, PollCount } from '@prisma/client'
 import { Block } from '../components/block-editor/src/interfaces'
 
+export type DiscussMeta = {
+  // The note that create this discuss
+  noteCreated: { id: string; symbol: string }
+
+  // The notes that connect to the discuss
+  notesConntected: { id: string; symbol: string }[]
+}
+
 /**
  * Store (symbol-string, sym-id) to handle later symbol-string change case
  * symId can be null if not yet created (in draft)

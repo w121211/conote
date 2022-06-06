@@ -20,6 +20,8 @@ interface Props {
 const HomePage = ({ discussesLatest }: Props): JSX.Element => {
   const [showAnnounce, setAnnounce] = useState(false)
 
+  console.log(discussesLatest)
+
   useEffect(() => {
     if (window.sessionStorage.getItem('announce') === null) {
       window.sessionStorage.setItem('announce', 'true')

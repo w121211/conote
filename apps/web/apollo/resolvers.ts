@@ -1,17 +1,25 @@
 import {
+  Branch,
+  Discuss,
+  DiscussCount,
   DiscussEmoji,
   DiscussEmojiCount,
   DiscussPostEmoji,
   DiscussPostEmojiCount,
+  Link,
+  Note,
   NoteDraft,
   NoteEmoji,
   NoteEmojiCount,
+  Sym,
 } from '@prisma/client'
 import { AuthenticationError } from 'apollo-server-micro'
 import { NextApiRequest, NextApiResponse } from 'next'
 import {
+  Discuss as GQLDiscuss,
   QueryResolvers,
   MutationResolvers,
+  NoteEntry as GQLNoteEntry,
 } from 'graphql-let/__generated__/__types__'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import { hasCount, toStringProps } from '../lib/helpers'
@@ -41,6 +49,63 @@ export type ResolverContext = {
   req: NextApiRequest
   res: NextApiResponse
 }
+
+//
+// Helpers
+//
+//
+//
+//
+//
+//
+
+function toGQLNoteEntry(
+  d: Note & {
+    branch: Branch
+    sym: Sym
+    link: Link | null
+  },
+): GQLNoteEntry {
+  const { id, branch, sym, link } = d
+  return {
+    id: id,
+    branchName: branch.name,
+    sym: sym,
+    link: link,
+  }
+}
+
+function toGQLDiscuss(
+  d: Discuss & {
+    count: DiscussCount | null
+    notes: (Note & {
+      branch: Branch
+      sym: Sym
+      link: Link | null
+    })[]
+  },
+): GQLDiscuss {
+  if (d.count) {
+    const { notes, meta, count, ...rest } = d
+    return toStringProps({
+      ...rest,
+      noteEntries: notes.map(e => toGQLNoteEntry(e)),
+      // TODO:
+      meta: meta as unknown as object,
+      count: toStringProps(count),
+    })
+  }
+  throw new Error('Discuss.count not found')
+}
+
+//
+// Resolvers
+//
+//
+//
+//
+//
+//
 
 const Query: Required<QueryResolvers<ResolverContext>> = {
   async author(_parent, { id, name }, _context, _info) {
@@ -85,35 +150,52 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   async discuss(_parent, { id }, _context, _info) {
     const discuss = await prisma.discuss.findUnique({
       where: { id },
-      include: { count: true },
+      include: {
+        count: true,
+        notes: { include: { sym: true, branch: true, link: true } },
+      },
     })
-    if (discuss && discuss.count) {
-      return toStringProps({
-        ...discuss,
-        // TODO:
-        meta: discuss.meta as unknown as object,
-        count: toStringProps(discuss.count),
-      })
+    if (discuss) {
+      return toGQLDiscuss(discuss)
     }
     throw new Error('Discuss not found')
   },
 
-  async discussesLatest(_parent, { afterId }, _context, _info) {
+  async discussesByUser(_parent, { userId, afterId }, _context, _info) {
     const discusses = await prisma.discuss.findMany({
-        include: { count: true },
+        where: { userId },
+        include: {
+          count: true,
+          notes: { include: { sym: true, branch: true, link: true } },
+        },
         orderBy: { updatedAt: 'desc' },
         cursor: afterId ? { id: afterId } : undefined,
         take: 10,
         skip: afterId ? 1 : 0,
       }),
       discusses_ = discusses.map(discuss => {
-        if (discuss && discuss.count) {
-          return toStringProps({
-            ...discuss,
-            // TODO:
-            meta: discuss.meta as unknown as object,
-            count: toStringProps(discuss.count),
-          })
+        if (discuss) {
+          return toGQLDiscuss(discuss)
+        }
+        throw new Error('Discuss not found')
+      })
+    return discusses_
+  },
+
+  async discussesLatest(_parent, { afterId }, _context, _info) {
+    const discusses = await prisma.discuss.findMany({
+        include: {
+          count: true,
+          notes: { include: { sym: true, branch: true, link: true } },
+        },
+        orderBy: { updatedAt: 'desc' },
+        cursor: afterId ? { id: afterId } : undefined,
+        take: 10,
+        skip: afterId ? 1 : 0,
+      }),
+      discusses_ = discusses.map(discuss => {
+        if (discuss) {
+          return toGQLDiscuss(discuss)
         }
         throw new Error('Discuss not found')
       })
@@ -265,88 +347,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return rates
   },
 
-  async noteEmojis(_parent, { noteId }, _context, _info) {
-    const emojis = (
-      await prisma.noteEmoji.findMany({
-        where: { noteId },
-        include: { count: true },
-      })
-    )
-      .filter(
-        (
-          e,
-        ): e is NoteEmoji & {
-          count: NoteEmojiCount
-        } => e.count !== null,
-      )
-      .map(e => ({
-        ...toStringProps(e),
-        count: { ...toStringProps(e.count) },
-      }))
-    return emojis
-  },
-
-  async poll(_parent, { id }, _context, _info) {
-    const poll = await pollModel.find(id)
-    if (poll) {
-      return {
-        ...toStringProps(poll),
-        count: { ...toStringProps(poll.count) },
-      }
-    }
-    throw new Error('Poll not found')
-  },
-
-  async rate(_parent, { id }, _context, _info) {
-    const rate = await prisma.rate.findUnique({
-      where: { id },
-    })
-    if (rate) {
-      return toStringProps(rate)
-    }
-    throw new Error('Rate not found')
-  },
-
-  async ratesByAuthor(_parent, { authorId, symId }, _context, _info) {
-    const rates = (
-      await prisma.rate.findMany({
-        where: { AND: { authorId, symId } },
-        orderBy: { updatedAt: 'desc' },
-      })
-    ).map(e => toStringProps(e))
-    return rates
-  },
-
-  async ratesBySource(_parent, { linkId }, _context, _info) {
-    const rate = (
-      await prisma.rate.findMany({
-        where: { linkId },
-        orderBy: { updatedAt: 'desc' },
-        // cursor: afterId ? { id: afterId } : undefined,
-        // take: 10,
-        // skip: afterId ? 1 : 0,
-      })
-    ).map(e => toStringProps(e))
-    return rate
-  },
-
-  async searchAuthor(_parent, { term }, _context, _info) {
-    const hits = await authorSearcher.search(term)
-    return hits.map(e => ({ id: e.id, str: e.name }))
-  },
-
-  async searchDiscuss(_parent, { term }, _context, _info) {
-    const hits = await discussSearcher.search(term)
-    return hits.map(e => ({ id: e.id, str: e.title }))
-  },
-
-  async searchSymbol(_parent, { term, type }, _context, _info) {
-    const hits = await symSearcher.search(term, type ?? undefined)
-    return hits.map(e => ({ id: e.id, str: e.symbol }))
-  },
-
-  // -------------New------------------
-
   // # get user's all drafts for draft-sidebar
   // # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
   // myNoteDraftEntries: [NoteDraftEntry!]!
@@ -413,6 +413,22 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     throw new Error('NoteDoc not found.')
   },
 
+  async noteDocsByUser(_parent, { userId, afterId }, _context, _info) {
+    const docs = (
+      await prisma.noteDoc.findMany({
+        where: { userId },
+        include: { branch: true, sym: true },
+        orderBy: { createdAt: 'desc' },
+        cursor: afterId ? { id: afterId } : undefined,
+        take: 10,
+        skip: afterId ? 1 : 0,
+      })
+    ).map(e =>
+      toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
+    )
+    return docs
+  },
+
   async noteDocsToMergeByNote(_parent, { noteId }, _context, _info) {
     const docs = (
       await prisma.noteDoc.findMany({
@@ -428,12 +444,15 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return docs
   },
 
-  async noteDocsMergedLatest(_parent, _args, _context, _info) {
+  async noteDocsMergedLatest(_parent, { afterId }, _context, _info) {
     const docs = (
       await prisma.noteDoc.findMany({
         where: { status: 'MERGED' },
         include: { branch: true, sym: true },
         orderBy: { createdAt: 'desc' },
+        cursor: afterId ? { id: afterId } : undefined,
+        take: 10,
+        skip: afterId ? 1 : 0,
       })
     ).map(e =>
       toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
@@ -441,12 +460,15 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return docs
   },
 
-  async noteDocsToMergeLatest(_parent, _args, _context, _info) {
+  async noteDocsToMergeLatest(_parent, { afterId }, _context, _info) {
     const docs = (
       await prisma.noteDoc.findMany({
         where: { status: 'CANDIDATE' },
         include: { branch: true, sym: true },
         orderBy: { createdAt: 'desc' },
+        cursor: afterId ? { id: afterId } : undefined,
+        take: 10,
+        skip: afterId ? 1 : 0,
       })
     ).map(e =>
       toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
@@ -484,7 +506,27 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return null
   },
 
-  // noteHistory(noteId: ID!, status: String): [NoteDocEntry!]!
+  async noteEmojis(_parent, { noteId }, _context, _info) {
+    const emojis = (
+      await prisma.noteEmoji.findMany({
+        where: { noteId },
+        include: { count: true },
+      })
+    )
+      .filter(
+        (
+          e,
+        ): e is NoteEmoji & {
+          count: NoteEmojiCount
+        } => e.count !== null,
+      )
+      .map(e => ({
+        ...toStringProps(e),
+        count: { ...toStringProps(e.count) },
+      }))
+    return emojis
+  },
+
   async noteHistory(_parent, { noteId, status }, _context, _info) {
     const entries = await prisma.note.findUnique({
       where: { id: noteId },
@@ -501,6 +543,65 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return []
   },
 
+  async poll(_parent, { id }, _context, _info) {
+    const poll = await pollModel.find(id)
+    if (poll) {
+      return {
+        ...toStringProps(poll),
+        count: { ...toStringProps(poll.count) },
+      }
+    }
+    throw new Error('Poll not found')
+  },
+
+  async rate(_parent, { id }, _context, _info) {
+    const rate = await prisma.rate.findUnique({
+      where: { id },
+    })
+    if (rate) {
+      return toStringProps(rate)
+    }
+    throw new Error('Rate not found')
+  },
+
+  async ratesByAuthor(_parent, { authorId, symId }, _context, _info) {
+    const rates = (
+      await prisma.rate.findMany({
+        where: { AND: { authorId, symId } },
+        orderBy: { updatedAt: 'desc' },
+      })
+    ).map(e => toStringProps(e))
+    return rates
+  },
+
+  async ratesBySource(_parent, { linkId }, _context, _info) {
+    const rate = (
+      await prisma.rate.findMany({
+        where: { linkId },
+        orderBy: { updatedAt: 'desc' },
+        // cursor: afterId ? { id: afterId } : undefined,
+        // take: 10,
+        // skip: afterId ? 1 : 0,
+      })
+    ).map(e => toStringProps(e))
+    return rate
+  },
+
+  async searchAuthor(_parent, { term }, _context, _info) {
+    const hits = await authorSearcher.search(term)
+    return hits.map(e => ({ id: e.id, str: e.name }))
+  },
+
+  async searchDiscuss(_parent, { term }, _context, _info) {
+    const hits = await discussSearcher.search(term)
+    return hits.map(e => ({ id: e.id, str: e.title }))
+  },
+
+  async searchSymbol(_parent, { term, type }, _context, _info) {
+    const hits = await symSearcher.search(term, type ?? undefined)
+    return hits.map(e => ({ id: e.id, str: e.symbol }))
+  },
+
   // searchNote(symbol: String, title: String): [Note!]!
   // async searchNote(_parent, { symbol, title, domain }, _context, _info) {
   //   // TODO
@@ -512,8 +613,6 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   //   // }
   //   return []
   // },
-
-  // ------------New End---------------
 }
 
 const Mutation: Required<MutationResolvers<ResolverContext>> = {
@@ -535,56 +634,62 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createDiscuss(_parent, { noteId, data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const { title, content } = data
-    const discuss = await prisma.discuss.create({
-      data: {
-        user: { connect: { id: userId } },
-        notes: noteId ? { connect: [{ id: noteId }] } : undefined,
-        meta: {},
-        title,
-        content,
-        // choices: data.choices,
-        count: { create: {} },
-      },
-      include: { count: true },
-    })
-    // SearchDiscussService.
+    const { userId } = await isAuthenticated(req),
+      { title, content } = data,
+      discuss = await prisma.discuss.create({
+        data: {
+          user: { connect: { id: userId } },
+          notes: noteId ? { connect: [{ id: noteId }] } : undefined,
+          meta: {},
+          title,
+          content,
+          count: { create: {} },
+        },
+        include: {
+          count: true,
+          notes: { include: { branch: true, sym: true, link: true } },
+        },
+      })
+
+    // TODO: Add to searchDiscussService
+
     if (hasCount(discuss)) {
-      return {
-        ...toStringProps(discuss),
-        meta: {},
-        count: toStringProps(discuss.count),
-      }
+      return toGQLDiscuss(discuss)
     }
-    throw 'Internal error'
+    throw new Error('Discuss.count not found')
   },
 
   async updateDiscuss(_parent, { id, data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req)
-    const discuss = await prisma.discuss.findUnique({
-      where: { id },
-    })
-    if (discuss?.userId === userId) {
-      const { title, content } = data
-      const discuss = await prisma.discuss.update({
+    const { userId } = await isAuthenticated(req),
+      { title, content } = data,
+      discuss = await prisma.discuss.findUnique({
         where: { id },
-        data: {
-          title,
-          content,
-        },
-        include: { count: true },
       })
-      if (hasCount(discuss)) {
-        return {
-          ...toStringProps(discuss),
-          meta: {},
-          count: toStringProps(discuss.count),
-        }
-      }
-      throw 'Internal error'
+
+    if (discuss === null) throw new Error('Discuss not found')
+    if (discuss.userId !== userId)
+      throw new Error(
+        'Not authorized, only author is allowed to update discuss',
+      )
+
+    const discuss_ = await prisma.discuss.update({
+      where: { id },
+      data: {
+        title,
+        content,
+      },
+      include: {
+        count: true,
+        notes: { include: { branch: true, sym: true, link: true } },
+      },
+    })
+
+    // TODO: Update to searchDiscussService
+
+    if (hasCount(discuss_)) {
+      return toGQLDiscuss(discuss_)
     }
-    throw 'Not authorized, only author is allowed to update discuss'
+    throw new Error('Discuss.count not found')
   },
 
   async upsertDiscussEmojiLike(
@@ -597,14 +702,13 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     let results
     if (!isNil(emojiId)) {
       results = await discussEmojiModel.upsertLike({ userId, liked, emojiId })
-    } else if (!isNil(discussId) && emojiCode) {
+    } else if (discussId && emojiCode) {
       results = await discussEmojiModel.upsertLike({
         userId,
         liked,
         subj: { subjId: discussId, code: emojiCode },
       })
     } else {
-      console.debug(emojiId, discussId)
       throw new Error('Input error')
     }
     return results.map(({ emoji, count, like }) => ({
@@ -685,7 +789,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   ) {
     const { userId } = await isAuthenticated(req)
     let results
-    if (emojiId) {
+    if (!isNil(emojiId)) {
       results = await noteEmojiModel.upsertLike({
         userId,
         liked,

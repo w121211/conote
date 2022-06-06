@@ -46,6 +46,9 @@ fragment discuss on Discuss {
     id
     nPosts
   }
+  noteEntries {
+    ...noteEntry
+  }
 }
 
 fragment discussEmoji on DiscussEmoji {
@@ -110,85 +113,6 @@ fragment link on Link {
   url
   authorId
 }
-
-fragment noteEmoji on NoteEmoji {
-  __typename
-  id
-  code
-  count {
-    ...noteEmojiCount
-  }
-}
-
-fragment noteEmojiCount on NoteEmojiCount {
-  __typename
-  id
-  nUps
-  nDowns
-}
-
-fragment noteEmojiLike on NoteEmojiLike {
-  __typename
-  id
-  noteEmojiId
-  liked
-  updatedAt
-}
-
-fragment poll on Poll {
-  __typename
-  id
-  userId
-  choices
-  count {
-    id
-    nVotes
-  }
-  discuss {
-    ...discuss
-  }
-  createdAt
-  updatedAt
-}
-
-fragment pollVote on PollVote {
-  __typename
-  id
-  pollId
-  choiceIdx
-}
-
-fragment rate on Rate {
-  __typename
-  id
-  userId
-  authorId
-  linkId
-  symId
-  choice
-  createdAt
-  updatedAt
-}
-
-fragment searchHit on SearchHit {
-  id
-  str
-}
-
-fragment sym on Sym {
-  __typename
-  id
-  type
-  symbol
-}
-
-fragment user on User {
-  __typename
-  id
-  email
-}
-
-# -----------NEW-----------
 
 fragment note on Note {
   __typename
@@ -305,7 +229,94 @@ fragment noteDraftEntry on NoteDraftEntry {
   title
 }
 
-#--------------END------------------
+fragment noteEmoji on NoteEmoji {
+  __typename
+  id
+  code
+  count {
+    ...noteEmojiCount
+  }
+}
+
+fragment noteEmojiCount on NoteEmojiCount {
+  __typename
+  id
+  nUps
+  nDowns
+}
+
+fragment noteEmojiLike on NoteEmojiLike {
+  __typename
+  id
+  noteEmojiId
+  liked
+  updatedAt
+}
+
+fragment noteEntry on NoteEntry {
+  __typename
+  id
+  branchName
+  sym {
+    ...sym
+  }
+  link {
+    ...link
+  }
+}
+
+fragment poll on Poll {
+  __typename
+  id
+  userId
+  choices
+  count {
+    id
+    nVotes
+  }
+  discuss {
+    ...discuss
+  }
+  createdAt
+  updatedAt
+}
+
+fragment pollVote on PollVote {
+  __typename
+  id
+  pollId
+  choiceIdx
+}
+
+fragment rate on Rate {
+  __typename
+  id
+  userId
+  authorId
+  linkId
+  symId
+  choice
+  createdAt
+  updatedAt
+}
+
+fragment searchHit on SearchHit {
+  id
+  str
+}
+
+fragment sym on Sym {
+  __typename
+  id
+  type
+  symbol
+}
+
+fragment user on User {
+  __typename
+  id
+  email
+}
 
 query Author($id: ID, $name: String) {
   author(id: $id, name: $name) {
@@ -327,6 +338,12 @@ query CommitsByUser($userId: ID!, $afterId: ID) {
 
 query Discuss($id: ID!) {
   discuss(id: $id) {
+    ...discuss
+  }
+}
+
+query DiscussesByUser($userId: ID!, $afterId: ID) {
+  discussesByUser(userId: $userId, afterId: $afterId) {
     ...discuss
   }
 }
@@ -471,20 +488,26 @@ query NoteDoc($id: ID!) {
   }
 }
 
+query NoteDocsByUser($userId: ID!, $afterId: ID) {
+  noteDocsByUser(userId: $userId, afterId: $afterId) {
+    ...noteDoc
+  }
+}
+
 query NoteDocsToMergeByNote($noteId: ID!) {
   noteDocsToMergeByNote(noteId: $noteId) {
     ...noteDoc
   }
 }
 
-query NoteDocsMergedLatest {
-  noteDocsMergedLatest {
+query NoteDocsMergedLatest($afterId: ID) {
+  noteDocsMergedLatest(afterId: $afterId) {
     ...noteDoc
   }
 }
 
-query NoteDocsToMergeLatest {
-  noteDocsToMergeLatest {
+query NoteDocsToMergeLatest($afterId: ID) {
+  noteDocsToMergeLatest(afterId: $afterId) {
     ...noteDoc
   }
 }
