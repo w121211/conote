@@ -1,6 +1,6 @@
 import React from 'react'
 import Select, { GroupBase, OptionsOrGroups } from 'react-select'
-import { Layout } from '../components/ui-component/layout'
+import Layout from '../components/ui-component/layout'
 
 type Option = {
   value: string

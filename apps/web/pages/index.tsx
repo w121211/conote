@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { SearchAllForm } from '../components/search-all-form'
-import NewHotList from '../components/_new-hot-list'
-import UserRateTable from '../components/user/user-rate-table'
-import { mockRateData } from './user/[userid]'
 import AuthItem from '../components/auth/auth-item'
 import {
   DiscussesLatestDocument,

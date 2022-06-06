@@ -1,12 +1,14 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import Layout from '../../layout/layout'
 import Popup from '../../components/popup/popup'
-import AuthorRateTable, { TableData } from '../../components/author/author-rate-table'
+import AuthorRateTable, {
+  TableData,
+} from '../../components/author/author-rate-table'
 import AuthorArticleList from '../../components/author/author-article-list'
 import { useAuthorLazyQuery } from '../../apollo/query.graphql'
 import AuthorMetaModal from '../../components/author/author-meta-modal'
 import AuthorInfo from '../../components/author/author-info'
+import Layout from '../../components/ui-component/layout'
 
 const mockRateData: TableData[] = [
   {
@@ -61,7 +63,9 @@ const AuthorPage = (): JSX.Element | null => {
   // }
 
   return (
-    <Layout buttonRight={data?.author && <AuthorMetaModal data={data.author} />}>
+    <Layout
+      buttonRight={data?.author && <AuthorMetaModal data={data.author} />}
+    >
       <div className="flex flex-col gap-8">
         <h1>@{router.query.author}</h1>
         {data?.author?.meta}
@@ -75,19 +79,31 @@ const AuthorPage = (): JSX.Element | null => {
             title="晶片荒惡化費半大跌 交期拉長至逾20周"
             summary=".............. (author: @cnyes)"
           />
-          <AuthorArticleList href="#" title="哈哈晶片荒惡化費" summary=".............. (author: @cnyes)" />
+          <AuthorArticleList
+            href="#"
+            title="哈哈晶片荒惡化費"
+            summary=".............. (author: @cnyes)"
+          />
           <AuthorArticleList
             href="#"
             title="晶片荒惡化費半大跌 交期拉長至逾20周"
             summary=".............. (author: @cnyes)"
           />
-          <AuthorArticleList href="#" title="哈哈晶片荒惡化費" summary=".............. (author: @cnyes)" />
+          <AuthorArticleList
+            href="#"
+            title="哈哈晶片荒惡化費"
+            summary=".............. (author: @cnyes)"
+          />
           <AuthorArticleList
             href="#"
             title="晶片荒惡化費半大跌 交期拉長至逾20周"
             summary=".............. (author: @cnyes)"
           />
-          <AuthorArticleList href="#" title="哈哈晶片荒惡化費" summary=".............. (author: @cnyes)" />
+          <AuthorArticleList
+            href="#"
+            title="哈哈晶片荒惡化費"
+            summary=".............. (author: @cnyes)"
+          />
         </div>
         <h2>Mention in</h2>
         <ul>

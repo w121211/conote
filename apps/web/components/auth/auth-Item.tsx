@@ -3,14 +3,13 @@ import Link from 'next/link'
 import { useMe } from './use-me'
 import ToggleMenu from '../ui-component/toggle-menu'
 import { LoggedInUser } from './auth.service'
+import LogoutButton from './logout-button'
 
 const AuthItem = () => {
   const { me, loading } = useMe()
-  // const { data: me, loading } = useMeQuery()
 
-  // if (loading) {
-  //   return null
-  // }
+  // if (loading) return null
+
   return (
     <>
       {me ? (
@@ -42,6 +41,7 @@ const AuthItem = () => {
             </a>
           </Link>
           <div className="h-[1px] my-2 bg-gray-200"></div>
+
           <Link href="/login">
             <a className="block px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 ">
               Logout

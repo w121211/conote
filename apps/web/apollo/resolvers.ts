@@ -35,6 +35,7 @@ import { noteModel } from '../lib/models/note-model'
 import { pollModel } from '../lib/models/poll-model'
 import { noteDocModel } from '../lib/models/note-doc-model'
 import { pollVoteModel } from '../lib/models/poll-vote-model'
+import { isNil } from 'lodash'
 
 export type ResolverContext = {
   req: NextApiRequest
@@ -594,15 +595,16 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   ) {
     const { userId } = await isAuthenticated(req)
     let results
-    if (emojiId) {
+    if (!isNil(emojiId)) {
       results = await discussEmojiModel.upsertLike({ userId, liked, emojiId })
-    } else if (discussId && emojiCode) {
+    } else if (!isNil(discussId) && emojiCode) {
       results = await discussEmojiModel.upsertLike({
         userId,
         liked,
         subj: { subjId: discussId, code: emojiCode },
       })
     } else {
+      console.debug(emojiId, discussId)
       throw new Error('Input error')
     }
     return results.map(({ emoji, count, like }) => ({
@@ -651,13 +653,13 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   ) {
     const { userId } = await isAuthenticated(req)
     let results
-    if (emojiId) {
+    if (!isNil(emojiId)) {
       results = await discussPostEmojiModel.upsertLike({
         userId,
         liked,
         emojiId,
       })
-    } else if (discussPostId && emojiCode) {
+    } else if (!isNil(discussPostId) && emojiCode) {
       results = await discussPostEmojiModel.upsertLike({
         userId,
         liked,

@@ -34,11 +34,11 @@ export const SearchAll = () => {
   const [inputValue, setInputValue] = useState('')
   const [keyArrow, setKeyArrow] = useState(false)
   const [selectedIdx, setSelectedIdx] = useState(0)
-  let modifierKeyPrefix = 'Ctrl'
-  const navApp = navigator?.userAgent.toLowerCase()
-  if (navApp.indexOf('mac') !== -1) {
-    modifierKeyPrefix = '⌘'
-  }
+  // let modifierKeyPrefix = 'Ctrl'
+  // const navApp = navigator?.userAgent.toLowerCase()
+  // if (navApp.indexOf('mac') !== -1) {
+  //   modifierKeyPrefix = '⌘'
+  // }
   // const onMouseEnter = (e: React.MouseEvent, idx: number) => {
   //   if (keyArrow) {
   //     e.preventDefault()
@@ -163,9 +163,9 @@ export const SearchAll = () => {
             search
           </span>
           <span className="text-gray-500 dark:text-gray-300">
-            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
+            {/* <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
               {modifierKeyPrefix}
-            </kbd>
+            </kbd> */}
             <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
               K
             </kbd>
