@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
 import { useMeQuery } from '../apollo/query.graphql'
-import AuthItem from './auth/auth-item'
+import AuthItem from './auth/auth-Item'
 import { useMe } from './auth/use-me'
 import { SearchAll } from './search-all-modal/search-all-modal'
 import { ThemeToggle } from './theme/theme-toggle'
@@ -18,8 +18,8 @@ const Navbar = ({
 
   backgroundColor?: string
 }) => {
-  // const { me, loading } = useMe()
-  const { data: me } = useMeQuery()
+  const { me, loading } = useMe()
+  // const { data: me } = useMeQuery()
   return (
     <nav
       className={`
@@ -56,7 +56,7 @@ const Navbar = ({
         {me ? (
           <div className="flex items-center gap-4 text-sm">
             <button className="btn-primary">Commit</button>
-            {/* <AuthItem me={me} /> */}
+            <AuthItem />
           </div>
         ) : (
           <AuthItem />

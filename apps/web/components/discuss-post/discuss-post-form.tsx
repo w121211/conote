@@ -8,6 +8,7 @@ import {
 // import './github-markdown-light.module.css'
 
 import './github-markdown-light.module.css'
+import { useMe } from '../auth/use-me'
 
 interface FormInput {
   content: string
@@ -20,6 +21,7 @@ const DiscussPostForm = ({
   discussId: string
   isModal?: boolean
 }) => {
+  const { me } = useMe()
   const [showTextarea, setShowTextarea] = useState(true)
   const { register, handleSubmit, getValues, watch, reset, formState } =
     useForm<FormInput>({
@@ -81,7 +83,6 @@ const DiscussPostForm = ({
         <div className="relative z-[1] mb-[-1px] ml-2 text-sm " role="tablist">
           <button
             className={`
-            
             px-4 py-2
             border-x border-t
             rounded-t
@@ -133,8 +134,8 @@ const DiscussPostForm = ({
               text-gray-700
               align-top 
               bg-gray-100 
-              
               outline-offset-2 
+
               focus:border-blue-400
               focus:outline-blue-300
             `}
@@ -143,6 +144,7 @@ const DiscussPostForm = ({
                 contentRef(e)
                 textareaTest = e
               }}
+              disabled={!me}
             />
           </div>
         ) : (
@@ -154,7 +156,7 @@ const DiscussPostForm = ({
             p-2
             border-b
             border-gray-300
-              `}
+            `}
           >
             <MarkDownParser text={getValues('content')} />
           </div>

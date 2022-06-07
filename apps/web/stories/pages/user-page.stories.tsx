@@ -7,7 +7,7 @@ export default {
   component: UserPage,
 } as ComponentMeta<typeof UserPage>
 
-const Template: ComponentStory<typeof UserPage> = () => <UserPage />
+const Template: ComponentStory<typeof UserPage> = args => <UserPage {...args} />
 
 export const Default = Template.bind({})
 

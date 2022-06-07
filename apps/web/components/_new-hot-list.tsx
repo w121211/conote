@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 // import { LatestNotes } from '../pages'
-import HotDisplay from './hot-display/hot-display'
+import HotDisplay from './latest-discuss-tile'
 // import TabsWithSlider from './tabs-with-slider'
 
 const NewHotList = () => {
