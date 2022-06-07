@@ -8,6 +8,8 @@ import {
   CommitQueryVariables,
 } from '../../apollo/query.graphql'
 import Layout from '../../components/ui-component/layout'
+import { getNotePageURL } from '../../shared/note-helpers'
+import Link from 'next/link'
 
 interface Props {
   commit: CommitFragment
@@ -16,7 +18,27 @@ interface Props {
 const CommitPage = ({ commit }: Props) => {
   return (
     <Layout>
-      <div></div>
+      <h1>Commit #{commit.id.slice(-6)}</h1>
+      <span>
+        @{commit.userId} {commit.createdAt}
+      </span>
+      <div>
+        <ul>
+          {commit.noteDocs.map(e => (
+            <ol key={e.id}>
+              <span>
+                <Link href={getNotePageURL('doc', e.symbol, e.id)}>
+                  <a>
+                    {e.symbol}
+                    <span>#{e.id.slice(-6)}</span>
+                  </a>
+                </Link>
+                ({e.meta.mergeState})
+              </span>
+            </ol>
+          ))}
+        </ul>
+      </div>
     </Layout>
   )
 }

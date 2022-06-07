@@ -10,6 +10,7 @@ import firebaseui from 'firebaseui'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import { useSessionLoginMutation } from '../../apollo/query.graphql'
 import { useFirebaseClient } from './firebase-client'
+import { useMe } from './use-me'
 
 /**
  * Known issues
@@ -76,18 +77,21 @@ const makeUIConfig = (
   },
 })
 
+/**
+ * TODO:
+ * - (bug) Flash of login panel after succesffuly signed in
+ */
 const LoginPanel = (): JSX.Element | null => {
   const firebaseClient = useFirebaseClient(),
     firebaseAuth = getAuth(firebaseClient),
     apolloClient = useApolloClient(),
-    [sessionLogin] = useSessionLoginMutation(),
+    [sessionLogin, mSessionLogin] = useSessionLoginMutation(),
     [error, setError] = useState<string | null>(null)
 
   async function handleSignedInUser(authResult: UserCredential) {
     // Session login endpoint is queried and the session cookie is set.
     // CSRF token should be sent along with request.
     // const csrfToken = getCookie('csrfToken'),
-
     const idToken = await authResult.user.getIdToken()
 
     try {
@@ -105,17 +109,38 @@ const LoginPanel = (): JSX.Element | null => {
     }
   }
 
+  if (mSessionLogin.loading) {
+    return null
+  }
+  // TODO: Use an page status display component (unified) with given error message
   if (error) {
-    return <div>{error}</div>
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <section className="text-center mx-6 lg:w-2/3">
+          <h1 className="mt-2 mb-3 text-2xl lg:text-3xl">Ooops! {error}</h1>
+          <div>
+            <a
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+              href="/"
+            >
+              Go to Home
+            </a>
+            <a href="/login">Login</a>
+          </div>
+        </section>
+      </div>
+    )
   }
   return (
     <div className="flex justify-center w-screen h-screen bg-gray-100">
       <div className="h-fit mt-[20vh] p-10  rounded bg-white shadow-2xl">
-        <h1 className="mb-4">免費登入</h1>
-        <div className="mb-10 text-gray-600">
-          馬上登入開始在Konote上寫筆記吧!
-        </div>
+        <h1 className="mb-4">Login</h1>
+        <div className="mb-10 text-gray-600">Start to write note!</div>
         <StyledFirebaseAuth
+          uiCallback={ui => {
+            // ui.disableAutoSignIn()
+            ui.signIn()
+          }}
           uiConfig={makeUIConfig(handleSignedInUser)}
           firebaseAuth={firebaseAuth}
         />

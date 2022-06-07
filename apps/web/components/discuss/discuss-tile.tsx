@@ -1,6 +1,8 @@
 import moment from 'moment'
+import Link from 'next/link'
 import React from 'react'
 import { DiscussFragment } from '../../apollo/query.graphql'
+import { getNotePageURL } from '../../shared/note-helpers'
 import { useMe } from '../auth/use-me'
 import { Box } from '../ui-component/box'
 import DiscussEmojis from './discuss-emojis'
@@ -31,6 +33,20 @@ const DiscussTile = ({ data }: { data: DiscussFragment }) => {
           )
         })}
       </div>
+
+      {/* TODO: Add style */}
+      <div className="flex gap-1">
+        {data.noteEntries.map(e => {
+          return (
+            <span key={e.id}>
+              <Link href={getNotePageURL('base', e.sym.symbol)}>
+                <a>{e.sym.symbol}</a>
+              </Link>
+            </span>
+          )
+        })}
+      </div>
+
       <h2 className="mt-4 mb-2 tracking-wider text-gray-800 text-xl font-medium">
         <span className="text-gray-300">#</span>
         {data.title}

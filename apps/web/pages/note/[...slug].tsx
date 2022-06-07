@@ -1,11 +1,12 @@
+import { isNil } from 'lodash'
 import React, { useEffect } from 'react'
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import {
   NoteByBranchSymbolDocument,
   NoteByBranchSymbolQuery,
   NoteByBranchSymbolQueryVariables,
-  NoteDocContentBodyFragment,
   NoteDocDocument,
   NoteDocFragment,
   NoteDocQuery,
@@ -21,29 +22,53 @@ import {
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import { EditorEl } from '../../components/block-editor/src/components/editor/editor-el'
 import Layout from '../../components/ui-component/layout'
-import Link from 'next/link'
 import { editorOpenSymbolInMain } from '../../components/block-editor/src/events'
-import { UrlObject } from 'url'
 import { BlockViewerEl } from '../../components/block-editor/src/components/block/block-viewer-el'
 import { convertGQLBlocks } from '../../components/block-editor/src/services/note-draft.service'
-import { NoteHead } from '../../components/note/note-head'
 import { getNotePageURL } from '../../shared/note-helpers'
+
+const NoteDocLink = ({ doc }: { doc: NoteDocFragment }) => {
+  return (
+    <Link href={getNotePageURL('doc', doc.symbol, doc.id)}>
+      <a>#{doc.id.slice(-6)}</a>
+    </Link>
+  )
+}
 
 /**
  * Show alert cases
- * - If is viewing doc and the doc not current head
- * - If is editing draft and there are waiting to merge docs
+ * - If current viewing doc is not the head
+ * - If there are docs waiting to merge
+ *
+ * TODO
+ * - Remember user's action?
  */
 const NoteAlerts = ({
-  curDoc,
-  curDraft,
+  cur,
   note,
+  noteDocsToMerge,
 }: {
-  curDoc?: NoteDocFragment
-  curDraft?: NoteDraftFragment
-  note: NoteFragment
+  cur: NoteDocFragment | NoteDraftFragment
+  note: NoteFragment | null
+  noteDocsToMerge: NoteDocFragment[] | null
 }) => {
-  return <div></div>
+  return (
+    <div>
+      {cur.__typename === 'NoteDoc' && note && cur.id !== note.headDoc.id && (
+        <div>The current viewing doc is not the head.</div>
+      )}
+      {noteDocsToMerge && noteDocsToMerge.length > 0 && (
+        <div>
+          {noteDocsToMerge.map(e => (
+            <span key={e.id}>
+              Doc <NoteDocLink doc={e} />
+            </span>
+          ))}
+          is/are waiting to merge.
+        </div>
+      )}
+    </div>
+  )
 }
 
 /**
@@ -52,9 +77,11 @@ const NoteAlerts = ({
 const NoteEditEl = ({
   symbol,
   note,
+  noteDocsToMerge,
 }: {
   symbol: string
   note: NoteFragment | null
+  noteDocsToMerge: NoteDocFragment[] | null
 }) => {
   const router = useRouter()
 
@@ -126,45 +153,49 @@ const NoteEditEl = ({
   )
 }
 
-const NoteDocDropdown = ({
+/**
+ * Only show if note is created
+ */
+const NoteDocSelectDropdown = ({
+  cur,
   note,
-  draft,
 }: {
+  cur: NoteDocFragment | NoteDraftFragment
   note: NoteFragment
-  draft?: NoteDraftFragment
 }): JSX.Element => {
   const { symbol } = note.sym,
     qDocsToMerge = useNoteDocsToMergeByNoteQuery({
       variables: { noteId: note.id },
     })
+
+  let curLabel = ''
+  if (cur.__typename === 'NoteDraft') {
+    curLabel = 'Draft'
+  } else if (cur.__typename === 'NoteDoc') {
+    curLabel = cur.id === note.headDoc.id ? 'Head' : cur.id.slice(-6)
+  }
+
   return (
     <div>
-      {draft && (
-        <Link href={getNotePageURL('edit', symbol)}>
-          <a>Draft</a>
-        </Link>
-      )}
-      {note && (
-        <Link href={getNotePageURL('view', symbol)}>
-          <a>Head</a>
-        </Link>
-      )}
-      {qDocsToMerge.data &&
-        qDocsToMerge.data.noteDocsToMergeByNote.map(e => (
-          <Link key={e.id} href={getNotePageURL('doc', symbol, e.id)}>
-            <a>Doc to merge #{e.id}</a>
+      Viewing {curLabel}
+      <div>
+        {cur.__typename === 'NoteDraft' && (
+          <Link href={getNotePageURL('edit', symbol)}>
+            <a>Draft</a>
           </Link>
-        ))}
+        )}
+        {note && (
+          <Link href={getNotePageURL('view', symbol)}>
+            <a>Head</a>
+          </Link>
+        )}
+        {qDocsToMerge.data &&
+          qDocsToMerge.data.noteDocsToMergeByNote.map(e => (
+            <NoteDocLink key={e.id} doc={e} />
+          ))}
+      </div>
     </div>
   )
-}
-
-const NoteDocContentBodyEl = ({
-  contentBody,
-}: {
-  contentBody: NoteDocContentBodyFragment
-}) => {
-  const { blocks } = contentBody
 }
 
 /**
@@ -173,17 +204,19 @@ const NoteDocContentBodyEl = ({
 const NoteViewEl = ({
   doc,
   note,
+  noteDocsToMerge,
 }: {
   doc: NoteDocFragment
   note: NoteFragment
+  noteDocsToMerge: NoteDocFragment[] | null
 }) => {
   const isHeadDoc = doc.id === note.headDoc.id,
     { blocks, docBlock } = convertGQLBlocks(doc.contentBody.blocks)
 
   return (
-    <div>
-      <NoteAlerts curDoc={doc} note={note} />
-      <NoteDocDropdown note={note} />
+    <Layout>
+      <NoteAlerts cur={doc} note={note} noteDocsToMerge={noteDocsToMerge} />
+      <NoteDocSelectDropdown cur={doc} note={note} />
 
       <div>
         <Link href={getNotePageURL('edit', note.sym.symbol)}>
@@ -195,18 +228,19 @@ const NoteViewEl = ({
       {/* <NoteHead /> */}
 
       <BlockViewerEl blocks={blocks} uid={docBlock.uid} />
-    </div>
+    </Layout>
   )
 }
 
 interface Props {
   url: {
     symbol: string
-    page: 'view' | 'edit' | 'doc' | null
+    page: 'base' | 'doc' | 'edit' | 'view'
     docId: string | null
   }
   note: NoteFragment | null
   noteDoc: NoteDocFragment | null
+  noteDocsToMerge: NoteDocFragment[] | null
 }
 
 /**
@@ -221,17 +255,22 @@ interface Props {
  * - /note/[symbol]/edit
  *   - If has no draft fallback to /note/[symbol]
  * - /note/[symbol]/doc/[docid]
+ *
+ * TODO:
+ * - Move draft query to SSR
+ * - Hydrate apollo by received props
  */
 const NoteSlugPage = ({
   url: { symbol, page },
   note,
   noteDoc,
+  noteDocsToMerge,
 }: Props): JSX.Element | null => {
   const router = useRouter(),
     qDraft = useNoteDraftQuery({ variables: { symbol } })
 
   useEffect(() => {
-    if (page === null && !qDraft.loading) {
+    if (page === 'base' && !qDraft.loading) {
       if (qDraft.data?.noteDraft || note === null) {
         router.replace(getNotePageURL('edit', symbol), undefined, {
           shallow: true,
@@ -240,28 +279,30 @@ const NoteSlugPage = ({
     }
   }, [qDraft])
 
-  if (qDraft.error) throw qDraft.error
   if (qDraft.loading) return null
+  if (qDraft.error && qDraft.error.message !== 'Not authenticated')
+    throw qDraft.error
 
-  if (page === 'edit') {
-    return <NoteEditEl symbol={symbol} note={note} />
-  }
-  if (page === 'view' && note) {
-    return <NoteViewEl doc={note.headDoc} note={note} />
-  }
-  if (page === 'doc' && note && noteDoc) {
-    return <NoteViewEl doc={noteDoc} note={note} />
-  }
-  if (page === null) {
+  const el = React.createElement
+
+  if (page === 'base') {
     if (qDraft.data?.noteDraft) {
-      return <NoteEditEl symbol={symbol} note={note} />
+      return el(NoteEditEl, { symbol, note, noteDocsToMerge })
     }
     if (note) {
-      return <NoteViewEl doc={note.headDoc} note={note} />
+      return el(NoteViewEl, { doc: note.headDoc, note, noteDocsToMerge })
     }
-    return <NoteEditEl symbol={symbol} note={null} />
+    return el(NoteEditEl, { symbol, note, noteDocsToMerge })
   }
-
+  if (page === 'edit') {
+    return el(NoteEditEl, { symbol, note, noteDocsToMerge })
+  }
+  if (page === 'view' && note) {
+    return el(NoteViewEl, { doc: note.headDoc, note, noteDocsToMerge })
+  }
+  if (page === 'doc' && note && noteDoc) {
+    return el(NoteViewEl, { doc: noteDoc, note, noteDocsToMerge })
+  }
   throw new Error('Unexpected error')
 }
 
@@ -286,7 +327,7 @@ export async function getServerSideProps({
     { view } = query
 
   let symbol: string,
-    page: Props['url']['page'] = null,
+    page: Props['url']['page'] = 'base',
     docId: string | null = null
 
   if (slug.length === 1) {
@@ -320,16 +361,19 @@ export async function getServerSideProps({
       (await client.query<NoteDocQuery, NoteDocQueryVariables>({
         query: NoteDocDocument,
         variables: { id: docId },
+      })),
+    qDocsToMerge =
+      qNote.data.noteByBranchSymbol &&
+      (await client.query<
+        NoteDocsToMergeByNoteQuery,
+        NoteDocsToMergeByNoteQueryVariables
+      >({
+        query: NoteDocsToMergeByNoteDocument,
+        variables: { noteId: qNote.data.noteByBranchSymbol.id },
       }))
 
-  // Fallback to null page
-  if (
-    page === 'view' &&
-    (qNote.data.noteByBranchSymbol === undefined ||
-      qNote.data.noteByBranchSymbol === null)
-  ) {
-    page = null
-  }
+  // Fallback to base page
+  if (page === 'view' && isNil(qNote.data.noteByBranchSymbol)) page = 'base'
 
   // Caching, see https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#caching-with-server-side-rendering-ssr
   res.setHeader(
@@ -342,6 +386,9 @@ export async function getServerSideProps({
       url: { symbol, page, docId },
       note: qNote.data.noteByBranchSymbol ?? null,
       noteDoc: qDoc ? qDoc.data.noteDoc : null,
+      noteDocsToMerge: qDocsToMerge
+        ? qDocsToMerge.data.noteDocsToMergeByNote
+        : null,
     },
   }
 }

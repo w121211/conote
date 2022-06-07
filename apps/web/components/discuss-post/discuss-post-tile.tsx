@@ -15,7 +15,7 @@ const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {
       <div className="flex gap-2">
         <div>
           <span className="text-lg font-medium text-gray-400 leading-none">
-            #{parseInt(post.id) + 1}
+            {/* #{parseInt(post.id) + 1} */}#
           </span>
           <div className="flex items-center ">
             {/* <span className="material-icons-outlined text-gray-300 leading-none">tag</span> */}
@@ -31,7 +31,8 @@ const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {
               }}
             >
               <a className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate underline-offset-2 hover:underline">
-                {post.userId}
+                @{post.userId.slice(-6)}
+                {me?.id === post.userId ? '(you)' : null}
               </a>
             </Link>
             {/* <span className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate"></span> */}

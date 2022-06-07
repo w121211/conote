@@ -1,7 +1,13 @@
 import { PrismaClient } from '@prisma/client'
 import { commitNoteDrafts } from '../../lib/models/commit-model'
-import { mockNoteDrafts } from '../../test/__mocks__/mock-note-draft'
+import {
+  mockNoteDrafts,
+  mockNoteDrafts_gotFromDoc,
+} from '../../test/__mocks__/mock-note-draft'
 import { testHelper } from '../../test/test-helpers'
+import { NoteDraftParsed } from '../../lib/interfaces'
+import { noteDocModel } from '../../lib/models/note-doc-model'
+import { mockUsers } from '../../test/__mocks__/mock-user'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),
@@ -24,14 +30,23 @@ async function main() {
   await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
   await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(5))
 
-  await commitNoteDrafts([mockNoteDrafts[0].id], mockNoteDrafts[0].userId)
+  const { noteDocs } = await commitNoteDrafts(
+    [mockNoteDrafts[0].id],
+    mockNoteDrafts[0].userId,
+  )
   await commitNoteDrafts([mockNoteDrafts[1].id], mockNoteDrafts[1].userId)
 
-  await testHelper.createMergePolls(prisma)
+  // await testHelper.createMergePolls(prisma)
 
-  // mockNoteDrafts.slice(0, 2).forEach(async e => {
-  //   await commitNoteDrafts([e.id], e.userId)
-  // })
+  const fromDoc = noteDocs[0],
+    fromDoc_ = noteDocModel.parse(fromDoc),
+    drafts = mockNoteDrafts_gotFromDoc(mockUsers[4].id, fromDoc_)
+
+  await testHelper.createNoteDrafts(prisma, drafts)
+  await commitNoteDrafts(
+    drafts.map(e => e.id),
+    mockUsers[4].id,
+  )
 }
 
 main()

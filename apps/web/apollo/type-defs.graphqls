@@ -324,7 +324,7 @@ type Commit {
   # Consdier to remove
   # noteDrafts: [NoteDraft!]!
 
-  updatedAt: String!
+  createdAt: String!
 }
 
 type Discuss {

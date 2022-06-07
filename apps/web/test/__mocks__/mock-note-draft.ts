@@ -1,16 +1,17 @@
+import { Branch, NoteDoc, Sym } from '@prisma/client'
 import { writeBlocks } from '../../components/block-editor/src/utils'
 import {
-  mockBlockInput,
+  mockBlockInputs,
   mockBlocks,
 } from '../../components/block-editor/test/__mocks__/mock-block'
-import { NoteDraftParsed } from '../../lib/interfaces'
+import { NoteDocParsed, NoteDraftParsed } from '../../lib/interfaces'
 import { mockBranches } from './mock-branch'
 import { mockDiscusses } from './mock-discuss'
 import { mockLinks } from './mock-link'
 import { mockSyms } from './mock-sym'
 import { mockUsers } from './mock-user'
 
-const base: NoteDraftParsed = {
+const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
   id: '',
   branchId: mockBranches[0].id,
   symbol: '',
@@ -28,13 +29,14 @@ const base: NoteDraftParsed = {
       { symbol: '[[Google]]', symId: null },
       { symbol: '$BA', symId: null },
     ],
-    blocks: writeBlocks(mockBlockInput, { docTitle: mockSyms[0].symbol }),
+    blocks: writeBlocks(mockBlockInputs[0], { docTitle: mockSyms[0].symbol }),
   },
-  createdAt: new Date(),
-  updatedAt: new Date(),
 }
 
-export const mockNoteDrafts: NoteDraftParsed[] = [
+export const mockNoteDrafts: Omit<
+  NoteDraftParsed,
+  'createdAt' | 'updatedAt'
+>[] = [
   {
     ...base,
     id: '0-from_empty',
@@ -46,7 +48,7 @@ export const mockNoteDrafts: NoteDraftParsed[] = [
         { symbol: '[[Google]]', symId: null },
         { symbol: '$BA', symId: null },
       ],
-      blocks: writeBlocks(mockBlockInput, { docTitle: mockSyms[0].symbol }),
+      blocks: writeBlocks(mockBlockInputs[0], { docTitle: mockSyms[0].symbol }),
     },
   },
   {
@@ -111,37 +113,42 @@ export const mockNoteDrafts: NoteDraftParsed[] = [
       blocks: mockBlocks,
     },
   },
-  {
-    ...base,
-    id: '5-some_more_for_draft_entry',
-    symbol: '$AAPL',
-    contentHead: {
-      title: 'Apple Inc.',
-    },
-    contentBody: {
-      discussIds: [],
-      symbols: [],
-      blocks: writeBlocks(mockBlockInput, { docTitle: '$AAPL' }),
-    },
-  },
-  {
-    ...base,
-    id: '6-some_more_for_draft_entry',
-    symbol: 'https://storybook.js.org/',
-    contentHead: {
-      title: 'Storybook: UI component explorer for frontend developers',
-      webpage: {
-        title: 'Storybook: UI component explorer for frontend developers',
-      },
-    },
-    contentBody: {
-      discussIds: [],
-      symbols: [],
-      blocks: writeBlocks(mockBlockInput, {
-        docTitle: 'https://storybook.js.org/',
-      }),
-    },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
 ]
+
+export function mockNoteDrafts_gotFromDoc(
+  userId: string,
+  fromDoc: NoteDocParsed<NoteDoc & { sym: Sym; branch: Branch }>,
+): Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'>[] {
+  const { id, branchId, symId, sym, domain, contentHead, contentBody } =
+      fromDoc,
+    base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
+      id: '',
+      branchId,
+      symId,
+      symbol: sym.symbol,
+      userId: '',
+      commitId: null,
+      fromDocId: id,
+      linkId: null,
+      status: 'EDIT',
+      domain: domain,
+      contentHead,
+      contentBody: {
+        ...contentBody,
+        blocks: writeBlocks(mockBlockInputs[1], {
+          docTitle: fromDoc.sym.symbol,
+        }),
+      },
+    }
+
+  return [
+    {
+      ...base,
+      id: '90-from_doc_modify_and_create_poll',
+      userId,
+    },
+    // { ...base, id: '91-from_doc_insert_only_and_merged', userId: mockUsers[4].id },
+    // { ...base, id: '92-from_doc_add_discuss', userId: mockUsers[4].id },
+    // { ...base, id: '93-from_doc_insert_only', userId: mockUsers[4].id },
+  ]
+}
