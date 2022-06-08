@@ -30,7 +30,7 @@ fragment commit on Commit {
   noteDocs {
     ...noteDoc
   }
-  updatedAt
+  createdAt
 }
 
 fragment discuss on Discuss {

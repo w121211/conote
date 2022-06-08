@@ -12,7 +12,7 @@ import {
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import DiscussTile from '../../components/discuss/discuss-tile'
-import DiscussPostTileList from '../../components/discuss-post/discuss-post-tiles'
+import DiscussPostTiles from '../../components/discuss-post/discuss-post-tiles'
 import DiscussPostForm from '../../components/discuss-post/discuss-post-form'
 import Layout from '../../components/ui-component/layout'
 
@@ -26,7 +26,7 @@ const DiscussPage = ({ discuss, discussPosts }: Props) => {
     <Layout backgroundColor="bg-gray-200">
       <div className="flex flex-col gap-4 w-full">
         <DiscussTile data={discuss} />
-        <DiscussPostTileList posts={discussPosts} />
+        <DiscussPostTiles posts={discussPosts} />
         <DiscussPostForm discussId={discuss.id} />
       </div>
     </Layout>
