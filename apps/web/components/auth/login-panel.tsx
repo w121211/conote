@@ -11,6 +11,7 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import { useSessionLoginMutation } from '../../apollo/query.graphql'
 import { useFirebaseClient } from './firebase-client'
 import { useMe } from './use-me'
+import { ErrorDisplay } from '../status-display'
 
 /**
  * Known issues
@@ -115,20 +116,25 @@ const LoginPanel = (): JSX.Element | null => {
   // TODO: Use an page status display component (unified) with given error message
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <section className="text-center mx-6 lg:w-2/3">
-          <h1 className="mt-2 mb-3 text-2xl lg:text-3xl">Ooops! {error}</h1>
-          <div>
+      <ErrorDisplay
+        error={error}
+        btn={
+          <>
             <a
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+              className="btn-primary-lg inline-block mr-6 font-medium "
               href="/"
             >
               Go to Home
             </a>
-            <a href="/login">Login</a>
-          </div>
-        </section>
-      </div>
+            <a
+              href="/login"
+              className="btn-normal-lg inline-block font-medium "
+            >
+              Login
+            </a>
+          </>
+        }
+      />
     )
   }
   return (
@@ -138,8 +144,8 @@ const LoginPanel = (): JSX.Element | null => {
         <div className="mb-10 text-gray-600">Start to write note!</div>
         <StyledFirebaseAuth
           uiCallback={ui => {
-            // ui.disableAutoSignIn()
-            ui.signIn()
+            ui.disableAutoSignIn()
+            // ui.signIn()
           }}
           uiConfig={makeUIConfig(handleSignedInUser)}
           firebaseAuth={firebaseAuth}
