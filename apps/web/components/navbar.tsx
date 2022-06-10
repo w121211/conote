@@ -1,26 +1,21 @@
-import Link from 'next/link'
 import React, { ReactNode } from 'react'
-import { useMeQuery } from '../apollo/query.graphql'
-import AuthItem from './auth/auth-Item'
+import Link from 'next/link'
+import AuthItem from './auth/auth-item'
 import { useMe } from './auth/use-me'
 import { CommitPanel } from './commit/commit-panel'
-import { SearchAll } from './search-all-modal/search-all-modal'
-import { ThemeToggle } from './theme/theme-toggle'
-// import { useMeQuery } from '../apollo/query.graphql'
+import SearchAllModal from './search-all-modal/search-all-modal'
 
 const Navbar = ({
   rbtn,
   onClickMenu,
-
   backgroundColor,
 }: {
   rbtn?: ReactNode
   onClickMenu: (boo?: boolean) => void
-
   backgroundColor?: string
 }) => {
   const { me, loading } = useMe()
-  // const { data: me } = useMeQuery()
+
   return (
     <nav
       className={`
@@ -47,10 +42,11 @@ const Navbar = ({
           <Link href="/">
             <a className=" text-gray-800 dark:text-gray-200">Konote</a>
           </Link>
-          <SearchAll />
+          <SearchAllModal />
         </div>
       </div>
       {/* {navPath} */}
+
       {/* --- right area --- */}
       <div className="flex items-center gap-2 mr-4 right-0">
         {rbtn}

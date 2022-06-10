@@ -44,10 +44,12 @@ const BlockViewer = ({
   uid,
   blocks,
   isChild,
+  omitParent,
 }: {
   uid: string
   blocks: Block[]
   isChild?: true
+  omitParent?: true
 }): JSX.Element | null => {
   const block = blocks.find(e => e.uid === uid)
 
@@ -68,17 +70,15 @@ const BlockViewer = ({
     <div
       data-uid={uid}
       data-childrenuids={children.map(e => e.uid).join(',')}
-      className={
-        // [
-        `block-container
+      className={`block-container
         ${isChild ? 'ml-[1em] [grid-area:body]' : ''}
         ${children.length > 0 && isOpen && 'show-tree-indicator'}
         ${isOpen ? 'is-open' : 'is-closed'}
-        `
-      }
+        `}
     >
-      <div
-        className='
+      {!omitParent && (
+        <div
+          className='
           relative
           grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"]
           grid-cols-[1em_1em_1fr_auto]
@@ -87,8 +87,8 @@ const BlockViewer = ({
           leading-normal
           my-1
          '
-      >
-        {/* {children.length > 0 && (
+        >
+          {/* {children.length > 0 && (
           <Toggle
             isShow={showEditableDom}
             isOpen={isOpen}
@@ -98,7 +98,7 @@ const BlockViewer = ({
             }}
           />
         )} */}
-        {/* <Anchor
+          {/* <Anchor
           anchorElement="circle"
           // handlePressAnchor={handlePressAnchor}
           isClosedWithChildren={!isOpen && children.length > 0}
@@ -109,8 +109,9 @@ const BlockViewer = ({
           onDragStart={e => bulletDragStart(e, uid, setDragging)}
           onDragEnd={() => bulletDragEnd(setDragging)}
         /> */}
-        <BlockViewerContent uid={block.uid} str={block.str} />
-      </div>
+          <BlockViewerContent uid={block.uid} str={block.str} />
+        </div>
+      )}
 
       {isOpen && children.length > 0 && childrenBlockEls}
     </div>

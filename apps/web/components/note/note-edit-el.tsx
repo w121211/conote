@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
-import { isNil } from 'lodash'
-import { NoteDocFragment, NoteFragment } from '../../apollo/query.graphql'
+import {
+  NoteDocFragment,
+  NoteDraftFragment,
+  NoteFragment,
+} from '../../apollo/query.graphql'
 import { EditorEl } from '../block-editor/src/components/editor/editor-el'
 import Layout from '../ui-component/layout'
-import { docSave, editorOpenSymbolInMain } from '../block-editor/src/events'
-import NoteHead from './note-head'
-import { getNotePageURL } from './note-helpers'
+import { editorOpenSymbolInMain } from '../block-editor/src/events'
+import NoteDocVersionDropdown from './note-doc-version-dropdown'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -15,10 +16,12 @@ import { getNotePageURL } from './note-helpers'
 const NoteEditEl = ({
   symbol,
   note,
+  noteDraft,
   noteDocsToMerge,
 }: {
   symbol: string
   note: NoteFragment | null
+  noteDraft: NoteDraftFragment | null
   noteDocsToMerge: NoteDocFragment[] | null
 }) => {
   const router = useRouter()
@@ -86,10 +89,16 @@ const NoteEditEl = ({
         }
       >
         {note && (
-          <Link href={getNotePageURL('view', note.sym.symbol)}>
-            <a>View</a>
-          </Link>
+          // <Link href={getNotePageURL('view', note.sym.symbol)}>
+          //   <a>View</a>
+          // </Link>
+          <NoteDocVersionDropdown
+            cur={noteDraft}
+            note={note}
+            noteDraft={noteDraft}
+          />
         )}
+        <div>Editing</div>
         <EditorEl />
       </Layout>
     </>

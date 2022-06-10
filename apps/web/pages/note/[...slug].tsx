@@ -18,7 +18,7 @@ import {
   useNoteDraftQuery,
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
-import { getNotePageURL } from '../../components/note/note-helpers'
+import { getNotePageURL } from '../../shared/note-helpers'
 import NoteEditEl from '../../components/note/note-edit-el'
 import NoteViewEl from '../../components/note/note-view-el'
 
@@ -81,25 +81,35 @@ const NoteSlugPage = ({
   if (qDraft.error && qDraft.error.message !== 'Not authenticated')
     throw qDraft.error
 
-  const el = React.createElement
+  const el = React.createElement,
+    props = {
+      symbol,
+      note,
+      noteDraft: qDraft.data?.noteDraft ?? null,
+      noteDocsToMerge,
+    }
 
   if (page === 'base') {
     if (qDraft.data?.noteDraft) {
-      return el(NoteEditEl, { symbol, note, noteDocsToMerge })
+      return el(NoteEditEl, props)
     }
     if (note) {
-      return el(NoteViewEl, { doc: note.headDoc, note, noteDocsToMerge })
+      return el(NoteViewEl, {
+        ...props,
+        doc: note.headDoc,
+        note,
+      })
     }
-    return el(NoteEditEl, { symbol, note, noteDocsToMerge })
+    return el(NoteEditEl, props)
   }
   if (page === 'edit') {
-    return el(NoteEditEl, { symbol, note, noteDocsToMerge })
+    return el(NoteEditEl, props)
   }
   if (page === 'view' && note) {
-    return el(NoteViewEl, { doc: note.headDoc, note, noteDocsToMerge })
+    return el(NoteViewEl, { ...props, doc: note.headDoc, note })
   }
   if (page === 'doc' && note && noteDoc) {
-    return el(NoteViewEl, { doc: noteDoc, note, noteDocsToMerge })
+    return el(NoteViewEl, { ...props, doc: noteDoc, note })
   }
   throw new Error('Unexpected error')
 }

@@ -1,5 +1,6 @@
 import { isNil } from 'lodash'
 import React, { useState } from 'react'
+import DomainSelect from '../../../../domain/domain-select'
 import Modal from '../../../../modal/modal'
 import { styleSymbol } from '../../../../ui-component/style-fc/style-symbol'
 import { Doc } from '../../interfaces'
@@ -35,6 +36,8 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
           />
         )} */}
       </div>
+
+      <DomainSelect />
 
       <div
         className="relative mb-3 hover:cursor-pointer"

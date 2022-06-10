@@ -3,12 +3,12 @@ import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
 import ModalProvider from '../../components/modal/modal-context'
-import { SearchAll } from '../../components/search-all-modal/search-all-modal'
+import SearchAllModal from '../../components/search-all-modal/search-all-modal'
 
 const apolloClient = getApolloClient()
 
 export default {
-  component: SearchAll,
+  component: SearchAllModal,
   decorators: [
     Story => (
       <div style={{ width: '30%', margin: '3rem' }}>
@@ -25,12 +25,12 @@ export default {
       ],
     },
   },
-} as ComponentMeta<typeof SearchAll>
+} as ComponentMeta<typeof SearchAllModal>
 
-const Template: ComponentStory<typeof SearchAll> = _ => (
+const Template: ComponentStory<typeof SearchAllModal> = _ => (
   <ApolloProvider client={apolloClient}>
     <ModalProvider>
-      <SearchAll />
+      <SearchAllModal />
     </ModalProvider>
   </ApolloProvider>
 )

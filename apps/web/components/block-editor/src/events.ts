@@ -669,13 +669,7 @@ export async function docOpen(
   domain = 'domain',
 ): Promise<{ docUid: string }> {
   const found = docRepo.findDoc(symbol)
-  if (found) {
-    // throw new Error('[docOpen] Doc is existed')
-    console.debug('[docOpen] Doc is existed')
-    return {
-      docUid: found.uid,
-    }
-  }
+  if (found) return { docUid: found.uid }
 
   const [note, draft] = await Promise.all([
     noteService.queryNote(symbol),
@@ -944,30 +938,35 @@ export async function editorOpenSymbolInModal(
   if (opening.modal.docUid && !opts?.skipSave) saveCurDoc(opening.modal.docUid)
 
   if (symbol === null || symbol === opening.main.symbol) {
-    editorRepo.updateOpening({
-      ...opening,
-      modal: { symbol: null, docUid: null },
-    })
     if (router) {
       await routeUpdateShallow(router, {
         pathname: '/note/[...slug]',
         query: { slug: [opening.main.symbol, 'edit'] },
       })
     }
+    editorRepo.updateOpening({
+      ...opening,
+      modal: { symbol: null, docUid: null },
+    })
   } else if (symbol === opening.modal.symbol) {
     // Do nothing
   } else {
-    const { docUid } = await docOpen(symbol)
-    editorRepo.updateOpening({
-      ...opening,
-      modal: { symbol, docUid },
-    })
     if (router) {
       await routeUpdateShallow(router, {
         pathname: '/note/[...slug]',
         query: { slug: [opening.main.symbol, 'edit'], pop: symbol },
       })
     }
+    editorRepo.updateOpening({
+      ...opening,
+      modal: { symbol, docUid: null },
+    })
+
+    const { docUid } = await docOpen(symbol)
+    editorRepo.updateOpening({
+      ...opening,
+      modal: { symbol, docUid },
+    })
   }
 }
 

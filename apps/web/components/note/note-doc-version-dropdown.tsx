@@ -6,7 +6,7 @@ import {
   NoteFragment,
   useNoteDocsToMergeByNoteQuery,
 } from '../../apollo/query.graphql'
-import { getNotePageURL } from './note-helpers'
+import { getNotePageURL } from '../../shared/note-helpers'
 
 /**
  * Only show if note is created
@@ -14,9 +14,11 @@ import { getNotePageURL } from './note-helpers'
 const NoteDocVersionDropdown = ({
   cur,
   note,
+  noteDraft,
 }: {
-  cur: NoteDocFragment | NoteDraftFragment
+  cur: NoteDocFragment | NoteDraftFragment | null
   note: NoteFragment
+  noteDraft: NoteDraftFragment | null
 }): JSX.Element => {
   const { symbol } = note.sym,
     qDocsToMerge = useNoteDocsToMergeByNoteQuery({
@@ -25,7 +27,7 @@ const NoteDocVersionDropdown = ({
     [hide, setHide] = useState(true)
 
   let curLabel = ''
-  if (cur.__typename === 'NoteDraft') {
+  if (cur === null || cur.__typename === 'NoteDraft') {
     curLabel = 'Draft'
   } else if (cur.__typename === 'NoteDoc') {
     curLabel = cur.id === note.headDoc.id ? 'Head' : cur.id.slice(-6)
@@ -40,7 +42,7 @@ const NoteDocVersionDropdown = ({
         type="button"
         onClick={() => setHide(!hide)}
       >
-        Dropdown button{' '}
+        {curLabel + ' '}
         {/* <svg
           className="w-4 h-4 ml-2"
           fill="none"
@@ -65,7 +67,7 @@ const NoteDocVersionDropdown = ({
           className="py-1 text-sm text-gray-700 dark:text-gray-200"
           aria-labelledby="dropdownDefault"
         >
-          {cur.__typename === 'NoteDraft' && (
+          {noteDraft && (
             <li>
               <Link href={getNotePageURL('edit', symbol)}>
                 <a className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">

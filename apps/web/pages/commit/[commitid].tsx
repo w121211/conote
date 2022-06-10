@@ -8,7 +8,7 @@ import {
   CommitQueryVariables,
 } from '../../apollo/query.graphql'
 import Layout from '../../components/ui-component/layout'
-import { getNotePageURL } from '../../components/note/note-helpers'
+import { getNotePageURL } from '../../shared/note-helpers'
 import Link from 'next/link'
 
 interface Props {

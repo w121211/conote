@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { DiscussFragment } from '../../../../../../apollo/query.graphql'
-import CreateDiscussForm from '../../../../../discuss/discuss-form'
+import DiscussForm from '../../../../../discuss/discuss-form'
 // import { DiscussModalPage } from '../../../../../discuss/modal-page/modal-page'
 import Modal from '../../../../../modal/modal'
 import { blockStrReplace } from '../../../events'
@@ -63,7 +63,6 @@ const InlineDiscussEl = ({
 
   return (
     <>
-      <span>ajdoiaj oisja</span>
       <Modal
         visible={showModal}
         onClose={() => setShowModal(false)}
@@ -75,12 +74,13 @@ const InlineDiscussEl = ({
             <DiscussModalPageEl id={id} />
           </div>
         ) : (
-          <CreateDiscussForm
+          <DiscussForm
             title={title}
             onCreate={data => discussOnCreate(blockUid, inline, data)}
           />
         )}
       </Modal>
+
       {isDiscussCreated ? (
         <span
           className="relative text-blue-500 hover:bg-gray-100"

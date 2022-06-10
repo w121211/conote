@@ -28,7 +28,7 @@ const mockList = [
   },
 ]
 
-export const SearchAll = () => {
+const SearchAllModal = () => {
   const [searchSymbol, { data }] = useSearchSymbolLazyQuery()
   const [showModal, setShowModal] = useState(false)
   const [inputValue, setInputValue] = useState('')
@@ -305,3 +305,5 @@ export const SearchAll = () => {
     </>
   )
 }
+
+export default SearchAllModal

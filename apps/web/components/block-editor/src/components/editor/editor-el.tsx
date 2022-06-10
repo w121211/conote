@@ -4,11 +4,7 @@ import Modal from '../../../../modal/modal'
 import { editorRepo } from '../../stores/editor.repository'
 import { DocEl } from '../doc/doc-el'
 import { useRouter } from 'next/router'
-import {
-  docRename,
-  editorOpenSymbolInMain,
-  editorOpenSymbolInModal,
-} from '../../events'
+import { editorOpenSymbolInMain, editorOpenSymbolInModal } from '../../events'
 
 /**
  * When component mount, EditorEl loads the current main-doc in the repo.
@@ -23,6 +19,7 @@ import {
 export const EditorEl = (): JSX.Element | null => {
   const router = useRouter(),
     [alert] = useObservable(editorRepo.alter$),
+    [opening] = useObservable(editorRepo.opening$),
     [mainDoc] = useObservable(editorRepo.mainDoc$, { initialValue: null }),
     [modalDoc] = useObservable(editorRepo.modalDoc$, { initialValue: null })
 
@@ -90,7 +87,10 @@ export const EditorEl = (): JSX.Element | null => {
         //   </div>
         // }
 
-        visible={modalDoc !== undefined && modalDoc !== null}
+        visible={
+          opening.modal.symbol !== null ||
+          (modalDoc !== undefined && modalDoc !== null)
+        }
         onClose={() => editorOpenSymbolInModal(null, router)}
 
         // visible={modalSymbol !== null}
@@ -112,7 +112,12 @@ export const EditorEl = (): JSX.Element | null => {
         //   })
         // }}
       >
-        {modalDoc && <DocEl doc={modalDoc} />}
+        {modalDoc ? (
+          <DocEl doc={modalDoc} />
+        ) : (
+          // TODO: modal loading
+          <div>Loading</div>
+        )}
       </Modal>
     </>
   )
