@@ -22,7 +22,7 @@ const initial: Block[] = [
     order: 0,
     parentUid: null,
     childrenUids: ['b1', 'b2'],
-    docTitle: 'a0',
+    docSymbol: 'a0',
   },
   {
     uid: 'b1',

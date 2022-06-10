@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
 import Modal from '../../../../modal/modal'
 import { editorRepo } from '../../stores/editor.repository'
 import { DocEl } from '../doc/doc-el'
 import { useRouter } from 'next/router'
-import { editorOpenSymbolInModal } from '../../events'
+import {
+  docRename,
+  editorOpenSymbolInMain,
+  editorOpenSymbolInModal,
+} from '../../events'
 
 /**
  * When component mount, EditorEl loads the current main-doc in the repo.
@@ -22,22 +26,32 @@ export const EditorEl = (): JSX.Element | null => {
     [mainDoc] = useObservable(editorRepo.mainDoc$, { initialValue: null }),
     [modalDoc] = useObservable(editorRepo.modalDoc$, { initialValue: null })
 
-  // useEffect(() => {
-  //   console.log('mainDoc', mainDoc)
-  //   console.log('modalDoc', modalDoc)
-  // }, [mainDoc, modalDoc])
+  useEffect(() => {
+    console.log('mainDoc', mainDoc)
+    console.log('modalDoc', modalDoc)
+  }, [mainDoc, modalDoc])
+
+  useEffect(() => {
+    return () => {
+      editorOpenSymbolInMain(null)
+    }
+  }, [])
 
   if (mainDoc === undefined) {
-    return (
-      <h1>
-        Editor-el without doc (happened when doc is dropped), Start a new doc
-        Search panel goes here
-      </h1>
-    )
+    router.push('/note/')
+    // return <div>mainDoc === undefined</div>
   }
 
   return (
     <>
+      {/* <button
+        onClick={() => {
+          docRename(mainDoc, mainDoc.symbol.replace(']]', 'X]]'), router)
+        }}
+      >
+        Rename
+      </button> */}
+
       {alert && <div>{alert.message}</div>}
 
       {mainDoc && <DocEl doc={mainDoc} />}

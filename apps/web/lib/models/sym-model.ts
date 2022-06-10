@@ -103,7 +103,7 @@ class SymModel {
     } else if (isURL(symbol)) {
       type = SymType.URL
     } else {
-      throw new Error(`symbol parse error: ${symbol}`)
+      throw new Error(`Symbol parse error: ${symbol}`)
     }
     return { symbol, type }
   }

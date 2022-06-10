@@ -29,7 +29,7 @@ export type BlockReducerFn = () => BlockReducer[]
 
 export const blocksStore = createStore(
   { name: 'blocksStore' },
-  withEntities<Block, 'uid'>({ idKey: 'uid', initialValue: [] }),
+  withEntities<Block, 'uid'>({ idKey: 'uid' }),
 )
 
 const blocksStateHistory = stateHistory(blocksStore)

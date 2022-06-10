@@ -4,7 +4,7 @@ import { NoteDraftEntryFragment } from '../../../../../apollo/query.graphql'
 import { useObservable } from '@ngneat/react-rxjs'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarItemPanel from './sidebar-item-panel'
-import { getNotePageURL } from '../../../../../shared/note-helpers'
+import { getNotePageURL } from '../../../../note/note-helpers'
 // import { DocEntryPack } from '../workspace/doc'
 // import ContentPanel from './doc-index-panel'
 
@@ -101,10 +101,10 @@ const SidebarItem = ({
 }: {
   item: NoteDraftEntryFragment
 }): JSX.Element | null => {
-  const [route] = useObservable(editorRepo.route$, { initialValue: null }),
+  const [opening] = useObservable(editorRepo.opening$, { initialValue: null }),
     { symbol, title } = item
 
-  if (route === null) {
+  if (opening === null) {
     return null
   }
   return (
@@ -112,7 +112,7 @@ const SidebarItem = ({
       <Link href={getNotePageURL('edit', item.symbol)}>
         <a
           className={`group flex items-center gap-1 pl-4 pr-4 leading-relax ${
-            route.symbolMain == symbol
+            opening.main.symbol == symbol
               ? 'bg-gray-200/60 hover:bg-gray-300/70'
               : 'bg-transparent hover:bg-gray-200/70'
           } `}
@@ -123,10 +123,10 @@ const SidebarItem = ({
           <span className="inline-block min-w-0 flex-1 truncate ">
             <ItemLabel symbol={symbol} title={title ?? undefined} />
           </span>
-
-          <SidebarItemPanel item={item} />
         </a>
       </Link>
+      {/* TODO: 放在link裡面時，點擊時會同時觸發href連結 */}
+      <SidebarItemPanel item={item} />
     </div>
   )
 }

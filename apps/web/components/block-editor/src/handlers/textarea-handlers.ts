@@ -8,6 +8,7 @@ import {
   selectionSetItems,
 } from '../events'
 import { DestructTextareaKeyEvent } from '../interfaces'
+import { getBlock } from '../stores/block.repository'
 import { rfdbRepo } from '../stores/rfdb.repository'
 import { getDatasetChildrenUid, getDatasetUid } from '../utils'
 
@@ -122,53 +123,61 @@ export function findSelectedItems(
   - User pastes and clipboard data doesn't have new lines -> default
   - User pastes without shift and clipboard data has new line characters -> PREVENT default and convert to outliner blocks"
  */
-export function textareaPaste(
-  e: React.ClipboardEvent<HTMLTextAreaElement>,
-  lastKeyDown: DestructTextareaKeyEvent | null,
-) {
-  const data = e.clipboardData
+// export function textareaPaste(
+//   e: React.ClipboardEvent<HTMLTextAreaElement>,
+//   lastKeyDown: DestructTextareaKeyEvent | null,
+// ) {
+//   const data = e.clipboardData
 
-  if (data) {
-    const textData = data.getData('text/plain'),
-      internalRepresentation = JSON.parse(
-        data.getData('application/athens-representation'),
-      ),
-      lineBreaks = reFind(/\r?\n/, textData)
+//   if (data) {
+//     const textData = data.getData('text/plain'),
+//       internalRepresentation = JSON.parse(
+//         data.getData('application/athens-representation'),
+//       ),
+//       lineBreaks = reFind(/\r?\n/, textData)
 
-    if (internalRepresentation && Array.isArray(internalRepresentation)) {
-      // With internal representation
-      // internal = internalRepresentation ,
-      // newUids = newUidsMap(internalPresentation),
-      // reprWithNewUids = updateUids(internalPresentation, newUids),
-      e.preventDefault()
-      // dispatchEvent('paste-internal', uid, state.string.local, reprWithNewUids)
-      events.pasteInternal()
-    } else if (seq(filter())) {
-      // images in clipboard
-      // items = arraySeq(e.clipboardData.items),
-      // { head, tail } = destructTarget(e.target),
-      // imgRegex = /#"(?i)^image\/(p?jpeg|gif|png)$"/,
-      // callback = () => {},
-      // For images
-    } else if (lineBreaks && !lastKeyDown.shift) {
-      // external to internal representation
-      // textToInter = textData !== '' && textToInternalPresentation(textData),
-      // lineBreaks = reFind(/\r?\n/, textData),
-      // noShift = state.lastKeydown !== 'shift'
-      e.preventDefault()
-      dispatchEvent('paste-internal', uid, state.string.local, textToInter)
-    } else if (noShift) {
-      e.preventDefaul()
-      dispatchEvent('paste-verbatim', uid, textData)
-    }
-  }
-}
+//     if (internalRepresentation && Array.isArray(internalRepresentation)) {
+//       // With internal representation
+//       // internal = internalRepresentation ,
+//       // newUids = newUidsMap(internalPresentation),
+//       // reprWithNewUids = updateUids(internalPresentation, newUids),
+//       e.preventDefault()
+//       // dispatchEvent('paste-internal', uid, state.string.local, reprWithNewUids)
+//       events.pasteInternal()
+//     } else if (seq(filter())) {
+//       // images in clipboard
+//       // items = arraySeq(e.clipboardData.items),
+//       // { head, tail } = destructTarget(e.target),
+//       // imgRegex = /#"(?i)^image\/(p?jpeg|gif|png)$"/,
+//       // callback = () => {},
+//       // For images
+//     } else if (lineBreaks && !lastKeyDown.shift) {
+//       // external to internal representation
+//       // textToInter = textData !== '' && textToInternalPresentation(textData),
+//       // lineBreaks = reFind(/\r?\n/, textData),
+//       // noShift = state.lastKeydown !== 'shift'
+//       e.preventDefault()
+//       dispatchEvent('paste-internal', uid, state.string.local, textToInter)
+//     } else if (noShift) {
+//       e.preventDefaul()
+//       dispatchEvent('paste-verbatim', uid, textData)
+//     }
+//   }
+// }
 
 export function textareaBlur(
   event: React.ChangeEvent<HTMLTextAreaElement>,
   uid: string,
 ) {
-  blockSave(uid, event.currentTarget.value)
+  // If the doc has only one block and got deleted, it will call textareaBlur.
+  //  Because the block is alredy deleted, the block not found error need to be catched
+  try {
+    getBlock(uid)
+    blockSave(uid, event.currentTarget.value)
+  } catch (err) {
+    console.debug('textareaBlur')
+    console.debug(err)
+  }
 }
 
 export function textareaChange(

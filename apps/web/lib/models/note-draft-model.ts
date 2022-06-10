@@ -1,12 +1,31 @@
 import { NoteDraft } from '@prisma/client'
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
+import { convertGQLBlocks } from '../../shared/block-helpers'
 import {
   NoteDocContentBody,
   NoteDocContentHead,
   NoteDraftParsed,
 } from '../interfaces'
 import prisma from '../prisma'
+import { noteDocModel } from './note-doc-model'
 import { symModel } from './sym-model'
+
+/**
+ *
+ */
+function validateContentBody(
+  symbol: string,
+  contentBody: NoteDraftInput['contentBody'],
+) {
+  const { docBlock, blocks } = convertGQLBlocks(contentBody.blocks)
+
+  if (docBlock.docSymbol === undefined)
+    throw new Error('docBlock.docSymbol === undefined')
+  if (docBlock.docSymbol !== docBlock.str)
+    throw new Error('docBlock.docSymbol !== docBlock.str')
+  if (symbol !== docBlock.docSymbol)
+    throw new Error('symbol !== docBlock.docSymbol')
+}
 
 class NoteDraftModel {
   /**
@@ -20,7 +39,10 @@ class NoteDraftModel {
 
   /**
    * Throws
+   * - If symbol has wrong format
+   * - If sym is found but not has from-doc (because sym is created along with note-doc)
    * - [] If not made any changes compare to the from-doc
+   *
    */
   async validateCreateInput(
     branchName: string,
@@ -28,29 +50,44 @@ class NoteDraftModel {
     fromDocId?: string,
     linkId?: string,
   ) {
-    // TODO: Validate the symbol
+    if (symbol) {
+      const symbol_ = symModel.parse(symbol)
+      if (symbol_.type !== 'TOPIC')
+        throw new Error('[updateSymbol] symbol_.type !== TOPIC')
+    }
+
     const branch = await prisma.branch.findUnique({
-      where: { name: branchName },
-      select: { id: true },
-    })
-    const symbolParsed = symbol ? symModel.parse(symbol) : null
-    const link = linkId
-      ? await prisma.link.findUnique({ where: { id: linkId } })
-      : null
-    const fromDoc = fromDocId
-      ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } })
-      : null
+        where: { name: branchName },
+      }),
+      sym = symbol && (await prisma.sym.findUnique({ where: { symbol } })),
+      headDoc =
+        branch && sym ? await noteDocModel.getHeadDoc(branch.id, sym.id) : null,
+      link = linkId
+        ? await prisma.link.findUnique({ where: { id: linkId } })
+        : null
+
+    // const fromDoc = fromDocId
+    //   ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } })
+    //   : null
 
     if (branch === null)
-      throw new Error('[NoteDraftModel.createByLink] branch not found.')
+      throw new Error('[NoteDraftModel.createByLink] Branch not found.')
+    if (fromDocId && fromDocId !== headDoc?.id)
+      throw new Error(
+        '[NoteDraftModel.createByLink] From-doc is not the head-doc.',
+      )
+    if (sym && fromDocId === undefined)
+      throw new Error(
+        '[NoteDraftModel.createByLink] Sym is found but not has from-doc.',
+      )
     if (linkId && link === null)
-      throw new Error('[NoteDraftModel.createByLink] link not found.')
-    if (fromDocId && fromDoc === null)
-      throw new Error('[NoteDraftModel.createByLink] fromDoc not found.')
+      throw new Error('[NoteDraftModel.createByLink] Link not found.')
+    // if (fromDocId && fromDoc === null)
+    //   throw new Error('[NoteDraftModel.createByLink] From-doc not found.')
 
     return {
       branch,
-      fromDoc,
+      fromDoc: headDoc,
       link,
     }
   }
@@ -66,23 +103,25 @@ class NoteDraftModel {
     { fromDocId, domain, contentHead, contentBody }: NoteDraftInput,
   ): Promise<NoteDraftParsed> {
     const { branch, fromDoc } = await this.validateCreateInput(
-        branchName,
+      branchName,
+      symbol,
+      fromDocId ?? undefined,
+    )
+
+    validateContentBody(symbol, contentBody)
+
+    const draft = await prisma.noteDraft.create({
+      data: {
         symbol,
-        fromDocId ?? undefined,
-      ),
-      draft = await prisma.noteDraft.create({
-        data: {
-          symbol,
-          branch: { connect: { id: branch.id } },
-          sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-          fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
-          user: { connect: { id: userId } },
-          domain,
-          // meta: meta as unknown as NoteDocMeta,
-          contentHead,
-          contentBody,
-        },
-      })
+        branch: { connect: { id: branch.id } },
+        sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+        user: { connect: { id: userId } },
+        domain,
+        contentHead,
+        contentBody,
+      },
+    })
     return this.parse(draft)
   }
 
@@ -131,15 +170,34 @@ class NoteDraftModel {
   /**
    * 'Save' the note-draft by updating its value
    * No needs to check the content here, check on commit
+   *
+   * @param newSymbol Only allow to update the symbol if sym is not connected
    */
   async update(
     draftId: string,
     { fromDocId, domain, contentHead, contentBody }: NoteDraftInput,
+    newSymbol?: string,
   ): Promise<NoteDraftParsed> {
-    const draft = await prisma.noteDraft.findUnique({ where: { id: draftId } })
-    if (draft === null) {
-      throw new Error('NoteDraft not found.')
+    const draft = await prisma.noteDraft.findUnique({
+      where: { id: draftId },
+      include: { sym: true },
+    })
+
+    if (draft === null) throw new Error('NoteDraft not found.')
+    if (newSymbol) {
+      const newSymbol_ = symModel.parse(newSymbol)
+      if (newSymbol_.type !== 'TOPIC')
+        throw new Error('newSymbol_.type !== TOPIC')
+      if (draft.sym !== null)
+        throw new Error('Not allow to modify draft symbol if it has sym')
     }
+
+    if (newSymbol) {
+      validateContentBody(newSymbol, contentBody)
+    } else {
+      validateContentBody(draft.symbol, contentBody)
+    }
+
     const draft_ = await prisma.noteDraft.update({
       data: {
         // TODO: Check
@@ -147,6 +205,7 @@ class NoteDraftModel {
         domain: domain,
         contentHead,
         contentBody,
+        symbol: newSymbol,
       },
       where: { id: draftId },
     })

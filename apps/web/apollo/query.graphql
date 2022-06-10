@@ -20,7 +20,7 @@ fragment block on Block {
   open
   order
   parentUid
-  docTitle
+  docSymbol
 }
 
 fragment commit on Commit {
@@ -171,6 +171,7 @@ fragment noteDocContentBody on NoteDocContentBody {
 
 fragment noteDocContentHead on NoteDocContentHead {
   __typename
+  symbol
   title
   duplicatedSymbols
   keywords
@@ -384,12 +385,6 @@ query Me {
   }
 }
 
-query MyNoteEmojiLike($noteEmojiId: ID!) {
-  myNoteEmojiLike(noteEmojiId: $noteEmojiId) {
-    ...noteEmojiLike
-  }
-}
-
 query MyDiscussEmojiLike($discussEmojiId: ID!) {
   myDiscussEmojiLike(discussEmojiId: $discussEmojiId) {
     ...discussEmojiLike
@@ -402,9 +397,15 @@ query MyDiscussPostEmojiLike($discussPostEmojiId: ID!) {
   }
 }
 
-query MyRates($symId: ID!) {
-  myRates(symId: $symId) {
-    ...rate
+query MyNoteDraftEntries {
+  myNoteDraftEntries {
+    ...noteDraftEntry
+  }
+}
+
+query MyNoteEmojiLike($noteEmojiId: ID!) {
+  myNoteEmojiLike(noteEmojiId: $noteEmojiId) {
+    ...noteEmojiLike
   }
 }
 
@@ -414,59 +415,9 @@ query MyPollVotes($pollId: ID!) {
   }
 }
 
-query NoteEmojis($noteId: ID!) {
-  noteEmojis(noteId: $noteId) {
-    ...noteEmoji
-  }
-}
-
-query Poll($id: ID!) {
-  poll(id: $id) {
-    ...poll
-  }
-}
-
-query Rate($id: ID!) {
-  rate(id: $id) {
+query MyRates($symId: ID!) {
+  myRates(symId: $symId) {
     ...rate
-  }
-}
-
-query RatesByAuthor($authorId: ID!, $symId: ID!) {
-  ratesByAuthor(authorId: $authorId, symId: $symId) {
-    ...rate
-  }
-}
-
-query RatesBySource($linkId: ID!) {
-  ratesBySource(linkId: $linkId) {
-    ...rate
-  }
-}
-
-query SearchAuthor($term: String!) {
-  searchAuthor(term: $term) {
-    ...searchHit
-  }
-}
-
-query SearchDiscuss($term: String!) {
-  searchDiscuss(term: $term) {
-    ...searchHit
-  }
-}
-
-query SearchSymbol($term: String!, $type: SymType) {
-  searchSymbol(term: $term, type: $type) {
-    ...searchHit
-  }
-}
-
-# --------NEW--------
-
-query MyNoteDraftEntries {
-  myNoteDraftEntries {
-    ...noteDraftEntry
   }
 }
 
@@ -518,9 +469,57 @@ query NoteDraft($id: ID, $symbol: String, $url: String) {
   }
 }
 
+query NoteEmojis($noteId: ID!) {
+  noteEmojis(noteId: $noteId) {
+    ...noteEmoji
+  }
+}
+
 query NoteHistory($noteId: ID!, $status: NoteDocStatus) {
   noteHistory(noteId: $noteId, status: $status) {
     ...noteDocEntry
+  }
+}
+
+query Poll($id: ID!) {
+  poll(id: $id) {
+    ...poll
+  }
+}
+
+query Rate($id: ID!) {
+  rate(id: $id) {
+    ...rate
+  }
+}
+
+query RatesByAuthor($authorId: ID!, $symId: ID!) {
+  ratesByAuthor(authorId: $authorId, symId: $symId) {
+    ...rate
+  }
+}
+
+query RatesBySource($linkId: ID!) {
+  ratesBySource(linkId: $linkId) {
+    ...rate
+  }
+}
+
+query SearchAuthor($term: String!) {
+  searchAuthor(term: $term) {
+    ...searchHit
+  }
+}
+
+query SearchDiscuss($term: String!) {
+  searchDiscuss(term: $term) {
+    ...searchHit
+  }
+}
+
+query SearchSymbol($term: String!, $type: SymType) {
+  searchSymbol(term: $term, type: $type) {
+    ...searchHit
   }
 }
 
@@ -530,9 +529,8 @@ query NoteHistory($noteId: ID!, $status: NoteDocStatus) {
 #   }
 # }
 
-# #-----------END----------------
-
 #----------Mutation------------
+
 # TODO: need to modify
 mutation CreateAuthor($data: AuthorInput!) {
   createAuthor(data: $data) {
@@ -543,6 +541,12 @@ mutation CreateAuthor($data: AuthorInput!) {
 mutation UpdateAuthor($id: ID!, $data: AuthorInput!) {
   updateAuthor(id: $id, data: $data) {
     ...author
+  }
+}
+
+mutation CreateCommit($noteDraftIds: [ID!]!) {
+  createCommit(noteDraftIds: $noteDraftIds) {
+    ...commit
   }
 }
 
@@ -612,6 +616,38 @@ mutation UpsertDiscussPostEmojiLike(
   }
 }
 
+mutation CreateNoteDraft(
+  $branch: String!
+  $symbol: String!
+  $data: NoteDraftInput!
+) {
+  createNoteDraft(branch: $branch, symbol: $symbol, data: $data) {
+    ...noteDraft
+  }
+}
+
+mutation CreateNoteDraftByLink(
+  $branch: String!
+  $linkId: String!
+  $data: NoteDraftInput!
+) {
+  createNoteDraftByLink(branch: $branch, linkId: $linkId, data: $data) {
+    ...noteDraft
+  }
+}
+
+mutation UpdateNoteDraft($id: ID!, $data: NoteDraftInput!, $newSymbol: String) {
+  updateNoteDraft(id: $id, data: $data, newSymbol: $newSymbol) {
+    ...noteDraft
+  }
+}
+
+mutation DropNoteDraft($id: ID!) {
+  dropNoteDraft(id: $id) {
+    ...noteDraftDropResponse
+  }
+}
+
 mutation UpsertNoteEmojiLike(
   $liked: Boolean!
   $emojiId: Int
@@ -665,48 +701,4 @@ mutation SessionLogin($idToken: String!) {
 
 mutation SessionLogout {
   sessionLogout
-}
-
-# ------------- NEW ------------
-
-mutation CreateCommit($noteDraftIds: [ID!]!) {
-  createCommit(noteDraftIds: $noteDraftIds) {
-    ...commit
-  }
-}
-
-mutation CreateNoteDraft(
-  $branch: String!
-  $symbol: String!
-  $draftInput: NoteDraftInput!
-) {
-  createNoteDraft(branch: $branch, symbol: $symbol, draftInput: $draftInput) {
-    ...noteDraft
-  }
-}
-
-mutation CreateNoteDraftByLink(
-  $branch: String!
-  $linkId: String!
-  $draftInput: NoteDraftInput!
-) {
-  createNoteDraftByLink(
-    branch: $branch
-    linkId: $linkId
-    draftInput: $draftInput
-  ) {
-    ...noteDraft
-  }
-}
-
-mutation UpdateNoteDraft($id: ID!, $data: NoteDraftInput!) {
-  updateNoteDraft(id: $id, data: $data) {
-    ...noteDraft
-  }
-}
-
-mutation DropNoteDraft($id: ID!) {
-  dropNoteDraft(id: $id) {
-    ...noteDraftDropResponse
-  }
 }

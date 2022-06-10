@@ -10,7 +10,6 @@ import firebaseui from 'firebaseui'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import { useSessionLoginMutation } from '../../apollo/query.graphql'
 import { useFirebaseClient } from './firebase-client'
-import { useMe } from './use-me'
 
 /**
  * Known issues
@@ -137,10 +136,6 @@ const LoginPanel = (): JSX.Element | null => {
         <h1 className="mb-4">Login</h1>
         <div className="mb-10 text-gray-600">Start to write note!</div>
         <StyledFirebaseAuth
-          uiCallback={ui => {
-            // ui.disableAutoSignIn()
-            ui.signIn()
-          }}
           uiConfig={makeUIConfig(handleSignedInUser)}
           firebaseAuth={firebaseAuth}
         />

@@ -40,7 +40,7 @@ const BlockViewerContent = ({
  * - block-el <- blocks/core.cljs
  * - Block.tsx
  */
-export const BlockViewerEl = ({
+const BlockViewer = ({
   uid,
   blocks,
   isChild,
@@ -57,7 +57,7 @@ export const BlockViewerEl = ({
     childrenBlockEls = useMemo(
       () =>
         children.map(e => (
-          <BlockViewerEl key={e.uid} uid={e.uid} blocks={blocks} isChild />
+          <BlockViewer key={e.uid} uid={e.uid} blocks={blocks} isChild />
         )),
       [children],
     )
@@ -116,3 +116,5 @@ export const BlockViewerEl = ({
     </div>
   )
 }
+
+export default BlockViewer

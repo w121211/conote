@@ -232,17 +232,17 @@ type Mutation {
   createNoteDraft(
     branch: String!
     symbol: String!
-    draftInput: NoteDraftInput!
+    data: NoteDraftInput!
   ): NoteDraft!
 
   createNoteDraftByLink(
     branch: String!
     linkId: String!
-    draftInput: NoteDraftInput!
+    data: NoteDraftInput!
   ): NoteDraft!
 
   # input not yet decided
-  updateNoteDraft(id: ID!, data: NoteDraftInput!): NoteDraft!
+  updateNoteDraft(id: ID!, data: NoteDraftInput!, newSymbol: String): NoteDraft!
 
   dropNoteDraft(id: ID!): NoteDraftDropResponse!
 
@@ -307,7 +307,7 @@ type Block {
   open: Boolean
   order: Int!
   parentUid: String
-  docTitle: String
+  docSymbol: String
 }
 
 type BlockUid_DiscussId {
@@ -468,6 +468,9 @@ type NoteDocContentBody {
 }
 
 type NoteDocContentHead {
+  # If provided, use it to update the current note's symbol when merged
+  symbol: String
+
   # Use for ticker, webpage symbols to display a title aside with symbol
   title: String
 
@@ -492,8 +495,8 @@ type NoteDocContentHeadWebpage {
   # Webpage's title
   title: String
 
-  # When the webpage content publish at, in millisecond
-  publishedAt: Int
+  # When the webpage content publish at
+  publishedAt: String
 
   # Tickers mentioned in the webpage content
   tickers: [String!]
@@ -651,7 +654,7 @@ input BlockInput {
   open: Boolean
   order: Int!
   parentUid: String
-  docTitle: String
+  docSymbol: String
 }
 
 input BlockUid_DiscussIdInput {
@@ -694,6 +697,7 @@ input NoteDocContentBodyInput {
 
 # Same as NoteDocContentHead
 input NoteDocContentHeadInput {
+  symbol: String
   title: String
   duplicatedSymbols: [String!]
   keywords: [String!]

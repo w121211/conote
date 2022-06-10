@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import { NoteHead } from '../../../../note/note-head'
-import { docTemplateSet } from '../../events'
+import NoteHead from '../../../../note/note-head'
+import { docSave } from '../../events'
 import type { Doc } from '../../interfaces'
 import { hotkey, multiBlockSelection } from '../../listeners'
 import { blockRepo, getBlock } from '../../stores/block.repository'
 import { BlockEl } from '../block/block-el'
+import DocPlaceholder from './doc-placeholder'
+import DocHead from './doc-head'
+import { docRepo } from '../../stores/doc.repository'
 
 interface DocProps {
   // assume to be block-els, if given, use it and ignore doc-block's children
@@ -84,6 +87,14 @@ export const DocEl = ({
   // }, [docBlockUid, docBlock])
 
   useEffect(() => {
+    return () => {
+      console.log('DocEl unmount')
+      const doc_ = docRepo.findDoc(doc.uid)
+      if (doc_) docSave(doc_)
+    }
+  }, [])
+
+  useEffect(() => {
     document.addEventListener('keydown', hotkey)
     document.addEventListener('keydown', multiBlockSelection)
 
@@ -117,6 +128,8 @@ export const DocEl = ({
       mx-auto 
       p-4"
     >
+      <DocHead doc={doc} />
+
       {/* <button
         className="
       float-left 
@@ -202,14 +215,14 @@ export const DocEl = ({
         <DocPlaceholder />
       )} */}
 
-      <NoteHead
+      {/* <NoteHead
         isNew
-        symbol="test"
+        symbol={doc.title}
         title="test test test"
-        link="http://asdfasdf.asdfasdf.com"
+        // link="http://asdfasdf.asdfasdf.com"
         fetchTime={new Date()}
         nodeId="asdfasdfas"
-      />
+      /> */}
 
       {/* <button
         onClick={() => {
@@ -239,8 +252,7 @@ export const DocEl = ({
             ))}
           </div>
         ) : (
-          // <DocPlaceholder />
-          <button onClick={e => docTemplateSet(docBlock)}>demo-template</button>
+          <DocPlaceholder doc={doc} />
         )
       }
     </article>

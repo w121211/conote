@@ -29,7 +29,7 @@ const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
       { symbol: '[[Google]]', symId: null },
       { symbol: '$BA', symId: null },
     ],
-    blocks: writeBlocks(mockBlockInputs[0], { docTitle: mockSyms[0].symbol }),
+    blocks: writeBlocks(mockBlockInputs[0], { docSymbol: mockSyms[0].symbol }),
   },
 }
 
@@ -48,7 +48,9 @@ export const mockNoteDrafts: Omit<
         { symbol: '[[Google]]', symId: null },
         { symbol: '$BA', symId: null },
       ],
-      blocks: writeBlocks(mockBlockInputs[0], { docTitle: mockSyms[0].symbol }),
+      blocks: writeBlocks(mockBlockInputs[0], {
+        docSymbol: mockSyms[0].symbol,
+      }),
     },
   },
   {
@@ -136,7 +138,7 @@ export function mockNoteDrafts_gotFromDoc(
       contentBody: {
         ...contentBody,
         blocks: writeBlocks(mockBlockInputs[1], {
-          docTitle: fromDoc.sym.symbol,
+          docSymbol: fromDoc.sym.symbol,
         }),
       },
     }

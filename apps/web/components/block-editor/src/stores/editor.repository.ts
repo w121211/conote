@@ -14,8 +14,8 @@ export const editorStore = createStore(
     },
     modal: {},
     opening: {
-      symbolMain: null,
-      symbolModal: null,
+      main: { symbol: null, docUid: null },
+      modal: { symbol: null, docUid: null },
     },
   }),
 )
@@ -26,18 +26,19 @@ class EditorRepository {
   leftSidebar$ = editorStore.pipe(select(state => state.leftSidebar))
 
   mainDoc$ = editorStore.pipe(
-    select(state => state.opening.symbolMain),
+    select(state => state.opening.main.docUid),
     filter((e): e is string => e !== null),
-    switchMap(symbol => docRepo.getDoc$(symbol)),
+    switchMap(uid => docRepo.getDoc$(uid)),
   )
 
   modalDoc$ = editorStore.pipe(
-    select(state => state.opening.symbolModal),
+    select(state => state.opening.modal.docUid),
     // filter((e): e is string => e !== null),
-    switchMap(symbol => (symbol ? docRepo.getDoc$(symbol) : of(null))),
+    // switchMap(symbol => (symbol ? docRepo.getDoc$(symbol) : of(null))),
+    switchMap(uid => (uid ? docRepo.getDoc$(uid) : of(null))),
   )
 
-  route$ = editorStore.pipe(select(state => state.opening))
+  opening$ = editorStore.pipe(select(state => state.opening))
 
   getValue() {
     return editorStore.getValue()

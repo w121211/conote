@@ -25,6 +25,9 @@ import {
 import { getApolloClient } from '../../../../apollo/apollo-client'
 import { docRepo } from '../stores/doc.repository'
 import { omitTypenameDeep } from '../utils'
+import { FetchPolicy } from '@apollo/client'
+import { nanoid } from 'nanoid'
+import { convertGQLBlocks } from '../../../../shared/block-helpers'
 
 // interface INoteDraftService {
 //   // Queries
@@ -51,122 +54,10 @@ import { omitTypenameDeep } from '../utils'
 // }
 
 /**
- * Convert gql-blocks to blocks by
- * - validate root-block
- * - add children uids
- * - validate children uids
- * - validate is any orphan block
- *
- * @returns
- * - blocks: includes doc-block
- * - docBlock
- */
-export function convertGQLBlocks(gqlBlocks: BlockFragment[]): {
-  blocks: Block[]
-  docBlock: Block
-} {
-  const nodes: TreeNodeBody<BlockFragment>[] = gqlBlocks.map(e => ({
-    uid: e.uid,
-    parentUid: e.parentUid ?? null,
-    order: e.order,
-    data: e,
-  }))
-
-  const root = treeUtil.buildFromList(nodes),
-    nodes_ = treeUtil.toList(root),
-    blocks: Block[] = nodes_.map(e => {
-      const {
-        data: { str, open, order, docTitle },
-        uid,
-        parentUid,
-        childrenUids,
-      } = e
-      return {
-        uid,
-        str,
-        open: open ?? undefined,
-        order,
-        docTitle: docTitle ?? undefined,
-        parentUid,
-        childrenUids,
-
-        // TODO:
-        // editTime?: number // TBC, consider to drop
-      }
-    }),
-    docBlock = blocks.find(e => e.uid === root.uid)
-
-  if (docBlock === undefined) {
-    throw new Error('[convertGQLBlocks] docBlock === undefined')
-  }
-
-  treeUtil.validateList(nodes_)
-  return { blocks, docBlock }
-}
-
-/**
  *
  */
 class NoteDraftService {
   private apolloClient = getApolloClient()
-
-  //
-  // Queries
-  //
-  //
-  //
-  //
-
-  /**
-   *
-   */
-  async queryDraft(symbol: string): Promise<NoteDraftFragment | null> {
-    const { data, errors } = await this.apolloClient.query<
-      NoteDraftQuery,
-      NoteDraftQueryVariables
-    >({
-      query: NoteDraftDocument,
-      variables: { symbol },
-    })
-
-    if (errors) {
-      console.debug('[NoteDraftQuery] error', errors)
-      return null
-    }
-    if (data.noteDraft) {
-      return data.noteDraft
-    }
-    return null
-  }
-
-  /**
-   *
-   */
-  async queryMyAllDraftEntries(): Promise<
-    MyNoteDraftEntriesQuery['myNoteDraftEntries']
-  > {
-    const { data } = await this.apolloClient.query<
-      MyNoteDraftEntriesQuery,
-      MyNoteDraftEntriesQueryVariables
-    >({
-      query: MyNoteDraftEntriesDocument,
-    })
-    if (data.myNoteDraftEntries) {
-      return data.myNoteDraftEntries
-    }
-    // if (errors) {
-    //   console.debug(errors)
-    //   throw new Error('[queryMyAllDrafts] Graphql error')
-    // }
-    throw new Error('[queryMyAllDrafts] No return data')
-  }
-
-  //
-  // Mutations
-  //
-  //
-  //
-  //
 
   /**
    *
@@ -174,19 +65,18 @@ class NoteDraftService {
   async createDraft(
     branch: string,
     symbol: string,
-    draftInput: NoteDraftInput,
+    input: NoteDraftInput,
   ): Promise<NoteDraftFragment> {
+    // console.log(branch, symbol, input)
+
     const { data, errors } = await this.apolloClient.mutate<
       CreateNoteDraftMutation,
       CreateNoteDraftMutationVariables
     >({
       mutation: CreateNoteDraftDocument,
-      variables: {
-        branch,
-        symbol,
-        draftInput,
-      },
+      variables: { branch, symbol, data: input },
     })
+
     if (data?.createNoteDraft) {
       return data.createNoteDraft
     }
@@ -221,19 +111,62 @@ class NoteDraftService {
   /**
    *
    */
-  async saveDraft(
+  async queryDraft(symbol: string): Promise<NoteDraftFragment | null> {
+    const { data, errors } = await this.apolloClient.query<
+      NoteDraftQuery,
+      NoteDraftQueryVariables
+    >({
+      query: NoteDraftDocument,
+      variables: { symbol },
+    })
+
+    if (errors) {
+      console.debug('[NoteDraftQuery] error', errors)
+      return null
+    }
+    if (data.noteDraft) {
+      return data.noteDraft
+    }
+    return null
+  }
+
+  /**
+   *
+   */
+  async queryMyAllDraftEntries(
+    fetchPolicy?: FetchPolicy,
+  ): Promise<MyNoteDraftEntriesQuery['myNoteDraftEntries']> {
+    const { data } = await this.apolloClient.query<
+      MyNoteDraftEntriesQuery,
+      MyNoteDraftEntriesQueryVariables
+    >({
+      query: MyNoteDraftEntriesDocument,
+      fetchPolicy,
+    })
+    if (data.myNoteDraftEntries) {
+      return data.myNoteDraftEntries
+    }
+    // if (errors) {
+    //   console.debug(errors)
+    //   throw new Error('[queryMyAllDrafts] Graphql error')
+    // }
+    throw new Error('[queryMyAllDrafts] No return data')
+  }
+
+  /**
+   *
+   */
+  async updateDraft(
     id: string,
-    draftInput: NoteDraftInput,
+    input: NoteDraftInput,
+    newSymbol?: string,
   ): Promise<NoteDraftFragment> {
     const { data, errors } = await this.apolloClient.mutate<
       UpdateNoteDraftMutation,
       UpdateNoteDraftMutationVariables
     >({
       mutation: UpdateNoteDraftDocument,
-      variables: {
-        id,
-        data: draftInput,
-      },
+      variables: { id, data: input, newSymbol },
     })
     if (data?.updateNoteDraft) {
       return data.updateNoteDraft
@@ -264,9 +197,10 @@ class NoteDraftService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       { blocks, docBlock } = convertGQLBlocks(contentBody.blocks),
       doc: Doc = {
+        uid: nanoid(),
         branch,
         domain,
-        title: symbol,
+        symbol,
         contentHead: omitTypenameDeep(contentHead),
         blockUid: docBlock.uid,
         noteCopy: note ?? undefined,

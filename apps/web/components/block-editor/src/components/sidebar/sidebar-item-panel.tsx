@@ -1,5 +1,3 @@
-import { useApolloClient } from '@apollo/client'
-import { useRouter } from 'next/router'
 import { NoteDraftEntryFragment } from '../../../../../apollo/query.graphql'
 import { editorLeftSidebarItemRemove } from '../../events'
 
@@ -24,7 +22,7 @@ const DocIndexPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
       <button
         className=" px-[2px] !pointer-events-auto disabled:bg-transparent disabled:!cursor-not-allowed text-gray-400 disabled:text-gray-300 hover:text-gray-500 
         hover:disabled:text-gray-300"
-        onClick={() => editorLeftSidebarItemRemove(item)}
+        onClick={async () => editorLeftSidebarItemRemove(item)}
       >
         <span className="material-icons-outlined text-xl  mix-blend-multiply">
           delete_forever

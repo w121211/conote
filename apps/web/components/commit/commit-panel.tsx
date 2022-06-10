@@ -64,7 +64,7 @@ export const CommitPanel = (): JSX.Element | null => {
 
   // const { checkedDrafts, checkBoxForm } = reactSelectForm()
 
-  const [showModal, setShowModal] = useState(true)
+  const [showModal, setShowModal] = useState(false)
   const [checkedIdx, setCheckedIdx] = useState<boolean[]>(
     Array(mockData.length).fill(false),
   )
