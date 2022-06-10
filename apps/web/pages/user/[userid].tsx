@@ -181,20 +181,18 @@ const UserPage = ({
             <h1 className="truncate mb-2 font-medium text-gray-800 dark:text-gray-100">
               @{router.query.userid}
             </h1>
-            <div className="mb-2 text-lg text-gray-500 dark:text-gray-400">
+            {/* <div className="mb-2 text-lg text-gray-500 dark:text-gray-400">
               建築師
             </div>
-            {/* <div> */}
             <p className="flex text-sm text-gray-500 dark:text-gray-400">
               <span className="material-icons text-base leading-none">
                 cake
               </span>
               10年會員
-            </p>
-            {/* </div> */}
+            </p> */}
           </div>
         </div>
-        <div>
+        {/* <div>
           <h2 className="mb-2 text-sm text-gray-500 dark:text-gray-400 font-medium tracking-widest">
             ABOUT
           </h2>
@@ -202,7 +200,7 @@ const UserPage = ({
             日本鳥取縣出身的男性聲優，於2019年4月1日加入由好友立花慎之介及福山潤所創立的BLACK
             SHIP，以前是AIR AGENCY所屬。身高173cm，體重65kg，血型是A型。
           </p>
-        </div>
+        </div> */}
 
         {/* {data?.author?.meta} */}
         <div className="flex gap-6">
