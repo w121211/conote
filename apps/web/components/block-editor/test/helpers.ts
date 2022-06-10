@@ -22,7 +22,7 @@ export const blocks: Block[] = [
     order: 0,
     parentUid: null,
     childrenUids: ['b1', 'b2'],
-    docTitle: 'page-0',
+    docSymbol: 'page-0',
     open: true,
   },
   {
@@ -118,5 +118,5 @@ export function clean(cur: Record<string, Block>): Record<string, Block> {
  * Mainly use for testing
  */
 export function getAllBlockUids(): string[] {
-  return blocksStore.query(getAllEntities()).map((e) => e.uid)
+  return blocksStore.query(getAllEntities()).map(e => e.uid)
 }

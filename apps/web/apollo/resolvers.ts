@@ -354,13 +354,9 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   async myNoteDraftEntries(_parent, _args, { req }, _info) {
     const { userId } = await isAuthenticated(req),
       drafts = await prisma.noteDraft.findMany({
-        where: {
-          AND: {
-            userId: userId,
-            status: 'EDIT',
-          },
-        },
+        where: { AND: { userId: userId, status: 'EDIT' } },
         // select: { id: true },
+        orderBy: { createdAt: 'asc' },
       }),
       parsed = drafts.map(e => noteDraftModel.parse(e)),
       entries = parsed.map(e => {
@@ -633,6 +629,17 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return authorModel.toGQLAuthor(author)
   },
 
+  async createCommit(_parent, { noteDraftIds }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      { commit, noteDocs } = await commitNoteDrafts(noteDraftIds, userId)
+    return {
+      ...toStringProps(commit),
+      noteDocs: noteDocs.map(e =>
+        toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
+      ),
+    }
+  },
+
   async createDiscuss(_parent, { noteId, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req),
       { title, content } = data,
@@ -781,6 +788,41 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }))
   },
 
+  async createNoteDraft(_parent, { branch, symbol, data }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      branch_ = branch === 'default' ? 'mock-branch-0' : branch,
+      draft = await noteDraftModel.create(branch_, symbol, userId, data)
+    return toStringProps(draft)
+  },
+
+  async createNoteDraftByLink(
+    _parent,
+    { branch, linkId, data },
+    { req },
+    _info,
+  ) {
+    const { userId } = await isAuthenticated(req),
+      draft = await noteDraftModel.createByLink(branch, linkId, userId, data)
+    return toStringProps(draft)
+  },
+
+  async updateNoteDraft(_parent, { id, data, newSymbol }, _context, _info) {
+    const draft = await noteDraftModel.update(id, data, newSymbol ?? undefined)
+    return toStringProps(draft)
+  },
+
+  // dropNoteDraft(id: ID!): DraftDropResponse!
+  async dropNoteDraft(_parent, { id }, _context, _info) {
+    try {
+      await prisma.noteDraft.update({ where: { id }, data: { status: 'DROP' } })
+    } catch (e) {
+      // what error message should be thrown
+      throw new Error('[dropNoteDraft] Unable to drop the NoteDraft')
+      // throw e
+    }
+    return { response: 'Draft is successfully dropped.' }
+  },
+
   async upsertNoteEmojiLike(
     _parent,
     { liked, emojiId, noteId, emojiCode },
@@ -869,67 +911,6 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     await sessionLogout(req, res)
     return true
   },
-
-  // -------------New---------------
-
-  async createCommit(_parent, { noteDraftIds }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      { commit, noteDocs } = await commitNoteDrafts(noteDraftIds, userId)
-    return {
-      ...toStringProps(commit),
-      noteDocs: noteDocs.map(e =>
-        toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
-      ),
-    }
-  },
-
-  async createNoteDraft(
-    _parent,
-    { branch, symbol, draftInput },
-    { req },
-    _info,
-  ) {
-    const { userId } = await isAuthenticated(req),
-      draft = await noteDraftModel.create(branch, symbol, userId, draftInput)
-    return toStringProps(draft)
-  },
-
-  async createNoteDraftByLink(
-    _parent,
-    { branch, linkId, draftInput },
-    { req },
-    _info,
-  ) {
-    const { userId } = await isAuthenticated(req),
-      draft = await noteDraftModel.createByLink(
-        branch,
-        linkId,
-        userId,
-        draftInput,
-      )
-    return toStringProps(draft)
-  },
-
-  // # input not yet decided
-  // updateNotepDraft(data: DraftInput): NoteDraft!
-  async updateNoteDraft(_parent, { id, data }, _context, _info) {
-    const draft = await noteDraftModel.update(id, data)
-    return toStringProps(draft)
-  },
-
-  // dropNoteDraft(id: ID!): DraftDropResponse!
-  async dropNoteDraft(_parent, { id }, _context, _info) {
-    try {
-      await prisma.noteDraft.update({ where: { id }, data: { status: 'DROP' } })
-    } catch (e) {
-      // what error message should be thrown
-      throw new Error('[dropNoteDraft] Unable to drop the NoteDraft')
-      // throw e
-    }
-    return { response: 'Draft is successfully dropped.' }
-  },
-
-  // -----------End New--------------
 }
 
 export default { Query, Mutation }

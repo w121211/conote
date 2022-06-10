@@ -83,7 +83,7 @@ export const mockDocBlockWithoutContent: Block = {
   uid: genBlockUid(),
   str: '[[Mock Doc Block Without Content]]',
   order: 0,
-  docTitle: '[[Mock Doc Block Without Content]]',
+  docSymbol: '[[Mock Doc Block Without Content]]',
   parentUid: null,
   childrenUids: [],
 }

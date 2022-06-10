@@ -23,7 +23,7 @@ function isBlockEqual(
   a: Omit<Block, 'childrenUids'>,
   b: Omit<Block, 'childrenUids'>,
 ) {
-  return a.str === b.str && a.docTitle === b.docTitle
+  return a.str === b.str && a.docSymbol === b.docSymbol
 }
 
 type MergeErrorFlag = 'paused-from_doc_not_head' | 'fail_to_auto_merge'

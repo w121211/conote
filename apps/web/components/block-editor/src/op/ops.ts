@@ -11,15 +11,20 @@ import {
   updateEntitiesIds,
 } from '@ngneat/elf-entities'
 import assert from 'assert'
-import {
+import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
+import { nanoid } from 'nanoid'
+import type {
   NoteDraftFragment,
   NoteFragment,
 } from '../../../../apollo/query.graphql'
-import { Block, BlockPosition, BlockPositionRelation, Doc } from '../interfaces'
-import {
-  convertGQLBlocks,
-  noteDraftService,
-} from '../services/note-draft.service'
+import { convertGQLBlocks } from '../../../../shared/block-helpers'
+import type {
+  Block,
+  BlockPosition,
+  BlockPositionRelation,
+  Doc,
+} from '../interfaces'
+import { noteDraftService } from '../services/note-draft.service'
 import {
   BlockReducer,
   BlockReducerFn,
@@ -503,16 +508,17 @@ export function blockSplitChainOp(
  */
 export function docLoadOp(
   branch: string,
-  title: string,
+  symbol: string,
   noteDraft: NoteDraftFragment,
   note: NoteFragment | null,
 ): {
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
+  docUid: string
 } {
-  if (docRepo.getDoc(title))
+  if (docRepo.findDoc(symbol))
     throw new Error('[docLoadOp] Doc is already existed')
-  if (title !== noteDraft.symbol)
+  if (symbol !== noteDraft.symbol)
     throw new Error('[docLoadOp] title !== noteDraft.symbol')
 
   const { doc, blocks, docBlock } = noteDraftService.toDoc(
@@ -521,12 +527,15 @@ export function docLoadOp(
     note,
   )
 
-  if (title !== docBlock.docTitle)
-    throw new Error('[docLoadOp] title !== docBlock.docTitle')
+  if (symbol !== docBlock.docSymbol) {
+    console.debug(docBlock, symbol)
+    throw new Error('[docLoadOp] symbol !== docBlock.docSymbol')
+  }
 
   return {
     blockReducers: [addEntities(blocks)],
     docReducers: [addEntities(doc)],
+    docUid: doc.uid,
   }
 }
 
@@ -539,14 +548,15 @@ export function docLoadOp(
  */
 export function docNewOp(
   branch: string,
-  title: string,
+  symbol: string,
   domain: string,
   note: NoteFragment | null,
 ): {
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
+  newDocUid: string
 } {
-  if (docRepo.getDoc(title))
+  if (docRepo.findDoc(symbol) !== null)
     throw new Error('[docNewOp] Doc is already existed')
 
   if (note) {
@@ -554,9 +564,10 @@ export function docNewOp(
         note.headDoc.contentBody.blocks,
       ),
       newDoc: Doc = {
+        uid: nanoid(),
         branch,
         domain,
-        title,
+        symbol,
         contentHead: {},
         blockUid: docBlock.uid,
         noteCopy: note ?? undefined,
@@ -564,27 +575,30 @@ export function docNewOp(
     return {
       blockReducers: [addEntities(blocks)],
       docReducers: [addEntities(newDoc)],
+      newDocUid: newDoc.uid,
     }
   } else {
     const newDocBlock: Block = {
         uid: genBlockUid(),
-        str: title,
-        docTitle: title,
+        str: symbol,
+        docSymbol: symbol,
         open: true,
         order: 0,
         parentUid: null,
         childrenUids: [],
       },
       newDoc: Doc = {
+        uid: nanoid(),
         branch,
         domain,
-        title,
+        symbol,
         contentHead: {},
         blockUid: newDocBlock.uid,
       }
     return {
       blockReducers: [addEntities([newDocBlock])],
       docReducers: [addEntities(newDoc)],
+      newDocUid: newDoc.uid,
     }
   }
 }
@@ -592,22 +606,34 @@ export function docNewOp(
 /**
  * Rename doc title and its doc-block, only when note is not existed
  * If note is existed, a rename request stored in note-meta
+ *
+ * Steps
+ * - Clone the doc with new name and add to the repo
+ * - Open the new name doc
+ * - Remove the old name doc
  */
 export function docRenameOp(
   doc: Doc,
-  newTitle: string,
+  newSymbol: string,
 ): {
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
 } {
-  if (doc.noteCopy) throw new Error('[docRenameOp] doc got note-copy')
+  if (doc.noteCopy)
+    throw new Error('[docRenameOp] Doc has note-copy, cannot rename directly.')
 
-  const _ = getBlock(doc.blockUid),
+  const docBlock = getBlock(doc.blockUid),
     blockReducers: BlockReducer[] = [
-      updateEntities(doc.blockUid, { docTitle: newTitle, str: newTitle }),
+      updateEntities(doc.blockUid, {
+        ...docBlock,
+        docSymbol: newSymbol,
+        str: newSymbol,
+      }),
     ],
-    docReducers = [updateEntitiesIds(doc.title, newTitle)]
-
+    docReducers = [
+      // addEntities([{ ...doc, title: newTitle }]),
+      updateEntities(doc.uid, { symbol: newSymbol }),
+    ]
   return { blockReducers, docReducers }
 }
 
@@ -620,7 +646,7 @@ export function docRemoveOp(doc: Doc): {
 } {
   const docBlock = getBlock(doc.blockUid),
     blockReducers = blockRemoveOp(docBlock),
-    docReducers = [deleteEntities(doc.title)]
+    docReducers = [deleteEntities(doc.uid)]
 
   return { blockReducers, docReducers }
 }
@@ -629,12 +655,27 @@ export function docRemoveOp(doc: Doc): {
  * Because local repositories already have the content (blocks, meta),
  * only update the note-draft-copy
  */
-export function docSaveOp(
+export function docUpdatePropsOp(
   doc: Doc,
-  savedDraft: NoteDraftFragment,
+  props: Partial<Pick<Doc, 'noteDraftCopy' | 'contentHead'>>,
 ): DocReducer[] {
-  return [updateEntities(doc.title, { noteDraftCopy: savedDraft })]
+  return [updateEntities(doc.uid, { ...doc, ...props })]
 }
+
+// /**
+//  *
+//  */
+// export function docUpdateContentHeadOp(
+//   doc: Doc,
+//   newContentHead: NoteDocContentHeadInput,
+// ): {
+//   docReducers: DocReducer[]
+// } {
+//   const docReducers = [
+//     updateEntities(doc.title, { contentHead: newContentHead }),
+//   ]
+//   return { docReducers }
+// }
 
 //
 // Shortcut Ops

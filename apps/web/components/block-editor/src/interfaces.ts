@@ -82,7 +82,10 @@ export type DestructTextareaKeyEvent = {
  */
 export type BlockPosition = {
   refBlockUid?: string
+
+  // TODO: Consider to remove?
   docTitle?: string
+
   relation: BlockPositionRelation
 }
 
@@ -145,7 +148,7 @@ export type Block = {
   order: number
 
   // Doc block only, equals to doc.str
-  docTitle?: string
+  docSymbol?: string
 
   str: string
   open?: boolean
@@ -161,13 +164,15 @@ export type BlockWithChildren = Block & { children: BlockWithChildren[] }
  * alone with a concept of node-block (node-page-block), ndoe-title, page-title, page-block (or context-block)
  */
 export type Doc = {
+  uid: string
+
+  // Represent as 'symbol' for server-side, should be unique most of time
+  //  except when renaming process
+  symbol: string
+
   branch: string
 
   domain: string
-
-  // Use as the id, no duplicated titles area allowed,
-  // also represent as 'symbol' for server-side
-  title: string
 
   // Note-doc-content-head is editable and stores here
   contentHead: NoteDocContentHeadInput
@@ -219,8 +224,17 @@ export type EditorProps = {
     }
   }
   opening: {
-    symbolMain: string | null
-    symbolModal: string | null
+    main: {
+      symbol: string | null
+      docUid: string | null
+    }
+    modal: {
+      symbol: string | null
+      docUid: string | null
+    }
+
+    // symbolMain: string | null
+    // symbolModal: string | null
 
     // (future) when open a block
     // blockUid?: string

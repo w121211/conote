@@ -1,3 +1,5 @@
+import { ApolloError, FetchPolicy } from '@apollo/client'
+import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
 import { editingFocus, routeUpdateShallow, setCursorPosition } from './effects'
 import {
   Block,
@@ -16,10 +18,10 @@ import {
   getBlockChildren,
 } from './stores/block.repository'
 import { rfdbRepo } from './stores/rfdb.repository'
-import { genBlockUid, isDocBlock, writeBlocks } from './utils'
-import { isInteger } from 'lodash'
+import { BlockInput, genBlockUid, isDocBlock, writeBlocks } from './utils'
+import { isInteger, isNil } from 'lodash'
 import { nextBlock, nthSiblingBlock, prevBlock } from './op/queries'
-import { docRepo, getDoc } from './stores/doc.repository'
+import { docRepo } from './stores/doc.repository'
 import { editorRepo } from './stores/editor.repository'
 import { NextRouter } from 'next/router'
 import {
@@ -27,7 +29,6 @@ import {
   NoteDraftEntryFragment,
   NoteDraftFragment,
 } from '../../../apollo/query.graphql'
-import { ApolloError } from '@apollo/client'
 import { noteService } from './services/note.service'
 import { noteDraftService } from './services/note-draft.service'
 import { commitService } from './services/commit.service'
@@ -115,7 +116,12 @@ export function keyBackspace(
   ) {
     return
   }
-  if (children.length === 0 && parent.docTitle && order === 0 && value === '') {
+  if (
+    children.length === 0 &&
+    parent.docSymbol &&
+    order === 0 &&
+    value === ''
+  ) {
     backspaceDeleteOnlyChild(block)
     return
   }
@@ -153,7 +159,7 @@ export function keyEnter(uid: string, dKeyDown: DestructTextareaKeyEvent) {
   const block = getBlock(uid),
     hasChildren = block.childrenUids.length > 0,
     parent = block.parentUid && getBlock(block.parentUid),
-    parentIsRootBlock = (parent && parent.docTitle) !== undefined,
+    parentIsRootBlock = (parent && parent.docSymbol) !== undefined,
     // contextRootUid = rfdbRepo.currentRoute.pathParams.id,  // contextRoot: the block opened as root
     contextRootUid = undefined,
     newUid = genBlockUid(),
@@ -266,7 +272,7 @@ export function unindent(
     //   contextRootUid === parent.uid,
     { start, end } = dKeyDown
 
-  if (parent && parent.docTitle === undefined) {
+  if (parent && parent.docSymbol === undefined) {
     const [saveOp, moveOp] = blockSaveBlockMoveCompositeOp(
       block,
       parent.uid,
@@ -286,7 +292,7 @@ export function unindentMulti(uids: string[]) {
     parent = firstBlock.parentUid ? getBlock(firstBlock.parentUid) : null,
     sameParent_ = areSameParent(blocks)
 
-  if (parent && parent.docTitle === undefined && sameParent_) {
+  if (parent && parent.docSymbol === undefined && sameParent_) {
     dropMultiSiblings(uids, parent.uid, 'after')
   }
 }
@@ -322,6 +328,7 @@ export function backspaceDeleteMergeBlockWithSave(
 }
 
 export function backspaceDeleteOnlyChild(block: Block) {
+  console.log('backspaceDeleteOnlyChild')
   blockRepo.update(ops.blockRemoveOp(block))
   editingUid(null)
 }
@@ -357,7 +364,7 @@ export function blockSave(uid: string, str: string) {
   const block = getBlock(uid),
     doNothing = block.str === str
 
-  if (block.docTitle) {
+  if (block.docSymbol) {
     throw new Error('[blockSave] doc-block not allow to change string')
   }
   if (!doNothing) {
@@ -586,7 +593,7 @@ function selectUp(selectedItems: string[]): string[] {
   // ;; if prev-block is root node TODO: (OR context root), don't do anything
   if (editingIdx === 0 && n > 1 && selectedItems.pop()) {
     // do nothing
-  } else if (prev && prev.docTitle) {
+  } else if (prev && prev.docSymbol) {
     newItems = selectedItems
     // ;; if prev block is parent, replace editing/uid and first item w parent; remove children
   } else if (parent && prev && parent.uid === prev.uid) {
@@ -657,44 +664,82 @@ export function selectedDown(selectedItems: string[]) {
  *
  */
 export async function docOpen(
-  title: string,
-  branch = 'mock-branch-0',
+  symbol: string,
+  branch = 'default',
   domain = 'domain',
-) {
-  if (docRepo.getDoc(title)) {
+): Promise<{ docUid: string }> {
+  const found = docRepo.findDoc(symbol)
+  if (found) {
     // throw new Error('[docOpen] Doc is existed')
     console.debug('[docOpen] Doc is existed')
-    return
+    return {
+      docUid: found.uid,
+    }
   }
 
   const [note, draft] = await Promise.all([
-      noteService.queryNote(title),
-      noteDraftService.queryDraft(title),
-    ]),
-    op = draft
-      ? ops.docLoadOp(branch, title, draft, note)
-      : ops.docNewOp(branch, title, domain, note),
-    { blockReducers, docReducers } = op
+    noteService.queryNote(symbol),
+    noteDraftService.queryDraft(symbol),
+  ])
 
-  blockRepo.update(blockReducers)
-  docRepo.update(docReducers)
+  if (draft === null) {
+    const { blockReducers, docReducers, newDocUid } = ops.docNewOp(
+      branch,
+      symbol,
+      domain,
+      note,
+    )
+    blockRepo.update(blockReducers)
+    docRepo.update(docReducers)
+
+    // Create the draft using just created doc
+    // then update note-draft-copy of doc
+    const doc = docRepo.getDoc(newDocUid),
+      draft = await noteDraftService.createDraft(
+        doc.branch,
+        doc.symbol,
+        noteDraftService.toNoteDraftInput(doc),
+      ),
+      op = ops.docUpdatePropsOp(doc, { noteDraftCopy: draft })
+
+    docRepo.update(op)
+    await editorLeftSidebarRefresh('network-only')
+    return { docUid: newDocUid }
+  } else {
+    const { blockReducers, docReducers, docUid } = ops.docLoadOp(
+      branch,
+      symbol,
+      draft,
+      note,
+    )
+    blockRepo.update(blockReducers)
+    docRepo.update(docReducers)
+    return { docUid }
+  }
 
   // console.debug(note, draft)
 }
 
 /**
  * Save doc on remote, use doc's title as 'symbol'
- *
- * Because local repositories already have the content (blocks, meta),
- * only update the note-draft-copy
+ *  Because local repositories already have the content,
+ *  only update the note-draft-copy.
  */
-export async function docSave(doc: Doc) {
-  const { branch, title } = doc,
-    input = noteDraftService.toNoteDraftInput(doc),
-    noteDraft = doc.noteDraftCopy
-      ? await noteDraftService.saveDraft(doc.noteDraftCopy.id, input)
-      : await noteDraftService.createDraft(branch, title, input),
-    op = ops.docSaveOp(doc, noteDraft)
+export async function docSave(doc: Doc, newSymbol?: string) {
+  // console.log('docSave', doc.title)
+
+  if (doc.noteDraftCopy === undefined) {
+    console.debug(doc)
+    throw new Error('[docSave] doc.noteDraftCopy === undefined')
+  }
+
+  const input = noteDraftService.toNoteDraftInput(doc),
+    draft = await noteDraftService.updateDraft(
+      doc.noteDraftCopy.id,
+      input,
+      newSymbol,
+    ),
+    op = ops.docUpdatePropsOp(doc, { noteDraftCopy: draft })
 
   docRepo.update(op)
 }
@@ -718,32 +763,83 @@ export async function docRemove(doc: Doc) {
  *
  * TODO:
  */
-export async function docRename(doc: Doc, newTitle: string) {
-  if (doc.noteCopy) {
-    // do nothing
-  } else {
-    const { blockReducers, docReducers } = ops.docRenameOp(doc, newTitle)
-    blockRepo.update(blockReducers)
-    docRepo.update(docReducers)
-  }
+export async function docRename(
+  doc: Doc,
+  newSymbol: string,
+  router?: NextRouter,
+) {
+  console.log('docRename', newSymbol)
+
+  if (doc.symbol === newSymbol) return
+  if (doc.noteCopy) return // Do nothing
+  if (doc.noteDraftCopy === undefined)
+    throw new Error('[docRename] doc.noteDraftCopy === undefined')
+
+  const { blockReducers, docReducers } = ops.docRenameOp(doc, newSymbol)
+  blockRepo.update(blockReducers)
+  docRepo.update(docReducers)
+
+  const doc_ = docRepo.getDoc(doc.uid)
+  await docSave(doc_, newSymbol)
+
+  // console.log(opening.symbolMain, doc.title)
+
+  const { opening } = editorRepo.getValue()
+  if (opening.main.docUid === doc.uid)
+    await editorOpenSymbolInMain(newSymbol, router, {
+      forceRouteUpdateShallow: true,
+      skipSave: true,
+    })
+  if (opening.modal.docUid === doc.uid)
+    await editorOpenSymbolInModal(newSymbol, router, { skipSave: true })
+
+  await editorLeftSidebarRefresh('network-only')
 }
 
 /**
  * Set doc template
  */
-export async function docTemplateSet(docBlock: Block) {
-  if (!isDocBlock(docBlock)) {
-    throw new Error('Given block is not doc-block')
-  }
+export async function docTemplateSet(doc: Doc) {
+  const demo: BlockInput = [
+    'DUMMY_ROOT',
+    [
+      '',
+      // [
+      //   'Brief',
+      //   [
+      //     ['The problem', ['']],
+      //     ['How this research solve?', ['']],
+      //     ['What difference compared to the others?', ['']],
+      //   ],
+      // ],
+      // ['Discuss', ['']],
+    ],
+  ]
 
-  const blocks = writeBlocks(['__DUMMY_ROOT__', ['hello', 'world']], {
-      docBlock,
-    }),
-    [, ...children] = blocks
-
-  const op = ops.blocksInsertOp(docBlock, children)
+  const docBlock = docRepo.getDocBlock(doc),
+    blocks = writeBlocks(demo, { docBlock }),
+    [, ...children] = blocks,
+    op = ops.blocksInsertOp(docBlock, children)
 
   blockRepo.update(op)
+}
+
+/**
+ */
+export async function docContentHeadUpdate(
+  doc: Doc,
+  newContentHead: NoteDocContentHeadInput,
+  router?: NextRouter,
+) {
+  const { symbol } = newContentHead,
+    isRename = !isNil(symbol) && symbol !== doc.symbol
+
+  const op = ops.docUpdatePropsOp(doc, { contentHead: newContentHead })
+  docRepo.update(op)
+
+  if (isRename) {
+    docRename(doc, symbol, router)
+  }
 }
 
 //
@@ -758,9 +854,10 @@ export async function docTemplateSet(docBlock: Block) {
 /**
  * Refresh left sidebar by query and load my-all-draft-entries
  */
-export async function editorLeftSidebarRefresh() {
+export async function editorLeftSidebarRefresh(fetchPolicy?: FetchPolicy) {
+  console.log('editorLeftSidebarRefresh')
   try {
-    const entries = await noteDraftService.queryMyAllDraftEntries()
+    const entries = await noteDraftService.queryMyAllDraftEntries(fetchPolicy)
     editorRepo.setLeftSidebarItems(entries)
   } catch (err) {
     if (err instanceof ApolloError) {
@@ -784,33 +881,42 @@ export async function editorLeftSidebarRefresh() {
 export async function editorLeftSidebarItemRemove(
   item: NoteDraftEntryFragment,
 ) {
+  console.log('editorLeftSidebarItemRemove', item)
   const { id, symbol } = item,
-    doc = docRepo.getDoc(symbol)
+    doc = docRepo.findDoc(symbol)
 
   if (doc) {
     await docRemove(doc)
   } else {
     await noteDraftService.dropDraft(id)
   }
-  await editorLeftSidebarRefresh()
+  await editorLeftSidebarRefresh('network-only')
 }
 
-async function saveCurDoc(curSymbol: string) {
-  const doc = curSymbol ? getDoc(curSymbol) : null
+async function saveCurDoc(docUid: string) {
+  try {
+    const doc = docRepo.getDoc(docUid)
+    await docSave(doc)
+  } catch (err) {
+    // In some cases (eg remove doc), the doc will not be found
+    console.debug(err)
+  }
+
+  // const doc = curSymbol ? getDoc(curSymbol) : null
 
   // const f_blocks = treeUtil.toTreeNodeBodyList(final.blocks),
   //   s_blocks = treeUtil.toTreeNodeBodyList(start.blocks),
   //   changes = treeNodeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
 
-  if (doc) {
-    if (doc.noteDraftCopy) {
-      await docSave(doc)
-      // } else if (curDoc.noteCopy & diff(curDoc)) {
-      // TODO: Show 'not save' warnning before remove
-    } else {
-      await docRemove(doc)
-    }
-  }
+  // if (doc) {
+  //   if (doc.noteDraftCopy) {
+  //     await docSave(doc)
+  //     // } else if (curDoc.noteCopy & diff(curDoc)) {
+  //     // TODO: Show 'not save' warnning before remove
+  //   } else {
+  //     await docRemove(doc)
+  //   }
+  // }
 }
 
 /**
@@ -826,38 +932,42 @@ async function saveCurDoc(curSymbol: string) {
 export async function editorOpenSymbolInModal(
   symbol: string | null,
   router?: NextRouter,
+  opts?: {
+    skipSave?: true
+  },
 ) {
-  const { opening } = editorRepo.getValue(),
-    { symbolMain, symbolModal } = opening
+  const { opening } = editorRepo.getValue()
 
-  if (symbolMain === null)
+  if (opening.main.symbol === null)
     throw new Error('[editorOpenSymbolInModal] symbolMain === null')
 
-  if (symbolModal) saveCurDoc(symbolModal)
+  if (opening.modal.docUid && !opts?.skipSave) saveCurDoc(opening.modal.docUid)
 
-  if (symbol === null || symbol === symbolMain) {
+  if (symbol === null || symbol === opening.main.symbol) {
+    editorRepo.updateOpening({
+      ...opening,
+      modal: { symbol: null, docUid: null },
+    })
     if (router) {
       await routeUpdateShallow(router, {
         pathname: '/note/[...slug]',
-        query: { slug: [symbolMain, 'edit'] },
+        query: { slug: [opening.main.symbol, 'edit'] },
       })
     }
-    editorRepo.updateOpening({ ...opening, symbolModal: null })
-  } else if (symbol === symbolModal) {
+  } else if (symbol === opening.modal.symbol) {
     // Do nothing
   } else {
-    if (router && symbolMain) {
-      await routeUpdateShallow(router, {
-        pathname: '/note/[...slug]',
-        query: { slug: [symbolMain, 'edit'], pop: symbol },
-      })
-    }
-
-    await docOpen(symbol)
+    const { docUid } = await docOpen(symbol)
     editorRepo.updateOpening({
       ...opening,
-      symbolModal: symbol,
+      modal: { symbol, docUid },
     })
+    if (router) {
+      await routeUpdateShallow(router, {
+        pathname: '/note/[...slug]',
+        query: { slug: [opening.main.symbol, 'edit'], pop: symbol },
+      })
+    }
   }
 }
 
@@ -867,18 +977,32 @@ export async function editorOpenSymbolInModal(
  * - Save all the previous docs
  * - Set new main-symbol
  * - Set modal-symbol to 'null'
+ *
  */
 export async function editorOpenSymbolInMain(
-  symbol: string,
+  symbol: string | null,
   router?: NextRouter,
+  opts?: {
+    skipSave?: true
+    forceRouteUpdateShallow?: true
+  },
 ) {
-  const { opening } = editorRepo.getValue(),
-    { symbolMain, symbolModal } = opening
+  console.log('editorOpenSymbolInMain', symbol)
 
-  if (symbolMain) saveCurDoc(symbolMain)
-  if (symbolModal) saveCurDoc(symbolModal)
+  const { opening } = editorRepo.getValue()
 
+  if (opening.main.docUid && !opts?.skipSave) saveCurDoc(opening.main.docUid)
+  if (opening.modal.docUid && !opts?.skipSave) saveCurDoc(opening.modal.docUid)
+
+  if (symbol === null) {
+    editorRepo.updateOpening({
+      main: { symbol: null, docUid: null },
+      modal: { symbol: null, docUid: null },
+    })
+    return
+  }
   if (router) {
+    console.log(router.query)
     const { pop } = router.query
     if (pop) {
       // Remove query params
@@ -886,14 +1010,18 @@ export async function editorOpenSymbolInMain(
         pathname: '/note/[...slug]',
         query: { slug: [symbol, 'edit'] },
       })
+    } else if (opts?.forceRouteUpdateShallow) {
+      await routeUpdateShallow(router, {
+        pathname: '/note/[...slug]',
+        query: { slug: [symbol, 'edit'] },
+      })
     }
   }
 
-  await docOpen(symbol)
+  const { docUid } = await docOpen(symbol)
   editorRepo.updateOpening({
-    ...opening,
-    symbolMain: symbol,
-    symbolModal: null,
+    modal: { symbol: null, docUid: null },
+    main: { symbol, docUid },
   })
 }
 
@@ -919,7 +1047,7 @@ export async function commitOnFinish(
   resultNoteDocs: NoteDocFragment[],
 ) {
   const pairs = commitService.pairNoteDraft_noteDoc(inputDrafts, resultNoteDocs)
-  await editorLeftSidebarRefresh()
+  await editorLeftSidebarRefresh('network-only')
 
   pairs.forEach(([noteDraft, noteDoc]) => {
     const doc = docRepo.getDoc(noteDraft.symbol)

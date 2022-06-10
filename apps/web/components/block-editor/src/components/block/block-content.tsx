@@ -5,7 +5,6 @@ import {
   textareaClick,
   textareaMouseDown,
   textareaMouseEnter,
-  textareaPaste,
   textareaUnmount,
 } from '../../handlers/textarea-handlers'
 import { textareaKeyDown } from '../../handlers/textarea-keydown'
@@ -50,17 +49,11 @@ export const BlockContent = ({
 }): JSX.Element => {
   const [localStr, setLocalStr] = useState(defaultLocalStr)
 
-  // useEffect(() => {
-  //   if (localStr !== defaultLocalStr) {
-  //     // textareaUnmount(uid, localStr)
-  //   }
-  //   // console.log(isEditing, showEditableDom)
-  // }, [isEditing, showEditableDom])
-
   useEffect(() => {
-    // console.log(defaultLocalStr, localStr)
-    setLocalStr(defaultLocalStr)
-  }, [defaultLocalStr])
+    if (localStr !== defaultLocalStr) {
+      textareaUnmount(uid, localStr)
+    }
+  }, [isEditing, showEditableDom])
 
   return (
     <div
@@ -92,9 +85,7 @@ export const BlockContent = ({
             resize-none
             text-inherit
             font-[inherit]
-          
             cursor-text
-            
             ${
               isEditing
                 ? 'opacity-100 z-[3] leading-[inherit]'
@@ -108,7 +99,7 @@ export const BlockContent = ({
           onChange={e => {
             textareaChange(e, uid, setLocalStr)
           }}
-          onPaste={e => textareaPaste(e, lastKeyDown)}
+          // onPaste={e => textareaPaste(e, lastKeyDown)}
           onKeyDown={e => {
             textareaKeyDown({
               e,

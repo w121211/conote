@@ -3,6 +3,7 @@ import React, { ReactNode } from 'react'
 import { useMeQuery } from '../apollo/query.graphql'
 import AuthItem from './auth/auth-Item'
 import { useMe } from './auth/use-me'
+import { CommitPanel } from './commit/commit-panel'
 import { SearchAll } from './search-all-modal/search-all-modal'
 import { ThemeToggle } from './theme/theme-toggle'
 // import { useMeQuery } from '../apollo/query.graphql'
@@ -55,7 +56,8 @@ const Navbar = ({
         {rbtn}
         {me ? (
           <div className="flex items-center gap-4 text-sm">
-            <button className="btn-primary">Commit</button>
+            {/* <button className="btn-primary">Commit</button> */}
+            <CommitPanel />
             <AuthItem />
           </div>
         ) : (

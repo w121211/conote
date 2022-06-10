@@ -2,7 +2,7 @@ import { hasEntity } from '@ngneat/elf-entities'
 import { blocksStore, getBlock } from '../stores/block.repository'
 import { Block, BlockPosition, BlockPositionRelation } from '../interfaces'
 import { allDescendants } from './queries'
-import { getDoc } from '../stores/doc.repository'
+import { docRepo } from '../stores/doc.repository'
 
 /**
  * Helpers for blocks-store, no mutations are allowed here
@@ -34,7 +34,7 @@ export function compatPosition({
   }
 
   const block = refBlockUid ? getBlock(refBlockUid) : null,
-    title = (block && block.docTitle) ?? undefined
+    title = (block && block.docSymbol) ?? undefined
 
   return {
     refBlockUid,
@@ -47,9 +47,13 @@ export function getRefBlockOfPosition(position: BlockPosition): Block {
   const { refBlockUid: refUid, docTitle: refTitle, relation } = position
 
   if (refTitle) {
-    const refDoc = getDoc(refTitle),
-      refBlock = getBlock(refDoc.blockUid)
-    return refBlock
+    const refDoc = docRepo.findDoc(refTitle),
+      refBlock = refDoc && getBlock(refDoc.blockUid)
+
+    if (refBlock) {
+      return refBlock
+    }
+    throw new Error('Doc not found by docTitle')
   } else if (refUid) {
     return getBlock(refUid)
   } else {
@@ -74,11 +78,12 @@ export function validatePosition({
   refBlockUid: uid,
   docTitle: title,
 }: BlockPosition) {
-  const titleBlockUid = title && getDoc(title).blockUid,
+  const titleDoc = title && docRepo.findDoc(title),
+    titleBlockUid = titleDoc && getBlock(titleDoc.blockUid).uid,
     block = uid ? getBlock(uid) : null
 
   let failMsg: string | undefined
-  if (block && block.docTitle) {
+  if (block && block.docSymbol) {
     failMsg =
       '[validatePosition] Location uid is a doc, location must use title instead.'
   } else if (title && titleBlockUid === undefined) {

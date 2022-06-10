@@ -62,6 +62,9 @@ export type NoteDocMetaMergeState =
   | 'paused-from_doc_not_head'
 
 export type NoteDocContentHead = {
+  // If provided, use it to update the current note's symbol when merged
+  symbol?: string
+
   // Use for ticker, webpage symbols to display a title aside with symbol
   title?: string
 
@@ -81,7 +84,7 @@ export type NoteDocContentHead = {
     title?: string
 
     // when the webpage content publish at
-    publishedAt?: number
+    publishedAt?: string
 
     // tickers mentioned in the webpage content
     tickers?: string[]

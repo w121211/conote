@@ -1,8 +1,9 @@
+import { isNil } from 'lodash'
 import React, { useState } from 'react'
-import { NoteDocFragment, NoteDraftFragment } from '../../apollo/query.graphql'
-import { ContentHeadForm } from '../block-editor/src/components/doc/content-head-form'
-import Modal from '../modal/modal'
-import { styleSymbol } from '../ui-component/style-fc/style-symbol'
+import Modal from '../../../../modal/modal'
+import { styleSymbol } from '../../../../ui-component/style-fc/style-symbol'
+import { Doc } from '../../interfaces'
+import { ContentHeadForm } from './content-head-form'
 
 // interface Props {
 //   isNew: boolean
@@ -13,15 +14,14 @@ import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 //   nodeId: string
 // }
 
-const NoteHead = ({
-  symbol,
-  doc,
-}: {
-  symbol: string
-  doc: NoteDocFragment
-}): JSX.Element | null => {
+const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   const [showModal, setShowModal] = useState(false)
   // const editing = cur.__typename === 'NoteDraft'
+  const newSymbol =
+    !isNil(doc.contentHead.symbol) && doc.contentHead.symbol !== doc.symbol
+      ? doc.contentHead.symbol
+      : null
+  // const newSymbol = doc.noteCopy && doc.contentHead.symbol !== doc.symbol ?
 
   return (
     <div className="ml-6 mb-5">
@@ -48,7 +48,8 @@ const NoteHead = ({
               language
             </span>
           )} */}
-          {styleSymbol(symbol, doc.contentHead.webpage?.title ?? undefined)}
+          {styleSymbol(doc.symbol, doc.contentHead.webpage?.title ?? undefined)}
+          {newSymbol && `-> ${newSymbol}`}
         </h1>
       </div>
 
@@ -60,10 +61,7 @@ const NoteHead = ({
         }}
       >
         <div className="w-full px-4 md:py-6 md:px-10">
-          {/* <h2 className="mt-0 mb-4 sm:mb-6 font-bold text-gray-800">
-            Note meta
-          </h2> */}
-          <div>A read onlyl form</div>
+          <ContentHeadForm doc={doc} onFinish={() => setShowModal(false)} />
         </div>
       </Modal>
 
@@ -163,4 +161,4 @@ const NoteHead = ({
   )
 }
 
-export default NoteHead
+export default DocHead

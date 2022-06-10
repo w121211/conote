@@ -117,7 +117,7 @@ export function escapeStr() {
 //
 
 export function isDocBlock(block: Block): boolean {
-  return block.docTitle !== undefined && block.parentUid === null
+  return block.docSymbol !== undefined && block.parentUid === null
 }
 
 /**
@@ -131,15 +131,15 @@ export function genBlockUid(): string {
 export type BlockInput = [string, BlockInput[]] | string
 
 /**
- * @param opts.docBlock if given, use it to replace input's root
- * @param opts.docTitle if given, use it to replace input's root title
- * @returns block array, the first block is doc-block
+ * @param opts.docBlock If given, use it to replace input's root
+ * @param opts.docSymbol If given, use it to replace input's root title
+ * @returns Block array, the first block is doc-block
  */
 export function writeBlocks(
   input: BlockInput,
   opts: {
     docBlock?: Block
-    docTitle?: string
+    docSymbol?: string
   } = {},
 ): Block[] {
   function f(input: BlockInput, order = 0, parentUid: string | null = null) {
@@ -153,7 +153,7 @@ export function writeBlocks(
     }
   }
 
-  const { docBlock, docTitle } = opts,
+  const { docBlock, docSymbol } = opts,
     rootInput = f(input)
 
   let rootInput_ = rootInput
@@ -163,10 +163,10 @@ export function writeBlocks(
       uid: docBlock.uid,
       str: docBlock.str,
     }
-  } else if (docTitle) {
+  } else if (docSymbol) {
     rootInput_ = {
       ...rootInput,
-      str: docTitle,
+      str: docSymbol,
     }
   }
 
@@ -186,7 +186,7 @@ export function writeBlocks(
       const { uid, str, order, parentUid, children } = shift,
         children_ = children ? children.map((e, i) => f(e, i, uid)) : [],
         childrenUids = children_.map(e => e.uid),
-        docTitle = parentUid === null ? str : undefined
+        docSymbol = parentUid === null ? str : undefined
 
       children_.forEach(e => stack.push(e))
       blocks.push({
@@ -195,7 +195,7 @@ export function writeBlocks(
         order,
         parentUid,
         childrenUids,
-        docTitle,
+        docSymbol,
         open: true,
       })
     }
