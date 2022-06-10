@@ -51,7 +51,7 @@ const DiscussTile = ({ data }: Props): JSX.Element => {
             query: { userId: userId },
           }}
         >
-          <a className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate underline-offset-2 hover:underline">
+          <a className="inline-block min-w-0 text-sm text-blue-500 font-medium truncate underline-offset-2 hover:underline">
             {userId}
           </a>
         </Link>

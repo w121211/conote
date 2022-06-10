@@ -1,6 +1,6 @@
 import moment from 'moment'
 import Link from 'next/link'
-import React, { ReactNode } from 'react'
+import React, { HtmlHTMLAttributes, ReactNode } from 'react'
 import { styleSymbol } from './style-fc/style-symbol'
 import { Box } from './box'
 
@@ -18,9 +18,15 @@ export interface ListProps {
   currentTab?: string
 }
 
-export const ListItem = ({ children }: { children: ReactNode }) => {
+export const ListItem = ({
+  children,
+  onClick,
+}: { children: ReactNode } & HtmlHTMLAttributes<HTMLDivElement>) => {
   return (
-    <div className="flex overflow-hidden min-w-0 py-4 first:pt-0 last:pb-0 last:border-none border-b border-inherit first:rounded-t last:rounded-b">
+    <div
+      className="flex overflow-hidden min-w-0 py-4 first:pt-0 last:pb-0 last:border-none border-b border-inherit first:rounded-t last:rounded-b"
+      onClick={onClick}
+    >
       {children}
     </div>
   )

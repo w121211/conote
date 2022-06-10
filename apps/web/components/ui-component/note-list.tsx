@@ -4,8 +4,8 @@ import { styleSymbol } from './style-fc/style-symbol'
 import { Box } from './box'
 import { ListItem } from './list-item'
 import { NoteDocFragment } from '../../apollo/query.graphql'
-import { getNotePageURL } from '../../shared/note-helpers'
 import Link from 'next/link'
+import { getNotePageURL } from '../note/note-helpers'
 
 export interface NoteData {
   title: string

@@ -34,7 +34,7 @@
 
 @layer components {
   .responsive-width {
-    @apply w-[425px] md:w-fit md:max-w-[720px] lg:max-w-[900px];
+    @apply w-[425px] md:w-full md:max-w-[720px] lg:max-w-[900px];
   }
   .input {
     @apply px-2 py-2 border border-gray-300 rounded text-sm text-gray-800 hover:bg-gray-50 focus:bg-gray-50 focus:outline-blue-400;
