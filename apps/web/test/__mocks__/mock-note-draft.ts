@@ -65,7 +65,9 @@ export const mockNoteDrafts: Omit<
         { blockUid: 'uid-1', discussId: mockDiscusses[2].id },
       ],
       symbols: [],
-      blocks: mockBlocks,
+      blocks: writeBlocks(mockBlockInputs[0], {
+        docSymbol: mockSyms[1].symbol,
+      }),
     },
   },
   {
@@ -77,7 +79,9 @@ export const mockNoteDrafts: Omit<
     contentBody: {
       discussIds: [],
       symbols: [],
-      blocks: mockBlocks,
+      blocks: writeBlocks(mockBlockInputs[0], {
+        docSymbol: mockSyms[2].symbol,
+      }),
     },
   },
   {

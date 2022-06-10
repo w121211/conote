@@ -17,7 +17,7 @@ const Layout = ({
   const [showSider, setShowSider] = useState(true)
   const [pinSider, setPinMenu] = useState(true)
   // const [scroll, setScroll] = useState(0)
-  const layoutRef = useRef<HTMLDivElement>(null)
+  // const layoutRef = useRef<HTMLDivElement>(null)
 
   function handleLocalSiderState() {
     const storageMenu = localStorage.getItem('showSider')

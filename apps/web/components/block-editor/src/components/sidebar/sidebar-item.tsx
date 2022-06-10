@@ -4,7 +4,7 @@ import { NoteDraftEntryFragment } from '../../../../../apollo/query.graphql'
 import { useObservable } from '@ngneat/react-rxjs'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarItemPanel from './sidebar-item-panel'
-import { getNotePageURL } from '../../../../note/note-helpers'
+import { getNotePageURL } from '../../../../../shared/note-helpers'
 // import { DocEntryPack } from '../workspace/doc'
 // import ContentPanel from './doc-index-panel'
 

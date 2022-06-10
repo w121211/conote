@@ -1,17 +1,7 @@
 import React, { useState } from 'react'
-import { NoteDocFragment, NoteDraftFragment } from '../../apollo/query.graphql'
-import { ContentHeadForm } from '../block-editor/src/components/doc/content-head-form'
+import { NoteDocFragment } from '../../apollo/query.graphql'
 import Modal from '../modal/modal'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'
-
-// interface Props {
-//   isNew: boolean
-//   symbol: string
-//   title?: string
-//   link?: string
-//   fetchTime?: Date
-//   nodeId: string
-// }
 
 const NoteHead = ({
   symbol,
@@ -21,8 +11,6 @@ const NoteHead = ({
   doc: NoteDocFragment
 }): JSX.Element | null => {
   const [showModal, setShowModal] = useState(false)
-  // const editing = cur.__typename === 'NoteDraft'
-
   return (
     <div className="ml-6 mb-5">
       <div className="flex items-center gap-2 mb-4">
@@ -38,9 +26,7 @@ const NoteHead = ({
 
       <div
         className="relative mb-3 hover:cursor-pointer"
-        onClick={() => {
-          setShowModal(true)
-        }}
+        onClick={() => setShowModal(true)}
       >
         <h1 className=" line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
           {/* {link && (
@@ -55,14 +41,13 @@ const NoteHead = ({
       <Modal
         sectionClassName=""
         visible={showModal}
-        onClose={() => {
-          setShowModal(false)
-        }}
+        onClose={() => setShowModal(false)}
       >
         <div className="w-full px-4 md:py-6 md:px-10">
           {/* <h2 className="mt-0 mb-4 sm:mb-6 font-bold text-gray-800">
             Note meta
           </h2> */}
+          {/* TODO: A read onlyl form */}
           <div>A read onlyl form</div>
         </div>
       </Modal>

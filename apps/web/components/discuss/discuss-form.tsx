@@ -19,34 +19,19 @@ const DiscussForm = ({
   title: string
   onCreate: (data: DiscussFragment) => void
 }) => {
-  const { handleSubmit, register, setValue, watch } = useForm<FormInput>({
-    defaultValues: { title },
-  })
-  const watchContent = watch('content')
-  const maxTextareaHeight = 300
-  const contentRef = register('content').ref
-
   const [createDiscuss] = useCreateDiscussMutation({
-    onCompleted(data) {
-      if (data.createDiscuss) {
-        onCreate(data.createDiscuss)
-      }
-    },
-  })
-
-  const onSubmit = (v: FormInput) => {
-    // console.log(v, noteId)
-    createDiscuss({
-      variables: {
-        noteId,
-        data: {
-          title: v.title,
-          content: v.content ?? '',
-          //   meta: undefined,
-        },
+      onCompleted(data) {
+        if (data.createDiscuss) {
+          onCreate(data.createDiscuss)
+        }
       },
-    })
-  }
+    }),
+    { handleSubmit, register, setValue, watch } = useForm<FormInput>({
+      defaultValues: { title },
+    }),
+    watchContent = watch('content'),
+    contentRef = register('content').ref,
+    maxTextareaHeight = 300
 
   let textareaTest: HTMLTextAreaElement | null = null
 
@@ -61,6 +46,20 @@ const DiscussForm = ({
       )}px`
     }
   }, [watchContent])
+
+  function onSubmit(v: FormInput) {
+    // console.log(v, noteId)
+    createDiscuss({
+      variables: {
+        noteId,
+        data: {
+          title: v.title,
+          content: v.content ?? '',
+          //   meta: undefined,
+        },
+      },
+    })
+  }
 
   return (
     <form

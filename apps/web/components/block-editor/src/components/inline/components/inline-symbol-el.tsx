@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { getNotePageURL } from '../../../../../note/note-helpers'
+import { getNotePageURL } from '../../../../../../shared/note-helpers'
 import { editorOpenSymbolInModal } from '../../../events'
 import { InlineSymbol } from '../../../interfaces'
 import { InlineElProps } from '../inline-el'

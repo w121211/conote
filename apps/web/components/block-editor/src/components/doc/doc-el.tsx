@@ -1,14 +1,13 @@
 import React, { useEffect } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import NoteHead from '../../../../note/note-head'
 import { docSave } from '../../events'
 import type { Doc } from '../../interfaces'
 import { hotkey, multiBlockSelection } from '../../listeners'
-import { blockRepo, getBlock } from '../../stores/block.repository'
-import { BlockEl } from '../block/block-el'
-import DocPlaceholder from './doc-placeholder'
-import DocHead from './doc-head'
+import { blockRepo } from '../../stores/block.repository'
 import { docRepo } from '../../stores/doc.repository'
+import { BlockEl } from '../block/block-el'
+import DocHead from './doc-head'
+import DocPlaceholder from './doc-placeholder'
 
 interface DocProps {
   // assume to be block-els, if given, use it and ignore doc-block's children
