@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import SidebarEl from '../block-editor/src/components/sidebar/sidebar-el'
+import LoginModal from '../login-modal'
 import Navbar from '../navbar'
 
 const Layout = ({
@@ -108,19 +109,20 @@ const Layout = ({
   // }
 
   return (
-    <div className="relative grid grid-cols-[auto_1fr] [grid-template-areas:'nav_nav'_'sider_children'] w-screen h-screen ">
+    <div className="relative grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] [grid-template-areas:'nav_nav'_'sider_children'] w-screen h-screen ">
       <SidebarEl
         showMenuHandler={triggerMenuHandler}
         pinMenuHandler={pinMenuHandler}
         showSider={showSider}
         isPined={pinSider}
+        backgroundColor={backgroundColor}
       />
       <div
-        className={`[grid-area:children] flex-grow pb-[20vh]  
+        className={`[grid-area:children] flex-grow pt-8 pb-[20vh]  
         overflow-auto scroll-smooth scrollbar
          ${backgroundColor ? backgroundColor : 'bg-white dark:bg-gray-700'}`}
       >
-        <div className=" mx-auto px-2 w-[425px] md:max-w-[720px] md:w-full lg:max-w-[900px] lg:px-24">
+        <div className=" mx-auto px-2 lg:px-24 responsive-width">
           {children}
           {/* <LoginModal>{children}</LoginModal> */}
         </div>

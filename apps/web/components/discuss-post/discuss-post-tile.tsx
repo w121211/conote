@@ -37,28 +37,27 @@ const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {
             </Link>
             {/* <span className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate"></span> */}
             <span className="inline-block text-gray-400 text-xs">
-              {moment(post.createdAt).subtract(10, 'days').calendar()}
+              {moment(post.createdAt).subtract(10, 'days').format('ll')}
             </span>
           </div>
           <p className=" pr-2 py-2 whitespace-pre-wrap [word-break:break-word] text-gray-700 text-sm">
             {post.content.trim()}
           </p>
 
-          {/* <div className="flex pt-1 border-t border-gray-200">{bottomBtn}</div> */}
           <div className="flex items-center pt-1 border-t border-gray-200">
             <div className="flex-grow">
               <DiscussPostEmojis
                 discussPostId={post.id}
-                disable={me?.id === post.userId}
+                disable={me?.id === post.userId || !me}
               />
             </div>
-            <button className="flex items-center p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
+            {/* <button className="flex items-center p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
               <span className="material-icons-outlined text-base leading-none">
                 reply
               </span>
               Reply
             </button>
-            <OptionsMenu isMyPost={me?.id === post.userId} />
+            <OptionsMenu isMyPost={me?.id === post.userId} /> */}
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
 import { useMeQuery } from '../apollo/query.graphql'
-import AuthItem from './auth/auth-item'
+import AuthItem from './auth/auth-Item'
 import { useMe } from './auth/use-me'
 import { CommitPanel } from './commit/commit-panel'
 import { SearchAll } from './search-all-modal/search-all-modal'
@@ -19,8 +19,8 @@ const Navbar = ({
 
   backgroundColor?: string
 }) => {
-  // const { me, loading } = useMe()
-  const { data: me } = useMeQuery()
+  const { me, loading } = useMe()
+  // const { data: me } = useMeQuery()
   return (
     <nav
       className={`

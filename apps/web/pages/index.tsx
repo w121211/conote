@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { SearchAllForm } from '../components/search-all-form'
-import AuthItem from '../components/auth/auth-item'
 import {
   DiscussesLatestDocument,
   DiscussesLatestQuery,
@@ -9,7 +8,8 @@ import {
   DiscussFragment,
 } from '../apollo/query.graphql'
 import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
-import HotDisplay from '../components/hot-display/hot-display'
+import { LatestDiscussTile } from '../components/latest-discuss-tile'
+import AuthItem from '../components/auth/auth-Item'
 
 interface Props {
   discussesLatest: DiscussFragment[]
@@ -54,7 +54,7 @@ const HomePage = ({ discussesLatest }: Props): JSX.Element => {
   //   )
 
   return (
-    <div className="flex flex-col w-screen h-screen overflow-auto">
+    <div className="w-screen h-screen overflow-auto">
       {showAnnounce && (
         <div className="sticky top-0 w-screen z-10 flex items-center justify-between p-1 capitalize text-sm text-gray-900 bg-yellow-400 text-center">
           <div className="flex-grow flex items-center justify-center  gap-2 ">
@@ -72,10 +72,10 @@ const HomePage = ({ discussesLatest }: Props): JSX.Element => {
           </span>
         </div>
       )}
-      <div className="flex flex-col">
+      <div className="flex flex-col h-full">
         <div className="flex items-center justify-between   border-slate-200 px-4 md:px-10 pt-6 pb-6 ">
           <div className="flex-3 flex items-center max-w-2xl">
-            <h2 className="my-0 mr-4 md:mr-10 ">Konote</h2>
+            <h3 className=" mr-4 md:mr-10 ">Konote</h3>
             <div className="w-5/6">
               <SearchAllForm />
             </div>
@@ -83,9 +83,9 @@ const HomePage = ({ discussesLatest }: Props): JSX.Element => {
           <AuthItem />
         </div>
         <>
-          <div className=" flex pb-[9vh] pt-6 bg-gray-100">
+          <div className="flex-1 flex pb-[9vh] pt-6 bg-gray-200">
             <div className="flex flex-col items-center md:items-start md:flex-row ms:justify-between  md:w-3/4 md:ml-[calc(4rem+96px)] gap-6">
-              <HotDisplay />
+              <LatestDiscussTile data={discussesLatest} />
               {/* <UserRateTable data={mockRateData} /> */}
             </div>
           </div>

@@ -23,8 +23,8 @@ interface Props {
 
 const DiscussPage = ({ discuss, discussPosts }: Props) => {
   return (
-    <Layout>
-      <div className="flex flex-col gap-3 w-full">
+    <Layout backgroundColor="bg-gray-200">
+      <div className="flex flex-col gap-4 w-full">
         <DiscussTile data={discuss} />
         <DiscussPostTiles posts={discussPosts} />
         <DiscussPostForm discussId={discuss.id} />

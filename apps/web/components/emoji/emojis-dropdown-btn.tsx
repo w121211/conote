@@ -26,13 +26,14 @@ export const EmojisDropdownBtn = ({ disable }: { disable?: boolean }) => {
         }
       }}
     >
-      {disable ? (
+      {dropdownBtn}
+      {/* {disable ? (
         <Tooltip title="不能對自己按讚" size="sm" darkMode align="middle">
           {dropdownBtn}
         </Tooltip>
       ) : (
         dropdownBtn
-      )}
+      )} */}
     </div>
   )
 }

@@ -17,6 +17,7 @@ import {
   NoteDocsByUserQueryVariables,
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
+import { LatestDiscussTile } from '../../components/latest-discuss-tile'
 
 export const mockRateData: TableData[] = [
   {
@@ -176,9 +177,9 @@ const UserPage = ({
           <span className="material-icons mr-2 text-[120px] leading-none text-gray-300 dark:text-gray-400">
             account_circle
           </span>
-          <div className="">
-            <h1 className="mb-2 font-medium text-gray-800 dark:text-gray-100">
-              @{router.query.userId}
+          <div className="truncate">
+            <h1 className="truncate mb-2 font-medium text-gray-800 dark:text-gray-100">
+              @{router.query.userid}
             </h1>
             <div className="mb-2 text-lg text-gray-500 dark:text-gray-400">
               建築師
@@ -206,16 +207,16 @@ const UserPage = ({
         {/* {data?.author?.meta} */}
         <div className="flex gap-6">
           <div className="w-1/2">
-            <UserNoteTable data={mockNoteList} />
+            <UserNoteTable data={noteDocsByUser} />
           </div>
-          <div className="w-1/2">
+          {/* <div className="w-1/2">
             <UserRateTable data={mockRateData} />
-          </div>
+          </div> */}
         </div>
 
-        <div className="">
-          <h2 className="mb-2 text-lg font-medium text-gray-700 ">DISCUSSES</h2>
-          <List listData={mockList} />
+        <div className="mt-8">
+          <h4 className="mb-2 text-gray-700 tracking-widest">DISCUSSES</h4>
+          <LatestDiscussTile data={discussesByUser} />
         </div>
       </div>
     </Layout>

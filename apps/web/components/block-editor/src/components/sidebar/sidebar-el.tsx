@@ -15,11 +15,13 @@ const SidebarEl = ({
   pinMenuHandler,
   isPined,
   showSider,
+  backgroundColor,
 }: {
   showMenuHandler: (bool?: boolean) => void
   pinMenuHandler: (bool?: boolean) => void
   isPined: boolean
   showSider: boolean
+  backgroundColor?: string
 }): JSX.Element | null => {
   const [sidebar] = useObservable(editorRepo.leftSidebar$, {
     initialValue: null,
@@ -62,9 +64,10 @@ const SidebarEl = ({
     <>
       <div
         className={`
-        [grid-area:sider]
+          [grid-area:sider]
           group
           absolute left-0 
+          z-50
           flex flex-col flex-shrink-0  
           w-72 
           h-full
@@ -78,7 +81,9 @@ const SidebarEl = ({
           } 
           ${
             isPined
-              ? ' sm:relative  border-gray-200  bg-gray-50 dark:bg-gray-800'
+              ? `sm:relative  border-gray-200  dark:bg-gray-800 ${
+                  backgroundColor ? backgroundColor : 'bg-gray-50'
+                }`
               : ' my-2 h-[calc(100%_-_16px)] border-t rounded-r border-gray-100 bg-white '
           } 
           ${isPined || !showSider ? 'shadow-transparent' : 'shadow-2xl'}

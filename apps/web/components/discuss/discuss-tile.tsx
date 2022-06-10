@@ -5,6 +5,7 @@ import { DiscussFragment } from '../../apollo/query.graphql'
 import { getNotePageURL } from '../note/note-helpers'
 import { useMe } from '../auth/use-me'
 import { Box } from '../ui-component/box'
+import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 import DiscussEmojis from './discuss-emojis'
 import OptionsMenu from './options-menu'
 
@@ -14,52 +15,59 @@ const currentTab = ''
 
 const quote = '這則討論和其他重複了!'
 
-const DiscussTile = ({ data }: { data: DiscussFragment }) => {
+interface Props {
+  data: DiscussFragment
+}
+
+const DiscussTile = ({ data }: Props): JSX.Element => {
   const { me } = useMe()
+  const { id, userId, title, content, createdAt, noteEntries } = data
   return (
-    <Box className="mb-3 pl-10 pt-4 pb-1">
+    <Box padding="md">
       <div className="flex gap-1">
-        {hashtags.map((tag, i) => {
+        {noteEntries?.map(({ sym: { symbol } }, i) => {
           return (
-            <span
-              className={` px-1 last:mr-0 rounded text-xs text-gray-800 bg-gray-200 tracking-wide ${
-                currentTab === tag ? 'text-blue-500' : ''
-              }`}
-              key={i}
-            >
-              {/* {i > 0 && <span className="inline-block mx-1 font-[Arial]">·</span>} */}
-              {tag}
-            </span>
+            <Link key={i} href={getNotePageURL('base', symbol)}>
+              <a
+                className={`last:mr-0 rounded text-sm tracking-wide ${
+                  currentTab === symbol ? 'text-blue-500' : ''
+                }`}
+              >
+                {styleSymbol(symbol)}
+              </a>
+            </Link>
           )
         })}
       </div>
-
-      {/* TODO: Add style */}
-      <div className="flex gap-1">
-        {data.noteEntries.map(e => {
-          return (
-            <span key={e.id}>
-              <Link href={getNotePageURL('base', e.sym.symbol)}>
-                <a>{e.sym.symbol}</a>
-              </Link>
-            </span>
-          )
-        })}
-      </div>
-
-      <h2 className="mt-4 mb-2 tracking-wider text-gray-800 text-xl font-medium">
+      <h2 className="mt-2 mb-1 tracking-wider text-gray-800 text-xl font-medium">
         <span className="text-gray-300">#</span>
-        {data.title}
+        {title}
         <span className="text-gray-300">#</span>
       </h2>
+      <div className=" mb-2 flex-shrink min-w-0 flex items-center gap-2 truncate">
+        <Link
+          href={{
+            pathname: '/user/[userId]',
+            query: { userId: userId },
+          }}
+        >
+          <a className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate underline-offset-2 hover:underline">
+            {userId}
+          </a>
+        </Link>
+        {/* <span className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate"></span> */}
+        <span className="inline-block text-gray-400 text-xs">
+          {moment(createdAt).subtract(10, 'days').format('ll')}
+        </span>
+      </div>
 
-      {data.content && (
+      {content && (
         <p className=" pr-2 py-2 whitespace-pre-wrap [word-break:break-word] text-gray-700 text-sm">
-          {data.content.trim()}
+          {content.trim()}
         </p>
       )}
 
-      {quote && (
+      {/* {quote && (
         <div className="mt-2 mb-4 px-4 py-2 bg-gray-100 text-sm text-gray-600">
           <div className="flex items-center">
             <span className="material-icons-round text-lg leading-none">
@@ -69,19 +77,19 @@ const DiscussTile = ({ data }: { data: DiscussFragment }) => {
           </div>
           <p className="text-right text-gray-400">{moment().calendar()}</p>
         </div>
-      )}
+      )} */}
 
-      <div className="flex pt-1 border-t border-gray-200">
+      <div className="flex mt-2 pt-1 border-t border-gray-200">
         <div className="flex-grow">
-          <DiscussEmojis discussId={data.id} disable={me?.id === data.userId} />
+          <DiscussEmojis discussId={id} disable={me?.id === userId || !me} />
         </div>
-        <button className="flex p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
+        {/* <button className="flex p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
           <span className="material-icons-outlined text-base leading-none">
             reply
           </span>
           Reply
         </button>
-        <OptionsMenu isMyPost={me?.id === data.userId ?? false} />
+        <OptionsMenu isMyPost={me?.id === data.userId ?? false} /> */}
       </div>
     </Box>
   )

@@ -14,7 +14,7 @@ export const Box = ({
     padding === 'md' ? `p-6 ` : padding === 'sm' ? `py-4 px-5` : ''
   return (
     <div
-      className={`${paddingClass} rounded border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700 shadow-sm ${className}`}
+      className={`${paddingClass} w-full rounded border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700 shadow-sm ${className}`}
     >
       {children}
     </div>
