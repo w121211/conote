@@ -17,13 +17,14 @@ const DocIndexPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
   //   ) : null
 
   return (
-    <div className="hidden group-hover:flex items-center ">
+    <div className="hidden group-hover:flex items-center z-10">
       {/* {commitButton} */}
       <button
         className=" px-[2px] !pointer-events-auto disabled:bg-transparent disabled:!cursor-not-allowed text-gray-400 disabled:text-gray-300 hover:text-gray-500 
         hover:disabled:text-gray-300"
         onClick={async e => {
           e.stopPropagation()
+          e.preventDefault()
           editorLeftSidebarItemRemove(item)
         }}
       >
