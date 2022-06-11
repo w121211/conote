@@ -359,14 +359,11 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         orderBy: { createdAt: 'asc' },
       }),
       parsed = drafts.map(e => noteDraftModel.parse(e)),
-      entries = parsed.map(e => {
-        const {
-          id,
-          symbol,
-          contentHead: { title },
-        } = e
-        return { id, symbol, title }
-      })
+      entries = parsed.map(({ id, symbol, contentHead: { title } }) => ({
+        id,
+        symbol,
+        title,
+      }))
     return entries
   },
 

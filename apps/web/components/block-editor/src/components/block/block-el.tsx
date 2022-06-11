@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
 import {
   blockDragLeave,
@@ -185,14 +185,14 @@ export const BlockEl = ({
     }, [children])
 
   // useEffect(() => {
-  //   console.log(uid, block, children)
-  // }, [block, children])
+  //   console.debug(uid, block)
+  // }, [block])
 
   if (block === undefined) {
     return null
   }
 
-  const { open, str: defaultLocalStr } = block,
+  const { open, str: defaultStr } = block,
     isOpen = open ?? true
 
   return (
@@ -277,7 +277,7 @@ export const BlockEl = ({
           {...{
             uid,
             isEditing,
-            defaultLocalStr,
+            defaultStr,
             showEditableDom,
             caret,
             setCaret,

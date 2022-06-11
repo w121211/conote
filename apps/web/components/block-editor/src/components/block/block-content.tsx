@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   textareaBlur,
   textareaChange,
@@ -15,6 +15,14 @@ import type {
 } from '../../interfaces'
 import ParseRenderEl from '../inline/parse-render-el'
 
+function usePrevious<T>(value: T) {
+  const ref = useRef<T>()
+  useEffect(() => {
+    ref.current = value
+  })
+  return ref.current
+}
+
 export const BlockContent = ({
   // rawContent,
   // renderedContent,
@@ -25,7 +33,7 @@ export const BlockContent = ({
   // textareaProps,
   uid,
   isEditing,
-  defaultLocalStr,
+  defaultStr,
   showEditableDom,
   caret,
   setCaret,
@@ -36,7 +44,7 @@ export const BlockContent = ({
 }: {
   uid: string
   isEditing: boolean
-  defaultLocalStr: string
+  defaultStr: string
   showEditableDom: boolean
   caret: CaretPosition
   setCaret: React.Dispatch<React.SetStateAction<CaretPosition>>
@@ -47,10 +55,22 @@ export const BlockContent = ({
     React.SetStateAction<DestructTextareaKeyEvent | null>
   >
 }): JSX.Element => {
-  const [localStr, setLocalStr] = useState(defaultLocalStr)
+  const [localStr, setLocalStr] = useState(defaultStr)
+
+  const prevDefaultStr = usePrevious(defaultStr)
 
   useEffect(() => {
-    if (localStr !== defaultLocalStr) {
+    // Require if defaultStr is changed outside through block ops
+    setLocalStr(defaultStr)
+  }, [defaultStr])
+
+  useEffect(() => {
+    // In cases 'defaultStr' and 'isEditing' changed in the same time (eg block-split-op),
+    //  prevent saving the block
+    const defaultStrChanged =
+      prevDefaultStr !== undefined && prevDefaultStr !== defaultStr
+
+    if (localStr !== defaultStr && !defaultStrChanged) {
       textareaUnmount(uid, localStr)
     }
   }, [isEditing, showEditableDom])

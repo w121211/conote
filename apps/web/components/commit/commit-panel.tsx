@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import {
-  useCreateNoteDraftMutation,
+  useCreateCommitMutation,
   useMyNoteDraftEntriesQuery,
 } from '../../apollo/query.graphql'
 import Modal from '../modal/modal'
-import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 import DomainSelect from '../domain/domain-select'
-import { LoadingSvg } from './loading-circle'
+import { useRouter } from 'next/router'
+import { styleSymbol } from '../ui-component/style-fc/style-symbol'
+import Link from 'next/link'
+import { getNotePageURL } from '../../shared/note-helpers'
 
 /**
  *
@@ -47,62 +49,48 @@ const mockData = [
 ]
 
 type FormValue = {
-  checkbox: string[]
+  // Selected draft ids
+  draftIds: string[]
   // checkboxMirror: string[]
 }
 
 export const CommitPanel = (): JSX.Element | null => {
-  // const { data, loading, error } = useMyNoteDraftEntriesQuery(),
-  //   [
-  //     commitNoteDrafts,
-  //     {
-  //       data: commitNoteDraftsData,
-  //       loading: commitNoteDraftsLoading,
-  //       error: commitNoteDraftsError,
-  //     },
-  //   ] = useCreateNoteDraftMutation()
+  const router = useRouter(),
+    qMyDrafts = useMyNoteDraftEntriesQuery(),
+    [createCommit, { error }] = useCreateCommitMutation({
+      onCompleted: data => {
+        router.push(`/commit/${data.createCommit.id}`)
+      },
+    }),
+    [showModal, setShowModal] = useState(false)
 
   // const { checkedDrafts, checkBoxForm } = reactSelectForm()
+  // const [checkedIdx, setCheckedIdx] = useState<boolean[]>(
+  //   Array(mockData.length).fill(false),
+  // )
 
-  const [showModal, setShowModal] = useState(false)
-  const [checkedIdx, setCheckedIdx] = useState<boolean[]>(
-    Array(mockData.length).fill(false),
-  )
-  const methods = useForm<FormValue>()
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting, isSubmitSuccessful },
-  } = methods
+  const methods = useForm<FormValue>(),
+    {
+      register,
+      handleSubmit,
+      formState: { isSubmitting, isSubmitSuccessful },
+    } = methods
 
-  const onSubmit = (value: FormValue) => {
-    console.log('checkbox', value.checkbox)
+  async function onSubmit(value: FormValue) {
+    // console.log('checkbox', value.draftIds)
+    await createCommit({ variables: { noteDraftIds: value.draftIds } })
   }
 
+  if (error) throw error
   // if (loading) {
   //   return null
-  // }
-  // if (error) {
-  //   console.error(error)
-  //   return <div>Error</div>
   // }
   // if (data === undefined) {
   //   return <div>Error</div>
   // }
-
   return (
     <div>
-      {/* {checkBoxForm}
-
-      {checkedDrafts} */}
-
-      <button
-        className="btn-primary text-sm"
-        onClick={e => {
-          setShowModal(true)
-          // commitNoteDrafts({ variables: { draftIds: checkedDrafts } })
-        }}
-      >
+      <button className="btn-primary text-sm" onClick={e => setShowModal(true)}>
         Commit
       </button>
       <FormProvider {...methods}>
@@ -113,7 +101,7 @@ export const CommitPanel = (): JSX.Element | null => {
         >
           <div className="flex flex-col h-full py-6  ">
             <div className="flex items-center mx-10 mb-3">
-              <h2 className={`my-0 text-gray-900`}>Commit to</h2>
+              <h2 className={`my-0 text-gray-900`}>Commit</h2>
               {/* <h2
                 className={`text-3xl text-gray-900 transition-[transform,opacity] delay-150 ${
                   isSubmitSuccessful
@@ -123,30 +111,35 @@ export const CommitPanel = (): JSX.Element | null => {
               >
                 Commit Success! #id
               </h2> */}
-              <DomainSelect />
+              {/* <DomainSelect /> */}
             </div>
 
             <form
               className="overflow-auto grid text-gray-700"
-              // onSubmit={handleSubmit(onSubmit)}
+              onSubmit={handleSubmit(onSubmit)}
             >
-              {mockData.map(({ symbol, title, type }, i) => {
-                return (
-                  <label
-                    key={symbol}
-                    className={`relative flex items-center px-10 py-2 transition-opacity `}
-                  >
-                    <input
-                      {...register('checkbox')}
-                      className="mr-2"
-                      type="checkbox"
-                      value={symbol}
-                      disabled={isSubmitting || isSubmitSuccessful}
-                    />
-                    {type === 'web' ? title : styleSymbol(symbol)}
-                  </label>
-                )
-              })}
+              {qMyDrafts.data?.myNoteDraftEntries.map(
+                ({ id, symbol, title }) => {
+                  return (
+                    <label
+                      key={id}
+                      className={`relative flex items-center px-10 py-2 transition-opacity `}
+                    >
+                      <input
+                        {...register('draftIds')}
+                        className="mr-2"
+                        type="checkbox"
+                        value={id}
+                        disabled={isSubmitting || isSubmitSuccessful}
+                      />
+                      {/* <Link href={getNotePageURL('edit', symbol)}>
+                        <a>{styleSymbol(symbol)}</a>
+                      </Link> */}
+                      {styleSymbol(symbol)}
+                    </label>
+                  )
+                },
+              )}
             </form>
             <div className="flex justify-end w-full bottom-0 rounded-b ">
               <button

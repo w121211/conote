@@ -542,7 +542,7 @@ type NoteDraftEntry {
   id: ID!
   symbol: String!
 
-  # Retrived from 'noteDocMeta.title', use for ticker, webpage
+  # Retrived from 'noteDoc.contentHead.title' and is used for ticker, webpage
   title: String
 }
 

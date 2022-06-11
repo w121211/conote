@@ -1,11 +1,12 @@
+import { nanoid } from 'nanoid'
 import { Doc } from '../../src/interfaces'
 import {
   mockDocBlock_contentBlocks,
   mockDocBlockWithoutContent,
 } from './mock-block'
 
-const base = {
-  branch: 'branch',
+const base: Omit<Doc, 'uid' | 'symbol' | 'blockUid'> = {
+  branch: 'default',
   domain: 'domain',
   contentHead: {},
 }
@@ -13,12 +14,14 @@ const base = {
 export const mockDocs: Doc[] = [
   {
     ...base,
-    title: mockDocBlock_contentBlocks[0].str,
+    uid: nanoid(),
+    symbol: mockDocBlock_contentBlocks[0].str,
     blockUid: mockDocBlock_contentBlocks[0].uid,
   },
   {
     ...base,
-    title: mockDocBlockWithoutContent.str,
+    uid: nanoid(),
+    symbol: mockDocBlockWithoutContent.str,
     blockUid: mockDocBlockWithoutContent.uid,
   },
 ]
