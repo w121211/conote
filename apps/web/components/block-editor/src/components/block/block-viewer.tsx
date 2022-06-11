@@ -70,7 +70,7 @@ const BlockViewer = ({
     <div
       data-uid={uid}
       data-childrenuids={children.map(e => e.uid).join(',')}
-      className={`block-container
+      className={`block-container 
         ${isChild ? 'ml-[1em] [grid-area:body]' : ''}
         ${children.length > 0 && isOpen && 'show-tree-indicator'}
         ${isOpen ? 'is-open' : 'is-closed'}
@@ -80,8 +80,8 @@ const BlockViewer = ({
         <div
           className='
           relative
-          grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"]
-          grid-cols-[1em_1em_1fr_auto]
+          grid [grid-template-areas:"above_above"_"content_refs"_"below_below"]
+          grid-cols-[1fr_auto]
           grid-rows-[0_1fr_0]
           rounded-lg
           leading-normal

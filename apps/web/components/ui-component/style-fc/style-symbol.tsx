@@ -4,7 +4,7 @@ import { TokenHelper } from '../../../shared/token-helpers'
 import { grammar } from '../../block-editor/src/parse-render'
 
 const bracketStyle = `text-gray-400/50 dark:text-gray-400`
-const blueHighlight = `text-blue-500 dark:text-blue-300`
+const blueHighlight = `text-blue-600 dark:text-blue-300`
 
 export function styleSymbol(
   str: string,

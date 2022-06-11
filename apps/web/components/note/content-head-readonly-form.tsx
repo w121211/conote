@@ -1,12 +1,8 @@
 import React from 'react'
-import { Controller, FormProvider, useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { components, ControlProps } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
-import { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
-import { Doc } from '../../interfaces'
-import { docContentHeadUpdate } from '../../events'
-import { useRouter } from 'next/router'
-import { FormInputs } from '../../../../poll/poll-form'
+import { NoteDocFragment } from '../../apollo/query.graphql'
 
 type Option = {
   label: string
@@ -18,10 +14,8 @@ const Control = (props: ControlProps<Option[], true>) => {
   return (
     <components.Control
       {...rest}
-      className={`flex-grow min-h-[38px] rounded text-sm hover:cursor-text hover:bg-gray-50 ${
-        rest.isFocused
-          ? '!shadow-[0_0_0_2px] !shadow-blue-400 !border-transparent'
-          : '!border-gray-300'
+      className={`flex-grow min-h-[38px] rounded !bg-white !border-none text-gray-500 text-sm ${
+        rest.isDisabled ? '' : ''
       }  `}
     >
       {children}
@@ -63,15 +57,8 @@ type FormValues = {
 //   }
 // }
 
-export const ContentHeadForm = ({
-  doc,
-  onFinish,
-}: {
-  doc: Doc
-  onFinish: () => void
-}) => {
-  const { symbol, contentHead } = doc,
-    router = useRouter()
+export const ContentHeadReadonlyForm = ({ doc }: { doc: NoteDocFragment }) => {
+  const { symbol, contentHead } = doc
 
   const methods = useForm<FormValues>({
       defaultValues: {
@@ -79,42 +66,17 @@ export const ContentHeadForm = ({
         // title: contentHead.title ?? '',
         keywords:
           contentHead.keywords?.map(e => ({ label: e, value: e })) ?? [],
-        // duplicatedSymbols: contentHead.duplicatedSymbols?.join(' ') ?? '',
-        // redirects: metaInput?.redirects?.join(' ') ?? '',
-        // duplicates: metaInput?.duplicates?.join(' ') ?? '',
-        // description: metaInput?.description ?? '',
-        // date: metaInput?.date ?? '',
-        // redirectTo: defaultValues?.redirectTo ?? '',
-        // description: '',
-        // date: '',
-        //   author: metaInput?.author ?? '',
-        //   url: metaInput?.url ?? '',
       },
     }),
-    { register, handleSubmit, control, formState } = methods,
-    { isDirty, isSubmitSuccessful, isSubmitted } = formState
-
-  async function onSubmit(input: FormValues) {
-    const { symbol: symbol_, title, keywords, duplicatedSymbols } = input,
-      contentHead_: NoteDocContentHeadInput = {
-        ...contentHead,
-        symbol: symbol_ === symbol ? undefined : symbol_,
-        keywords: keywords.map(e => e.value),
-      }
-    await docContentHeadUpdate(doc, contentHead_, router)
-    onFinish()
-  }
+    { register, handleSubmit, control, formState } = methods
 
   return (
     <form
       className="grid grid-cols-1 auto-rows-auto sm:grid-cols-[max-content_auto] items-center sm:gap-4 "
       autoComplete="off"
-      onSubmit={handleSubmit(onSubmit)}
     >
       <label className="mr-4 mt-2 first:mt-0 sm:m-0 sm:text-right text-gray-700 text-sm">
-        {/* <span className="flex-shrink-0 min-w-fit  mr-4 sm:w-20"><h5 className=" text-right text-gray-700 font-normal"> */}
         Symbol
-        {/* </h5></span> */}
       </label>
       <input
         {...register('symbol', {
@@ -123,6 +85,7 @@ export const ContentHeadForm = ({
         })}
         className={`input flex-grow`}
         type="text"
+        disabled
       />
 
       {/* <label className="mr-4 mt-2 first:mt-0 sm:m-0 sm:text-right text-gray-700 text-sm">
@@ -146,6 +109,7 @@ export const ContentHeadForm = ({
         name="keywords"
         render={({ field: { onChange, value, ref } }) => (
           <CreatableSelect
+            isDisabled
             instanceId="1"
             isMulti
             styles={{
@@ -163,16 +127,6 @@ export const ContentHeadForm = ({
           />
         )}
       />
-
-      <div className=" text-right sm:col-span-2">
-        <button
-          className="btn-primary-md "
-          type="submit"
-          disabled={!isDirty || isSubmitSuccessful || isSubmitted}
-        >
-          {isSubmitted ? (isDirty ? 'Submit' : 'Submitted') : 'Submit'}
-        </button>
-      </div>
     </form>
   )
 }

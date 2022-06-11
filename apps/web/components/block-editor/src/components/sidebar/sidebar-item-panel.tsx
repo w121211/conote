@@ -22,7 +22,10 @@ const DocIndexPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
       <button
         className=" px-[2px] !pointer-events-auto disabled:bg-transparent disabled:!cursor-not-allowed text-gray-400 disabled:text-gray-300 hover:text-gray-500 
         hover:disabled:text-gray-300"
-        onClick={async () => editorLeftSidebarItemRemove(item)}
+        onClick={async e => {
+          e.stopPropagation()
+          editorLeftSidebarItemRemove(item)
+        }}
       >
         <span className="material-icons-outlined text-xl  mix-blend-multiply">
           delete_forever

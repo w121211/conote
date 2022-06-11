@@ -4,6 +4,8 @@ import { useMe } from './use-me'
 import ToggleMenu from '../ui-component/toggle-menu'
 import { LoggedInUser } from './auth.service'
 import LogoutButton from './logout-button'
+import { DropdownListDivider } from '../ui-component/dropdown-list-divider'
+import { DropdownListItem } from '../ui-component/dropdown-list-item'
 
 const AuthItem = () => {
   const { me, loading } = useMe()
@@ -29,24 +31,23 @@ const AuthItem = () => {
           <span className="block px-2  truncate  text-gray-600 text-sm font-medium cursor-default">
             {me.id}
           </span>
-          <div className="h-[1px] my-2 bg-gray-200"></div>
-          <Link
-            href={{
-              pathname: '/user/[userId]',
-              query: { userId: me.id },
-            }}
-          >
-            <a className="block whitespace-nowrap px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 ">
-              Your Profile
-            </a>
-          </Link>
-          <div className="h-[1px] my-2 bg-gray-200"></div>
-
-          <Link href="/login">
-            <a className="block px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 ">
-              Logout
-            </a>
-          </Link>
+          <DropdownListDivider />
+          <DropdownListItem>
+            <Link
+              href={{
+                pathname: '/user/[userId]',
+                query: { userId: me.id },
+              }}
+            >
+              <a>Your Profile</a>
+            </Link>
+          </DropdownListItem>
+          <DropdownListDivider />
+          <DropdownListItem>
+            <Link href="/login">
+              <a>Logout</a>
+            </Link>
+          </DropdownListItem>
         </ToggleMenu>
       ) : (
         <a className="btn-primary  text-sm" href="/login">

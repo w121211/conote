@@ -9,7 +9,7 @@ import {
 } from '../apollo/query.graphql'
 import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
 import { LatestDiscussTile } from '../components/latest-discuss-tile'
-import AuthItem from '../components/auth/auth-item'
+import AuthItem from '../components/auth/auth-Item'
 
 interface Props {
   discussesLatest: DiscussFragment[]

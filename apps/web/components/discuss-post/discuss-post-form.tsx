@@ -9,6 +9,7 @@ import {
 
 import './github-markdown-light.module.css'
 import { useMe } from '../auth/use-me'
+import LoginModal from '../login-modal'
 
 interface FormInput {
   content: string
@@ -121,9 +122,10 @@ const DiscussPostForm = ({
       <div className=" rounded-b border border-gray-300 bg-white ">
         {showTextarea ? (
           <div className="m-2">
-            <textarea
-              {...register('content')}
-              className={`
+            <LoginModal>
+              <textarea
+                {...register('content')}
+                className={`
               w-full 
               ${isModal ? 'min-h-[18px]' : 'min-h-[120px]'} 
               max-h-${'[' + maxTextareaHeight + ']'}px] 
@@ -139,13 +141,14 @@ const DiscussPostForm = ({
               focus:border-blue-400
               focus:outline-blue-300
             `}
-              placeholder="Leave a comment"
-              ref={e => {
-                contentRef(e)
-                textareaTest = e
-              }}
-              disabled={!me}
-            />
+                placeholder="Leave a comment"
+                ref={e => {
+                  contentRef(e)
+                  textareaTest = e
+                }}
+                disabled={!me}
+              />
+            </LoginModal>
           </div>
         ) : (
           <div

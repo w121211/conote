@@ -123,7 +123,7 @@ export const CommitPanel = (): JSX.Element | null => {
               >
                 Commit Success! #id
               </h2> */}
-              <DomainSelect />
+              {/* <DomainSelect /> */}
             </div>
 
             <form

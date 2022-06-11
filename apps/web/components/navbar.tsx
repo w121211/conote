@@ -1,40 +1,60 @@
 import React, { ReactNode } from 'react'
 import Link from 'next/link'
-import AuthItem from './auth/auth-item'
 import { useMe } from './auth/use-me'
 import { CommitPanel } from './commit/commit-panel'
 import SearchAllModal from './search-all-modal/search-all-modal'
+import AuthItem from './auth/auth-Item'
+import { createStore, select, setProp, withProps } from '@ngneat/elf'
+import { localStorageStrategy, persistState } from '@ngneat/elf-persist-state'
+
+interface SiderUI {
+  open: boolean
+}
+
+export const siderStore = createStore(
+  { name: 'sider' },
+  withProps<SiderUI>({ open: true }),
+)
+
+// export const persist = persistState(siderStore, {
+//   key: 'sider',
+//   storage: localStorageStrategy,
+// })
+
+const isOpen = siderStore.getValue()
 
 const Navbar = ({
   rbtn,
-  onClickMenu,
-  backgroundColor,
-}: {
+}: // onClickMenu,
+// backgroundColor,
+{
   rbtn?: ReactNode
-  onClickMenu: (boo?: boolean) => void
-  backgroundColor?: string
+  // onClickMenu: (boo?: boolean ) => void
+  // backgroundColor?: string
 }) => {
   const { me, loading } = useMe()
+
+  const onClickMenu = () => {
+    siderStore.update(state => ({ ...state, open: !state.open }))
+  }
 
   return (
     <nav
       className={`
-        [grid-area:nav]
+       sticky z-50
+       
         flex items-center justify-between 
         w-screen
         top-0 
         py-2 
         border-b border-gray-200
-        ${backgroundColor ? backgroundColor : 'bg-white dark:bg-gray-700'}  
-        
+        bg-white dark:bg-gray-700}  
       `}
     >
       <div className={`flex items-center gap-2 ml-2 `}>
         <span
           className="material-icons p-1 rounded leading-none text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer"
-          onClick={() => {
-            onClickMenu()
-          }}
+          onClick={onClickMenu}
         >
           menu
         </span>

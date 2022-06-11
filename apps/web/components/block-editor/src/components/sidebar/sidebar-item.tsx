@@ -123,10 +123,9 @@ const SidebarItem = ({
           <span className="inline-block min-w-0 flex-1 truncate ">
             <ItemLabel symbol={symbol} title={title ?? undefined} />
           </span>
+          <SidebarItemPanel item={item} />
         </a>
       </Link>
-      {/* TODO: 放在link裡面時，點擊時會同時觸發href連結 */}
-      <SidebarItemPanel item={item} />
     </div>
   )
 }

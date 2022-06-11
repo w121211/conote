@@ -19,16 +19,14 @@ const InlineSymbolEl = ({
     return (
       <Link href={getNotePageURL('view', symbol)}>
         <a>
-          <span className="relative text-blue-500 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-600">
-            {children}
-          </span>
+          <span className="relative symbol-link">{children}</span>
         </a>
       </Link>
     )
   }
   return (
     <span
-      className="relative text-blue-500 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-600"
+      className="relative symbol-link"
       onClick={e => editorOpenSymbolInModal(symbol, router)}
       role="button"
     >
