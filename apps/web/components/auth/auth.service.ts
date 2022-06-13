@@ -49,32 +49,34 @@ async function getFirebaseUser(
   )
 }
 
+let me: UserFragment | null = null
+
 /**
  * Return firebase-user only if both client and server both confirm the user is logged in
- * - server logged-out, client logged-out -> do nothing
- * - server logged-in, client logged-in -> do nothing
- * - server logged-in, client logged-out -> logout from server
- * - server logged-out, client logged-in -> logout from client
+ * - Server logged-out, client logged-out -> do nothing
+ * - Server logged-in, client logged-in -> do nothing
+ * - Server logged-in, client logged-out -> logout from server
+ * - Server logged-out, client logged-in -> logout from client
  *
  */
 export async function getLoggedInUser(
   apolloClient: ApolloClient<object>,
+  opts = { refetch: false },
 ): Promise<LoggedInUser | null> {
   const firebaseClient = getFirebaseClient(),
     firebaseAuth = getAuth(firebaseClient),
     firebaseUser = await getFirebaseUser(firebaseAuth)
 
-  let me: UserFragment | null = null
+  // let _me: UserFragment | null = null
+
+  if (me && !opts.refetch) return me
 
   try {
-    const { data: queryMeData } = await apolloClient.query<
-      MeQuery,
-      MeQueryResult
-    >({
+    const qMe = await apolloClient.query<MeQuery, MeQueryResult>({
       query: MeDocument,
       fetchPolicy: 'network-only',
     })
-    if (queryMeData) me = queryMeData.me
+    if (qMe.data) me = qMe.data.me
   } catch (err) {
     // console.debug(err)
   }
@@ -98,12 +100,12 @@ export async function getLoggedInUser(
   }
   if (me === null && firebaseUser) {
     console.debug('me === null && firebaseUser')
-    // await logout(firebaseAuth, apolloClient)
+    await logout(firebaseAuth, apolloClient)
     return null
   }
 
   console.debug('[getLoggedInUser] Unexpected case')
-  // await logout(firebaseAuth, apolloClient)
+  await logout(firebaseAuth, apolloClient)
   return null
 }
 

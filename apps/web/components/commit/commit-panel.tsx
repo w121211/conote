@@ -10,6 +10,7 @@ import { useRouter } from 'next/router'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 import Link from 'next/link'
 import { getNotePageURL } from '../../shared/note-helpers'
+import { editorLeftSidebarRefresh } from '../block-editor/src/events'
 
 /**
  *
@@ -79,6 +80,8 @@ export const CommitPanel = (): JSX.Element | null => {
   async function onSubmit(value: FormValue) {
     // console.log('checkbox', value.draftIds)
     await createCommit({ variables: { noteDraftIds: value.draftIds } })
+    await editorLeftSidebarRefresh('network-only')
+    setShowModal(false)
   }
 
   if (error) throw error

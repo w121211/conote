@@ -18,7 +18,7 @@ export class PollModel {
     choices: string[]
     meta?: PollMeta
     noteDocToMerge?: NoteDoc
-  }): Promise<PollParsed> {
+  }): Promise<PollParsed<Poll>> {
     const poll = await prisma.poll.create({
       data: {
         user: { connect: { id: userId } },
@@ -34,18 +34,22 @@ export class PollModel {
     return this.parse(poll)
   }
 
-  async find(id: string): Promise<PollParsed | null> {
+  async find(id: string) {
     const poll = await prisma.poll.findUnique({
-      include: { count: true },
+      include: {
+        count: true,
+        noteDocToMerge: { include: { branch: true, sym: true } },
+      },
       where: { id },
     })
     if (poll) {
+      console.debug(poll)
       return this.parse(poll)
     }
     return null
   }
 
-  parse(poll: Poll & { count: PollCount | null }): PollParsed {
+  parse<T extends Poll & { count: PollCount | null }>(poll: T): PollParsed<T> {
     if (hasCount(poll)) {
       return {
         ...poll,
