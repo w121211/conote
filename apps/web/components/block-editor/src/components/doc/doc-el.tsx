@@ -124,8 +124,8 @@ export const DocEl = ({
       basis-full 
       self-stretch 
       w-full max-w-[60em] 
-      mx-auto 
-      p-4"
+      -ml-4 
+      "
     >
       <DocHead doc={doc} />
 

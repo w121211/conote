@@ -25,7 +25,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   // const newSymbol = doc.noteCopy && doc.contentHead.symbol !== doc.symbol ?
 
   return (
-    <div className="ml-6 mb-5">
+    <div className="ml-4 mb-5">
       <div className="flex items-center gap-2 mb-4">
         {/* <DomainSelect /> */}
         {/* {isNew && (
@@ -37,7 +37,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         )} */}
       </div>
 
-      <DomainSelect />
+      {/* <DomainSelect /> */}
 
       <div
         className="relative mb-3 hover:cursor-pointer"

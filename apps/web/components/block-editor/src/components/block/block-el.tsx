@@ -201,7 +201,9 @@ export const BlockEl = ({
       data-childrenuids={children.map(e => e.uid).join(',')}
       className={
         // [
+        /* ---relative is neccersary for searchEl to align--- */
         `block-container
+        relative
         ${isChild ? 'ml-[1em] [grid-area:body]' : ''}
         ${children.length > 0 && isOpen && 'show-tree-indicator'}
         ${isOpen ? 'is-open' : 'is-closed'}

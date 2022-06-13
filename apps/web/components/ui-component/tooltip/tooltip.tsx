@@ -31,7 +31,9 @@ const warning = `border-red-600 bg-red-600 text-white`
 
 function getPageTopOffset(el: HTMLElement | null) {
   if (el !== null) {
+    // let topOffset = getComputedStyle(el).top
     let topOffset = el.getBoundingClientRect().top
+    console.log(topOffset)
     while (el !== null && el !== document.documentElement) {
       el = el.parentElement
 

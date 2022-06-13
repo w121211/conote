@@ -14,7 +14,7 @@ const ToggleMenu = ({
   const [open, setOpen] = useState(false)
   return (
     <details
-      className="group relative h-fit cursor-pointer select-none leading-none"
+      className="group relative h-fit w-fit cursor-pointer select-none leading-none"
       open={false}
       onToggle={e => {
         if (disabled) {

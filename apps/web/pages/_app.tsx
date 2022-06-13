@@ -8,6 +8,7 @@ import { TooltipProvider } from '../components/ui-component/tooltip/tooltip-prov
 import { useMe } from '../components/auth/use-me'
 import Link from 'next/link'
 import { useApolloClientInitial } from '../apollo/apollo-client'
+import Navbar from '../components/navbar'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApolloClientInitial(pageProps.initialApolloState),
@@ -63,7 +64,12 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
       <ApolloProvider client={apolloClient}>
         <TooltipProvider>
           <ModalProvider>
-            <Component {...pageProps} />
+            <div className="grid grid-rows-[auto_1fr] w-screen h-screen">
+              <Navbar />
+              <div className="">
+                <Component {...pageProps} />
+              </div>
+            </div>
           </ModalProvider>
         </TooltipProvider>
       </ApolloProvider>

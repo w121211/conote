@@ -10,6 +10,7 @@ import { inlineService } from '../../../services/inline.service'
 import { InlineElProps } from '../inline-el'
 import DiscussModalPageEl from '../../../../../discuss/discuss-modal-page-el'
 import { Tooltip } from '../../../../../ui-component/tooltip/tooltip'
+import { PopperTooltip } from '../../../../../ui-component/tooltip/popper-tooltip'
 
 /**
  * Update block string when discuss is created
@@ -37,15 +38,6 @@ const InlineDiscussEl = ({
     [showModal, setShowModal] = useState(false),
     // [showWarnTooltip, setShowWarnTooltip] = useState(false),
     isDiscussCreated = id !== undefined,
-    modalButtons = !isDiscussCreated && (
-      <button
-        form="create-discuss-form"
-        className={`btn-primary h-10 w-24 `}
-        type="submit"
-      >
-        Submint
-      </button>
-    ),
     modalTopRightBtn = isDiscussCreated && (
       <Link
         href={{
@@ -67,7 +59,7 @@ const InlineDiscussEl = ({
         visible={showModal}
         onClose={() => setShowModal(false)}
         topRightBtn={modalTopRightBtn}
-        buttons={modalButtons}
+        // buttons={modalButtons}
       >
         {id ? (
           <div className="px-10">
@@ -76,22 +68,25 @@ const InlineDiscussEl = ({
         ) : (
           <DiscussForm
             title={title}
-            onCreate={data => discussOnCreate(blockUid, inline, data)}
+            onCreate={data => {
+              discussOnCreate(blockUid, inline, data)
+              setShowModal(false)
+            }}
           />
         )}
       </Modal>
 
       {isDiscussCreated ? (
         <span
-          className="relative text-blue-500 hover:bg-gray-100"
+          className="relative symbol-link"
           onClick={() => setShowModal(true)}
           role="button"
         >
           {children}
         </span>
       ) : (
-        <Tooltip
-          title="⚠ Discuss is not created yet"
+        <PopperTooltip
+          label="⚠ Discuss is not created yet"
           // visible={showWarnTooltip}
           // visible={showWarnTooltip}
           // onClose={() => setShowWarnTooltip(false)}
@@ -107,7 +102,7 @@ const InlineDiscussEl = ({
             {children}
             {/* <span>(click to create)</span> */}
           </span>
-        </Tooltip>
+        </PopperTooltip>
       )}
     </>
   )

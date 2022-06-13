@@ -126,7 +126,7 @@ const SearchAllModal = () => {
     }
   }, [inputValue])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (keyArrow || (inputValue && selectedIdx === 0)) {
       const selected = document.querySelector('[aria-selected="true"]')
       selected &&

@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import HotListItem from './_hot-list-item'
-import { List } from './ui-component/list'
 import { Box } from './ui-component/box'
 import { ListItem } from './ui-component/list-item'
 import Link from 'next/link'
@@ -25,7 +23,7 @@ export const LatestDiscussTile = ({ data }: Props): JSX.Element => {
             <div className="flex-grow">
               <Link
                 href={{
-                  pathname: './discuss/[discussid]',
+                  pathname: '/discuss/[discussid]',
                   query: { discussid: id },
                 }}
               >

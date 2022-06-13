@@ -14,124 +14,22 @@ const Layout = ({
   backgroundColor?: string
   navColor?: string
 }): JSX.Element => {
-  const [showSider, setShowSider] = useState(true)
-  const [pinSider, setPinMenu] = useState(true)
-  // const [scroll, setScroll] = useState(0)
-  // const layoutRef = useRef<HTMLDivElement>(null)
-
-  function handleLocalSiderState() {
-    const storageMenu = localStorage.getItem('showSider')
-    const storagePin = localStorage.getItem('pinSider')
-    if (window.innerWidth < 769) {
-      if (storageMenu !== null && storagePin !== null) {
-        setShowSider(false)
-        setPinMenu(false)
-      } else {
-        localStorage.setItem('showSider', 'false')
-        localStorage.setItem('pinSider', 'false')
-      }
-    } else {
-      if (storageMenu !== null && storagePin !== null) {
-        setShowSider(storageMenu === 'true' ? true : false)
-        setPinMenu(storagePin === 'true' ? true : false)
-      } else {
-        // console.log('bigger', showSider)
-        localStorage.setItem('showSider', 'true')
-        localStorage.setItem('pinSider', 'true')
-      }
-    }
-  }
-
-  useEffect(() => {
-    if (window) {
-      if (window.innerWidth < 768) {
-        setShowSider(false)
-        setPinMenu(false)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    handleLocalSiderState()
-  }, [])
-
-  useEffect(() => {
-    if (showSider === false) {
-      setPinMenu(false)
-    }
-    localStorage.setItem('showSider', `${showSider}`)
-  }, [showSider])
-
-  useEffect(() => {
-    localStorage.setItem('pinSider', `${pinSider}`)
-  }, [pinSider])
-
-  const triggerMenuHandler = (boo?: boolean) => {
-    if (boo === undefined) {
-      setShowSider(!showSider)
-    } else {
-      setShowSider(boo)
-    }
-  }
-  const pinMenuHandler = (boo?: boolean) => {
-    if (boo === undefined) {
-      setPinMenu(!pinSider)
-    } else {
-      setPinMenu(boo)
-    }
-  }
-
-  const handleScroll = (e: any) => {
-    // console.log(e.target.scrollTop)
-    // if (e.target) {
-    //   //getBoundingClientRect().top 總是<=0
-    //   const clientRectTop = e.target.scrollTop
-    //   // console.log(clientRectTop, scroll, clientRectTop > scroll)
-    //   if (scroll > clientRectTop && clientRectTop > 45) {
-    //     setShowNav(true)
-    //     setScroll(clientRectTop)
-    //   }
-    //   if (scroll < clientRectTop) {
-    //     setShowNav(false)
-    //     setScroll(clientRectTop)
-    //   }
-    //   if (clientRectTop === 0) {
-    //     setShowNav(true)
-    //     setScroll(clientRectTop)
-    //   }
-    // }
-  }
-
-  // ${
-  //   pinSider
-  //     ? 'xl:px-[10%] lg:px-[4%]'
-  //     : 'md:w-[720px] md:px-2 lg:w-[900px] lg:px-24'
-  // }
-
+  const childrenRef = useRef<HTMLDivElement>(null)
   return (
-    <div className="relative grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] [grid-template-areas:'nav_nav'_'sider_children'] w-screen h-screen ">
-      <SidebarEl
-        showMenuHandler={triggerMenuHandler}
-        pinMenuHandler={pinMenuHandler}
-        showSider={showSider}
-        isPined={pinSider}
-        backgroundColor={backgroundColor}
-      />
+    <div className="relative grid grid-cols-[auto_1fr] [grid-template-areas:'sider_children'] w-screen h-[calc(100vh_-_49px)] ">
+      {/* // <div className="relative flex w-screen overscroll-contain"> */}
+      <SidebarEl backgroundColor={backgroundColor} />
       <div
         className={`[grid-area:children] flex-grow pt-8 pb-[20vh]  
-        overflow-auto scroll-smooth scrollbar
+         scroll-smooth overflow-auto
          ${backgroundColor ? backgroundColor : 'bg-white dark:bg-gray-700'}`}
+        ref={childrenRef}
       >
-        <div className=" mx-auto px-2 lg:px-24 responsive-width">
+        <div className={`responsive-width mx-auto px-6 md:px-10`}>
           {children}
           {/* <LoginModal>{children}</LoginModal> */}
         </div>
       </div>
-      <Navbar
-        rbtn={buttonRight}
-        backgroundColor={navColor}
-        onClickMenu={triggerMenuHandler}
-      />
     </div>
   )
 }

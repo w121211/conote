@@ -30,7 +30,7 @@ const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {
                 query: { userId: post.userId },
               }}
             >
-              <a className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate underline-offset-2 hover:underline">
+              <a className="inline-block min-w-0 text-sm text-blue-500 font-medium truncate underline-offset-2 hover:underline">
                 @{post.userId.slice(-6)}
                 {me?.id === post.userId ? '(you)' : null}
               </a>

@@ -48,7 +48,7 @@ const DiscussForm = ({
   }, [watchContent])
 
   function onSubmit(v: FormInput) {
-    // console.log(v, noteId)
+    console.log(v, noteId)
     createDiscuss({
       variables: {
         noteId,
@@ -63,7 +63,7 @@ const DiscussForm = ({
 
   return (
     <form
-      id="create-discuss-form"
+      // id="create-discuss-form"
       className=" grid auto-rows-min w-full px-10 py-5 gap-4"
       onSubmit={handleSubmit(onSubmit)}
       autoComplete="off"
@@ -100,6 +100,15 @@ const DiscussForm = ({
           textareaTest = e
         }}
       />
+      <div className=" text-center">
+        <button
+          // form="create-discuss-form"
+          className={`btn-primary-lg `}
+          type="submit"
+        >
+          Submint
+        </button>
+      </div>
     </form>
   )
 }

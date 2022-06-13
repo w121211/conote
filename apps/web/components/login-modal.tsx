@@ -20,6 +20,7 @@ const LoginModal = ({ children }: { children: ReactNode }) => {
         </div>
       </div>
       <Modal
+        sectionClassName="!w-fit"
         visible={showLoginModal}
         buttons={
           <button className="btn-primary">
@@ -28,7 +29,7 @@ const LoginModal = ({ children }: { children: ReactNode }) => {
         }
         onClose={() => setShowLoginModal(false)}
       >
-        <div className="text-center">請先登入!</div>
+        <div className="w-[200px] py-8 text-center">請先登入!</div>
       </Modal>
     </>
   )

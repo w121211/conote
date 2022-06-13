@@ -205,7 +205,7 @@ export const Anchor = (props: AnchorProps) => {
       p-0
       border-none
       text-inherit
-      cursor-pointer
+      cursor-default
       appearance-none
       transition-all duration-[0.05s]
 

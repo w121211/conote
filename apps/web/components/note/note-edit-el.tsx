@@ -9,6 +9,8 @@ import { EditorEl } from '../block-editor/src/components/editor/editor-el'
 import Layout from '../ui-component/layout'
 import { editorOpenSymbolInMain } from '../block-editor/src/events'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
+import LoginModal from '../login-modal'
+import { useMe } from '../auth/use-me'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -25,7 +27,10 @@ const NoteEditEl = ({
   noteDocsToMerge: NoteDocFragment[] | null
 }) => {
   const router = useRouter()
-
+  const { me, loading } = useMe()
+  if (!loading && !me) {
+    router.push('/login')
+  }
   useEffect(() => {
     // Call this method only when symbol changed
     editorOpenSymbolInMain(symbol, router)

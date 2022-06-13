@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { NoteDocFragment } from '../../apollo/query.graphql'
+import { ContentHeadForm } from '../block-editor/src/components/doc/content-head-form'
 import Modal from '../modal/modal'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'
+import { ContentHeadReadonlyForm } from './content-head-readonly-form'
 
 const NoteHead = ({
   symbol,
@@ -12,7 +14,7 @@ const NoteHead = ({
 }): JSX.Element | null => {
   const [showModal, setShowModal] = useState(false)
   return (
-    <div className="ml-6 mb-5">
+    <div className="ml-4 mb-5">
       <div className="flex items-center gap-2 mb-4">
         {/* <DomainSelect /> */}
         {/* {isNew && (
@@ -48,7 +50,8 @@ const NoteHead = ({
             Note meta
           </h2> */}
           {/* TODO: A read onlyl form */}
-          <div>A read onlyl form</div>
+          <ContentHeadReadonlyForm doc={doc} />
+          {/* <div>A read onlyl form</div> */}
         </div>
       </Modal>
 

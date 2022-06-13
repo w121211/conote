@@ -11,6 +11,8 @@ import Layout from '../ui-component/layout'
 import { convertGQLBlocks } from '../../shared/block-helpers'
 import NoteHead from './note-head'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
+import { Badge } from '../ui-component/badge'
+// import { NoteDocVersionDropdown } from '../domain/domain-select'
 
 /**
  * View only note-doc
@@ -33,22 +35,28 @@ const NoteViewEl = ({
     <Layout>
       {/* <NoteAlerts cur={doc} note={note} noteDocsToMerge={noteDocsToMerge} /> */}
 
-      <NoteDocVersionDropdown cur={doc} note={note} noteDraft={noteDraft} />
+      <div className="flex">
+        <div className="flex-1 flex items-stretch">
+          <span className="self-center">{doc.domain}</span>
 
-      <div>
-        <Link href={getNotePageURL('edit', note.sym.symbol)}>
-          <a>EDIT</a>
-        </Link>
+          <div className="w-[1px] mx-3 border-l border-gray-200"></div>
+
+          <Link href={getNotePageURL('edit', note.sym.symbol)}>
+            <a className="btn-primary-md">EDIT</a>
+          </Link>
+        </div>
+
+        <NoteDocVersionDropdown cur={doc} note={note} noteDraft={noteDraft} />
       </div>
 
-      <div>{doc.domain}</div>
+      <div className="-ml-4">
+        <NoteHead symbol={doc.symbol} doc={doc} />
 
-      <NoteHead symbol={doc.symbol} doc={doc} />
+        {/* <div>Content head</div> */}
+        {/* <NoteHead /> */}
 
-      {/* <div>Content head</div> */}
-      {/* <NoteHead /> */}
-
-      <BlockViewer blocks={blocks} uid={docBlock.uid} omitParent />
+        <BlockViewer blocks={blocks} uid={docBlock.uid} omitParent />
+      </div>
     </Layout>
   )
 }
