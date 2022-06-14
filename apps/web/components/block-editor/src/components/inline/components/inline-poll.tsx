@@ -5,11 +5,14 @@ import {
   useSelected,
   useSlateStatic,
 } from 'slate-react'
-import { InlinePollElement } from '../editor/slate-custom-types'
 import { Transforms } from 'slate'
-import { PollFragment, usePollLazyQuery } from '../../apollo/query.graphql'
-import { InlineItemService } from '../../services/inline.service'
-import PollGroup from '../../../../../poll-form/poll-group'
+import PollGroup from '../../../../../poll/poll-group'
+import {
+  PollFragment,
+  usePollLazyQuery,
+} from '../../../../../../apollo/query.graphql'
+import { InlineItemService } from '../../../../../inline/inline-item-service'
+import { InlinePollElement } from '../../../../../editor/slate-custom-types'
 
 const InlinePoll = (
   props: RenderElementProps & { element: InlinePollElement },

@@ -24,16 +24,17 @@ const SidebarEl = ({
   const ref = useRef<HTMLDivElement>(null)
   const timeoutRef = useRef<any>(null)
 
-  function hideSidebarWhenResize() {
+  function onResize() {
     if (window && window.innerWidth < 769) {
-      setIsPined(false)
       setIsOpen(false)
+      setIsPined(false)
     }
   }
 
   function onTouchStart(e: TouchEvent) {
     if (isOpen && !ref.current?.contains(e.target as HTMLElement)) {
       setIsOpen(false)
+      setIsPined(false)
     }
   }
 
@@ -46,11 +47,11 @@ const SidebarEl = ({
   }, [])
 
   useEffect(() => {
-    window.addEventListener('resize', hideSidebarWhenResize)
+    window.addEventListener('resize', onResize)
     window.addEventListener('touchstart', onTouchStart, false)
 
     return () => {
-      window.removeEventListener('resize', hideSidebarWhenResize)
+      window.removeEventListener('resize', onResize)
       window.removeEventListener('touchstart', onTouchStart)
     }
   }, [])
@@ -58,7 +59,7 @@ const SidebarEl = ({
   useEffect(() => {
     siderStore.subscribe(state => {
       setIsOpen(state.open)
-      if (state.open === false) {
+      if (!state.open) {
         setIsPined(false)
       }
     })

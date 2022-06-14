@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { MarkDownParser } from '../discuss/mark-down-parser'
 import {
@@ -61,7 +61,7 @@ const DiscussPostForm = ({
   const contentRef = register('content').ref
   let textareaTest: HTMLTextAreaElement | null = null
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (textareaTest) {
       /* Reset height - important to shrink on delete */
       textareaTest.style.height = isModal ? '44px' : 'inherit'

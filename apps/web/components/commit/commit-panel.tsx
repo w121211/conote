@@ -6,8 +6,6 @@ import {
 } from '../../apollo/query.graphql'
 import Modal from '../modal/modal'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'
-import DomainSelect from '../domain/domain-select'
-import { LoadingSvg } from './loading-circle'
 
 /**
  *

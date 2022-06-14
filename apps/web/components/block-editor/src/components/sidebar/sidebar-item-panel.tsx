@@ -17,10 +17,10 @@ const DocIndexPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
   //   ) : null
 
   return (
-    <div className="hidden group-hover:flex items-center z-10">
+    <div className=" hidden group-hover:flex items-center z-10">
       {/* {commitButton} */}
       <button
-        className=" px-[2px] !pointer-events-auto disabled:bg-transparent disabled:!cursor-not-allowed text-gray-400 disabled:text-gray-300 hover:text-gray-500 
+        className="flex-1 flex px-[2px] !pointer-events-auto disabled:bg-transparent disabled:!cursor-not-allowed text-gray-400 disabled:text-gray-300 hover:text-gray-500 
         hover:disabled:text-gray-300"
         onClick={async e => {
           e.stopPropagation()
@@ -28,7 +28,7 @@ const DocIndexPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
           editorLeftSidebarItemRemove(item)
         }}
       >
-        <span className="material-icons-outlined text-xl  mix-blend-multiply">
+        <span className="material-icons-outlined text-xl leading-none mix-blend-multiply">
           delete_forever
         </span>
       </button>

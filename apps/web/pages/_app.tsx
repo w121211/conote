@@ -65,6 +65,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         <TooltipProvider>
           <ModalProvider>
             <div className="grid grid-rows-[auto_1fr] w-screen h-screen">
+              {/* {!(typeof window === 'undefined') && <Navbar />} */}
               <Navbar />
               <div className="">
                 <Component {...pageProps} />

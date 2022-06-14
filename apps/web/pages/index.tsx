@@ -80,7 +80,7 @@ const HomePage = ({ discussesLatest }: Props): JSX.Element => {
               <SearchAllForm />
             </div>
           </div>
-          <AuthItem />
+          {/* <AuthItem /> */}
         </div>
         <>
           <div className="flex-1 flex pb-[9vh] pt-6 bg-gray-200">
