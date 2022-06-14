@@ -50,7 +50,7 @@ describe('blockSplitOp()', () => {
    */
 
   it('before, index=0', () => {
-    blockRepo.updateInChain(
+    blockRepo.updateChain(
       blockSplitChainOp(getBlock('c4'), 'x', 'helloworld', 0, 'before'),
     )
     expect(() =>
@@ -82,7 +82,7 @@ describe('blockSplitOp()', () => {
   })
 
   it('after, index=5', () => {
-    blockRepo.updateInChain(
+    blockRepo.updateChain(
       blockSplitChainOp(getBlock('c4'), 'x', 'helloworld', 5, 'after'),
     )
     expect(() =>
@@ -114,7 +114,7 @@ describe('blockSplitOp()', () => {
   })
 
   it('first, index=5', () => {
-    blockRepo.updateInChain(
+    blockRepo.updateChain(
       blockSplitChainOp(getBlock('c4'), 'x', 'helloworld', 5, 'first'),
     )
     expect(() =>
@@ -145,7 +145,7 @@ describe('blockSplitOp()', () => {
   })
 
   it('last, index=5', () => {
-    blockRepo.updateInChain(
+    blockRepo.updateChain(
       blockSplitChainOp(getBlock('c4'), 'x', 'helloworld', 5, 'last'),
     )
     expect(() =>

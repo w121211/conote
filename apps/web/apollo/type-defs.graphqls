@@ -442,13 +442,12 @@ type NoteEntry {
 
 type NoteDoc {
   id: ID!
-
   # Require bracnh and symbol in cases query note-doc without note
   branchName: String!
   symbol: String!
-
   commitId: String!
   fromDocId: String
+  mergePollId: String
   userId: String!
   status: NoteDocStatus!
   meta: NoteDocMeta!
@@ -542,7 +541,7 @@ type NoteDraftEntry {
   id: ID!
   symbol: String!
 
-  # Retrived from 'noteDocMeta.title', use for ticker, webpage
+  # Retrived from 'noteDoc.contentHead.title' and is used for ticker, webpage
   title: String
 }
 
@@ -556,6 +555,7 @@ type Poll {
   discuss: Discuss
   createdAt: String!
   updatedAt: String!
+  noteDocToMerge: NoteDoc
 }
 
 type PollMeta {

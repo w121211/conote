@@ -194,15 +194,15 @@ class TestHelper {
   /**
    * Warnning! This method not follow the correct steps to create merge polls
    *  and should only use for test only
-   *
    */
-  async createMergePolls(prisma: PrismaClient) {
+  async createMergePolls(prisma: PrismaClient, noteDocToMerge: NoteDoc) {
     return await prisma.$transaction(
       mockMergePolls.map(e =>
         prisma.poll.create({
           data: {
             ...e,
             count: { create: { nVotes: e.choices.map(_ => 0) } },
+            noteDocToMerge: { connect: { id: noteDocToMerge.id } },
           },
         }),
       ),

@@ -137,6 +137,7 @@ fragment noteDoc on NoteDoc {
   symbol
   commitId
   fromDocId
+  mergePollId
   userId
   status
   domain
@@ -271,6 +272,8 @@ fragment poll on Poll {
   id
   userId
   choices
+  createdAt
+  updatedAt
   count {
     id
     nVotes
@@ -278,8 +281,9 @@ fragment poll on Poll {
   discuss {
     ...discuss
   }
-  createdAt
-  updatedAt
+  noteDocToMerge {
+    ...noteDoc
+  }
 }
 
 fragment pollVote on PollVote {

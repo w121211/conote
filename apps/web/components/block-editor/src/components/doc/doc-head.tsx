@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import DomainSelect from '../../../../domain/domain-select'
 import Modal from '../../../../modal/modal'
 import { styleSymbol } from '../../../../ui-component/style-fc/style-symbol'
-import { Doc } from '../../interfaces'
+import type { Doc } from '../../interfaces'
 import { ContentHeadForm } from './content-head-form'
 
 // interface Props {

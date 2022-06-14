@@ -1,4 +1,5 @@
 import { Sym, SymType } from '@prisma/client'
+import { parseSymbol } from '../../shared/symbol.utils'
 import prisma from '../prisma'
 
 /**
@@ -18,24 +19,6 @@ import prisma from '../prisma'
 type SymbolParsed = {
   symbol: string
   type: SymType
-}
-
-const reTicker = /^\$[A-Z0-9]+$/
-
-const reTopic = /^\[\[[^\]]+\]\]$/
-
-/**
- * Check is given sting a url
- *
- * @reference https://stackoverflow.com/a/43467144/2293778
- */
-function isURL(str: string) {
-  try {
-    const url = new URL(str)
-    return url.protocol === 'http:' || url.protocol === 'https:'
-  } catch (err) {
-    return false
-  }
 }
 
 class SymModel {
@@ -94,18 +77,7 @@ class SymModel {
    * - [] Not able to recognize author
    */
   parse(symbol: string): SymbolParsed {
-    let type: SymType
-
-    if (symbol.match(reTicker) !== null) {
-      type = SymType.TICKER
-    } else if (symbol.match(reTopic) !== null) {
-      type = SymType.TOPIC
-    } else if (isURL(symbol)) {
-      type = SymType.URL
-    } else {
-      throw new Error(`Symbol parse error: ${symbol}`)
-    }
-    return { symbol, type }
+    return parseSymbol(symbol)
   }
 
   async update(id: string, newSymbol: string): Promise<Sym> {

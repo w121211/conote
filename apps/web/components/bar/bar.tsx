@@ -2,20 +2,21 @@ import React, { useEffect, useState } from 'react'
 
 const BarChart = ({
   content,
-  value,
+  // value,
   count,
   total,
   voted,
   checked,
 }: {
   content: string
-  value: number
+  // value: number
   total: number
   count: number
   voted: boolean
   checked?: boolean
 }): JSX.Element => {
-  const persentage = (count: number, total: number) => Math.round((count / total + Number.EPSILON) * 100) || 0
+  const persentage = (count: number, total: number) =>
+    Math.round((count / total + Number.EPSILON) * 100) || 0
 
   return (
     <div className="w-full p-1 text-gray-700">
@@ -25,9 +26,13 @@ const BarChart = ({
         }`}
       >
         <div
-          className={`absolute flex w-full h-9 rounded overflow-hidden bg-blue-500 ${voted ? 'bg-blue-700' : ''}`}
+          className={`absolute flex w-full h-9 rounded overflow-hidden bg-blue-500 ${
+            voted ? 'bg-blue-700' : ''
+          }`}
           style={{
-            clipPath: `inset(0  ${100 - persentage(count, total)}% 0 0 round 4px) `,
+            clipPath: `inset(0  ${
+              100 - persentage(count, total)
+            }% 0 0 round 4px) `,
           }}
         >
           <span className="flex items-center justify-between w-full mx--4 capitalize text-white">

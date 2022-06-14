@@ -8,6 +8,7 @@ import { testHelper } from '../../test/test-helpers'
 import { NoteDraftParsed } from '../../lib/interfaces'
 import { noteDocModel } from '../../lib/models/note-doc-model'
 import { mockUsers } from '../../test/__mocks__/mock-user'
+import { mockNoteDocs } from '../../test/__mocks__/mock-note-doc'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),
@@ -36,17 +37,18 @@ async function main() {
   )
   await commitNoteDrafts([mockNoteDrafts[1].id], mockNoteDrafts[1].userId)
 
-  // await testHelper.createMergePolls(prisma)
+  // Warnning! This is the wrong way to create merge polls. Only used for the testing.
+  await testHelper.createMergePolls(prisma, noteDocs[0])
 
-  const fromDoc = noteDocs[0],
-    fromDoc_ = noteDocModel.parse(fromDoc),
-    drafts = mockNoteDrafts_gotFromDoc(mockUsers[4].id, fromDoc_)
+  // const fromDoc = noteDocs[0],
+  //   fromDoc_ = noteDocModel.parse(fromDoc),
+  //   drafts = mockNoteDrafts_gotFromDoc(mockUsers[4].id, fromDoc_)
 
-  await testHelper.createNoteDrafts(prisma, drafts)
-  await commitNoteDrafts(
-    drafts.map(e => e.id),
-    mockUsers[4].id,
-  )
+  // await testHelper.createNoteDrafts(prisma, drafts)
+  // await commitNoteDrafts(
+  //   drafts.map(e => e.id),
+  //   mockUsers[4].id,
+  // )
 }
 
 main()

@@ -1,21 +1,17 @@
 import { NoteDoc, Poll } from '@prisma/client'
 import { isEqual } from 'lodash'
+import { MERGE_POLL_V1_0 } from '../../shared/constants'
 import { PollMeta, PollParsed } from '../interfaces'
 import prisma from '../prisma'
 import { PollModel } from './poll-model'
 import { getBotId } from './user-model'
 
-export const MERGE_POLL_CHOICES = [
-  'accpet',
-  'reject-abuse',
-  'reject-hateful',
-  // Commmentable choice
-  'reject-others',
-]
-
 const defaultMergePollMeta: PollMeta = {
   openInDays: 5,
+  spec: MERGE_POLL_V1_0.spec,
 }
+
+const defaultChoices = MERGE_POLL_V1_0.codes.map(e => e[0])
 
 class PollMergeModel extends PollModel {
   /**
@@ -25,7 +21,7 @@ class PollMergeModel extends PollModel {
   async createMergePoll(doc: NoteDoc) {
     return this.create({
       userId: await getBotId(),
-      choices: MERGE_POLL_CHOICES,
+      choices: defaultChoices,
       meta: defaultMergePollMeta,
       noteDocToMerge: doc,
     })
@@ -50,7 +46,7 @@ class PollMergeModel extends PollModel {
    *
    */
   async verdict(mergePoll: Poll): Promise<{
-    poll: PollParsed
+    poll: PollParsed<Poll>
     result: 'accept' | 'reject'
     nAccepts: number
     nRejects: number
@@ -70,10 +66,8 @@ class PollMergeModel extends PollModel {
       }),
       poll_ = this.parse(poll)
 
-    if (!isEqual(poll_.choices, MERGE_POLL_CHOICES))
-      throw new Error(
-        '[mergeOrReject] !isEqual(poll_.choices, MERGE_POLL_CHOICES)',
-      )
+    if (!isEqual(poll_.choices, defaultChoices))
+      throw new Error('[mergeOrReject] !isEqual(poll_.choices, defaultChoices)')
 
     // if (poll_.createdAt + poll_.meta.openInDays < Date.now())
     //   throw new Error(
@@ -81,7 +75,7 @@ class PollMergeModel extends PollModel {
     //   )
 
     // Trick, all choices other than 'ACCEPT' are 'REJECT'
-    const acceptIdx = poll.choices.indexOf(MERGE_POLL_CHOICES[0]),
+    const acceptIdx = poll.choices.indexOf(defaultChoices[0]),
       nAccepts = poll_.count.nVotes[acceptIdx],
       nRejects = poll_.count.nVotes.reduce(
         (acc, cur, i) => (i === acceptIdx ? acc : acc + cur),

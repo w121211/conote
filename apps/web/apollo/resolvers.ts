@@ -8,6 +8,7 @@ import {
   DiscussPostEmojiCount,
   Link,
   Note,
+  NoteDoc,
   NoteDraft,
   NoteEmoji,
   NoteEmojiCount,
@@ -58,6 +59,10 @@ export type ResolverContext = {
 //
 //
 //
+
+function toGQLNoteDoc(d: NoteDoc & { branch: Branch; sym: Sym }) {
+  return toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(d)))
+}
 
 function toGQLNoteEntry(
   d: Note & {
@@ -121,9 +126,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     if (commit) {
       return {
         ...toStringProps(commit),
-        noteDocs: commit.noteDocs.map(e =>
-          toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
-        ),
+        noteDocs: commit.noteDocs.map(e => toGQLNoteDoc(e)),
       }
     }
     throw new Error('Commit not found')
@@ -140,9 +143,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     })
     return commits.map(commit => {
       const { noteDocs, ...rest } = toStringProps(commit),
-        noteDocs_ = noteDocs.map(e =>
-          toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
-        )
+        noteDocs_ = noteDocs.map(e => toGQLNoteDoc(e))
       return { ...rest, noteDocs: noteDocs_ }
     })
   },
@@ -359,14 +360,11 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         orderBy: { createdAt: 'asc' },
       }),
       parsed = drafts.map(e => noteDraftModel.parse(e)),
-      entries = parsed.map(e => {
-        const {
-          id,
-          symbol,
-          contentHead: { title },
-        } = e
-        return { id, symbol, title }
-      })
+      entries = parsed.map(({ id, symbol, contentHead: { title } }) => ({
+        id,
+        symbol,
+        title,
+      }))
     return entries
   },
 
@@ -375,7 +373,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       note_ = {
         ...note,
         branchName: note.branch.name,
-        headDoc: toStringProps(noteDocModel.attachBranchSymbol(headDoc)),
+        headDoc: toGQLNoteDoc(headDoc),
       }
     return toStringProps(note_)
   },
@@ -389,7 +387,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         note_ = {
           ...note,
           branchName: note.branch.name,
-          headDoc: toStringProps(noteDocModel.attachBranchSymbol(headDoc)),
+          headDoc: toGQLNoteDoc(headDoc),
         }
       return toStringProps(note_)
     }
@@ -402,9 +400,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       include: { branch: true, sym: true },
     })
     if (doc) {
-      return toStringProps(
-        noteDocModel.attachBranchSymbol(noteDocModel.parse(doc)),
-      )
+      return toGQLNoteDoc(doc)
     }
     throw new Error('NoteDoc not found.')
   },
@@ -419,9 +415,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         take: 10,
         skip: afterId ? 1 : 0,
       })
-    ).map(e =>
-      toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
-    )
+    ).map(e => toGQLNoteDoc(e))
     return docs
   },
 
@@ -434,9 +428,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         include: { branch: true, sym: true },
         orderBy: { createdAt: 'asc' },
       })
-    ).map(e =>
-      toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
-    )
+    ).map(e => toGQLNoteDoc(e))
     return docs
   },
 
@@ -450,9 +442,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         take: 10,
         skip: afterId ? 1 : 0,
       })
-    ).map(e =>
-      toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
-    )
+    ).map(e => toGQLNoteDoc(e))
     return docs
   },
 
@@ -544,6 +534,9 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     if (poll) {
       return {
         ...toStringProps(poll),
+        noteDocToMerge: poll.noteDocToMerge
+          ? toGQLNoteDoc(poll.noteDocToMerge)
+          : null,
         count: { ...toStringProps(poll.count) },
       }
     }

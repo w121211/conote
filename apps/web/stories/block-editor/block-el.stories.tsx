@@ -12,7 +12,7 @@ import { InitStoreForStorybook } from './helper-components/init-store-for-storyb
 import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
 
 // Need to place outside, otherwise the storybook result weird behavior
-const basicBlocks = writeBlocks(['a', ['b', 'c']])
+const basicBlocks = writeBlocks(['a', ['b', 'c', 'helloworld']])
 
 const apolloClient = getApolloClient()
 

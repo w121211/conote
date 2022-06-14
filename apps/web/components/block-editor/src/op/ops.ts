@@ -478,14 +478,17 @@ export function blockSplitChainOp(
   // splitOp = [saveOp, newOp, saveNewOp, ...moveChildrenOp, closeNewOp]
   // return splitOp
 
+  console.debug(str.substring(idx))
+  console.debug(str.substring(0, idx))
+
   const chains: BlockReducerFn[] = [
-    // save old-block
+    // Save old-block
     () => blockSaveOp(oldBlock.uid, str.substring(0, idx)),
 
-    // create new block
+    // Create new block
     () => blockNewOp(newBlockUid, { refBlockUid: oldBlock.uid, relation }),
 
-    // save new-block
+    // Save new-block
     () => blockSaveOp(newBlockUid, str.substring(idx)),
 
     // move children (if any)
@@ -507,10 +510,12 @@ export function blockSplitChainOp(
  * Create a doc from note-draft and also add blocks
  */
 export function docLoadOp(
-  branch: string,
   symbol: string,
-  noteDraft: NoteDraftFragment,
-  note: NoteFragment | null,
+  load: {
+    doc: Doc
+    docBlock: Block
+    blocks: Block[]
+  },
 ): {
   blockReducers: BlockReducer[]
   docReducers: DocReducer[]
@@ -518,24 +523,16 @@ export function docLoadOp(
 } {
   if (docRepo.findDoc(symbol))
     throw new Error('[docLoadOp] Doc is already existed')
-  if (symbol !== noteDraft.symbol)
+  if (symbol !== load.doc.symbol)
     throw new Error('[docLoadOp] title !== noteDraft.symbol')
-
-  const { doc, blocks, docBlock } = noteDraftService.toDoc(
-    branch,
-    noteDraft,
-    note,
-  )
-
-  if (symbol !== docBlock.docSymbol) {
-    console.debug(docBlock, symbol)
+  if (symbol !== load.docBlock.docSymbol) {
+    console.debug(load.docBlock, symbol)
     throw new Error('[docLoadOp] symbol !== docBlock.docSymbol')
   }
-
   return {
-    blockReducers: [addEntities(blocks)],
-    docReducers: [addEntities(doc)],
-    docUid: doc.uid,
+    blockReducers: [addEntities(load.blocks)],
+    docReducers: [addEntities(load.doc)],
+    docUid: load.doc.uid,
   }
 }
 

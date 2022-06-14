@@ -194,7 +194,6 @@ class NoteDraftService {
     note: NoteFragment | null,
   ): { doc: Doc; blocks: Block[]; docBlock: Block } {
     const { symbol, domain, contentBody, contentHead } = noteDraft,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       { blocks, docBlock } = convertGQLBlocks(contentBody.blocks),
       doc: Doc = {
         uid: nanoid(),
@@ -206,7 +205,6 @@ class NoteDraftService {
         noteCopy: note ?? undefined,
         noteDraftCopy: noteDraft,
       }
-
     return { doc, blocks, docBlock }
   }
 

@@ -1,12 +1,11 @@
 import React from 'react'
+import { useRouter } from 'next/router'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { components, ControlProps } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
-import { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
-import { Doc } from '../../interfaces'
+import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
 import { docContentHeadUpdate } from '../../events'
-import { useRouter } from 'next/router'
-import { FormInputs } from '../../../../poll/poll-form'
+import { Doc } from '../../interfaces'
 
 type Option = {
   label: string

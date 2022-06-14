@@ -529,7 +529,6 @@ function handleEnter({ e, uid, search, setSearch }: TextareaKeyDownArgs) {
     // throttledDispatchSync(() => {
     //   events.enter(uid, dKeyDown)
     // })
-
     throttle(() => keyEnter(uid, dKeyDown), 100, { trailing: false })()
   }
 }

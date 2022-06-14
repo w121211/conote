@@ -27,10 +27,10 @@ const icon = (type: AlertType) => {
 interface AlertProps {
   str: string
   type: AlertType
-  action: string
-  time: string // to do: change to Date type
-  onClose: () => void
-  visible: boolean
+  action?: string
+  time?: string // to do: change to Date type
+  onClose?: () => void
+  visible?: boolean
 }
 
 export const Alert: FC<AlertProps> = ({
@@ -38,8 +38,9 @@ export const Alert: FC<AlertProps> = ({
   action,
   time,
   type,
-  visible,
-  onClose,
+  visible = true,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onClose = () => {},
 }) => {
   if (!visible) {
     return null
@@ -67,6 +68,7 @@ export const Alert: FC<AlertProps> = ({
             ? 'error'
             : 'check_circle'}
         </span>
+
         <p className="flex-grow pt-[2px] dark:text-white break-words whitespace-pre-wrap">
           <span className="font-bold">[{action}]</span>
           {styleSymbol(str, '')}
@@ -74,6 +76,7 @@ export const Alert: FC<AlertProps> = ({
             {time}
           </span>
         </p>
+
         <span
           className="material-icons text-base leading-none text-gray-600 dark:text-gray-200 hover:cursor-pointer"
           onClick={onClose}

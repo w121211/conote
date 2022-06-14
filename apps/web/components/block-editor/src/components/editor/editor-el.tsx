@@ -9,12 +9,12 @@ import { LoadingSvg } from '../../../../loading-circle'
 
 /**
  * When component mount, EditorEl loads the current main-doc in the repo.
- *   Event 'editorOpenSymbolInMain' is provided to open the main-doc anywhere.
- *   EditorEl will act as a canvas to show the current doc.
+ *  Event 'editorOpenSymbolInMain' is provided to open the main-doc anywhere.
+ *  EditorEl will act as a canvas to show the current doc.
  *
  * Assign mainDoc/modalDoc as null initially
- * - if doc === 'null' -> is loading,
- * - if doc === 'undefined' -> loading finished and doc is not found,
+ * - If doc === 'null' -> is loading,
+ * - If doc === 'undefined' -> loading finished and doc is not found,
  *   this is happened when current main doc is dropped
  */
 export const EditorEl = (): JSX.Element | null => {
@@ -24,10 +24,10 @@ export const EditorEl = (): JSX.Element | null => {
     [mainDoc] = useObservable(editorRepo.mainDoc$, { initialValue: null }),
     [modalDoc] = useObservable(editorRepo.modalDoc$, { initialValue: null })
 
-  useEffect(() => {
-    console.log('mainDoc', mainDoc)
-    console.log('modalDoc', modalDoc)
-  }, [mainDoc, modalDoc])
+  // useEffect(() => {
+  //   console.debug('mainDoc', mainDoc)
+  //   console.debug('modalDoc', modalDoc)
+  // }, [mainDoc, modalDoc])
 
   useEffect(() => {
     return () => {
@@ -39,7 +39,6 @@ export const EditorEl = (): JSX.Element | null => {
     router.push('/note/')
     // return <div>mainDoc === undefined</div>
   }
-
   return (
     <>
       {/* <button

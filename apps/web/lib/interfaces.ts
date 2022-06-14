@@ -105,12 +105,15 @@ export type NoteDraftParsed = Omit<NoteDraft, 'contentHead' | 'contentBody'> & {
 
 export type PollMeta = {
   // Consider to include, eg 'merge_poll-v1'
-  // spec?: string
+  spec?: string
 
   // Clase the poll after the given period
   openInDays: number
 }
 
-export type PollParsed = Omit<Poll & { count: PollCount }, 'meta'> & {
+export type PollParsed<T extends Poll> = Omit<
+  T & { count: PollCount },
+  'meta'
+> & {
   meta: PollMeta
 }

@@ -4,10 +4,9 @@ import { getLoggedInUser, LoggedInUser } from './auth.service'
 
 /**
  * React hook to get current logged-in user
- *
- * Check both client and server side, if one side not logged in, does logout for both sides
+ *  Check both client and server side, if one side not logged in, does logout for both sides
  */
-export function useMe(): {
+export function useMe(opts = { refetch: false }): {
   me: LoggedInUser | null
   loading: boolean
 } {
@@ -16,7 +15,7 @@ export function useMe(): {
     [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    getLoggedInUser(apolloClient).then(user => {
+    getLoggedInUser(apolloClient, opts).then(user => {
       setMe(user)
       setLoading(false)
     })

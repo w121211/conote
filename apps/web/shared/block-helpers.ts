@@ -9,9 +9,8 @@ import { Block } from '../components/block-editor/src/interfaces'
  * - validate children uids
  * - validate is any orphan block
  *
- * @returns
- * - blocks: includes doc-block
- * - docBlock
+ * @returns blocks: includes doc-block
+ * @returns docBlock
  */
 export function convertGQLBlocks(
   gqlBlocks: Omit<BlockFragment, '__typename'>[],
@@ -51,9 +50,8 @@ export function convertGQLBlocks(
     }),
     docBlock = blocks.find(e => e.uid === root.uid)
 
-  if (docBlock === undefined) {
+  if (docBlock === undefined)
     throw new Error('[convertGQLBlocks] docBlock === undefined')
-  }
 
   treeUtil.validateList(nodes_)
   return { blocks, docBlock }

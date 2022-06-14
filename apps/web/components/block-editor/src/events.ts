@@ -6,19 +6,17 @@ import {
   DestructTextareaKeyEvent,
   BlockPositionRelation,
   Doc,
-  InlineItem,
 } from './interfaces'
 import * as ops from './op/ops'
 import { areSameParent, compatPosition } from './op/helpers'
 import {
   BlockReducer,
   blockRepo,
-  blocksStore,
   getBlock,
   getBlockChildren,
 } from './stores/block.repository'
 import { rfdbRepo } from './stores/rfdb.repository'
-import { BlockInput, genBlockUid, isDocBlock, writeBlocks } from './utils'
+import { BlockInput, genBlockUid, writeBlocks } from './utils'
 import { isInteger, isNil } from 'lodash'
 import { nextBlock, nthSiblingBlock, prevBlock } from './op/queries'
 import { docRepo } from './stores/doc.repository'
@@ -27,7 +25,6 @@ import { NextRouter } from 'next/router'
 import {
   NoteDocFragment,
   NoteDraftEntryFragment,
-  NoteDraftFragment,
 } from '../../../apollo/query.graphql'
 import { noteService } from './services/note.service'
 import { noteDraftService } from './services/note-draft.service'
@@ -328,7 +325,7 @@ export function backspaceDeleteMergeBlockWithSave(
 }
 
 export function backspaceDeleteOnlyChild(block: Block) {
-  console.log('backspaceDeleteOnlyChild')
+  // console.log('backspaceDeleteOnlyChild')
   blockRepo.update(ops.blockRemoveOp(block))
   editingUid(null)
 }
@@ -475,6 +472,7 @@ export function enterSplitBlock(
   index: number,
   relation: BlockPositionRelation,
 ) {
+  // console.debug(value)
   blockRepo.updateChain(
     ops.blockSplitChainOp(block, newUid, value, index, relation),
   )
@@ -700,12 +698,8 @@ export async function docOpen(
     await editorLeftSidebarRefresh('network-only')
     return { docUid: newDocUid }
   } else {
-    const { blockReducers, docReducers, docUid } = ops.docLoadOp(
-      branch,
-      symbol,
-      draft,
-      note,
-    )
+    const parsed = noteDraftService.toDoc(branch, draft, note),
+      { blockReducers, docReducers, docUid } = ops.docLoadOp(symbol, parsed)
     blockRepo.update(blockReducers)
     docRepo.update(docReducers)
     return { docUid }
@@ -762,8 +756,6 @@ export async function docRename(
   newSymbol: string,
   router?: NextRouter,
 ) {
-  console.log('docRename', newSymbol)
-
   if (doc.symbol === newSymbol) return
   if (doc.noteCopy) return // Do nothing
   if (doc.noteDraftCopy === undefined)
@@ -849,7 +841,6 @@ export async function docContentHeadUpdate(
  * Refresh left sidebar by query and load my-all-draft-entries
  */
 export async function editorLeftSidebarRefresh(fetchPolicy?: FetchPolicy) {
-  console.log('editorLeftSidebarRefresh')
   try {
     const entries = await noteDraftService.queryMyAllDraftEntries(fetchPolicy)
     editorRepo.setLeftSidebarItems(entries)
@@ -875,7 +866,6 @@ export async function editorLeftSidebarRefresh(fetchPolicy?: FetchPolicy) {
 export async function editorLeftSidebarItemRemove(
   item: NoteDraftEntryFragment,
 ) {
-  console.log('editorLeftSidebarItemRemove', item)
   const { id, symbol } = item,
     doc = docRepo.findDoc(symbol)
 
@@ -986,7 +976,7 @@ export async function editorOpenSymbolInMain(
     forceRouteUpdateShallow?: true
   },
 ) {
-  console.log('editorOpenSymbolInMain', symbol)
+  // console.log('editorOpenSymbolInMain', symbol)
 
   const { opening } = editorRepo.getValue()
 
@@ -1001,7 +991,6 @@ export async function editorOpenSymbolInMain(
     return
   }
   if (router) {
-    console.log(router.query)
     const { pop } = router.query
     if (pop) {
       // Remove query params

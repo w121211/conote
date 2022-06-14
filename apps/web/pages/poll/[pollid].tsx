@@ -1,42 +1,46 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import {
-  DiscussFragment,
-  DiscussPostFragment,
-  DiscussPostsDocument,
-  DiscussPostsQuery,
-  DiscussPostsQueryVariables,
   PollDocument,
   PollFragment,
   PollQuery,
   PollQueryVariables,
 } from '../../apollo/query.graphql'
-import DiscussTile from '../../components/discuss/discuss-tile'
-import DiscussPostTiles from '../../components/discuss-post/discuss-post-tiles'
-import DiscussPostForm from '../../components/discuss-post/discuss-post-form'
 import Layout from '../../components/ui-component/layout'
+import { isNil } from 'lodash'
+import MergePollVoteForm from '../../components/poll/merge-poll-vote-form'
+import NoteDocLink from '../../components/note/note-doc-link'
+import UserLink from '../../components/user/user-link'
+import moment from 'moment'
+import { useMe } from '../../components/auth/use-me'
+import { Alert } from '../../components/ui-component/alert'
 
 interface Props {
   poll: PollFragment
-  discuss: DiscussFragment
-  discussPosts: DiscussPostFragment[]
+  // discuss: DiscussFragment
+  // discussPosts: DiscussPostFragment[]
 }
 
-const PollPage = ({
-  poll,
-  discuss,
-  discussPosts,
-}: Props): JSX.Element | null => {
-  const { choices } = poll
+const PollPage = ({ poll }: Props): JSX.Element | null => {
+  const { noteDocToMerge } = poll,
+    { me } = useMe()
+
+  if (isNil(noteDocToMerge))
+    throw new Error('Currently only support merge poll')
 
   return (
     <Layout>
-      <div className="flex flex-col gap-3 w-full">
-        <DiscussTile data={discuss} />
-        <DiscussPostTiles posts={discussPosts} />
-        <DiscussPostForm discussId={discuss.id} />
-      </div>
+      {me === null && <Alert str="Require login to vote" type="warning" />}
+      <h4>Merge request</h4>
+      <p>
+        <NoteDocLink doc={noteDocToMerge} /> wants to merge.
+      </p>
+      <p>
+        Committer <UserLink userId={noteDocToMerge.userId} />{' '}
+        {moment(poll.createdAt).fromNow()}
+      </p>
+      <MergePollVoteForm poll={poll} />
     </Layout>
   )
 }
@@ -56,16 +60,16 @@ export async function getServerSideProps({
       variables: { id },
     })
 
-  if (qPoll.data.poll.discuss === null || qPoll.data.poll.discuss === undefined)
-    throw new Error('qPoll.data.poll.discuss === null')
+  // if (isNil(qPoll.data.poll.discuss))
+  //   throw new Error('qPoll.data.poll.discuss is NIL')
 
-  const qPosts = await client.query<
-    DiscussPostsQuery,
-    DiscussPostsQueryVariables
-  >({
-    query: DiscussPostsDocument,
-    variables: { discussId: qPoll.data.poll.discuss.id },
-  })
+  // const qPosts = await client.query<
+  //   DiscussPostsQuery,
+  //   DiscussPostsQueryVariables
+  // >({
+  //   query: DiscussPostsDocument,
+  //   variables: { discussId: qPoll.data.poll.discuss.id },
+  // })
 
   res.setHeader(
     'Cache-Control',
@@ -74,8 +78,8 @@ export async function getServerSideProps({
   return {
     props: {
       poll: qPoll.data.poll,
-      discuss: qPoll.data.poll.discuss,
-      discussPosts: qPosts.data.discussPosts,
+      // discuss: qPoll.data.poll.discuss,
+      // discussPosts: qPosts.data.discussPosts,
     },
   }
 }
