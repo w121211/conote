@@ -78,7 +78,7 @@ class SearchService {
     if (hit) {
       switch (type) {
         case 'discuss':
-          return hit.str
+          return hit.str + '-' + hit.id
         case 'topic':
           // Remove '[[' and ']]'
           return hit.str.substring(2, hit.str.length - 2)

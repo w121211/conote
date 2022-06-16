@@ -1,8 +1,9 @@
 import React from 'react'
 import { nanoid } from 'nanoid'
-import { Block } from './interfaces'
-import { validateChildrenUids } from './op/helpers'
+import { Block, Doc } from './interfaces'
 import { cloneDeepWith } from 'lodash'
+import { getBlock } from './stores/block.repository'
+import { docRepo } from './stores/doc.repository'
 
 //
 // OS
@@ -128,82 +129,24 @@ export function genBlockUid(): string {
   return nanoid()
 }
 
-export type BlockInput = [string, BlockInput[]] | string
-
 /**
- * @param opts.docBlock If given, use it to replace input's root
- * @param opts.docSymbol If given, use it to replace input's root title
- * @returns Block array, the first block is doc-block
+ * Recusively find the root of the given block (should be a doc-block) and returns its doc.
  */
-export function writeBlocks(
-  input: BlockInput,
-  opts: {
-    docBlock?: Block
-    docSymbol?: string
-  } = {},
-): Block[] {
-  function f(input: BlockInput, order = 0, parentUid: string | null = null) {
-    const [str, children] = typeof input === 'string' ? [input, []] : input
-    return {
-      uid: genBlockUid(),
-      str,
-      order,
-      parentUid,
-      children,
-    }
+export function getDocByBlock(blockUid: string): Doc {
+  console.log(blockUid)
+  let cur = getBlock(blockUid)
+  while (cur.parentUid !== null) {
+    cur = getBlock(cur.parentUid)
   }
+  if (cur.docSymbol === undefined)
+    throw new Error('[getRootBlock] Root block should have a doc symbol')
 
-  const { docBlock, docSymbol } = opts,
-    rootInput = f(input)
-
-  let rootInput_ = rootInput
-  if (docBlock) {
-    rootInput_ = {
-      ...rootInput,
-      uid: docBlock.uid,
-      str: docBlock.str,
-    }
-  } else if (docSymbol) {
-    rootInput_ = {
-      ...rootInput,
-      str: docSymbol,
-    }
-  }
-
-  const blocks: Block[] = [],
-    stack: {
-      uid: string
-      str: string
-      order: number
-      parentUid: string | null
-      children?: BlockInput[]
-    }[] = [rootInput_]
-
-  while (stack.length > 0) {
-    const shift = stack.shift()
-
-    if (shift) {
-      const { uid, str, order, parentUid, children } = shift,
-        children_ = children ? children.map((e, i) => f(e, i, uid)) : [],
-        childrenUids = children_.map(e => e.uid),
-        docSymbol = parentUid === null ? str : undefined
-
-      children_.forEach(e => stack.push(e))
-      blocks.push({
-        uid,
-        str,
-        order,
-        parentUid,
-        childrenUids,
-        docSymbol,
-        open: true,
-      })
-    }
-  }
-
-  validateChildrenUids(Object.fromEntries(blocks.map(e => [e.uid, e])))
-
-  return blocks
+  const doc = docRepo.findDoc(cur.docSymbol)
+  if (doc === null)
+    throw new Error(
+      '[getRootBlock] Doc is not found by the symbol of doc-block',
+    )
+  return doc
 }
 
 //

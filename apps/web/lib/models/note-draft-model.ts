@@ -1,6 +1,6 @@
 import { NoteDraft } from '@prisma/client'
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
-import { convertGQLBlocks } from '../../shared/block-helpers'
+import { parseGQLContentBody } from '../../shared/block-helpers'
 import {
   NoteDocContentBody,
   NoteDocContentHead,
@@ -13,20 +13,6 @@ import { symModel } from './sym-model'
 /**
  *
  */
-function validateContentBody(
-  symbol: string,
-  contentBody: NoteDraftInput['contentBody'],
-) {
-  const { docBlock, blocks } = convertGQLBlocks(contentBody.blocks)
-
-  if (docBlock.docSymbol === undefined)
-    throw new Error('docBlock.docSymbol === undefined')
-  if (docBlock.docSymbol !== docBlock.str)
-    throw new Error('docBlock.docSymbol !== docBlock.str')
-  if (symbol !== docBlock.docSymbol)
-    throw new Error('symbol !== docBlock.docSymbol')
-}
-
 class NoteDraftModel {
   /**
    * throws if:
@@ -100,15 +86,19 @@ class NoteDraftModel {
     branchName: string,
     symbol: string,
     userId: string,
-    { fromDocId, domain, contentHead, contentBody }: NoteDraftInput,
+    {
+      fromDocId,
+      domain,
+      contentHead,
+      contentBody: contentBodyInput,
+    }: NoteDraftInput,
   ): Promise<NoteDraftParsed> {
     const { branch, fromDoc } = await this.validateCreateInput(
-      branchName,
-      symbol,
-      fromDocId ?? undefined,
-    )
-
-    validateContentBody(symbol, contentBody)
+        branchName,
+        symbol,
+        fromDocId ?? undefined,
+      ),
+      contentBody = parseGQLContentBody(symbol, contentBodyInput)
 
     const draft = await prisma.noteDraft.create({
       data: {
@@ -175,7 +165,13 @@ class NoteDraftModel {
    */
   async update(
     draftId: string,
-    { fromDocId, domain, contentHead, contentBody }: NoteDraftInput,
+    userId: string,
+    {
+      fromDocId,
+      domain,
+      contentHead,
+      contentBody: contentBodyInput,
+    }: NoteDraftInput,
     newSymbol?: string,
   ): Promise<NoteDraftParsed> {
     const draft = await prisma.noteDraft.findUnique({
@@ -184,6 +180,8 @@ class NoteDraftModel {
     })
 
     if (draft === null) throw new Error('NoteDraft not found.')
+    if (draft.userId !== userId)
+      throw new Error('User is not the owner, cannot update')
     if (newSymbol) {
       const newSymbol_ = symModel.parse(newSymbol)
       if (newSymbol_.type !== 'TOPIC')
@@ -192,11 +190,15 @@ class NoteDraftModel {
         throw new Error('Not allow to modify draft symbol if it has sym')
     }
 
-    if (newSymbol) {
-      validateContentBody(newSymbol, contentBody)
-    } else {
-      validateContentBody(draft.symbol, contentBody)
-    }
+    // if (newSymbol) {
+    //   validateContentBody(newSymbol, contentBody)
+    // } else {
+    //   validateContentBody(draft.symbol, contentBody)
+    // }
+
+    const contentBody = newSymbol
+      ? parseGQLContentBody(newSymbol, contentBodyInput)
+      : parseGQLContentBody(draft.symbol, contentBodyInput)
 
     const draft_ = await prisma.noteDraft.update({
       data: {
@@ -213,7 +215,7 @@ class NoteDraftModel {
   }
 
   /**
-   * TODO: validate meta, content
+   * TODO: validate content head, content body
    */
   parse(draft: NoteDraft): NoteDraftParsed {
     return {

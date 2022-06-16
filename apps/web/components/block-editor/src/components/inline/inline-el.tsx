@@ -11,7 +11,7 @@ export type InlineElProps = {
   blockUid: string
   inline: InlineItem
 
-  // If not given, assume the note in edit mode
+  // If not given, assume the note is in editing
   isViewer?: true
 }
 
@@ -28,10 +28,11 @@ const InlineEl = (props: InlineElProps): JSX.Element => {
       return el(InlineSymbolEl, { inline, ...rest }, token)
     case 'text':
       return <span>{str}</span>
+    default: {
+      console.debug('[InlineEl] Not processed type: ' + type)
+      return <span>{str}</span>
+    }
   }
-  // return null
-
-  throw new Error('[InlineEl] Unexpected case')
 }
 
 export default InlineEl

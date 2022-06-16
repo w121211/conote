@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Modal from '../modal/modal'
 import './search-all-modal.module.css'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'

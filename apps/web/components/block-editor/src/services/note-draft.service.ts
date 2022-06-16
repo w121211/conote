@@ -1,8 +1,6 @@
-import { TreeNodeBody, treeUtil } from '@conote/docdiff'
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
 import { Block, Doc } from '../interfaces'
 import {
-  BlockFragment,
   CreateNoteDraftDocument,
   CreateNoteDraftMutation,
   CreateNoteDraftMutationVariables,
@@ -27,31 +25,7 @@ import { docRepo } from '../stores/doc.repository'
 import { omitTypenameDeep } from '../utils'
 import { FetchPolicy } from '@apollo/client'
 import { nanoid } from 'nanoid'
-import { convertGQLBlocks } from '../../../../shared/block-helpers'
-
-// interface INoteDraftService {
-//   // Queries
-
-//   queryDraft(symbol: string): Promise<GQLNoteDraft | null>
-
-//   queryMyAllDrafts(): Promise<MyNoteDraftEntriesQuery['myNoteDraftEntries']>
-
-//   // Mutations
-
-//   createDraft(
-//     branch: string,
-//     symbol: string,
-//     draftInput: NoteDraftInput,
-//   ): Promise<GQLNoteDraft>
-
-//   dropDraft(id: string): Promise<NoteDraftDropResponseFragment>
-
-//   saveDraft(id: string, draftInput: NoteDraftInput): Promise<GQLNoteDraft>
-
-//   // Helpers
-
-//   toNoteDraftInput(doc: Doc): NoteDraftInput
-// }
+import { parseGQLBlocks } from '../../../../shared/block-helpers'
 
 /**
  *
@@ -178,13 +152,6 @@ class NoteDraftService {
     throw new Error('[saveDraft] no return data')
   }
 
-  //
-  // Helpers
-  //
-  //
-  //
-  //
-
   /**
    * Remove '__typename' from query data
    */
@@ -193,14 +160,20 @@ class NoteDraftService {
     noteDraft: NoteDraftFragment,
     note: NoteFragment | null,
   ): { doc: Doc; blocks: Block[]; docBlock: Block } {
-    const { symbol, domain, contentBody, contentHead } = noteDraft,
-      { blocks, docBlock } = convertGQLBlocks(contentBody.blocks),
+    const {
+        symbol,
+        domain,
+        contentBody: { blocks: gqlBlocks, ...restContentBody },
+        contentHead,
+      } = noteDraft,
+      { blocks, docBlock } = parseGQLBlocks(gqlBlocks),
       doc: Doc = {
         uid: nanoid(),
         branch,
         domain,
         symbol,
         contentHead: omitTypenameDeep(contentHead),
+        contentBody: restContentBody,
         blockUid: docBlock.uid,
         noteCopy: note ?? undefined,
         noteDraftCopy: noteDraft,

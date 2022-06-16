@@ -1,9 +1,11 @@
+import Link from 'next/link'
 import React, { useEffect } from 'react'
 import {
   NoteDocFragment,
   NoteDraftFragment,
   NoteFragment,
 } from '../../apollo/query.graphql'
+import NoteDocLink from './note-doc-link'
 
 /**
  * Show alert cases
@@ -29,12 +31,19 @@ const NoteAlerts = ({
       )}
       {noteDocsToMerge && noteDocsToMerge.length > 0 && (
         <div>
-          {noteDocsToMerge.map(e => (
-            <span key={e.id}>
-              Doc <NoteDocLink doc={e} />
-            </span>
-          ))}
-          is/are waiting to merge.
+          {noteDocsToMerge.map(e => {
+            if (e.mergePollId === undefined)
+              throw new Error('e.mergePollId === undefined')
+            return (
+              <span key={e.id}>
+                <NoteDocLink doc={e} />
+                is requesting to merge.
+                <Link href={`/poll/${e.mergePollId}`}>
+                  <a>Go to Poll</a>
+                </Link>
+              </span>
+            )
+          })}
         </div>
       )}
     </div>

@@ -8,10 +8,11 @@ import {
 import { getNotePageURL } from '../../shared/note-helpers'
 import BlockViewer from '../block-editor/src/components/block/block-viewer'
 import Layout from '../ui-component/layout'
-import { convertGQLBlocks } from '../../shared/block-helpers'
+import { parseGQLBlocks } from '../../shared/block-helpers'
 import NoteHead from './note-head'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import { Badge } from '../ui-component/badge'
+import NoteAlerts from './note-alerts'
 // import { NoteDocVersionDropdown } from '../domain/domain-select'
 
 /**
@@ -29,11 +30,11 @@ const NoteViewEl = ({
   noteDocsToMerge: NoteDocFragment[] | null
 }) => {
   const isHeadDoc = doc.id === note.headDoc.id,
-    { blocks, docBlock } = convertGQLBlocks(doc.contentBody.blocks)
+    { blocks, docBlock } = parseGQLBlocks(doc.contentBody.blocks)
 
   return (
     <Layout>
-      {/* <NoteAlerts cur={doc} note={note} noteDocsToMerge={noteDocsToMerge} /> */}
+      <NoteAlerts cur={doc} note={note} noteDocsToMerge={noteDocsToMerge} />
 
       <div className="flex">
         <div className="flex-1 flex items-stretch">

@@ -11,11 +11,13 @@ interface FormInput {
 }
 
 const DiscussForm = ({
-  noteId,
+  // noteId,
+  noteDraftId,
   title,
   onCreate,
 }: {
-  noteId?: string
+  // noteId?: string
+  noteDraftId: string
   title: string
   onCreate: (data: DiscussFragment) => void
 }) => {
@@ -48,10 +50,9 @@ const DiscussForm = ({
   }, [watchContent])
 
   function onSubmit(v: FormInput) {
-    console.log(v, noteId)
     createDiscuss({
       variables: {
-        noteId,
+        noteDraftId,
         data: {
           title: v.title,
           content: v.content ?? '',
@@ -94,7 +95,7 @@ const DiscussForm = ({
               focus:border-blue-400
               focus:outline-blue-300
             `}
-        placeholder="Leave a comment"
+        placeholder="Add information to your question (optional)."
         ref={e => {
           contentRef(e)
           textareaTest = e
@@ -106,7 +107,7 @@ const DiscussForm = ({
           className={`btn-primary-lg `}
           type="submit"
         >
-          Submint
+          Create the discuss
         </button>
       </div>
     </form>

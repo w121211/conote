@@ -185,6 +185,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 
   async discussesLatest(_parent, { afterId }, _context, _info) {
     const discusses = await prisma.discuss.findMany({
+        where: { status: 'ACTIVE' },
         include: {
           count: true,
           notes: { include: { sym: true, branch: true, link: true } },
@@ -633,13 +634,14 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }
   },
 
-  async createDiscuss(_parent, { noteId, data }, { req }, _info) {
+  async createDiscuss(_parent, { noteDraftId, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req),
       { title, content } = data,
       discuss = await prisma.discuss.create({
         data: {
           user: { connect: { id: userId } },
-          notes: noteId ? { connect: [{ id: noteId }] } : undefined,
+          // notes: noteId ? { connect: [{ id: noteId }] } : undefined,
+          draft: { connect: { id: noteDraftId } },
           meta: {},
           title,
           content,
@@ -799,8 +801,14 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return toStringProps(draft)
   },
 
-  async updateNoteDraft(_parent, { id, data, newSymbol }, _context, _info) {
-    const draft = await noteDraftModel.update(id, data, newSymbol ?? undefined)
+  async updateNoteDraft(_parent, { id, data, newSymbol }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      draft = await noteDraftModel.update(
+        id,
+        userId,
+        data,
+        newSymbol ?? undefined,
+      )
     return toStringProps(draft)
   },
 

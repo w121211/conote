@@ -17,7 +17,7 @@ import type {
   NoteDraftFragment,
   NoteFragment,
 } from '../../../../apollo/query.graphql'
-import { convertGQLBlocks } from '../../../../shared/block-helpers'
+import { parseGQLBlocks } from '../../../../shared/block-helpers'
 import type {
   Block,
   BlockPosition,
@@ -557,15 +557,15 @@ export function docNewOp(
     throw new Error('[docNewOp] Doc is already existed')
 
   if (note) {
-    const { blocks, docBlock } = convertGQLBlocks(
-        note.headDoc.contentBody.blocks,
-      ),
+    const { blocks: gqlBlocks, ...rest } = note.headDoc.contentBody,
+      { blocks, docBlock } = parseGQLBlocks(gqlBlocks),
       newDoc: Doc = {
         uid: nanoid(),
         branch,
         domain,
         symbol,
         contentHead: {},
+        contentBody: { ...rest },
         blockUid: docBlock.uid,
         noteCopy: note ?? undefined,
       }
@@ -590,6 +590,10 @@ export function docNewOp(
         domain,
         symbol,
         contentHead: {},
+        contentBody: {
+          discussIds: [],
+          symbols: [],
+        },
         blockUid: newDocBlock.uid,
       }
     return {

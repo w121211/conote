@@ -39,7 +39,7 @@ export function getBlock(uid: string): Block {
 
   if (block === undefined) {
     console.error(uid)
-    throw new Error('[getBlock] Block not found' + uid)
+    throw new Error('[getBlock] Block not found: ' + uid)
   }
   return block
 }

@@ -11,6 +11,7 @@ import { editorOpenSymbolInMain } from '../block-editor/src/events'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import LoginModal from '../login-modal'
 import { useMe } from '../auth/use-me'
+import Link from 'next/link'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -19,7 +20,6 @@ const NoteEditEl = ({
   symbol,
   note,
   noteDraft,
-  noteDocsToMerge,
 }: {
   symbol: string
   note: NoteFragment | null
@@ -28,13 +28,13 @@ const NoteEditEl = ({
 }) => {
   const router = useRouter()
   const { me, loading } = useMe()
-  if (!loading && !me) {
-    router.push('/login')
-  }
+
   useEffect(() => {
-    // Call this method only when symbol changed
-    editorOpenSymbolInMain(symbol, router)
-  }, [symbol])
+    if (me) {
+      // Call this method only when symbol changed
+      editorOpenSymbolInMain(symbol, router)
+    }
+  }, [me, symbol])
 
   // const onUnload = (e: BeforeUnloadEvent) => {
   //   e.preventDefault()
@@ -58,6 +58,22 @@ const NoteEditEl = ({
   //   return () => window.removeEventListener('beforeunload', onUnload)
   // }, [])
 
+  if (loading) {
+    return null
+  }
+  if (me === null) {
+    return (
+      <div>
+        Start editing {symbol}
+        <div className="w-[200px] py-8 text-center">Login require</div>
+        <button className="btn-primary">
+          <Link href="/login">
+            <a>Login</a>
+          </Link>
+        </button>
+      </div>
+    )
+  }
   return (
     <>
       <Layout

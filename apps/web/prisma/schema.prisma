@@ -45,21 +45,26 @@ model Commit {
 }
 
 model Discuss {
-  id        String         @id @default(cuid())
+  id        String        @id @default(cuid())
+  draftId   String
   userId    String
-  type      DiscussType    @default(DISCUSS)
-  status    DiscussStatus  @default(ACTIVE)
-  meta      Json           @default("{}")
+  type      DiscussType   @default(DISCUSS)
+  status    DiscussStatus @default(DRAFT)
+  meta      Json          @default("{}")
   title     String
   content   String?
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  user      User           @relation(fields: [userId], references: [id])
-  count     DiscussCount? // 1-to-1
-  emojis    DiscussEmoji[]
-  posts     DiscussPost[]
-  notes     Note[]
-  polls     Poll[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // The draft that creat this discuss
+  draft NoteDraft @relation(fields: [draftId], references: [id])
+
+  user   User           @relation(fields: [userId], references: [id])
+  count  DiscussCount? // 1-to-1
+  emojis DiscussEmoji[]
+  posts  DiscussPost[]
+  notes  Note[]
+  polls  Poll[]
 }
 
 model DiscussCount {
@@ -237,6 +242,9 @@ model NoteDraft {
   note        Note?           @relation(fields: [branchId, symId], references: [branchId, symId])
   sym         Sym?            @relation(fields: [symId], references: [id])
   user        User            @relation(fields: [userId], references: [id])
+
+  // Discusses created by this draft
+  discusses Discuss[]
 }
 
 model NoteEmoji {

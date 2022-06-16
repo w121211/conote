@@ -1,5 +1,6 @@
 import { Block } from '../../src/interfaces'
-import { BlockInput, genBlockUid, writeBlocks } from '../../src/utils'
+import { genBlockUid } from '../../src/utils'
+import { BlockInput, writeBlocks } from '../../src/utils/block-writer'
 
 const input0: BlockInput = [
   '[[Firefox]]',
@@ -41,6 +42,8 @@ const input0: BlockInput = [
             'In this area, all seven of the browsers compared here score points.',
           ],
         ],
+        ['#One more discuss?-mock_discuss_1_draft#', ['']],
+        ['#Two more discuss?-mock_discuss_2_archive#', ['']],
       ],
     ],
   ],

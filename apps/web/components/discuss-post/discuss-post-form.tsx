@@ -3,10 +3,9 @@ import { useForm } from 'react-hook-form'
 import { MarkDownParser } from '../discuss/mark-down-parser'
 import {
   DiscussPostsDocument,
+  DiscussPostsQuery,
   useCreateDiscussPostMutation,
 } from '../../apollo/query.graphql'
-// import './github-markdown-light.module.css'
-
 import './github-markdown-light.module.css'
 import { useMe } from '../auth/use-me'
 import LoginModal from '../login-modal'
@@ -18,9 +17,11 @@ interface FormInput {
 const DiscussPostForm = ({
   discussId,
   isModal,
+  onSubmitted,
 }: {
   discussId: string
   isModal?: boolean
+  onSubmitted?: () => void
 }) => {
   const { me } = useMe()
   const [showTextarea, setShowTextarea] = useState(true)
@@ -39,7 +40,7 @@ const DiscussPostForm = ({
         reset({ content: '' })
         submitRef.current.blur()
       }
-      window.location.reload()
+      if (onSubmitted) onSubmitted()
     },
   })
 

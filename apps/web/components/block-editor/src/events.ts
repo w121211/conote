@@ -16,7 +16,7 @@ import {
   getBlockChildren,
 } from './stores/block.repository'
 import { rfdbRepo } from './stores/rfdb.repository'
-import { BlockInput, genBlockUid, writeBlocks } from './utils'
+import { genBlockUid } from './utils'
 import { isInteger, isNil } from 'lodash'
 import { nextBlock, nthSiblingBlock, prevBlock } from './op/queries'
 import { docRepo } from './stores/doc.repository'
@@ -29,6 +29,7 @@ import {
 import { noteService } from './services/note.service'
 import { noteDraftService } from './services/note-draft.service'
 import { commitService } from './services/commit.service'
+import { BlockInput, writeBlocks } from './utils/block-writer'
 
 // const noteService = getNoteService(),
 //   noteDraftService = getNoteDraftService(),
