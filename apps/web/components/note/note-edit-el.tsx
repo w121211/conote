@@ -60,50 +60,20 @@ const NoteEditEl = ({
 
   return (
     <>
-      <Layout
-        buttonRight={
-          <>
-            {/* {mainDoc?.doc && <NoteMetaModal doc={mainDoc.doc} />}
-            {mainDoc?.doc?.noteCopy && (
-              <div className="inline-block z-20">
-                <HeaderNoteEmojis noteId={mainDoc.doc.noteCopy.id} />
-              </div>
-            )} */}
-
-            {/* <button
-              className=" p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
-              onClick={() => {
-                if (mainDoc?.doc) {
-                  workspace.save(mainDoc.doc)
-                }
-              }}
-            >
-              <span className="material-icons-outlined text-xl leading-none ">
-                save
-              </span>
-            </button>
-            
-            <button className=" p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-              <span className="material-icons-outlined text-xl leading-none ">
-                more_horiz
-              </span>
-            </button> */}
-
-            {/* <AuthItem /> */}
-          </>
-        }
-      >
-        {note && (
-          // <Link href={getNotePageURL('view', note.sym.symbol)}>
-          //   <a>View</a>
-          // </Link>
-          <NoteDocVersionDropdown
-            cur={noteDraft}
-            note={note}
-            noteDraft={noteDraft}
-          />
-        )}
-        <div>Editing</div>
+      <Layout>
+        <div className="flex">
+          <div className="flex-1">Editing</div>
+          {note && (
+            // <Link href={getNotePageURL('view', note.sym.symbol)}>
+            //   <a>View</a>
+            // </Link>
+            <NoteDocVersionDropdown
+              cur={noteDraft}
+              note={note}
+              noteDraft={noteDraft}
+            />
+          )}
+        </div>
         <EditorEl />
       </Layout>
     </>
