@@ -131,6 +131,7 @@ export async function getServerSideProps({
   GetServerSidePropsResult<Props>
 > {
   if (params === undefined) throw new Error('params === undefined')
+
   const { slug } = params,
     { view } = query
 

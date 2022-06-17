@@ -14,12 +14,8 @@ const DiscussModalPageEl = ({ id }: { id: string }) => {
   const qDiscuss = useDiscussQuery({ variables: { id } }),
     qPosts = useDiscussPostsQuery({ variables: { discussId: id } })
 
-  if (qDiscuss.error) {
-    throw qDiscuss.error
-  }
-  if (qPosts.error) {
-    throw qPosts.error
-  }
+  if (qDiscuss.error) throw qDiscuss.error
+  if (qPosts.error) throw qPosts.error
   if (qDiscuss.data === undefined || qPosts.data === undefined) {
     return null
   }

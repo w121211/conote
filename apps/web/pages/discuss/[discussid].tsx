@@ -9,6 +9,8 @@ import {
   DiscussPostsQueryVariables,
   DiscussQuery,
   DiscussQueryVariables,
+  useDiscussPostsQuery,
+  useDiscussQuery,
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import DiscussTile from '../../components/discuss/discuss-tile'
@@ -17,17 +19,39 @@ import DiscussPostForm from '../../components/discuss-post/discuss-post-form'
 import Layout from '../../components/ui-component/layout'
 
 interface Props {
+  initialApolloState: any
   discuss: DiscussFragment
   discussPosts: DiscussPostFragment[]
 }
 
-const DiscussPage = ({ discuss, discussPosts }: Props) => {
+/**
+ * Recall queries so that we can enjoy extra features of `useQuery`, eg update
+ */
+const DiscussPage = ({ discuss }: Props) => {
+  const qDiscuss = useDiscussQuery({
+      variables: { id: discuss.id },
+    }),
+    qPosts = useDiscussPostsQuery({
+      variables: { discussId: discuss.id },
+    })
+
+  if (qDiscuss.error) throw qDiscuss.error
+  if (qPosts.error) throw qPosts.error
+  if (qDiscuss.data === undefined || qPosts.data === undefined) {
+    return null
+  }
   return (
     <Layout backgroundColor="bg-gray-200">
       <div className="flex flex-col gap-4 w-full">
-        <DiscussTile data={discuss} />
+        {/* <DiscussTile data={discuss} />
         <DiscussPostTiles posts={discussPosts} />
-        <DiscussPostForm discussId={discuss.id} />
+        <DiscussPostForm
+          discussId={discuss.id}
+          onSubmitted={() => window.location.reload()}
+        /> */}
+        <DiscussTile data={qDiscuss.data.discuss} />
+        <DiscussPostTiles posts={qPosts.data.discussPosts} />
+        <DiscussPostForm discussId={qDiscuss.data.discuss.id} />
       </div>
     </Layout>
   )
@@ -58,6 +82,7 @@ export async function getServerSideProps({
   )
   return {
     props: {
+      initialApolloState: client.cache.extract(),
       discuss: qDiscuss.data.discuss,
       discussPosts: qPosts.data.discussPosts,
     },

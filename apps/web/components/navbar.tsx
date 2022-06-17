@@ -3,9 +3,8 @@ import Link from 'next/link'
 import { useMe } from './auth/use-me'
 import { CommitPanel } from './commit/commit-panel'
 import SearchAllModal from './search-all-modal/search-all-modal'
-import AuthItem from './auth/auth-Item'
+import AuthItem from './auth/auth-el'
 import { createStore, select, setProp, withProps } from '@ngneat/elf'
-import { localStorageStrategy, persistState } from '@ngneat/elf-persist-state'
 
 interface SiderUI {
   open: boolean

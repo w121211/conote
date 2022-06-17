@@ -9,7 +9,7 @@ import {
 } from '../apollo/query.graphql'
 import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
 import { LatestDiscussTile } from '../components/latest-discuss-tile'
-import AuthItem from '../components/auth/auth-Item'
+import AuthItem from '../components/auth/auth-el'
 
 interface Props {
   discussesLatest: DiscussFragment[]
@@ -19,8 +19,6 @@ interface Props {
 
 const HomePage = ({ discussesLatest }: Props): JSX.Element => {
   const [showAnnounce, setAnnounce] = useState(false)
-
-  console.log(discussesLatest)
 
   useEffect(() => {
     if (window.sessionStorage.getItem('announce') === null) {

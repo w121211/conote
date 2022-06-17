@@ -20,9 +20,6 @@ CREATE TYPE "NoteDocStatus" AS ENUM ('CANDIDATE', 'PAUSE', 'MERGED', 'REJECTED')
 CREATE TYPE "NoteDraftStatus" AS ENUM ('EDIT', 'COMMIT', 'DROP');
 
 -- CreateEnum
-CREATE TYPE "PollFailReason" AS ENUM ('MIN_VOTES', 'MIN_JUDGMENTS', 'MAJOR_VERDICT', 'VERDICT_AS_FAIL', 'OTHER');
-
--- CreateEnum
 CREATE TYPE "PollStatus" AS ENUM ('CLOSE_SUCCESS', 'CLOSE_FAIL', 'OPEN', 'PAUSE', 'JUDGE', 'ABNORMAL');
 
 -- CreateEnum
@@ -67,9 +64,10 @@ CREATE TABLE "Commit" (
 -- CreateTable
 CREATE TABLE "Discuss" (
     "id" TEXT NOT NULL,
+    "draftId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "type" "DiscussType" NOT NULL DEFAULT E'DISCUSS',
-    "status" "DiscussStatus" NOT NULL DEFAULT E'ACTIVE',
+    "status" "DiscussStatus" NOT NULL DEFAULT E'DRAFT',
     "meta" JSONB NOT NULL DEFAULT '{}',
     "title" TEXT NOT NULL,
     "content" TEXT,
@@ -276,7 +274,7 @@ CREATE TABLE "Poll" (
     "userId" TEXT NOT NULL,
     "type" "PollType" NOT NULL DEFAULT E'FIXED',
     "status" "PollStatus" NOT NULL DEFAULT E'OPEN',
-    "meta" JSONB NOT NULL DEFAULT '{}',
+    "meta" JSONB NOT NULL,
     "choices" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -294,6 +292,19 @@ CREATE TABLE "PollCount" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "PollCount_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PollVote" (
+    "id" SERIAL NOT NULL,
+    "discussPostId" INTEGER,
+    "pollId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "choiceIdx" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PollVote_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -329,19 +340,6 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Vote" (
-    "id" SERIAL NOT NULL,
-    "discussPostId" INTEGER,
-    "pollId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "choiceIdx" INTEGER NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Vote_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -387,9 +385,6 @@ CREATE UNIQUE INDEX "Note_linkId_key" ON "Note"("linkId");
 CREATE UNIQUE INDEX "Note_branchId_symId_key" ON "Note"("branchId", "symId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "NoteDoc_fromDocId_key" ON "NoteDoc"("fromDocId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "NoteDoc_mergePollId_key" ON "NoteDoc"("mergePollId");
 
 -- CreateIndex
@@ -408,6 +403,9 @@ CREATE UNIQUE INDEX "Link_url_key" ON "Link"("url");
 CREATE UNIQUE INDEX "PollCount_pollId_key" ON "PollCount"("pollId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "PollVote_discussPostId_key" ON "PollVote"("discussPostId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Sym_linkId_key" ON "Sym"("linkId");
 
 -- CreateIndex
@@ -417,9 +415,6 @@ CREATE UNIQUE INDEX "Sym_symbol_key" ON "Sym"("symbol");
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Vote_discussPostId_key" ON "Vote"("discussPostId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "_DiscussToNote_AB_unique" ON "_DiscussToNote"("A", "B");
 
 -- CreateIndex
@@ -427,6 +422,9 @@ CREATE INDEX "_DiscussToNote_B_index" ON "_DiscussToNote"("B");
 
 -- AddForeignKey
 ALTER TABLE "Commit" ADD CONSTRAINT "Commit_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Discuss" ADD CONSTRAINT "Discuss_draftId_fkey" FOREIGN KEY ("draftId") REFERENCES "NoteDraft"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Discuss" ADD CONSTRAINT "Discuss_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -537,6 +535,15 @@ ALTER TABLE "Poll" ADD CONSTRAINT "Poll_userId_fkey" FOREIGN KEY ("userId") REFE
 ALTER TABLE "PollCount" ADD CONSTRAINT "PollCount_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "PollVote" ADD CONSTRAINT "PollVote_discussPostId_fkey" FOREIGN KEY ("discussPostId") REFERENCES "DiscussPost"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PollVote" ADD CONSTRAINT "PollVote_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PollVote" ADD CONSTRAINT "PollVote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Rate" ADD CONSTRAINT "Rate_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Author"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -550,15 +557,6 @@ ALTER TABLE "Rate" ADD CONSTRAINT "Rate_userId_fkey" FOREIGN KEY ("userId") REFE
 
 -- AddForeignKey
 ALTER TABLE "Sym" ADD CONSTRAINT "Sym_linkId_fkey" FOREIGN KEY ("linkId") REFERENCES "Link"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Vote" ADD CONSTRAINT "Vote_discussPostId_fkey" FOREIGN KEY ("discussPostId") REFERENCES "DiscussPost"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Vote" ADD CONSTRAINT "Vote_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Vote" ADD CONSTRAINT "Vote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_DiscussToNote" ADD CONSTRAINT "_DiscussToNote_A_fkey" FOREIGN KEY ("A") REFERENCES "Discuss"("id") ON DELETE CASCADE ON UPDATE CASCADE;

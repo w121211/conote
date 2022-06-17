@@ -1,14 +1,11 @@
 import { PrismaClient } from '@prisma/client'
 import { commitNoteDrafts } from '../../lib/models/commit-model'
-import {
-  mockNoteDrafts,
-  mockNoteDrafts_gotFromDoc,
-} from '../../test/__mocks__/mock-note-draft'
+import { mockNoteDrafts } from '../../test/__mocks__/mock-note-draft'
 import { testHelper } from '../../test/test-helpers'
-import { NoteDraftParsed } from '../../lib/interfaces'
+import { noteDraftModel } from '../../lib/models/note-draft-model'
+import { mockBranches } from '../../test/__mocks__/mock-branch'
 import { noteDocModel } from '../../lib/models/note-doc-model'
-import { mockUsers } from '../../test/__mocks__/mock-user'
-import { mockNoteDocs } from '../../test/__mocks__/mock-note-doc'
+import { parseGQLBlocks } from '../../shared/block-helpers'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),
@@ -26,19 +23,35 @@ async function main() {
   await testHelper.createUsers(prisma)
   await testHelper.createBranches(prisma)
 
-  await testHelper.createDiscusses(prisma)
+  // await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
 
-  await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
-  await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(5))
+  const mockDraft = mockNoteDrafts[0],
+    { symbol, userId, contentBody, ...rest } = mockDraft,
+    draft = await noteDraftModel.create(mockBranches[0].name, symbol, userId, {
+      ...rest,
+      contentBody: { blocks: contentBody.blocks, discussIds: [], symbols: [] },
+    })
 
-  const { noteDocs } = await commitNoteDrafts(
-    [mockNoteDrafts[0].id],
-    mockNoteDrafts[0].userId,
+  await testHelper.createDiscusses(prisma, draft.id)
+  // const draft_ = await noteDraftModel.update(draft.id, draft.userId, {
+  //   ...rest,
+  //   contentBody: {
+  //     blocks: contentBody.blocks,
+  //     discussIds: [],
+  // symbols: [],
+  //   },
+  // })
+
+  const { noteDocs } = await commitNoteDrafts([draft.id], draft.userId)
+
+  const { blocks, docBlock } = parseGQLBlocks(
+    noteDocModel.parse(noteDocs[0]).contentBody.blocks,
   )
-  await commitNoteDrafts([mockNoteDrafts[1].id], mockNoteDrafts[1].userId)
+
+  console.log(docBlock)
 
   // Warnning! This is the wrong way to create merge polls. Only used for the testing.
-  await testHelper.createMergePolls(prisma, noteDocs[0])
+  // await testHelper.createMergePolls(prisma, noteDocs[0])
 
   // const fromDoc = noteDocs[0],
   //   fromDoc_ = noteDocModel.parse(fromDoc),

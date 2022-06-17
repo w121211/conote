@@ -1,5 +1,5 @@
 import { Branch, NoteDoc, Sym } from '@prisma/client'
-import { writeBlocks } from '../../components/block-editor/src/utils'
+import { writeBlocks } from '../../components/block-editor/src/utils/block-writer'
 import {
   mockBlockInputs,
   mockBlocks,
@@ -33,6 +33,8 @@ const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
   },
 }
 
+const mockDiscusses_ = mockDiscusses('')
+
 export const mockNoteDrafts: Omit<
   NoteDraftParsed,
   'createdAt' | 'updatedAt'
@@ -60,9 +62,9 @@ export const mockNoteDrafts: Omit<
     userId: mockUsers[1].id,
     contentBody: {
       discussIds: [
-        { blockUid: 'uid-0', discussId: mockDiscusses[0].id },
-        { blockUid: 'uid-1', discussId: mockDiscusses[1].id },
-        { blockUid: 'uid-1', discussId: mockDiscusses[2].id },
+        { blockUid: 'uid-0', discussId: mockDiscusses_[0].id },
+        { blockUid: 'uid-1', discussId: mockDiscusses_[1].id },
+        { blockUid: 'uid-1', discussId: mockDiscusses_[2].id },
       ],
       symbols: [],
       blocks: writeBlocks(mockBlockInputs[0], {
@@ -93,13 +95,13 @@ export const mockNoteDrafts: Omit<
       discussIds: [
         {
           blockUid: 'uid-0',
-          discussId: mockDiscusses[0].id,
+          discussId: mockDiscusses_[0].id,
           commitId: 'commit-id-0',
         },
-        { blockUid: 'uid-1', discussId: mockDiscusses[1].id },
+        { blockUid: 'uid-1', discussId: mockDiscusses_[1].id },
         {
           blockUid: 'uid-1',
-          discussId: mockDiscusses[2].id,
+          discussId: mockDiscusses_[2].id,
           commitId: 'commit-id-1',
         },
       ],

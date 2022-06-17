@@ -554,8 +554,8 @@ mutation CreateCommit($noteDraftIds: [ID!]!) {
   }
 }
 
-mutation CreateDiscuss($noteId: ID, $data: DiscussInput!) {
-  createDiscuss(noteId: $noteId, data: $data) {
+mutation CreateDiscuss($noteDraftId: ID!, $data: DiscussInput!) {
+  createDiscuss(noteDraftId: $noteDraftId, data: $data) {
     ...discuss
   }
 }

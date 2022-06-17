@@ -197,8 +197,7 @@ type Mutation {
   # commit must be created first
   createCommit(noteDraftIds: [ID!]!): Commit!
 
-  # optional noteId for connecting discuss with note
-  createDiscuss(noteId: ID, data: DiscussInput!): Discuss!
+  createDiscuss(noteDraftId: ID!, data: DiscussInput!): Discuss!
 
   updateDiscuss(id: ID!, data: DiscussInput!): Discuss!
 

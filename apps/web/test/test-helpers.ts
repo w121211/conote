@@ -1,4 +1,4 @@
-import { Branch, NoteDoc, PrismaClient, Sym } from '@prisma/client'
+import { NoteDoc, PrismaClient } from '@prisma/client'
 import { mockDiscusses, mockDiscussPosts } from './__mocks__/mock-discuss'
 import { mockBotUser, mockUsers } from './__mocks__/mock-user'
 import { mockBranches } from './__mocks__/mock-branch'
@@ -10,9 +10,6 @@ import { mockCommits } from './__mocks__/mock-commit'
 import { mockNoteDocs } from './__mocks__/mock-note-doc'
 import { mockLinks } from './__mocks__/mock-link'
 import { mockMergePolls } from './__mocks__/mock-poll'
-import { noteDocModel } from '../lib/models/note-doc-model'
-import { mockBlockInputs } from '../components/block-editor/test/__mocks__/mock-block'
-import { writeBlocks } from '../components/block-editor/src/utils'
 
 // fake incremental id
 let i = 0
@@ -174,9 +171,9 @@ class TestHelper {
     return { sym, note, commit, noteDoc }
   }
 
-  async createDiscusses(prisma: PrismaClient): Promise<void> {
+  async createDiscusses(prisma: PrismaClient, draftId: string): Promise<void> {
     await prisma.$transaction([
-      ...mockDiscusses.map(e =>
+      ...mockDiscusses(draftId).map(e =>
         prisma.discuss.create({
           data: { ...e, count: { create: {} } },
         }),

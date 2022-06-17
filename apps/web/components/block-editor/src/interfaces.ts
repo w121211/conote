@@ -1,6 +1,10 @@
 import type { Token } from 'prismjs'
-import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
 import type {
+  NoteDocContentBodyInput,
+  NoteDocContentHeadInput,
+} from 'graphql-let/__generated__/__types__'
+import type {
+  NoteDocContentBodyFragment,
   NoteDraftEntryFragment,
   NoteDraftFragment,
   NoteFragment,
@@ -176,6 +180,9 @@ export type Doc = {
 
   // Note-doc-content-head is editable and stores here
   contentHead: NoteDocContentHeadInput
+
+  // contentBody: Omit<NoteDocContentBodyFragment, '__typename' | 'blocks'>
+  contentBody: Omit<NoteDocContentBodyInput, 'blocks'>
 
   // Refer to root-block-uid
   blockUid: string
