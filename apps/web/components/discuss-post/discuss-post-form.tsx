@@ -7,8 +7,8 @@ import {
   useCreateDiscussPostMutation,
 } from '../../apollo/query.graphql'
 import './github-markdown-light.module.css'
-import { useMe } from '../auth/use-me'
 import LoginModal from '../login-modal'
+import { useMeContext } from '../auth/use-me-context'
 
 interface FormInput {
   content: string
@@ -23,7 +23,7 @@ const DiscussPostForm = ({
   isModal?: boolean
   onSubmitted?: () => void
 }) => {
-  const { me } = useMe()
+  const { me } = useMeContext()
   const [showTextarea, setShowTextarea] = useState(true)
   const { register, handleSubmit, getValues, watch, reset, formState } =
     useForm<FormInput>({

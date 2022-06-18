@@ -78,7 +78,7 @@ const SidebarEl = ({
       id="sider"
       className={`
           [grid-area:sider]
-          group
+         
           absolute left-0 
           z-50
           flex flex-col flex-shrink-0  
@@ -117,7 +117,7 @@ const SidebarEl = ({
       }}
       ref={ref}
     >
-      <div className="absolute justify-end flex-shrink-0 top-0 right-0 mr-2 mt-2">
+      <div className="group absolute justify-end flex-shrink-0 w-full top-0 right-0 mr-2 mt-2 text-right">
         <span
           className={`
               hidden md:inline-block 

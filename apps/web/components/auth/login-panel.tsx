@@ -10,7 +10,6 @@ import firebaseui from 'firebaseui'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import { useSessionLoginMutation } from '../../apollo/query.graphql'
 import { useFirebaseClient } from './firebase-client'
-import { useMe } from './use-me'
 import { ErrorDisplay } from '../status-display'
 
 /**

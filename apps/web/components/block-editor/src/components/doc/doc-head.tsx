@@ -6,15 +6,6 @@ import { styleSymbol } from '../../../../ui-component/style-fc/style-symbol'
 import type { Doc } from '../../interfaces'
 import { ContentHeadForm } from './content-head-form'
 
-// interface Props {
-//   isNew: boolean
-//   symbol: string
-//   title?: string
-//   link?: string
-//   fetchTime?: Date
-//   nodeId: string
-// }
-
 const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   const [showModal, setShowModal] = useState(false)
   // const editing = cur.__typename === 'NoteDraft'

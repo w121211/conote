@@ -34,7 +34,7 @@ import {
   useSearchAuthorLazyQuery,
   useSearchSymbolLazyQuery,
 } from '../../apollo/query.graphql'
-import { useMe } from '../auth/use-me'
+import { useMeContext } from '../auth/use-me-context'
 import Modal from '../modal/modal'
 import CreateAuthorForm from './create-author-form'
 import CreateSymbolForm from './create-symbol-form'
@@ -89,7 +89,7 @@ const AuthorControl = ({ children, ...props }: ControlProps<Option, false>) => {
 const AsyncAuthorConsumer = ({ name }: { name: string }) => {
   const [searchAuthor, { data, refetch }] = useSearchAuthorLazyQuery()
   // const { data: meData } = useMeQuery()
-  const { me } = useMe()
+  const { me } = useMeContext()
 
   const defaultOptions = [{ value: me?.id ?? '', label: '我' }]
   const { control, setValue } = useFormContext()

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import React from 'react'
 import { DiscussFragment } from '../../apollo/query.graphql'
 import { getNotePageURL } from '../../shared/note-helpers'
-import { useMe } from '../auth/use-me'
+import { useMeContext } from '../auth/use-me-context'
 import { Box } from '../ui-component/box'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 import DiscussEmojis from './discuss-emojis'
@@ -20,7 +20,7 @@ interface Props {
 }
 
 const DiscussTile = ({ data }: Props): JSX.Element => {
-  const { me } = useMe()
+  const { me } = useMeContext()
   const { id, userId, title, content, createdAt, noteEntries } = data
   return (
     <Box padding="md">
@@ -39,7 +39,7 @@ const DiscussTile = ({ data }: Props): JSX.Element => {
           )
         })}
       </div>
-      <h2 className="mt-2 mb-1 tracking-wider text-gray-800 text-xl font-medium">
+      <h2 className="mt-2 mb-1 text-gray-800 text-xl font-medium">
         <span className="text-gray-300">#</span>
         {title}
         <span className="text-gray-300">#</span>

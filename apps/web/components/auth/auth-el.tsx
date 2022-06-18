@@ -1,14 +1,14 @@
 import React from 'react'
 import Link from 'next/link'
-import { useMe } from './use-me'
 import ToggleMenu from '../ui-component/toggle-menu'
 import { LoggedInUser } from './auth.service'
 import LogoutButton from './logout-button'
 import { DropdownListDivider } from '../ui-component/dropdown-list-divider'
 import { DropdownListItem } from '../ui-component/dropdown-list-item'
+import { useMeContext } from './use-me-context'
 
 const AuthItem = () => {
-  const { me, loading } = useMe()
+  const { me, loading } = useMeContext()
 
   // if (loading) return null
 
@@ -32,22 +32,22 @@ const AuthItem = () => {
             {me.id}
           </span>
           <DropdownListDivider />
-          <DropdownListItem>
-            <Link
-              href={{
-                pathname: '/user/[userId]',
-                query: { userId: me.id },
-              }}
-            >
-              <a>Your Profile</a>
-            </Link>
-          </DropdownListItem>
+          <Link
+            href={{
+              pathname: '/user/[userId]',
+              query: { userId: me.id },
+            }}
+          >
+            <a>
+              <DropdownListItem>Your Profile</DropdownListItem>
+            </a>
+          </Link>
           <DropdownListDivider />
-          <DropdownListItem>
-            <Link href="/login">
-              <a>Logout</a>
-            </Link>
-          </DropdownListItem>
+          <Link href="/login">
+            <a>
+              <DropdownListItem>Logout</DropdownListItem>
+            </a>
+          </Link>
         </ToggleMenu>
       ) : (
         <a className="btn-primary  text-sm" href="/login">

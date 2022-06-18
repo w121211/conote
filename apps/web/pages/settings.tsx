@@ -1,7 +1,7 @@
-import { useMe } from '../components/auth/use-me'
+import { useMeContext } from '../components/auth/use-me-context'
 
 const Page = (): JSX.Element | null => {
-  const { me } = useMe()
+  const { me } = useMeContext()
 
   return (
     <div>

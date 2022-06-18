@@ -1,8 +1,10 @@
 import React from 'react'
-export const LoadingSvg = () => (
+export const LoadingSvg = ({ svgClassName }: { svgClassName?: string }) => (
   <div className="flex items-center justify-center ">
     <svg
-      className=" animate-spin text-gray-400"
+      className={`animate-spin text-gray-400 ${
+        svgClassName ? svgClassName : ''
+      }`}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

@@ -1,10 +1,10 @@
 import React, { ReactNode, useState } from 'react'
-import { useMe } from './auth/use-me'
+import { useMeContext } from './auth/use-me-context'
 import Modal from './modal/modal'
 
 const LoginModal = ({ children }: { children?: ReactNode }) => {
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const { me } = useMe()
+  const { me } = useMeContext()
   return (
     <>
       <div

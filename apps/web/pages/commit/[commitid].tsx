@@ -11,7 +11,6 @@ import Layout from '../../components/ui-component/layout'
 import { getNotePageURL } from '../../shared/note-helpers'
 import Link from 'next/link'
 import moment from 'moment'
-import { useMe } from '../../components/auth/use-me'
 import UserLink from '../../components/user/user-link'
 
 interface Props {

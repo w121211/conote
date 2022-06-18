@@ -170,9 +170,6 @@ const InlineDiscussEl = (
       ) : (
         <PopperTooltip
           label="⚠ Click to create the discuss"
-          // visible={showWarnTooltip}
-          // visible={showWarnTooltip}
-          // onClose={() => setShowWarnTooltip(false)}
           size="sm"
           type="warning"
         >
@@ -183,7 +180,6 @@ const InlineDiscussEl = (
             role="button"
           >
             {children}
-            {/* <span>(click to create)</span> */}
           </span>
         </PopperTooltip>
       )}

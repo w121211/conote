@@ -49,26 +49,26 @@ const NoteDocVersionDropdown = ({
     >
       <ul>
         {noteDraft && (
-          <DropdownListItem>
-            <Link href={getNotePageURL('edit', symbol)}>
-              <a>Draft</a>
-            </Link>
-          </DropdownListItem>
+          <Link href={getNotePageURL('edit', symbol)}>
+            <a>
+              <DropdownListItem>Draft</DropdownListItem>
+            </a>
+          </Link>
         )}
         {note && (
-          <DropdownListItem>
-            <Link href={getNotePageURL('view', symbol)}>
-              <a>Head</a>
-            </Link>
-          </DropdownListItem>
+          <Link href={getNotePageURL('view', symbol)}>
+            <a>
+              <DropdownListItem>Head</DropdownListItem>
+            </a>
+          </Link>
         )}
         {qDocsToMerge.data &&
           qDocsToMerge.data.noteDocsToMergeByNote.map(e => (
-            <DropdownListItem key={e.id}>
-              <Link href={getNotePageURL('doc', symbol, e.id)}>
-                <a href="#">#{e.id.slice(-6)}</a>
-              </Link>
-            </DropdownListItem>
+            <Link href={getNotePageURL('doc', symbol, e.id)} key={e.id}>
+              <a href="#">
+                <DropdownListItem>#{e.id.slice(-6)}</DropdownListItem>
+              </a>
+            </Link>
           ))}
       </ul>
     </ToggleMenu>

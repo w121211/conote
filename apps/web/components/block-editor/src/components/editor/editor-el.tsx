@@ -113,7 +113,9 @@ export const EditorEl = (): JSX.Element | null => {
         // }}
       >
         {modalDoc ? (
-          <DocEl doc={modalDoc} />
+          <div className="py-5 px-10 pb-10">
+            <DocEl doc={modalDoc} />
+          </div>
         ) : (
           <div className="flex items-center justify-center w-full h-80">
             <div className="w-10 h-10">

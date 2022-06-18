@@ -9,6 +9,7 @@ import { useMe } from '../components/auth/use-me'
 import Link from 'next/link'
 import { useApolloClientInitial } from '../apollo/apollo-client'
 import Navbar from '../components/navbar'
+import { MeProvider } from '../components/auth/use-me-context'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApolloClientInitial(pageProps.initialApolloState),
@@ -62,17 +63,19 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
       /> */}
 
       <ApolloProvider client={apolloClient}>
-        <TooltipProvider>
-          <ModalProvider>
-            <div className="grid grid-rows-[auto_1fr] w-screen h-screen">
-              {/* {!(typeof window === 'undefined') && <Navbar />} */}
-              <Navbar />
-              <div className="">
-                <Component {...pageProps} />
+        <MeProvider>
+          <TooltipProvider>
+            <ModalProvider>
+              <div className="grid grid-rows-[auto_1fr] w-screen h-screen">
+                {/* {!(typeof window === 'undefined') && <Navbar />} */}
+                <Navbar />
+                <div className="">
+                  <Component {...pageProps} />
+                </div>
               </div>
-            </div>
-          </ModalProvider>
-        </TooltipProvider>
+            </ModalProvider>
+          </TooltipProvider>
+        </MeProvider>
       </ApolloProvider>
     </ErrorBoundary>
   )

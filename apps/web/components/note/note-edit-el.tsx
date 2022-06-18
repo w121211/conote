@@ -10,8 +10,8 @@ import Layout from '../ui-component/layout'
 import { editorOpenSymbolInMain } from '../block-editor/src/events'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import LoginModal from '../login-modal'
-import { useMe } from '../auth/use-me'
 import Link from 'next/link'
+import { useMeContext } from '../auth/use-me-context'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -27,7 +27,7 @@ const NoteEditEl = ({
   noteDocsToMerge: NoteDocFragment[] | null
 }) => {
   const router = useRouter()
-  const { me, loading } = useMe()
+  const { me, loading } = useMeContext()
 
   useEffect(() => {
     if (me) {

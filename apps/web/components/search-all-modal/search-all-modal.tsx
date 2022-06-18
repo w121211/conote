@@ -84,17 +84,18 @@ const SearchAllModal = () => {
           setKeyArrow(true)
         }
       }
-      if (e.key === 'Enter') {
-        if (inputValue.length > 0) {
-          /* ---selectedIdx === i+1--- */
-          /* ---create symbol is selected--- */
-          if (selectedIdx < 0) {
-            //
-          } else {
-            /* ---select data item--- */
-            router.push(getNotePageURL('base', dataList[selectedIdx - 1].str))
-            setShowModal(false)
-          }
+    }
+    if (e.key === 'Enter') {
+      if (inputValue.length > 0) {
+        /* ---selectedIdx === i+1--- */
+        /* ---create symbol is selected--- */
+        if (selectedIdx === 0) {
+          router.push(getNotePageURL('base', `[[${inputValue}]]`))
+          setShowModal(false)
+        } else if (dataList && dataList.length > 0) {
+          /* ---select data item--- */
+          router.push(getNotePageURL('base', dataList[selectedIdx - 1].str))
+          setShowModal(false)
         }
       }
     }
@@ -231,20 +232,25 @@ const SearchAllModal = () => {
               {inputValue.length > 0 ? (
                 // --- result list ---
                 <>
-                  <p
-                    className="mt-2 px-2 py-3 rounded hover:cursor-pointer"
-                    onMouseLeave={e => onMouseLeave(e, 0)}
-                    onMouseMove={e => onMouseMove(e, 0)}
-                    role="option"
-                    aria-selected={selectedIdx === 0}
-                  >
-                    <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
-                      create symbol
-                    </span>
-                    <span className="text-gray-800 dark:text-gray-200 font-bold">
-                      {inputValue}
-                    </span>
-                  </p>
+                  <Link href={getNotePageURL('base', `[[${inputValue}]]`)}>
+                    <a>
+                      <p
+                        className="mt-2 px-2 py-3 rounded hover:cursor-pointer"
+                        onMouseLeave={e => onMouseLeave(e, 0)}
+                        onMouseMove={e => onMouseMove(e, 0)}
+                        onClick={() => setShowModal(false)}
+                        role="option"
+                        aria-selected={selectedIdx === 0}
+                      >
+                        <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
+                          create symbol
+                        </span>
+                        <span className="text-gray-800 dark:text-gray-200 font-bold">
+                          {inputValue}
+                        </span>
+                      </p>
+                    </a>
+                  </Link>
                   <ul className="text-gray-700/80 dark:text-gray-200/70">
                     {data?.searchSymbol.map(({ str, id }, i) => {
                       return (
