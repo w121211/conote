@@ -80,31 +80,35 @@ GCP Samples
 
 Steps:
 
-- create a GKE cluster, @see https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
-- enable google cloud build api, @see https://cloud.google.com/build/docs/build-push-docker-image https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run
-- create a google cloud artifact registry, eg 'conote-docker-repo', @see https://cloud.google.com/artifact-registry/docs/docker/quickstart
-- setup gke ingress with http, enable `HttpLoadBalancing`, @see https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress?hl=en#http-add-on
-- setup Google-managed SSL certificates, `external ip` @see https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs?hl=en
-- modiy .env.local url (corresponding GKE's external IP）
+- Create a GKE cluster, @see https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
+- Enable google cloud build api, @see https://cloud.google.com/build/docs/build-push-docker-image https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run
+- Create a google cloud artifact registry, eg 'conote-docker-repo', @see https://cloud.google.com/artifact-registry/docs/docker/quickstart
+- Setup gke ingress with http, enable `HttpLoadBalancing`, @see https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress?hl=en#http-add-on
+- Setup Google-managed SSL certificates, `external ip` @see https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs?hl=en
+- Modiy .env.local url (corresponding GKE's external IP）
 
-- install postgresql on gke through helm
+- Install postgresql on gke through helm
 
 ```sh
-# switch context to cloud cluster
+# Switch context to cloud cluster
 kubectl config get-contexts
 kubectl config use-context ...
 
-# change repo name based on google cloud artifact registry https://cloud.google.com/artifact-registry/docs/docker/quickstart
+# Change repo name based on google cloud artifact registry https://cloud.google.com/artifact-registry/docs/docker/quickstart
 skaffold dev --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --port-forward
 
-# build & deploy
+# Build & deploy
 skaffold run --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --tail
 
-# deploy only (no build)
-skaffold deploy --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --images='conote-webapp-image:latest'
+# Deploy only (no build)
+skaffold deploy --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --images='conote-webapp-image:latest' --tail
 
-# remove deployment
+# Remove deployment
 skaffold delete
+
+# View logs
+kubectl get pods
+kubectl logs -f ${name_of_pod}
 ```
 
 Setup external-ip
@@ -170,15 +174,15 @@ kubectl delete pod conote-release-postgresql-client
 
 ```sh
 # psql commands
-\l # list databases
-\c prisma # change to prisma database
-\dt # list tables
+\l # List databases
+\c prisma # Change to prisma database
+\dt # List tables
 SELECT * FROM "User";
 
-# dump from local docker
+# Dump from local docker
 docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > local_prisma_dump-$(date +%Y%m%d).tar
 
-# dump from k8s
+# Dump from k8s
 kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > gke_conote_prisma_dump-$(date +%Y%m%d).tar
 ```
 
@@ -191,7 +195,7 @@ Dump to CSV, JSON? Use dump & restore, then access pgadmin and export to csv, js
 # create database if not exist in psql
 $(psql) CREATE DATABASE prisma;
 
-# For case require to drop database, !!! use carefully !!!
+# !!!Use carefully!!!, for case require to drop database,
 $(psql) DROP DATABASE prisma;
 
 # restore to k8s

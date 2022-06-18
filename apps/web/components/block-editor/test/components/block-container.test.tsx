@@ -5,7 +5,7 @@ import { setEntities } from '@ngneat/elf-entities'
 import { render, fireEvent, waitFor, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // import '@testing-library/jest-dom'
-import { BlockContainer } from '../../src/components/block/_block-container'
+// import { BlockContainer } from '../../src/components/block/_block-container'
 import { blockRepo, blocksStore } from '../../src/stores/block.repository'
 import { blocks } from '../helpers'
 import { validateChildrenUids } from '../../src/op/helpers'
@@ -47,11 +47,11 @@ beforeEach(() => {
 //   expect(screen.getByRole('button')).not.toBeDisabled()
 // })
 
-test('BlockContainer', async () => {
-  const { container, getByText } = render(<BlockContainer uid={'a0'} />)
-  // fireEvent.click(container)
-  // userEvent.hover(container)
-  fireEvent.mouseEnter(screen.getByText(/a0/))
-  await waitFor(() => screen.getByTestId('block-content-textarea'))
-  screen.debug()
-})
+// test('BlockContainer', async () => {
+//   const { container, getByText } = render(<BlockContainer uid={'a0'} />)
+//   // fireEvent.click(container)
+//   // userEvent.hover(container)
+//   fireEvent.mouseEnter(screen.getByText(/a0/))
+//   await waitFor(() => screen.getByTestId('block-content-textarea'))
+//   screen.debug()
+// })

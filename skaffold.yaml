@@ -20,7 +20,7 @@ profiles:
       artifacts:
         - image: conote-webapp-image
           context: .
-          # kaniko:  # fail with yarn workspace
+          # kaniko:  # Fail with yarn workspace
           #   cache: {}
       googleCloudBuild:
         # diskSizeGb: 300

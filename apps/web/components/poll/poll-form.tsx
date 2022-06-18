@@ -66,7 +66,7 @@ export const RadioInput = ({
       />
       <BarChart
         content={content}
-        value={parseInt(value)}
+        // value={parseInt(value)}
         total={total ?? 0}
         count={count ?? 0}
         voted={myVote?.choiceIdx.toString() === value}

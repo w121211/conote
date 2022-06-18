@@ -263,21 +263,21 @@ function updateQuery(
 //
 //
 
-function _autoCompleteHashtag(
-  e: React.KeyboardEvent<HTMLTextAreaElement>,
-  search: Search,
-  setSearch: React.Dispatch<React.SetStateAction<Search>>,
-) {
-  const { hits, hitIndex } = search
+// function _autoCompleteHashtag(
+//   e: React.KeyboardEvent<HTMLTextAreaElement>,
+//   search: Search,
+//   setSearch: React.Dispatch<React.SetStateAction<Search>>,
+// ) {
+//   const { hits, hitIndex } = search
 
-  if (hitIndex) {
-    const { nodeTitle, blockUid } = hits[hitIndex],
-      expansion = nodeTitle ?? blockUid,
-      { currentTarget } = e
+//   if (hitIndex) {
+//     const { nodeTitle, blockUid } = hits[hitIndex],
+//       expansion = nodeTitle ?? blockUid,
+//       { currentTarget } = e
 
-    return autoCompleteHashtag(currentTarget, expansion ?? null, setSearch)
-  }
-}
+//     return autoCompleteHashtag(currentTarget, expansion ?? null, setSearch)
+//   }
+// }
 
 export function autoCompleteHashtag(
   target: HTMLTextAreaElement,
