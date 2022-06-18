@@ -4,20 +4,21 @@ import { render, fireEvent, waitFor, screen } from '@testing-library/react'
 import { DocEl } from '../../src/components/doc/doc-el'
 import { blockRepo } from '../../src/stores/block.repository'
 import { docRepo } from '../../src/stores/doc.repository'
-import { mockDoc } from '../__mocks__/mock-doc'
+
 import {
   findSelectedItems,
   getDescendantsUids,
 } from '../../src/handlers/textarea-handlers'
+import { mockDocs } from '../__mocks__/mock-doc'
 
-beforeAll(() => {
-  blockRepo.update([setEntities(mockDoc.blocks)])
-  docRepo.update([setEntities([mockDoc.doc])])
-})
+// beforeAll(() => {
+//   blockRepo.update([setEntities(mockDocs.blocks)])
+//   docRepo.update([setEntities([mockDoc.doc])])
+// })
 
-test('', () => {
-  getDescendantsUids()
-})
+// test('', () => {
+//   getDescendantsUids()
+// })
 
 // test('findSelectedItems()', () => {
 //   render(<DocEl doc={mockDoc.doc} />)

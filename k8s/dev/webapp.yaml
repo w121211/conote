@@ -53,7 +53,7 @@ spec:
                 secretKeyRef:
                   name: conote-release-postgresql
                   key: password
-            - name: DATABASE_URL
+            - name: APP_DATABASE_URL
               value: 'postgresql://postgresuser:$(POSTGRES_PASSWORD)@conote-release-postgresql:5432/prisma?schema=public'
           #     - name: DATABASE_URL
           #       valueFrom:
