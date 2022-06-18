@@ -17,6 +17,7 @@ import {
   usePollQuery,
 } from '../../apollo/query.graphql'
 import BarChart from '../bar/bar'
+import LoginModal from '../login-modal'
 
 export type RadioInputs = {
   choice?: string
@@ -28,7 +29,7 @@ export type FormInputs = {
   lines: string
 }
 
-export const RadioInput = ({
+const RadioInput = ({
   value,
   content,
   count,
@@ -51,28 +52,30 @@ export const RadioInput = ({
   const methods = useFormContext()
 
   return (
-    <label className="relative inline-flex items-center">
-      <input
-        {...methods.register('choice')}
-        type="radio"
-        value={value}
-        checked={checked}
-        onClick={e => {
-          e.stopPropagation()
-          // handleChange(e.target)
-          // setChecked(prev => !prev)
-          choiceValue && choiceValue(value)
-        }}
-      />
-      <BarChart
-        content={content}
-        // value={parseInt(value)}
-        total={total ?? 0}
-        count={count ?? 0}
-        voted={myVote?.choiceIdx.toString() === value}
-        checked={checked}
-      />
-    </label>
+    <LoginModal>
+      <label className="relative inline-flex items-center">
+        <input
+          {...methods.register('choice')}
+          type="radio"
+          value={value}
+          checked={checked}
+          onClick={e => {
+            e.stopPropagation()
+            // handleChange(e.target)
+            // setChecked(prev => !prev)
+            choiceValue && choiceValue(value)
+          }}
+        />
+        <BarChart
+          content={content}
+          value={parseInt(value)}
+          total={total ?? 0}
+          count={count ?? 0}
+          voted={myVote?.choiceIdx.toString() === value}
+          checked={checked}
+        />
+      </label>
+    </LoginModal>
   )
 }
 

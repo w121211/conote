@@ -27,8 +27,8 @@ export const LatestDiscussTile = ({ data }: Props): JSX.Element => {
                   query: { discussid: id },
                 }}
               >
-                <a className="line-clamp-2">
-                  <h4 className=" text-gray-700 dark:text-gray-200 hover:underline-offset-2 hover:underline">
+                <a className="w-fit line-clamp-2">
+                  <h4 className="text-gray-700 dark:text-gray-200 hover:underline-offset-2 hover:underline">
                     {title}
                   </h4>
                 </a>

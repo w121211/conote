@@ -71,15 +71,15 @@ const HomePage = ({ discussesLatest }: Props): JSX.Element => {
         </div>
       )}
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between   border-slate-200 px-4 md:px-10 pt-6 pb-6 ">
+        {/* <div className="flex items-center justify-between   border-slate-200 px-4 md:px-10 pt-6 pb-6 ">
           <div className="flex-3 flex items-center max-w-2xl">
             <h3 className=" mr-4 md:mr-10 ">Konote</h3>
             <div className="w-5/6">
               <SearchAllForm />
             </div>
           </div>
-          <AuthItem />
-        </div>
+          {/* <AuthItem /> */}
+        {/* </div> */}
         <>
           <div className="flex-1 flex pb-[9vh] pt-6 bg-gray-200">
             <div className="flex flex-col items-center md:items-start md:flex-row ms:justify-between  md:w-3/4 md:ml-[calc(4rem+96px)] gap-6">

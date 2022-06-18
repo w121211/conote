@@ -2,13 +2,13 @@ import moment from 'moment'
 import React from 'react'
 import Link from 'next/link'
 import { DiscussPostFragment } from '../../apollo/query.graphql'
-import { useMe } from '../auth/use-me'
 import OptionsMenu from '../discuss/options-menu'
 import DiscussPostEmojis from './discuss-post-emojis'
 import { Box } from '../ui-component/box'
+import { useMeContext } from '../auth/use-me-context'
 
 const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {
-  const { me } = useMe()
+  const { me } = useMeContext()
 
   return (
     <Box padding="sm">

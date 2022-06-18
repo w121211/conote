@@ -13,8 +13,8 @@ import MergePollVoteForm from '../../components/poll/merge-poll-vote-form'
 import NoteDocLink from '../../components/note/note-doc-link'
 import UserLink from '../../components/user/user-link'
 import moment from 'moment'
-import { useMe } from '../../components/auth/use-me'
 import { Alert } from '../../components/ui-component/alert'
+import { useMeContext } from '../../components/auth/use-me-context'
 
 interface Props {
   poll: PollFragment
@@ -24,7 +24,7 @@ interface Props {
 
 const PollPage = ({ poll }: Props): JSX.Element | null => {
   const { noteDocToMerge } = poll,
-    { me } = useMe()
+    { me } = useMeContext()
 
   if (isNil(noteDocToMerge))
     throw new Error('Currently only support merge poll')

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { MarkDownParser } from '../discuss/mark-down-parser'
 import {
@@ -7,8 +7,8 @@ import {
   useCreateDiscussPostMutation,
 } from '../../apollo/query.graphql'
 import './github-markdown-light.module.css'
-import { useMe } from '../auth/use-me'
 import LoginModal from '../login-modal'
+import { useMeContext } from '../auth/use-me-context'
 
 interface FormInput {
   content: string
@@ -23,7 +23,7 @@ const DiscussPostForm = ({
   isModal?: boolean
   onSubmitted?: () => void
 }) => {
-  const { me } = useMe()
+  const { me } = useMeContext()
   const [showTextarea, setShowTextarea] = useState(true)
   const { register, handleSubmit, getValues, watch, reset, formState } =
     useForm<FormInput>({
@@ -62,7 +62,7 @@ const DiscussPostForm = ({
   const contentRef = register('content').ref
   let textareaTest: HTMLTextAreaElement | null = null
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (textareaTest) {
       /* Reset height - important to shrink on delete */
       textareaTest.style.height = isModal ? '44px' : 'inherit'

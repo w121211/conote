@@ -1,4 +1,4 @@
-import IStorage from './i-storage'
+import IStorage from '../../shared/i-storage'
 
 export type DomainType = 'dev' | 'fin'
 

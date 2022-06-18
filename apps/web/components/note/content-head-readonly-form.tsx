@@ -122,7 +122,7 @@ export const ContentHeadReadonlyForm = ({ doc }: { doc: NoteDocFragment }) => {
             value={value}
             components={customComponents}
             noOptionsMessage={() => null}
-            placeholder={'placeholder'}
+            placeholder={''}
             onChange={onChange}
           />
         )}

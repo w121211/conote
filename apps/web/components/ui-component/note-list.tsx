@@ -23,9 +23,9 @@ export const NoteList = ({ data }: { data: NoteDocFragment[] }) => {
         const styledSymbol = styleSymbol(symbol, title)
         return (
           <ListItem key={i}>
-            <div className="flex-1 group truncate hover:cursor-pointer ">
+            <div className="flex-1 group truncate ">
               <Link href={getNotePageURL('base', symbol)}>
-                <a className="flex-grow flex-shrink mb-1 truncate min-w-0 text-blue-500 dark:text-blue-300 font-normal">
+                <a className="link flex-grow flex-shrink mb-1 truncate min-w-0 font-normal">
                   {styledSymbol}
                 </a>
               </Link>

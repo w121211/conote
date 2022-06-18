@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { useMe } from '../auth/use-me'
+import { useMeContext } from '../auth/use-me-context'
 
 const UserLink = ({ userId }: { userId: string }) => {
-  const { me } = useMe()
+  const { me } = useMeContext()
   return (
     <span>
       <Link href={`/user/${userId}`}>

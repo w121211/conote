@@ -4,6 +4,7 @@ import {
   DiscussFragment,
   useCreateDiscussMutation,
 } from '../../apollo/query.graphql'
+import { FormSubmitBtn } from '../form-submit-btn'
 
 interface FormInput {
   title: string
@@ -28,7 +29,12 @@ const DiscussForm = ({
         }
       },
     }),
-    { handleSubmit, register, setValue, watch } = useForm<FormInput>({
+    {
+      handleSubmit,
+      register,
+      formState: { isSubmitting },
+      watch,
+    } = useForm<FormInput>({
       defaultValues: { title },
     }),
     watchContent = watch('content'),
@@ -70,45 +76,46 @@ const DiscussForm = ({
       autoComplete="off"
       spellCheck="false"
     >
-      <input
-        {...register('title', { required: true })}
-        className="text-2xl font-bold focus:outline-none"
-        type="text"
-        placeholder="Title"
-        autoFocus
-      />
+      <div className="relative before:content-['#'] before:absolute before:-translate-x-full before:-ml-1 before:pt-2 before:text-gray-400 before:font-medium before:text-xl">
+        <textarea
+          {...register('title', { required: true })}
+          className="input w-full text-gray-800 text-xl font-medium resize-none "
+          placeholder="Title"
+          autoFocus
+          disabled={isSubmitting}
+        />
+      </div>
       <textarea
         {...register('content')}
         className={`
+              input
               w-full 
               min-h-[18px]
               max-h-${'[' + maxTextareaHeight + ']'}px] 
               resize-none 
-              p-2 
-              border border-gray-300 
-              rounded 
-              text-gray-700
               align-top 
               bg-gray-100 
-              
-              outline-offset-2 
-              focus:border-blue-400
-              focus:outline-blue-300
+              hover:bg-gray-100
+             
             `}
         placeholder="Add information to your question (optional)."
         ref={e => {
           contentRef(e)
           textareaTest = e
         }}
+        disabled={isSubmitting}
       />
       <div className=" text-center">
-        <button
+        <FormSubmitBtn size="lg" isLoading>
+          Create the discuss
+        </FormSubmitBtn>
+        {/* <button
           // form="create-discuss-form"
           className={`btn-primary-lg `}
           type="submit"
         >
           Create the discuss
-        </button>
+        </button> */}
       </div>
     </form>
   )

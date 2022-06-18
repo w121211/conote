@@ -1,44 +1,45 @@
 import React, { useEffect, useState } from 'react'
 import Modal from '../modal/modal'
-import './search-all-modal.module.css'
+import classes from './search-all-modal.module.css'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 import { useSearchSymbolLazyQuery } from '../../apollo/query.graphql'
+import { getNotePageURL } from '../../shared/note-helpers'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 const mockList = [
   {
-    title: '[[Awesome Tailwind Css]]',
+    str: '[[Awesome Tailwind Css]]',
     domain: 'web',
   },
-  { title: '[[Typescript]]', domain: 'web' },
+  { str: '[[Typescript]]', domain: 'web' },
   {
-    title: '[[Awesome Tailwind Css]]',
+    str: '[[Awesome Tailwind Css]]',
     domain: 'dev',
   },
   {
-    title: '[[Awesome Tailwind Css]]',
+    str: '[[Awesome Tailwind Css]]',
     domain: 'web',
   },
   {
-    title: '[[Awesome Tailwind Css]]',
+    str: '[[Awesome Tailwind Css]]',
     domain: 'dev',
   },
   {
-    title: '[[Awesome Tailwind Css]]',
+    str: '[[Awesome Tailwind Css]]',
     domain: 'web',
   },
 ]
 
 const SearchAllModal = () => {
-  const [searchSymbol, { data }] = useSearchSymbolLazyQuery()
+  const [keyPrefix, setKeyPrefix] = useState('ctrl')
   const [showModal, setShowModal] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [keyArrow, setKeyArrow] = useState(false)
   const [selectedIdx, setSelectedIdx] = useState(0)
-  // let modifierKeyPrefix = 'Ctrl'
-  // const navApp = navigator?.userAgent.toLowerCase()
-  // if (navApp.indexOf('mac') !== -1) {
-  //   modifierKeyPrefix = '⌘'
-  // }
+  const router = useRouter()
+  const [searchSymbol, { data }] = useSearchSymbolLazyQuery()
+
   // const onMouseEnter = (e: React.MouseEvent, idx: number) => {
   //   if (keyArrow) {
   //     e.preventDefault()
@@ -63,7 +64,8 @@ const SearchAllModal = () => {
   }
 
   const onKeydown = (e: React.KeyboardEvent) => {
-    if (mockList.length > 0) {
+    const dataList = inputValue.length > 0 ? data?.searchSymbol : mockList
+    if (dataList && dataList.length > 0) {
       if (e.key === 'ArrowUp') {
         e.preventDefault()
         if (selectedIdx > 0) {
@@ -75,11 +77,25 @@ const SearchAllModal = () => {
       if (e.key === 'ArrowDown') {
         e.preventDefault()
         if (
-          selectedIdx + 1 < mockList.length ||
-          (inputValue.length > 0 && selectedIdx < mockList.length)
+          selectedIdx + 1 < dataList.length ||
+          (inputValue.length > 0 && selectedIdx < dataList.length)
         ) {
           setSelectedIdx(prev => prev + 1)
           setKeyArrow(true)
+        }
+      }
+    }
+    if (e.key === 'Enter') {
+      if (inputValue.length > 0) {
+        /* ---selectedIdx === i+1--- */
+        /* ---create symbol is selected--- */
+        if (selectedIdx === 0) {
+          router.push(getNotePageURL('base', `[[${inputValue}]]`))
+          setShowModal(false)
+        } else if (dataList && dataList.length > 0) {
+          /* ---select data item--- */
+          router.push(getNotePageURL('base', dataList[selectedIdx - 1].str))
+          setShowModal(false)
         }
       }
     }
@@ -89,6 +105,13 @@ const SearchAllModal = () => {
   const onKeyUp = (_: React.KeyboardEvent) => {
     setKeyArrow(false)
   }
+
+  useEffect(() => {
+    const navApp = navigator?.userAgent.toLowerCase()
+    if (navApp.indexOf('mac') !== -1) {
+      setKeyPrefix('⌘')
+    }
+  }, [])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -163,9 +186,9 @@ const SearchAllModal = () => {
             search
           </span>
           <span className="text-gray-500 dark:text-gray-300">
-            {/* <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
-              {modifierKeyPrefix}
-            </kbd> */}
+            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
+              {keyPrefix}
+            </kbd>
             <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
               K
             </kbd>
@@ -175,7 +198,7 @@ const SearchAllModal = () => {
 
       {/* --- search modal --- */}
       <Modal
-        sectionClassName=" dark:bg-gray-700 !w-[600px] "
+        sectionClassName={`dark:bg-gray-700 !w-[600px] searchModal ${classes.searchModal}`}
         visible={showModal}
         onClose={() => {
           setShowModal(false)
@@ -209,40 +232,49 @@ const SearchAllModal = () => {
               {inputValue.length > 0 ? (
                 // --- result list ---
                 <>
-                  <p
-                    className="mt-2 px-2 py-3 rounded hover:cursor-pointer text-sm"
-                    onMouseLeave={e => onMouseLeave(e, 0)}
-                    onMouseMove={e => onMouseMove(e, 0)}
-                    role="option"
-                    aria-selected={selectedIdx === 0}
-                  >
-                    <span className="mr-2 text-gray-500 dark:text-gray-400 uppercase font-bold">
-                      create symbol
-                    </span>
-                    <span className="text-gray-800 dark:text-gray-200 font-bold">
-                      {inputValue}
-                    </span>
-                  </p>
+                  <Link href={getNotePageURL('base', `[[${inputValue}]]`)}>
+                    <a>
+                      <p
+                        className="mt-2 px-2 py-3 rounded hover:cursor-pointer"
+                        onMouseLeave={e => onMouseLeave(e, 0)}
+                        onMouseMove={e => onMouseMove(e, 0)}
+                        onClick={() => setShowModal(false)}
+                        role="option"
+                        aria-selected={selectedIdx === 0}
+                      >
+                        <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
+                          create symbol
+                        </span>
+                        <span className="text-gray-800 dark:text-gray-200 font-bold">
+                          {inputValue}
+                        </span>
+                      </p>
+                    </a>
+                  </Link>
                   <ul className="text-gray-700/80 dark:text-gray-200/70">
                     {data?.searchSymbol.map(({ str, id }, i) => {
                       return (
-                        <li
-                          key={id}
-                          className="flex flex-col gap-1 px-2 py-3 rounded hover:cursor-pointer"
-                          onMouseLeave={e => onMouseLeave(e, i + 1)}
-                          onMouseMove={e => onMouseMove(e, i + 1)}
-                          role="option"
-                          aria-selected={i + 1 === selectedIdx}
-                        >
-                          <h4 className="font-medium leading-relaxed">
-                            {styleSymbol(str, '')}
-                          </h4>
-                          <p className="flex text-xs text-blue-500/80 dark:text-blue-300/80 gap-1 ">
-                            {/* {domain.map(keyword => {
+                        <Link key={id} href={getNotePageURL('base', str)}>
+                          <a>
+                            <li
+                              className="flex flex-col gap-1 px-2 py-3 rounded hover:cursor-pointer"
+                              onMouseLeave={e => onMouseLeave(e, i + 1)}
+                              onMouseMove={e => onMouseMove(e, i + 1)}
+                              onClick={() => setShowModal(false)}
+                              role="option"
+                              aria-selected={i + 1 === selectedIdx}
+                            >
+                              <h5 className="font-medium leading-relaxed">
+                                {styleSymbol(str, '')}
+                              </h5>
+                              {/* <p className="flex text-xs text-blue-500/80 dark:text-blue-300/80 gap-1 ">
+                            {domain.map(keyword => {
                               return styleSymbol(keyword, '')
-                            })} */}
-                          </p>
-                        </li>
+                            })}
+                          </p> */}
+                            </li>
+                          </a>
+                        </Link>
                       )
                     })}
                   </ul>
@@ -250,11 +282,11 @@ const SearchAllModal = () => {
               ) : (
                 // recent list
                 <>
-                  <header className="mt-6 mb-3 pl-2 border-b border-inherit text-gray-700 dark:text-gray-200">
-                    <h4 className=" font-semibold capitalize ">recent</h4>
+                  <header className="mt-6 mb-3 pl-2 pb-2 border-b border-inherit text-gray-700 dark:text-gray-200">
+                    <h5 className=" font-semibold capitalize ">recent</h5>
                   </header>
                   <ul className="text-gray-700/80 dark:text-gray-200/70">
-                    {mockList.map(({ title, domain }, i) => {
+                    {mockList.map(({ str, domain }, i) => {
                       return (
                         <li
                           key={i}
@@ -268,9 +300,9 @@ const SearchAllModal = () => {
                           <span className="p-1 rounded text-xs text-gray-500/80 dark:text-gray-300/80 bg-gray-200">
                             {styleSymbol(domain, '')}
                           </span>
-                          <h4 className="my-0 font-medium leading-relaxed ">
-                            {styleSymbol(title, '')}
-                          </h4>
+                          <h5 className="my-0 font-medium leading-relaxed ">
+                            {styleSymbol(str, '')}
+                          </h5>
                         </li>
                       )
                     })}

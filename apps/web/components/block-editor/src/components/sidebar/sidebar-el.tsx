@@ -24,16 +24,17 @@ const SidebarEl = ({
   const ref = useRef<HTMLDivElement>(null)
   const timeoutRef = useRef<any>(null)
 
-  function hideSidebarWhenResize() {
+  function onResize() {
     if (window && window.innerWidth < 769) {
-      setIsPined(false)
       setIsOpen(false)
+      setIsPined(false)
     }
   }
 
   function onTouchStart(e: TouchEvent) {
     if (isOpen && !ref.current?.contains(e.target as HTMLElement)) {
       setIsOpen(false)
+      setIsPined(false)
     }
   }
 
@@ -46,11 +47,11 @@ const SidebarEl = ({
   }, [])
 
   useEffect(() => {
-    window.addEventListener('resize', hideSidebarWhenResize)
+    window.addEventListener('resize', onResize)
     window.addEventListener('touchstart', onTouchStart, false)
 
     return () => {
-      window.removeEventListener('resize', hideSidebarWhenResize)
+      window.removeEventListener('resize', onResize)
       window.removeEventListener('touchstart', onTouchStart)
     }
   }, [])
@@ -58,7 +59,7 @@ const SidebarEl = ({
   useEffect(() => {
     siderStore.subscribe(state => {
       setIsOpen(state.open)
-      if (state.open === false) {
+      if (!state.open) {
         setIsPined(false)
       }
     })
@@ -77,7 +78,7 @@ const SidebarEl = ({
       id="sider"
       className={`
           [grid-area:sider]
-          group
+         
           absolute left-0 
           z-50
           flex flex-col flex-shrink-0  
@@ -116,7 +117,7 @@ const SidebarEl = ({
       }}
       ref={ref}
     >
-      <div className="absolute justify-end flex-shrink-0 top-0 right-0 mr-2 mt-2">
+      <div className="group absolute justify-end flex-shrink-0 w-full top-0 right-0 mr-2 mt-2 text-right">
         <span
           className={`
               hidden md:inline-block 

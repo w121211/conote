@@ -10,8 +10,8 @@ import Layout from '../ui-component/layout'
 import { editorOpenSymbolInMain } from '../block-editor/src/events'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import LoginModal from '../login-modal'
-import { useMe } from '../auth/use-me'
 import Link from 'next/link'
+import { useMeContext } from '../auth/use-me-context'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -27,7 +27,7 @@ const NoteEditEl = ({
   noteDocsToMerge: NoteDocFragment[] | null
 }) => {
   const router = useRouter()
-  const { me, loading } = useMe()
+  const { me, loading } = useMeContext()
 
   useEffect(() => {
     if (me) {
@@ -76,50 +76,20 @@ const NoteEditEl = ({
   }
   return (
     <>
-      <Layout
-        buttonRight={
-          <>
-            {/* {mainDoc?.doc && <NoteMetaModal doc={mainDoc.doc} />}
-            {mainDoc?.doc?.noteCopy && (
-              <div className="inline-block z-20">
-                <HeaderNoteEmojis noteId={mainDoc.doc.noteCopy.id} />
-              </div>
-            )} */}
-
-            {/* <button
-              className=" p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
-              onClick={() => {
-                if (mainDoc?.doc) {
-                  workspace.save(mainDoc.doc)
-                }
-              }}
-            >
-              <span className="material-icons-outlined text-xl leading-none ">
-                save
-              </span>
-            </button>
-            
-            <button className=" p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-              <span className="material-icons-outlined text-xl leading-none ">
-                more_horiz
-              </span>
-            </button> */}
-
-            {/* <AuthItem /> */}
-          </>
-        }
-      >
-        {note && (
-          // <Link href={getNotePageURL('view', note.sym.symbol)}>
-          //   <a>View</a>
-          // </Link>
-          <NoteDocVersionDropdown
-            cur={noteDraft}
-            note={note}
-            noteDraft={noteDraft}
-          />
-        )}
-        <div>Editing</div>
+      <Layout>
+        <div className="flex">
+          <div className="flex-1">Editing</div>
+          {note && (
+            // <Link href={getNotePageURL('view', note.sym.symbol)}>
+            //   <a>View</a>
+            // </Link>
+            <NoteDocVersionDropdown
+              cur={noteDraft}
+              note={note}
+              noteDraft={noteDraft}
+            />
+          )}
+        </div>
         <EditorEl />
       </Layout>
     </>

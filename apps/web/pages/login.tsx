@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import LoginPanel from '../components/auth/login-panel'
 import LogoutButton from '../components/auth/logout-button'
-import { useMe } from '../components/auth/use-me'
 import { StatusDisplay } from '../components/status-display'
+import { useMeContext } from '../components/auth/use-me-context'
 
 const Page = (): JSX.Element | null => {
-  const { me, loading } = useMe()
+  const { me, loading } = useMeContext()
 
   if (loading) {
     return null
