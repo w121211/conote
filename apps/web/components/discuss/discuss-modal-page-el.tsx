@@ -20,7 +20,7 @@ const DiscussModalPageEl = ({ id }: { id: string }) => {
     return null
   }
   return (
-    <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-col gap-3 w-full pb-5">
       <DiscussTile data={qDiscuss.data.discuss} />
       <DiscussPostTiles posts={qPosts.data.discussPosts} />
       <DiscussPostForm discussId={qDiscuss.data.discuss.id} />
