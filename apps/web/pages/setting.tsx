@@ -42,7 +42,7 @@ const mockData = [
 
 const SettingPage = () => {
   return (
-    <Layout backgroundColor="bg-gray-100">
+    <div className="pb-32">
       <h2 className="py-3 border-b border-gray-300 text-gray-900 text-2xl">
         Settings
       </h2>
@@ -78,7 +78,7 @@ const SettingPage = () => {
           </form>
         )
       })}
-    </Layout>
+    </div>
   )
 }
 

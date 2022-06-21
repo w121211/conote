@@ -28,11 +28,7 @@ const DiscussTile = ({ data }: Props): JSX.Element => {
         {noteEntries?.map(({ sym: { symbol } }, i) => {
           return (
             <Link key={i} href={getNotePageURL('base', symbol)}>
-              <a
-                className={`last:mr-0 rounded text-sm tracking-wide ${
-                  currentTab === symbol ? 'text-blue-500' : ''
-                }`}
-              >
+              <a className={`symbol-link last:mr-0 text-sm tracking-wide `}>
                 {styleSymbol(symbol)}
               </a>
             </Link>
@@ -51,7 +47,7 @@ const DiscussTile = ({ data }: Props): JSX.Element => {
             query: { userId: userId },
           }}
         >
-          <a className="inline-block min-w-0 text-sm text-blue-500 font-medium truncate underline-offset-2 hover:underline">
+          <a className="link inline-block min-w-0 text-sm font-medium truncate ">
             {userId}
           </a>
         </Link>

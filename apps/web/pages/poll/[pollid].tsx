@@ -30,7 +30,7 @@ const PollPage = ({ poll }: Props): JSX.Element | null => {
     throw new Error('Currently only support merge poll')
 
   return (
-    <Layout>
+    <div>
       {me === null && <Alert str="Require login to vote" type="warning" />}
       <h4>Merge request</h4>
       <p>
@@ -41,7 +41,7 @@ const PollPage = ({ poll }: Props): JSX.Element | null => {
         {moment(poll.createdAt).fromNow()}
       </p>
       <MergePollVoteForm poll={poll} />
-    </Layout>
+    </div>
   )
 }
 

@@ -33,7 +33,7 @@ const NoteViewEl = ({
     { blocks, docBlock } = parseGQLBlocks(doc.contentBody.blocks)
 
   return (
-    <Layout>
+    <div className="pb-32">
       <NoteAlerts cur={doc} note={note} noteDocsToMerge={noteDocsToMerge} />
 
       <div className="flex">
@@ -58,7 +58,7 @@ const NoteViewEl = ({
 
         <BlockViewer blocks={blocks} uid={docBlock.uid} omitParent />
       </div>
-    </Layout>
+    </div>
   )
 }
 

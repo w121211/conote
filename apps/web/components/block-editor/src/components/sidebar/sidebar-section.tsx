@@ -21,7 +21,7 @@ const SidebarSection = ({
             text-gray-700 dark:text-gray-300 
             tracking-wide leading-7 
             cursor-pointer select-none  
-            hover:bg-gray-200/60 dark:hover:bg-gray-600/70
+            hover:bg-gray-200 dark:hover:bg-gray-600/70
           `}
           onClick={() => {
             setFolded(!folded)
@@ -35,7 +35,7 @@ const SidebarSection = ({
             )}
             <span className="flex items-center gap-1 font-medium">
               {title}
-              <span className="px-2 rounded-full text-xs leading-normal bg-gray-400 text-white font-medium mix-blend-normal">
+              <span className="px-2 rounded-full text-xs leading-normal bg-gray-400 text-white font-medium ">
                 {items.length}
               </span>
             </span>

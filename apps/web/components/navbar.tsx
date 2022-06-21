@@ -41,13 +41,13 @@ const Navbar = ({
     <nav
       className={`
        sticky z-50
-       
+       [grid-area:nav]
         flex items-center justify-between 
         w-screen
         top-0 
         py-2 
         border-b border-gray-200
-        bg-white dark:bg-gray-700}  
+        bg-gray-50/70 dark:bg-gray-700}  
       `}
     >
       <div className={`flex items-center gap-2 ml-2 `}>

@@ -53,7 +53,7 @@ const MergeStateLabel = ({
 
 const CommitPage = ({ commit }: Props) => {
   return (
-    <Layout>
+    <div>
       <h1>Commit #{commit.id.slice(-6)}</h1>
       <div>
         by <UserLink userId={commit.userId} />
@@ -79,7 +79,7 @@ const CommitPage = ({ commit }: Props) => {
           ))}
         </ul>
       </div>
-    </Layout>
+    </div>
   )
 }
 
