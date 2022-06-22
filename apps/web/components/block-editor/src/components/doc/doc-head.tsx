@@ -30,21 +30,21 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
 
       {/* <DomainSelect /> */}
 
-      <div
-        className="relative mb-3 hover:cursor-pointer"
-        onClick={() => {
-          setShowModal(true)
-        }}
-      >
-        <h1 className=" line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
-          {/* {link && (
+      <div className="relative mb-3 ">
+        <button className="symbol-link" onClick={() => setShowModal(true)}>
+          <h1 className=" line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
+            {/* {link && (
             <span className="material-icons text-blue-400 text-4xl align-bottom">
-              language
+            language
             </span>
           )} */}
-          {styleSymbol(doc.symbol, doc.contentHead.webpage?.title ?? undefined)}
-          {newSymbol && `-> ${newSymbol}`}
-        </h1>
+            {styleSymbol(
+              doc.symbol,
+              doc.contentHead.webpage?.title ?? undefined,
+            )}
+            {newSymbol && `-> ${newSymbol}`}
+          </h1>
+        </button>
       </div>
 
       <Modal

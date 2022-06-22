@@ -6,12 +6,13 @@ import {
   NoteFragment,
 } from '../../apollo/query.graphql'
 import { EditorEl } from '../block-editor/src/components/editor/editor-el'
-import Layout from '../ui-component/layout'
+import Layout from '../ui-component/layout/layout'
 import { editorOpenSymbolInMain } from '../block-editor/src/events'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import LoginModal from '../login-modal'
 import Link from 'next/link'
 import { useMeContext } from '../auth/use-me-context'
+import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-padding'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -75,22 +76,24 @@ const NoteEditEl = ({
     )
   }
   return (
-    <div className="pb-32">
-      <div className="flex">
-        <div className="flex-1">Editing</div>
-        {note && (
-          // <Link href={getNotePageURL('view', note.sym.symbol)}>
-          //   <a>View</a>
-          // </Link>
-          <NoteDocVersionDropdown
-            cur={noteDraft}
-            note={note}
-            noteDraft={noteDraft}
-          />
-        )}
+    <LayoutChildrenPadding>
+      <div className="pb-32">
+        <div className="flex">
+          <div className="flex-1">Editing</div>
+          {note && (
+            // <Link href={getNotePageURL('view', note.sym.symbol)}>
+            //   <a>View</a>
+            // </Link>
+            <NoteDocVersionDropdown
+              cur={noteDraft}
+              note={note}
+              noteDraft={noteDraft}
+            />
+          )}
+        </div>
+        <EditorEl />
       </div>
-      <EditorEl />
-    </div>
+    </LayoutChildrenPadding>
   )
 }
 

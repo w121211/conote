@@ -97,7 +97,7 @@ const SidebarEl = ({
               ? `sm:relative border-gray-200  dark:bg-gray-800 ${
                   backgroundColor ? backgroundColor : 'bg-gray-100'
                 }`
-              : ' my-2 h-[calc(100vh_-_81px)] border-t rounded-r border-gray-100 bg-gray-50 '
+              : ' mt-2 h-[calc(100%_-_40px)] border-t rounded-r border-gray-100 bg-gray-50 '
           } 
           ${isPined || !isOpen ? 'shadow-transparent' : 'shadow-2xl'}
             `}

@@ -10,11 +10,14 @@ import Link from 'next/link'
 import { useApolloClientInitial } from '../apollo/apollo-client'
 import Navbar from '../components/navbar'
 import { MeProvider } from '../components/auth/use-me-context'
-import Layout from '../components/ui-component/layout'
+import Layout from '../components/ui-component/layout/layout'
+import { useState } from 'react'
+import { Alert } from '../components/ui-component/alert'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApolloClientInitial(pageProps.initialApolloState),
     { me, loading } = useMe()
+  const [showAnnounce, setAnnounce] = useState(true)
 
   if (pageProps.protected && !loading && me === null) {
     return (
@@ -67,9 +70,19 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         <MeProvider>
           <TooltipProvider>
             <ModalProvider>
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
+              <div className="flex flex-col h-screen">
+                {showAnnounce && (
+                  <Alert type="announce" onClose={() => setAnnounce(false)}>
+                    <div className="flex-grow flex items-center justify-center  gap-2 ">
+                      <span className="material-icons">campaign</span>
+                      <span className="truncate">new announcement!</span>
+                    </div>
+                  </Alert>
+                )}
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
+              </div>
             </ModalProvider>
           </TooltipProvider>
         </MeProvider>

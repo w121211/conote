@@ -119,7 +119,7 @@ export const CommitPanel = (): JSX.Element | null => {
 
             <form
               className="overflow-auto grid text-gray-700"
-              onSubmit={handleSubmit(onSubmit)}
+              // onSubmit={handleSubmit(onSubmit)}
             >
               {qMyDrafts.data?.myNoteDraftEntries.map(
                 ({ id, symbol, title }) => {

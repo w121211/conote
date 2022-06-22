@@ -8,7 +8,7 @@ export const StatusDisplay = ({
   btn?: JSX.Element
 }): JSX.Element => {
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center h-full w-full">
       <section className="text-center mx-6 lg:w-2/3">
         <h1 className="mb-10 ">{str}</h1>
         {btn}

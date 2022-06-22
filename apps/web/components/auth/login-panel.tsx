@@ -137,7 +137,7 @@ const LoginPanel = (): JSX.Element | null => {
     )
   }
   return (
-    <div className="flex justify-center w-screen h-screen bg-gray-100">
+    <div className="flex justify-center">
       <div className="h-fit mt-[20vh] p-10  rounded bg-white shadow-2xl">
         <h1 className="mb-4">Login</h1>
         <div className="mb-10 text-gray-600">Start to write note!</div>
