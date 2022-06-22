@@ -48,8 +48,6 @@ async function main() {
     noteDocModel.parse(noteDocs[0]).contentBody.blocks,
   )
 
-  console.log(docBlock)
-
   // Warnning! This is the wrong way to create merge polls. Only used for the testing.
   // await testHelper.createMergePolls(prisma, noteDocs[0])
 

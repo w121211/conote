@@ -146,7 +146,7 @@ const UserPage = ({
   noteDocsByUser,
   discussesByUser,
 }: Props): JSX.Element | null => {
-  console.log(noteDocsByUser, discussesByUser)
+  // console.log(noteDocsByUser, discussesByUser)
 
   // const [showMentionedPopup, setShowMentionedPopup] = useState(false)
   // const [queryUser, { data, loading, error }] = useUserLazyQuery()
