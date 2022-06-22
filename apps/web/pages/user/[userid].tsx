@@ -171,7 +171,7 @@ const UserPage = ({
   // }
 
   return (
-    <Layout>
+    <div>
       <div className="flex flex-col gap-8 ">
         <div className="flex">
           <span className="material-icons mr-2 text-[120px] leading-none text-gray-300 dark:text-gray-400">
@@ -217,7 +217,7 @@ const UserPage = ({
           <LatestDiscussTile data={discussesByUser} />
         </div>
       </div>
-    </Layout>
+    </div>
   )
 }
 

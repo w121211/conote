@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useApolloClientInitial } from '../apollo/apollo-client'
 import Navbar from '../components/navbar'
 import { MeProvider } from '../components/auth/use-me-context'
+import Layout from '../components/ui-component/layout'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApolloClientInitial(pageProps.initialApolloState),
@@ -66,13 +67,9 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         <MeProvider>
           <TooltipProvider>
             <ModalProvider>
-              <div className="grid grid-rows-[auto_1fr] w-screen h-screen">
-                {/* {!(typeof window === 'undefined') && <Navbar />} */}
-                <Navbar />
-                <div className="">
-                  <Component {...pageProps} />
-                </div>
-              </div>
+              <Layout>
+                <Component {...pageProps} />
+              </Layout>
             </ModalProvider>
           </TooltipProvider>
         </MeProvider>

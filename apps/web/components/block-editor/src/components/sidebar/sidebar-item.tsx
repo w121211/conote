@@ -113,11 +113,11 @@ const SidebarItem = ({
         <a
           className={`group flex items-center gap-1 pl-4 pr-4 leading-relax ${
             opening.main.symbol == symbol
-              ? 'bg-gray-200/60 hover:bg-gray-300/70'
+              ? 'bg-gray-200 hover:bg-gray-300/70'
               : 'bg-transparent hover:bg-gray-200/70'
           } `}
         >
-          <span className="material-icons text-lg text-[20px] text-gray-300 mix-blend-multiply">
+          <span className="material-icons text-lg text-[20px] text-gray-400/60">
             {symbol.startsWith('@') ? 'language' : 'notes'}
           </span>
           <span className="inline-block min-w-0 flex-1 truncate ">

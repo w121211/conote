@@ -4,7 +4,7 @@ import {
   DiscussFragment,
   useCreateDiscussMutation,
 } from '../../apollo/query.graphql'
-import { FormSubmitBtn } from '../form-submit-btn'
+import { FormSubmitBtn } from '../ui-component/form/form-submit-btn'
 
 interface FormInput {
   title: string

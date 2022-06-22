@@ -75,7 +75,7 @@ const NoteEditEl = ({
     )
   }
   return (
-    <>
+    <div className="pb-32">
       <div className="flex">
         <div className="flex-1">Editing</div>
         {note && (
@@ -90,7 +90,7 @@ const NoteEditEl = ({
         )}
       </div>
       <EditorEl />
-    </>
+    </div>
   )
 }
 

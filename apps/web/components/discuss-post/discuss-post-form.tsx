@@ -9,6 +9,7 @@ import {
 import './github-markdown-light.module.css'
 import LoginModal from '../login-modal'
 import { useMeContext } from '../auth/use-me-context'
+import { FormSubmitBtn } from '../ui-component/form/form-submit-btn'
 
 interface FormInput {
   content: string
@@ -29,7 +30,7 @@ const DiscussPostForm = ({
     useForm<FormInput>({
       defaultValues: { content: '' },
     })
-  const { isSubmitSuccessful } = formState
+  const { isSubmitSuccessful, isSubmitting } = formState
   const submitRef = useRef<HTMLButtonElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -53,10 +54,6 @@ const DiscussPostForm = ({
   const watchContent = watch('content')
 
   const formClassName = `relative w-full text-sm scroll-mb-10 shadow-sm`
-
-  const btnClassName = isModal
-    ? `hidden group-focus-within:block focus:block w-full text-right mt-2`
-    : `text-right m-2 mt-4`
 
   const maxTextareaHeight = isModal ? 100 : 300
   const contentRef = register('content').ref
@@ -165,15 +162,16 @@ const DiscussPostForm = ({
             <MarkDownParser text={getValues('content')} />
           </div>
         )}
-        <div className={btnClassName}>
-          <button
+        <div className="text-right m-2 mt-4">
+          <FormSubmitBtn isLoading={isSubmitting}>Comment</FormSubmitBtn>
+          {/* <button
             type="submit"
             className="btn-primary font-medium "
             disabled={watchContent.length === 0 || isSubmitSuccessful}
             ref={submitRef}
           >
             Comment
-          </button>
+          </button> */}
         </div>
       </div>
     </form>

@@ -41,19 +41,11 @@ const DiscussPage = ({ discuss }: Props) => {
     return null
   }
   return (
-    <Layout backgroundColor="bg-gray-200">
-      <div className="flex flex-col gap-4 w-full">
-        {/* <DiscussTile data={discuss} />
-        <DiscussPostTiles posts={discussPosts} />
-        <DiscussPostForm
-          discussId={discuss.id}
-          onSubmitted={() => window.location.reload()}
-        /> */}
-        <DiscussTile data={qDiscuss.data.discuss} />
-        <DiscussPostTiles posts={qPosts.data.discussPosts} />
-        <DiscussPostForm discussId={qDiscuss.data.discuss.id} />
-      </div>
-    </Layout>
+    <div className="flex flex-col gap-4 pb-32">
+      <DiscussTile data={qDiscuss.data.discuss} />
+      <DiscussPostTiles posts={qPosts.data.discussPosts} />
+      <DiscussPostForm discussId={qDiscuss.data.discuss.id} />
+    </div>
   )
 }
 

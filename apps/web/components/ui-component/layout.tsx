@@ -16,20 +16,24 @@ const Layout = ({
 }): JSX.Element => {
   const childrenRef = useRef<HTMLDivElement>(null)
   return (
-    <div className="relative grid grid-cols-[auto_1fr] [grid-template-areas:'sider_children'] w-screen h-[calc(100vh_-_49px)] ">
+    <div className="relative grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] [grid-template-areas:'nav_nav''sider_children'] w-screen h-screen ">
       {/* // <div className="relative flex w-screen overscroll-contain"> */}
       <SidebarEl backgroundColor={backgroundColor} />
       <div
-        className={`[grid-area:children] flex-grow pt-8 pb-[20vh]  
-         scroll-smooth overflow-auto
-         ${backgroundColor ? backgroundColor : 'bg-white dark:bg-gray-700'}`}
+        className={`
+          flex-1  
+          [grid-area:children] 
+          flex justify-center 
+          scroll-smooth overflow-auto 
+         ${backgroundColor ? backgroundColor : 'bg-gray-50 dark:bg-gray-700'}`}
         ref={childrenRef}
       >
-        <div className={`responsive-width mx-auto px-6 md:px-10`}>
+        <div className={`flex-1 responsive-width px-10 pt-8`}>
           {children}
           {/* <LoginModal>{children}</LoginModal> */}
         </div>
       </div>
+      <Navbar />
     </div>
   )
 }

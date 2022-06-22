@@ -1,20 +1,17 @@
 import React, { ReactNode } from 'react'
-import { LoadingSvg } from './loading-circle'
+import { LoadingSvg } from '../../loading-circle'
 
-interface Props {
+export const FormSubmitBtn = ({
+  children,
+  size = 'md',
+  onSubmit,
+  isLoading,
+}: {
   children: ReactNode
   size?: 'sm' | 'md' | 'lg'
   onSubmit?: () => void
   isLoading?: boolean
-  isSubmitSucessful?: boolean
-}
-
-export const FormSubmitBtn = ({
-  children,
-  size = 'sm',
-  onSubmit,
-  isLoading,
-}: Props): JSX.Element => {
+}): JSX.Element => {
   return (
     <button
       className={`${

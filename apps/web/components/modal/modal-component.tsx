@@ -44,7 +44,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
         h-fit
         bg-white 
         
-        mt-[5vh] 
+        mt-10
         rounded  
         shadow-2xl 
        `}
@@ -52,7 +52,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
         {(topLeftBtn || subTitle || topRightBtn) && (
           <div
             className={`flex items-center justify-between w-full h-6 px-4 sm:h-8 ${
-              sectionClassName ? sectionClassName : 'bg-white'
+              sectionClassName ? sectionClassName : 'bg-transparent'
             }`}
           >
             <div className="flex items-center">
@@ -83,7 +83,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
         sm:min-w-[20vw] 
         sm:max-w-[80vw] md:max-w-[65vw] lg:max-w-[600px]
         h-fit 
-        max-h-[80vh] sm:max-h-[90vh]
+        max-h-[80vh]
       
          
        ${sectionClassName ? sectionClassName : ''}`}
