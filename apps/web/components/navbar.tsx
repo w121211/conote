@@ -15,22 +15,9 @@ export const siderStore = createStore(
   withProps<SiderUI>({ open: true }),
 )
 
-// export const persist = persistState(siderStore, {
-//   key: 'sider',
-//   storage: localStorageStrategy,
-// })
-
 const isOpen = siderStore.getValue()
 
-const Navbar = ({
-  rbtn,
-}: // onClickMenu,
-// backgroundColor,
-{
-  rbtn?: ReactNode
-  // onClickMenu: (boo?: boolean ) => void
-  // backgroundColor?: string
-}) => {
+const Navbar = ({ rbtn }: { rbtn?: ReactNode }) => {
   const { me, loading } = useMeContext()
 
   const onClickMenu = () => {

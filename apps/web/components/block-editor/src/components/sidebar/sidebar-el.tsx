@@ -1,9 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
 import { editorLeftSidebarRefresh } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
-import { siderStore } from '../../../../navbar'
 
 /**
  * Call 'editorLeftSidebarRefresh' event on component mount to query required data.
@@ -11,72 +15,68 @@ import { siderStore } from '../../../../navbar'
  * TODOS:
  * [] draft-entries sort by ?
  */
-const SidebarEl = ({
-  backgroundColor,
-}: {
-  backgroundColor?: string
-}): JSX.Element | null => {
-  const [sidebar] = useObservable(editorRepo.leftSidebar$, {
-    initialValue: null,
-  })
-  const [isOpen, setIsOpen] = useState(true)
-  const [isPined, setIsPined] = useState(true)
-  const ref = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<any>(null)
-
-  function onResize() {
-    if (window && window.innerWidth < 769) {
-      setIsOpen(false)
-      setIsPined(false)
-    }
+const SidebarEl = forwardRef<
+  HTMLDivElement,
+  {
+    backgroundColor?: string
+    isOpen: boolean
+    isPined: boolean
+    setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
+    setIsPined: React.Dispatch<React.SetStateAction<boolean>>
+    timeoutRef: React.MutableRefObject<any>
   }
+>(
+  (
+    { backgroundColor, isOpen, isPined, setIsOpen, setIsPined, timeoutRef },
+    ref,
+  ): JSX.Element | null => {
+    const [sidebar] = useObservable(editorRepo.leftSidebar$, {
+      initialValue: null,
+    })
 
-  function onTouchStart(e: TouchEvent) {
-    if (isOpen && !ref.current?.contains(e.target as HTMLElement)) {
-      setIsOpen(false)
-      setIsPined(false)
-    }
-  }
+    const _ref = useRef<HTMLDivElement>(null)
+    useImperativeHandle(ref, () => _ref.current as HTMLDivElement)
 
-  const pinMenuHandler = () => {
-    setIsPined(prev => !prev)
-  }
-
-  useEffect(() => {
-    editorLeftSidebarRefresh()
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('resize', onResize)
-    window.addEventListener('touchstart', onTouchStart, false)
-
-    return () => {
-      window.removeEventListener('resize', onResize)
-      window.removeEventListener('touchstart', onTouchStart)
-    }
-  }, [])
-
-  useEffect(() => {
-    siderStore.subscribe(state => {
-      setIsOpen(state.open)
-      if (!state.open) {
+    function onResize() {
+      if (window && window.innerWidth < 769) {
+        setIsOpen(false)
         setIsPined(false)
       }
-    })
-  }, [])
+    }
 
-  useEffect(() => {
-    siderStore.update(state => ({ ...state, open: isOpen }))
-  }, [isOpen])
+    function onTouchStart(e: TouchEvent) {
+      if (isOpen && !_ref.current?.contains(e.target as HTMLElement)) {
+        setIsOpen(false)
+        setIsPined(false)
+      }
+    }
 
-  if (sidebar === null) {
-    return null
-  }
+    const pinMenuHandler = () => {
+      setIsPined(prev => !prev)
+    }
 
-  return (
-    <div
-      id="sider"
-      className={`
+    useEffect(() => {
+      editorLeftSidebarRefresh()
+    }, [])
+
+    useEffect(() => {
+      window.addEventListener('resize', onResize)
+      window.addEventListener('touchstart', onTouchStart, false)
+
+      return () => {
+        window.removeEventListener('resize', onResize)
+        window.removeEventListener('touchstart', onTouchStart)
+      }
+    }, [])
+
+    if (sidebar === null) {
+      return null
+    }
+
+    return (
+      <div
+        id="sider"
+        className={`
           [grid-area:sider]
          
           absolute left-0 
@@ -87,6 +87,8 @@ const SidebarEl = ({
           pt-8
           border-r 
           transition-all 
+          duration-300
+          ease-in-out
           ${
             isOpen
               ? ' translate-x-0 translate-y-0 '
@@ -101,25 +103,16 @@ const SidebarEl = ({
           } 
           ${isPined || !isOpen ? 'shadow-transparent' : 'shadow-2xl'}
             `}
-      onMouseEnter={() => {
-        if (!isPined) {
-          clearTimeout(timeoutRef.current)
-        }
-      }}
-      onMouseLeave={() => {
-        if (!isPined) {
-          clearTimeout(timeoutRef.current)
-          timeoutRef.current = setTimeout(() => {
-            setIsOpen(false)
-            setIsPined(false)
-          }, 500)
-        }
-      }}
-      ref={ref}
-    >
-      <div className="group absolute justify-end flex-shrink-0 w-full top-0 right-0 mr-2 mt-2 text-right">
-        <span
-          className={`
+        onMouseEnter={() => {
+          if (!isPined) {
+            clearTimeout(timeoutRef.current)
+          }
+        }}
+        ref={_ref}
+      >
+        <div className="group absolute justify-end flex-shrink-0 w-full top-0 right-0 mr-2 mt-2 text-right">
+          <span
+            className={`
               hidden md:inline-block 
               ${isPined ? 'material-icons' : 'material-icons-outlined'} 
               bg-transparent 
@@ -129,28 +122,31 @@ const SidebarEl = ({
               opacity-0 group-hover:opacity-100 
               rotate-45 
               select-none`}
-          onClick={() => {
-            pinMenuHandler()
-          }}
-        >
-          push_pin
-        </span>
-        <span
-          className={`material-icons md:hidden text-gray-6  00 rounded-full bg-transparent
+            onClick={() => {
+              pinMenuHandler()
+            }}
+          >
+            push_pin
+          </span>
+          <span
+            className={`material-icons md:hidden text-gray-6  00 rounded-full bg-transparent
             cursor-pointer select-none`}
-          onClick={() => {
-            setIsOpen(false)
-          }}
-        >
-          close
-        </span>
+            onClick={() => {
+              setIsOpen(false)
+            }}
+          >
+            close
+          </span>
+        </div>
+
+        {/* <DocIndexSection title="Committed" indexArray={committedDocIndicies} /> */}
+
+        <SidebarSection title="EDIT" items={sidebar.items} />
       </div>
+    )
+  },
+)
 
-      {/* <DocIndexSection title="Committed" indexArray={committedDocIndicies} /> */}
-
-      <SidebarSection title="EDIT" items={sidebar.items} />
-    </div>
-  )
-}
+SidebarEl.displayName = 'SidebarEl'
 
 export default SidebarEl
