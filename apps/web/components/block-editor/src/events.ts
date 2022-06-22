@@ -56,6 +56,8 @@ export function historyUndo() {
   // const editingUid = rfdbRepo.getValue().editing.uid,
   //   block = editingUid ? getBlock(editingUid) : null
   blockRepo.undo()
+  const cursor = blockRepo.getCursor()
+  if (cursor) editingUid(cursor.blockUid, cursor.caretIndex)
 }
 
 export function historyRedo() {
@@ -235,9 +237,15 @@ export function indent(
       )
 
     if (sibOpenOp) {
-      blockRepo.update([...saveOp, ...moveOp, ...sibOpenOp])
+      blockRepo.update([...saveOp, ...moveOp, ...sibOpenOp], {
+        blockUid: uid,
+        caretIndex: start,
+      })
     } else {
-      blockRepo.update([...saveOp, ...moveOp])
+      blockRepo.update([...saveOp, ...moveOp], {
+        blockUid: uid,
+        caretIndex: start,
+      })
     }
     setCursorPosition(uid, start, end)
   }
@@ -277,7 +285,10 @@ export function unindent(
       'after',
       localStr,
     )
-    blockRepo.update([...saveOp, ...moveOp])
+    blockRepo.update([...saveOp, ...moveOp], {
+      blockUid: uid,
+      caretIndex: start,
+    })
 
     editingUid(uid)
     setCursorPosition(uid, start, end)
@@ -309,7 +320,10 @@ export function backspaceDeleteMergeBlock(
   value: string,
   prevBlock: Block,
 ) {
-  blockRepo.updateChain(ops.blockMergeChainOp(block, prevBlock, value))
+  blockRepo.updateChain(ops.blockMergeChainOp(block, prevBlock, value), {
+    blockUid: prevBlock.uid,
+    caretIndex: prevBlock.str.length,
+  })
   editingUid(prevBlock.uid, prevBlock.str.length)
 }
 
@@ -321,13 +335,17 @@ export function backspaceDeleteMergeBlockWithSave(
 ) {
   blockRepo.updateChain(
     ops.blockMergeWithUpdatedChainOp(block, prevBlock, value, localUpdate),
+    {
+      blockUid: prevBlock.uid,
+      caretIndex: localUpdate?.length ?? 0,
+    },
   )
   editingUid(prevBlock.uid, localUpdate?.length)
 }
 
 export function backspaceDeleteOnlyChild(block: Block) {
   // console.log('backspaceDeleteOnlyChild')
-  blockRepo.update(ops.blockRemoveOp(block))
+  blockRepo.update(ops.blockRemoveOp(block), null)
   editingUid(null)
 }
 
@@ -444,7 +462,7 @@ export function enterAddChild(block: Block, newUid: string) {
       relation: 'first',
     }),
     op = ops.blockNewOp(newUid, position)
-  blockRepo.update(op)
+  blockRepo.update(op, { blockUid: newUid, caretIndex: 0 })
   editingUid(newUid)
 }
 
@@ -454,7 +472,7 @@ export function enterBumpUp(block: Block, newUid: string) {
       relation: 'before',
     }),
     op = ops.blockNewOp(newUid, position)
-  blockRepo.update(op)
+  blockRepo.update(op, { blockUid: newUid, caretIndex: 0 })
   editingUid(newUid)
 }
 
@@ -462,6 +480,7 @@ export function enterBumpUp(block: Block, newUid: string) {
 export function enterNewBlock(block: Block, newUid: string) {
   blockRepo.update(
     ops.blockNewOp(newUid, { refBlockUid: block.uid, relation: 'after' }),
+    { blockUid: newUid, caretIndex: 0 },
   )
   editingUid(newUid)
 }
@@ -476,6 +495,7 @@ export function enterSplitBlock(
   // console.debug(value)
   blockRepo.updateChain(
     ops.blockSplitChainOp(block, newUid, value, index, relation),
+    { blockUid: newUid, caretIndex: 0 },
   )
   editingUid(newUid)
 }
@@ -566,7 +586,7 @@ export function selectionDelete() {
   const selectedUids = rfdbRepo.getValue().selection.items,
     chain = ops.blockRemoveManyChainOp(selectedUids)
 
-  blockRepo.updateChain(chain)
+  blockRepo.updateChain(chain, null)
   rfdbRepo.updateSelectionItems([])
   editingUid(null)
 }
@@ -607,6 +627,7 @@ function selectUp(selectedItems: string[]): string[] {
 }
 
 export function selectedUp(selectedItems: string[]) {
+  console.debug('selectedUp', selectedItems)
   rfdbRepo.updateSelectionItems(selectUp(selectedItems))
 }
 

@@ -144,12 +144,13 @@ export const CommitPanel = (): JSX.Element | null => {
                 },
               )}
             </form>
+
             <div className="flex justify-end w-full bottom-0 rounded-b ">
               <button
                 className={`btn-primary w-fit mr-10`}
                 type="submit"
                 disabled={isSubmitting}
-                onClick={() => handleSubmit(onSubmit)()}
+                // onClick={() => handleSubmit(onSubmit)()}
               >
                 Commit
               </button>

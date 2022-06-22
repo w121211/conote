@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import { UndoManager } from '../../components/block-editor/src/utils/undo-manager'
+import {
+  destructKeyDown,
+  isShortcutKey,
+} from '../../components/block-editor/src/utils'
 
 const UndoableTextarea = () => {
   const undoManager = useMemo(() => new UndoManager(''), []),
@@ -11,43 +15,46 @@ const UndoableTextarea = () => {
     return () => console.log('UndoableTextarea unmount')
   }, [])
 
+  function undo() {
+    const s = undoManager.undo()
+    if (s === null) {
+      console.log('undo stack is empty')
+    } else {
+      setValue(s)
+    }
+  }
+
+  function redo() {
+    const s = undoManager.redo()
+    if (s === null) {
+      console.log('redo stack is empty')
+    } else {
+      setValue(s)
+    }
+  }
+
   return (
-    <div>
-      <textarea
-        value={value}
-        onChange={e => {
-          const { value } = e.currentTarget
-          setValue(value)
-          undoManager.nextValue(value)
-        }}
-      ></textarea>
-      <button
-        onClick={e => {
-          // console.log(undoManager.undo())
-          const s = undoManager.undo()
-          if (s === null) {
-            console.log('undo stack is empty')
+    <textarea
+      value={value}
+      onKeyDown={e => {
+        const dKeyDown = destructKeyDown(e),
+          { key, ctrl, meta, shift } = dKeyDown
+
+        if (isShortcutKey(meta, ctrl) && key === 'z') {
+          e.preventDefault()
+          if (shift) {
+            redo()
           } else {
-            setValue(s)
+            undo()
           }
-        }}
-      >
-        Undo
-      </button>
-      <button
-        onClick={e => {
-          // console.log(undoManager.undo())
-          const s = undoManager.redo()
-          if (s === null) {
-            console.log('redo stack is empty')
-          } else {
-            setValue(s)
-          }
-        }}
-      >
-        Redo
-      </button>
-    </div>
+        }
+      }}
+      onChange={e => {
+        const { value } = e.currentTarget
+        setValue(value)
+        undoManager.nextValue(value)
+      }}
+    />
   )
 }
 

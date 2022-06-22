@@ -1,6 +1,7 @@
 import { throttle } from 'lodash'
 import { insert } from 'text-field-edit'
 import {
+  blockSave,
   indent,
   keyArrowDown,
   keyArrowUp,
@@ -20,6 +21,7 @@ import { getSearchService } from '../services/search.service'
 import { getBlock } from '../stores/block.repository'
 import { rfdbRepo } from '../stores/rfdb.repository'
 import { isShortcutKey } from '../utils'
+import { UndoManager } from '../utils/undo-manager'
 import { getCaretCoordinates } from './textarea-caret'
 
 const searchService = getSearchService()
@@ -423,10 +425,10 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
 
   //   ;; going LEFT at **0th index** should always go to **last index** of block **above**
   //   ;; last index is special - always go to last index when going up or down
-  else if ((left && isStart) || (up && isEnd)) {
+  else if ((left && isStart) || (up && isEnd && !isStart)) {
     e.preventDefault()
     keyArrowUp(uid, 'end')
-  } else if (down && isEnd) {
+  } else if (down && isEnd && !isStart) {
     e.preventDefault()
     keyArrowDown(uid, 'end')
   } else if (right && isEnd) {
@@ -601,11 +603,18 @@ function handlePairChar(
  * If undo, save the latest value to block, undo event will be fired on global listener
  *
  */
-function handleShortcuts({ e, uid, localStr }: TextareaKeyDownArgs) {
+function handleShortcuts({
+  e,
+  uid,
+  localStr,
+  setLocalStr,
+  undoManager,
+}: TextareaKeyDownArgs) {
+  console.log('handleShortcuts')
   const { key, shift, value, target } = destructKeyDown(e)
 
   if (key === 'A') {
-    // select all blocks
+    // TODO: Select all blocks
   } else if (key === 'z') {
     if (shift) {
       // redo
@@ -615,7 +624,7 @@ function handleShortcuts({ e, uid, localStr }: TextareaKeyDownArgs) {
       // document.execCommand('undo')
       // events.blockSave(uid, localStr)
       // e.preventDefault()
-      e.stopPropagation()
+      // e.stopPropagation()
     }
   }
 }
@@ -679,6 +688,7 @@ type TextareaKeyDownArgs = {
   uid: string
   editing: boolean
   localStr: string
+  setLocalStr: React.Dispatch<React.SetStateAction<string>>
   caret: CaretPosition
   setCaret: React.Dispatch<React.SetStateAction<CaretPosition>>
   search: Search
@@ -687,6 +697,7 @@ type TextareaKeyDownArgs = {
   setLastKeyDown: React.Dispatch<
     React.SetStateAction<DestructTextareaKeyEvent | null>
   >
+  undoManager?: UndoManager
 }
 
 export function textareaKeyDown(args: TextareaKeyDownArgs) {

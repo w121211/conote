@@ -133,8 +133,8 @@ const InlineDiscussEl = (
   }
 
   const doc = useMemo(() => getDocByBlock(blockUid), [blockUid])
-  if (doc.noteDraftCopy === undefined)
-    throw new Error('doc.noteDraftCopy === undefined')
+  // if (doc.noteDraftCopy === undefined)
+  //   throw new Error('doc.noteDraftCopy === undefined')
 
   return (
     <>

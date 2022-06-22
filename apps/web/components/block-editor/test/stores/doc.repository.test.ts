@@ -8,6 +8,10 @@ const base: Doc = {
   branch: 'branch',
   domain: 'domain',
   contentHead: {},
+  contentBody: {
+    discussIds: [],
+    symbols: [],
+  },
   blockUid: 'blockUid',
 }
 

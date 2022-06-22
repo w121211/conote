@@ -8,7 +8,12 @@ import {
 const base: Omit<Doc, 'uid' | 'symbol' | 'blockUid'> = {
   branch: 'default',
   domain: 'domain',
+  // noteDraftCopy: { ...mockNoteDrafts[0], updatedAt: Date.now().toString() },
   contentHead: {},
+  contentBody: {
+    discussIds: [],
+    symbols: [],
+  },
 }
 
 export const mockDocs: Doc[] = [

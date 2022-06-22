@@ -76,22 +76,20 @@ const NoteEditEl = ({
   }
   return (
     <>
-      <Layout>
-        <div className="flex">
-          <div className="flex-1">Editing</div>
-          {note && (
-            // <Link href={getNotePageURL('view', note.sym.symbol)}>
-            //   <a>View</a>
-            // </Link>
-            <NoteDocVersionDropdown
-              cur={noteDraft}
-              note={note}
-              noteDraft={noteDraft}
-            />
-          )}
-        </div>
-        <EditorEl />
-      </Layout>
+      <div className="flex">
+        <div className="flex-1">Editing</div>
+        {note && (
+          // <Link href={getNotePageURL('view', note.sym.symbol)}>
+          //   <a>View</a>
+          // </Link>
+          <NoteDocVersionDropdown
+            cur={noteDraft}
+            note={note}
+            noteDraft={noteDraft}
+          />
+        )}
+      </div>
+      <EditorEl />
     </>
   )
 }

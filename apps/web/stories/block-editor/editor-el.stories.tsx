@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ComponentStory, ComponentMeta } from '@storybook/react'
+import { ComponentMeta } from '@storybook/react'
 import ModalProvider from '../../components/modal/modal-context'
 import { getFirebaseClient } from '../../components/auth/firebase-client'
 import {

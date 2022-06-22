@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { historyUndo } from '../../events'
 import {
   textareaBlur,
   textareaChange,
@@ -13,6 +14,8 @@ import type {
   DestructTextareaKeyEvent,
   Search,
 } from '../../interfaces'
+import { destructKeyDown, isShortcutKey } from '../../utils'
+import { UndoManager } from '../../utils/undo-manager'
 import ParseRenderEl from '../inline/parse-render-el'
 
 function usePrevious<T>(value: T) {
@@ -59,6 +62,8 @@ export const BlockContent = ({
 
   const prevDefaultStr = usePrevious(defaultStr)
 
+  const undoManager = useMemo(() => new UndoManager(defaultStr), [])
+
   useEffect(() => {
     // Require if defaultStr is changed outside through block ops
     setLocalStr(defaultStr)
@@ -74,6 +79,39 @@ export const BlockContent = ({
       textareaUnmount(uid, localStr)
     }
   }, [isEditing, showEditableDom])
+
+  function undo() {
+    const s = undoManager.undo()
+    if (s === null) {
+      console.log('undo stack is empty')
+
+      historyUndo()
+    } else {
+      setLocalStr(s)
+    }
+  }
+
+  function redo() {
+    const s = undoManager.redo()
+    if (s === null) {
+      console.log('redo stack is empty')
+    } else {
+      setLocalStr(s)
+    }
+  }
+
+  function hotkey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    const dKeyDown = destructKeyDown(e),
+      { key, ctrl, meta, shift } = dKeyDown
+    if (isShortcutKey(meta, ctrl) && key === 'z') {
+      e.preventDefault()
+      if (shift) {
+        redo()
+      } else {
+        undo()
+      }
+    }
+  }
 
   return (
     <div
@@ -118,20 +156,24 @@ export const BlockContent = ({
           value={localStr}
           onChange={e => {
             textareaChange(e, uid, setLocalStr)
+            // undoManager.nextValue(localStr)
           }}
           // onPaste={e => textareaPaste(e, lastKeyDown)}
           onKeyDown={e => {
+            // hotkey(e)
             textareaKeyDown({
               e,
               uid,
               editing: isEditing,
               localStr,
+              setLocalStr,
               caret,
               setCaret,
               search,
               setSearch,
               lastKeyDown,
               setLastKeyDown,
+              undoManager,
             })
           }}
           onBlur={e => textareaBlur(e, uid)}

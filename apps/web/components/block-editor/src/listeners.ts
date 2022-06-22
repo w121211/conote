@@ -130,8 +130,7 @@ export function multiBlockSelection(e: KeyboardEvent) {
 export function hotkey(event: KeyboardEvent) {
   const dKeyDown = destructKeyDown(event),
     { key, ctrl, meta, shift, alt } = dKeyDown
-  // editingUid = rfdbRepo
-  // editingUid = subscribe('editing/uid')
+  // console.log('hotkey', meta, ctrl)
 
   if (isShortcutKey(meta, ctrl)) {
     switch (key) {
@@ -145,11 +144,10 @@ export function hotkey(event: KeyboardEvent) {
 
       // Reado/undo
       case 'z':
-        // console.log('redo/undo')
         if (shift) {
           historyRedo()
         } else {
-          console.debug('editor undo()')
+          // console.debug('editor undo()')
           historyUndo()
         }
         break

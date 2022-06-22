@@ -76,6 +76,17 @@ export type ResolverContext = {
 // }
 
 function createApolloClient() {
+  if (
+    process.env.NODE_ENV === 'development' &&
+    typeof window !== 'undefined' &&
+    (window as any).IS_STORYBOOK
+  ) {
+    // On development && is testing on storybook
+    return new ApolloClient({
+      cache: createCache(),
+      uri: 'http://localhost:3000/api/graphql',
+    })
+  }
   return new ApolloClient<NormalizedCacheObject>({
     cache: createCache(),
     uri: '/api/graphql',
