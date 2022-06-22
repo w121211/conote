@@ -106,9 +106,7 @@ const DiscussForm = ({
         disabled={isSubmitting}
       />
       <div className=" text-center">
-        <FormSubmitBtn size="lg" isLoading={isSubmitting}>
-          Create the discuss
-        </FormSubmitBtn>
+        <FormSubmitBtn size="lg">Create the discuss</FormSubmitBtn>
         {/* <button
           // form="create-discuss-form"
           className={`btn-primary-lg `}

@@ -1,4 +1,4 @@
-import { createStore, Reducer } from '@ngneat/elf'
+import { createStore, Reducer, setProp, withProps } from '@ngneat/elf'
 import {
   getEntity,
   selectEntity,
@@ -7,14 +7,14 @@ import {
 } from '@ngneat/elf-entities'
 import { stateHistory } from '@ngneat/elf-state-history'
 import { map, Observable } from 'rxjs'
-import { Block } from '../interfaces'
+import { Block, CursorProp } from '../interfaces'
 
 type BlocksStoreState = {
   entities: Record<string, Block>
   ids: string[]
 }
 
-export type BlockReducer = Reducer<BlocksStoreState>
+export type BlockReducer = Reducer<BlocksStoreState & CursorProp>
 
 export type BlockReducerFn = () => BlockReducer[]
 
@@ -30,6 +30,7 @@ export type BlockReducerFn = () => BlockReducer[]
 export const blocksStore = createStore(
   { name: 'blocksStore' },
   withEntities<Block, 'uid'>({ idKey: 'uid' }),
+  withProps<CursorProp>({ cursor: null }),
 )
 
 const blocksStateHistory = stateHistory(blocksStore)
@@ -56,6 +57,7 @@ export function getBlockChildren(uid: string): Block[] {
 
 class BlockRepository {
   undo() {
+    console.log(blocksStateHistory.hasPast)
     blocksStateHistory.undo()
   }
 
@@ -98,7 +100,14 @@ class BlockRepository {
     )
   }
 
-  update(reducers: BlockReducer[]) {
+  getCursor(): CursorProp['cursor'] {
+    return blocksStore.getValue().cursor
+  }
+
+  update(reducers: BlockReducer[], cursor?: CursorProp['cursor']) {
+    if (cursor !== undefined) {
+      reducers.push(setProp('cursor', cursor))
+    }
     blocksStore.update(...reducers)
   }
 
@@ -107,21 +116,20 @@ class BlockRepository {
    *
    * TODO: undo/redo
    */
-  updateChain(chainOpFns: BlockReducerFn[]) {
-    for (let i = 0; i < chainOpFns.length; i++) {
+  updateChain(chainOpFns: BlockReducerFn[], cursor?: CursorProp['cursor']) {
+    chainOpFns.forEach((e, i) => {
       const isFirst = i === 0,
-        isLast = i === chainOpFns.length - 1,
-        fn = chainOpFns[i]
+        isLast = i === chainOpFns.length - 1
 
-      if (isFirst) {
-        blocksStateHistory.pause()
-      }
-      if (isLast) {
-        blocksStateHistory.resume()
-      }
+      if (isFirst) blocksStateHistory.pause()
+      if (isLast) blocksStateHistory.resume()
 
-      blocksStore.update(...fn())
-    }
+      if (isLast && cursor !== undefined) {
+        blocksStore.update(...e(), setProp('cursor', cursor))
+      } else {
+        blocksStore.update(...e())
+      }
+    })
   }
 }
 

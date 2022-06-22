@@ -3,7 +3,7 @@
  * https://github.com/ngneat/elf/blob/master/packages/state-history/src/lib/state-history.spec.ts
  *
  */
-import { createStore, Store } from '@ngneat/elf'
+import { createStore, setProp, Store, withProps } from '@ngneat/elf'
 import {
   addEntities,
   setEntities,
@@ -18,27 +18,32 @@ interface Entity {
   str: string
 }
 
-function eq(store: Store, entities: Entity[]) {
-  expect(store.getValue().entities).toEqual(
-    Object.fromEntries(entities.map((e) => [e.id, e])),
-  )
+interface Props {
+  count: number
 }
 
-function entity(id: number, str: string): Entity {
+function eq(store: Store, entities: Entity[], props?: Props) {
+  expect(store.getValue().entities).toEqual(
+    Object.fromEntries(entities.map(e => [e.id, e])),
+  )
+
+  if (props) {
+    const value = store.getValue()
+    Object.entries(props).forEach(([k, v]) => {
+      expect(value[k]).toEqual(v)
+    })
+  }
+}
+
+function e(id: number, str: string): Entity {
   return { id, str }
 }
 
-/**
- * consequence op with pause/resume
- *
- *
- */
-
-const e1 = entity(1, '1'),
-  e2 = entity(2, '2'),
-  e3 = entity(3, '3')
-
 describe('stateHistory', () => {
+  const e1 = e(1, '1'),
+    e2 = e(2, '2'),
+    e3 = e(3, '3')
+
   it('batch update', () => {
     const store = createStore(
         { name: '' },
@@ -85,17 +90,72 @@ describe('stateHistory', () => {
     history.pause()
 
     store.update(updateEntities(e1.id, { str: '1a' }))
-    store.update(updateEntities(e1.id, { str: '1ab' }))
+    store.update(updateEntities(e1.id, { str: '1aa' }))
 
     // resume need to place before the last op
     history.resume()
 
-    store.update(updateEntities(e1.id, { str: '1abc' }))
+    store.update(updateEntities(e1.id, { str: '1aaa' }))
 
     history.undo()
     eq(store, [e1])
 
     history.undo()
     eq(store, [])
+  })
+
+  it('undo/redo store mix entities and props', () => {
+    const store = createStore(
+        { name: '' },
+        withEntities<Entity>({ initialValue: [] }),
+        withProps<Props>({ count: 0 }),
+      ),
+      history = stateHistory(store)
+
+    eq(store, [], { count: 0 })
+
+    // Update entities but not props
+
+    store.update(addEntities(e1))
+    eq(store, [e1], { count: 0 })
+
+    history.undo()
+    eq(store, [], { count: 0 })
+
+    history.redo()
+    eq(store, [e1], { count: 0 })
+
+    // Update entities and props
+
+    store.update(addEntities([e2]), setProp('count', 1))
+    eq(store, [e1, e2], { count: 1 })
+
+    history.undo()
+    eq(store, [e1], { count: 0 })
+
+    history.redo()
+    eq(store, [e1, e2], { count: 1 })
+
+    history.undo()
+    eq(store, [e1], { count: 0 })
+
+    // Pause
+
+    history.pause()
+
+    store.update(updateEntities(e1.id, { str: '1a' }), setProp('count', 2))
+    store.update(updateEntities(e1.id, { str: '1aa' }))
+
+    // Resume need to place before the last op
+    history.resume()
+
+    store.update(updateEntities(e1.id, { str: '1aaa' }))
+    eq(store, [{ ...e1, str: '1aaa' }], { count: 2 })
+
+    history.undo()
+    eq(store, [e1], { count: 0 })
+
+    history.undo()
+    eq(store, [], { count: 0 })
   })
 })

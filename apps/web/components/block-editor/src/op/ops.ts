@@ -477,10 +477,6 @@ export function blockSplitChainOp(
   //     : []
   // splitOp = [saveOp, newOp, saveNewOp, ...moveChildrenOp, closeNewOp]
   // return splitOp
-
-  console.debug(str.substring(idx))
-  console.debug(str.substring(0, idx))
-
   const chains: BlockReducerFn[] = [
     // Save old-block
     () => blockSaveOp(oldBlock.uid, str.substring(0, idx)),

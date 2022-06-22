@@ -4,7 +4,6 @@ import type {
   NoteDocContentHeadInput,
 } from 'graphql-let/__generated__/__types__'
 import type {
-  NoteDocContentBodyFragment,
   NoteDraftEntryFragment,
   NoteDraftFragment,
   NoteFragment,
@@ -188,10 +187,20 @@ export type Doc = {
   blockUid: string
 
   // The latest note by query
-  noteCopy?: NoteFragment
+  noteCopy?: Omit<NoteFragment, '__typename'>
 
   // The latest note-draft
-  noteDraftCopy?: NoteDraftFragment
+  noteDraftCopy?: Omit<NoteDraftFragment, '__typename'>
+}
+
+/**
+ *
+ */
+export type CursorProp = {
+  cursor: {
+    blockUid: string
+    caretIndex: number
+  } | null
 }
 
 /**

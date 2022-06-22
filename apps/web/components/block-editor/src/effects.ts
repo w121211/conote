@@ -14,6 +14,7 @@
 ;; - uid sometimes nil
 */
 
+import { isNumber } from 'lodash'
 import { NextRouter } from 'next/router'
 import { UrlObject } from 'url'
 
@@ -44,7 +45,7 @@ export function editingFocus(uid: string | null, index?: number | 'end') {
 
       if (el) {
         el.focus()
-        if (editingIndex) {
+        if (isNumber(editingIndex)) {
           //  setCursorPosition(el, editingIndex)
           // @see https://github.com/google/closure-library/blob/master/closure/goog/dom/selection.js#L226
           el.setSelectionRange(editingIndex, editingIndex)
@@ -55,6 +56,8 @@ export function editingFocus(uid: string | null, index?: number | 'end') {
 }
 
 /**
+ * TODO: reuse in editingFocus?
+ * 
 ;; todo(abhinav)
 ;; think of this + up/down + editing/focus for common up down press
 ;; and cursor goes to apt position rather than last visited point in the block(current)
