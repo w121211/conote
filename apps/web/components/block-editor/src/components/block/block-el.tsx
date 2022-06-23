@@ -20,7 +20,7 @@ import { Anchor } from './anchor'
 import { BlockContent } from './block-content'
 import { DropAreaIndicator } from './drop-area-indicator'
 import { Toggle } from './toggle'
-import './block-container.module.css'
+import classes from './block-container.module.css'
 import { blockOpen } from '../../events'
 
 // export const BlockContainer = ({
@@ -203,13 +203,14 @@ export const BlockEl = ({
         // [
         /* ---relative is neccersary for searchEl to align--- */
         `block-container
-        relative
+        
+        ${classes.blockContainer}
         ${isChild ? 'ml-[1em] [grid-area:body]' : ''}
         ${children.length > 0 && isOpen && 'show-tree-indicator'}
-        ${isOpen ? 'is-open' : 'is-closed'}
-        ${isSelected ? 'is-selected' : ''}
+        ${isOpen ? classes.isOpen : classes.isClosed}
+        ${isSelected ? classes.isSelected : ''}
         ${isSelected && dragging ? 'is-dragging' : ''}
-        ${isEditing ? 'is-editing' : ''}`
+        ${isEditing ? classes.isEditing : ''}`
         // ]
         // isLocked && 'is-locked',
         // linkedRef && 'is-linked-ref',
@@ -235,7 +236,7 @@ export const BlockEl = ({
           grid [grid-template-areas:"above_above_above_above"_"toggle_bullet_content_refs"_"below_below_below_below"]
           grid-cols-[1em_1em_1fr_auto]
           grid-rows-[0_1fr_0]
-          rounded-lg
+          rounded
           leading-normal
           my-1
          '

@@ -1,11 +1,15 @@
 import { PrismaClient } from '@prisma/client'
 import { commitNoteDrafts } from '../../lib/models/commit-model'
-import { mockNoteDrafts } from '../../test/__mocks__/mock-note-draft'
+import {
+  mockNoteDrafts,
+  mockNoteDrafts_gotFromDoc,
+} from '../../test/__mocks__/mock-note-draft'
 import { testHelper } from '../../test/test-helpers'
 import { noteDraftModel } from '../../lib/models/note-draft-model'
 import { mockBranches } from '../../test/__mocks__/mock-branch'
 import { noteDocModel } from '../../lib/models/note-doc-model'
 import { parseGQLBlocks } from '../../shared/block-helpers'
+import { mockUsers } from '../../test/__mocks__/mock-user'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),
@@ -51,17 +55,17 @@ async function main() {
   console.log(docBlock)
 
   // Warnning! This is the wrong way to create merge polls. Only used for the testing.
-  // await testHelper.createMergePolls(prisma, noteDocs[0])
+  await testHelper.createMergePolls(prisma, noteDocs[0])
 
-  // const fromDoc = noteDocs[0],
-  //   fromDoc_ = noteDocModel.parse(fromDoc),
-  //   drafts = mockNoteDrafts_gotFromDoc(mockUsers[4].id, fromDoc_)
+  const fromDoc = noteDocs[0],
+    fromDoc_ = noteDocModel.parse(fromDoc),
+    drafts = mockNoteDrafts_gotFromDoc(mockUsers[4].id, fromDoc_)
 
-  // await testHelper.createNoteDrafts(prisma, drafts)
-  // await commitNoteDrafts(
-  //   drafts.map(e => e.id),
-  //   mockUsers[4].id,
-  // )
+  await testHelper.createNoteDrafts(prisma, drafts)
+  await commitNoteDrafts(
+    drafts.map(e => e.id),
+    mockUsers[4].id,
+  )
 }
 
 main()

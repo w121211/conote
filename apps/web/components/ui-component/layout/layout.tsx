@@ -51,7 +51,7 @@ const Layout = ({
   }, [isOpen])
 
   return (
-    <div className="flex-1 relative grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] [grid-template-areas:'nav_nav''sider_children'] w-screen">
+    <div className="flex-1 relative min-h-0 grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] [grid-template-areas:'nav_nav''sider_children'] w-screen">
       <SidebarEl
         backgroundColor={backgroundColor}
         ref={siderRef}

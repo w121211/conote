@@ -6,15 +6,17 @@ export const FormSubmitBtn = ({
   size = 'md',
   onSubmit,
   isLoading,
+  isDisable,
 }: {
   children: ReactNode
   size?: 'sm' | 'md' | 'lg'
   onSubmit?: () => void
   isLoading?: boolean
+  isDisable?: boolean
 }): JSX.Element => {
   return (
     <button
-      className={`${
+      className={`w-fit ${
         size === 'sm'
           ? 'btn-primary'
           : size === 'md'
@@ -31,6 +33,7 @@ export const FormSubmitBtn = ({
           onSubmit
         }
       }}
+      disabled={isDisable}
     >
       <div className="flex">
         {isLoading && <LoadingSvg svgClassName="w-5 h-5 mr-2 !text-white" />}

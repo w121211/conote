@@ -15,6 +15,7 @@ import UserLink from '../../components/user/user-link'
 import moment from 'moment'
 import { Alert } from '../../components/ui-component/alert'
 import { useMeContext } from '../../components/auth/use-me-context'
+import LoginModal from '../../components/login-modal'
 
 interface Props {
   poll: PollFragment
@@ -30,18 +31,19 @@ const PollPage = ({ poll }: Props): JSX.Element | null => {
     throw new Error('Currently only support merge poll')
 
   return (
-    <div>
-      {me === null && <Alert str="Require login to vote" type="warning" />}
-      <h4>Merge request</h4>
-      <p>
-        <NoteDocLink doc={noteDocToMerge} /> wants to merge.
-      </p>
-      <p>
-        Committer <UserLink userId={noteDocToMerge.userId} />{' '}
-        {moment(poll.createdAt).fromNow()}
-      </p>
-      <MergePollVoteForm poll={poll} />
-    </div>
+    <LoginModal>
+      <div>
+        <h4>Merge request</h4>
+        <p>
+          <NoteDocLink doc={noteDocToMerge} /> wants to merge.
+        </p>
+        <p>
+          Committer <UserLink userId={noteDocToMerge.userId} />{' '}
+          {moment(poll.createdAt).fromNow()}
+        </p>
+        <MergePollVoteForm poll={poll} />
+      </div>
+    </LoginModal>
   )
 }
 

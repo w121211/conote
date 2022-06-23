@@ -1,4 +1,4 @@
-.block-container {
+.blockContainer {
   @apply relative
         flex flex-col content-start flex-1 basis-full 
         rounded-sm
@@ -12,16 +12,16 @@
         after:pointer-events-none
         after:rounded
         after:transition-opacity after:duration-75
-        after:bg-[#0075E1]/10;
+        after:bg-blue-100/60;
 }
 /* .block-container .block-container {
   @apply ml-[2em]
         [grid-area:body];
 } */
-.block-container.is-selected:after {
+.blockContainer.isSelected:after {
   @apply opacity-100;
 }
-.is-selected .block-container.is-selected:after {
+.isSelected .blockContainer.isSelected:after {
   @apply opacity-0;
 }
 /* .block-container.show-tree-indicator {

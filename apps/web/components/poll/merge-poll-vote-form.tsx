@@ -12,6 +12,7 @@ import {
 } from '../../apollo/query.graphql'
 import { MERGE_POLL_V1_0 } from '../../shared/constants'
 import BarChart from '../bar/bar'
+import { FormSubmitBtn } from '../ui-component/form/form-submit-btn'
 
 const MergePollResult = ({
   poll,
@@ -41,7 +42,7 @@ const MergePollResult = ({
   return (
     <div>
       <label className="relative inline-flex items-center">
-        <input type="radio" checked={isAccept} />
+        {/* <input className="absolute opacity-0" type="radio" checked={isAccept} /> */}
         <BarChart
           content={'Agree'}
           total={nTotal}
@@ -51,7 +52,11 @@ const MergePollResult = ({
         />
       </label>
       <label className="relative inline-flex items-center">
-        <input type="radio" checked={!isAccept} />
+        {/* <input
+          className="absolute opacity-0"
+          type="radio"
+          checked={!isAccept}
+        /> */}
         <BarChart
           content={'Disagree'}
           total={nTotal}
@@ -147,25 +152,23 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
             <div className="mb-4 last:mb-0">
               <div>
                 <div className="flex flex-col">
-                  <label htmlFor="agree">
+                  <label>
                     <input
                       {...register('choice', { required: true })}
                       type="radio"
                       name="choice"
                       value="agree"
-                      id="agree"
-                    />{' '}
+                    />
                     Agree
                   </label>
 
-                  <label htmlFor="disagree">
+                  <label>
                     <input
                       {...register('choice')}
                       type="radio"
                       name="choice"
                       value="disagree"
-                      id="disagree"
-                    />{' '}
+                    />
                     Disagree
                   </label>
 
@@ -173,14 +176,13 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
                     <div>
                       {rejectCodes.map(([code, desc]) => (
                         <div key={code}>
-                          <label htmlFor={code}>
+                          <label>
                             <input
                               {...register('rejectCode')}
                               type="radio"
                               name="rejectCode"
                               value={code}
-                              id={code}
-                            />{' '}
+                            />
                             {desc}
                           </label>
                         </div>
@@ -194,10 +196,8 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
               </div> */}
               </div>
             </div>
-            <button
-              className="btn-primary"
-              // disabled={myVote !== undefined || !isValid}
-              disabled={
+            <FormSubmitBtn
+              isDisable={
                 myVote !== undefined ||
                 !isNil(qMyPollVotes.error) ||
                 isSubmitting ||
@@ -206,8 +206,7 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
               }
             >
               Submit
-              {/* {myVote ? 'You have voted' : 'Submit'} */}
-            </button>
+            </FormSubmitBtn>
           </form>
         </div>
       </FormProvider>
