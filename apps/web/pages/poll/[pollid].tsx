@@ -31,7 +31,11 @@ const PollPage = ({ poll }: Props): JSX.Element | null => {
 
   return (
     <div>
-      {me === null && <Alert str="Require login to vote" type="warning" />}
+      {me === null && (
+        <Alert type="warning">
+          <h4>Require login to vote</h4>
+        </Alert>
+      )}
       <h4>Merge request</h4>
       <p>
         <NoteDocLink doc={noteDocToMerge} /> wants to merge.

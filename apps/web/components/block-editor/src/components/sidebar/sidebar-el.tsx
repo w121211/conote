@@ -8,6 +8,8 @@ import { useObservable } from '@ngneat/react-rxjs'
 import { editorLeftSidebarRefresh } from '../../events'
 import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
+import { siderRepo } from '../../../../stores/sider.repository'
+import { setProps } from '@ngneat/elf'
 
 /**
  * Call 'editorLeftSidebarRefresh' event on component mount to query required data.
@@ -19,66 +21,51 @@ const SidebarEl = forwardRef<
   HTMLDivElement,
   {
     backgroundColor?: string
-    isOpen: boolean
-    isPined: boolean
-    setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
-    setIsPined: React.Dispatch<React.SetStateAction<boolean>>
-    timeoutRef: React.MutableRefObject<any>
+    onMouseEnter: (e: React.MouseEvent) => void
   }
->(
-  (
-    { backgroundColor, isOpen, isPined, setIsOpen, setIsPined, timeoutRef },
-    ref,
-  ): JSX.Element | null => {
-    const [sidebar] = useObservable(editorRepo.leftSidebar$, {
+>((props, ref): JSX.Element | null => {
+  const { backgroundColor, onMouseEnter } = props,
+    [sidebar] = useObservable(editorRepo.leftSidebar$, {
       initialValue: null,
-    })
+    }),
+    [isOpen] = useObservable(siderRepo.isOpen$),
+    [isPinned] = useObservable(siderRepo.isPinned$),
+    div = useRef<HTMLDivElement>(null)
 
-    const _ref = useRef<HTMLDivElement>(null)
-    useImperativeHandle(ref, () => _ref.current as HTMLDivElement)
+  useImperativeHandle(ref, () => div.current as HTMLDivElement)
 
-    function onResize() {
-      if (window && window.innerWidth < 769) {
-        setIsOpen(false)
-        setIsPined(false)
-      }
+  function onResize() {
+    if (window && window.innerWidth < 769) {
+      siderRepo.update(setProps({ isOpen: false, isPinned: false }))
     }
+  }
 
-    function onTouchStart(e: TouchEvent) {
-      if (isOpen && !_ref.current?.contains(e.target as HTMLElement)) {
-        setIsOpen(false)
-        setIsPined(false)
-      }
+  function onTouchStart(e: TouchEvent) {
+    if (isOpen && !div.current?.contains(e.target as HTMLElement)) {
+      siderRepo.update(setProps({ isOpen: false, isPinned: false }))
     }
+  }
 
-    const pinMenuHandler = () => {
-      setIsPined(prev => !prev)
+  useEffect(() => {
+    editorLeftSidebarRefresh()
+
+    window.addEventListener('resize', onResize)
+    window.addEventListener('touchstart', onTouchStart, false)
+
+    return () => {
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('touchstart', onTouchStart)
     }
+  }, [])
 
-    useEffect(() => {
-      editorLeftSidebarRefresh()
-    }, [])
+  if (sidebar === null) return null
 
-    useEffect(() => {
-      window.addEventListener('resize', onResize)
-      window.addEventListener('touchstart', onTouchStart, false)
-
-      return () => {
-        window.removeEventListener('resize', onResize)
-        window.removeEventListener('touchstart', onTouchStart)
-      }
-    }, [])
-
-    if (sidebar === null) {
-      return null
-    }
-
-    return (
-      <div
-        id="sider"
-        className={`
+  return (
+    <div
+      id="sider"
+      ref={div}
+      className={`
           [grid-area:sider]
-         
           absolute left-0 
           z-50
           flex flex-col flex-shrink-0  
@@ -95,22 +82,22 @@ const SidebarEl = forwardRef<
               : '-translate-x-full translate-y-0 '
           } 
           ${
-            isPined
+            isPinned
               ? `sm:relative border-gray-200  dark:bg-gray-800 ${
                   backgroundColor ? backgroundColor : 'bg-gray-100'
                 }`
               : ' mt-2 h-[calc(100%_-_40px)] border-t rounded-r border-gray-100 bg-gray-50 '
           } 
-          ${isPined || !isOpen ? 'shadow-transparent' : 'shadow-2xl'}
+          ${isPinned || !isOpen ? 'shadow-transparent' : 'shadow-2xl'}
             `}
-        onMouseEnter={() => {
-          if (!isPined) {
-            clearTimeout(timeoutRef.current)
-          }
-        }}
-        ref={_ref}
-      >
-        <div className="group absolute justify-end flex-shrink-0 w-full top-0 right-0 mr-2 mt-2 text-right">
+      // onMouseEnter={() => {
+      //   if (!isPinned) {
+      //     clearTimeout(timeoutRef.current)
+      //   }
+      // }}
+      onMouseEnter={e => onMouseEnter(e)}
+    >
+      {/* <div className="group absolute justify-end flex-shrink-0 w-full top-0 right-0 mr-2 mt-2 text-right">
           <span
             className={`
               hidden md:inline-block 
@@ -137,15 +124,14 @@ const SidebarEl = forwardRef<
           >
             close
           </span>
-        </div>
+        </div> */}
 
-        {/* <DocIndexSection title="Committed" indexArray={committedDocIndicies} /> */}
+      {/* <DocIndexSection title="Committed" indexArray={committedDocIndicies} /> */}
 
-        <SidebarSection title="EDIT" items={sidebar.items} />
-      </div>
-    )
-  },
-)
+      <SidebarSection title="EDIT" items={sidebar.items} />
+    </div>
+  )
+})
 
 SidebarEl.displayName = 'SidebarEl'
 
