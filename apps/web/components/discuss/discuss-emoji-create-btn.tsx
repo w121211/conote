@@ -23,7 +23,7 @@ const DiscussEmojiCreateBtn = ({
     createEmoji()
   }
   if (error) {
-    console.log(error.message)
+    console.debug(error.message)
   }
 
   return <EmojiBtn onClick={onClick} emojiCode={emojiCode} />

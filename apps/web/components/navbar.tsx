@@ -1,28 +1,19 @@
+import { setProps } from '@ngneat/elf'
 import React, { ReactNode } from 'react'
 import Link from 'next/link'
 import { CommitPanel } from './commit/commit-panel'
 import SearchAllModal from './search-all-modal/search-all-modal'
 import AuthItem from './auth/auth-el'
-import { createStore, select, setProp, withProps } from '@ngneat/elf'
+// import { createStore, select, setProp, withProps } from '@ngneat/elf'
 import { useMeContext } from './auth/use-me-context'
-
-interface SiderUI {
-  open: boolean
-}
-
-export const siderStore = createStore(
-  { name: 'sider' },
-  withProps<SiderUI>({ open: true }),
-)
-
-const isOpen = siderStore.getValue()
+import { siderRepo } from './stores/sider.repository'
 
 const Navbar = ({ rbtn }: { rbtn?: ReactNode }) => {
   const { me, loading } = useMeContext()
 
-  const onClickMenu = () => {
-    siderStore.update(state => ({ ...state, open: !state.open }))
-  }
+  // const onClickMenu = () => {
+  //   siderStore.update(state => ({ ...state, open: !state.open }))
+  // }
 
   return (
     <nav
@@ -40,7 +31,14 @@ const Navbar = ({ rbtn }: { rbtn?: ReactNode }) => {
       <div className={`flex items-center gap-2 ml-2 `}>
         <span
           className="material-icons p-1 rounded leading-none text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 hover:cursor-pointer"
-          onClick={onClickMenu}
+          onClick={() => {
+            const { isPinned } = siderRepo.getValue()
+            if (isPinned) {
+              siderRepo.update(setProps({ isOpen: false, isPinned: false }))
+            } else {
+              siderRepo.update(setProps({ isOpen: true, isPinned: true }))
+            }
+          }}
         >
           menu
         </span>

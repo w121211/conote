@@ -88,7 +88,7 @@ import * as fs from 'fs'
 //     return
 //   }
 
-//   // 查看目前的ticks更新到何時
+//   // 查看目前的ticks 更新到何時
 //   const tick = await prisma.tick.findFirst({
 //     where: { symbol: { id: symbol.id } },
 //     orderBy: { at: 'desc' },

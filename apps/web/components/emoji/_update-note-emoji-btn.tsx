@@ -35,7 +35,7 @@ const UpdateNoteEmojiBtn = ({
       // console.log(data.upsertEmojiLike)
     },
     onError(error) {
-      console.log(error.graphQLErrors)
+      console.debug(error.graphQLErrors)
     },
   })
 
@@ -81,7 +81,7 @@ const UpdateNoteEmojiBtn = ({
 
   useEffect(() => {
     const myLike = myEmojiLikeData?.myNoteEmojiLike
-    console.log(likedChoice)
+    // console.log(likedChoice)
     // if (
     //   (noteEmoji.code === 'UP' || noteEmoji.code === 'DOWN') &&
     //   likedChoice &&

@@ -131,7 +131,7 @@ export function genBlockUid(): string {
  * Recusively find the root of the given block (should be a doc-block) and returns its doc.
  */
 export function getDocByBlock(blockUid: string): Doc {
-  console.log(blockUid)
+  // console.log(blockUid)
   let cur = getBlock(blockUid)
   while (cur.parentUid !== null) {
     cur = getBlock(cur.parentUid)

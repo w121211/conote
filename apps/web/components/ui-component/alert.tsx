@@ -34,7 +34,7 @@ interface AlertProps {
   type: AlertType
   action?: string
   time?: string // to do: change to Date type
-  onClose: () => void
+  onClose?: () => void
   visible?: boolean
 }
 
