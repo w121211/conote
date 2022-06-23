@@ -16,7 +16,7 @@
 
 @layer base {
   body {
-    overflow: hidden;
+    @apply overflow-hidden bg-gray-50;
   }
   h1 {
     @apply text-4xl font-bold text-gray-800;

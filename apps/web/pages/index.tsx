@@ -10,6 +10,7 @@ import {
 import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
 import { LatestDiscussTile } from '../components/latest-discuss-tile'
 import AuthItem from '../components/auth/auth-el'
+import { LayoutChildrenPadding } from '../components/ui-component/layout/layout-children-padding'
 
 interface Props {
   discussesLatest: DiscussFragment[]
@@ -18,16 +19,14 @@ interface Props {
 }
 
 const HomePage = ({ discussesLatest }: Props): JSX.Element => {
-  const [showAnnounce, setAnnounce] = useState(false)
-
-  useEffect(() => {
-    if (window.sessionStorage.getItem('announce') === null) {
-      window.sessionStorage.setItem('announce', 'true')
-      setAnnounce(true)
-    } else {
-      window.sessionStorage.setItem('announce', showAnnounce ? 'true' : 'false')
-    }
-  }, [showAnnounce])
+  // useEffect(() => {
+  //   if (window.sessionStorage.getItem('announce') === null) {
+  //     window.sessionStorage.setItem('announce', 'true')
+  //     setAnnounce(true)
+  //   } else {
+  //     window.sessionStorage.setItem('announce', showAnnounce ? 'true' : 'false')
+  //   }
+  // }, [showAnnounce])
 
   // if (loading)
   //   return (
@@ -52,40 +51,14 @@ const HomePage = ({ discussesLatest }: Props): JSX.Element => {
   //   )
 
   return (
-    <div className="">
-      {showAnnounce && (
-        <div className="sticky top-0 w-screen z-10 flex items-center justify-between p-1 capitalize text-sm text-gray-900 bg-yellow-400 text-center">
-          <div className="flex-grow flex items-center justify-center  gap-2 ">
-            <span className="material-icons">campaign</span>
-            <span className="truncate">new announcement!</span>
-          </div>
-          <span
-            className="material-icons relative inline-block items-center right-0 text-base 
-            hover:cursor-pointer hover:text-gray-600"
-            onClick={() => {
-              setAnnounce(false)
-            }}
-          >
-            close
-          </span>
-        </div>
-      )}
-      {/* <div className="flex items-center justify-between   border-slate-200 px-4 md:px-10 pt-6 pb-6 ">
-          <div className="flex-3 flex items-center max-w-2xl">
-          <h3 className=" mr-4 md:mr-10 ">Konote</h3>
-          <div className="w-5/6">
-          <SearchAllForm />
-          </div>
-          </div>
-          {/* <AuthItem /> */}
-      {/* </div> */}
+    <LayoutChildrenPadding>
       <div className="flex justify-center pb-[9vh]">
         <div className="flex-1 flex flex-col items-center md:items-start md:flex-row md:justify-between  gap-6">
           <LatestDiscussTile data={discussesLatest} />
           {/* <UserRateTable data={mockRateData} /> */}
         </div>
       </div>
-    </div>
+    </LayoutChildrenPadding>
   )
 }
 

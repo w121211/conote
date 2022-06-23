@@ -4,7 +4,7 @@ import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
 import ModalProvider from '../../components/modal/modal-context'
 import { ThemeProvider } from '../../components/theme/theme-provider'
-import Layout from '../../components/ui-component/layout'
+import Layout from '../../components/ui-component/layout/layout'
 
 const apolloClient = getApolloClient()
 

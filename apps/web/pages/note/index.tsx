@@ -1,4 +1,4 @@
-import Layout from '../../components/ui-component/layout'
+import Layout from '../../components/ui-component/layout/layout'
 
 const NoteStarterPage = (): JSX.Element => {
   return (

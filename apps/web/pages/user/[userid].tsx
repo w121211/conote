@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import UserRateTable, { TableData } from '../../components/user/user-rate-table'
 import UserNoteTable from '../../components/user/user-note-table'
 import { NoteData } from '../../components/ui-component/note-list'
-import Layout from '../../components/ui-component/layout'
+import Layout from '../../components/ui-component/layout/layout'
 import { List, ListElement } from '../../components/ui-component/list'
 import {
   DiscussesByUserDocument,
@@ -18,6 +18,7 @@ import {
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import { LatestDiscussTile } from '../../components/latest-discuss-tile'
+import { LayoutChildrenPadding } from '../../components/ui-component/layout/layout-children-padding'
 
 export const mockRateData: TableData[] = [
   {
@@ -171,7 +172,7 @@ const UserPage = ({
   // }
 
   return (
-    <div>
+    <LayoutChildrenPadding>
       <div className="flex flex-col gap-8 ">
         <div className="flex">
           <span className="material-icons mr-2 text-[120px] leading-none text-gray-300 dark:text-gray-400">
@@ -183,10 +184,10 @@ const UserPage = ({
             </h1>
             {/* <div className="mb-2 text-lg text-gray-500 dark:text-gray-400">
               建築師
-            </div>
-            <p className="flex text-sm text-gray-500 dark:text-gray-400">
+              </div>
+              <p className="flex text-sm text-gray-500 dark:text-gray-400">
               <span className="material-icons text-base leading-none">
-                cake
+              cake
               </span>
               10年會員
             </p> */}
@@ -194,11 +195,11 @@ const UserPage = ({
         </div>
         {/* <div>
           <h2 className="mb-2 text-sm text-gray-500 dark:text-gray-400 font-medium tracking-widest">
-            ABOUT
+          ABOUT
           </h2>
           <p className="text-sm text-gray-800 dark:text-gray-100">
-            日本鳥取縣出身的男性聲優，於2019年4月1日加入由好友立花慎之介及福山潤所創立的BLACK
-            SHIP，以前是AIR AGENCY所屬。身高173cm，體重65kg，血型是A型。
+          日本鳥取縣出身的男性聲優，於2019年4月1日加入由好友立花慎之介及福山潤所創立的BLACK
+          SHIP，以前是AIR AGENCY所屬。身高173cm，體重65kg，血型是A型。
           </p>
         </div> */}
 
@@ -217,7 +218,7 @@ const UserPage = ({
           <LatestDiscussTile data={discussesByUser} />
         </div>
       </div>
-    </div>
+    </LayoutChildrenPadding>
   )
 }
 

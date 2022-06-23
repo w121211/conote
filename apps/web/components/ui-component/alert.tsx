@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, ReactNode } from 'react'
 import { styleSymbol } from './style-fc/style-symbol'
 
 const warningBg = `bg-orange-200/50 dark:bg-orange-300/30`
@@ -10,37 +10,41 @@ const errorIcon = `text-red-500 dark:text-red-400`
 const successBg = `bg-green-200/50 dark:bg-green-300/30`
 const successIcon = `text-green-500 dark:text-green-400`
 
-type AlertType = 'warning' | 'error' | 'success'
+const announceBg = `bg-yellow-300 dark:bg-yellow-400`
+// const announceIcon=`text-blue-600 dark:bg-blue-300`
+
+type AlertType = 'warning' | 'error' | 'success' | 'announce'
 
 const bg = (type: AlertType) => {
   if (type === 'warning') return warningBg
   if (type === 'error') return errorBg
   if (type === 'success') return successBg
+  if (type === 'announce') return announceBg
 }
 
 const icon = (type: AlertType) => {
   if (type === 'warning') return warningIcon
   if (type === 'error') return errorIcon
   if (type === 'success') return successIcon
+  if (type === 'announce') return ''
 }
 
 interface AlertProps {
-  str: string
+  children: ReactNode
   type: AlertType
   action?: string
   time?: string // to do: change to Date type
-  onClose?: () => void
+  onClose: () => void
   visible?: boolean
 }
 
 export const Alert: FC<AlertProps> = ({
-  str,
+  children,
   action,
   time,
   type,
   visible = true,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onClose = () => {},
+  onClose,
 }) => {
   if (!visible) {
     return null
@@ -48,7 +52,7 @@ export const Alert: FC<AlertProps> = ({
   return (
     <div
       className={`
-        py-2 px-1 
+        py-1 px-1 
         text-sm 
         ${bg(type)}
         `}
@@ -66,12 +70,14 @@ export const Alert: FC<AlertProps> = ({
             ? 'warning'
             : type === 'error'
             ? 'error'
-            : 'check_circle'}
+            : type === 'success'
+            ? 'check_circle'
+            : ''}
         </span>
 
         <p className="flex-grow pt-[2px] dark:text-white break-words whitespace-pre-wrap">
-          <span className="font-bold">[{action}]</span>
-          {styleSymbol(str, '')}
+          {action && <span className="font-bold">[{action}]</span>}
+          {children}
           <span className="text-gray-400 dark:text-gray-300 text-xs">
             {time}
           </span>

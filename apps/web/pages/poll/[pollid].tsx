@@ -7,7 +7,7 @@ import {
   PollQuery,
   PollQueryVariables,
 } from '../../apollo/query.graphql'
-import Layout from '../../components/ui-component/layout'
+import Layout from '../../components/ui-component/layout/layout'
 import { isNil } from 'lodash'
 import MergePollVoteForm from '../../components/poll/merge-poll-vote-form'
 import NoteDocLink from '../../components/note/note-doc-link'

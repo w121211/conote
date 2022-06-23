@@ -16,7 +16,8 @@ import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import DiscussTile from '../../components/discuss/discuss-tile'
 import DiscussPostTiles from '../../components/discuss-post/discuss-post-tiles'
 import DiscussPostForm from '../../components/discuss-post/discuss-post-form'
-import Layout from '../../components/ui-component/layout'
+import Layout from '../../components/ui-component/layout/layout'
+import { LayoutChildrenPadding } from '../../components/ui-component/layout/layout-children-padding'
 
 interface Props {
   initialApolloState: any
@@ -41,11 +42,13 @@ const DiscussPage = ({ discuss }: Props) => {
     return null
   }
   return (
-    <div className="flex flex-col gap-4 pb-32">
-      <DiscussTile data={qDiscuss.data.discuss} />
-      <DiscussPostTiles posts={qPosts.data.discussPosts} />
-      <DiscussPostForm discussId={qDiscuss.data.discuss.id} />
-    </div>
+    <LayoutChildrenPadding>
+      <div className="flex flex-col gap-4 pb-32">
+        <DiscussTile data={qDiscuss.data.discuss} />
+        <DiscussPostTiles posts={qPosts.data.discussPosts} />
+        <DiscussPostForm discussId={qDiscuss.data.discuss.id} />
+      </div>
+    </LayoutChildrenPadding>
   )
 }
 
