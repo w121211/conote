@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import LoginPanel from '../components/auth/login-panel'
 import LogoutButton from '../components/auth/logout-button'
-import { StatusDisplay } from '../components/status-display'
+import { StatusDisplay } from '../components/ui-component/status-display'
 import { useMeContext } from '../components/auth/use-me-context'
 
 const Page = (): JSX.Element | null => {

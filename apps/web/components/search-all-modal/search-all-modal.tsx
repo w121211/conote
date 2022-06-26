@@ -34,6 +34,8 @@ const mockList = [
 const SearchAllModal = () => {
   const [keyPrefix, setKeyPrefix] = useState('ctrl')
   const [showModal, setShowModal] = useState(false)
+  const [compositionStart, setCompositionStart] = useState(false)
+  const [compositionEnd, setCompositionEnd] = useState(true)
   const [inputValue, setInputValue] = useState('')
   const [keyArrow, setKeyArrow] = useState(false)
   const [selectedIdx, setSelectedIdx] = useState(0)
@@ -85,7 +87,7 @@ const SearchAllModal = () => {
         }
       }
     }
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !compositionStart && compositionEnd) {
       if (inputValue.length > 0) {
         /* ---selectedIdx === i+1--- */
         /* ---create symbol is selected--- */
@@ -170,8 +172,10 @@ const SearchAllModal = () => {
           p-1
            border-gray-200 dark:border-gray-500
           rounded
-          bg-gray-100
-          hover:bg-gray-200/70
+          bg-gray-200/60
+          hover:bg-gray-200
+          transition-['background-color']
+          duration-200
           text-sm
           capitalize"
         onClick={() => {
@@ -218,15 +222,33 @@ const SearchAllModal = () => {
               spellCheck="false"
               placeholder="Search"
               onChange={e => {
-                setSelectedIdx(0)
-                setInputValue(e.target.value)
+                if (!compositionStart && compositionEnd) {
+                  // console.log('onchange')
+                  setSelectedIdx(0)
+                  setInputValue(e.target.value)
+                }
+              }}
+              onCompositionStart={() => {
+                // console.log('composition start')
+                setCompositionStart(true)
+                setCompositionEnd(false)
+              }}
+              onCompositionEnd={e => {
+                // console.log(
+                //   'composition end',
+                //   (e.target as HTMLInputElement).value,
+                // )
+                setCompositionStart(false)
+                setCompositionEnd(true)
+
+                setInputValue((e.target as HTMLInputElement).value)
               }}
               onKeyDown={onKeydown}
               onKeyUp={onKeyUp}
             />
           </div>
 
-          {/* list */}
+          {/* --- list --- */}
           <div className="flex-1 overflow-y-auto pb-2">
             <section className="px-4 border-gray-200 dark:border-gray-500">
               {inputValue.length > 0 ? (

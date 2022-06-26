@@ -209,7 +209,7 @@ export const BlockEl = ({
         ${children.length > 0 && isOpen && 'show-tree-indicator'}
         ${isOpen ? classes.isOpen : classes.isClosed}
         ${isSelected ? classes.isSelected : ''}
-        ${isSelected && dragging ? 'is-dragging' : ''}
+        ${isSelected && dragging ? 'dragging' : ''}
         ${isEditing ? classes.isEditing : ''}`
         // ]
         // isLocked && 'is-locked',
