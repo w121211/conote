@@ -67,6 +67,9 @@ const SearchAllModal = () => {
 
   const onKeydown = (e: React.KeyboardEvent) => {
     const dataList = inputValue.length > 0 ? data?.searchSymbol : mockList
+    if (compositionStart && !compositionEnd) {
+      return
+    }
     if (dataList && dataList.length > 0) {
       if (e.key === 'ArrowUp') {
         e.preventDefault()
@@ -87,7 +90,7 @@ const SearchAllModal = () => {
         }
       }
     }
-    if (e.key === 'Enter' && !compositionStart && compositionEnd) {
+    if (e.key === 'Enter') {
       if (inputValue.length > 0) {
         /* ---selectedIdx === i+1--- */
         /* ---create symbol is selected--- */
