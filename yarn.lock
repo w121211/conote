@@ -17375,6 +17375,11 @@ storybook-addon-next-router@^3.1.1:
   dependencies:
     tslib "^2.3.0"
 
+storybook-css-modules@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/storybook-css-modules/-/storybook-css-modules-1.0.8.tgz#19392c07a31849dbcd2753ae6331e7f8c0f2ec69"
+  integrity sha512-anITwllH6nLw0quPElVBLRrE8QDbcRv0Dgl8sKLOc4uiqw+g1GE2l21Stjx3Wyv2O6ZKJScbyOpOuuz3SmeaOQ==
+
 storybook-tailwind-dark-mode@^1.0.12:
   version "1.0.12"
   resolved "https://registry.yarnpkg.com/storybook-tailwind-dark-mode/-/storybook-tailwind-dark-mode-1.0.12.tgz#3f9f22ce201abdc01321d8af0b0045d9b956be46"
