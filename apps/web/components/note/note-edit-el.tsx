@@ -12,6 +12,7 @@ import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import { useMeContext } from '../auth/use-me-context'
 import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-padding'
 import { preventSave } from '../block-editor/src/listeners'
+import { StatusDisplay } from '../ui-component/status-display'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -58,6 +59,25 @@ const NoteEditEl = ({
           </Link>
         </button>
       </div>
+      <StatusDisplay
+        str="Login require"
+        btn={
+          <button className="btn-primary-lg font-medium text-lg">
+            <Link href="/login">
+              <a>Login</a>
+            </Link>
+          </button>
+        }
+      />
+      // <div>
+      //   Start editing {symbol}
+      //   <div className="w-[200px] py-8 text-center">Login require</div>
+      //   <button className="btn-primary">
+      //     <Link href="/login">
+      //       <a>Login</a>
+      //     </Link>
+      //   </button>
+      // </div>
     )
   }
   return (

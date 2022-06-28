@@ -30,8 +30,8 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
 
       {/* <DomainSelect /> */}
 
-      <div className="relative mb-3 ">
-        <button className="symbol-link" onClick={() => setShowModal(true)}>
+      <div className="relative mb-3">
+        <span className="symbol-link" onClick={() => setShowModal(true)}>
           <h1 className=" line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
             {/* {link && (
             <span className="material-icons text-blue-400 text-4xl align-bottom">
@@ -44,7 +44,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
             )}
             {newSymbol && `-> ${newSymbol}`}
           </h1>
-        </button>
+        </span>
       </div>
 
       <Modal

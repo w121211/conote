@@ -27,7 +27,7 @@ const NoteHead = ({
       </div>
 
       <div className="relative mb-3 ">
-        <button className="symbol-link" onClick={() => setShowModal(true)}>
+        <span className="symbol-link" onClick={() => setShowModal(true)}>
           <h1 className=" line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
             {/* {link && (
             <span className="material-icons text-blue-400 text-4xl align-bottom">
@@ -36,7 +36,7 @@ const NoteHead = ({
           )} */}
             {styleSymbol(symbol, doc.contentHead.webpage?.title ?? undefined)}
           </h1>
-        </button>
+        </span>
       </div>
 
       <Modal

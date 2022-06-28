@@ -10,7 +10,7 @@ import firebaseui from 'firebaseui'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import { useSessionLoginMutation } from '../../apollo/query.graphql'
 import { useFirebaseClient } from './firebase-client'
-import { ErrorDisplay } from '../status-display'
+import { ErrorDisplay } from '../ui-component/status-display'
 
 /**
  * Known issues
@@ -123,16 +123,10 @@ const LoginPanel = ({
         error={error}
         btn={
           <>
-            <a
-              className="btn-primary-lg inline-block mr-6 font-medium "
-              href="/"
-            >
+            <a className="btn-primary-lg inline-block mr-6 " href="/">
               Go to Home
             </a>
-            <a
-              href="/login"
-              className="btn-normal-lg inline-block font-medium "
-            >
+            <a href="/login" className="btn-normal-lg inline-block ">
               Login
             </a>
           </>

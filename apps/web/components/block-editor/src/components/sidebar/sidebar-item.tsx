@@ -113,8 +113,8 @@ const SidebarItem = ({
         <a
           className={`group flex items-center gap-1 pl-4 pr-4 leading-relax ${
             opening.main.symbol == symbol
-              ? 'bg-gray-200 hover:bg-gray-300/70'
-              : 'bg-transparent hover:bg-gray-200/70'
+              ? 'bg-gray-200 hover:bg-gray-300/80'
+              : 'bg-transparent hover:bg-gray-200'
           } `}
         >
           <span className="material-icons text-lg text-[20px] text-gray-400/60">
