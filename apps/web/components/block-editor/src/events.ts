@@ -755,12 +755,14 @@ export async function docOpen(
 export async function docSave(
   docUid: string,
   newSymbol?: string,
-  force = false,
+  opts = {
+    force: false,
+  },
 ) {
   // console.log('docSave')
   const { changed, changes, doc, input, noteDraftCopy } = isDocChanged(docUid)
 
-  if (force || changed) {
+  if (opts.force || changed) {
     const draft = await noteDraftService.updateDraft(
         noteDraftCopy.id,
         input,

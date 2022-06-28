@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import {
@@ -11,8 +11,8 @@ import { editorOpenSymbolInMain } from '../block-editor/src/events'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import { useMeContext } from '../auth/use-me-context'
 import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-padding'
-import { preventSave } from '../block-editor/src/listeners'
 import { StatusDisplay } from '../ui-component/status-display'
+import { preventSave } from '../block-editor/src/listeners'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -48,36 +48,18 @@ const NoteEditEl = ({
   }
   if (me === null) {
     return (
-      <div>
-        Start editing {symbol}
-        <div className="w-[200px] py-8 text-center">Login require</div>
-        <button className="btn-primary">
-          <Link
-            href={{ pathname: '/login', query: { from: location.pathname } }}
-          >
-            <a>Login</a>
-          </Link>
-        </button>
-      </div>
       <StatusDisplay
         str="Login require"
         btn={
           <button className="btn-primary-lg font-medium text-lg">
-            <Link href="/login">
+            <Link
+              href={{ pathname: '/login', query: { from: location.pathname } }}
+            >
               <a>Login</a>
             </Link>
           </button>
         }
       />
-      // <div>
-      //   Start editing {symbol}
-      //   <div className="w-[200px] py-8 text-center">Login require</div>
-      //   <button className="btn-primary">
-      //     <Link href="/login">
-      //       <a>Login</a>
-      //     </Link>
-      //   </button>
-      // </div>
     )
   }
   return (
