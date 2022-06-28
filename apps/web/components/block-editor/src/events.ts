@@ -30,6 +30,8 @@ import { noteService } from './services/note.service'
 import { noteDraftService } from './services/note-draft.service'
 import { commitService } from './services/commit.service'
 import { BlockInput, writeBlocks } from './utils/block-writer'
+import { treeNodeDifferencer, treeUtil } from '@conote/docdiff'
+import { isDocChanged } from '../../../shared/block-helpers'
 
 // const noteService = getNoteService(),
 //   noteDraftService = getNoteDraftService(),
@@ -161,7 +163,6 @@ export function keyEnter(uid: string, dKeyDown: DestructTextareaKeyEvent) {
     parent = block.parentUid && getBlock(block.parentUid),
     parentIsRootBlock = (parent && parent.docSymbol) !== undefined,
     // contextRootUid = rfdbRepo.currentRoute.pathParams.id,  // contextRoot: the block opened as root
-    contextRootUid = undefined,
     newUid = genBlockUid(),
     { value, start } = dKeyDown,
     caretAtEnd = value.length === start,
@@ -173,14 +174,16 @@ export function keyEnter(uid: string, dKeyDown: DestructTextareaKeyEvent) {
     enterNewBlock(block, newUid)
   } else if (valueEmpty && parentIsRootBlock) {
     enterNewBlock(block, newUid)
-  } else if (block.open && !caretAtEnd) {
+  } else if (block.open && hasChildren && !caretAtEnd && start !== 0) {
     enterSplitBlock(block, newUid, value, start, 'first')
   } else if (start !== 0) {
     enterSplitBlock(block, newUid, value, start, 'after')
   } else if (valueEmpty) {
-    unindent(uid, dKeyDown, '', contextRootUid)
+    // unindent(uid, dKeyDown, '', contextRootUid)
+    enterNewBlock(block, newUid)
   } else if (start === 0 && value) {
-    enterBumpUp(block, newUid)
+    // enterBumpUp(block, newUid)
+    enterSplitBlock(block, newUid, value, start, 'after')
   } else {
     console.error('[enter]', { uid, dKeyDown, block, parent })
     throw new Error('[enter]')
@@ -447,6 +450,18 @@ export function editingUid(uid: string | null, cursorAnchor?: number | 'end') {
   editingFocus(uid, cursorAnchor)
 }
 
+export function editingFirstChild(doc: Doc) {
+  const docBlock = getBlock(doc.blockUid),
+    { childrenUids } = docBlock
+  if (childrenUids.length > 0) editingUid(childrenUids[0])
+}
+
+export function editingLastChild(doc: Doc) {
+  const docBlock = getBlock(doc.blockUid),
+    { childrenUids } = docBlock
+  if (childrenUids.length > 0) editingUid(childrenUids[childrenUids.length - 1])
+}
+
 //
 // Enter Events
 //
@@ -593,6 +608,7 @@ export function selectionDelete() {
 
 export function selectionSetItems(uids: string[]) {
   rfdbRepo.updateSelectionItems(uids)
+  editingUid(null)
 }
 
 function selectUp(selectedItems: string[]): string[] {
@@ -734,24 +750,26 @@ export async function docOpen(
  * Save doc on remote, use doc's title as 'symbol'
  *  Because local repositories already have the content,
  *  only update the note-draft-copy.
+ * @param force if not true, will check and only save when doc is changed
  */
-export async function docSave(doc: Doc, newSymbol?: string) {
-  // console.log('docSave', doc.title)
+export async function docSave(
+  docUid: string,
+  newSymbol?: string,
+  force = false,
+) {
+  // console.log('docSave')
+  const { changed, changes, doc, input, noteDraftCopy } = isDocChanged(docUid)
 
-  if (doc.noteDraftCopy === undefined) {
-    console.debug(doc)
-    throw new Error('[docSave] doc.noteDraftCopy === undefined')
+  if (force || changed) {
+    const draft = await noteDraftService.updateDraft(
+        noteDraftCopy.id,
+        input,
+        newSymbol,
+      ),
+      op = ops.docUpdatePropsOp(doc, { noteDraftCopy: draft })
+
+    docRepo.update(op)
   }
-
-  const input = noteDraftService.toNoteDraftInput(doc),
-    draft = await noteDraftService.updateDraft(
-      doc.noteDraftCopy.id,
-      input,
-      newSymbol,
-    ),
-    op = ops.docUpdatePropsOp(doc, { noteDraftCopy: draft })
-
-  docRepo.update(op)
 }
 
 /**
@@ -787,8 +805,7 @@ export async function docRename(
   blockRepo.update(blockReducers)
   docRepo.update(docReducers)
 
-  const doc_ = docRepo.getDoc(doc.uid)
-  await docSave(doc_, newSymbol)
+  await docSave(doc.uid, newSymbol)
 
   // console.log(opening.symbolMain, doc.title)
 
@@ -901,8 +918,7 @@ export async function editorLeftSidebarItemRemove(
 
 async function saveCurDoc(docUid: string) {
   try {
-    const doc = docRepo.getDoc(docUid)
-    await docSave(doc)
+    await docSave(docUid)
   } catch (err) {
     // In some cases (eg remove doc), the doc will not be found
     console.debug(err)
@@ -1060,7 +1076,7 @@ export async function commitOnFinish(
   await editorLeftSidebarRefresh('network-only')
 
   pairs.forEach(([noteDraft, noteDoc]) => {
-    const doc = docRepo.getDoc(noteDraft.symbol)
+    const doc = docRepo.findDoc(noteDraft.symbol)
     if (doc) {
       const { blockReducers, docReducers } = ops.docRemoveOp(doc)
       blockRepo.update(blockReducers)

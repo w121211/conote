@@ -1,7 +1,6 @@
 import { throttle } from 'lodash'
 import { insert } from 'text-field-edit'
 import {
-  blockSave,
   indent,
   keyArrowDown,
   keyArrowUp,
@@ -29,10 +28,10 @@ const searchService = getSearchService()
 const pairChars = ['()', '[]', '{}', '""', '##']
 
 const pairCharDict = {
-  '(': ')',
+  // '(': ')',
   '[': ']',
-  '{': '}',
-  '"': '"',
+  // '{': '}',
+  // '"': '"',
   '#': '#',
 }
 
@@ -360,7 +359,13 @@ function arrowKeyDirection(e: React.KeyboardEvent): boolean {
   return ARROW_KEYS.includes(e.key)
 }
 
-function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
+function handleArrowKey({
+  e,
+  uid,
+  caret,
+  search,
+  setSearch,
+}: TextareaKeyDownArgs) {
   const { key, shift, ctrl, target, selection, start, end, value } =
       destructKeyDown(e),
     isSelection = selection.length > 0,
@@ -407,13 +412,13 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
   }
 
   //   ;; Type, one of #{:slash :block :page}: If slash commands or inline search is open, cycle through options
-  // else if (type) {
-  //   if (left || right) {
-  //     //
-  //   } else if (up || down) {
-  //     //
-  //   }
-  // }
+  else if (search.type !== null) {
+    if (left || right) {
+      setSearch(nullSearch)
+    } else if (up || down) {
+      // TODO
+    }
+  }
 
   //
   else if (isSelection) {
@@ -450,6 +455,7 @@ function handleArrowKey({ e, uid, caret, search }: TextareaKeyDownArgs) {
  *
  */
 function handleBackspace({ e, uid, search, setSearch }: TextareaKeyDownArgs) {
+  // console.log('handleBackspace')
   const dKeyDown = destructKeyDown(e),
     { target, value, start, end } = dKeyDown,
     noSelection = start === end,
@@ -564,7 +570,7 @@ function handlePairChar(
     replaceSelectionWith(e.currentTarget, key + closePair)
     setCursorPosition(target, start + 1)
 
-    // need to get current-value because the value is changed by the replace selection event
+    // Need to get current-value because the value is changed by the replace selection event
     const value = e.currentTarget.value
     if (value && value.length >= 2) {
       const twoChar = value.substring(start, start + 2),
@@ -610,7 +616,7 @@ function handleShortcuts({
   setLocalStr,
   undoManager,
 }: TextareaKeyDownArgs) {
-  console.log('handleShortcuts')
+  // console.log('handleShortcuts')
   const { key, shift, value, target } = destructKeyDown(e)
 
   if (key === 'A') {
@@ -701,6 +707,8 @@ type TextareaKeyDownArgs = {
 }
 
 export function textareaKeyDown(args: TextareaKeyDownArgs) {
+  // console.log('textareaKeyDown')
+
   const { editing, e, search, setCaret, setLastKeyDown } = args
 
   // ;; don't process key events from block that lost focus (quick Enter & Tab)

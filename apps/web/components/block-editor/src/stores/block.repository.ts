@@ -57,7 +57,7 @@ export function getBlockChildren(uid: string): Block[] {
 
 class BlockRepository {
   undo() {
-    console.log(blocksStateHistory.hasPast)
+    // console.log(blocksStateHistory.hasPast)
     blocksStateHistory.undo()
   }
 

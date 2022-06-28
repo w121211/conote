@@ -477,15 +477,22 @@ export function blockSplitChainOp(
   //     : []
   // splitOp = [saveOp, newOp, saveNewOp, ...moveChildrenOp, closeNewOp]
   // return splitOp
+
+  // const [strBefore, strAfter] = [str.substring(0, idx), str.substring(idx)]
+  const strBefore = str.substring(0, idx),
+    strAfter = str.substring(idx),
+    newBlockStr = relation === 'before' ? strBefore : strAfter,
+    oldBlockStr = relation === 'before' ? strAfter : strBefore
+
   const chains: BlockReducerFn[] = [
     // Save old-block
-    () => blockSaveOp(oldBlock.uid, str.substring(0, idx)),
+    () => blockSaveOp(oldBlock.uid, oldBlockStr),
 
     // Create new block
     () => blockNewOp(newBlockUid, { refBlockUid: oldBlock.uid, relation }),
 
     // Save new-block
-    () => blockSaveOp(newBlockUid, str.substring(idx)),
+    () => blockSaveOp(newBlockUid, newBlockStr),
 
     // move children (if any)
   ]

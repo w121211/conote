@@ -1,4 +1,7 @@
+import { isDocChanged } from '../../../shared/block-helpers'
 import {
+  docSave,
+  editingFirstChild,
   editingUid,
   historyRedo,
   historyUndo,
@@ -12,7 +15,7 @@ import {
   unindentMulti,
 } from './events'
 import { Block, BlockWithChildren } from './interfaces'
-import { blockRepo } from './stores/block.repository'
+import { editorRepo } from './stores/editor.repository'
 import { rfdbRepo, rfdbStore } from './stores/rfdb.repository'
 import { destructKeyDown, isShortcutKey } from './utils'
 
@@ -130,8 +133,15 @@ export function multiBlockSelection(e: KeyboardEvent) {
 export function hotkey(event: KeyboardEvent) {
   const dKeyDown = destructKeyDown(event),
     { key, ctrl, meta, shift, alt } = dKeyDown
-  // console.log('hotkey', meta, ctrl)
 
+  // const editingUid = rfdbRepo.getValue().editing.uid
+  // if (editingUid === null) {
+  //   if (key === 'ArrowUp') {
+  //     editingFirstChild()
+  //   } else if (key === 'ArrowDown') {
+  //     //
+  //   }
+  // } else
   if (isShortcutKey(meta, ctrl)) {
     switch (key) {
       // Save
@@ -262,10 +272,46 @@ function blocksToClipboardData(
 //   })
 // }
 
+/**
+ *
+ */
+export function preventSave(e: BeforeUnloadEvent) {
+  const { main, modal } = editorRepo.getValue().opening
+
+  let preventClose = false
+
+  if (main.docUid) {
+    const { changed } = isDocChanged(main.docUid)
+    if (changed) {
+      docSave(main.docUid)
+      preventClose = true
+    }
+  }
+  if (modal.docUid) {
+    const { changed } = isDocChanged(modal.docUid)
+    if (changed) {
+      docSave(modal.docUid)
+      preventClose = true
+    }
+  }
+
+  if (preventClose) {
+    window.confirm(
+      "Konote hasn't finished saving yet. " +
+        'Try refreshing or quitting again later.',
+    )
+    e.preventDefault()
+    e.returnValue =
+      'Setting e.returnValue to string prevents exit for some browsers.'
+    return 'Returning a string also prevents exit on other browsers.'
+  }
+}
+
 // function init() {
 //   document.addEventListener('mousedown', unfocus)
 //   window.addEventListener('keydown', multiBlockSelection)
 //   window.addEventListener('keydown', keyDown)
 //   window.addEventListener('copy', copy)
 //   window.addEventListener('cut', cut)
+//   preventSave()
 // }
