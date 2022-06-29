@@ -25,7 +25,7 @@ function onCreateDiscuss(
     inlineDiscuss.str,
     inlineService.toInlineDiscussString(discuss.id, discuss.title),
   )
-  docSave(doc)
+  docSave(doc.uid)
 }
 
 const InlineDiscussViewer = ({

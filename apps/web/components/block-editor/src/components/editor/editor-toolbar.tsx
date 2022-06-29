@@ -20,7 +20,7 @@ export const EditorToolbar = (): JSX.Element | null => {
       <button
         onClick={() => {
           if (mainDoc) {
-            docSave(mainDoc)
+            docSave(mainDoc.uid)
           }
         }}
       >

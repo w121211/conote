@@ -5,6 +5,7 @@ import { docSave } from '../../events'
 import type { Doc } from '../../interfaces'
 import { hotkey, multiBlockSelection } from '../../listeners'
 import { blockRepo } from '../../stores/block.repository'
+import { docRepo } from '../../stores/doc.repository'
 import { BlockEl } from '../block/block-el'
 import DocHead from './doc-head'
 import DocPlaceholder from './doc-placeholder'
@@ -95,7 +96,10 @@ export const DocEl = ({
     return () => {
       // console.log('DocEl unmount')
       sub.unsubscribe()
-      docSave(doc.uid)
+      docSave(doc.uid).catch(err => {
+        // In case user delete the doc and cause doc-el unmount
+        console.debug(err)
+      })
     }
   }, [])
 
