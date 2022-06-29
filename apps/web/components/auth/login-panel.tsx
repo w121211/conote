@@ -81,7 +81,11 @@ const makeUIConfig = (
  * TODO:
  * - (bug) Flash of login panel after succesffuly signed in
  */
-const LoginPanel = (): JSX.Element | null => {
+const LoginPanel = ({
+  redirectPathAfterLogin,
+}: {
+  redirectPathAfterLogin?: string
+}): JSX.Element | null => {
   const firebaseClient = useFirebaseClient(),
     firebaseAuth = getAuth(firebaseClient),
     apolloClient = useApolloClient(),
@@ -98,7 +102,8 @@ const LoginPanel = (): JSX.Element | null => {
       await apolloClient.resetStore()
       const { data } = await sessionLogin({ variables: { idToken } })
       if (data?.sessionLogin) {
-        location.reload()
+        // location.reload()
+        if (redirectPathAfterLogin) location.assign(redirectPathAfterLogin)
       } else {
         // console.error('session login fail')
         setError('Login fail')
@@ -112,7 +117,6 @@ const LoginPanel = (): JSX.Element | null => {
   if (mSessionLogin.loading) {
     return null
   }
-  // TODO: Use an page status display component (unified) with given error message
   if (error) {
     return (
       <ErrorDisplay

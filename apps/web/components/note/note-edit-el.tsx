@@ -1,18 +1,17 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import {
   NoteDocFragment,
   NoteDraftFragment,
   NoteFragment,
 } from '../../apollo/query.graphql'
 import { EditorEl } from '../block-editor/src/components/editor/editor-el'
-import Layout from '../ui-component/layout/layout'
 import { editorOpenSymbolInMain } from '../block-editor/src/events'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
-import LoginModal from '../login-modal'
-import Link from 'next/link'
 import { useMeContext } from '../auth/use-me-context'
 import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-padding'
+import { preventSave } from '../block-editor/src/listeners'
 import { StatusDisplay } from '../ui-component/status-display'
 
 /**
@@ -30,6 +29,7 @@ const NoteEditEl = ({
 }) => {
   const router = useRouter()
   const { me, loading } = useMeContext()
+  // const handlerRef = useRef(handler)
 
   useEffect(() => {
     if (me) {
@@ -38,33 +38,27 @@ const NoteEditEl = ({
     }
   }, [me, symbol])
 
-  // const onUnload = (e: BeforeUnloadEvent) => {
-  //   e.preventDefault()
-  //   // if (mainDoc?.doc) {
-  //   //   // workspace.save(mainDoc.doc)
-  //   //   console.log('save')
-  //   //   workspace.save(mainDoc.doc)
-  //   //   // return 'save'
-  //   // }
-  //   // console.log(router)
-  //   // if () {
-  //   //   // return null
-  //   // }
-  //   e.returnValue = 'leave'
-  //   return 'leave'
-  //   // return null
-  // }
-
-  // useEffect(() => {
-  //   window.addEventListener('beforeunload', onUnload)
-  //   return () => window.removeEventListener('beforeunload', onUnload)
-  // }, [])
+  useEffect(() => {
+    window.addEventListener('beforeunload', preventSave)
+    return () => window.removeEventListener('beforeunload', preventSave)
+  }, [])
 
   if (loading) {
     return null
   }
   if (me === null) {
     return (
+      <div>
+        Start editing {symbol}
+        <div className="w-[200px] py-8 text-center">Login require</div>
+        <button className="btn-primary">
+          <Link
+            href={{ pathname: '/login', query: { from: location.pathname } }}
+          >
+            <a>Login</a>
+          </Link>
+        </button>
+      </div>
       <StatusDisplay
         str="Login require"
         btn={

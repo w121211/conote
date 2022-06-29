@@ -25,6 +25,7 @@ export const docsStore = createStore(
 
 class DocRepository {
   getDoc(uid: string): Doc {
+    console.log(uid)
     const doc = docsStore.query(getEntity(uid))
     if (doc === undefined) {
       throw new Error('[getDoc] Doc not found:' + uid)

@@ -1,4 +1,4 @@
-import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
+import type { NoteDraftInput } from 'graphql-let/__generated__/__types__'
 import { Block, Doc } from '../interfaces'
 import {
   CreateNoteDraftDocument,
@@ -135,6 +135,7 @@ class NoteDraftService {
     input: NoteDraftInput,
     newSymbol?: string,
   ): Promise<NoteDraftFragment> {
+    // console.log('updateDraft')
     const { data, errors } = await this.apolloClient.mutate<
       UpdateNoteDraftMutation,
       UpdateNoteDraftMutationVariables

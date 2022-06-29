@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
+import React, { useEffect, useState } from 'react'
+import { interval } from 'rxjs'
 import { docSave } from '../../events'
 import type { Doc } from '../../interfaces'
 import { hotkey, multiBlockSelection } from '../../listeners'
 import { blockRepo } from '../../stores/block.repository'
-import { docRepo } from '../../stores/doc.repository'
 import { BlockEl } from '../block/block-el'
 import DocHead from './doc-head'
 import DocPlaceholder from './doc-placeholder'
@@ -59,14 +59,16 @@ export const DocEl = ({
   // children,
   doc,
 }: DocProps): JSX.Element | null => {
-  const [isPageMenuOpen, setIsPageMenuOpen] = React.useState(false)
-  const [pageMenuAnchor, setPageMenuAnchor] =
-    React.useState<HTMLButtonElement | null>(null)
+  const [isPageMenuOpen, setIsPageMenuOpen] = useState(false),
+    [pageMenuAnchor, setPageMenuAnchor] = useState<HTMLButtonElement | null>(
+      null,
+    )
 
   const [docBlock] = useObservable(blockRepo.getBlock$(doc.blockUid), {
-    deps: [doc],
-    initialValue: null,
-  })
+      deps: [doc],
+      initialValue: null,
+    }),
+    interval$ = interval(30000)
 
   // (BUG) useObservable set docBlock as null initially if default value is undefined
   // however, the return type will not include null
@@ -86,10 +88,14 @@ export const DocEl = ({
   // }, [docBlockUid, docBlock])
 
   useEffect(() => {
+    const sub = interval$.subscribe(async () => {
+      await docSave(doc.uid)
+    })
+
     return () => {
-      console.log('DocEl unmount')
-      const doc_ = docRepo.findDoc(doc.uid)
-      if (doc_) docSave(doc_)
+      // console.log('DocEl unmount')
+      sub.unsubscribe()
+      docSave(doc.uid)
     }
   }, [])
 

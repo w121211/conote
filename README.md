@@ -25,10 +25,10 @@ yarn run build-packages
 Install [docker-sync](https://github.com/EugenMayer/docker-sync) for much better performance
 
 ```sh
-# from project-root
+# From project-root
 docker-sync start
 
-# use arm64 config, eg Mac M1 chip
+# Use arm64 config instead, eg Mac M1 chip
 docker-sync start --config=docker-sync.arm64.yml
 ```
 
