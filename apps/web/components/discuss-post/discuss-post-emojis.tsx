@@ -6,8 +6,7 @@ import {
 } from '../../apollo/query.graphql'
 import { EmojisDropdownBtn } from '../emoji/emojis-dropdown-btn'
 import ToggleMenu from '../ui-component/toggle-menu'
-import DiscussPostEmojiCreateBtn from './discuss-post-emoji-create-btn'
-import DiscussPostEmojiUpdateBtn from './discuss-post-emoji-update-btn'
+import DiscussPostEmojiUpsertBtn from './discuss-post-emoji-upsert-btn'
 
 const DiscussPostEmojis = ({
   discussPostId,
@@ -38,17 +37,13 @@ const DiscussPostEmojis = ({
           const data = emojisData?.discussPostEmojis.find(
             el => el.code === code,
           )
-          return data ? (
-            <DiscussPostEmojiUpdateBtn
+          return (
+            <DiscussPostEmojiUpsertBtn
               key={code}
               discussPostEmoji={data}
-              type="panel"
-            />
-          ) : (
-            <DiscussPostEmojiCreateBtn
-              key={code}
               discussPostId={discussPostId}
               emojiCode={code}
+              type="panel"
             />
           )
         })}
@@ -60,9 +55,11 @@ const DiscussPostEmojis = ({
             return null
           }
           return (
-            <DiscussPostEmojiUpdateBtn
+            <DiscussPostEmojiUpsertBtn
               key={code}
               discussPostEmoji={data}
+              discussPostId={discussPostId}
+              emojiCode={code}
               type="normal"
             />
           )

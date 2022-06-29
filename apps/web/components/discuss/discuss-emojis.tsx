@@ -6,8 +6,7 @@ import {
 } from '../../apollo/query.graphql'
 import { EmojisDropdownBtn } from '../emoji/emojis-dropdown-btn'
 import ToggleMenu from '../ui-component/toggle-menu'
-import DiscussEmojiCreateBtn from './discuss-emoji-create-btn'
-import DiscussEmojiUpdateBtn from './discuss-emoji-update-btn'
+import DiscussEmojiUpsertBtn from './discuss-emoji-upsert-btn'
 
 const DiscussEmojis = ({
   discussId,
@@ -31,31 +30,35 @@ const DiscussEmojis = ({
         summary={<EmojisDropdownBtn disable={disable} />}
         disabled={disable}
       >
-        {emojis.map((e, i) => {
-          const data = emojisData?.discussEmojis.find(el => el.code === e)
-          if (data) {
-            return (
-              <DiscussEmojiUpdateBtn key={i} discussEmoji={data} type="panel" />
-            )
-          }
+        {emojis.map(code => {
+          const data = emojisData?.discussEmojis.find(el => el.code === code)
+
           return (
-            <DiscussEmojiCreateBtn
-              key={i}
+            <DiscussEmojiUpsertBtn
+              key={code}
               discussId={discussId}
-              emojiCode={e}
+              emojiCode={code}
+              discussEmoji={data}
+              type="panel"
             />
           )
         })}
       </ToggleMenu>
 
       {shouldShowEmojiIcons(emojisData?.discussEmojis) &&
-        emojis.map((code, i) => {
+        emojis.map(code => {
           const data = emojisData?.discussEmojis.find(e => e.code === code)
           if (data?.count.nUps === 0 || !data) {
             return null
           }
           return (
-            <DiscussEmojiUpdateBtn key={i} discussEmoji={data} type="normal" />
+            <DiscussEmojiUpsertBtn
+              key={code}
+              discussId={discussId}
+              emojiCode={code}
+              discussEmoji={data}
+              type="normal"
+            />
           )
         })}
     </div>

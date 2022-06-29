@@ -48,27 +48,26 @@ const NoteEditEl = ({
   }
   if (me === null) {
     return (
-      <div>
-        Start editing {symbol}
-        <div className="w-[200px] py-8 text-center">Login require</div>
-        <button className="btn-primary">
-          <Link
-            href={{ pathname: '/login', query: { from: location.pathname } }}
-          >
-            <a>Login</a>
-          </Link>
-        </button>
-      </div>
+      // <div>
+      //   Start editing {symbol}
+      //   <div className="w-[200px] py-8 text-center">Login require</div>
+      //   <button className="btn-primary">
+      //     <Link
+      //       href={{ pathname: '/login', query: { from: location.pathname } }}
+      //     >
+      //       <a>Login</a>
+      //     </Link>
+      //   </button>
+      // </div>
       <StatusDisplay
         str="Login require"
         btn={
-          <button className="btn-primary-lg font-medium text-lg">
-            <Link href="/login">
-              <a>Login</a>
-            </Link>
-          </button>
+          <Link href="/login">
+            <a className="btn-primary-lg font-medium text-lg">Login</a>
+          </Link>
         }
       />
+
       // <div>
       //   Start editing {symbol}
       //   <div className="w-[200px] py-8 text-center">Login require</div>
