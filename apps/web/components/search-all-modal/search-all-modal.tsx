@@ -32,7 +32,7 @@ const mockList = [
 ]
 
 const SearchAllModal = () => {
-  const [keyPrefix, setKeyPrefix] = useState('ctrl')
+  // const [keyPrefix, setKeyPrefix] = useState('ctrl')
   const [showModal, setShowModal] = useState(false)
   const [compositionStart, setCompositionStart] = useState(false)
   const [compositionEnd, setCompositionEnd] = useState(true)
@@ -111,26 +111,26 @@ const SearchAllModal = () => {
     setKeyArrow(false)
   }
 
-  useEffect(() => {
-    const navApp = navigator?.userAgent.toLowerCase()
-    if (navApp.indexOf('mac') !== -1) {
-      setKeyPrefix('⌘')
-    }
-  }, [])
+  // useEffect(() => {
+  //   const navApp = navigator?.userAgent.toLowerCase()
+  //   if (navApp.indexOf('mac') !== -1) {
+  //     setKeyPrefix('⌘')
+  //   }
+  // }, [])
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'KeyK' && (e.metaKey || e.ctrlKey)) {
-        setShowModal(prev => !prev)
-      }
-    }
+  // useEffect(() => {
+  //   const onKeyDown = (e: KeyboardEvent) => {
+  //     if (e.code === 'KeyK' && (e.metaKey || e.ctrlKey)) {
+  //       setShowModal(prev => !prev)
+  //     }
+  //   }
 
-    document.addEventListener('keydown', onKeyDown)
+  //   document.addEventListener('keydown', onKeyDown)
 
-    return () => {
-      document.removeEventListener('keydown', onKeyDown)
-    }
-  }, [])
+  //   return () => {
+  //     document.removeEventListener('keydown', onKeyDown)
+  //   }
+  // }, [])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -192,14 +192,14 @@ const SearchAllModal = () => {
           <span className="flex-grow mr-10 text-left text-gray-400">
             search
           </span>
-          <span className="text-gray-500 dark:text-gray-300">
+          {/* <span className="text-gray-500 dark:text-gray-300">
             <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
               {keyPrefix}
             </kbd>
             <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
               K
             </kbd>
-          </span>
+          </span> */}
         </div>
       </button>
 
