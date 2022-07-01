@@ -40,6 +40,7 @@ module.exports = {
     },
     'storybook-tailwind-dark-mode',
     'storybook-addon-next-router',
+    'storybook-css-modules',
     // 'storybook-addon-apollo-client',
     'storybook-css-modules',
   ],

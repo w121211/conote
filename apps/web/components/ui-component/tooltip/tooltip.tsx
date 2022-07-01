@@ -1,7 +1,7 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { TooltipContext } from './tooltip-provider'
-import './tooltip.module.css'
+import classes from './tooltip.module.css'
 
 export interface TooltipProps {
   title: string | React.ReactNode
@@ -106,7 +106,7 @@ export const Tooltip: React.FC<
         
         whitespace-nowrap 
         border rounded 
-        transition
+       ${classes.transition}
         pointer-events-none
 
         before:content-['']

@@ -5,7 +5,7 @@ import React from 'react'
 // import { useTooltipTriggerState } from '@react-stately/tooltip'
 // import { TooltipTriggerProps } from '@react-types/tooltip'
 import { Block } from '../../interfaces'
-import './anchor.module.css'
+// import './anchor.module.css'
 // import { DetailPopover } from '@/Block/components/DetailPopover'
 
 // export const AnchorButton = styled.button`

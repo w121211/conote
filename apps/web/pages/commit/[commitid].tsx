@@ -12,6 +12,8 @@ import { getNotePageURL } from '../../shared/note-helpers'
 import Link from 'next/link'
 import moment from 'moment'
 import UserLink from '../../components/user/user-link'
+import { styleSymbol } from '../../components/ui-component/style-fc/style-symbol'
+import { LayoutChildrenPadding } from '../../components/ui-component/layout/layout-children-padding'
 
 interface Props {
   commit: CommitFragment
@@ -44,42 +46,53 @@ const MergeStateLabel = ({
   if (mergePollId) {
     return (
       <Link href={`/poll/${mergePollId}`}>
-        <a>{t}</a>
+        <a className="link text-xs italic">{styleSymbol(t)}</a>
       </Link>
     )
   }
-  return <>{t}</>
+  return <span className="text-gray-400 text-xs italic">{t}</span>
 }
 
 const CommitPage = ({ commit }: Props) => {
   return (
-    <div>
-      <h1>Commit #{commit.id.slice(-6)}</h1>
-      <div>
+    <LayoutChildrenPadding>
+      <h1 className="mb-1 text-gray-900">Commit #{commit.id.slice(-6)}</h1>
+      <div className="text-gray-700">
         by <UserLink userId={commit.userId} />
       </div>
-      <div>{moment(commit.createdAt).fromNow()}</div>
-      <div>
+      <div className="text-gray-400 text-sm">
+        {moment(commit.createdAt).fromNow()}
+      </div>
+      <div className="mt-8">
         <ul>
           {commit.noteDocs.map(e => (
-            <ol key={e.id}>
-              <span>
-                <Link href={getNotePageURL('doc', e.symbol, e.id)}>
-                  <a>
-                    {e.symbol}
-                    <span>#{e.id.slice(-6)}</span>
-                  </a>
-                </Link>
+            <ol key={e.id} className="flex mb-4">
+              <span className="material-icons-outlined mt-0.5 mr-2 text-green-600">
+                check_circle
+              </span>
+              <div>
+                <div>
+                  <Link href={getNotePageURL('doc', e.symbol, e.id)}>
+                    <a>
+                      <span className="symbol-link mr-2">
+                        {styleSymbol(e.symbol)}
+                      </span>
+                      <span className="link text-gray-400 text-sm">
+                        #{e.id.slice(-6)}
+                      </span>
+                    </a>
+                  </Link>
+                </div>
                 <MergeStateLabel
                   mergeState={e.meta.mergeState}
                   mergePollId={e.mergePollId ?? undefined}
                 />
-              </span>
+              </div>
             </ol>
           ))}
         </ul>
       </div>
-    </div>
+    </LayoutChildrenPadding>
   )
 }
 

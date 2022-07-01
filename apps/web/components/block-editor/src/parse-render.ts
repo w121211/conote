@@ -101,10 +101,10 @@ const reTopic = /\[\[[^\]\n]+\]\]/u
 // const reDiscuss =
 //   /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-(c[a-z0-9]{24,29})#(?=\s|$)/u
 const reDiscuss =
-  /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-([a-z0-9_]{12,29})#(?=\s|$)/u
+  /(?<=\s|^)#([$[\]\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-([a-z0-9_]{12,29})#(?=\s|$)/u
 
 const reDiscussNew =
-  /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+[\d\p{Letter}\p{Terminal_Punctuation}]#(?=\s|$)/u
+  /(?<=\s|^)#[$[\]\d\s\p{Letter}\p{Terminal_Punctuation}-]+[\d\p{Letter}\p{Terminal_Punctuation}]#(?=\s|$)/u
 
 const reFiltertag = /(?<=\s|^)#[\d\p{Letter}]+(?=\s|$)/
 

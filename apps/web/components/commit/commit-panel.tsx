@@ -20,30 +20,30 @@ type FormValue = {
 
 export const CommitPanel = (): JSX.Element | null => {
   const router = useRouter(),
-    qMyDrafts = useMyNoteDraftEntriesQuery(),
-    [createCommit, { error }] = useCreateCommitMutation({
-      onCompleted: data => {
-        router.push(`/commit/${data.createCommit.id}`)
-      },
-    }),
     [showModal, setShowModal] = useState(false)
 
   // const { checkedDrafts, checkBoxForm } = reactSelectForm()
   // const [checkedIdx, setCheckedIdx] = useState<boolean[]>(
   //   Array(mockData.length).fill(false),
   // )
-
   const methods = useForm<FormValue>(),
     {
       register,
       handleSubmit,
-      formState: { isSubmitting, isSubmitSuccessful },
-    } = methods
+      formState: { isSubmitting },
+    } = methods,
+    qMyDrafts = useMyNoteDraftEntriesQuery(),
+    [createCommit, { error }] = useCreateCommitMutation({
+      onCompleted: data => {
+        router.push(`/commit/${data.createCommit.id}`)
+      },
+    })
 
   async function onSubmit(value: FormValue) {
     // console.log('checkbox', value.draftIds)
     await createCommit({ variables: { noteDraftIds: value.draftIds } })
     await editorLeftSidebarRefresh('network-only')
+
     setShowModal(false)
   }
 
