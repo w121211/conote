@@ -52,6 +52,10 @@ export const CommitPanel = (): JSX.Element | null => {
   if (qMyDrafts.data === undefined)
     throw new Error('qMyDrafts.data === undefined')
 
+  const editingItems = qMyDrafts.data.myNoteDraftEntries.filter(
+    e => e.status === 'EDIT',
+  )
+
   return (
     <div>
       <button className="btn-primary text-sm" onClick={e => setShowModal(true)}>
@@ -63,7 +67,7 @@ export const CommitPanel = (): JSX.Element | null => {
         visible={showModal}
         onClose={() => setShowModal(false)}
       >
-        {qMyDrafts.data.myNoteDraftEntries.length === 0 ? (
+        {editingItems.length === 0 ? (
           <div>No drafts</div>
         ) : (
           <FormProvider {...methods}>
@@ -82,35 +86,31 @@ export const CommitPanel = (): JSX.Element | null => {
                 {/* <DomainSelect /> */}
               </div>
 
-              {qMyDrafts.data && (
-                <form
-                  className="overflow-auto grid text-gray-700"
-                  // onSubmit={handleSubmit(onSubmit)}
-                >
-                  {qMyDrafts.data.myNoteDraftEntries.map(
-                    ({ id, symbol, title }) => {
-                      return (
-                        <label
-                          key={id}
-                          className={`relative flex items-center px-10 py-2 transition-opacity `}
-                        >
-                          <input
-                            {...register('draftIds')}
-                            className="mr-2"
-                            type="checkbox"
-                            value={id}
-                            disabled={isSubmitting || isSubmitSuccessful}
-                          />
-                          {/* <Link href={getNotePageURL('edit', symbol)}>
+              <form
+                className="overflow-auto grid text-gray-700"
+                // onSubmit={handleSubmit(onSubmit)}
+              >
+                {editingItems.map(({ id, symbol, title }) => {
+                  return (
+                    <label
+                      key={id}
+                      className={`relative flex items-center px-10 py-2 transition-opacity `}
+                    >
+                      <input
+                        {...register('draftIds')}
+                        className="mr-2"
+                        type="checkbox"
+                        value={id}
+                        disabled={isSubmitting || isSubmitSuccessful}
+                      />
+                      {/* <Link href={getNotePageURL('edit', symbol)}>
                         <a>{styleSymbol(symbol)}</a>
                       </Link> */}
-                          {styleSymbol(symbol)}
-                        </label>
-                      )
-                    },
-                  )}
-                </form>
-              )}
+                      {styleSymbol(symbol)}
+                    </label>
+                  )
+                })}
+              </form>
 
               <div className="flex justify-end w-full bottom-0 rounded-b ">
                 <button

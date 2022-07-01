@@ -57,7 +57,7 @@ model Discuss {
   updatedAt DateTime      @updatedAt
 
   // The draft that creat this discuss
-  draft NoteDraft @relation(fields: [draftId], references: [id])
+  draft NoteDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
 
   user   User           @relation(fields: [userId], references: [id])
   count  DiscussCount? // 1-to-1
@@ -73,7 +73,7 @@ model DiscussCount {
   nPosts    Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  discuss   Discuss  @relation(fields: [discussId], references: [id])
+  discuss   Discuss  @relation(fields: [discussId], references: [id], onDelete: Cascade)
 }
 
 model DiscussEmoji {
@@ -82,7 +82,7 @@ model DiscussEmoji {
   code      EmojiCode
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
-  discuss   Discuss            @relation(fields: [discussId], references: [id])
+  discuss   Discuss            @relation(fields: [discussId], references: [id], onDelete: Cascade)
   count     DiscussEmojiCount?
   likes     DiscussEmojiLike[]
 
@@ -95,7 +95,7 @@ model DiscussEmojiCount {
   nUps           Int          @default(0)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id])
+  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id], onDelete: Cascade)
 }
 
 model DiscussEmojiLike {
@@ -105,7 +105,7 @@ model DiscussEmojiLike {
   liked          Boolean
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id])
+  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id])
 
   @@unique([discussEmojiId, userId])
@@ -119,7 +119,7 @@ model DiscussPost {
   content   String
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
-  discuss   Discuss            @relation(fields: [discussId], references: [id])
+  discuss   Discuss            @relation(fields: [discussId], references: [id], onDelete: Cascade)
   user      User               @relation(fields: [userId], references: [id])
   emojis    DiscussPostEmoji[]
 
@@ -133,7 +133,7 @@ model DiscussPostEmoji {
   code          EmojiCode
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @updatedAt
-  discussPost   DiscussPost            @relation(fields: [discussPostId], references: [id])
+  discussPost   DiscussPost            @relation(fields: [discussPostId], references: [id], onDelete: Cascade)
   count         DiscussPostEmojiCount?
   likes         DiscussPostEmojiLike[]
 
@@ -146,7 +146,7 @@ model DiscussPostEmojiCount {
   nUps               Int              @default(0)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
-  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id])
+  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id], onDelete: Cascade)
 }
 
 model DiscussPostEmojiLike {
@@ -156,7 +156,7 @@ model DiscussPostEmojiLike {
   liked              Boolean
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
-  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id])
+  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id], onDelete: Cascade)
   user               User             @relation(fields: [userId], references: [id])
 
   @@unique([userId, discussPostEmojiId])
@@ -231,6 +231,7 @@ model NoteDraft {
   userId      String
   status      NoteDraftStatus @default(EDIT)
   domain      String
+  meta        Json            @default("{}")
   contentHead Json
   contentBody Json
   createdAt   DateTime        @default(now())

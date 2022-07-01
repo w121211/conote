@@ -24,9 +24,9 @@ const mergeState_text: Record<string, string | undefined> = {
   'merged_auto-initial_commit': 'Auto merged (first commit rule)',
   'merged_auto-only_insertions': 'Auto merged (only insertions rule)',
   merged_poll: 'Merged by poll',
-  'rejected_auto-no_changes': '',
-  rejected_poll: '',
-  'paused-from_doc_not_head': '',
+  'rejected_auto-no_changes': 'rejected_auto-no_changes',
+  rejected_poll: 'rejected_poll',
+  'paused-from_doc_not_head': 'paused-from_doc_not_head',
 }
 
 const MergeStateLabel = ({

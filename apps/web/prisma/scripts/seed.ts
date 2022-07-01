@@ -30,7 +30,7 @@ async function main() {
   // await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
 
   const mockDraft = mockNoteDrafts[0],
-    { symbol, userId, contentBody, ...rest } = mockDraft,
+    { symbol, userId, contentBody, meta, ...rest } = mockDraft,
     draft = await noteDraftModel.create(mockBranches[0].name, symbol, userId, {
       ...rest,
       contentBody: { blocks: contentBody.blocks, discussIds: [], symbols: [] },

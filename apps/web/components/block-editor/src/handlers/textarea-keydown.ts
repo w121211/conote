@@ -577,9 +577,10 @@ function handlePairChar(
         fourChar = value.substring(start - 1, start + 3)
 
       let type: SearchType | null = null
-      if (twoChar === '##') {
-        type = 'discuss'
-      } else if (fourChar === '[[]]') {
+      // if (twoChar === '##') {
+      //   type = 'discuss'
+      // } else
+      if (fourChar === '[[]]') {
         type = 'topic'
       }
 

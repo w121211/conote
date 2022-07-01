@@ -740,5 +740,4 @@ export function docUpdatePropsOp(
 //     blockSaveOp = isNewBlockStr && blockSaveOp()
 
 //     // newBlockOrder = isEmptyBlock ?
-
 // }

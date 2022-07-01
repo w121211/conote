@@ -41,6 +41,7 @@ module.exports = {
     'storybook-tailwind-dark-mode',
     'storybook-addon-next-router',
     // 'storybook-addon-apollo-client',
+    'storybook-css-modules',
   ],
   framework: '@storybook/react',
 

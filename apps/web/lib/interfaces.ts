@@ -98,7 +98,18 @@ export type NoteDocContentBody = {
   blocks: Omit<Block, 'childrenUids'>[]
 }
 
-export type NoteDraftParsed = Omit<NoteDraft, 'contentHead' | 'contentBody'> & {
+export type NoteDraftMeta = {
+  // Join note drafts as a chain
+  chain?: {
+    prevId: string | null
+  }
+}
+
+export type NoteDraftParsed = Omit<
+  NoteDraft,
+  'meta' | 'contentHead' | 'contentBody'
+> & {
+  meta: NoteDraftMeta
   contentHead: NoteDocContentHead
   contentBody: NoteDocContentBody
 }

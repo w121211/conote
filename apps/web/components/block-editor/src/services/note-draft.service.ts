@@ -1,9 +1,15 @@
-import type { NoteDraftInput } from 'graphql-let/__generated__/__types__'
+import type {
+  NoteDraftInput,
+  NoteDraftMetaInput,
+} from 'graphql-let/__generated__/__types__'
 import { Block, Doc } from '../interfaces'
 import {
   CreateNoteDraftDocument,
   CreateNoteDraftMutation,
   CreateNoteDraftMutationVariables,
+  DeleteNoteDraftDocument,
+  DeleteNoteDraftMutation,
+  DeleteNoteDraftMutationVariables,
   DropNoteDraftDocument,
   DropNoteDraftMutation,
   DropNoteDraftMutationVariables,
@@ -17,6 +23,9 @@ import {
   NoteDraftQueryVariables,
   NoteFragment,
   UpdateNoteDraftDocument,
+  UpdateNoteDraftMetaDocument,
+  UpdateNoteDraftMetaMutation,
+  UpdateNoteDraftMetaMutationVariables,
   UpdateNoteDraftMutation,
   UpdateNoteDraftMutationVariables,
 } from '../../../../apollo/query.graphql'
@@ -59,6 +68,27 @@ class NoteDraftService {
       throw new Error('[createDraft] mutation error')
     }
     throw new Error('[createDraft] no return data')
+  }
+
+  /**
+   *
+   */
+  async deleteDraft(id: string): Promise<boolean> {
+    const { data, errors } = await this.apolloClient.mutate<
+      DeleteNoteDraftMutation,
+      DeleteNoteDraftMutationVariables
+    >({
+      mutation: DeleteNoteDraftDocument,
+      variables: { id },
+    })
+    if (data) {
+      return data.deleteNoteDraft
+    }
+    if (errors) {
+      console.error(errors)
+      throw new Error('[deleteDraft] DropNoteDraftMutation error')
+    }
+    throw new Error('[deleteDraft] no return data')
   }
 
   /**
@@ -148,9 +178,33 @@ class NoteDraftService {
     }
     if (errors) {
       console.error(errors)
-      throw new Error('[saveDraft] mutation error')
+      throw new Error('[updateDraft] mutation error')
     }
-    throw new Error('[saveDraft] no return data')
+    throw new Error('[updateDraft] no return data')
+  }
+
+  /**
+   *
+   */
+  async updateDraftMeta(
+    id: string,
+    input: NoteDraftMetaInput,
+  ): Promise<NoteDraftFragment> {
+    const { data, errors } = await this.apolloClient.mutate<
+      UpdateNoteDraftMetaMutation,
+      UpdateNoteDraftMetaMutationVariables
+    >({
+      mutation: UpdateNoteDraftMetaDocument,
+      variables: { id, data: input },
+    })
+    if (data?.updateNoteDraftMeta) {
+      return data.updateNoteDraftMeta
+    }
+    if (errors) {
+      console.error(errors)
+      throw new Error('[updateDraftMeta] mutation error')
+    }
+    throw new Error('[updateDraftMeta] no return data')
   }
 
   /**

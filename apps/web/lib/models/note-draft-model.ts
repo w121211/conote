@@ -1,9 +1,13 @@
 import { NoteDraft } from '@prisma/client'
-import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
+import {
+  NoteDraftInput,
+  NoteDraftMetaInput,
+} from 'graphql-let/__generated__/__types__'
 import { parseGQLContentBody } from '../../shared/block-helpers'
 import {
   NoteDocContentBody,
   NoteDocContentHead,
+  NoteDraftMeta,
   NoteDraftParsed,
 } from '../interfaces'
 import prisma from '../prisma'
@@ -86,14 +90,15 @@ class NoteDraftModel {
     branchName: string,
     symbol: string,
     userId: string,
-    {
-      fromDocId,
-      domain,
-      contentHead,
-      contentBody: contentBodyInput,
-    }: NoteDraftInput,
+    data: NoteDraftInput,
   ): Promise<NoteDraftParsed> {
-    const { branch, fromDoc } = await this.validateCreateInput(
+    const {
+        fromDocId,
+        domain,
+        contentHead,
+        contentBody: contentBodyInput,
+      } = data,
+      { branch, fromDoc } = await this.validateCreateInput(
         branchName,
         symbol,
         fromDocId ?? undefined,
@@ -220,8 +225,19 @@ class NoteDraftModel {
   parse(draft: NoteDraft): NoteDraftParsed {
     return {
       ...draft,
+      meta: draft.meta as unknown as NoteDraftMeta,
       contentHead: draft.contentHead as unknown as NoteDocContentHead,
       contentBody: draft.contentBody as unknown as NoteDocContentBody,
+    }
+  }
+
+  toMeta(input?: NoteDraftMetaInput): NoteDraftMeta {
+    return {
+      chain: input
+        ? {
+            prevId: input.chainPrevId,
+          }
+        : undefined,
     }
   }
 }

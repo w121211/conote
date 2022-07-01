@@ -208,6 +208,9 @@ fragment noteDraft on NoteDraft {
   commitId
   fromDocId
   domain
+  meta {
+    ...noteDraftMeta
+  }
   symbol
   contentHead {
     ...noteDocContentHead
@@ -227,8 +230,19 @@ fragment noteDraftDropResponse on NoteDraftDropResponse {
 fragment noteDraftEntry on NoteDraftEntry {
   __typename
   id
+  meta {
+    ...noteDraftMeta
+  }
+  status
   symbol
   title
+}
+
+fragment noteDraftMeta on NoteDraftMeta {
+  __typename
+  chain {
+    prevId
+  }
 }
 
 fragment noteEmoji on NoteEmoji {
@@ -646,10 +660,20 @@ mutation UpdateNoteDraft($id: ID!, $data: NoteDraftInput!, $newSymbol: String) {
   }
 }
 
+mutation UpdateNoteDraftMeta($id: ID!, $data: NoteDraftMetaInput!) {
+  updateNoteDraftMeta(id: $id, data: $data) {
+    ...noteDraft
+  }
+}
+
 mutation DropNoteDraft($id: ID!) {
   dropNoteDraft(id: $id) {
     ...noteDraftDropResponse
   }
+}
+
+mutation DeleteNoteDraft($id: ID!) {
+  deleteNoteDraft(id: $id)
 }
 
 mutation UpsertNoteEmojiLike(

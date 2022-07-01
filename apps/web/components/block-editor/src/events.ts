@@ -6,6 +6,7 @@ import {
   DestructTextareaKeyEvent,
   BlockPositionRelation,
   Doc,
+  EditorProps,
 } from './interfaces'
 import * as ops from './op/ops'
 import { areSameParent, compatPosition } from './op/helpers'
@@ -16,7 +17,7 @@ import {
   getBlockChildren,
 } from './stores/block.repository'
 import { rfdbRepo } from './stores/rfdb.repository'
-import { genBlockUid } from './utils'
+import { buildChains, genBlockUid } from './utils'
 import { isInteger, isNil } from 'lodash'
 import { nextBlock, nthSiblingBlock, prevBlock } from './op/queries'
 import { docRepo } from './stores/doc.repository'
@@ -25,12 +26,12 @@ import { NextRouter } from 'next/router'
 import {
   NoteDocFragment,
   NoteDraftEntryFragment,
+  NoteDraftFragment,
 } from '../../../apollo/query.graphql'
 import { noteService } from './services/note.service'
 import { noteDraftService } from './services/note-draft.service'
 import { commitService } from './services/commit.service'
 import { BlockInput, writeBlocks } from './utils/block-writer'
-import { treeNodeDifferencer, treeUtil } from '@conote/docdiff'
 import { isDocChanged } from '../../../shared/block-helpers'
 
 // const noteService = getNoteService(),
@@ -703,9 +704,13 @@ export async function docOpen(
   symbol: string,
   branch = 'default',
   domain = 'domain',
-): Promise<{ docUid: string }> {
+): Promise<{ docUid: string; draft: Omit<NoteDraftFragment, '__typename'> }> {
   const found = docRepo.findDoc(symbol)
-  if (found) return { docUid: found.uid }
+  if (found) {
+    if (isNil(found.noteDraftCopy))
+      throw new Error('isNil(found.noteDraftCopy)')
+    return { docUid: found.uid, draft: found.noteDraftCopy }
+  }
 
   const [note, draft] = await Promise.all([
     noteService.queryNote(symbol),
@@ -734,13 +739,13 @@ export async function docOpen(
 
     docRepo.update(op)
     await editorLeftSidebarRefresh('network-only')
-    return { docUid: newDocUid }
+    return { docUid: newDocUid, draft }
   } else {
     const parsed = noteDraftService.toDoc(branch, draft, note),
       { blockReducers, docReducers, docUid } = ops.docLoadOp(symbol, parsed)
     blockRepo.update(blockReducers)
     docRepo.update(docReducers)
-    return { docUid }
+    return { docUid, draft }
   }
 
   // console.debug(note, draft)
@@ -912,8 +917,10 @@ export async function editorLeftSidebarItemRemove(
 
   if (doc) {
     await docRemove(doc)
-  } else {
+  } else if (item.status === 'EDIT') {
     await noteDraftService.dropDraft(id)
+  } else if (item.status === 'DROP') {
+    await noteDraftService.deleteDraft(id)
   }
   await editorLeftSidebarRefresh('network-only')
 }
@@ -1051,6 +1058,93 @@ export async function editorOpenSymbolInMain(
     modal: { symbol: null, docUid: null },
     main: { symbol, docUid },
   })
+}
+
+export async function editorChainsRefresh(): Promise<
+  NoteDraftEntryFragment[][]
+> {
+  try {
+    const entries = await noteDraftService.queryMyAllDraftEntries(
+        'network-only',
+      ),
+      chains = buildChains(entries)
+    editorRepo.setDraftEntries(entries)
+    editorRepo.setChains(chains)
+    return chains
+  } catch (err) {
+    if (err instanceof ApolloError) {
+      // TODO: Handle not authenticated case -> set auth status in editor repo
+      console.debug(err)
+      return []
+    } else {
+      throw err
+    }
+  }
+}
+
+/**
+ * If symbol is existed in chains, remove it and insert
+ * If symbol is not existed in chains, insert it
+ */
+export async function editorChainInsert(
+  // entries: NoteDraftEntryFragment[],
+  symbol: string,
+  prevDraftId: string,
+) {
+  const { draft: thisDraft } = await docOpen(symbol)
+  const { draftEntries: entries } = editorRepo.getValue(),
+    exist = entries.find(e => e.id === thisDraft.id),
+    existPrev = exist && entries.find(e => e.id === exist.meta.chain?.prevId),
+    existNext = exist && entries.find(e => e.meta.chain?.prevId === exist.id),
+    atPrev = entries.find(e => e.id === prevDraftId),
+    atNext = entries.find(e => e.meta.chain?.prevId === prevDraftId)
+
+  if (isNil(atPrev)) throw new Error('isNil(atPrev)')
+
+  // Remove existing item
+  if (exist && existNext) {
+    await noteDraftService.updateDraftMeta(existNext.id, {
+      chainPrevId: existPrev?.id ?? 'null',
+    })
+  }
+
+  // Insert item
+  await noteDraftService.updateDraftMeta(thisDraft.id, {
+    chainPrevId: prevDraftId,
+  })
+  if (atNext)
+    await noteDraftService.updateDraftMeta(atNext.id, {
+      chainPrevId: thisDraft.id,
+    })
+
+  await editorChainsRefresh()
+  await editorChainOpen(thisDraft.id)
+}
+
+export async function editorChainOpen(
+  // chains: NoteDraftEntryFragment[][],
+  draftId: string,
+  // router?: NextRouter,
+  // opts?: {
+  //   skipSave?: true
+  //   forceRouteUpdateShallow?: true
+  // },
+) {
+  // console.log('editorOpenSymbolInMain', symbol)
+
+  const { chains } = editorRepo.getValue()
+  const chain = chains.find(a => a.find(b => b.id === draftId) !== undefined)
+
+  if (chain === undefined) throw new Error('draftId not found in chains')
+
+  const chain_: EditorProps['chainTab']['chain'] = []
+  for (const e of chain) {
+    const { symbol } = e,
+      { docUid } = await docOpen(symbol)
+    chain_.push({ entry: e, docUid })
+  }
+
+  editorRepo.setChainTab(chain_)
 }
 
 //

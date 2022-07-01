@@ -107,6 +107,27 @@ const SidebarItem = ({
   if (opening === null) {
     return null
   }
+  if (item.status === 'DROP') {
+    return (
+      <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-500 ">
+        <span
+          className={`group flex items-center gap-1 pl-4 pr-4 leading-relax ${
+            opening.main.symbol == symbol
+              ? 'bg-gray-200 hover:bg-gray-300/80'
+              : 'bg-transparent hover:bg-gray-200'
+          } `}
+        >
+          <span className="material-icons text-lg text-[20px] text-gray-400/60">
+            {symbol.startsWith('@') ? 'language' : 'notes'}
+          </span>
+          <span className="inline-block min-w-0 flex-1 truncate ">
+            <ItemLabel symbol={symbol} title={title ?? undefined} />
+          </span>
+          <SidebarItemPanel item={item} />
+        </span>
+      </div>
+    )
+  }
   return (
     <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-500 ">
       <Link href={getNotePageURL('edit', item.symbol)}>

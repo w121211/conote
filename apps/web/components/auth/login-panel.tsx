@@ -102,8 +102,11 @@ const LoginPanel = ({
       await apolloClient.resetStore()
       const { data } = await sessionLogin({ variables: { idToken } })
       if (data?.sessionLogin) {
-        // location.reload()
-        if (redirectPathAfterLogin) location.assign(redirectPathAfterLogin)
+        if (redirectPathAfterLogin) {
+          location.assign(redirectPathAfterLogin)
+        } else {
+          location.reload()
+        }
       } else {
         // console.error('session login fail')
         setError('Login fail')

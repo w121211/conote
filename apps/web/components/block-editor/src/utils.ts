@@ -1,9 +1,10 @@
-import React from 'react'
+import { cloneDeepWith, isNil } from 'lodash'
 import { nanoid } from 'nanoid'
+import type React from 'react'
 import { Block, Doc } from './interfaces'
-import { cloneDeepWith } from 'lodash'
 import { getBlock } from './stores/block.repository'
 import { docRepo } from './stores/doc.repository'
+import type { NoteDraftEntryFragment } from '../../../apollo/query.graphql'
 
 //
 // OS
@@ -170,4 +171,53 @@ export function omitTypenameDeep(
     }
     return undefined
   })
+}
+
+//
+// Doc helpers
+//
+//
+//
+//
+//
+//
+//
+
+export function buildChains(
+  entries: NoteDraftEntryFragment[],
+): NoteDraftEntryFragment[][] {
+  const dict: Record<string, NoteDraftEntryFragment | null> =
+      Object.fromEntries(entries.map(e => [e.id, e])),
+    nextId: Record<string, string | null> = Object.fromEntries(
+      entries.map(e => [e.id, null]),
+    ),
+    seeds: NoteDraftEntryFragment[] = []
+
+  entries.forEach(e => {
+    if (e.meta.chain?.prevId) {
+      // nextId[e.id] = e.meta.chain.prevId
+      nextId[e.meta.chain.prevId] = e.id
+    } else {
+      seeds.push(e)
+    }
+  })
+
+  const chains = seeds.map(e => {
+    const chain = [e]
+
+    let nextId_ = nextId[e.id],
+      i = 0
+    while (nextId_) {
+      const entry = dict[nextId_]
+      if (isNil(entry)) throw new Error('isNil(entry)')
+      chain.push(entry)
+
+      nextId_ = nextId[nextId_]
+      i++
+      if (i > 1000) throw new Error('Infinite loop')
+    }
+    return chain
+  })
+
+  return chains
 }

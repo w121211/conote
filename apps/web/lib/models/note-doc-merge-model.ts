@@ -140,8 +140,10 @@ class NoteDocMergeModel extends NoteDocModel {
         contentBody_inserts.length > 0 &&
         contentBody_inserts.length === contentBody_changes.length
 
-    if (contentHead_isEqual && contentBody_changes.length === 0)
+    if (contentHead_isEqual && contentBody_changes.length === 0) {
+      console.debug(contentBody_changes)
       return await this._update(doc.id, 'REJECTED', 'rejected_auto-no_changes')
+    }
 
     if (waitingDocs.length <= 1) {
       if (headDoc && headDoc.userId === doc.userId)

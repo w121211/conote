@@ -223,7 +223,8 @@ export type EditorProps = {
   }
   leftSidebar: {
     show: boolean
-    items: NoteDraftEntryFragment[]
+    droppedItems: NoteDraftEntryFragment[]
+    editingItems: NoteDraftEntryFragment[]
   }
   modal: {
     discuss?: {
@@ -249,11 +250,19 @@ export type EditorProps = {
       docUid: string | null
     }
 
-    // symbolMain: string | null
-    // symbolModal: string | null
-
     // (future) when open a block
     // blockUid?: string
+  }
+
+  // Experimental
+  draftEntries: NoteDraftEntryFragment[]
+  chains: NoteDraftEntryFragment[][]
+  chainTab: {
+    isOpening: boolean
+    chain: {
+      entry: NoteDraftEntryFragment
+      docUid: string
+    }[]
   }
 }
 

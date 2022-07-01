@@ -22,6 +22,7 @@ const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
   linkId: null,
   status: 'EDIT',
   domain: 'domain0',
+  meta: {},
   contentHead: {},
   contentBody: {
     discussIds: [],

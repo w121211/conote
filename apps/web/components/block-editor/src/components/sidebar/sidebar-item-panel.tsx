@@ -1,7 +1,7 @@
 import { NoteDraftEntryFragment } from '../../../../../apollo/query.graphql'
 import { editorLeftSidebarItemRemove } from '../../events'
 
-const DocIndexPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
+const SidebarItemPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
   // const commitButton =
   //   isTreeNode(item) && TreeService.isRoot(item) ? (
   //     <button
@@ -35,4 +35,4 @@ const DocIndexPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
     </div>
   )
 }
-export default DocIndexPanel
+export default SidebarItemPanel

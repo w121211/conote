@@ -10,6 +10,7 @@ import { editorRepo } from '../../stores/editor.repository'
 import SidebarSection from './sidebar-section'
 import { siderRepo } from '../../../../stores/sider.repository'
 import { setProps } from '@ngneat/elf'
+import Link from 'next/link'
 
 /**
  * Call 'editorLeftSidebarRefresh' event on component mount to query required data.
@@ -48,7 +49,6 @@ const SidebarEl = forwardRef<
 
   useEffect(() => {
     editorLeftSidebarRefresh()
-
     window.addEventListener('resize', onResize)
     window.addEventListener('touchstart', onTouchStart, false)
 
@@ -126,9 +126,13 @@ const SidebarEl = forwardRef<
           </span>
         </div> */}
 
-      {/* <DocIndexSection title="Committed" indexArray={committedDocIndicies} /> */}
+      {/* <SidebarSection title="DELETED" items={sidebar.droppedItems} /> */}
 
-      <SidebarSection title="EDIT" items={sidebar.items} />
+      <Link href="/note">
+        <a>New note</a>
+      </Link>
+
+      <SidebarSection title="EDIT" items={sidebar.editingItems} />
     </div>
   )
 })

@@ -351,21 +351,27 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 
   // # get user's all drafts for draft-sidebar
   // # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
-  // myNoteDraftEntries: [NoteDraftEntry!]!
   // can use select filter to only get id field
   async myNoteDraftEntries(_parent, _args, { req }, _info) {
     const { userId } = await isAuthenticated(req),
       drafts = await prisma.noteDraft.findMany({
-        where: { AND: { userId: userId, status: 'EDIT' } },
-        // select: { id: true },
+        // where: {
+        //   OR: [{ status: 'EDIT' }, { status: 'DROP' }],
+        //   AND: { userId: userId },
+        // },
+        where: { userId: userId, status: 'EDIT' },
         orderBy: { createdAt: 'asc' },
       }),
       parsed = drafts.map(e => noteDraftModel.parse(e)),
-      entries = parsed.map(({ id, symbol, contentHead: { title } }) => ({
-        id,
-        symbol,
-        title,
-      }))
+      entries = parsed.map(
+        ({ id, meta, status, symbol, contentHead: { title } }) => ({
+          id,
+          status,
+          symbol,
+          title,
+          meta,
+        }),
+      )
     return entries
   },
 
@@ -403,7 +409,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     if (doc) {
       return toGQLNoteDoc(doc)
     }
-    throw new Error('NoteDoc not found.')
+    throw new Error('NoteDoc not found.' + id)
   },
 
   async noteDocsByUser(_parent, { userId, afterId }, _context, _info) {
@@ -424,7 +430,8 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const docs = (
       await prisma.noteDoc.findMany({
         where: {
-          AND: [{ note: { id: noteId } }, { status: 'CANDIDATE' }],
+          note: { id: noteId },
+          status: 'CANDIDATE',
         },
         include: { branch: true, sym: true },
         orderBy: { createdAt: 'asc' },
@@ -485,12 +492,23 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
       })
     }
     if (draft) {
-      if (draft.userId !== userId) {
-        throw new Error('Not the draft owner')
-      }
+      if (draft.userId !== userId) throw new Error('Not the owner of draft')
       return toStringProps(noteDraftModel.parse(draft))
     }
     return null
+  },
+
+  async noteDraftById(_parent, { id }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      draft = await prisma.noteDraft.findUnique({
+        where: { id },
+      })
+
+    if (draft) {
+      if (draft.userId !== userId) throw new Error('Not the owner of draft')
+      return toStringProps(noteDraftModel.parse(draft))
+    }
+    throw new Error('Note draft not found.')
   },
 
   async noteEmojis(_parent, { noteId }, _context, _info) {
@@ -812,16 +830,35 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     return toStringProps(draft)
   },
 
-  // dropNoteDraft(id: ID!): DraftDropResponse!
+  async updateNoteDraftMeta(_parent, { id, data }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      draft = await prisma.noteDraft.findUnique({
+        where: { id },
+      })
+
+    if (draft === null) throw new Error('NoteDraft not found.')
+    if (draft.userId !== userId)
+      throw new Error('User is not the owner, cannot update')
+
+    const meta = noteDraftModel.toMeta(data)
+    const draft_ = await prisma.noteDraft.update({
+      data: { meta },
+      where: { id },
+    })
+
+    return toStringProps(noteDraftModel.parse(draft_))
+  },
+
   async dropNoteDraft(_parent, { id }, _context, _info) {
-    try {
-      await prisma.noteDraft.update({ where: { id }, data: { status: 'DROP' } })
-    } catch (e) {
-      // what error message should be thrown
-      throw new Error('[dropNoteDraft] Unable to drop the NoteDraft')
-      // throw e
-    }
+    await prisma.noteDraft.update({ where: { id }, data: { status: 'DROP' } })
     return { response: 'Draft is successfully dropped.' }
+  },
+
+  async deleteNoteDraft(_parent, { id }, _context, _info) {
+    // Require to delete discusses first
+    // await prisma.discuss.deleteMany({ where: { draftId: id } })
+    await prisma.noteDraft.delete({ where: { id } })
+    return true
   },
 
   async upsertNoteEmojiLike(
