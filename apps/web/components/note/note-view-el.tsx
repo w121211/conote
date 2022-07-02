@@ -5,10 +5,10 @@ import {
   NoteDraftFragment,
   NoteFragment,
 } from '../../apollo/query.graphql'
-import { getNotePageURL } from '../../shared/note-helpers'
+import { getNotePageURL } from '../page-utils'
 import BlockViewer from '../block-editor/src/components/block/block-viewer'
 import Layout from '../ui-component/layout/layout'
-import { parseGQLBlocks } from '../../shared/block-helpers'
+import { parseGQLBlocks } from '../../shared/block.common'
 import NoteHead from './note-head'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import { Badge } from '../ui-component/badge'

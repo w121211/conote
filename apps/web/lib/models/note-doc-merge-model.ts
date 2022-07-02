@@ -1,5 +1,5 @@
 import { TreeNodeChange, treeNodeDifferencer, treeUtil } from '@conote/docdiff'
-import {
+import type {
   Branch,
   Note,
   NoteDoc,
@@ -9,22 +9,11 @@ import {
   Sym,
 } from '@prisma/client'
 import { isEqual } from 'lodash'
-import { Block } from '../../components/block-editor/src/interfaces'
-import {
-  NoteDocContentBody,
-  NoteDocContentHead,
-  NoteDocMeta,
-} from '../interfaces'
+import { differenceContentBody } from '../../shared/note-doc.common'
+import type { NoteDocMeta } from '../interfaces'
 import prisma from '../prisma'
 import { NoteDocModel } from './note-doc-model'
 import { pollMergeModel } from './poll-merge-model'
-
-function isBlockEqual(
-  a: Omit<Block, 'childrenUids'>,
-  b: Omit<Block, 'childrenUids'>,
-) {
-  return a.str === b.str && a.docSymbol === b.docSymbol
-}
 
 type MergeErrorFlag = 'paused-from_doc_not_head' | 'fail_to_auto_merge'
 
@@ -58,26 +47,6 @@ class MergeError extends Error {
 }
 
 class NoteDocMergeModel extends NoteDocModel {
-  /**
-   * Get changes of content-head
-   *
-   * TODO
-   */
-  _compareContentHead(final: NoteDocContentHead, start: NoteDocContentHead) {
-    throw new Error('Not implement')
-    // return isEqual(final, start)
-  }
-
-  _compareContentBody(
-    final: NoteDocContentBody,
-    start: NoteDocContentBody,
-  ): TreeNodeChange[] {
-    const f_blocks = treeUtil.toTreeNodeBodyList(final.blocks),
-      s_blocks = treeUtil.toTreeNodeBodyList(start.blocks),
-      changes = treeNodeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
-    return changes
-  }
-
   async _createMergePoll(
     doc: NoteDoc,
   ): Promise<NoteDoc & { branch: Branch; sym: Sym; mergePoll: Poll | null }> {
@@ -129,7 +98,7 @@ class NoteDocMergeModel extends NoteDocModel {
       headDoc = await this.getHeadDoc(branchId, symId),
       // TODO
       contentHead_isEqual = isEqual(doc_.contentHead, fromDoc_.contentHead),
-      contentBody_changes = this._compareContentBody(
+      contentBody_changes = differenceContentBody(
         doc_.contentBody,
         fromDoc_.contentBody,
       ),

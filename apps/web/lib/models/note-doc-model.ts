@@ -1,5 +1,5 @@
-import { Branch, NoteDoc, PrismaPromise, Sym } from '@prisma/client'
-import {
+import type { Branch, NoteDoc, PrismaPromise, Sym } from '@prisma/client'
+import type {
   NoteDocContentBody,
   NoteDocContentHead,
   NoteDocMeta,

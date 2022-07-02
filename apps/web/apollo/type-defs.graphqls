@@ -465,12 +465,14 @@ type NoteDoc {
 }
 
 type NoteDocContentBody {
-  blocks: [Block!]!
-  diff: JSON
   discussIds: [BlockUid_DiscussId!]!
 
   # A symbol-noteId map, so later the cahnge of symbol name won't affect
   symbols: [Symbol_SymId!]!
+  blocks: [Block!]!
+
+  # Experimental
+  blockDiff: [TreeNodeChange!]
 }
 
 type NoteDocContentHead {
@@ -629,6 +631,11 @@ type Symbol_SymId {
   symId: String
 }
 
+type TreeNodeChange {
+  type: String!
+  uid: String!
+}
+
 type User {
   id: ID!
   email: String!
@@ -716,7 +723,7 @@ input NoteDocContentBodyInput {
   discussIds: [BlockUid_DiscussIdInput!]!
   symbols: [Symbol_SymIdInput!]!
   blocks: [BlockInput!]!
-  diff: JSON
+  blockDiff: [TreeNodeChangeInput!]!
 }
 
 # Same as NoteDocContentHead
@@ -759,6 +766,11 @@ input RateInput {
 input Symbol_SymIdInput {
   symbol: String!
   symId: String
+}
+
+input TreeNodeChangeInput {
+  type: String!
+  uid: String!
 }
 
 # ------ NEXT ------

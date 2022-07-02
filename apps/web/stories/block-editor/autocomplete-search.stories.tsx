@@ -9,7 +9,7 @@ import { mockBlocks } from '../../components/block-editor/test/__mocks__/mock-bl
 import ModalProvider from '../../components/modal/modal-context'
 import { InitStoreForStorybook } from './helper-components/init-store-for-storybook'
 import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
-import { writeBlocks } from '../../components/block-editor/src/utils/block-writer'
+import { writeBlocks } from '../../shared/block-writer'
 
 // Need to place outside, otherwise the storybook result weird behavior
 const basicBlocks = writeBlocks(['a', ['b', 'c']])

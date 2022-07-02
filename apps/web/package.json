@@ -138,7 +138,7 @@
     "test": "jest",
     "test-all": "yarn lint && yarn type-check && yarn test",
     "test-fetcher": "jest -c=jest.fetcher.config.js --watch",
-    "test-lib": "dotenv -e .env.local -- jest -c=./test/jest.lib.config.js --watch",
+    "test-lib": "dotenv -e .env.local -- jest -c=./jest.lib.config.js --watch",
     "type-check": "tsc --pretty --noEmit"
   }
 }

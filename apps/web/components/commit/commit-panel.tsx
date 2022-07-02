@@ -1,16 +1,13 @@
+import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import {
   useCreateCommitMutation,
   useMyNoteDraftEntriesQuery,
 } from '../../apollo/query.graphql'
-import Modal from '../modal/modal'
-import DomainSelect from '../domain/domain-select'
-import { useRouter } from 'next/router'
-import { styleSymbol } from '../ui-component/style-fc/style-symbol'
-import Link from 'next/link'
-import { getNotePageURL } from '../../shared/note-helpers'
 import { editorLeftSidebarRefresh } from '../block-editor/src/events'
+import Modal from '../modal/modal'
+import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 
 type FormValue = {
   // Selected draft ids
@@ -21,11 +18,6 @@ type FormValue = {
 export const CommitPanel = (): JSX.Element | null => {
   const router = useRouter(),
     [showModal, setShowModal] = useState(false)
-
-  // const { checkedDrafts, checkBoxForm } = reactSelectForm()
-  // const [checkedIdx, setCheckedIdx] = useState<boolean[]>(
-  //   Array(mockData.length).fill(false),
-  // )
   const methods = useForm<FormValue>(),
     {
       register,
@@ -43,11 +35,13 @@ export const CommitPanel = (): JSX.Element | null => {
     // console.log('checkbox', value.draftIds)
     await createCommit({ variables: { noteDraftIds: value.draftIds } })
     await editorLeftSidebarRefresh('network-only')
-
     setShowModal(false)
   }
 
-  if (error) throw error
+  if (error) {
+    console.debug(error)
+    throw error
+  }
   if (qMyDrafts.loading) return null
   if (qMyDrafts.data === undefined)
     throw new Error('qMyDrafts.data === undefined')
@@ -101,7 +95,8 @@ export const CommitPanel = (): JSX.Element | null => {
                         className="mr-2"
                         type="checkbox"
                         value={id}
-                        disabled={isSubmitting || isSubmitSuccessful}
+                        disabled={isSubmitting}
+                        // disabled={true}
                       />
                       {/* <Link href={getNotePageURL('edit', symbol)}>
                         <a>{styleSymbol(symbol)}</a>

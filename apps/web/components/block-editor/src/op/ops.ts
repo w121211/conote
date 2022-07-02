@@ -17,14 +17,13 @@ import type {
   NoteDraftFragment,
   NoteFragment,
 } from '../../../../apollo/query.graphql'
-import { parseGQLBlocks } from '../../../../shared/block-helpers'
+import { parseGQLBlocks } from '../../../../shared/block.common'
 import type {
   Block,
   BlockPosition,
   BlockPositionRelation,
   Doc,
 } from '../interfaces'
-import { noteDraftService } from '../services/note-draft.service'
 import {
   BlockReducer,
   BlockReducerFn,

@@ -1,4 +1,3 @@
-import { isDocChanged } from '../../../shared/block-helpers'
 import {
   docSave,
   editingFirstChild,
@@ -17,7 +16,7 @@ import {
 import { Block, BlockWithChildren } from './interfaces'
 import { editorRepo } from './stores/editor.repository'
 import { rfdbRepo, rfdbStore } from './stores/rfdb.repository'
-import { destructKeyDown, isShortcutKey } from './utils'
+import { destructKeyDown, isDocChanged, isShortcutKey } from './utils'
 
 //
 // Mouse events

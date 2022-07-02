@@ -7,7 +7,7 @@ import {
 } from '@ngneat/elf-entities'
 import { stateHistory } from '@ngneat/elf-state-history'
 import { map, Observable } from 'rxjs'
-import { Block, CursorProp } from '../interfaces'
+import type { Block, CursorProp, Doc } from '../interfaces'
 
 type BlocksStoreState = {
   entities: Record<string, Block>

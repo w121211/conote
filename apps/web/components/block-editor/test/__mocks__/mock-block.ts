@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid'
 import { Block } from '../../src/interfaces'
 import { genBlockUid } from '../../src/utils'
 import { BlockInput, writeBlocks } from '../../src/utils/block-writer'

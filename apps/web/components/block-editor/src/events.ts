@@ -1,7 +1,7 @@
 import { ApolloError, FetchPolicy } from '@apollo/client'
 import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
 import { editingFocus, routeUpdateShallow, setCursorPosition } from './effects'
-import {
+import type {
   Block,
   DestructTextareaKeyEvent,
   BlockPositionRelation,
@@ -20,9 +20,13 @@ import { rfdbRepo } from './stores/rfdb.repository'
 import { buildChains, genBlockUid } from './utils'
 import { isInteger, isNil } from 'lodash'
 import { nextBlock, nthSiblingBlock, prevBlock } from './op/queries'
-import { docRepo } from './stores/doc.repository'
+import {
+  docRepo,
+  docToNoteDraftInput,
+  isDocChanged,
+} from './stores/doc.repository'
 import { editorRepo } from './stores/editor.repository'
-import { NextRouter } from 'next/router'
+import type { NextRouter } from 'next/router'
 import {
   NoteDocFragment,
   NoteDraftEntryFragment,
@@ -32,7 +36,6 @@ import { noteService } from './services/note.service'
 import { noteDraftService } from './services/note-draft.service'
 import { commitService } from './services/commit.service'
 import { BlockInput, writeBlocks } from './utils/block-writer'
-import { isDocChanged } from '../../../shared/block-helpers'
 
 // const noteService = getNoteService(),
 //   noteDraftService = getNoteDraftService(),
@@ -733,7 +736,7 @@ export async function docOpen(
       draft = await noteDraftService.createDraft(
         doc.branch,
         doc.symbol,
-        noteDraftService.toNoteDraftInput(doc),
+        docToNoteDraftInput(doc),
       ),
       op = ops.docUpdatePropsOp(doc, { noteDraftCopy: draft })
 
@@ -755,7 +758,7 @@ export async function docOpen(
  * Save doc on remote, use doc's title as 'symbol'
  *  Because local repositories already have the content,
  *  only update the note-draft-copy.
- * @param force if not true, will check and only save when doc is changed
+ * @param opts.force if not true, will check and only save when doc is changed
  */
 export async function docSave(
   docUid: string,

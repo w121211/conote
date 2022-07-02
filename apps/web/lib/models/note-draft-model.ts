@@ -3,7 +3,7 @@ import {
   NoteDraftInput,
   NoteDraftMetaInput,
 } from 'graphql-let/__generated__/__types__'
-import { parseGQLContentBody } from '../../shared/block-helpers'
+import { parseGQLContentBody } from '../../shared/block.common'
 import {
   NoteDocContentBody,
   NoteDocContentHead,

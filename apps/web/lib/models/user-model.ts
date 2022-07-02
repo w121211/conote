@@ -1,4 +1,4 @@
-import { User } from '@prisma/client'
+import type { User } from '@prisma/client'
 import prisma from '../prisma'
 
 if (process.env.APP_BOT_EMAIL === undefined) {

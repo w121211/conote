@@ -1,4 +1,4 @@
-import {
+import type {
   Branch,
   Commit,
   Discuss,
@@ -9,50 +9,55 @@ import {
   Sym,
 } from '@prisma/client'
 import cuid from 'cuid'
+import { differenceContentBody } from '../../shared/note-doc.common'
 import prisma from '../prisma'
 import { noteDocMergeModel } from './note-doc-merge-model'
 import { noteDocModel } from './note-doc-model'
 import { noteDraftModel } from './note-draft-model'
 import { symModel } from './sym-model'
 
+class InputError extends Error {
+  constructor(msg: string) {
+    super(msg)
+    // this.name = 'MergeError'
+
+    // Set the prototype explicitly.
+    // See https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html#example
+    // Object.setPrototypeOf(this, InputError.prototype)
+    Object.setPrototypeOf(this, new.target.prototype)
+  }
+}
+
+export class CommitInputError extends Error {
+  rejects: { draftId: string; msg: string }[]
+
+  constructor(rejects: { draftId: string; msg: string }[]) {
+    super(rejects.map(e => `(${e.draftId}) ${e.msg}`).join(', '))
+    Object.setPrototypeOf(this, new.target.prototype)
+
+    this.rejects = rejects
+  }
+}
+
 /**
  *
  */
-async function validateDraft(id: string, userId: string) {
-  const draft = await prisma.noteDraft.findUnique({
-      where: { id },
+async function validateDraft(draft: NoteDraft, userId: string) {
+  const sym = await prisma.sym.findUnique({
+      where: { symbol: draft.symbol },
     }),
-    sym =
-      draft &&
-      (await prisma.sym.findUnique({
-        where: { symbol: draft.symbol },
-      })),
-    curDoc =
-      sym &&
-      // TODO: noteDocModel.getCurrentNoteDoc(branchId, symId)
-      (await prisma.noteDoc.findFirst({
-        where: {
-          branchId: draft.branchId,
-          symId: sym.id,
-          status: 'MERGED',
-        },
-        orderBy: { updatedAt: 'desc' },
-      })),
+    headDoc = sym && (await noteDocModel.getHeadDoc(draft.branchId, sym.id)),
     note =
-      draft &&
-      sym &&
+      headDoc &&
       (await prisma.note.findUnique({
         where: {
-          branchId_symId: {
-            branchId: draft.branchId,
-            symId: sym.id,
-          },
+          branchId_symId: { branchId: headDoc.branchId, symId: headDoc.symId },
         },
       })),
-    draftParsed = draft && noteDraftModel.parse(draft),
-    newJoinedDiscussIds =
-      draftParsed &&
-      draftParsed.contentBody.discussIds.filter(e => e.commitId === undefined),
+    draftParsed = noteDraftModel.parse(draft),
+    newJoinedDiscussIds = draftParsed.contentBody.discussIds.filter(
+      e => e.commitId === undefined,
+    ),
     newJoinedDiscusses =
       newJoinedDiscussIds &&
       (await prisma.$transaction(
@@ -64,37 +69,50 @@ async function validateDraft(id: string, userId: string) {
       ))
 
   // console.log(`existing discuss ${existingDiscusses?.length}`)
-
-  if (draft === null) {
-    throw new Error('Some draftId does not exist.')
-  }
-  if (draftParsed === null) {
-    throw new Error('Some draftId does not exist.')
-  }
-  if (draft.fromDocId && (curDoc === null || draft.fromDocId !== curDoc.id)) {
-    throw new Error('FromDoc is not the latest doc of this note.')
-  }
-  if (draft.fromDocId === null && curDoc !== null) {
-    throw new Error('FromDoc is not the latest doc of this note.')
+  if (sym && headDoc === null) {
+    throw new Error('Unexpected error: found sym but not found headDoc')
   }
   if (sym && note === null) {
     throw new Error('Unexpected error: found sym but not found note')
   }
-  if (draft.userId !== userId) {
-    throw new Error('User is not the owner of the draft')
+  if (note && headDoc === null) {
+    throw new Error('Unexpected error: found note but not found head-doc')
   }
-  // TODO: check if the draft is the same as curDoc
-  // if(draft.fromDocId) {
-  //   const domainChanged = draft.domain === curDoc!.domain
-  //   const metaChanged = metaDiff(curDoc!.meta as unknown as NoteDocMeta, draftParsed.meta)
-  //   const contentChanged = getContentDiff(curDoc!.content as unknown as NoteDocContent, draftParsed.content)
-  //   if (!domainChanged && !metaChange && !contentChange)
-  // }
+
+  if (draft.userId !== userId) {
+    throw new InputError('User is not the owner of the draft')
+  }
+  if (draft.symId !== null && draft.symId !== sym?.id) {
+    throw new InputError("Draft's symbol does not match its sym-id")
+  }
+  if (draft.fromDocId) {
+    if (headDoc === null)
+      throw new InputError("Draft's from-doc does not match current head-doc")
+    if (headDoc && headDoc.id !== draft.fromDocId)
+      throw new InputError("Draft's from-doc does not match current head-doc")
+  }
+  if (draft.fromDocId === null && headDoc !== null) {
+    throw new InputError(
+      'Draft does not have a from-doc, but a head-doc is exist',
+    )
+  }
+  if (draft.fromDocId !== null && headDoc) {
+    // const domainChanged = draft.domain === curDoc!.domain
+    // const metaChanged = metaDiff(curDoc!.meta as unknown as NoteDocMeta, draftParsed.meta)
+    // const contentChanged = getContentDiff(curDoc!.content as unknown as NoteDocContent, draftParsed.content)
+
+    const diffBody = differenceContentBody(
+      draftParsed.contentBody,
+      headDoc.contentBody,
+    )
+    if (diffBody.length === 0)
+      throw new InputError("Draft's content-body do not change from from-doc")
+  }
 
   return {
     draft,
     draftParsed,
-    fromDoc: curDoc,
+    fromDoc: headDoc,
     sym,
     note,
     newJoinedDiscusses,
@@ -125,21 +143,46 @@ export async function commitNoteDrafts(
     branch: Branch
   })[]
 }> {
-  const drafts: NoteDraft[] = [],
-    symbol_symId: Record<string, string> = {},
+  // const drafts: NoteDraft[] = [],
+  const symbol_symId: Record<string, string> = {},
     symbol_noteId: Record<string, string> = {},
     promises: PrismaPromise<any>[] = [],
     commitId = cuid()
 
-  // Loop first run
+  // Validate drafts before commit
+  const validateResults: Awaited<ReturnType<typeof validateDraft>>[] = [],
+    rejects: CommitInputError['rejects'] = []
+
   for (const id of draftIds) {
-    const { draft, draftParsed, fromDoc, sym, note, newJoinedDiscusses } =
-        await validateDraft(id, userId),
+    const draft = await prisma.noteDraft.findUnique({ where: { id } })
+    if (draft === null) {
+      throw new Error('Draft not found by given id')
+    }
+
+    try {
+      validateResults.push(await validateDraft(draft, userId))
+    } catch (err) {
+      if (err instanceof InputError) {
+        rejects.push({ draftId: id, msg: err.message })
+      } else {
+        throw err
+      }
+    }
+  }
+
+  if (rejects.length > 0) {
+    // console.debug(rejects)
+    throw new CommitInputError(rejects)
+  }
+
+  // Loop first run: create syms, connect discusses
+  validateResults.forEach(e => {
+    const { draft, draftParsed, fromDoc, sym, note, newJoinedDiscusses } = e,
       { branchId, linkId, symbol } = draft,
       symId = sym ? sym.id : cuid(),
       noteId = note ? note.id : cuid()
 
-    drafts.push(draft)
+    // drafts.push(draft)
     symbol_symId[symbol] = symId
     symbol_noteId[symbol] = noteId
 
@@ -190,12 +233,13 @@ export async function commitNoteDrafts(
         }
       })
     }
-  }
+  })
 
   // Loop second run: for each draft, create doc and connect to the note
-  for (const e of drafts) {
-    const draftParsed = noteDraftModel.parse(e),
-      symId = symbol_symId[e.symbol]
+  validateResults.forEach(e => {
+    const { draft, draftParsed } = e,
+      // draftParsed = noteDraftModel.parse(e),
+      symId = symbol_symId[draft.symbol]
 
     if (symId === null) throw new Error('Unexpected error: symId === null')
 
@@ -207,11 +251,11 @@ export async function commitNoteDrafts(
     // For each draft, connect draft to commit and update its status to commit
     promises.push(
       prisma.noteDraft.update({
-        where: { id: e.id },
+        where: { id: draft.id },
         data: { commit: { connect: { id: commitId } }, status: 'COMMIT' },
       }),
     )
-  }
+  })
 
   // Create Commit and get or create Sym, Note and NoteDoc
   const [commit] = await prisma.$transaction([
@@ -233,12 +277,12 @@ export async function commitNoteDrafts(
 
   const notes = (
     await prisma.$transaction(
-      drafts.map(e =>
+      validateResults.map(({ draft }) =>
         prisma.note.findUnique({
           where: {
             branchId_symId: {
-              branchId: e.branchId,
-              symId: symbol_symId[e.symbol],
+              branchId: draft.branchId,
+              symId: symbol_symId[draft.symbol],
             },
           },
           include: {

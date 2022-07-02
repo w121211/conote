@@ -1,4 +1,4 @@
-import { Block } from '../interfaces'
+import type { Block } from '../interfaces'
 import { getBlock, getBlockChildren } from '../stores/block.repository'
 
 // export function uidAndEmbedId(uid: string) {

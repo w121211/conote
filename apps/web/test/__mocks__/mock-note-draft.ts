@@ -1,10 +1,10 @@
-import { Branch, NoteDoc, Sym } from '@prisma/client'
+import type { Branch, NoteDoc, Sym } from '@prisma/client'
 import { writeBlocks } from '../../components/block-editor/src/utils/block-writer'
 import {
   mockBlockInputs,
   mockBlocks,
 } from '../../components/block-editor/test/__mocks__/mock-block'
-import { NoteDocParsed, NoteDraftParsed } from '../../lib/interfaces'
+import type { NoteDocParsed, NoteDraftParsed } from '../../lib/interfaces'
 import { mockBranches } from './mock-branch'
 import { mockDiscusses } from './mock-discuss'
 import { mockLinks } from './mock-link'
@@ -141,6 +141,7 @@ export function mockNoteDrafts_gotFromDoc(
       linkId: null,
       status: 'EDIT',
       domain: domain,
+      xmeta: {},
       contentHead,
       contentBody: {
         ...contentBody,

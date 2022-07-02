@@ -3,7 +3,7 @@ import Modal from '../modal/modal'
 import classes from './search-all-modal.module.css'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 import { useSearchSymbolLazyQuery } from '../../apollo/query.graphql'
-import { getNotePageURL } from '../../shared/note-helpers'
+import { getNotePageURL } from '../page-utils'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 

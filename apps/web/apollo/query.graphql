@@ -167,7 +167,10 @@ fragment noteDocContentBody on NoteDocContentBody {
   blocks {
     ...block
   }
-  diff
+  blockDiff {
+    type
+    uid
+  }
 }
 
 fragment noteDocContentHead on NoteDocContentHead {

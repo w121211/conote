@@ -4,6 +4,7 @@ import { mockDiffBlocks } from '../../components/block-editor/test/__mocks__/moc
 import { NoteDocContentBody, NoteDocParsed } from '../../lib/interfaces'
 import { mockBranches } from './mock-branch'
 import { mockCommits } from './mock-commit'
+import { mockNoteDrafts } from './mock-note-draft'
 import { mockMergePolls } from './mock-poll'
 import { mockSyms } from './mock-sym'
 import { mockUsers } from './mock-user'
@@ -42,6 +43,9 @@ export const mockNoteDocs: NoteDocParsed<NoteDoc>[] = [
     ...base,
     id: '0-candidate_initial_commit',
     status: 'CANDIDATE',
+    contentHead: mockNoteDrafts[0].contentHead,
+    contentBody: mockNoteDrafts[0].contentBody,
+    userId: mockNoteDrafts[0].userId,
   },
   {
     ...base,

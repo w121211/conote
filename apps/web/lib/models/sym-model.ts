@@ -1,5 +1,5 @@
-import { Sym, SymType } from '@prisma/client'
-import { parseSymbol } from '../../shared/symbol.utils'
+import type { Sym, SymType } from '@prisma/client'
+import { parseSymbol } from '../../shared/symbol.common'
 import prisma from '../prisma'
 
 /**

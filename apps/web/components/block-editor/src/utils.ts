@@ -1,9 +1,7 @@
 import { cloneDeepWith, isNil } from 'lodash'
 import { nanoid } from 'nanoid'
 import type React from 'react'
-import { Block, Doc } from './interfaces'
-import { getBlock } from './stores/block.repository'
-import { docRepo } from './stores/doc.repository'
+import type { Block } from './interfaces'
 import type { NoteDraftEntryFragment } from '../../../apollo/query.graphql'
 
 //
@@ -107,7 +105,7 @@ export function escapeStr() {
 }
 
 //
-// Block helpers
+// Block
 //
 //
 //
@@ -128,25 +126,15 @@ export function genBlockUid(): string {
   return nanoid()
 }
 
-/**
- * Recusively find the root of the given block (should be a doc-block) and returns its doc.
- */
-export function getDocByBlock(blockUid: string): Doc {
-  // console.log(blockUid)
-  let cur = getBlock(blockUid)
-  while (cur.parentUid !== null) {
-    cur = getBlock(cur.parentUid)
-  }
-  if (cur.docSymbol === undefined)
-    throw new Error('[getRootBlock] Root block should have a doc symbol')
-
-  const doc = docRepo.findDoc(cur.docSymbol)
-  if (doc === null)
-    throw new Error(
-      '[getRootBlock] Doc is not found by the symbol of doc-block',
-    )
-  return doc
-}
+//
+// Doc
+//
+//
+//
+//
+//
+//
+//
 
 //
 // Graphql

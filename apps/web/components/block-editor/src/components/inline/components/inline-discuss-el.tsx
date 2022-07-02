@@ -9,7 +9,7 @@ import { inlineService } from '../../../services/inline.service'
 import { InlineElProps } from '../inline-el'
 import DiscussModalPageEl from '../../../../../discuss/discuss-modal-page-el'
 import { PopperTooltip } from '../../../../../ui-component/tooltip/popper-tooltip'
-import { getDocByBlock } from '../../../utils'
+import { getDocByBlock } from '../../../stores/doc.repository'
 
 /**
  * Update block string when discuss is created

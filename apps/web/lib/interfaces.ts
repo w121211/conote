@@ -1,5 +1,6 @@
-import { NoteDoc, NoteDraft, Poll, PollCount } from '@prisma/client'
-import { Block } from '../components/block-editor/src/interfaces'
+import type { TreeNodeChange } from '@conote/docdiff'
+import type { NoteDoc, NoteDraft, Poll, PollCount } from '@prisma/client'
+import type { Block } from '../components/block-editor/src/interfaces'
 
 export type DiscussMeta = {
   // The note that create this discuss
@@ -94,8 +95,10 @@ export type NoteDocContentHead = {
 export type NoteDocContentBody = {
   discussIds: BlockUid_DiscussId[]
   symbols: Symbol_SymId[]
-  diff?: any
   blocks: Omit<Block, 'childrenUids'>[]
+
+  // Experimental
+  blockDiff?: TreeNodeChange[]
 }
 
 export type NoteDraftMeta = {

@@ -34,7 +34,7 @@ import { docRepo } from '../stores/doc.repository'
 import { omitTypenameDeep } from '../utils'
 import { FetchPolicy } from '@apollo/client'
 import { nanoid } from 'nanoid'
-import { parseGQLBlocks } from '../../../../shared/block-helpers'
+import { parseGQLBlocks } from '../../../../shared/block.common'
 
 /**
  *
@@ -234,29 +234,6 @@ class NoteDraftService {
         noteDraftCopy: noteDraft,
       }
     return { doc, blocks, docBlock }
-  }
-
-  /**
-   *
-   */
-  toNoteDraftInput(doc: Doc): NoteDraftInput {
-    const { noteCopy, domain, contentHead } = doc,
-      blocks = docRepo.getContentBlocks(doc),
-      blocksWithoutChildrenUids = blocks.map(e => {
-        const { childrenUids, editTime, ...rest } = e
-        return { ...rest }
-      }),
-      input: NoteDraftInput = {
-        fromDocId: noteCopy?.headDoc.id,
-        domain,
-        contentHead,
-        contentBody: {
-          blocks: blocksWithoutChildrenUids,
-          discussIds: [],
-          symbols: [],
-        },
-      }
-    return input
   }
 }
 

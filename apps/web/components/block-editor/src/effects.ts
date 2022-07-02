@@ -15,8 +15,8 @@
 */
 
 import { isNumber } from 'lodash'
-import { NextRouter } from 'next/router'
-import { UrlObject } from 'url'
+import type { NextRouter } from 'next/router'
+import type { UrlObject } from 'url'
 
 // import { uidAndEmbedId } from './db'
 

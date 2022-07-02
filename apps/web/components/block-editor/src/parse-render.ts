@@ -1,7 +1,7 @@
-import React from 'react'
+import type { RateChoice } from 'graphql-let/__generated__/__types__'
 import { Grammar, Token, tokenize, TokenStream } from 'prismjs'
-import { RateChoice } from 'graphql-let/__generated__/__types__'
-import { InlineItem } from './interfaces'
+import React from 'react'
+import type { InlineItem } from './interfaces'
 
 //
 // Token Helpers

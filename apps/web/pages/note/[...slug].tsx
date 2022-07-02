@@ -18,7 +18,7 @@ import {
   useNoteDraftQuery,
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
-import { getNotePageURL } from '../../shared/note-helpers'
+import { getNotePageURL } from '../../components/page-utils'
 import NoteEditEl from '../../components/note/note-edit-el'
 import NoteViewEl from '../../components/note/note-view-el'
 

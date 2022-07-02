@@ -6,7 +6,7 @@ import {
   NoteFragment,
   useNoteDocsToMergeByNoteQuery,
 } from '../../apollo/query.graphql'
-import { getNotePageURL } from '../../shared/note-helpers'
+import { getNotePageURL } from '../page-utils'
 import { DropdownListItem } from '../ui-component/dropdown-list-item'
 import ToggleMenu from '../ui-component/toggle-menu'
 

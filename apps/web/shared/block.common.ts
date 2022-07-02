@@ -1,27 +1,38 @@
-import {
-  TreeNodeBody,
-  TreeNodeChange,
-  treeNodeDifferencer,
-  treeUtil,
-} from '@conote/docdiff'
-import type { NoteDraftInput } from 'graphql-let/__generated__/__types__'
-import {
+import { TreeNodeBody, treeNodeDifferencer, treeUtil } from '@conote/docdiff'
+import type {
   BlockFragment,
   NoteDocContentBodyFragment,
 } from '../apollo/query.graphql'
-import {
+import type {
   Block,
-  Doc,
   InlineDiscuss,
 } from '../components/block-editor/src/interfaces'
 import { parse } from '../components/block-editor/src/parse-render'
-import { noteDraftService } from '../components/block-editor/src/services/note-draft.service'
-import { docRepo } from '../components/block-editor/src/stores/doc.repository'
 import type {
   BlockUid_DiscussId,
   NoteDocContentBody,
   Symbol_SymId,
 } from '../lib/interfaces'
+
+function isBlockEqual(
+  a: Omit<Block, 'childrenUids'>,
+  b: Omit<Block, 'childrenUids'>,
+) {
+  return a.str === b.str && a.docSymbol === b.docSymbol
+}
+
+/**
+ *
+ */
+export function differenceBlocks(
+  final: NoteDocContentBody['blocks'],
+  start: NoteDocContentBody['blocks'],
+) {
+  const f_blocks = treeUtil.toTreeNodeBodyList(final),
+    s_blocks = treeUtil.toTreeNodeBodyList(start),
+    changes = treeNodeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
+  return changes
+}
 
 /**
  * Convert gql-blocks to blocks by
@@ -128,45 +139,4 @@ export function parseGQLContentBody(
     discussIds: discussIds_,
     symbols: symbols_,
   }
-}
-
-function differenceBlocks(
-  final: NoteDocContentBody['blocks'],
-  start: NoteDocContentBody['blocks'],
-) {
-  const f_blocks = treeUtil.toTreeNodeBodyList(final),
-    s_blocks = treeUtil.toTreeNodeBodyList(start),
-    changes = treeNodeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
-  return changes
-}
-
-function isBlockEqual(
-  a: Omit<Block, 'childrenUids'>,
-  b: Omit<Block, 'childrenUids'>,
-) {
-  return a.str === b.str && a.docSymbol === b.docSymbol
-}
-
-export function isDocChanged(docUid: string): {
-  changed: boolean
-  changes: TreeNodeChange[]
-  doc: Doc
-  input: NoteDraftInput
-  noteDraftCopy: NonNullable<Doc['noteDraftCopy']>
-} {
-  const doc = docRepo.getDoc(docUid),
-    { noteDraftCopy } = doc
-
-  if (noteDraftCopy === undefined) {
-    console.debug(doc)
-    throw new Error('[isDocSaved] doc.noteDraftCopy === undefined')
-  }
-
-  const input = noteDraftService.toNoteDraftInput(doc),
-    { blocks: startBlocks } = parseGQLBlocks(noteDraftCopy.contentBody.blocks),
-    { blocks: finalBlocks } = parseGQLBlocks(input.contentBody.blocks),
-    changes = differenceBlocks(finalBlocks, startBlocks),
-    changed = changes.length > 0
-
-  return { changed, changes, doc, noteDraftCopy, input }
 }
