@@ -711,7 +711,7 @@ export async function docOpen(
   const found = docRepo.findDoc(symbol)
   if (found) {
     if (isNil(found.noteDraftCopy))
-      throw new Error('isNil(found.noteDraftCopy)')
+      throw new Error('Doc does not have note-draft-copy')
     return { docUid: found.uid, draft: found.noteDraftCopy }
   }
 
@@ -730,8 +730,7 @@ export async function docOpen(
     blockRepo.update(blockReducers)
     docRepo.update(docReducers)
 
-    // Create the draft using just created doc
-    // then update note-draft-copy of doc
+    // Create the note-draft using the doc just created, and then update note-draft-copy of the doc
     const doc = docRepo.getDoc(newDocUid),
       draft = await noteDraftService.createDraft(
         doc.branch,

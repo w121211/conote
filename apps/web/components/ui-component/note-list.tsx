@@ -5,7 +5,7 @@ import { Box } from './box'
 import { ListItem } from './list-item'
 import { NoteDocFragment } from '../../apollo/query.graphql'
 import Link from 'next/link'
-import { getNotePageURL } from '../page-utils'
+import { getNotePageURL } from '../utils'
 
 export interface NoteData {
   title: string

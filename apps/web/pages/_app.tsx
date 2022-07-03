@@ -8,11 +8,11 @@ import { TooltipProvider } from '../components/ui-component/tooltip/tooltip-prov
 import { useMe } from '../components/auth/use-me'
 import Link from 'next/link'
 import { useApolloClientInitial } from '../apollo/apollo-client'
-import Navbar from '../components/navbar'
 import { MeProvider } from '../components/auth/use-me-context'
 import Layout from '../components/ui-component/layout/layout'
 import { useState } from 'react'
 import { Alert } from '../components/ui-component/alert'
+import { getLoginPageURL } from '../components/utils'
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   const apolloClient = useApolloClientInitial(pageProps.initialApolloState),
@@ -23,7 +23,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     return (
       <div>
         <p>
-          <Link href="/login">
+          <Link href={getLoginPageURL()}>
             <a>Login</a>
           </Link>{' '}
           to continue

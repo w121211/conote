@@ -13,6 +13,7 @@ import { useMeContext } from '../auth/use-me-context'
 import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-padding'
 import { StatusDisplay } from '../ui-component/status-display'
 import { preventSave } from '../block-editor/src/listeners'
+import { getLoginPageURL } from '../utils'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -62,7 +63,7 @@ const NoteEditEl = ({
       <StatusDisplay
         str="Login require"
         btn={
-          <Link href="/login">
+          <Link href={getLoginPageURL()}>
             <a className="btn-primary-lg font-medium text-lg">Login</a>
           </Link>
         }

@@ -2,37 +2,17 @@ import type { TreeNodeChange } from '@conote/docdiff'
 import type { NoteDoc, NoteDraft, Poll, PollCount } from '@prisma/client'
 import type { Block } from '../components/block-editor/src/interfaces'
 
+export type CommitInputErrorItem = {
+  draftId: string
+  msg: string
+}
+
 export type DiscussMeta = {
   // The note that create this discuss
   noteCreated: { id: string; symbol: string }
 
   // The notes that connect to the discuss
   notesConntected: { id: string; symbol: string }[]
-}
-
-/**
- * Store (symbol-string, sym-id) to handle later symbol-string change case
- * symId can be null if not yet created (in draft)
- *
- * @example {symbol: '$GOOG', symId: '123'}
- *
- */
-export type Symbol_SymId = {
-  symbol: string
-  symId: string | null
-}
-
-/**
- * Store each block's discussion id (if exist)
- * include commit-id for better tracking each discuss
- * if one block has multiple discussion-ids, store as two items
- *
- * [{blockUid: 'b1', discussId: 'd1'}, {blockUid: 'b1', discussId: 'd2'}]
- */
-export type BlockUid_DiscussId = {
-  blockUid: string
-  discussId: string
-  commitId?: string
 }
 
 export type NoteDocParsed<T extends NoteDoc> = Omit<
@@ -90,6 +70,31 @@ export type NoteDocContentHead = {
     // tickers mentioned in the webpage content
     tickers?: string[]
   }
+}
+
+/**
+ * Store each block's discussion id (if exist)
+ * include commit-id for better tracking each discuss
+ * if one block has multiple discussion-ids, store as two items
+ *
+ * [{blockUid: 'b1', discussId: 'd1'}, {blockUid: 'b1', discussId: 'd2'}]
+ */
+type BlockUid_DiscussId = {
+  blockUid: string
+  discussId: string
+  commitId?: string
+}
+
+/**
+ * Store (symbol-string, sym-id) to handle later symbol-string change case
+ * symId can be null if not yet created (in draft)
+ *
+ * @example {symbol: '$GOOG', symId: '123'}
+ *
+ */
+type Symbol_SymId = {
+  symbol: string
+  symId: string | null
 }
 
 export type NoteDocContentBody = {

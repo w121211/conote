@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { NoteDocFragment } from '../../apollo/query.graphql'
-import { getNotePageURL } from '../page-utils'
+import { getNotePageURL } from '../utils'
 
 const NoteDocLink = ({ doc }: { doc: NoteDocFragment }) => (
   <Link href={getNotePageURL('doc', doc.symbol, doc.id)}>

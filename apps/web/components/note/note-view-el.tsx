@@ -5,7 +5,7 @@ import {
   NoteDraftFragment,
   NoteFragment,
 } from '../../apollo/query.graphql'
-import { getNotePageURL } from '../page-utils'
+import { getNotePageURL } from '../utils'
 import BlockViewer from '../block-editor/src/components/block/block-viewer'
 import Layout from '../ui-component/layout/layout'
 import { parseGQLBlocks } from '../../shared/block.common'

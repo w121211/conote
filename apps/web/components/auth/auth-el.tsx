@@ -6,9 +6,12 @@ import LogoutButton from './logout-button'
 import { DropdownListDivider } from '../ui-component/dropdown-list-divider'
 import { DropdownListItem } from '../ui-component/dropdown-list-item'
 import { useMeContext } from './use-me-context'
+import { getLoginPageURL } from '../utils'
+import { useRouter } from 'next/router'
 
 const AuthItem = () => {
-  const { me, loading } = useMeContext()
+  const router = useRouter(),
+    { me, loading } = useMeContext()
 
   // if (loading) return null
 
@@ -28,7 +31,7 @@ const AuthItem = () => {
             </div>
           }
         >
-          <span className="block px-2  truncate  text-gray-600 text-sm font-medium cursor-default">
+          <span className="block px-2 truncate text-gray-600 text-sm font-medium cursor-default">
             {me.id}
           </span>
           <DropdownListDivider />
@@ -43,14 +46,14 @@ const AuthItem = () => {
             </a>
           </Link>
           <DropdownListDivider />
-          <Link href="/login">
+          <Link href={getLoginPageURL()}>
             <a>
               <DropdownListItem>Logout</DropdownListItem>
             </a>
           </Link>
         </ToggleMenu>
       ) : (
-        <a className="btn-primary  text-sm" href="/login">
+        <a className="btn-primary text-sm" href={getLoginPageURL(router)}>
           Login
         </a>
       )}

@@ -167,10 +167,10 @@ export type BlockWithChildren = Block & { children: BlockWithChildren[] }
  * alone with a concept of node-block (node-page-block), ndoe-title, page-title, page-block (or context-block)
  */
 export type Doc = {
+  // Client side only id, generate one when first open the doc
   uid: string
 
-  // Represent as 'symbol' for server-side, should be unique most of time
-  //  except when renaming process
+  // Should be unique most of time except when renaming
   symbol: string
 
   branch: string
@@ -180,17 +180,17 @@ export type Doc = {
   // Note-doc-content-head is editable and stores here
   contentHead: NoteDocContentHeadInput
 
-  // contentBody: Omit<NoteDocContentBodyFragment, '__typename' | 'blocks'>
+  // Use 'input' instead of 'fragment' for updating the note-draft
   contentBody: Omit<NoteDocContentBodyInput, 'blocks'>
 
   // Refer to root-block-uid
   blockUid: string
 
-  // The latest note by query
-  noteCopy?: Omit<NoteFragment, '__typename'>
+  // The note & head-doc that used to create the draft, ie the from-doc
+  noteCopy: Omit<NoteFragment, '__typename'> | null
 
-  // The latest note-draft
-  noteDraftCopy?: Omit<NoteDraftFragment, '__typename'>
+  // The current saved note-draft
+  noteDraftCopy: Omit<NoteDraftFragment, '__typename'> | null
 }
 
 /**

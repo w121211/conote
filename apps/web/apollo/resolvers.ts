@@ -14,7 +14,7 @@ import {
   NoteEmojiCount,
   Sym,
 } from '@prisma/client'
-import { AuthenticationError } from 'apollo-server-micro'
+import { ApolloError, AuthenticationError } from 'apollo-server-micro'
 import { NextApiRequest, NextApiResponse } from 'next'
 import {
   Discuss as GQLDiscuss,
@@ -38,7 +38,7 @@ import {
   discussPostEmojiModel,
   noteEmojiModel,
 } from '../lib/models/emoji-model'
-import { commitNoteDrafts } from '../lib/models/commit-model'
+import { CommitInputError, commitNoteDrafts } from '../lib/models/commit-model'
 import { noteDraftModel } from '../lib/models/note-draft-model'
 import { noteModel } from '../lib/models/note-model'
 import { pollModel } from '../lib/models/poll-model'
@@ -642,13 +642,24 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createCommit(_parent, { noteDraftIds }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      { commit, noteDocs } = await commitNoteDrafts(noteDraftIds, userId)
-    return {
-      ...toStringProps(commit),
-      noteDocs: noteDocs.map(e =>
-        toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
-      ),
+    const { userId } = await isAuthenticated(req)
+
+    try {
+      const { commit, noteDocs } = await commitNoteDrafts(noteDraftIds, userId)
+      return {
+        ...toStringProps(commit),
+        noteDocs: noteDocs.map(e =>
+          toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
+        ),
+      }
+    } catch (err) {
+      if (err instanceof CommitInputError) {
+        throw new ApolloError('Commit input error', 'COMMIT_INPUT_ERROR', {
+          items: err.items,
+        })
+      } else {
+        throw err
+      }
     }
   },
 

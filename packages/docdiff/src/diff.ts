@@ -1,5 +1,23 @@
 import { differenceWith, intersectionWith } from 'lodash'
-import type { TreeNodeBody, TreeNodeChange } from './interfaces'
+import type {
+  TreeNodeBody,
+  TreeNodeChange,
+  TreeNodeChangeType,
+} from './interfaces'
+
+const treeNodeChangeTypeSet = new Set([
+  'change-parent',
+  'change-parent-update',
+  'delete',
+  'insert',
+  'move',
+  'move-update',
+  'update',
+])
+
+export function isTreeNodeChangeType(type: string): type is TreeNodeChangeType {
+  return treeNodeChangeTypeSet.has(type)
+}
 
 /**
  * Current support 'delete', 'insert', 'update' changes,

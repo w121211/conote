@@ -14,9 +14,10 @@ import {
   unindentMulti,
 } from './events'
 import { Block, BlockWithChildren } from './interfaces'
+import { isDocChanged } from './stores/doc.repository'
 import { editorRepo } from './stores/editor.repository'
 import { rfdbRepo, rfdbStore } from './stores/rfdb.repository'
-import { destructKeyDown, isDocChanged, isShortcutKey } from './utils'
+import { destructKeyDown, isShortcutKey } from './utils'
 
 //
 // Mouse events

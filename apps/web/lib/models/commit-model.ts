@@ -10,6 +10,7 @@ import type {
 } from '@prisma/client'
 import cuid from 'cuid'
 import { differenceContentBody } from '../../shared/note-doc.common'
+import type { CommitInputErrorItem } from '../interfaces'
 import prisma from '../prisma'
 import { noteDocMergeModel } from './note-doc-merge-model'
 import { noteDocModel } from './note-doc-model'
@@ -29,13 +30,14 @@ class InputError extends Error {
 }
 
 export class CommitInputError extends Error {
-  rejects: { draftId: string; msg: string }[]
+  items: CommitInputErrorItem[]
 
-  constructor(rejects: { draftId: string; msg: string }[]) {
-    super(rejects.map(e => `(${e.draftId}) ${e.msg}`).join(', '))
+  constructor(items: CommitInputErrorItem[]) {
+    const msg = items.map(e => `(${e.draftId}) ${e.msg}`).join(', ')
+
+    super(msg)
     Object.setPrototypeOf(this, new.target.prototype)
-
-    this.rejects = rejects
+    this.items = items
   }
 }
 
@@ -151,7 +153,7 @@ export async function commitNoteDrafts(
 
   // Validate drafts before commit
   const validateResults: Awaited<ReturnType<typeof validateDraft>>[] = [],
-    rejects: CommitInputError['rejects'] = []
+    errItems: CommitInputError['items'] = []
 
   for (const id of draftIds) {
     const draft = await prisma.noteDraft.findUnique({ where: { id } })
@@ -163,16 +165,16 @@ export async function commitNoteDrafts(
       validateResults.push(await validateDraft(draft, userId))
     } catch (err) {
       if (err instanceof InputError) {
-        rejects.push({ draftId: id, msg: err.message })
+        errItems.push({ draftId: id, msg: err.message })
       } else {
         throw err
       }
     }
   }
 
-  if (rejects.length > 0) {
+  if (errItems.length > 0) {
     // console.debug(rejects)
-    throw new CommitInputError(rejects)
+    throw new CommitInputError(errItems)
   }
 
   // Loop first run: create syms, connect discusses

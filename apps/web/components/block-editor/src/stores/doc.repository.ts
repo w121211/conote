@@ -108,6 +108,7 @@ export function docToNoteDraftInput(doc: Doc): NoteDraftInput {
       const { childrenUids, editTime, ...rest } = e
       return { ...rest }
     }),
+    // Null is a valide input for differencer, but '[]' is not
     startBlocks = noteCopy
       ? noteCopy.headDoc.contentBody.blocks.map(e => ({
           ...e,
@@ -115,7 +116,7 @@ export function docToNoteDraftInput(doc: Doc): NoteDraftInput {
           open: e.open ?? undefined,
           docSymbol: e.docSymbol ?? undefined,
         }))
-      : [],
+      : null,
     blockDiff = differenceBlocks(blocksWithoutChildrenUids, startBlocks),
     input: NoteDraftInput = {
       fromDocId: noteCopy?.headDoc.id,
@@ -164,9 +165,9 @@ export function isDocChanged(docUid: string): {
   const doc = docRepo.getDoc(docUid),
     { noteDraftCopy } = doc
 
-  if (noteDraftCopy === undefined) {
+  if (noteDraftCopy === null) {
     console.debug(doc)
-    throw new Error('[isDocSaved] doc.noteDraftCopy === undefined')
+    throw new Error('[isDocSaved] doc.noteDraftCopy === null')
   }
 
   const input = docToNoteDraftInput(doc),

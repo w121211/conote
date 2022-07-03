@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { styleSymbol } from './ui-component/style-fc/style-symbol'
 import moment from 'moment'
 import { DiscussFragment } from '../apollo/query.graphql'
-import { getNotePageURL } from './page-utils'
+import { getNotePageURL } from './utils'
 
 interface Props {
   data: DiscussFragment[]

@@ -1,4 +1,9 @@
-import { TreeNodeBody, treeNodeDifferencer, treeUtil } from '@conote/docdiff'
+import {
+  isTreeNodeChangeType,
+  TreeNodeBody,
+  treeNodeDifferencer,
+  treeUtil,
+} from '@conote/docdiff'
 import type {
   BlockFragment,
   NoteDocContentBodyFragment,
@@ -8,11 +13,7 @@ import type {
   InlineDiscuss,
 } from '../components/block-editor/src/interfaces'
 import { parse } from '../components/block-editor/src/parse-render'
-import type {
-  BlockUid_DiscussId,
-  NoteDocContentBody,
-  Symbol_SymId,
-} from '../lib/interfaces'
+import type { NoteDocContentBody } from '../lib/interfaces'
 
 function isBlockEqual(
   a: Omit<Block, 'childrenUids'>,
@@ -22,14 +23,15 @@ function isBlockEqual(
 }
 
 /**
- *
+ * Input require to be a valide tree.
+ * An empty array of blocks cannot build a tree and will throw an error, use 'null' instead
  */
 export function differenceBlocks(
   final: NoteDocContentBody['blocks'],
-  start: NoteDocContentBody['blocks'],
+  start: NoteDocContentBody['blocks'] | null,
 ) {
   const f_blocks = treeUtil.toTreeNodeBodyList(final),
-    s_blocks = treeUtil.toTreeNodeBodyList(start),
+    s_blocks = start && treeUtil.toTreeNodeBodyList(start),
     changes = treeNodeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
   return changes
 }
@@ -100,18 +102,28 @@ export function parseGQLContentBody(
     blocks: Omit<BlockFragment, '__typename'>[]
   },
 ): NoteDocContentBody {
-  const { blocks, discussIds, symbols, ...r } = gqlContentBody,
+  const { blocks, discussIds, symbols, blockDiff, ...r } = gqlContentBody,
     { docBlock, blocks: blocks_ } = parseGQLBlocks(gqlContentBody.blocks),
-    discussIds_: BlockUid_DiscussId[] = discussIds.map(
+    discussIds_: NoteDocContentBody['discussIds'] = discussIds.map(
       ({ __typename, commitId, ...r }) => ({
         ...r,
         commitId: commitId ?? undefined,
       }),
     ),
-    symbols_: Symbol_SymId[] = symbols.map(({ __typename, symId, ...r }) => ({
-      ...r,
-      symId: symId ?? null,
-    }))
+    symbols_: NoteDocContentBody['symbols'] = symbols.map(
+      ({ __typename, symId, ...r }) => ({
+        ...r,
+        symId: symId ?? null,
+      }),
+    ),
+    blockDiff_: NoteDocContentBody['blockDiff'] = blockDiff
+      ? blockDiff.map(({ __typename, type, ...r }) => {
+          if (isTreeNodeChangeType(type)) {
+            return { type, ...r }
+          }
+          throw new Error("The 'type' in 'blockDiff' is not TreeNodeChangeType")
+        })
+      : undefined
 
   if (docBlock.docSymbol === undefined)
     throw new Error('docBlock.docSymbol === undefined')
@@ -138,5 +150,6 @@ export function parseGQLContentBody(
     blocks: blocks_,
     discussIds: discussIds_,
     symbols: symbols_,
+    blockDiff: blockDiff_,
   }
 }

@@ -1,10 +1,12 @@
 import React, { ReactNode, useState } from 'react'
 import { useMeContext } from './auth/use-me-context'
 import Modal from './modal/modal'
+import { getLoginPageURL } from './utils'
 
 const LoginModal = ({ children }: { children?: ReactNode }) => {
   const [showLoginModal, setShowLoginModal] = useState(false)
   const { me } = useMeContext()
+  // const searchParams = new URLSearchParams({})
   return (
     <>
       <div
@@ -21,7 +23,8 @@ const LoginModal = ({ children }: { children?: ReactNode }) => {
         visible={showLoginModal}
         buttons={
           <button className="btn-primary">
-            <a href="/login">Login</a>
+            {/* <a href="/login">Login</a> */}
+            <a href={getLoginPageURL()}>Login</a>
           </button>
         }
         onClose={() => setShowLoginModal(false)}

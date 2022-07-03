@@ -11,6 +11,7 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import { useSessionLoginMutation } from '../../apollo/query.graphql'
 import { useFirebaseClient } from './firebase-client'
 import { ErrorDisplay } from '../ui-component/status-display'
+import { getLoginPageURL } from '../utils'
 
 /**
  * Known issues
@@ -129,7 +130,7 @@ const LoginPanel = ({
             <a className="btn-primary-lg inline-block mr-6 " href="/">
               Go to Home
             </a>
-            <a href="/login" className="btn-normal-lg inline-block ">
+            <a href={getLoginPageURL()} className="btn-normal-lg inline-block ">
               Login
             </a>
           </>
