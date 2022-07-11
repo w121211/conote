@@ -1,6 +1,6 @@
 import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import InlineEl from '../../components/block-editor/src/components/inline/inline-el'
+import InlineEl from '../../frontend/components/block-editor/src/components/inline/inline-el'
 
 /**
  * Setup data

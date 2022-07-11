@@ -1,6 +1,6 @@
 import React from 'react'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import { CommitPanel } from '../../components/block-editor/src/components/commit/commit-panel'
+import { CommitPanel } from '../../frontend/components/block-editor/src/components/commit/commit-panel'
 
 export default {
   title: 'BlockEditor/CommitPanel',

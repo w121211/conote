@@ -1,30 +1,10 @@
+import { LinkScrapedResult } from '../interfaces'
 import { MemoryCache } from './memory-cache'
 import { tryFetch } from './vendors/index'
 
-export type SrcType = 'VIDEO' | 'POST' | 'AUTHOR' | 'OTHER'
-
-export type FetchResult = {
-  domain: string
-  finalUrl: string
-  srcId?: string
-  srcType: SrcType
-
-  // metascraper
-  authorId?: string
-  authorName?: string
-  date?: string
-  description?: string
-  lang?: string
-  title?: string
-
-  // ./packages/scraper
-  keywords?: string[]
-  tickers?: string[]
-  error?: string
-}
-
 export class FetchClient {
-  private cache: MemoryCache | null = null // cache support
+  // Cache support
+  private cache: MemoryCache | null = null
 
   constructor(localCachePath: string | null = null) {
     if (localCachePath) {
@@ -32,7 +12,9 @@ export class FetchClient {
     }
   }
 
-  public async fetch(url: string): Promise<FetchResult & { fromCache?: true }> {
+  public async fetch(
+    url: string,
+  ): Promise<LinkScrapedResult & { fromCache?: true }> {
     if (this.cache) {
       try {
         return {

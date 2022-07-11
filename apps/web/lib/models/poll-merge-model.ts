@@ -1,6 +1,6 @@
 import type { NoteDoc, Poll } from '@prisma/client'
 import { isEqual } from 'lodash'
-import { MERGE_POLL_V1_0 } from '../../shared/constants'
+import { MERGE_POLL_V1_0 } from '../../share/constants'
 import type { PollMeta, PollParsed } from '../interfaces'
 import prisma from '../prisma'
 import { PollModel } from './poll-model'

@@ -2,8 +2,8 @@ import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
-import ModalProvider from '../../components/modal/modal-context'
-import SearchAllModal from '../../components/search-all-modal/search-all-modal'
+import ModalProvider from '../../frontend/components/modal/modal-context'
+import SearchAllModal from '../../frontend/components/search-all-modal/search-all-modal'
 
 const apolloClient = getApolloClient()
 

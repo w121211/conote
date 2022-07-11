@@ -1,4 +1,4 @@
-import {
+import type {
   Branch,
   Discuss,
   DiscussCount,
@@ -45,6 +45,8 @@ import { pollModel } from '../lib/models/poll-model'
 import { noteDocModel } from '../lib/models/note-doc-model'
 import { pollVoteModel } from '../lib/models/poll-vote-model'
 import { isNil } from 'lodash'
+import { linkModel } from '../lib/models/link-model'
+import { LinkParsed } from '../lib/interfaces'
 
 export type ResolverContext = {
   req: NextApiRequest
@@ -76,7 +78,7 @@ function toGQLNoteEntry(
     id: id,
     branchName: branch.name,
     sym: sym,
-    link: link,
+    link: link && linkModel.parse(link),
   }
 }
 
@@ -261,10 +263,20 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 
   async link(_parent, { id, url }, _context, _info) {
     if (id) {
-      await prisma.link.findUnique({ where: { id } })
+      const link = await prisma.link.findUnique({
+          where: { id },
+          include: { sym: true },
+        }),
+        link_ = link && linkModel.parse(link)
+      return link_
     }
     if (url) {
-      return await prisma.link.findUnique({ where: { url } })
+      const link = await prisma.link.findUnique({
+          where: { url },
+          include: { sym: true },
+        }),
+        link_ = link && linkModel.parse(link)
+      return link_
     }
     throw new Error('Param requires either id or url')
   },
@@ -381,6 +393,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         ...note,
         branchName: note.branch.name,
         headDoc: toGQLNoteDoc(headDoc),
+        link: note.link && linkModel.parse(note.link),
       }
     return toStringProps(note_)
   },
@@ -395,6 +408,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
           ...note,
           branchName: note.branch.name,
           headDoc: toGQLNoteDoc(headDoc),
+          link: note.link && linkModel.parse(note.link),
         }
       return toStringProps(note_)
     }
@@ -812,6 +826,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }))
   },
 
+  async createLink(_parent, { url }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      [link] = await linkModel.getOrCreateLink(url)
+    return link
+  },
+
   async createNoteDraft(_parent, { branch, symbol, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req),
       branch_ = branch === 'default' ? 'mock-branch-0' : branch,
@@ -826,7 +846,8 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     _info,
   ) {
     const { userId } = await isAuthenticated(req),
-      draft = await noteDraftModel.createByLink(branch, linkId, userId, data)
+      branch_ = branch === 'default' ? 'mock-branch-0' : branch,
+      draft = await noteDraftModel.createByLink(branch_, linkId, userId, data)
     return toStringProps(draft)
   },
 

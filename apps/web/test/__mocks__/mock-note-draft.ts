@@ -1,15 +1,28 @@
 import type { Branch, NoteDoc, Sym } from '@prisma/client'
-import { writeBlocks } from '../../components/block-editor/src/utils/block-writer'
+import { writeBlocks } from '../../frontend/components/block-editor/src/utils/block-writer'
 import {
   mockBlockInputs,
-  mockBlocks,
-} from '../../components/block-editor/test/__mocks__/mock-block'
+  mockDocBlock_contentBlocks,
+} from '../../frontend/components/block-editor/test/__mocks__/mock-block'
 import type { NoteDocParsed, NoteDraftParsed } from '../../lib/interfaces'
+import { differenceBlocks } from '../../share/block.common'
 import { mockBranches } from './mock-branch'
 import { mockDiscusses } from './mock-discuss'
 import { mockLinks } from './mock-link'
 import { mockSyms } from './mock-sym'
 import { mockUsers } from './mock-user'
+
+const blocksArr: NoteDraftParsed['contentBody']['blocks'][] = [
+  writeBlocks(mockBlockInputs[0], {
+    docSymbol: mockSyms[0].symbol,
+  }),
+  writeBlocks(mockBlockInputs[0], {
+    docSymbol: mockSyms[1].symbol,
+  }),
+  writeBlocks(mockBlockInputs[0], {
+    docSymbol: mockSyms[2].symbol,
+  }),
+]
 
 const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
   id: '',
@@ -30,7 +43,8 @@ const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
       { symbol: '[[Google]]', symId: null },
       { symbol: '$BA', symId: null },
     ],
-    blocks: writeBlocks(mockBlockInputs[0], { docSymbol: mockSyms[0].symbol }),
+    blocks: blocksArr[0],
+    blockDiff: differenceBlocks(blocksArr[0], null),
   },
 }
 
@@ -51,9 +65,8 @@ export const mockNoteDrafts: Omit<
         { symbol: '[[Google]]', symId: null },
         { symbol: '$BA', symId: null },
       ],
-      blocks: writeBlocks(mockBlockInputs[0], {
-        docSymbol: mockSyms[0].symbol,
-      }),
+      blocks: blocksArr[0],
+      blockDiff: differenceBlocks(blocksArr[0], null),
     },
   },
   {
@@ -68,9 +81,8 @@ export const mockNoteDrafts: Omit<
         { blockUid: 'uid-1', discussId: mockDiscusses_[2].id },
       ],
       symbols: [],
-      blocks: writeBlocks(mockBlockInputs[0], {
-        docSymbol: mockSyms[1].symbol,
-      }),
+      blocks: blocksArr[1],
+      blockDiff: differenceBlocks(blocksArr[1], null),
     },
   },
   {
@@ -82,14 +94,13 @@ export const mockNoteDrafts: Omit<
     contentBody: {
       discussIds: [],
       symbols: [],
-      blocks: writeBlocks(mockBlockInputs[0], {
-        docSymbol: mockSyms[2].symbol,
-      }),
+      blocks: blocksArr[2],
+      blockDiff: differenceBlocks(blocksArr[2], null),
     },
   },
   {
     ...base,
-    id: '3_got_discusses_with_commitId',
+    id: '3-got_discusses_with_commitId',
     symbol: mockSyms[1].symbol,
     userId: mockUsers[1].id,
     contentBody: {
@@ -107,7 +118,8 @@ export const mockNoteDrafts: Omit<
         },
       ],
       symbols: [],
-      blocks: mockBlocks,
+      blocks: mockDocBlock_contentBlocks,
+      blockDiff: differenceBlocks(mockDocBlock_contentBlocks, null),
     },
   },
   {
@@ -119,7 +131,8 @@ export const mockNoteDrafts: Omit<
     contentBody: {
       discussIds: [],
       symbols: [],
-      blocks: mockBlocks,
+      blocks: mockDocBlock_contentBlocks,
+      blockDiff: differenceBlocks(mockDocBlock_contentBlocks, null),
     },
   },
 ]
@@ -130,6 +143,9 @@ export function mockNoteDrafts_gotFromDoc(
 ): Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'>[] {
   const { id, branchId, symId, sym, domain, contentHead, contentBody } =
       fromDoc,
+    blocks = writeBlocks(mockBlockInputs[1], {
+      docSymbol: fromDoc.sym.symbol,
+    }),
     base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
       id: '',
       branchId,
@@ -141,13 +157,14 @@ export function mockNoteDrafts_gotFromDoc(
       linkId: null,
       status: 'EDIT',
       domain: domain,
-      xmeta: {},
+      meta: {},
       contentHead,
       contentBody: {
         ...contentBody,
-        blocks: writeBlocks(mockBlockInputs[1], {
-          docSymbol: fromDoc.sym.symbol,
-        }),
+        blocks,
+        // TODO
+        // blockDiff: differenceBlocks(blocks, contentBody.blocks),
+        blockDiff: [],
       },
     }
 

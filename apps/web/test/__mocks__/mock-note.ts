@@ -1,4 +1,4 @@
-import { Note } from '@prisma/client'
+import type { Note } from '@prisma/client'
 import { mockBranches } from './mock-branch'
 import { mockSyms } from './mock-sym'
 

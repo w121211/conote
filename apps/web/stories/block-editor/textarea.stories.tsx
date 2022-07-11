@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import { UndoManager } from '../../components/block-editor/src/utils/undo-manager'
+import { UndoManager } from '../../frontend/components/block-editor/src/utils/undo-manager'
 import {
   destructKeyDown,
   isShortcutKey,
-} from '../../components/block-editor/src/utils'
+} from '../../frontend/components/block-editor/src/utils'
 
 const UndoableTextarea = () => {
   const undoManager = useMemo(() => new UndoManager(''), []),

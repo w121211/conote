@@ -1,6 +1,6 @@
 import type { NoteDoc } from '@prisma/client'
 import { cloneDeep } from 'lodash'
-import { mockDiffBlocks } from '../../../components/block-editor/test/__mocks__/mock-diff-blocks'
+import { mockDiffBlocks } from '../../../frontend/components/block-editor/test/__mocks__/mock-diff-blocks'
 import { NoteDocParsed } from '../../../lib/interfaces'
 import { noteDocMergeModel } from '../../../lib/models/note-doc-merge-model'
 import { noteDocModel } from '../../../lib/models/note-doc-model'

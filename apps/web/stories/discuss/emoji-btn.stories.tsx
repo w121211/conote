@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { EmojiBtn } from '../../components/emoji/emoji-btn'
+import { EmojiBtn } from '../../frontend/components/emoji/emoji-btn'
 
 export default {
   component: EmojiBtn,

@@ -112,6 +112,18 @@ fragment link on Link {
   id
   url
   authorId
+  scraped {
+    domain
+    finalUrl
+    authorId
+    authorName
+    date
+    description
+    lang
+    title
+    keywords
+    tickers
+  }
 }
 
 fragment note on Note {
@@ -207,14 +219,16 @@ fragment noteDocMeta on NoteDocMeta {
 fragment noteDraft on NoteDraft {
   __typename
   id
-  userId
+  symbol
   commitId
   fromDocId
+  linkId
+  userId
   domain
+  status
   meta {
     ...noteDraftMeta
   }
-  symbol
   contentHead {
     ...noteDocContentHead
   }
@@ -222,7 +236,6 @@ fragment noteDraft on NoteDraft {
     ...noteDocContentBody
   }
   updatedAt
-  status
 }
 
 fragment noteDraftDropResponse on NoteDraftDropResponse {
@@ -634,6 +647,12 @@ mutation UpsertDiscussPostEmojiLike(
     like {
       ...discussPostEmojiLike
     }
+  }
+}
+
+mutation CreateLink($url: String!) {
+  createLink(url: $url) {
+    ...link
   }
 }
 

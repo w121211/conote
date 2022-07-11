@@ -1,8 +1,11 @@
+import { LinkScrapedResult } from '../../interfaces'
 import { base } from './base'
 import { youtube } from './youtube'
-import { FetchResult } from '../fetch-client'
 
-export type DomainFetchFunction = (url: string, domain?: string) => Promise<FetchResult>
+export type DomainFetchFunction = (
+  url: string,
+  domain?: string,
+) => Promise<LinkScrapedResult>
 
 export class DomainNotFitError extends Error {
   constructor(message?: string) {
@@ -14,7 +17,7 @@ export class DomainNotFitError extends Error {
 // fallbacks, execute sequentially
 const fetchers: DomainFetchFunction[] = [youtube, base]
 
-export const tryFetch = async (url: string): Promise<FetchResult> => {
+export const tryFetch = async (url: string): Promise<LinkScrapedResult> => {
   for (const fetcher of fetchers) {
     try {
       // eslint-disable-next-line no-await-in-loop

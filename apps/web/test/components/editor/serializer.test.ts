@@ -1,7 +1,10 @@
 import { TreeNode } from '@conote/docdiff'
-import { EditorSerializer } from '../../../components/editor/serializer'
+import { EditorSerializer } from '../../../frontend/components/editor/serializer'
 
-const bt = (id: number, children: TreeNode<Bullet>[] = []): TreeNode<Bullet> => {
+const bt = (
+  id: number,
+  children: TreeNode<Bullet>[] = [],
+): TreeNode<Bullet> => {
   return {
     cid: id.toString(),
     data: { id: id.toString(), head: `${id}${id}${id}` },

@@ -1,7 +1,7 @@
 import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import ParseRenderEl from '../../components/block-editor/src/components/inline/parse-render-el'
-import { mockBlockStr } from '../../components/block-editor/test/__mocks__/mock-block-str'
+import ParseRenderEl from '../../frontend/components/block-editor/src/components/inline/parse-render-el'
+import { mockBlockStr } from '../../frontend/components/block-editor/test/__mocks__/mock-block-str'
 
 export default {
   title: 'BlockEditor/ParseRenderEl',

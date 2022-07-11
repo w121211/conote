@@ -222,6 +222,9 @@ type Mutation {
     discussPostId: Int
   ): [UpsertDiscussPostEmojiLikeResult!]!
 
+  # Get or create the link
+  createLink(url: String!): Link!
+
   upsertNoteEmojiLike(
     liked: Boolean!
     emojiId: Int
@@ -404,7 +407,27 @@ type Link {
   id: ID!
   url: String!
   authorId: String
-  # scraped: Scraped!
+  scraped: LinkScrapedResult!
+}
+
+type LinkScrapedResult {
+  domain: String!
+  finalUrl: String!
+  # srcId?: string
+  # srcType: 'video' | 'post' | 'author' | 'other'
+
+  # // metascraper
+  authorId: String
+  authorName: String
+  date: String
+  description: String
+  lang: String
+  title: String
+
+  # // ./packages/scraper
+  keywords: [String!]
+  tickers: [String!]
+  # error?: string
 }
 
 type Note {
@@ -472,7 +495,7 @@ type NoteDocContentBody {
   blocks: [Block!]!
 
   # Experimental
-  blockDiff: [TreeNodeChange!]
+  blockDiff: [TreeNodeChange!]!
 }
 
 type NoteDocContentHead {
@@ -521,21 +544,19 @@ type NoteDocMeta {
 type NoteDraft {
   id: ID!
 
-  # Use as id for front-end (equals to doc-title)
+  # Act as an additional id in front-end
   symbol: String!
-
-  # noteId: String  # not using for creating a draft and not this field in db
-  userId: String!
 
   commitId: String
   fromDocId: String
+  linkId: String
+  userId: String!
   domain: String!
+  status: NoteDraftStatus!
   meta: NoteDraftMeta!
-
   contentHead: NoteDocContentHead!
   contentBody: NoteDocContentBody!
   updatedAt: String!
-  status: NoteDraftStatus!
 }
 
 # type NoteDraftCommitResponse {
@@ -715,13 +736,13 @@ input NoteDraftInput {
 }
 
 input NoteDraftMetaInput {
-  # Use string 'null' to represent null
-  chainPrevId: String!
+  # Null for no prev-id
+  chainPrevId: String
 }
 
 input NoteDocContentBodyInput {
-  discussIds: [BlockUid_DiscussIdInput!]!
-  symbols: [Symbol_SymIdInput!]!
+  # discussIds: [BlockUid_DiscussIdInput!]!
+  # symbols: [Symbol_SymIdInput!]!
   blocks: [BlockInput!]!
   blockDiff: [TreeNodeChangeInput!]!
 }

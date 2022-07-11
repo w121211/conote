@@ -1,9 +1,9 @@
 import React from 'react'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import { CommitPanel } from '../../components/commit/commit-panel'
+import { CommitPanel } from '../../frontend/components/commit/commit-panel'
 import { ApolloProvider } from '@apollo/client'
 import { getApolloClient } from '../../apollo/apollo-client'
-import ModalProvider from '../../components/modal/modal-context'
+import ModalProvider from '../../frontend/components/modal/modal-context'
 
 const apolloClient = getApolloClient()
 

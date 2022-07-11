@@ -1,6 +1,6 @@
 import { NoteDoc } from '@prisma/client'
-import { mockDocBlock_contentBlocks } from '../../components/block-editor/test/__mocks__/mock-block'
-import { mockDiffBlocks } from '../../components/block-editor/test/__mocks__/mock-diff-blocks'
+import { mockDocBlock_contentBlocks } from '../../frontend/components/block-editor/test/__mocks__/mock-block'
+import { mockDiffBlocks } from '../../frontend/components/block-editor/test/__mocks__/mock-diff-blocks'
 import { NoteDocContentBody, NoteDocParsed } from '../../lib/interfaces'
 import { mockBranches } from './mock-branch'
 import { mockCommits } from './mock-commit'
@@ -17,6 +17,7 @@ const contentBody: NoteDocContentBody = {
     { symbol: mockSyms[2].symbol, symId: mockSyms[2].id },
   ],
   blocks: mockDocBlock_contentBlocks,
+  blockDiff: [],
 }
 
 const base: NoteDocParsed<NoteDoc> = {

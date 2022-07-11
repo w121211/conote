@@ -2,7 +2,7 @@ import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
-import DiscussPostTiles from '../../components/discuss-post/discuss-post-tiles'
+import DiscussPostTiles from '../../frontend/components/discuss-post/discuss-post-tiles'
 
 const apolloClient = getApolloClient()
 

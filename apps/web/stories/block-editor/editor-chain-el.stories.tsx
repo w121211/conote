@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { ComponentMeta } from '@storybook/react'
-import ModalProvider from '../../components/modal/modal-context'
-import { EditorToolbar } from '../../components/block-editor/src/components/editor/editor-toolbar'
-import { noteService } from '../../components/block-editor/src/services/note.service'
-import { noteDraftService } from '../../components/block-editor/src/services/note-draft.service'
+import ModalProvider from '../../frontend/components/modal/modal-context'
+import { EditorToolbar } from '../../frontend/components/block-editor/src/components/editor/editor-toolbar'
+import { noteService } from '../../frontend/components/block-editor/src/services/note.service'
+import { noteDraftService } from '../../frontend/components/block-editor/src/services/note-draft.service'
 import {
   editorChainOpen,
   editorChainsRefresh,
   editorLeftSidebarRefresh,
-} from '../../components/block-editor/src/events'
-import { EditorChainEl } from '../../components/block-editor/src/components/editor/editor-chain-el'
+} from '../../frontend/components/block-editor/src/events'
+import { EditorChainEl } from '../../frontend/components/block-editor/src/components/editor/editor-chain-el'
 
 export default {
   title: 'BlockEditor/EditorChainEl',

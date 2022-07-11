@@ -1,55 +1,42 @@
-import { Link, Sym } from '@prisma/client'
-import { FetchClient, FetchResult } from '../fetcher/fetch-client'
+import type { Link, Sym } from '@prisma/client'
+import { FetchClient } from '../fetcher/fetch-client'
 import { tryFetch } from '../fetcher/vendors'
+import type { LinkParsed, LinkScrapedResult } from '../interfaces'
 import prisma from '../prisma'
-
-type LinkParsed = Omit<Link, 'scraped'> & {
-  sym: Sym | null
-  scraped: FetchResult
-}
 
 class LinkModel {
   private async find(url: string): Promise<LinkParsed | null> {
-    const found = await prisma.link.findUnique({
-      include: { sym: true },
+    const link = await prisma.link.findUnique({
       where: { url },
     })
-    if (found) {
-      return {
-        ...found,
-        scraped: found.scraped as unknown as FetchResult,
-      }
-    }
-    return null
+    return link ? this.parse(link) : null
   }
 
   /**
-   * If url is found, return link
-   * If url is not found, fetch the url and create a link and return
+   * If url is found, return the link
+   * If url is not found, fetch the url
+   * - If final url is found in current links, return the link
+   * - If final url is not found, create the link and return
    *
-   * TODO: consider redirect, different urls refers to the same page
+   * TODO
+   * - [] Redirect, different urls refers to the same page
+   * - [] If final url is found in current links, return the link -> May also update scraped result
    */
-  async getOrCreateLink({
-    url,
-    scraper,
-  }: {
-    url: string
-    scraper?: FetchClient
-  }): Promise<[LinkParsed, { fetchResult: FetchResult }]> {
+  async getOrCreateLink(
+    url: string,
+    scraper?: FetchClient,
+  ): Promise<[LinkParsed, { scraped: LinkScrapedResult }]> {
     const linkByUrl = await this.find(url)
-    if (linkByUrl) {
-      return [linkByUrl, { fetchResult: linkByUrl.scraped }]
-    }
+    if (linkByUrl) return [linkByUrl, { scraped: linkByUrl.scraped }]
 
     // TODO: found resolved-url is existed in database after fetch
-    const fetchResult: FetchResult = scraper
+    const scraped: LinkScrapedResult = scraper
         ? await scraper.fetch(url)
         : await tryFetch(url),
-      linkByFinalUrl = await this.find(fetchResult.finalUrl)
+      linkByFinalUrl = await this.find(scraped.finalUrl)
 
-    if (linkByFinalUrl) {
-      return [linkByFinalUrl, { fetchResult: linkByFinalUrl.scraped }]
-    }
+    if (linkByFinalUrl)
+      return [linkByFinalUrl, { scraped: linkByFinalUrl.scraped }]
 
     // TODO: if fetch result contains authors
     // let author: Author | undefined
@@ -65,22 +52,20 @@ class LinkModel {
 
     const link = await prisma.link.create({
       data: {
-        url: fetchResult.finalUrl,
-        domain: fetchResult.domain,
-        // sourceType: res.srcType,
-        // sourceId: res.srcId,
-        scraped: fetchResult as any,
+        url: scraped.finalUrl,
+        domain: scraped.domain,
+        scraped,
       },
-      include: { sym: true },
     })
 
-    return [
-      {
-        ...link,
-        scraped: link.scraped as unknown as FetchResult,
-      },
-      { fetchResult: fetchResult },
-    ]
+    return [this.parse(link), { scraped }]
+  }
+
+  parse(link: Link): LinkParsed {
+    return {
+      ...link,
+      scraped: link.scraped as unknown as LinkScrapedResult,
+    }
   }
 }
 

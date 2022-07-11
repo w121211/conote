@@ -9,7 +9,8 @@ import type {
   Sym,
 } from '@prisma/client'
 import cuid from 'cuid'
-import { differenceContentBody } from '../../shared/note-doc.common'
+import { differenceWith, intersectionWith } from 'lodash'
+import { differenceContentBody } from '../../share/note-doc.common'
 import type { CommitInputErrorItem } from '../interfaces'
 import prisma from '../prisma'
 import { noteDocMergeModel } from './note-doc-merge-model'
@@ -56,19 +57,39 @@ async function validateDraft(draft: NoteDraft, userId: string) {
           branchId_symId: { branchId: headDoc.branchId, symId: headDoc.symId },
         },
       })),
-    draftParsed = noteDraftModel.parse(draft),
-    newJoinedDiscussIds = draftParsed.contentBody.discussIds.filter(
-      e => e.commitId === undefined,
+    draftParsed = noteDraftModel.parseReal(draft),
+    discussesCreated = await prisma.discuss.findMany({
+      where: { draftId: draft.id },
+    }),
+    discussesCreated_foundInBlocks = intersectionWith(
+      discussesCreated,
+      draftParsed.contentBody.discussIds,
+      (a, b) => a.id === b.discussId,
     ),
-    newJoinedDiscusses =
-      newJoinedDiscussIds &&
-      (await prisma.$transaction(
-        newJoinedDiscussIds.map(e =>
-          prisma.discuss.findUnique({
-            where: { id: e.discussId },
-          }),
-        ),
-      ))
+    discussesCreated_unfoundInBlocks = differenceWith(
+      discussesCreated,
+      discussesCreated_foundInBlocks,
+      (a, b) => a.id === b.id,
+    )
+
+  // discussesCreated.filter(
+  //   e => !discussIdsInBlocks.includes(e.id),
+  // )
+
+  // discussesInConcentBlocks =
+
+  // newJoinedDiscussIds = draftParsed.contentBody.discussIds.filter(
+  //   e => e.commitId === undefined,
+  // ),
+  // newJoinedDiscusses =
+  //   newJoinedDiscussIds &&
+  //   (await prisma.$transaction(
+  //     newJoinedDiscussIds.map(e =>
+  //       prisma.discuss.findUnique({
+  //         where: { id: e.discussId },
+  //       }),
+  //     ),
+  //   ))
 
   // console.log(`existing discuss ${existingDiscusses?.length}`)
   if (sym && headDoc === null) {
@@ -117,7 +138,9 @@ async function validateDraft(draft: NoteDraft, userId: string) {
     fromDoc: headDoc,
     sym,
     note,
-    newJoinedDiscusses,
+    // newJoinedDiscusses,
+    discussesCreated_foundInBlocks,
+    discussesCreated_unfoundInBlocks,
   }
 }
 
@@ -145,7 +168,6 @@ export async function commitNoteDrafts(
     branch: Branch
   })[]
 }> {
-  // const drafts: NoteDraft[] = [],
   const symbol_symId: Record<string, string> = {},
     symbol_noteId: Record<string, string> = {},
     promises: PrismaPromise<any>[] = [],
@@ -179,7 +201,15 @@ export async function commitNoteDrafts(
 
   // Loop first run: create syms, connect discusses
   validateResults.forEach(e => {
-    const { draft, draftParsed, fromDoc, sym, note, newJoinedDiscusses } = e,
+    const {
+        draft,
+        // draftParsed,
+        // fromDoc,
+        sym,
+        note,
+        discussesCreated_foundInBlocks,
+        discussesCreated_unfoundInBlocks,
+      } = e,
       { branchId, linkId, symbol } = draft,
       symId = sym ? sym.id : cuid(),
       noteId = note ? note.id : cuid()
@@ -209,44 +239,49 @@ export async function commitNoteDrafts(
       )
     }
 
-    // Connect each new-joined-discuss && whose status is "DRAFT" to Note
-    // and update its status to "ACITVE"
-    if (newJoinedDiscusses) {
-      newJoinedDiscusses.forEach(e => {
-        if (e?.status === 'DRAFT') {
-          promises.push(
-            prisma.discuss.update({
-              data: {
-                notes: { connect: { branchId_symId: { branchId, symId } } },
-                status: 'ACTIVE',
-              },
-              where: { id: e.id },
-            }),
-          )
-        } else {
-          promises.push(
-            prisma.discuss.update({
-              data: {
-                notes: { connect: { branchId_symId: { branchId, symId } } },
-              },
-              where: { id: e?.id },
-            }),
-          )
-        }
-      })
-    }
+    // Delete discusses that are not found in the blocks.
+    // These are discusses created by the draft but get removed from blocks.
+    discussesCreated_unfoundInBlocks.forEach(e => {
+      promises.push(
+        prisma.discuss.delete({
+          where: { id: e.id },
+        }),
+      )
+    })
+
+    // Connect discusses to the note and update their status to "ACITVE" if possible
+    discussesCreated_foundInBlocks.forEach(e => {
+      if (e.status === 'DRAFT') {
+        promises.push(
+          prisma.discuss.update({
+            data: {
+              notes: { connect: { branchId_symId: { branchId, symId } } },
+              status: 'ACTIVE',
+            },
+            where: { id: e.id },
+          }),
+        )
+      } else {
+        promises.push(
+          prisma.discuss.update({
+            data: {
+              notes: { connect: { branchId_symId: { branchId, symId } } },
+            },
+            where: { id: e.id },
+          }),
+        )
+      }
+    })
   })
 
   // Loop second run: for each draft, create doc and connect to the note
   validateResults.forEach(e => {
     const { draft, draftParsed } = e,
-      // draftParsed = noteDraftModel.parse(e),
       symId = symbol_symId[draft.symbol]
 
     if (symId === null) throw new Error('Unexpected error: symId === null')
 
     promises.push(
-      // Also update symbol_symId in this function
       noteDocModel.create(draftParsed, commitId, symId, userId, symbol_symId),
     )
 

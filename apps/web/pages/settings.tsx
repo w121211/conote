@@ -1,4 +1,5 @@
-import { useMeContext } from '../components/auth/use-me-context'
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import { useMeContext } from '../frontend/components/auth/use-me-context'
 
 const Page = (): JSX.Element | null => {
   const { me } = useMeContext()

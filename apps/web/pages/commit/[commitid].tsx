@@ -7,13 +7,13 @@ import {
   CommitQuery,
   CommitQueryVariables,
 } from '../../apollo/query.graphql'
-import Layout from '../../components/ui-component/layout/layout'
-import { getNotePageURL } from '../../components/utils'
+import Layout from '../../frontend/components/ui-component/layout/layout'
+import { getNotePageURL } from '../../frontend/utils'
 import Link from 'next/link'
 import moment from 'moment'
-import UserLink from '../../components/user/user-link'
-import { styleSymbol } from '../../components/ui-component/style-fc/style-symbol'
-import { LayoutChildrenPadding } from '../../components/ui-component/layout/layout-children-padding'
+import UserLink from '../../frontend/components/user/user-link'
+import { styleSymbol } from '../../frontend/components/ui-component/style-fc/style-symbol'
+import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
 
 interface Props {
   commit: CommitFragment
@@ -72,7 +72,7 @@ const CommitPage = ({ commit }: Props) => {
               </span>
               <div>
                 <div>
-                  <Link href={getNotePageURL('doc', e.symbol, e.id)}>
+                  <Link href={getNotePageURL(e.symbol, e.id)}>
                     <a>
                       <span className="symbol-link mr-2">
                         {styleSymbol(e.symbol)}

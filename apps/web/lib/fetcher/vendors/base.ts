@@ -10,7 +10,7 @@ import { createScraper } from '@conote/scraper'
 import yfinancePack from '@conote/scraper/dist/packs/yfinance'
 import keywordsPack from '@conote/scraper/dist/packs/keywords'
 import tickersPack from '@conote/scraper/dist/packs/tickers'
-import { DomainFetchFunction } from './index'
+import type { DomainFetchFunction } from './index'
 
 // const metascraper = createMetascraper([
 //   metascraperAuthor(),
@@ -51,7 +51,14 @@ export function parseUrl(url: string): ParseUrlResult {
 export const base: DomainFetchFunction = async url => {
   try {
     const { body: html, url: finalUrl } = await got(url)
-    const { url: scrapedUrl, author, date, description, lang, title } = await metascraper({ html, url: finalUrl })
+    const {
+      url: scrapedUrl,
+      author,
+      date,
+      description,
+      lang,
+      title,
+    } = await metascraper({ html, url: finalUrl })
     const { keywords, tickers } = await extraScraper({ html, url: finalUrl })
     const { domain } = parseUrl(finalUrl)
     // if (domain === undefined) {
@@ -61,7 +68,7 @@ export const base: DomainFetchFunction = async url => {
     return {
       domain,
       finalUrl: scrapedUrl,
-      srcType: 'OTHER',
+      srcType: 'other',
       authorName: author,
       date,
       description,
@@ -76,7 +83,7 @@ export const base: DomainFetchFunction = async url => {
       return {
         domain,
         finalUrl: url,
-        srcType: 'OTHER',
+        srcType: 'other',
         error: err.message,
       }
     } else {

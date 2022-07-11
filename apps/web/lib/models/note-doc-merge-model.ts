@@ -9,7 +9,7 @@ import type {
   Sym,
 } from '@prisma/client'
 import { isEqual } from 'lodash'
-import { differenceContentBody } from '../../shared/note-doc.common'
+import { differenceContentBody } from '../../share/note-doc.common'
 import type { NoteDocMeta } from '../interfaces'
 import prisma from '../prisma'
 import { NoteDocModel } from './note-doc-model'

@@ -1,25 +1,7 @@
-import type { Sym, SymType } from '@prisma/client'
-import { parseSymbol } from '../../shared/symbol.common'
+import { Sym, SymType } from '@prisma/client'
+import { parseSymbol } from '../../share/symbol.common'
+import { SymbolParsed } from '../interfaces'
 import prisma from '../prisma'
-
-/**
- * Symbol types and its format:
- *
- * - Ticker: start with '$', all capital alphabet-letter or number
- *   @eg $AB, $A01
- *
- * - Topic: a title enclosed by `[[...]]`
- *   @eg [[what ever]], [[中文範例]]
- *
- * - URL: a valide http url start with 'http://' or 'https://'
- *   @eg https://github.com/typescript-eslint
- *
- */
-
-type SymbolParsed = {
-  symbol: string
-  type: SymType
-}
 
 class SymModel {
   /**

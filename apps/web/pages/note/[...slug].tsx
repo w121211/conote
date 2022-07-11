@@ -1,8 +1,5 @@
-import { isNil } from 'lodash'
-import React, { useEffect } from 'react'
-import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import React from 'react'
 import {
   NoteByBranchSymbolDocument,
   NoteByBranchSymbolQuery,
@@ -18,107 +15,72 @@ import {
   useNoteDraftQuery,
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
-import { getNotePageURL } from '../../components/utils'
-import NoteEditEl from '../../components/note/note-edit-el'
-import NoteViewEl from '../../components/note/note-view-el'
-
-const NoteDocLink = ({ doc }: { doc: NoteDocFragment }) => {
-  return (
-    <Link href={getNotePageURL('doc', doc.symbol, doc.id)}>
-      <a>#{doc.id.slice(-6)}</a>
-    </Link>
-  )
-}
+import NoteViewEl from '../../frontend/components/note/note-view-el'
 
 interface Props {
-  url: {
-    symbol: string
-    page: 'base' | 'doc' | 'edit' | 'view'
+  query: {
+    symbol?: string
+    url?: string
+    // page: 'base' | 'doc' | 'edit' | 'view'
     docId: string | null
   }
   note: NoteFragment | null
-  noteDoc: NoteDocFragment | null
   noteDocsToMerge: NoteDocFragment[] | null
+  noteDocById: NoteDocFragment | null
 }
 
 /**
- * Catch routes
- * - /note/[symbol]?view=1    Enforce viewer
- *   - If has no note, fallback to '/note/[symbol]'
- * - /note/[symbol]
- *   - If has draft, open the editor and and shallow update url to /note/[symbol]/edit
- *   - If has no draft, show note's head-doc
- *   - If has no note nor draft, open the editor with blank page
- *     and shallow update url to /note/[symbol]/edit
- * - /note/[symbol]/edit
- *   - If has no draft fallback to /note/[symbol]
- * - /note/[symbol]/doc/[docid]
- *
  * TODO:
  * - Move draft query to SSR
  * - Hydrate apollo by received props
  */
 const NoteSlugPage = ({
-  url: { symbol, page },
+  query: { symbol, url, docId },
   note,
-  noteDoc,
+  noteDocById,
   noteDocsToMerge,
 }: Props): JSX.Element | null => {
-  const router = useRouter(),
-    qDraft = useNoteDraftQuery({ variables: { symbol } })
-
-  useEffect(() => {
-    if (page === 'base' && !qDraft.loading) {
-      if (qDraft.data?.noteDraft || note === null) {
-        router.replace(getNotePageURL('edit', symbol), undefined, {
-          shallow: true,
-        })
-      }
-    }
-  }, [qDraft])
+  const qDraft = useNoteDraftQuery({ variables: { symbol } })
 
   if (qDraft.loading) return null
   if (qDraft.error && qDraft.error.message !== 'Not authenticated')
     throw qDraft.error
 
-  const el = React.createElement,
-    props = {
-      symbol,
-      note,
-      noteDraft: qDraft.data?.noteDraft ?? null,
-      noteDocsToMerge,
-    }
+  const props = {
+    symbol,
+    note,
+    noteDraft: qDraft.data?.noteDraft ?? null,
+  }
 
-  if (page === 'base') {
-    if (qDraft.data?.noteDraft) {
-      return el(NoteEditEl, props)
-    }
-    if (note) {
-      return el(NoteViewEl, {
-        ...props,
-        doc: note.headDoc,
-        note,
-      })
-    }
-    return el(NoteEditEl, props)
+  if (note && noteDocById && Array.isArray(noteDocsToMerge)) {
+    return (
+      <NoteViewEl {...{ ...props, doc: noteDocById, note, noteDocsToMerge }} />
+    )
   }
-  if (page === 'edit') {
-    return el(NoteEditEl, props)
+  if (note && Array.isArray(noteDocsToMerge)) {
+    return (
+      <NoteViewEl {...{ ...props, doc: note.headDoc, note, noteDocsToMerge }} />
+    )
   }
-  if (page === 'view' && note) {
-    return el(NoteViewEl, { ...props, doc: note.headDoc, note })
+  if (symbol) {
+    return <div>Note {symbol} is not found, create one.</div>
   }
-  if (page === 'doc' && note && noteDoc) {
-    return el(NoteViewEl, { ...props, doc: noteDoc, note })
+  if (url) {
+    return <div>Note on {url} is not found, create one.</div>
   }
-  throw new Error('Unexpected error')
-}
-
-function isEditOrDoc(s: string): s is 'edit' | 'doc' {
-  return ['edit', 'doc'].includes(s)
+  throw new Error('')
 }
 
 /**
+ * Catch routes
+ * - /note/[symbol]
+ * - /note/[symbol]/doc/[docid]
+ *
+ * - /note/Hello_world
+ * - /note/www.hello.world/sub/directory?wq_a=aaa+wq_b=bbb
+ * - /note?u=https://www.hello.world/sub/directory?a=aaa+b=bbb
+ * - /note?s=Hello+world
+ *
  * TODO:
  * - Currently draft is not able for server-side rendering
  *   because apollo's schema-link does not have 'request' which session data stored in it
@@ -132,28 +94,18 @@ export async function getServerSideProps({
 > {
   if (params === undefined) throw new Error('params === undefined')
 
-  const { slug } = params,
-    { view } = query
+  const { slug } = params
 
   let symbol: string,
-    page: Props['url']['page'] = 'base',
     docId: string | null = null
 
   if (slug.length === 1) {
     symbol = slug[0]
-    if (view) page = 'view'
-  } else if (slug.length > 1 && slug.length <= 3) {
+  } else if (slug.length === 3 && slug[1] === 'doc') {
     symbol = slug[0]
     docId = slug[2] ? slug[2] : null
-
-    const p = slug[1]
-    if (isEditOrDoc(p)) {
-      page = p
-    } else {
-      return { notFound: true }
-    }
   } else {
-    throw new Error('slug.length expect to be 1, 2, or 3')
+    throw new Error('slug.length expect to be 1 or 3')
   }
 
   const client = getApolloClientSSR(),
@@ -165,7 +117,6 @@ export async function getServerSideProps({
       variables: { branch: 'default', symbol },
     }),
     qDoc =
-      page === 'doc' &&
       docId &&
       (await client.query<NoteDocQuery, NoteDocQueryVariables>({
         query: NoteDocDocument,
@@ -181,9 +132,6 @@ export async function getServerSideProps({
         variables: { noteId: qNote.data.noteByBranchSymbol.id },
       }))
 
-  // Fallback to base page
-  if (page === 'view' && isNil(qNote.data.noteByBranchSymbol)) page = 'base'
-
   // Caching, see https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#caching-with-server-side-rendering-ssr
   res.setHeader(
     'Cache-Control',
@@ -192,9 +140,9 @@ export async function getServerSideProps({
 
   return {
     props: {
-      url: { symbol, page, docId },
+      query: { symbol, docId },
       note: qNote.data.noteByBranchSymbol ?? null,
-      noteDoc: qDoc ? qDoc.data.noteDoc : null,
+      noteDocById: qDoc ? qDoc.data.noteDoc : null,
       noteDocsToMerge: qDocsToMerge
         ? qDocsToMerge.data.noteDocsToMergeByNote
         : null,

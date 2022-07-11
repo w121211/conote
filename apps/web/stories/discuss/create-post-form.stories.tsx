@@ -2,9 +2,9 @@ import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
-import CreateDiscussPostForm from '../../components/discuss-post/discuss-post-form'
-import Modal from '../../components/modal/modal'
-import ModalProvider from '../../components/modal/modal-context'
+import CreateDiscussPostForm from '../../frontend/components/discuss-post/discuss-post-form'
+import Modal from '../../frontend/components/modal/modal'
+import ModalProvider from '../../frontend/components/modal/modal-context'
 
 const apolloClient = getApolloClient()
 

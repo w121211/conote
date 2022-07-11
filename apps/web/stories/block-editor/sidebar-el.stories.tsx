@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import SidebarEl from '../../components/block-editor/src/components/sidebar/sidebar-el'
-import { ThemeProvider } from '../../components/theme/theme-provider'
+import SidebarEl from '../../frontend/components/block-editor/src/components/sidebar/sidebar-el'
+import { ThemeProvider } from '../../frontend/components/theme/theme-provider'
 
 export default {
   title: 'BlockEditor/SidebarEl',

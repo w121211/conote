@@ -1,37 +1,44 @@
-import { AppProps } from 'next/app'
 import { ApolloProvider } from '@apollo/client'
-import ModalProvider from '../components/modal/modal-context'
-import '../style/global.css'
-import { ErrorBoundary } from 'react-error-boundary'
-import ErrorFallback from '../components/error-fallback'
-import { TooltipProvider } from '../components/ui-component/tooltip/tooltip-provider'
-import { useMe } from '../components/auth/use-me'
+import { AppProps } from 'next/app'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
+import React, { useState } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
+import { ToastContainer } from 'react-toastify'
 import { useApolloClientInitial } from '../apollo/apollo-client'
-import { MeProvider } from '../components/auth/use-me-context'
-import Layout from '../components/ui-component/layout/layout'
-import { useState } from 'react'
-import { Alert } from '../components/ui-component/alert'
-import { getLoginPageURL } from '../components/utils'
+import { useMe } from '../frontend/components/auth/use-me'
+import { MeProvider } from '../frontend/components/auth/use-me-context'
+import ErrorFallback from '../frontend/components/error-fallback'
+import Layout from '../frontend/components/ui-component/layout/layout'
+import ModalProvider from '../frontend/components/modal/modal-context'
+import { Alert } from '../frontend/components/ui-component/alert'
+import { StatusDisplay } from '../frontend/components/ui-component/status-display'
+import { TooltipProvider } from '../frontend/components/ui-component/tooltip/tooltip-provider'
+import { getLoginPageURL } from '../frontend/utils'
+import 'react-toastify/dist/ReactToastify.css'
+import '../style/global.css'
 
-const App = ({ Component, pageProps }: AppProps): JSX.Element => {
-  const apolloClient = useApolloClientInitial(pageProps.initialApolloState),
-    { me, loading } = useMe()
-  const [showAnnounce, setAnnounce] = useState(true)
+const App = ({ Component, pageProps }: AppProps): JSX.Element | null => {
+  const router = useRouter(),
+    apolloClient = useApolloClientInitial(pageProps.initialApolloState),
+    { me, loading } = useMe(),
+    [showAnnounce, setAnnounce] = useState(true)
 
+  if (pageProps.protected && loading) {
+    return null
+  }
   if (pageProps.protected && !loading && me === null) {
     return (
-      <div>
-        <p>
-          <Link href={getLoginPageURL()}>
-            <a>Login</a>
-          </Link>{' '}
-          to continue
-        </p>
-      </div>
+      <StatusDisplay
+        str="Login require"
+        btn={
+          <Link href={getLoginPageURL(router)}>
+            <a className="btn-primary-lg font-medium text-lg">Login</a>
+          </Link>
+        }
+      />
     )
   }
-
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       {/* <Script id='show-sidebar' strategy='afterInteractive' dangerouslySetInnerHTML={{
@@ -66,6 +73,14 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         }}
       /> */}
 
+      <ToastContainer
+        position="top-center"
+        autoClose={false}
+        hideProgressBar
+        closeOnClick
+        draggable={false}
+      />
+
       <ApolloProvider client={apolloClient}>
         <MeProvider>
           <TooltipProvider>
@@ -73,10 +88,10 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
               <div className="flex flex-col h-screen">
                 {showAnnounce && (
                   <Alert type="announce" onClose={() => setAnnounce(false)}>
-                    <div className="flex-grow flex items-center justify-center  gap-2 ">
+                    <span className="flex-grow flex items-center justify-center  gap-2 ">
                       <span className="material-icons">campaign</span>
                       <span className="truncate">new announcement!</span>
-                    </div>
+                    </span>
                   </Alert>
                 )}
                 <Layout>

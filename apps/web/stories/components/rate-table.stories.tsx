@@ -1,6 +1,9 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { RateTable, TableData } from '../../components/ui-component/rate-table'
+import {
+  RateTable,
+  TableData,
+} from '../../frontend/components/ui-component/rate-table'
 
 const mockRateData: TableData[] = [
   {
