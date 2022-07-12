@@ -4,6 +4,29 @@ import { genBlockUid } from '../utils'
 
 export type BlockInput = [string, BlockInput[]] | string
 
+//
+// Templates
+//
+//
+//
+//
+//
+//
+
+export const blankLines: BlockInput = [
+  'DUMMY_ROOT',
+  ['', '', '', '', '', '', '', '', '', '', '', ''],
+]
+
+//
+//
+//
+//
+//
+//
+//
+//
+
 /**
  * @param opts.docBlock If given, use it to replace input's root
  * @param opts.docSymbol If given, use it to replace input's root title

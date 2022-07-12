@@ -203,25 +203,20 @@ class NoteDraftService {
 
   /**
    * Remove '__typename' from query data
-   * @return blocks - include doc-block
+   * @returns blocks, include the docBlock
+   * @returns docBlock
    */
   toDoc(
-    branch: string,
     draft: NoteDraftFragment,
     note: NoteFragment | null,
   ): { doc: Doc; blocks: Block[]; docBlock: Block } {
     const {
-        symbol,
-        domain,
         contentBody: { blocks: gqlBlocks, ...restContentBody },
         contentHead,
       } = draft,
       { blocks, docBlock } = parseGQLBlocks(gqlBlocks),
       doc: Doc = {
         uid: genDocUid(),
-        branch,
-        domain,
-        symbol,
         contentHead: omitTypenameDeep(contentHead),
         contentBody: restContentBody,
         blockUid: docBlock.uid,

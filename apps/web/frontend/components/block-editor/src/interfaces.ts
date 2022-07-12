@@ -170,12 +170,11 @@ export type Doc = {
   // Client side only id, generate one when first open the doc
   uid: string
 
+  // No longer need because draft-copy contains all
   // Should be unique most of time except when renaming
-  symbol: string
-
-  branch: string
-
-  domain: string
+  // symbol: string
+  // branch: string
+  // domain: string
 
   // Note-doc-content-head is editable and stores here
   contentHead: NoteDocContentHeadInput

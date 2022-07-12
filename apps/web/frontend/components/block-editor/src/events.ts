@@ -688,14 +688,16 @@ export function selectedDown(selectedItems: string[]) {
 //   }
 // }
 
-function docLoadFromDraft(
-  symbol: string,
-  branch: string,
-  draft: NoteDraftFragment,
-  note: NoteFragment | null,
-) {
-  const docData = noteDraftService.toDoc(branch, draft, note),
-    { blockReducers, docReducers, docUid } = ops.docLoadOp(symbol, docData)
+/**
+ * TODO:
+ * - [] Remove branch param and use it from draft
+ */
+function docLoadFromDraft(draft: NoteDraftFragment, note: NoteFragment | null) {
+  const docData = noteDraftService.toDoc(draft, note),
+    { blockReducers, docReducers, docUid } = ops.docLoadOp(
+      draft.symbol,
+      docData,
+    )
   blockRepo.update(blockReducers)
   docRepo.update(docReducers)
 
@@ -704,26 +706,20 @@ function docLoadFromDraft(
 }
 
 /**
- * Doc's title is set as 'symbol' and acts as 'uid'
  * If doc is found in the repository (local memory), no need to query,
- *  otherwise, query remote's note, note-draft and create a local-doc,
- *  DocEl component will update the doc by title through rxjs.
- *
- * If local-doc found, do nothing.
- * If local-doc not found, find remote's note-draft.
- * If remote-note-draft not found, create local-doc from note-doc.
- *  But this doc is show in view mdode (not editable). Only when the user create
- *  the note-draft (by click saving), the local-doc become editable.
- * If note-doc not found, create new local-doc.
+ *  otherwise, query remote's note, note-draft and then create a doc,
+ * - If local-doc found, do nothing.
+ * - If local-doc not found, find remote's draft.
+ * - If remote's draft not found, create draft & local-doc from note's head-doc.
+ * - If note's head-doc not found, create new draft and then local-doc.
+ *   - If symbol is a link, get or create link first, and then use link's resolved url as symbol
  *
  */
-export async function docOpen(
+export async function docGetOrCreate(
   symbol: string,
   branch = 'default',
   domain = 'domain',
 ): Promise<Doc> {
-  const symbol_ = parseSymbol(symbol)
-
   const doc = docRepo.findDoc({ symbol })
   if (doc) return doc
 
@@ -735,32 +731,28 @@ export async function docOpen(
   console.timeEnd('noteService.queryNote')
 
   if (draft !== null) {
-    return docLoadFromDraft(symbol, branch, draft, note)
+    return docLoadFromDraft(draft, note)
   } else {
-    // Create a temporary doc (without draft) and use it to create the draft,
-    // then save the doc to the repo with the just created draft.
-    const { newDoc, draftInput } = genNewDoc(branch, symbol, domain, note),
+    const symbol_ = parseSymbol(symbol),
       link =
         symbol_.url !== undefined &&
         (await linkService.createLink(symbol_.url)),
+      symbol__ = link ? `[[${link.url}]]` : symbol_.symbol
+
+    // Create a temporary doc (without draft) and use it to create the draft,
+    // then save the doc to the repo with the just created draft.
+    const { draftInput } = genNewDoc(symbol__, symbol_.type, domain, note),
       draft = link
-        ? await noteDraftService.createDraftByLink(
-            newDoc.branch,
-            link.id,
-            draftInput,
-          )
-        : await noteDraftService.createDraft(
-            newDoc.branch,
-            newDoc.symbol,
-            draftInput,
-          ),
-      newDoc_ = docLoadFromDraft(symbol, branch, draft, note)
+        ? await noteDraftService.createDraftByLink(branch, link.id, draftInput)
+        : await noteDraftService.createDraft(branch, symbol__, draftInput),
+      newDoc = docLoadFromDraft(draft, note)
 
     // await editorLeftSidebarRefresh('network-only')
     console.time('editorChainsRefresh')
     await editorChainsRefresh('network-only')
     console.timeEnd('editorChainsRefresh')
-    return newDoc_
+
+    return newDoc
   }
 }
 
@@ -802,8 +794,8 @@ function docRemove(doc: Doc) {
 }
 
 /**
- * If note not existed, rename directly
- * If note existed, update note-meta without rename
+ * If note not existed, rename the doc
+ * If note existed, update content-head without rename
  *
  * TODO:
  */
@@ -812,8 +804,8 @@ export async function docRename(
   newSymbol: string,
   router?: NextRouter,
 ) {
-  if (doc.symbol === newSymbol) return
-  if (doc.noteCopy) return // Do nothing
+  if (doc.noteDraftCopy.symbol === newSymbol) return
+  if (doc.noteCopy) return // Note existed, update content-head without rename
 
   const { blockReducers, docReducers } = ops.docRenameOp(doc, newSymbol)
   blockRepo.update(blockReducers)
@@ -832,31 +824,37 @@ export async function docRename(
   if (opening.modal.docUid === doc.uid)
     await editorOpenSymbolInModal(newSymbol, router, { skipSave: true })
 
-  await editorLeftSidebarRefresh('network-only')
+  // await editorLeftSidebarRefresh('network-only')
+  await editorChainsRefresh('network-only')
+}
+
+function genTemplateGeneral(): BlockInput {
+  const general: BlockInput = [
+    'DUMMY_ROOT',
+    [
+      [
+        'Basic',
+        [
+          ['What is ...?', ['']],
+          // ['Explain ... in one picture?', ['']],
+          ['Why and why not ...?', ['']],
+          ['How ...?', ['']],
+          // ['How this research solve?', ['']],
+          ['What difference compared to the others?', ['']],
+        ],
+      ],
+      ['Discuss', ['']],
+    ],
+  ]
+  return general
 }
 
 /**
  * Set doc template
  */
 export async function docTemplateSet(doc: Doc) {
-  const demo: BlockInput = [
-    'DUMMY_ROOT',
-    [
-      '',
-      // [
-      //   'Brief',
-      //   [
-      //     ['The problem', ['']],
-      //     ['How this research solve?', ['']],
-      //     ['What difference compared to the others?', ['']],
-      //   ],
-      // ],
-      // ['Discuss', ['']],
-    ],
-  ]
-
   const docBlock = docRepo.getDocBlock(doc),
-    blocks = writeBlocks(demo, { docBlock }),
+    blocks = writeBlocks(genTemplateGeneral(), { docBlock }),
     [, ...children] = blocks,
     op = ops.blocksInsertOp(docBlock, children)
 
@@ -864,6 +862,7 @@ export async function docTemplateSet(doc: Doc) {
 }
 
 /**
+ *
  */
 export async function docContentHeadUpdate(
   doc: Doc,
@@ -871,7 +870,7 @@ export async function docContentHeadUpdate(
   router?: NextRouter,
 ) {
   const { symbol } = newContentHead,
-    isRename = !isNil(symbol) && symbol !== doc.symbol
+    isRename = !isNil(symbol) && symbol !== doc.noteDraftCopy.symbol
 
   const op = ops.docUpdatePropsOp(doc.uid, { contentHead: newContentHead })
   docRepo.update(op)
@@ -1006,7 +1005,7 @@ export async function editorOpenSymbolInModal(
       modal: { symbol, docUid: null },
     })
 
-    const doc = await docOpen(symbol)
+    const doc = await docGetOrCreate(symbol)
     editorRepo.updateOpening({
       ...opening,
       modal: { symbol, docUid: doc.uid },
@@ -1060,7 +1059,7 @@ export async function editorOpenSymbolInMain(
     }
   }
 
-  const doc = await docOpen(symbol)
+  const doc = await docGetOrCreate(symbol)
   editorRepo.updateOpening({
     modal: { symbol: null, docUid: null },
     main: { symbol, docUid: doc.uid },
@@ -1172,7 +1171,7 @@ export async function editorChainItemInsert(
   symbol: string,
   afterThisDraftId: string | null,
 ) {
-  const doc = await docOpen(symbol),
+  const doc = await docGetOrCreate(symbol),
     { draftEntries, tab } = editorRepo.getValue(),
     entries = draftEntries.filter(e => e.status === 'EDIT')
 
@@ -1195,7 +1194,7 @@ export async function editorChainItemOpen(draftId: string) {
   // console.log('editorOpenSymbolInMain', symbol)
   const chains = await editorChainsRefresh(),
     entries = editorRepo.getChainEntries(chains, draftId),
-    docs = await Promise.all(entries.map(e => docOpen(e.symbol))),
+    docs = await Promise.all(entries.map(e => docGetOrCreate(e.symbol))),
     chain: EditorProps['tab']['chain'] = zip(entries, docs).map(([a, b]) => {
       if (a && b) {
         return {

@@ -7,6 +7,7 @@ import {
 
 const mockNoteDraftCopy: Doc['noteDraftCopy'] = {
   id: 'mockNoteDraftCopy',
+  branchName: 'branchName',
   symbol: 'symbol',
   userId: 'userId',
   domain: 'domain',
@@ -20,16 +21,14 @@ const mockNoteDraftCopy: Doc['noteDraftCopy'] = {
   },
   contentBody: {
     __typename: 'NoteDocContentBody',
-    discussIds: [],
-    symbols: [],
+    // discussIds: [],
+    // symbols: [],
     blocks: [],
     blockDiff: [],
   },
 }
 
 const base: Omit<Doc, 'uid' | 'symbol' | 'blockUid'> = {
-  branch: 'default',
-  domain: 'domain',
   noteCopy: null,
   noteDraftCopy: mockNoteDraftCopy,
   contentHead: {},
@@ -44,13 +43,19 @@ export const mockDocs: Doc[] = [
   {
     ...base,
     uid: nanoid(),
-    symbol: mockDocBlock_contentBlocks[0].str,
     blockUid: mockDocBlock_contentBlocks[0].uid,
+    noteDraftCopy: {
+      ...base.noteDraftCopy,
+      symbol: mockDocBlock_contentBlocks[0].str,
+    },
   },
   {
     ...base,
     uid: nanoid(),
-    symbol: mockDocBlockWithoutContent.str,
     blockUid: mockDocBlockWithoutContent.uid,
+    noteDraftCopy: {
+      ...base.noteDraftCopy,
+      symbol: mockDocBlockWithoutContent.str,
+    },
   },
 ]

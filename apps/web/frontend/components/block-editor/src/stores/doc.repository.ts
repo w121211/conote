@@ -2,7 +2,8 @@ import { TreeNodeChange } from '@conote/docdiff'
 import { createStore, Reducer } from '@ngneat/elf'
 import { getEntity, selectEntity, withEntities } from '@ngneat/elf-entities'
 import type { NoteDraftInput } from 'graphql-let/__generated__/__types__'
-import { NoteFragment } from '../../../../../apollo/query.graphql'
+import type { NoteFragment } from '../../../../../apollo/query.graphql'
+import type { SymbolParsed } from '../../../../../lib/interfaces'
 import {
   differenceBlocks,
   parseGQLBlocks,
@@ -10,6 +11,7 @@ import {
 import type { Block, Doc } from '../interfaces'
 import { allDescendants, rootBlock } from '../op/queries'
 import { genBlockUid, genDocUid, omitTypenameDeep } from '../utils'
+import { blankLines, writeBlocks } from '../utils/block-writer'
 import { getBlock } from './block.repository'
 
 type DocStoreState = {
@@ -38,7 +40,7 @@ class DocRepository {
 
     if (searchBy.symbol) {
       const found = Object.entries(entities).find(
-        ([, v]) => v.symbol === searchBy.symbol,
+        ([, v]) => v.noteDraftCopy.symbol === searchBy.symbol,
       )
       return found ? found[1] : null
     } else if (searchBy.draftId) {
@@ -118,7 +120,7 @@ function toGQLBlocks(blocks: Block[]) {
 }
 
 export function docToNoteDraftInput(doc: Doc): NoteDraftInput {
-  const { noteCopy, domain, contentHead } = doc,
+  const { noteCopy, noteDraftCopy, contentHead } = doc,
     blocks = docRepo.getContentBlocks(doc),
     blocks_ = toGQLBlocks(blocks),
     // Null is a valide input for differencer, but '[]' is not
@@ -133,7 +135,7 @@ export function docToNoteDraftInput(doc: Doc): NoteDraftInput {
     blockDiff = differenceBlocks(blocks_, startBlocks),
     input: NoteDraftInput = {
       fromDocId: noteCopy?.headDoc.id,
-      domain,
+      domain: noteDraftCopy.domain,
       contentHead,
       contentBody: {
         // discussIds: [],
@@ -147,11 +149,12 @@ export function docToNoteDraftInput(doc: Doc): NoteDraftInput {
 
 /**
  * Doc is first generated then save into draft, so `noteDraftCopy` is omitted
+ * - If symbol is a link, start with blank lines
  *
  */
 export function genNewDoc(
-  branch: string,
   symbol: string,
+  symbolType: SymbolParsed['type'],
   domain: string,
   note: NoteFragment | null,
 ): {
@@ -162,17 +165,15 @@ export function genNewDoc(
   if (docRepo.findDoc({ symbol }) !== null)
     throw new Error('[genNewDoc] Doc is already existed')
 
-  let newDoc: Omit<Doc, 'noteDraftCopy'>, newBlocks: Block[]
+  let newDoc: Omit<Doc, 'noteDraftCopy'>
+  let newBlocks: Block[]
 
   if (note) {
-    const { blocks: gqlBlocks, discussIds, symbols } = note.headDoc.contentBody,
+    const { blocks: gqlBlocks } = note.headDoc.contentBody,
       { blocks, docBlock } = parseGQLBlocks(gqlBlocks)
     newBlocks = blocks
     newDoc = {
       uid: genDocUid(),
-      branch,
-      domain,
-      symbol,
       noteCopy: note,
       contentHead: omitTypenameDeep(note.headDoc.contentHead),
       contentBody: {
@@ -192,12 +193,12 @@ export function genNewDoc(
       parentUid: null,
       childrenUids: [],
     }
-    newBlocks = [newDocBlock]
+    newBlocks =
+      symbolType === 'URL'
+        ? writeBlocks(blankLines, { docBlock: newDocBlock })
+        : [newDocBlock]
     newDoc = {
       uid: genDocUid(),
-      branch,
-      domain,
-      symbol,
       noteCopy: null,
       contentHead: {},
       contentBody: {
@@ -211,7 +212,7 @@ export function genNewDoc(
 
   const input: NoteDraftInput = {
     fromDocId: newDoc.noteCopy?.headDoc.id,
-    domain: newDoc.domain,
+    domain,
     contentHead: newDoc.contentHead,
     contentBody: {
       ...newDoc.contentBody,

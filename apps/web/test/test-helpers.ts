@@ -1,4 +1,4 @@
-import { NoteDoc, PrismaClient } from '@prisma/client'
+import type { NoteDoc, NoteDraft, PrismaClient } from '@prisma/client'
 import { mockDiscusses, mockDiscussPosts } from './__mocks__/mock-discuss'
 import { mockBotUser, mockUsers } from './__mocks__/mock-user'
 import { mockBranches } from './__mocks__/mock-branch'
@@ -202,7 +202,7 @@ class TestHelper {
 
   async createNoteDrafts(
     prisma: PrismaClient,
-    drafts: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'>[],
+    drafts: Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'>[],
   ) {
     return await prisma.$transaction(
       drafts.map(e => prisma.noteDraft.create({ data: e })),

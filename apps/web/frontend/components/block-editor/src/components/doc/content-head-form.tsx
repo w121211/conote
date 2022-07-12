@@ -1,12 +1,13 @@
-import React from 'react'
+import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
+import { isNil } from 'lodash'
 import { useRouter } from 'next/router'
+import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { components, ControlProps } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
-import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
+import { parseSymbol } from '../../../../../../share/symbol.common'
 import { docContentHeadUpdate } from '../../events'
-import { Doc } from '../../interfaces'
-import { isNil } from 'lodash'
+import type { Doc } from '../../interfaces'
 
 type Option = {
   label: string
@@ -70,12 +71,12 @@ export const ContentHeadForm = ({
   doc: Doc
   onFinish: () => void
 }) => {
-  const { symbol, contentHead, noteDraftCopy } = doc,
+  const { contentHead, noteDraftCopy } = doc,
     router = useRouter()
 
   const methods = useForm<FormValues>({
       defaultValues: {
-        symbol: contentHead.symbol ?? symbol,
+        symbol: contentHead.symbol ?? noteDraftCopy.symbol,
         // title: contentHead.title ?? '',
         keywords:
           contentHead.keywords?.map(e => ({ label: e, value: e })) ?? [],
@@ -92,13 +93,13 @@ export const ContentHeadForm = ({
       },
     }),
     { register, handleSubmit, control, formState } = methods,
-    { isDirty, isSubmitSuccessful, isSubmitted } = formState
+    { errors, isDirty, isSubmitSuccessful, isSubmitted } = formState
 
   async function onSubmit(input: FormValues) {
-    const { symbol: symbol_, title, keywords, duplicatedSymbols } = input,
+    const { symbol: symbolInput, title, keywords, duplicatedSymbols } = input,
       contentHead_: NoteDocContentHeadInput = {
         ...contentHead,
-        symbol: symbol_ === symbol ? undefined : symbol_,
+        symbol: symbolInput === noteDraftCopy.symbol ? undefined : symbolInput,
         keywords: keywords.map(e => e.value),
       }
     await docContentHeadUpdate(doc, contentHead_, router)
@@ -120,11 +121,27 @@ export const ContentHeadForm = ({
         {...register('symbol', {
           required: true,
           pattern: /\[\[[^\]\n]+\]\]/u,
+          validate: v => {
+            console.log('validate')
+            try {
+              const s = parseSymbol(v)
+              return s.type === 'TOPIC'
+            } catch (err) {
+              return false
+            }
+          },
         })}
         className={`input flex-grow`}
         type="text"
         disabled={!isNil(noteDraftCopy.linkId)}
       />
+      {errors['symbol'] && (
+        <div>
+          {
+            'Incorrect symbol format, some examples [[Hello world]], [[How to ... ?]]'
+          }
+        </div>
+      )}
 
       {/* <label className="mr-4 mt-2 first:mt-0 sm:m-0 sm:text-right text-gray-700 text-sm">
           <span className="flex-shrink-0 min-w-fit  mr-4 sm:w-20"><h5 className=" text-right text-gray-700 font-normal">
@@ -169,9 +186,9 @@ export const ContentHeadForm = ({
         <button
           className="btn-primary-md "
           type="submit"
-          disabled={!isDirty || isSubmitSuccessful || isSubmitted}
+          disabled={!isDirty || isSubmitSuccessful}
         >
-          {isSubmitted ? (isDirty ? 'Submit' : 'Submitted') : 'Submit'}
+          Submit
         </button>
       </div>
     </form>

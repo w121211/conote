@@ -1,4 +1,4 @@
-import type { Branch, NoteDoc, Sym } from '@prisma/client'
+import type { Branch, NoteDoc, NoteDraft, Sym } from '@prisma/client'
 import { writeBlocks } from '../../frontend/components/block-editor/src/utils/block-writer'
 import {
   mockBlockInputs,
@@ -12,7 +12,7 @@ import { mockLinks } from './mock-link'
 import { mockSyms } from './mock-sym'
 import { mockUsers } from './mock-user'
 
-const blocksArr: NoteDraftParsed['contentBody']['blocks'][] = [
+const blocksArr: NoteDraftParsed<NoteDraft>['contentBody']['blocks'][] = [
   writeBlocks(mockBlockInputs[0], {
     docSymbol: mockSyms[0].symbol,
   }),
@@ -24,7 +24,7 @@ const blocksArr: NoteDraftParsed['contentBody']['blocks'][] = [
   }),
 ]
 
-const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
+const base: Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'> = {
   id: '',
   branchId: mockBranches[0].id,
   symbol: '',
@@ -51,7 +51,7 @@ const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
 const mockDiscusses_ = mockDiscusses('')
 
 export const mockNoteDrafts: Omit<
-  NoteDraftParsed,
+  NoteDraftParsed<NoteDraft>,
   'createdAt' | 'updatedAt'
 >[] = [
   {
@@ -140,13 +140,13 @@ export const mockNoteDrafts: Omit<
 export function mockNoteDrafts_gotFromDoc(
   userId: string,
   fromDoc: NoteDocParsed<NoteDoc & { sym: Sym; branch: Branch }>,
-): Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'>[] {
+): Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'>[] {
   const { id, branchId, symId, sym, domain, contentHead, contentBody } =
       fromDoc,
     blocks = writeBlocks(mockBlockInputs[1], {
       docSymbol: fromDoc.sym.symbol,
     }),
-    base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
+    base: Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'> = {
       id: '',
       branchId,
       symId,

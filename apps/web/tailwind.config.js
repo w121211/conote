@@ -1,5 +1,6 @@
 const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
+
 module.exports = {
   // @see https://tailwindcss.com/docs/upcoming-changes
   future: {

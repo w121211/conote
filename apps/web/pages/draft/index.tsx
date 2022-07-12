@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
-import { docOpen } from '../../frontend/components/block-editor/src/events'
+import { docGetOrCreate } from '../../frontend/components/block-editor/src/events'
 import SearcherModalButton from '../../frontend/components/search-all-modal/searcher-modal-button'
 import { SearcherProps } from '../../frontend/stores/searcher.repository'
 import { getDraftPageURL } from '../../frontend/utils'
@@ -20,7 +20,7 @@ const DraftIndexPage = ({ query }: Props): JSX.Element | null => {
 
   async function redirectToDraftIdPage(symbol: string) {
     setLoading(true)
-    const doc = await docOpen(symbol)
+    const doc = await docGetOrCreate(symbol)
     router.push(getDraftPageURL(doc.noteDraftCopy.id))
   }
 

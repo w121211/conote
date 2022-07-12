@@ -1,5 +1,6 @@
 import type { TreeNodeChange } from '@conote/docdiff'
 import type {
+  Branch,
   Link,
   NoteDoc,
   NoteDraft,
@@ -157,8 +158,8 @@ export type NoteDraftMeta = {
   }
 }
 
-export type NoteDraftParsed = Omit<
-  NoteDraft,
+export type NoteDraftParsed<T extends NoteDraft> = Omit<
+  T,
   'meta' | 'contentHead' | 'contentBody'
 > & {
   meta: NoteDraftMeta

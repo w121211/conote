@@ -1,7 +1,6 @@
-import { isTreeNodeChangeType } from '@conote/docdiff'
-import type { NoteDoc, NoteDraft } from '@prisma/client'
+import type { Branch, NoteDoc, NoteDraft } from '@prisma/client'
 import type {
-  NoteDocContentBodyInput,
+  NoteDraft as GQLNoteDraft,
   NoteDraftInput,
   NoteDraftMetaInput,
 } from 'graphql-let/__generated__/__types__'
@@ -9,10 +8,10 @@ import {
   parseBlockValues,
   parseGQLContentBodyInput,
 } from '../../share/block.common'
+import { toStringProps } from '../helpers'
 import type {
   NoteDocContentBody,
   NoteDocContentHead,
-  NoteDocParsed,
   NoteDraftMeta,
   NoteDraftParsed,
 } from '../interfaces'
@@ -29,7 +28,7 @@ class NoteDraftModel {
    * - has previous doc && no changes to previous doc
    *
    */
-  checkDraftForCommit(draftId: NoteDraftParsed) {
+  checkDraftForCommit(draftId: NoteDraftParsed<NoteDraft>) {
     throw 'Not implemented'
   }
 
@@ -92,14 +91,14 @@ class NoteDraftModel {
 
   /**
    * TODO
-   * - [] Swap block-uid for new inserted blocks to prevent directly using the client generated uids
+   * - [] Swap block-uid for new inserted blocks to prevent directly using the client generated uids -> do this when creating the doc
    */
   async create(
     branchName: string,
     symbol: string,
     userId: string,
     data: NoteDraftInput,
-  ): Promise<NoteDraftParsed> {
+  ): Promise<GQLNoteDraft> {
     const {
         fromDocId,
         domain,
@@ -124,8 +123,9 @@ class NoteDraftModel {
         contentHead,
         contentBody,
       },
+      include: { branch: true },
     })
-    return this.parse(draft)
+    return this.toGQLNoteDraft(draft)
   }
 
   async createByLink(
@@ -133,7 +133,7 @@ class NoteDraftModel {
     linkId: string,
     userId: string,
     { fromDocId, domain, contentHead, contentBody }: NoteDraftInput,
-  ): Promise<NoteDraftParsed> {
+  ): Promise<GQLNoteDraft> {
     const { branch, fromDoc, link } = await this.validateCreateInput(
         branchName,
         undefined,
@@ -154,10 +154,11 @@ class NoteDraftModel {
             contentHead,
             contentBody,
           },
+          include: { branch: true },
         }))
 
     if (draft) {
-      return this.parse(draft)
+      return this.toGQLNoteDraft(draft)
     }
     throw new Error()
   }
@@ -165,12 +166,13 @@ class NoteDraftModel {
   /**
    * Drop note-draft by updating its status to 'DROP'
    */
-  async drop(id: string): Promise<NoteDraftParsed> {
+  async drop(id: string): Promise<GQLNoteDraft> {
     const draft = await prisma.noteDraft.update({
       data: { status: 'DROP' },
       where: { id },
+      include: { branch: true },
     })
-    return this.parse(draft)
+    return this.toGQLNoteDraft(draft)
   }
 
   /**
@@ -197,7 +199,7 @@ class NoteDraftModel {
       contentBody: contentBodyInput,
     }: NoteDraftInput,
     newSymbol?: string,
-  ): Promise<NoteDraftParsed> {
+  ): Promise<GQLNoteDraft> {
     const draft = await prisma.noteDraft.findUnique({
       where: { id: draftId },
       include: { sym: true },
@@ -232,14 +234,15 @@ class NoteDraftModel {
         symbol: newSymbol,
       },
       where: { id: draftId },
+      include: { branch: true },
     })
-    return this.parse(draft_)
+    return this.toGQLNoteDraft(draft_)
   }
 
   /**
    * Parse shallow
    */
-  parse(draft: NoteDraft): NoteDraftParsed {
+  parse<T extends NoteDraft>(draft: T): NoteDraftParsed<T> {
     return {
       ...draft,
       meta: draft.meta as unknown as NoteDraftMeta,
@@ -251,7 +254,7 @@ class NoteDraftModel {
   /**
    * TODO: validate content head, content body
    */
-  parseReal(draft: NoteDraft): NoteDraftParsed {
+  parseReal<T extends NoteDraft>(draft: T): NoteDraftParsed<T> {
     const draft_ = this.parse(draft),
       { discussIds } = parseBlockValues(draft_.contentBody.blocks)
 
@@ -269,7 +272,6 @@ class NoteDraftModel {
   /**
    * Parse using block values, used before commit
    */
-
   toMeta(input?: NoteDraftMetaInput): NoteDraftMeta {
     return {
       chain: input
@@ -278,6 +280,15 @@ class NoteDraftModel {
           }
         : undefined,
     }
+  }
+
+  toGQLNoteDraft(draft: NoteDraft & { branch: Branch | null }): GQLNoteDraft {
+    if (draft.branch === null) throw new Error('draft.branch ==== null')
+    const draft_ = {
+      ...this.parse(draft),
+      branchName: draft.branch.name,
+    }
+    return toStringProps(draft_)
   }
 }
 

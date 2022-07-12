@@ -167,15 +167,15 @@ fragment noteDoc on NoteDoc {
 
 fragment noteDocContentBody on NoteDocContentBody {
   __typename
-  discussIds {
-    blockUid
-    discussId
-    commitId
-  }
-  symbols {
-    symbol
-    symId
-  }
+  # discussIds {
+  #   blockUid
+  #   discussId
+  #   commitId
+  # }
+  # symbols {
+  #   symbol
+  #   symId
+  # }
   blocks {
     ...block
   }
@@ -219,6 +219,7 @@ fragment noteDocMeta on NoteDocMeta {
 fragment noteDraft on NoteDraft {
   __typename
   id
+  branchName
   symbol
   commitId
   fromDocId

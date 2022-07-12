@@ -6,8 +6,10 @@ plugins:
   - typescript-react-apollo
 config:
   enumsAsTypes: true
-  preResolveTypes: true # produce flatten-type, avoid Pick<...>
-  scalars: # mapping to typescript types
+  # Produce flatten-type, avoid Pick<...>
+  preResolveTypes: true
+  # Mapping to typescript types
+  scalars:
     BigInt: BigInt
     JSON: object
     DateTime: 'string | Date'

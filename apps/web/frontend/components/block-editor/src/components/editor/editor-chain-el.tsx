@@ -45,7 +45,7 @@ const ChainDoc = ({
     initialValue: null,
   })
 
-  // useCallback instead of useRef, https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node
+  // Use useCallback instead of useRef, https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node
   const ref = useCallback(
     (node: HTMLElement) => {
       if (node !== null) {

@@ -1,6 +1,5 @@
 import { isNil } from 'lodash'
 import React, { useState } from 'react'
-import DomainSelect from '../../../../domain/domain-select'
 import Modal from '../../../../modal/modal'
 import { styleSymbol } from '../../../../ui-component/style-fc/style-symbol'
 import type { Doc } from '../../interfaces'
@@ -10,7 +9,8 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   const [showModal, setShowModal] = useState(false)
   // const editing = cur.__typename === 'NoteDraft'
   const newSymbol =
-    !isNil(doc.contentHead.symbol) && doc.contentHead.symbol !== doc.symbol
+    !isNil(doc.contentHead.symbol) &&
+    doc.contentHead.symbol !== doc.noteDraftCopy.symbol
       ? doc.contentHead.symbol
       : null
   // const newSymbol = doc.noteCopy && doc.contentHead.symbol !== doc.symbol ?
@@ -39,7 +39,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
             </span>
           )} */}
             {styleSymbol(
-              doc.symbol,
+              doc.noteDraftCopy.symbol,
               doc.contentHead.webpage?.title ?? undefined,
             )}
             {newSymbol && `-> ${newSymbol}`}

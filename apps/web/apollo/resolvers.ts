@@ -487,27 +487,30 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   async noteDraft(_parent, { id, symbol, url }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
 
-    let draft: NoteDraft | null = null
+    let draft: (NoteDraft & { branch: Branch }) | null = null
     if (id) {
       draft = await prisma.noteDraft.findUnique({
         where: { id },
+        include: { branch: true },
       })
     }
     if (symbol) {
       // TODO: use findMany and check there is only one element in the array
       draft = await prisma.noteDraft.findFirst({
         where: { userId, symbol, status: 'EDIT' },
+        include: { branch: true },
       })
     }
     if (url) {
       // TODO: use findMany and check there is only one element in the array
       draft = await prisma.noteDraft.findFirst({
         where: { userId, symbol: url, status: 'EDIT' },
+        include: { branch: true },
       })
     }
     if (draft) {
       if (draft.userId !== userId) throw new Error('Not the owner of draft')
-      return toStringProps(noteDraftModel.parse(draft))
+      return noteDraftModel.toGQLNoteDraft(draft)
     }
     return null
   },
@@ -516,11 +519,12 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req),
       draft = await prisma.noteDraft.findUnique({
         where: { id },
+        include: { branch: true },
       })
 
     if (draft) {
       if (draft.userId !== userId) throw new Error('Not the owner of draft')
-      return toStringProps(noteDraftModel.parse(draft))
+      return noteDraftModel.toGQLNoteDraft(draft)
     }
     throw new Error('Note draft not found.')
   },
@@ -836,7 +840,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req),
       branch_ = branch === 'default' ? 'mock-branch-0' : branch,
       draft = await noteDraftModel.create(branch_, symbol, userId, data)
-    return toStringProps(draft)
+    return draft
   },
 
   async createNoteDraftByLink(
@@ -848,7 +852,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req),
       branch_ = branch === 'default' ? 'mock-branch-0' : branch,
       draft = await noteDraftModel.createByLink(branch_, linkId, userId, data)
-    return toStringProps(draft)
+    return draft
   },
 
   async updateNoteDraft(_parent, { id, data, newSymbol }, { req }, _info) {
@@ -859,7 +863,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
         data,
         newSymbol ?? undefined,
       )
-    return toStringProps(draft)
+    return draft
   },
 
   async updateNoteDraftMeta(_parent, { id, data }, { req }, _info) {
@@ -876,9 +880,10 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const draft_ = await prisma.noteDraft.update({
       data: { meta },
       where: { id },
+      include: { branch: true },
     })
 
-    return toStringProps(noteDraftModel.parse(draft_))
+    return noteDraftModel.toGQLNoteDraft(draft_)
   },
 
   async dropNoteDraft(_parent, { id }, _context, _info) {

@@ -488,12 +488,11 @@ type NoteDoc {
 }
 
 type NoteDocContentBody {
-  discussIds: [BlockUid_DiscussId!]!
-
+  # discussIds: [BlockUid_DiscussId!]!
   # A symbol-noteId map, so later the cahnge of symbol name won't affect
-  symbols: [Symbol_SymId!]!
-  blocks: [Block!]!
+  # symbols: [Symbol_SymId!]!
 
+  blocks: [Block!]!
   # Experimental
   blockDiff: [TreeNodeChange!]!
 }
@@ -543,10 +542,9 @@ type NoteDocMeta {
 
 type NoteDraft {
   id: ID!
-
+  branchName: String!
   # Act as an additional id in front-end
   symbol: String!
-
   commitId: String
   fromDocId: String
   linkId: String

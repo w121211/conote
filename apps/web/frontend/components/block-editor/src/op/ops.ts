@@ -10,6 +10,7 @@ import {
   updateEntities,
 } from '@ngneat/elf-entities'
 import assert from 'assert'
+import { difference } from 'lodash'
 import type {
   Block,
   BlockPosition,
@@ -516,10 +517,9 @@ export function docLoadOp(
 } {
   if (docRepo.findDoc({ symbol }))
     throw new Error('[docLoadOp] Doc is already existed')
-  if (symbol !== data.doc.symbol)
-    throw new Error('[docLoadOp] title !== noteDraft.symbol')
+
   if (symbol !== data.docBlock.docSymbol) {
-    console.debug(data.docBlock, symbol)
+    console.debug(symbol, data.docBlock.docSymbol)
     throw new Error('[docLoadOp] symbol !== docBlock.docSymbol')
   }
   return {
