@@ -23,8 +23,8 @@ export const editorStore = createStore(
     chains: [],
     tab: {
       chain: [],
-      openDraftId: null,
-      //
+      curDraftId: null,
+      prevDraftId: null,
       loading: false,
     },
   }),
@@ -172,8 +172,10 @@ class EditorRepository {
     editorStore.update(setProp('chains', chains))
   }
 
-  setTab(tab: EditorProps['tab']) {
-    editorStore.update(setProp('tab', tab))
+  setTab(tab: Omit<EditorProps['tab'], 'prevDraftId'>) {
+    editorStore.update(
+      setProp('tab', v => ({ ...tab, prevDraftId: v.curDraftId })),
+    )
   }
 }
 

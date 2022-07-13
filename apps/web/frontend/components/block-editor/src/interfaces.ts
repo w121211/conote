@@ -264,8 +264,8 @@ export type EditorProps = {
       docUid: string
     }[]
     // Modify by chainItemOpen event
-    openDraftId: string | null
-    //
+    curDraftId: string | null
+    prevDraftId: string | null
     loading: boolean
   }
 }

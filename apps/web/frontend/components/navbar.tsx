@@ -1,14 +1,11 @@
 import { setProps } from '@ngneat/elf'
 import React, { ReactNode } from 'react'
 import Link from 'next/link'
-import { CommitPanel } from './commit/commit-panel'
-// import SearchAllModal from './search-all-modal/search-all-modal'
-import AuthItem from './auth/auth-el'
-// import { createStore, select, setProp, withProps } from '@ngneat/elf'
-import { useMeContext } from './auth/use-me-context'
 import { siderRepo } from '../stores/sider.repository'
+import { CommitPanel } from './commit/commit-panel'
+import AuthItem from './auth/auth-el'
+import { useMeContext } from './auth/use-me-context'
 import SearcherModal from './search-all-modal/searcher-modal'
-import SearcherlModalButton from './search-all-modal/searcher-modal-button'
 
 const Navbar = ({ rbtn }: { rbtn?: ReactNode }) => {
   const { me } = useMeContext()
@@ -48,8 +45,7 @@ const Navbar = ({ rbtn }: { rbtn?: ReactNode }) => {
           <Link href="/">
             <a className=" text-gray-800 dark:text-gray-200">Konote</a>
           </Link>
-          <SearcherlModalButton searcher={{ searchRange: 'symbol' }} />
-          <SearcherModal />
+          <SearcherModal searcher={{ searchRange: 'symbol' }} />
           {/* <SearchAllModal /> */}
         </div>
       </div>

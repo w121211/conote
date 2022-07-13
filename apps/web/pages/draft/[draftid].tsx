@@ -24,7 +24,6 @@ const DraftIdPage = ({ draftId }: Props): JSX.Element | null => {
     <LayoutChildrenPadding>
       <div className="pb-32">
         <div className="flex">
-          <div className="flex-1">Editing</div>
           {/* {note && (
             <NoteDocVersionDropdown
               cur={noteDraft}
