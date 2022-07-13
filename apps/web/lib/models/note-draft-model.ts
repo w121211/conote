@@ -1,9 +1,18 @@
-import { NoteDraft } from '@prisma/client'
-import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
-import { parseGQLContentBody } from '../../shared/block-helpers'
+import type { Branch, NoteDoc, NoteDraft } from '@prisma/client'
+import type {
+  NoteDraft as GQLNoteDraft,
+  NoteDraftInput,
+  NoteDraftMetaInput,
+} from 'graphql-let/__generated__/__types__'
 import {
+  parseBlockValues,
+  parseGQLContentBodyInput,
+} from '../../share/block.common'
+import { toStringProps } from '../helpers'
+import type {
   NoteDocContentBody,
   NoteDocContentHead,
+  NoteDraftMeta,
   NoteDraftParsed,
 } from '../interfaces'
 import prisma from '../prisma'
@@ -19,7 +28,7 @@ class NoteDraftModel {
    * - has previous doc && no changes to previous doc
    *
    */
-  checkDraftForCommit(draftId: NoteDraftParsed) {
+  checkDraftForCommit(draftId: NoteDraftParsed<NoteDraft>) {
     throw 'Not implemented'
   }
 
@@ -39,7 +48,7 @@ class NoteDraftModel {
     if (symbol) {
       const symbol_ = symModel.parse(symbol)
       if (symbol_.type !== 'TOPIC')
-        throw new Error('[updateSymbol] symbol_.type !== TOPIC')
+        throw new Error('[validateCreateInput] symbol type is not TOPIC')
     }
 
     const branch = await prisma.branch.findUnique({
@@ -56,18 +65,20 @@ class NoteDraftModel {
     //   ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } })
     //   : null
 
-    if (branch === null)
-      throw new Error('[NoteDraftModel.createByLink] Branch not found.')
-    if (fromDocId && fromDocId !== headDoc?.id)
+    if (symbol === undefined && linkId === undefined)
       throw new Error(
-        '[NoteDraftModel.createByLink] From-doc is not the head-doc.',
+        '[validateCreateInput] Param require either symbol or linkId.',
       )
+    if (branch === null)
+      throw new Error('[validateCreateInput] Branch not found.')
+    if (fromDocId && fromDocId !== headDoc?.id)
+      throw new Error('[validateCreateInput] From-doc is not the head-doc.')
     if (sym && fromDocId === undefined)
       throw new Error(
-        '[NoteDraftModel.createByLink] Sym is found but not has from-doc.',
+        '[validateCreateInput] Sym is found but not has from-doc.',
       )
     if (linkId && link === null)
-      throw new Error('[NoteDraftModel.createByLink] Link not found.')
+      throw new Error('[validateCreateInput] Link not found.')
     // if (fromDocId && fromDoc === null)
     //   throw new Error('[NoteDraftModel.createByLink] From-doc not found.')
 
@@ -80,25 +91,26 @@ class NoteDraftModel {
 
   /**
    * TODO
-   * - [] Swap block-uid for new inserted blocks to prevent directly using the client generated uids
+   * - [] Swap block-uid for new inserted blocks to prevent directly using the client generated uids -> do this when creating the doc
    */
   async create(
     branchName: string,
     symbol: string,
     userId: string,
-    {
-      fromDocId,
-      domain,
-      contentHead,
-      contentBody: contentBodyInput,
-    }: NoteDraftInput,
-  ): Promise<NoteDraftParsed> {
-    const { branch, fromDoc } = await this.validateCreateInput(
+    data: NoteDraftInput,
+  ): Promise<GQLNoteDraft> {
+    const {
+        fromDocId,
+        domain,
+        contentHead,
+        contentBody: contentBodyInput,
+      } = data,
+      { branch, fromDoc } = await this.validateCreateInput(
         branchName,
         symbol,
         fromDocId ?? undefined,
       ),
-      contentBody = parseGQLContentBody(symbol, contentBodyInput)
+      contentBody = parseGQLContentBodyInput(symbol, contentBodyInput)
 
     const draft = await prisma.noteDraft.create({
       data: {
@@ -111,8 +123,9 @@ class NoteDraftModel {
         contentHead,
         contentBody,
       },
+      include: { branch: true },
     })
-    return this.parse(draft)
+    return this.toGQLNoteDraft(draft)
   }
 
   async createByLink(
@@ -120,46 +133,59 @@ class NoteDraftModel {
     linkId: string,
     userId: string,
     { fromDocId, domain, contentHead, contentBody }: NoteDraftInput,
-  ): Promise<NoteDraftParsed> {
+  ): Promise<GQLNoteDraft> {
     const { branch, fromDoc, link } = await this.validateCreateInput(
-      branchName,
-      undefined,
-      fromDocId ?? undefined,
-      linkId,
-    )
+        branchName,
+        undefined,
+        fromDocId ?? undefined,
+        linkId,
+      ),
+      draft =
+        link &&
+        (await prisma.noteDraft.create({
+          data: {
+            symbol: `[[${link.url}]]`,
+            branch: { connect: { id: branch.id } },
+            sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+            fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+            link: { connect: { id: link.id } },
+            user: { connect: { id: userId } },
+            domain,
+            contentHead,
+            contentBody,
+          },
+          include: { branch: true },
+        }))
 
-    if (link === null) throw new Error('[createByLink] link === null')
-
-    const draft = await prisma.noteDraft.create({
-      data: {
-        symbol: link.url,
-        branch: { connect: { id: branch.id } },
-        sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-        fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
-        link: { connect: { id: linkId } },
-        user: { connect: { id: userId } },
-        domain,
-        contentHead,
-        contentBody,
-      },
-    })
-    return this.parse(draft)
+    if (draft) {
+      return this.toGQLNoteDraft(draft)
+    }
+    throw new Error()
   }
 
   /**
    * Drop note-draft by updating its status to 'DROP'
    */
-  async drop(id: string): Promise<NoteDraftParsed> {
+  async drop(id: string): Promise<GQLNoteDraft> {
     const draft = await prisma.noteDraft.update({
       data: { status: 'DROP' },
       where: { id },
+      include: { branch: true },
     })
-    return this.parse(draft)
+    return this.toGQLNoteDraft(draft)
   }
 
   /**
-   * 'Save' the note-draft by updating its value
+   * Save the note-draft by updating its value
    * No needs to check the content here, check on commit
+   *
+   * Symbol update logic:
+   * - Only 'topic' symbols are modifiable, not 'url', 'ticker' symbols
+   * - If the draft has from-doc, then not allow to update the draft.symbol here,
+   *   and only stores the updated symbol in the content-head.
+   *   The symbol will get updated when the merge is accepted, this will also update the sym's symbol.
+   * - If the symbol is existed in database, allow to modify but require to fix before merging
+   * - Else, update the draft's symbol
    *
    * @param newSymbol Only allow to update the symbol if sym is not connected
    */
@@ -173,7 +199,7 @@ class NoteDraftModel {
       contentBody: contentBodyInput,
     }: NoteDraftInput,
     newSymbol?: string,
-  ): Promise<NoteDraftParsed> {
+  ): Promise<GQLNoteDraft> {
     const draft = await prisma.noteDraft.findUnique({
       where: { id: draftId },
       include: { sym: true },
@@ -182,23 +208,21 @@ class NoteDraftModel {
     if (draft === null) throw new Error('NoteDraft not found.')
     if (draft.userId !== userId)
       throw new Error('User is not the owner, cannot update')
+
     if (newSymbol) {
       const newSymbol_ = symModel.parse(newSymbol)
+
       if (newSymbol_.type !== 'TOPIC')
-        throw new Error('newSymbol_.type !== TOPIC')
+        throw new Error('Only topic symbol is allowed to modify')
       if (draft.sym !== null)
-        throw new Error('Not allow to modify draft symbol if it has sym')
+        throw new Error(
+          'Sym existed in database, not allow to modify the symbol directly',
+        )
     }
 
-    // if (newSymbol) {
-    //   validateContentBody(newSymbol, contentBody)
-    // } else {
-    //   validateContentBody(draft.symbol, contentBody)
-    // }
-
     const contentBody = newSymbol
-      ? parseGQLContentBody(newSymbol, contentBodyInput)
-      : parseGQLContentBody(draft.symbol, contentBodyInput)
+      ? parseGQLContentBodyInput(newSymbol, contentBodyInput)
+      : parseGQLContentBodyInput(draft.symbol, contentBodyInput)
 
     const draft_ = await prisma.noteDraft.update({
       data: {
@@ -210,19 +234,61 @@ class NoteDraftModel {
         symbol: newSymbol,
       },
       where: { id: draftId },
+      include: { branch: true },
     })
-    return this.parse(draft_)
+    return this.toGQLNoteDraft(draft_)
+  }
+
+  /**
+   * Parse shallow
+   */
+  parse<T extends NoteDraft>(draft: T): NoteDraftParsed<T> {
+    return {
+      ...draft,
+      meta: draft.meta as unknown as NoteDraftMeta,
+      contentHead: draft.contentHead as unknown as NoteDocContentHead,
+      contentBody: draft.contentBody as unknown as NoteDocContentBody,
+    }
   }
 
   /**
    * TODO: validate content head, content body
    */
-  parse(draft: NoteDraft): NoteDraftParsed {
+  parseReal<T extends NoteDraft>(draft: T): NoteDraftParsed<T> {
+    const draft_ = this.parse(draft),
+      { discussIds } = parseBlockValues(draft_.contentBody.blocks)
+
     return {
       ...draft,
+      meta: draft.meta as unknown as NoteDraftMeta,
       contentHead: draft.contentHead as unknown as NoteDocContentHead,
-      contentBody: draft.contentBody as unknown as NoteDocContentBody,
+      contentBody: {
+        ...draft_.contentBody,
+        discussIds,
+      },
     }
+  }
+
+  /**
+   * Parse using block values, used before commit
+   */
+  toMeta(input?: NoteDraftMetaInput): NoteDraftMeta {
+    return {
+      chain: input
+        ? {
+            prevId: input.chainPrevId ?? null,
+          }
+        : undefined,
+    }
+  }
+
+  toGQLNoteDraft(draft: NoteDraft & { branch: Branch | null }): GQLNoteDraft {
+    if (draft.branch === null) throw new Error('draft.branch ==== null')
+    const draft_ = {
+      ...this.parse(draft),
+      branchName: draft.branch.name,
+    }
+    return toStringProps(draft_)
   }
 }
 

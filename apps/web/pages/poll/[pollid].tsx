@@ -1,5 +1,7 @@
-import React from 'react'
+import { isNil } from 'lodash'
+import moment from 'moment'
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import React from 'react'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import {
   PollDocument,
@@ -7,43 +9,35 @@ import {
   PollQuery,
   PollQueryVariables,
 } from '../../apollo/query.graphql'
-import Layout from '../../components/ui-component/layout/layout'
-import { isNil } from 'lodash'
-import MergePollVoteForm from '../../components/poll/merge-poll-vote-form'
-import NoteDocLink from '../../components/note/note-doc-link'
-import UserLink from '../../components/user/user-link'
-import moment from 'moment'
-import { Alert } from '../../components/ui-component/alert'
-import { useMeContext } from '../../components/auth/use-me-context'
-import LoginModal from '../../components/login-modal'
+import NoteDocLink from '../../frontend/components/note/note-doc-link'
+import MergePollVoteForm from '../../frontend/components/poll/merge-poll-vote-form'
+import UserLink from '../../frontend/components/user/user-link'
+import { AppPageProps } from '../../frontend/interfaces'
 
-interface Props {
+type Props = AppPageProps & {
   poll: PollFragment
   // discuss: DiscussFragment
   // discussPosts: DiscussPostFragment[]
 }
 
 const PollPage = ({ poll }: Props): JSX.Element | null => {
-  const { noteDocToMerge } = poll,
-    { me } = useMeContext()
+  const { noteDocToMerge } = poll
 
   if (isNil(noteDocToMerge))
     throw new Error('Currently only support merge poll')
 
   return (
-    <LoginModal>
-      <div>
-        <h4>Merge request</h4>
-        <p>
-          <NoteDocLink doc={noteDocToMerge} /> wants to merge.
-        </p>
-        <p>
-          Committer <UserLink userId={noteDocToMerge.userId} />{' '}
-          {moment(poll.createdAt).fromNow()}
-        </p>
-        <MergePollVoteForm poll={poll} />
-      </div>
-    </LoginModal>
+    <div>
+      <h4>Merge request</h4>
+      <p>
+        <NoteDocLink doc={noteDocToMerge} /> wants to merge.
+      </p>
+      <p>
+        Committer <UserLink userId={noteDocToMerge.userId} />{' '}
+        {moment(poll.createdAt).fromNow()}
+      </p>
+      <MergePollVoteForm poll={poll} />
+    </div>
   )
 }
 
@@ -79,6 +73,7 @@ export async function getServerSideProps({
   )
   return {
     props: {
+      protected: true,
       poll: qPoll.data.poll,
       // discuss: qPoll.data.poll.discuss,
       // discussPosts: qPosts.data.discussPosts,

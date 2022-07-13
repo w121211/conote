@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import { Tooltip } from '../../components/ui-component/tooltip/tooltip'
-import { TooltipProvider } from '../../components/ui-component/tooltip/tooltip-provider'
+import { Tooltip } from '../../frontend/components/ui-component/tooltip/tooltip'
+import { TooltipProvider } from '../../frontend/components/ui-component/tooltip/tooltip-provider'
 
 export default {
   component: Tooltip,

@@ -1,8 +1,8 @@
 import { setEntities } from '@ngneat/elf-entities'
-import { blockRepo } from '../../../components/block-editor/src/stores/block.repository'
-import { docRepo } from '../../../components/block-editor/src/stores/doc.repository'
-import { mockBlocks } from '../../../components/block-editor/test/__mocks__/mock-block'
-import { mockDocs } from '../../../components/block-editor/test/__mocks__/mock-doc'
+import { blockRepo } from '../../../frontend/components/block-editor/src/stores/block.repository'
+import { docRepo } from '../../../frontend/components/block-editor/src/stores/doc.repository'
+import { mockBlocks } from '../../../frontend/components/block-editor/test/__mocks__/mock-block'
+import { mockDocs } from '../../../frontend/components/block-editor/test/__mocks__/mock-doc'
 
 export const InitStoreForStorybook = ({
   children,

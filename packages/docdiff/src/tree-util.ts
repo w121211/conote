@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash'
-import { MatchFn, TreeNode, TreeNodeBody } from './interfaces'
+import { TreeNode, TreeNodeBody } from './interfaces'
 
 export function isTreeNode<T>(
   node: TreeNode<T> | TreeNodeBody<T>,

@@ -1,6 +1,6 @@
 import type { NoteDoc, Poll, PollCount } from '@prisma/client'
 import { hasCount } from '../helpers'
-import { PollMeta, PollParsed } from '../interfaces'
+import type { PollMeta, PollParsed } from '../interfaces'
 import prisma from '../prisma'
 
 const defaultPollMeta: PollMeta = {

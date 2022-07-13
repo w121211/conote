@@ -1,17 +1,30 @@
-import { Branch, NoteDoc, Sym } from '@prisma/client'
-import { writeBlocks } from '../../components/block-editor/src/utils/block-writer'
+import type { Branch, NoteDoc, NoteDraft, Sym } from '@prisma/client'
+import { writeBlocks } from '../../frontend/components/block-editor/src/utils/block-writer'
 import {
   mockBlockInputs,
-  mockBlocks,
-} from '../../components/block-editor/test/__mocks__/mock-block'
-import { NoteDocParsed, NoteDraftParsed } from '../../lib/interfaces'
+  mockDocBlock_contentBlocks,
+} from '../../frontend/components/block-editor/test/__mocks__/mock-block'
+import type { NoteDocParsed, NoteDraftParsed } from '../../lib/interfaces'
+import { differenceBlocks } from '../../share/block.common'
 import { mockBranches } from './mock-branch'
 import { mockDiscusses } from './mock-discuss'
 import { mockLinks } from './mock-link'
 import { mockSyms } from './mock-sym'
 import { mockUsers } from './mock-user'
 
-const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
+const blocksArr: NoteDraftParsed<NoteDraft>['contentBody']['blocks'][] = [
+  writeBlocks(mockBlockInputs[0], {
+    docSymbol: mockSyms[0].symbol,
+  }),
+  writeBlocks(mockBlockInputs[0], {
+    docSymbol: mockSyms[1].symbol,
+  }),
+  writeBlocks(mockBlockInputs[0], {
+    docSymbol: mockSyms[2].symbol,
+  }),
+]
+
+const base: Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'> = {
   id: '',
   branchId: mockBranches[0].id,
   symbol: '',
@@ -22,6 +35,7 @@ const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
   linkId: null,
   status: 'EDIT',
   domain: 'domain0',
+  meta: {},
   contentHead: {},
   contentBody: {
     discussIds: [],
@@ -29,14 +43,15 @@ const base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
       { symbol: '[[Google]]', symId: null },
       { symbol: '$BA', symId: null },
     ],
-    blocks: writeBlocks(mockBlockInputs[0], { docSymbol: mockSyms[0].symbol }),
+    blocks: blocksArr[0],
+    blockDiff: differenceBlocks(blocksArr[0], null),
   },
 }
 
 const mockDiscusses_ = mockDiscusses('')
 
 export const mockNoteDrafts: Omit<
-  NoteDraftParsed,
+  NoteDraftParsed<NoteDraft>,
   'createdAt' | 'updatedAt'
 >[] = [
   {
@@ -50,9 +65,8 @@ export const mockNoteDrafts: Omit<
         { symbol: '[[Google]]', symId: null },
         { symbol: '$BA', symId: null },
       ],
-      blocks: writeBlocks(mockBlockInputs[0], {
-        docSymbol: mockSyms[0].symbol,
-      }),
+      blocks: blocksArr[0],
+      blockDiff: differenceBlocks(blocksArr[0], null),
     },
   },
   {
@@ -67,9 +81,8 @@ export const mockNoteDrafts: Omit<
         { blockUid: 'uid-1', discussId: mockDiscusses_[2].id },
       ],
       symbols: [],
-      blocks: writeBlocks(mockBlockInputs[0], {
-        docSymbol: mockSyms[1].symbol,
-      }),
+      blocks: blocksArr[1],
+      blockDiff: differenceBlocks(blocksArr[1], null),
     },
   },
   {
@@ -81,14 +94,13 @@ export const mockNoteDrafts: Omit<
     contentBody: {
       discussIds: [],
       symbols: [],
-      blocks: writeBlocks(mockBlockInputs[0], {
-        docSymbol: mockSyms[2].symbol,
-      }),
+      blocks: blocksArr[2],
+      blockDiff: differenceBlocks(blocksArr[2], null),
     },
   },
   {
     ...base,
-    id: '3_got_discusses_with_commitId',
+    id: '3-got_discusses_with_commitId',
     symbol: mockSyms[1].symbol,
     userId: mockUsers[1].id,
     contentBody: {
@@ -106,7 +118,8 @@ export const mockNoteDrafts: Omit<
         },
       ],
       symbols: [],
-      blocks: mockBlocks,
+      blocks: mockDocBlock_contentBlocks,
+      blockDiff: differenceBlocks(mockDocBlock_contentBlocks, null),
     },
   },
   {
@@ -118,7 +131,8 @@ export const mockNoteDrafts: Omit<
     contentBody: {
       discussIds: [],
       symbols: [],
-      blocks: mockBlocks,
+      blocks: mockDocBlock_contentBlocks,
+      blockDiff: differenceBlocks(mockDocBlock_contentBlocks, null),
     },
   },
 ]
@@ -126,10 +140,13 @@ export const mockNoteDrafts: Omit<
 export function mockNoteDrafts_gotFromDoc(
   userId: string,
   fromDoc: NoteDocParsed<NoteDoc & { sym: Sym; branch: Branch }>,
-): Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'>[] {
+): Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'>[] {
   const { id, branchId, symId, sym, domain, contentHead, contentBody } =
       fromDoc,
-    base: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'> = {
+    blocks = writeBlocks(mockBlockInputs[1], {
+      docSymbol: fromDoc.sym.symbol,
+    }),
+    base: Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'> = {
       id: '',
       branchId,
       symId,
@@ -140,12 +157,14 @@ export function mockNoteDrafts_gotFromDoc(
       linkId: null,
       status: 'EDIT',
       domain: domain,
+      meta: {},
       contentHead,
       contentBody: {
         ...contentBody,
-        blocks: writeBlocks(mockBlockInputs[1], {
-          docSymbol: fromDoc.sym.symbol,
-        }),
+        blocks,
+        // TODO
+        // blockDiff: differenceBlocks(blocks, contentBody.blocks),
+        blockDiff: [],
       },
     }
 

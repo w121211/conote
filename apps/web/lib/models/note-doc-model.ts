@@ -1,5 +1,11 @@
-import { Branch, NoteDoc, PrismaPromise, Sym } from '@prisma/client'
-import {
+import type {
+  Branch,
+  NoteDoc,
+  NoteDraft,
+  PrismaPromise,
+  Sym,
+} from '@prisma/client'
+import type {
   NoteDocContentBody,
   NoteDocContentHead,
   NoteDocMeta,
@@ -65,7 +71,7 @@ export class NoteDocModel {
    * @param incomingSymbolsDict { [symbol]: sym-id } dict
    */
   create(
-    draft: NoteDraftParsed,
+    draft: NoteDraftParsed<NoteDraft>,
     commitId: string,
     symId: string,
     userId: string,

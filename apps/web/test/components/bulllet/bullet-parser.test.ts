@@ -1,4 +1,7 @@
-import { BulletParser, tokenizeBulletString } from '../../../components/bullet/bullet-parser'
+import {
+  BulletParser,
+  tokenizeBulletString,
+} from '../../../frontend/components/bullet/bullet-parser'
 
 // it('grammar', () => {
 //   // expect(clean(replaceBulletInput(templateTicker.body, params))).toMatchSnapshot()

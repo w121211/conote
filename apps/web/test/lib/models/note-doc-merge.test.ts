@@ -1,6 +1,6 @@
-import { NoteDoc } from '@prisma/client'
+import type { NoteDoc } from '@prisma/client'
 import { cloneDeep } from 'lodash'
-import { mockDiffBlocks } from '../../../components/block-editor/test/__mocks__/mock-diff-blocks'
+import { mockDiffBlocks } from '../../../frontend/components/block-editor/test/__mocks__/mock-diff-blocks'
 import { NoteDocParsed } from '../../../lib/interfaces'
 import { noteDocMergeModel } from '../../../lib/models/note-doc-merge-model'
 import { noteDocModel } from '../../../lib/models/note-doc-model'
@@ -14,20 +14,20 @@ import { mockMergePolls } from '../../__mocks__/mock-poll'
 import { mockSyms } from '../../__mocks__/mock-sym'
 import { mockUsers } from '../../__mocks__/mock-user'
 import { mockMergePollVotes } from '../../__mocks__/mock-vote'
-import { createMockMergePolls, createMockVotes } from './poll-merge.test'
+import { createMockVotes } from './poll-merge.test'
 
 /**
  * Warning! This method does not follow the correct procedures to create the note-docs
  *  and should only be used for testing merge functions. The correct way is through
  *  commit process and create all related data there.
  */
-async function createMockNoteDocs(docs: NoteDocParsed[]) {
+async function createMockNoteDocs(docs: NoteDocParsed<NoteDoc>[]) {
   await prisma.$transaction(mockLinks.map(e => prisma.link.create({ data: e })))
   await prisma.$transaction(mockSyms.map(e => prisma.sym.create({ data: e })))
   await prisma.$transaction(
     mockCommits.map(e => prisma.commit.create({ data: e })),
   )
-  await createMockMergePolls()
+
   await prisma.$transaction(mockNotes.map(e => prisma.note.create({ data: e })))
 
   const docs_ = await prisma.$transaction(
@@ -42,6 +42,9 @@ async function createMockNoteDocs(docs: NoteDocParsed[]) {
       })
     }),
   )
+
+  await testHelper.createMergePolls(prisma, docs_[0])
+
   return docs_
 }
 
@@ -92,7 +95,7 @@ describe('_validateOnMerge()', () => {
   })
 
   it('throws if from-doc is not the head', async () => {
-    const cdt: NoteDocParsed = {
+    const cdt: NoteDocParsed<NoteDoc> = {
         // mockNoteDocs[2] is the head, so use it as the starter
         ...mockNoteDocs[2],
         id: '99-candidate__has_from_doc',
@@ -138,7 +141,7 @@ describe('_mergeAuto()', () => {
    * Base test variables
    */
   const fromDoc = mockNoteDocs[2],
-    baseCandidate: NoteDocParsed = {
+    baseCandidate: NoteDocParsed<NoteDoc> = {
       ...fromDoc,
       id: '99-candidate__has_from_doc',
       fromDocId: fromDoc.id,
@@ -249,7 +252,7 @@ describe('_createMergePoll()', () => {
 
 describe('_mergeByPoll()', () => {
   const fromDoc = mockNoteDocs[2],
-    baseCandidate: NoteDocParsed = {
+    baseCandidate: NoteDocParsed<NoteDoc> = {
       ...fromDoc,
       id: '99-candidate__has_from_doc',
       fromDocId: fromDoc.id,
@@ -297,7 +300,7 @@ describe('_mergeByPoll()', () => {
 
 describe('mergeOnCreate()', () => {
   const fromDoc = mockNoteDocs[2],
-    baseCandidate: NoteDocParsed = {
+    baseCandidate: NoteDocParsed<NoteDoc> = {
       ...fromDoc,
       id: '99-candidate__has_from_doc',
       fromDocId: fromDoc.id,

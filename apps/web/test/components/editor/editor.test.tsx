@@ -1,7 +1,7 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
-import { BulletEditor } from '../../../components/editor/editor'
-import { Doc } from '../../../components/workspace/doc'
+import { BulletEditor } from '../../../frontend/components/editor/editor'
+import { Doc } from '../../../frontend/components/workspace/doc'
 
 test("press 'delete' on empty line followed by line contains inlines", () => {
   const doc = Doc.createDoc({

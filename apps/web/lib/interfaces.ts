@@ -1,5 +1,28 @@
-import { NoteDoc, NoteDraft, Poll, PollCount } from '@prisma/client'
-import { Block } from '../components/block-editor/src/interfaces'
+import type { TreeNodeChange } from '@conote/docdiff'
+import type {
+  Branch,
+  Link,
+  NoteDoc,
+  NoteDraft,
+  Poll,
+  PollCount,
+  SymType,
+} from '@prisma/client'
+import type { Block } from '../frontend/components/block-editor/src/interfaces'
+
+//
+// Data models
+//
+//
+//
+//
+//
+//
+
+export type CommitInputErrorItem = {
+  draftId: string
+  msg: string
+}
 
 export type DiscussMeta = {
   // The note that create this discuss
@@ -9,29 +32,28 @@ export type DiscussMeta = {
   notesConntected: { id: string; symbol: string }[]
 }
 
-/**
- * Store (symbol-string, sym-id) to handle later symbol-string change case
- * symId can be null if not yet created (in draft)
- *
- * @example {symbol: '$GOOG', symId: '123'}
- *
- */
-export type Symbol_SymId = {
-  symbol: string
-  symId: string | null
+export type LinkParsed = Omit<Link, 'scraped'> & {
+  scraped: LinkScrapedResult
 }
 
-/**
- * Store each block's discussion id (if exist)
- * include commit-id for better tracking each discuss
- * if one block has multiple discussion-ids, store as two items
- *
- * [{blockUid: 'b1', discussId: 'd1'}, {blockUid: 'b1', discussId: 'd2'}]
- */
-export type BlockUid_DiscussId = {
-  blockUid: string
-  discussId: string
-  commitId?: string
+export type LinkScrapedResult = {
+  domain: string
+  finalUrl: string
+  srcId?: string
+  srcType: 'video' | 'post' | 'author' | 'other'
+
+  // metascraper
+  authorId?: string
+  authorName?: string
+  date?: string
+  description?: string
+  lang?: string
+  title?: string
+
+  // ./packages/scraper
+  keywords?: string[]
+  tickers?: string[]
+  error?: string
 }
 
 export type NoteDocParsed<T extends NoteDoc> = Omit<
@@ -91,14 +113,56 @@ export type NoteDocContentHead = {
   }
 }
 
-export type NoteDocContentBody = {
-  discussIds: BlockUid_DiscussId[]
-  symbols: Symbol_SymId[]
-  diff?: any
-  blocks: Omit<Block, 'childrenUids'>[]
+/**
+ * Store each block's discussion id (if exist)
+ * include commit-id for better tracking each discuss
+ * if one block has multiple discussion-ids, store as two items
+ *
+ * [{blockUid: 'b1', discussId: 'd1'}, {blockUid: 'b1', discussId: 'd2'}]
+ */
+type BlockUid_DiscussId = {
+  blockUid: string
+  discussId: string
+  commitId?: string
 }
 
-export type NoteDraftParsed = Omit<NoteDraft, 'contentHead' | 'contentBody'> & {
+/**
+ * Store (symbol-string, sym-id) to handle later symbol-string change case
+ * symId can be null if not yet created (in draft)
+ *
+ * @example {symbol: '$GOOG', symId: '123'}
+ *
+ */
+type Symbol_SymId = {
+  symbol: string
+  symId: string | null
+}
+
+export type NoteDocContentBody = {
+  //
+  discussIds: BlockUid_DiscussId[]
+
+  //
+  symbols: Symbol_SymId[]
+
+  blocks: Omit<Block, 'childrenUids'>[]
+
+  // Experimental
+  blockDiff: TreeNodeChange[]
+}
+
+export type NoteDraftMeta = {
+  // Join note drafts as a chain
+  chain?: {
+    prevId: string | null
+  }
+}
+
+export type NoteDraftParsed<T extends NoteDraft> = Omit<
+  T,
+  'meta' | 'contentHead' | 'contentBody'
+> & {
+  meta: NoteDraftMeta
   contentHead: NoteDocContentHead
   contentBody: NoteDocContentBody
 }
@@ -116,4 +180,16 @@ export type PollParsed<T extends Poll> = Omit<
   'meta'
 > & {
   meta: PollMeta
+}
+
+/**
+ * Symbol types and its format:
+ * - Ticker, start with '$', capital letter or number, eg $AB, $A01
+ * - Topic, a title enclosed by `[[...]]`, eg [[what ever]], [[中文範例]]
+ * - URL, a valide http url start with 'http://' or 'https://', eg [[https://github.com/typescript-eslint]]
+ */
+export type SymbolParsed = {
+  type: SymType
+  symbol: string
+  url?: string
 }

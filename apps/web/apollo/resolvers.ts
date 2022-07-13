@@ -1,4 +1,4 @@
-import {
+import type {
   Branch,
   Discuss,
   DiscussCount,
@@ -14,7 +14,7 @@ import {
   NoteEmojiCount,
   Sym,
 } from '@prisma/client'
-import { AuthenticationError } from 'apollo-server-micro'
+import { ApolloError, AuthenticationError } from 'apollo-server-micro'
 import { NextApiRequest, NextApiResponse } from 'next'
 import {
   Discuss as GQLDiscuss,
@@ -38,13 +38,15 @@ import {
   discussPostEmojiModel,
   noteEmojiModel,
 } from '../lib/models/emoji-model'
-import { commitNoteDrafts } from '../lib/models/commit-model'
+import { CommitInputError, commitNoteDrafts } from '../lib/models/commit-model'
 import { noteDraftModel } from '../lib/models/note-draft-model'
 import { noteModel } from '../lib/models/note-model'
 import { pollModel } from '../lib/models/poll-model'
 import { noteDocModel } from '../lib/models/note-doc-model'
 import { pollVoteModel } from '../lib/models/poll-vote-model'
 import { isNil } from 'lodash'
+import { linkModel } from '../lib/models/link-model'
+import { LinkParsed } from '../lib/interfaces'
 
 export type ResolverContext = {
   req: NextApiRequest
@@ -76,7 +78,7 @@ function toGQLNoteEntry(
     id: id,
     branchName: branch.name,
     sym: sym,
-    link: link,
+    link: link && linkModel.parse(link),
   }
 }
 
@@ -261,10 +263,20 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 
   async link(_parent, { id, url }, _context, _info) {
     if (id) {
-      await prisma.link.findUnique({ where: { id } })
+      const link = await prisma.link.findUnique({
+          where: { id },
+          include: { sym: true },
+        }),
+        link_ = link && linkModel.parse(link)
+      return link_
     }
     if (url) {
-      return await prisma.link.findUnique({ where: { url } })
+      const link = await prisma.link.findUnique({
+          where: { url },
+          include: { sym: true },
+        }),
+        link_ = link && linkModel.parse(link)
+      return link_
     }
     throw new Error('Param requires either id or url')
   },
@@ -351,21 +363,27 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
 
   // # get user's all drafts for draft-sidebar
   // # provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
-  // myNoteDraftEntries: [NoteDraftEntry!]!
   // can use select filter to only get id field
   async myNoteDraftEntries(_parent, _args, { req }, _info) {
     const { userId } = await isAuthenticated(req),
       drafts = await prisma.noteDraft.findMany({
-        where: { AND: { userId: userId, status: 'EDIT' } },
-        // select: { id: true },
+        // where: {
+        //   OR: [{ status: 'EDIT' }, { status: 'DROP' }],
+        //   AND: { userId: userId },
+        // },
+        where: { userId: userId, status: 'EDIT' },
         orderBy: { createdAt: 'asc' },
       }),
       parsed = drafts.map(e => noteDraftModel.parse(e)),
-      entries = parsed.map(({ id, symbol, contentHead: { title } }) => ({
-        id,
-        symbol,
-        title,
-      }))
+      entries = parsed.map(
+        ({ id, meta, status, symbol, contentHead: { title } }) => ({
+          id,
+          status,
+          symbol,
+          title,
+          meta,
+        }),
+      )
     return entries
   },
 
@@ -375,6 +393,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         ...note,
         branchName: note.branch.name,
         headDoc: toGQLNoteDoc(headDoc),
+        link: note.link && linkModel.parse(note.link),
       }
     return toStringProps(note_)
   },
@@ -389,6 +408,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
           ...note,
           branchName: note.branch.name,
           headDoc: toGQLNoteDoc(headDoc),
+          link: note.link && linkModel.parse(note.link),
         }
       return toStringProps(note_)
     }
@@ -403,7 +423,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     if (doc) {
       return toGQLNoteDoc(doc)
     }
-    throw new Error('NoteDoc not found.')
+    throw new Error('NoteDoc not found.' + id)
   },
 
   async noteDocsByUser(_parent, { userId, afterId }, _context, _info) {
@@ -424,7 +444,8 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     const docs = (
       await prisma.noteDoc.findMany({
         where: {
-          AND: [{ note: { id: noteId } }, { status: 'CANDIDATE' }],
+          note: { id: noteId },
+          status: 'CANDIDATE',
         },
         include: { branch: true, sym: true },
         orderBy: { createdAt: 'asc' },
@@ -466,31 +487,46 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   async noteDraft(_parent, { id, symbol, url }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
 
-    let draft: NoteDraft | null = null
+    let draft: (NoteDraft & { branch: Branch }) | null = null
     if (id) {
       draft = await prisma.noteDraft.findUnique({
         where: { id },
+        include: { branch: true },
       })
     }
     if (symbol) {
       // TODO: use findMany and check there is only one element in the array
       draft = await prisma.noteDraft.findFirst({
         where: { userId, symbol, status: 'EDIT' },
+        include: { branch: true },
       })
     }
     if (url) {
       // TODO: use findMany and check there is only one element in the array
       draft = await prisma.noteDraft.findFirst({
         where: { userId, symbol: url, status: 'EDIT' },
+        include: { branch: true },
       })
     }
     if (draft) {
-      if (draft.userId !== userId) {
-        throw new Error('Not the draft owner')
-      }
-      return toStringProps(noteDraftModel.parse(draft))
+      if (draft.userId !== userId) throw new Error('Not the owner of draft')
+      return noteDraftModel.toGQLNoteDraft(draft)
     }
     return null
+  },
+
+  async noteDraftById(_parent, { id }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      draft = await prisma.noteDraft.findUnique({
+        where: { id },
+        include: { branch: true },
+      })
+
+    if (draft) {
+      if (draft.userId !== userId) throw new Error('Not the owner of draft')
+      return noteDraftModel.toGQLNoteDraft(draft)
+    }
+    throw new Error('Note draft not found.')
   },
 
   async noteEmojis(_parent, { noteId }, _context, _info) {
@@ -624,13 +660,24 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createCommit(_parent, { noteDraftIds }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      { commit, noteDocs } = await commitNoteDrafts(noteDraftIds, userId)
-    return {
-      ...toStringProps(commit),
-      noteDocs: noteDocs.map(e =>
-        toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
-      ),
+    const { userId } = await isAuthenticated(req)
+
+    try {
+      const { commit, noteDocs } = await commitNoteDrafts(noteDraftIds, userId)
+      return {
+        ...toStringProps(commit),
+        noteDocs: noteDocs.map(e =>
+          toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
+        ),
+      }
+    } catch (err) {
+      if (err instanceof CommitInputError) {
+        throw new ApolloError('Commit input error', 'COMMIT_INPUT_ERROR', {
+          items: err.items,
+        })
+      } else {
+        throw err
+      }
     }
   },
 
@@ -783,11 +830,17 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }))
   },
 
+  async createLink(_parent, { url }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      [link] = await linkModel.getOrCreateLink(url)
+    return link
+  },
+
   async createNoteDraft(_parent, { branch, symbol, data }, { req }, _info) {
     const { userId } = await isAuthenticated(req),
       branch_ = branch === 'default' ? 'mock-branch-0' : branch,
       draft = await noteDraftModel.create(branch_, symbol, userId, data)
-    return toStringProps(draft)
+    return draft
   },
 
   async createNoteDraftByLink(
@@ -797,8 +850,9 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     _info,
   ) {
     const { userId } = await isAuthenticated(req),
-      draft = await noteDraftModel.createByLink(branch, linkId, userId, data)
-    return toStringProps(draft)
+      branch_ = branch === 'default' ? 'mock-branch-0' : branch,
+      draft = await noteDraftModel.createByLink(branch_, linkId, userId, data)
+    return draft
   },
 
   async updateNoteDraft(_parent, { id, data, newSymbol }, { req }, _info) {
@@ -809,19 +863,39 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
         data,
         newSymbol ?? undefined,
       )
-    return toStringProps(draft)
+    return draft
   },
 
-  // dropNoteDraft(id: ID!): DraftDropResponse!
+  async updateNoteDraftMeta(_parent, { id, data }, { req }, _info) {
+    const { userId } = await isAuthenticated(req),
+      draft = await prisma.noteDraft.findUnique({
+        where: { id },
+      })
+
+    if (draft === null) throw new Error('NoteDraft not found.')
+    if (draft.userId !== userId)
+      throw new Error('User is not the owner, cannot update')
+
+    const meta = noteDraftModel.toMeta(data)
+    const draft_ = await prisma.noteDraft.update({
+      data: { meta },
+      where: { id },
+      include: { branch: true },
+    })
+
+    return noteDraftModel.toGQLNoteDraft(draft_)
+  },
+
   async dropNoteDraft(_parent, { id }, _context, _info) {
-    try {
-      await prisma.noteDraft.update({ where: { id }, data: { status: 'DROP' } })
-    } catch (e) {
-      // what error message should be thrown
-      throw new Error('[dropNoteDraft] Unable to drop the NoteDraft')
-      // throw e
-    }
+    await prisma.noteDraft.update({ where: { id }, data: { status: 'DROP' } })
     return { response: 'Draft is successfully dropped.' }
+  },
+
+  async deleteNoteDraft(_parent, { id }, _context, _info) {
+    // Require to delete discusses first
+    // await prisma.discuss.deleteMany({ where: { draftId: id } })
+    await prisma.noteDraft.delete({ where: { id } })
+    return true
   },
 
   async upsertNoteEmojiLike(

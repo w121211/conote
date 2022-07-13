@@ -8,8 +8,8 @@ import { testHelper } from '../../test/test-helpers'
 import { noteDraftModel } from '../../lib/models/note-draft-model'
 import { mockBranches } from '../../test/__mocks__/mock-branch'
 import { noteDocModel } from '../../lib/models/note-doc-model'
-import { parseGQLBlocks } from '../../shared/block-helpers'
 import { mockUsers } from '../../test/__mocks__/mock-user'
+import { parseGQLBlocks } from '../../share/block.common'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),
@@ -30,10 +30,15 @@ async function main() {
   // await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
 
   const mockDraft = mockNoteDrafts[0],
-    { symbol, userId, contentBody, ...rest } = mockDraft,
+    { symbol, userId, contentBody, meta, ...rest } = mockDraft,
     draft = await noteDraftModel.create(mockBranches[0].name, symbol, userId, {
       ...rest,
-      contentBody: { blocks: contentBody.blocks, discussIds: [], symbols: [] },
+      contentBody: {
+        blocks: contentBody.blocks,
+        blockDiff: [],
+        // discussIds: [],
+        // symbols: [],
+      },
     })
 
   await testHelper.createDiscusses(prisma, draft.id)

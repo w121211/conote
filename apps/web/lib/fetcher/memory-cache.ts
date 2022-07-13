@@ -2,11 +2,11 @@
  * A simple memory cache, mainly use for avoiding repeatly calls on the same urls during development
  */
 import { readFileSync, writeFileSync } from 'fs'
-import { FetchResult } from './fetch-client'
+import { LinkScrapedResult } from '../interfaces'
 
 export class MemoryCache {
   private filepath: string
-  private cache: Record<string, FetchResult> = {}
+  private cache: Record<string, LinkScrapedResult> = {}
 
   constructor(cachePath: string) {
     this.filepath = cachePath
@@ -18,7 +18,7 @@ export class MemoryCache {
     }
   }
 
-  private load(filepath: string): Record<string, FetchResult> {
+  private load(filepath: string): Record<string, LinkScrapedResult> {
     console.log(`loading cache from ${filepath}`)
     return JSON.parse(readFileSync(filepath, { encoding: 'utf8' }))
   }
@@ -28,7 +28,7 @@ export class MemoryCache {
     writeFileSync(this.filepath, JSON.stringify(this.cache))
   }
 
-  public get(url: string): FetchResult {
+  public get(url: string): LinkScrapedResult {
     if (url in this.cache) {
       console.log('hit cache: ' + url)
       return this.cache[url]
@@ -36,7 +36,7 @@ export class MemoryCache {
     throw new Error('Cache not found:' + url)
   }
 
-  public set(url: string, result: FetchResult): void {
+  public set(url: string, result: LinkScrapedResult): void {
     this.cache[url] = result
   }
 }

@@ -7,7 +7,6 @@
     "@conote/scraper": "^0.1.0",
     "@hookform/error-message": "^2.0.0",
     "@metascraper/helpers": "^5.24.8",
-    "@ngneat/effects": "^1.1.0",
     "@ngneat/elf": "^1.5.6",
     "@ngneat/elf-entities": "^4.2.1",
     "@ngneat/elf-persist-state": "^1.1.2",
@@ -28,7 +27,6 @@
     "got": "^11.8.2",
     "graphql": "^15.0.0",
     "graphql-scalars": "^1.14.1",
-    "i": "^0.3.7",
     "jsonwebtoken": "^8.5.1",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
@@ -46,8 +44,8 @@
     "next": "^12.0.4",
     "next-react-svg": "^1.1.2",
     "prismjs": "^1.24.1",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-error-boundary": "^3.1.4",
     "react-firebase-hooks": "^4.0.1",
     "react-firebaseui": "^6.0.0",
@@ -56,7 +54,9 @@
     "react-popper-tooltip": "^4.4.1",
     "react-select": "^5.2.1",
     "react-syntax-highlighter": "^15.5.0",
+    "react-toastify": "^9.0.5",
     "react-tooltip": "^4.2.21",
+    "react-use": "^17.4.0",
     "react-use-measure": "^2.0.4",
     "rxjs": "^7.4.0",
     "slate": "^0.71.0",
@@ -85,10 +85,8 @@
     "@types/cookie": "^0.4.1",
     "@types/jest": "^27.4.0",
     "@types/micro-cors": "^0.1.1",
-    "@types/node": "^17.0.21",
+    "@types/node": "^18.0.3",
     "@types/prismjs": "^1.16.6",
-    "@types/react": "^18.0.9",
-    "@types/react-dom": "^18.0.4",
     "@types/styled-components": "^5.1.25",
     "@types/tailwindcss": "^3.0.9",
     "autoprefixer": "^10.4.4",
@@ -115,8 +113,9 @@
     "storybook-tailwind-dark-mode": "^1.0.12",
     "style-loader": "^3.3.1",
     "tailwindcss": "^3.0.23",
+    "ts-node": "^10.8.2",
     "tsconfig-paths-webpack-plugin": "^3.5.1",
-    "typescript": "^4.6.2"
+    "typescript": "^4.7.4"
   },
   "private": true,
   "scripts": {
@@ -138,7 +137,7 @@
     "test": "jest",
     "test-all": "yarn lint && yarn type-check && yarn test",
     "test-fetcher": "jest -c=jest.fetcher.config.js --watch",
-    "test-lib": "dotenv -e .env.local -- jest -c=./test/jest.lib.config.js --watch",
+    "test-lib": "dotenv -e .env.local -- jest -c=./jest.lib.config.js --watch",
     "type-check": "tsc --pretty --noEmit"
   }
 }

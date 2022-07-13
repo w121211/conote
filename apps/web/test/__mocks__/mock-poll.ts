@@ -1,6 +1,6 @@
 import { Poll, PollStatus, PollType } from '@prisma/client'
 import { PollParsed } from '../../lib/interfaces'
-import { MERGE_POLL_V1_0 } from '../../shared/constants'
+import { MERGE_POLL_V1_0 } from '../../share/constants'
 import { mockBotUser } from './mock-user'
 
 const mergePollBase: Omit<PollParsed<Poll>, 'count'> = {

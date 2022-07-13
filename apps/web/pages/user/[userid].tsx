@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
-import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import React from 'react'
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
-import UserRateTable, { TableData } from '../../components/user/user-rate-table'
-import UserNoteTable from '../../components/user/user-note-table'
-import { NoteData } from '../../components/ui-component/note-list'
-import Layout from '../../components/ui-component/layout/layout'
-import { List, ListElement } from '../../components/ui-component/list'
+import type { TableData } from '../../frontend/components/user/user-rate-table'
+import UserNoteTable from '../../frontend/components/user/user-note-table'
+import { NoteData } from '../../frontend/components/ui-component/note-list'
+import { ListElement } from '../../frontend/components/ui-component/list'
 import {
   DiscussesByUserDocument,
   DiscussesByUserQuery,
@@ -17,8 +16,8 @@ import {
   NoteDocsByUserQueryVariables,
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
-import { LatestDiscussTile } from '../../components/latest-discuss-tile'
-import { LayoutChildrenPadding } from '../../components/ui-component/layout/layout-children-padding'
+import { LatestDiscussTile } from '../../frontend/components/latest-discuss-tile'
+import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
 
 export const mockRateData: TableData[] = [
   {
@@ -139,33 +138,19 @@ const mockNoteList: NoteData[] = [
 ]
 
 interface Props {
+  userId: string
   noteDocsByUser: NoteDocFragment[]
   discussesByUser: DiscussFragment[]
 }
 
 const UserPage = ({
+  userId,
   noteDocsByUser,
   discussesByUser,
 }: Props): JSX.Element | null => {
   // console.log(noteDocsByUser, discussesByUser)
 
   // const [showMentionedPopup, setShowMentionedPopup] = useState(false)
-  // const [queryUser, { data, loading, error }] = useUserLazyQuery()
-  const router = useRouter(),
-    {
-      query: { userid: userId },
-    } = router
-  // ,qUser =
-
-  // useEffect(() => {
-  //   const { query, isReady } = router
-  //   if (isReady) {
-  //     const { author } = query
-  //     if (author && typeof author === 'string') {
-  //       queryUser({ variables: { name: 'firebase' } })
-  //     }
-  //   }
-  // }, [router])
 
   // if (!data === undefined || error || loading) {
   //   return null
@@ -180,7 +165,7 @@ const UserPage = ({
           </span>
           <div className="truncate">
             <h1 className="truncate mb-2 font-medium text-gray-800 dark:text-gray-100">
-              @{router.query.userid}
+              @{userId}
             </h1>
             {/* <div className="mb-2 text-lg text-gray-500 dark:text-gray-400">
               建築師
@@ -258,6 +243,7 @@ export async function getServerSideProps({
   )
   return {
     props: {
+      userId,
       noteDocsByUser: qDocs.data.noteDocsByUser,
       discussesByUser: qDiscusses.data.discussesByUser,
     },

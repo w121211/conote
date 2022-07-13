@@ -1,13 +1,11 @@
-import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
-import LoginModal from '../../components/login-modal'
-import { MockedProvider } from '@apollo/client/testing'
-import { MeDocument } from '../../apollo/query.graphql'
 import gql from 'graphql-tag'
+import { MeDocument } from '../../apollo/query.graphql'
+import LoginRequireModal from '../../frontend/components/auth/login-require-modal'
 
 export default {
-  component: LoginModal,
-} as ComponentMeta<typeof LoginModal>
+  component: LoginRequireModal,
+} as ComponentMeta<typeof LoginRequireModal>
 
 const ME = gql`
   query Me {
@@ -32,11 +30,11 @@ const mocks = [
   },
 ]
 
-const Template: ComponentStory<typeof LoginModal> = args => (
+const Template: ComponentStory<typeof LoginRequireModal> = args => (
   // <MockedProvider mocks={mocks} addTypename={false}>
-  <LoginModal {...args}>
+  <LoginRequireModal {...args}>
     <div>ff</div>
-  </LoginModal>
+  </LoginRequireModal>
   // </MockedProvider>
 )
 

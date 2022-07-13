@@ -2,7 +2,7 @@ import React from 'react'
 import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import { getApolloClient } from '../../apollo/apollo-client'
-import { DiscussTile } from '../../components/discuss/discuss-tile'
+import { DiscussTile } from '../../frontend/components/discuss/discuss-tile'
 // import { mockDiscusses } from '../../test/__mocks__/mock-discuss'
 
 const apolloClient = getApolloClient()

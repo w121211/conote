@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ComponentMeta } from '@storybook/react'
-import ModalProvider from '../../components/modal/modal-context'
-import { getFirebaseClient } from '../../components/auth/firebase-client'
+import ModalProvider from '../../frontend/components/modal/modal-context'
+import { getFirebaseClient } from '../../frontend/components/auth/firebase-client'
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -13,12 +13,12 @@ import {
   SessionLoginMutation,
   SessionLoginMutationVariables,
 } from '../../apollo/query.graphql'
-import { getLoggedInUser } from '../../components/auth/auth.service'
-import { EditorEl } from '../../components/block-editor/src/components/editor/editor-el'
-import { EditorToolbar } from '../../components/block-editor/src/components/editor/editor-toolbar'
-import { noteService } from '../../components/block-editor/src/services/note.service'
-import { noteDraftService } from '../../components/block-editor/src/services/note-draft.service'
-import { editorOpenSymbolInMain } from '../../components/block-editor/src/events'
+import { getLoggedInUser } from '../../frontend/components/auth/auth.service'
+import { EditorEl } from '../../frontend/components/block-editor/src/components/editor/editor-el'
+import { EditorToolbar } from '../../frontend/components/block-editor/src/components/editor/editor-toolbar'
+import { noteService } from '../../frontend/components/block-editor/src/services/note.service'
+import { noteDraftService } from '../../frontend/components/block-editor/src/services/note-draft.service'
+import { editorOpenSymbolInMain } from '../../frontend/components/block-editor/src/events'
 
 export default {
   title: 'BlockEditor/EditorEl',

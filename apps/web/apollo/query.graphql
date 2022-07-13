@@ -112,6 +112,18 @@ fragment link on Link {
   id
   url
   authorId
+  scraped {
+    domain
+    finalUrl
+    authorId
+    authorName
+    date
+    description
+    lang
+    title
+    keywords
+    tickers
+  }
 }
 
 fragment note on Note {
@@ -155,19 +167,22 @@ fragment noteDoc on NoteDoc {
 
 fragment noteDocContentBody on NoteDocContentBody {
   __typename
-  discussIds {
-    blockUid
-    discussId
-    commitId
-  }
-  symbols {
-    symbol
-    symId
-  }
+  # discussIds {
+  #   blockUid
+  #   discussId
+  #   commitId
+  # }
+  # symbols {
+  #   symbol
+  #   symId
+  # }
   blocks {
     ...block
   }
-  diff
+  blockDiff {
+    type
+    uid
+  }
 }
 
 fragment noteDocContentHead on NoteDocContentHead {
@@ -204,11 +219,17 @@ fragment noteDocMeta on NoteDocMeta {
 fragment noteDraft on NoteDraft {
   __typename
   id
-  userId
+  branchName
+  symbol
   commitId
   fromDocId
+  linkId
+  userId
   domain
-  symbol
+  status
+  meta {
+    ...noteDraftMeta
+  }
   contentHead {
     ...noteDocContentHead
   }
@@ -216,7 +237,6 @@ fragment noteDraft on NoteDraft {
     ...noteDocContentBody
   }
   updatedAt
-  status
 }
 
 fragment noteDraftDropResponse on NoteDraftDropResponse {
@@ -227,8 +247,19 @@ fragment noteDraftDropResponse on NoteDraftDropResponse {
 fragment noteDraftEntry on NoteDraftEntry {
   __typename
   id
+  meta {
+    ...noteDraftMeta
+  }
+  status
   symbol
   title
+}
+
+fragment noteDraftMeta on NoteDraftMeta {
+  __typename
+  chain {
+    prevId
+  }
 }
 
 fragment noteEmoji on NoteEmoji {
@@ -620,6 +651,12 @@ mutation UpsertDiscussPostEmojiLike(
   }
 }
 
+mutation CreateLink($url: String!) {
+  createLink(url: $url) {
+    ...link
+  }
+}
+
 mutation CreateNoteDraft(
   $branch: String!
   $symbol: String!
@@ -646,10 +683,20 @@ mutation UpdateNoteDraft($id: ID!, $data: NoteDraftInput!, $newSymbol: String) {
   }
 }
 
+mutation UpdateNoteDraftMeta($id: ID!, $data: NoteDraftMetaInput!) {
+  updateNoteDraftMeta(id: $id, data: $data) {
+    ...noteDraft
+  }
+}
+
 mutation DropNoteDraft($id: ID!) {
   dropNoteDraft(id: $id) {
     ...noteDraftDropResponse
   }
+}
+
+mutation DeleteNoteDraft($id: ID!) {
+  deleteNoteDraft(id: $id)
 }
 
 mutation UpsertNoteEmojiLike(

@@ -83,6 +83,8 @@ type Query {
   # Query either by id, symbol or url
   noteDraft(id: ID, symbol: String, url: String): NoteDraft
 
+  noteDraftById(id: ID!): NoteDraft!
+
   # Get all docs from note pull request records including candidates (like Github PR history)
   noteHistory(noteId: ID!, status: NoteDocStatus): [NoteDocEntry!]!
 
@@ -220,6 +222,9 @@ type Mutation {
     discussPostId: Int
   ): [UpsertDiscussPostEmojiLikeResult!]!
 
+  # Get or create the link
+  createLink(url: String!): Link!
+
   upsertNoteEmojiLike(
     liked: Boolean!
     emojiId: Int
@@ -227,7 +232,7 @@ type Mutation {
     noteId: String
   ): [UpsertNoteEmojiLikeResult!]!
 
-  # not sure about the type of meta, which is for creating from existing note
+  # Not sure about the type of meta, which is for creating from existing note
   createNoteDraft(
     branch: String!
     symbol: String!
@@ -243,7 +248,13 @@ type Mutation {
   # input not yet decided
   updateNoteDraft(id: ID!, data: NoteDraftInput!, newSymbol: String): NoteDraft!
 
+  updateNoteDraftMeta(id: ID!, data: NoteDraftMetaInput!): NoteDraft!
+
+  # Update note draft status to 'DROP'
   dropNoteDraft(id: ID!): NoteDraftDropResponse!
+
+  # Remove note draft from database
+  deleteNoteDraft(id: ID!): Boolean!
 
   #  NEXT:
   createPoll(data: PollInput!): Poll!
@@ -396,7 +407,27 @@ type Link {
   id: ID!
   url: String!
   authorId: String
-  # scraped: Scraped!
+  scraped: LinkScrapedResult!
+}
+
+type LinkScrapedResult {
+  domain: String!
+  finalUrl: String!
+  # srcId?: string
+  # srcType: 'video' | 'post' | 'author' | 'other'
+
+  # // metascraper
+  authorId: String
+  authorName: String
+  date: String
+  description: String
+  lang: String
+  title: String
+
+  # // ./packages/scraper
+  keywords: [String!]
+  tickers: [String!]
+  # error?: string
 }
 
 type Note {
@@ -457,12 +488,13 @@ type NoteDoc {
 }
 
 type NoteDocContentBody {
-  blocks: [Block!]!
-  diff: JSON
-  discussIds: [BlockUid_DiscussId!]!
-
+  # discussIds: [BlockUid_DiscussId!]!
   # A symbol-noteId map, so later the cahnge of symbol name won't affect
-  symbols: [Symbol_SymId!]!
+  # symbols: [Symbol_SymId!]!
+
+  blocks: [Block!]!
+  # Experimental
+  blockDiff: [TreeNodeChange!]!
 }
 
 type NoteDocContentHead {
@@ -510,21 +542,19 @@ type NoteDocMeta {
 
 type NoteDraft {
   id: ID!
-
-  # Use as id for front-end (equals to doc-title)
+  branchName: String!
+  # Act as an additional id in front-end
   symbol: String!
-
-  # noteId: String  # not using for creating a draft and not this field in db
-  userId: String!
-
   commitId: String
   fromDocId: String
+  linkId: String
+  userId: String!
   domain: String!
-
+  status: NoteDraftStatus!
+  meta: NoteDraftMeta!
   contentHead: NoteDocContentHead!
   contentBody: NoteDocContentBody!
   updatedAt: String!
-  status: NoteDraftStatus!
 }
 
 # type NoteDraftCommitResponse {
@@ -538,10 +568,20 @@ type NoteDraftDropResponse {
 
 type NoteDraftEntry {
   id: ID!
+  status: NoteDraftStatus!
   symbol: String!
+  meta: NoteDraftMeta!
 
   # Retrived from 'noteDoc.contentHead.title' and is used for ticker, webpage
   title: String
+}
+
+type NoteDraftMeta {
+  chain: NoteDraftMetaChain
+}
+
+type NoteDraftMetaChain {
+  prevId: String
 }
 
 type Poll {
@@ -608,6 +648,11 @@ type Sym {
 type Symbol_SymId {
   symbol: String!
   symId: String
+}
+
+type TreeNodeChange {
+  type: String!
+  uid: String!
 }
 
 type User {
@@ -683,15 +728,21 @@ input NoteDraftInput {
   # noteId: String   # not using for creating a draft and not this field in db
   fromDocId: String
   domain: String!
+  meta: NoteDraftMetaInput
   contentHead: NoteDocContentHeadInput!
   contentBody: NoteDocContentBodyInput!
 }
 
+input NoteDraftMetaInput {
+  # Null for no prev-id
+  chainPrevId: String
+}
+
 input NoteDocContentBodyInput {
-  discussIds: [BlockUid_DiscussIdInput!]!
-  symbols: [Symbol_SymIdInput!]!
+  # discussIds: [BlockUid_DiscussIdInput!]!
+  # symbols: [Symbol_SymIdInput!]!
   blocks: [BlockInput!]!
-  diff: JSON
+  blockDiff: [TreeNodeChangeInput!]!
 }
 
 # Same as NoteDocContentHead
@@ -734,6 +785,11 @@ input RateInput {
 input Symbol_SymIdInput {
   symbol: String!
   symId: String
+}
+
+input TreeNodeChangeInput {
+  type: String!
+  uid: String!
 }
 
 # ------ NEXT ------

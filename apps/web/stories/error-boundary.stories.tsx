@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
 import { ComponentMeta } from '@storybook/react'
 import { ErrorBoundary, useErrorHandler } from 'react-error-boundary'
-import { editorRouteUpdate } from '../components/block-editor/src/events'
-import ErrorFallback from '../components/error-fallback'
-import { EditorEl } from '../components/block-editor/src/components/editor/editor-el'
+import { editorRouteUpdate } from '../frontend/components/block-editor/src/events'
+import ErrorFallback from '../frontend/components/error-fallback'
+import { EditorEl } from '../frontend/components/block-editor/src/components/editor/editor-el'
 
 const ErrorDemo = () => {
   const handleError = useErrorHandler()

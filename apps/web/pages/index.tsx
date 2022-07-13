@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
-import { SearchAllForm } from '../components/search-all-form'
+import React from 'react'
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import {
   DiscussesLatestDocument,
   DiscussesLatestQuery,
@@ -8,48 +7,14 @@ import {
   DiscussFragment,
 } from '../apollo/query.graphql'
 import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
-import { LatestDiscussTile } from '../components/latest-discuss-tile'
-import AuthItem from '../components/auth/auth-el'
-import { LayoutChildrenPadding } from '../components/ui-component/layout/layout-children-padding'
+import { LatestDiscussTile } from '../frontend/components/latest-discuss-tile'
+import { LayoutChildrenPadding } from '../frontend/components/ui-component/layout/layout-children-padding'
 
-interface Props {
+type Props = {
   discussesLatest: DiscussFragment[]
-  // noteDocEntriesToMerge: NoteDocEntryFragment[]
-  // noteDocEntriesMerged: NoteDocEntryFragment[]
 }
 
 const HomePage = ({ discussesLatest }: Props): JSX.Element => {
-  // useEffect(() => {
-  //   if (window.sessionStorage.getItem('announce') === null) {
-  //     window.sessionStorage.setItem('announce', 'true')
-  //     setAnnounce(true)
-  //   } else {
-  //     window.sessionStorage.setItem('announce', showAnnounce ? 'true' : 'false')
-  //   }
-  // }, [showAnnounce])
-
-  // if (loading)
-  //   return (
-  //     <div className="flex flex-col items-center justify-center w-screen h-screen">
-  //       <svg
-  //         className="origin-center animate-loadingSpinner"
-  //         width="100"
-  //         height="100"
-  //       >
-  //         <circle
-  //           className="stroke-blue-500 origin-center [stroke-dasharray:187] [stroke-dashoffset:0] animate-loadingCircle"
-  //           cx="50"
-  //           cy="50"
-  //           r="25"
-  //           fill="none"
-  //           strokeWidth={5}
-  //           strokeLinecap="round"
-  //         />
-  //       </svg>
-  //       {/* <h1>Loading</h1> */}
-  //     </div>
-  //   )
-
   return (
     <LayoutChildrenPadding>
       <div className="flex justify-center pb-[9vh]">

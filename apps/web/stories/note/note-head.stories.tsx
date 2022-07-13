@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { NoteHead } from '../../components/note/note-head'
-import ModalProvider from '../../components/modal/modal-context'
+import { NoteHead } from '../../frontend/components/note/note-head'
+import ModalProvider from '../../frontend/components/modal/modal-context'
 import { ApolloProvider } from '@apollo/client'
 import { getApolloClient } from '../../apollo/apollo-client'
 

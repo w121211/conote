@@ -1,15 +1,15 @@
-import { NoteDoc, PrismaClient } from '@prisma/client'
+import type { NoteDoc, NoteDraft, PrismaClient } from '@prisma/client'
 import { mockDiscusses, mockDiscussPosts } from './__mocks__/mock-discuss'
 import { mockBotUser, mockUsers } from './__mocks__/mock-user'
 import { mockBranches } from './__mocks__/mock-branch'
 import { mockNoteDrafts } from './__mocks__/mock-note-draft'
-import { NoteDraftParsed } from '../lib/interfaces'
 import { mockSyms } from './__mocks__/mock-sym'
 import { mockNotes } from './__mocks__/mock-note'
 import { mockCommits } from './__mocks__/mock-commit'
 import { mockNoteDocs } from './__mocks__/mock-note-doc'
 import { mockLinks } from './__mocks__/mock-link'
 import { mockMergePolls } from './__mocks__/mock-poll'
+import type { NoteDraftParsed } from '../lib/interfaces'
 
 // fake incremental id
 let i = 0
@@ -107,16 +107,10 @@ class TestHelper {
     const noteDraft = await prisma.noteDraft.create({
         data: mockNoteDrafts[0],
       }),
-      sym = await prisma.sym.create({
-        data: mockSyms[0],
-      }),
-      note = await prisma.note.create({
-        data: mockNotes[0],
-      }),
+      sym = await prisma.sym.create({ data: mockSyms[0] }),
+      note = await prisma.note.create({ data: mockNotes[0] }),
       // Need to create commit before note-doc so the note-doc can connect to it
-      commit = await prisma.commit.create({
-        data: mockCommits[0],
-      }),
+      commit = await prisma.commit.create({ data: mockCommits[0] }),
       // poll = await prisma.poll.create({
       //   data: {
       //     id: mockNoteDocs[1].mergePollId,
@@ -208,7 +202,7 @@ class TestHelper {
 
   async createNoteDrafts(
     prisma: PrismaClient,
-    drafts: Omit<NoteDraftParsed, 'createdAt' | 'updatedAt'>[],
+    drafts: Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'>[],
   ) {
     return await prisma.$transaction(
       drafts.map(e => prisma.noteDraft.create({ data: e })),

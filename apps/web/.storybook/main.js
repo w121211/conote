@@ -42,6 +42,7 @@ module.exports = {
     'storybook-addon-next-router',
     'storybook-css-modules',
     // 'storybook-addon-apollo-client',
+    'storybook-css-modules',
   ],
   framework: '@storybook/react',
 

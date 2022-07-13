@@ -57,7 +57,7 @@ model Discuss {
   updatedAt DateTime      @updatedAt
 
   // The draft that creat this discuss
-  draft NoteDraft @relation(fields: [draftId], references: [id])
+  draft NoteDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
 
   user   User           @relation(fields: [userId], references: [id])
   count  DiscussCount? // 1-to-1
@@ -73,7 +73,7 @@ model DiscussCount {
   nPosts    Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  discuss   Discuss  @relation(fields: [discussId], references: [id])
+  discuss   Discuss  @relation(fields: [discussId], references: [id], onDelete: Cascade)
 }
 
 model DiscussEmoji {
@@ -82,7 +82,7 @@ model DiscussEmoji {
   code      EmojiCode
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
-  discuss   Discuss            @relation(fields: [discussId], references: [id])
+  discuss   Discuss            @relation(fields: [discussId], references: [id], onDelete: Cascade)
   count     DiscussEmojiCount?
   likes     DiscussEmojiLike[]
 
@@ -95,7 +95,7 @@ model DiscussEmojiCount {
   nUps           Int          @default(0)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id])
+  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id], onDelete: Cascade)
 }
 
 model DiscussEmojiLike {
@@ -105,7 +105,7 @@ model DiscussEmojiLike {
   liked          Boolean
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id])
+  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id])
 
   @@unique([discussEmojiId, userId])
@@ -119,7 +119,7 @@ model DiscussPost {
   content   String
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
-  discuss   Discuss            @relation(fields: [discussId], references: [id])
+  discuss   Discuss            @relation(fields: [discussId], references: [id], onDelete: Cascade)
   user      User               @relation(fields: [userId], references: [id])
   emojis    DiscussPostEmoji[]
 
@@ -133,7 +133,7 @@ model DiscussPostEmoji {
   code          EmojiCode
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @updatedAt
-  discussPost   DiscussPost            @relation(fields: [discussPostId], references: [id])
+  discussPost   DiscussPost            @relation(fields: [discussPostId], references: [id], onDelete: Cascade)
   count         DiscussPostEmojiCount?
   likes         DiscussPostEmojiLike[]
 
@@ -146,7 +146,7 @@ model DiscussPostEmojiCount {
   nUps               Int              @default(0)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
-  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id])
+  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id], onDelete: Cascade)
 }
 
 model DiscussPostEmojiLike {
@@ -156,7 +156,7 @@ model DiscussPostEmojiLike {
   liked              Boolean
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
-  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id])
+  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id], onDelete: Cascade)
   user               User             @relation(fields: [userId], references: [id])
 
   @@unique([userId, discussPostEmojiId])
@@ -181,11 +181,18 @@ model Note {
 }
 
 model NoteDoc {
-  id          String        @id @default(cuid())
-  branchId    String
-  symId       String
-  commitId    String
-  fromDocId   String?
+  id       String @id @default(cuid())
+  branchId String
+  symId    String
+  commitId String
+
+  // The draft used to create this doc. Is unique becuase one doc can only map to one draft.
+  // If draft is updated, update its counter doc instead of creating a new doc
+  // draftId String @unique
+
+  fromDocId String?
+
+  // To determine can the doc merge. Is optional because auto-merge not require a poll
   mergePollId String?       @unique
   userId      String
   status      NoteDocStatus @default(CANDIDATE)
@@ -200,44 +207,45 @@ model NoteDoc {
   contentHead Json
   contentBody Json
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  branch    Branch    @relation(fields: [branchId], references: [id])
-  commit    Commit    @relation(fields: [commitId], references: [id])
-  fromDoc   NoteDoc?  @relation("DocHistory", fields: [fromDocId], references: [id])
-  nextDocs  NoteDoc[] @relation("DocHistory")
-
-  // To determine can the doc merge
-  // Is optional because auto-merge not require a poll
-  mergePoll Poll? @relation(fields: [mergePollId], references: [id])
-
-  note       Note        @relation(fields: [branchId, symId], references: [branchId, symId])
-  sym        Sym         @relation(fields: [symId], references: [id])
-  user       User        @relation(fields: [userId], references: [id])
-  noteDrafts NoteDraft[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  branch         Branch      @relation(fields: [branchId], references: [id])
+  commit         Commit      @relation(fields: [commitId], references: [id])
+  fromDoc        NoteDoc?    @relation("DocHistory", fields: [fromDocId], references: [id])
+  nextDocs       NoteDoc[]   @relation("DocHistory")
+  mergePoll      Poll?       @relation(fields: [mergePollId], references: [id])
+  note           Note        @relation(fields: [branchId, symId], references: [branchId, symId])
+  // draft          NoteDraft   @relation("DraftToDoc", fields: [draftId], references: [id])
+  draftsFromThis NoteDraft[] @relation("FromDoc")
+  sym            Sym         @relation(fields: [symId], references: [id])
+  user           User        @relation(fields: [userId], references: [id])
 }
 
 model NoteDraft {
   id String @id @default(cuid())
 
   // Use as an identifier
+  // Cannot be unique because drafts won't delete from database when user removed the draft
   symbol String
 
-  branchId    String
-  symId       String?
-  commitId    String?
-  fromDocId   String?
+  branchId  String
+  symId     String?
+  commitId  String?
+  fromDocId String?
+
   linkId      String?
   userId      String
   status      NoteDraftStatus @default(EDIT)
   domain      String
+  meta        Json            @default("{}")
   contentHead Json
   contentBody Json
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   branch      Branch          @relation(fields: [branchId], references: [id])
   commit      Commit?         @relation(fields: [commitId], references: [id])
-  fromDoc     NoteDoc?        @relation(fields: [fromDocId], references: [id])
+  // commitDoc   NoteDoc?        @relation("DraftToDoc")
+  fromDoc     NoteDoc?        @relation("FromDoc", fields: [fromDocId], references: [id])
   link        Link?           @relation(fields: [linkId], references: [id])
   note        Note?           @relation(fields: [branchId, symId], references: [branchId, symId])
   sym         Sym?            @relation(fields: [symId], references: [id])
@@ -380,8 +388,10 @@ model Sym {
   link      Link?       @relation(fields: [linkId], references: [id])
   rates     Rate[]
   drafts    NoteDraft[]
-  notes     Note[]
-  noteDocs  NoteDoc[]
+
+  // A sym can have multiple notes because note use branch-sym as unique key
+  notes    Note[]
+  noteDocs NoteDoc[]
 }
 
 model User {
