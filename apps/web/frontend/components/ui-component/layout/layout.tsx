@@ -59,7 +59,6 @@ const Layout = ({
         ref={childrenRef}
       >
         {children}
-        {/* <LoginModal>{children}</LoginModal> */}
       </div>
       <Navbar />
     </div>

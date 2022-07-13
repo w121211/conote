@@ -8,7 +8,7 @@ const UserLink = ({ userId }: { userId: string }) => {
       <Link href={`/user/${userId}`}>
         <a className="link">@{userId.slice(-6)}</a>
       </Link>
-      {me ? '(you)' : null}
+      {me && me.id === userId ? '(you)' : null}
     </span>
   )
 }

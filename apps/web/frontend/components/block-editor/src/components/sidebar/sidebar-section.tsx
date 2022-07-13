@@ -70,7 +70,7 @@ const SidebarSection = ({
           ))
         : !folded && (
             <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow ">
-              {'no note :('}
+              {'empty box :('}
             </span>
           )}
     </div>

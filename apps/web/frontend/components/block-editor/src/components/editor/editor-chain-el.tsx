@@ -1,13 +1,14 @@
 import { useObservable } from '@ngneat/react-rxjs'
 import { isNil } from 'lodash'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useUpdateEffect } from 'react-use'
-import SearcherModalButton from '../../../../search-all-modal/searcher-modal-button'
-import { SearcherProps } from '../../../../../stores/searcher.repository'
+import React, { useCallback, useState } from 'react'
+import Link from 'next/link'
+import { getNotePageURL } from '../../../../../utils'
+import SearcherModal from '../../../../search-all-modal/searcher-modal'
 import { editorChainItemInsert } from '../../events'
 import { docRepo } from '../../stores/doc.repository'
 import { editorRepo } from '../../stores/editor.repository'
 import DocEl from '../doc/doc-el'
+import { SearcherProps } from '../../../../../interfaces'
 
 const ChainItemInsertButton = ({
   afterThisDraftId,
@@ -31,7 +32,7 @@ const ChainItemInsertButton = ({
   if (loading) {
     return <div>Loading</div>
   }
-  return <SearcherModalButton searcher={searcher} />
+  return <SearcherModal searcher={searcher} />
 }
 
 const ChainDoc = ({
@@ -62,33 +63,25 @@ const ChainDoc = ({
   }
   return (
     <div>
+      {doc && (
+        <div>
+          <button>View</button>
+          {doc.noteCopy && (
+            <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
+              <a>View current head note</a>
+            </Link>
+          )}
+        </div>
+      )}
+      {/* <DocEl doc={doc} /> */}
       <DocEl doc={doc} ref={ref} />
     </div>
   )
 }
 
 export const EditorChainEl = (): JSX.Element | null => {
-  const [tab] = useObservable(editorRepo.tab$, {
-    initialValue: { openDraftId: null, chain: [], loading: true },
-  })
-
-  // const ref = useRef<HTMLDivElement>(null)
+  const [tab] = useObservable(editorRepo.tab$)
   // [alert] = useObservable(editorRepo.alter$),
-
-  // useEffect(() => {
-  //   console.log(ref)
-  //   console.log(tab.chain)
-  //   if (ref.current === null || !document) {
-  //     return
-  //   }
-  //   if (location.hash.length === 0) {
-  //     return
-  //   }
-  //   if (ref.current) {
-  //     console.log('scrollIntoView')
-  //     ref.current.scrollIntoView()
-  //   }
-  // })
 
   if (tab.chain.length === 0) {
     // return <div>chainDocs?.length === 0</div>
@@ -97,15 +90,33 @@ export const EditorChainEl = (): JSX.Element | null => {
   return (
     <div>
       {/* {alert && <div>{alert.message}</div>} */}
-      {tab.chain.map((e, i) => (
-        <div key={e.docUid}>
-          <ChainDoc
-            docUid={e.docUid}
-            scrollToThis={e.entry.id === tab.openDraftId}
-          />
-          <ChainItemInsertButton afterThisDraftId={e.entry.id} />
-        </div>
-      ))}
+      {tab.chain.map((e, i) => {
+        const isFocus = e.entry.id === tab.curDraftId,
+          isInSameChain =
+            isFocus &&
+            tab.chain.find(a => a.entry.id === tab.prevDraftId) !== undefined,
+          scrollToThis =
+            (i === 0 && isFocus && isInSameChain) || (i > 0 && isFocus)
+
+        return (
+          <div key={e.docUid}>
+            <ChainDoc docUid={e.docUid} scrollToThis={scrollToThis} />
+            <ChainItemInsertButton afterThisDraftId={e.entry.id} />
+          </div>
+        )
+      })}
+      {/* <button
+        onClick={() => {
+          if (div.current) {
+            // div.current.scrollIntoView()
+            div.current.scrollTo({ top: -1000 })
+          }
+          // const body = document.querySelector('body')
+          // console.log(body)
+        }}
+      >
+        Top
+      </button> */}
     </div>
   )
 }

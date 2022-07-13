@@ -1205,7 +1205,11 @@ export async function editorChainItemOpen(draftId: string) {
       throw new Error()
     })
 
-  editorRepo.setTab({ openDraftId: draftId, chain, loading: false })
+  editorRepo.setTab({
+    curDraftId: draftId,
+    chain,
+    loading: false,
+  })
 
   return { chain }
 }

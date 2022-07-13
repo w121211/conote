@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from 'react'
-import { useObservable } from '@ngneat/react-rxjs'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import React, { useEffect, useState } from 'react'
 import {
   SearchSymbolQuery,
   useSearchSymbolLazyQuery,
 } from '../../../apollo/query.graphql'
-import Modal from '../modal/modal'
-import { SearcherProps, searcherRepo } from '../../stores/searcher.repository'
-import { styleSymbol } from '../ui-component/style-fc/style-symbol'
+import type { SearcherProps } from '../../interfaces'
 import { getDraftPageURLBySymbol, getNotePageURL } from '../../utils'
+import Modal from '../modal/modal'
+import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 import classes from './search-all-modal.module.css'
 
-type ItemProps = {
+interface HitItemProps {
   inputValue: string
   searchSymbolHits: SearchSymbolQuery['searchSymbol']
   selectedIdx: number
@@ -28,7 +27,7 @@ const HitList = ({
   onMouseLeave,
   onMouseMove,
   setShowModal,
-}: Pick<SearcherProps['searcher'], 'onClickHit'> & ItemProps) => {
+}: Pick<SearcherProps['searcher'], 'onClickHit'> & HitItemProps) => {
   return (
     <ul className="text-gray-700/80 dark:text-gray-200/70">
       {searchSymbolHits.map((hit, i) => (
@@ -84,7 +83,7 @@ const SymbolCreate = ({
   onMouseLeave,
   onMouseMove,
   setShowModal,
-}: Pick<SearcherProps['searcher'], 'onClickSymbolCreate'> & ItemProps) => {
+}: Pick<SearcherProps['searcher'], 'onClickSymbolCreate'> & HitItemProps) => {
   const symbol = `[[${inputValue}]]`
 
   if (onClickSymbolCreate) {
@@ -136,22 +135,29 @@ const SymbolCreate = ({
   )
 }
 
+//
+// Searcher component
+//
+//
+//
+//
+//
+//
+
 /**
+ * If provide `onClick-` events, searcher renders hit items to buttons, otherwise renders to href links.
  *
  */
-const SearcherModal = () => {
-  const router = useRouter()
+const SearcherModal = ({ searcher }: SearcherProps) => {
+  const { onClickHit, onClickSymbolCreate } = searcher
 
-  const [showModal] = useObservable(searcherRepo.showModal$),
-    [searcher] = useObservable(searcherRepo.searcher$),
-    { onClickHit, onClickSymbolCreate } = searcher,
-    setShowModal = searcherRepo.setShowModal
-
+  const router = useRouter(),
+    [showModal, setShowModal] = useState(false),
+    [inputValue, setInputValue] = useState(''),
+    [arrowKeyDown, setArrowKeyDown] = useState(false),
+    [selectedIdx, setSelectedIdx] = useState(0),
+    [searchSymbol, qSearchSymbol] = useSearchSymbolLazyQuery()
   // const [keyPrefix, setKeyPrefix] = useState('ctrl')
-  const [inputValue, setInputValue] = useState('')
-  const [arrowKeyDown, setArrowKeyDown] = useState(false)
-  const [selectedIdx, setSelectedIdx] = useState(0)
-  const [searchSymbol, qSearchSymbol] = useSearchSymbolLazyQuery()
 
   // const onMouseEnter = (e: React.MouseEvent, idx: number) => {
   //   if (keyArrow) {
@@ -270,7 +276,7 @@ const SearcherModal = () => {
     // setKeyArrow(false)
   }, [arrowKeyDown, inputValue])
 
-  const props: ItemProps = {
+  const props: HitItemProps = {
     inputValue,
     searchSymbolHits: qSearchSymbol.data?.searchSymbol ?? [],
     selectedIdx,
@@ -280,46 +286,79 @@ const SearcherModal = () => {
   }
 
   return (
-    <Modal
-      sectionClassName={`dark:bg-gray-700 !w-[600px] searchModal ${classes.searchModal}`}
-      visible={showModal}
-      onClose={() => setShowModal(false)}
-    >
-      <div className="flex flex-col h-full border-gray-200 dark:border-gray-500">
-        {/* --- input --- */}
-        <div className="flex items-center mx-4 border-b border-inherit">
-          <span className="material-icons text-xl text-gray-400 leading-none">
+    <>
+      <button
+        className="
+          flex items-center 
+          w-full
+          p-1
+          border-gray-200 dark:border-gray-500
+          rounded
+          bg-gray-200/60
+          hover:bg-gray-200
+          transition-['background-color']
+          duration-200
+          text-sm
+          capitalize"
+        onClick={() => setShowModal(true)}
+      >
+        <span className="material-icons mr-1 text-xl text-gray-400 leading-none">
+          search
+        </span>
+        <div className="flex-1 flex">
+          <span className="flex-grow mr-10 text-left text-gray-400">
             search
           </span>
-          <input
-            className="w-full h-12 mx-2 outline-none bg-transparent text-gray-800 dark:text-gray-200 dark:caret-gray-100"
-            autoFocus
-            autoCorrect="off"
-            autoComplete="off"
-            spellCheck="false"
-            placeholder="Search"
-            onChange={e => {
-              setSelectedIdx(0)
-              setInputValue(e.target.value)
-            }}
-            onKeyDown={e => onKeyDown(e)}
-            onKeyUp={e => onKeyUp(e)}
-          />
+          {/* <span className="text-gray-500 dark:text-gray-300">
+            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
+              {keyPrefix}
+            </kbd>
+            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
+              K
+            </kbd>
+          </span> */}
         </div>
+      </button>
+      <Modal
+        sectionClassName={`dark:bg-gray-700 !w-[600px] searchModal ${classes.searchModal}`}
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+      >
+        <div className="flex flex-col h-full border-gray-200 dark:border-gray-500">
+          {/* --- input --- */}
+          <div className="flex items-center mx-4 border-b border-inherit">
+            <span className="material-icons text-xl text-gray-400 leading-none">
+              search
+            </span>
+            <input
+              className="w-full h-12 mx-2 outline-none bg-transparent text-gray-800 dark:text-gray-200 dark:caret-gray-100"
+              autoFocus
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck="false"
+              placeholder="Search"
+              onChange={e => {
+                setSelectedIdx(0)
+                setInputValue(e.target.value)
+              }}
+              onKeyDown={e => onKeyDown(e)}
+              onKeyUp={e => onKeyUp(e)}
+            />
+          </div>
 
-        {/* --- list --- */}
-        <div className="flex-1 overflow-y-auto pb-2">
-          <section className="px-4 border-gray-200 dark:border-gray-500">
-            {inputValue.length > 0 ? (
-              <>
-                <SymbolCreate {...{ ...props, onClickSymbolCreate }} />
-                <HitList {...{ ...props, onClickHit }} />
-              </>
-            ) : (
-              // TODO
-              <div>Empty</div>
-            )}
-            {/* ) : (
+          {/* --- list --- */}
+          <div className="flex-1 overflow-y-auto pb-2">
+            <section className="px-4 border-gray-200 dark:border-gray-500">
+              {inputValue.length > 0 ? (
+                <>
+                  <SymbolCreate {...{ ...props, onClickSymbolCreate }} />
+                  <HitList {...{ ...props, onClickHit }} />
+                </>
+              ) : (
+                // TODO
+                <div>Empty</div>
+              )}
+              {/* ) : (
                 // recent list
                 <>
                   <header className="mt-6 mb-3 pl-2 pb-2 border-b border-inherit text-gray-700 dark:text-gray-200">
@@ -349,31 +388,32 @@ const SearcherModal = () => {
                   </ul>
                 </>
               )} */}
-          </section>
-        </div>
+            </section>
+          </div>
 
-        {/* <footer className="px-4 py-2 shadow-footer dark:shadow-footer-dark"> */}
-        <footer className="px-4 py-2 border-t border-gray-200">
-          <ul className="flex gap-4 text-xs leading-none text-gray-500 dark:text-gray-400">
-            <li className=" ">
-              <kbd className="inline-block mr-[2px] py-[2px] px-1 rounded-sm font-sans bg-gray-300/50 dark:bg-gray-600 text-gray-600 dark:text-gray-300">
-                ↑
-              </kbd>
-              <kbd className="inline-block mr-1 py-[2px] px-1 rounded-sm font-sans bg-gray-300/50 dark:bg-gray-600 text-gray-600 dark:text-gray-300">
-                ↓
-              </kbd>
-              <span>to navigate</span>
-            </li>
-            <li>
-              <kbd className="inline-block mr-1 py-[2px] px-1 rounded-sm bg-gray-300/50 dark:bg-gray-600  text-gray-600 dark:text-gray-300 ">
-                esc
-              </kbd>
-              <span>to close</span>
-            </li>
-          </ul>
-        </footer>
-      </div>
-    </Modal>
+          {/* <footer className="px-4 py-2 shadow-footer dark:shadow-footer-dark"> */}
+          <footer className="px-4 py-2 border-t border-gray-200">
+            <ul className="flex gap-4 text-xs leading-none text-gray-500 dark:text-gray-400">
+              <li className=" ">
+                <kbd className="inline-block mr-[2px] py-[2px] px-1 rounded-sm font-sans bg-gray-300/50 dark:bg-gray-600 text-gray-600 dark:text-gray-300">
+                  ↑
+                </kbd>
+                <kbd className="inline-block mr-1 py-[2px] px-1 rounded-sm font-sans bg-gray-300/50 dark:bg-gray-600 text-gray-600 dark:text-gray-300">
+                  ↓
+                </kbd>
+                <span>to navigate</span>
+              </li>
+              <li>
+                <kbd className="inline-block mr-1 py-[2px] px-1 rounded-sm bg-gray-300/50 dark:bg-gray-600  text-gray-600 dark:text-gray-300 ">
+                  esc
+                </kbd>
+                <span>to close</span>
+              </li>
+            </ul>
+          </footer>
+        </div>
+      </Modal>
+    </>
   )
 }
 

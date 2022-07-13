@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import type { Block } from '../../interfaces'
 import '../block/block-container.module.css'
 import ParseRenderEl from '../inline/parse-render-el'

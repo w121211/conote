@@ -5,7 +5,7 @@ import { EditorToolbar } from '../../frontend/components/block-editor/src/compon
 import { noteService } from '../../frontend/components/block-editor/src/services/note.service'
 import { noteDraftService } from '../../frontend/components/block-editor/src/services/note-draft.service'
 import {
-  editorChainOpen,
+  editorChainItemOpen,
   editorChainsRefresh,
   editorLeftSidebarRefresh,
 } from '../../frontend/components/block-editor/src/events'
@@ -22,7 +22,7 @@ export const Basic = () => {
       const entries = await noteDraftService.queryMyAllDraftEntries(),
         chains = [entries]
       await editorChainsRefresh()
-      await editorChainOpen(entries[0].id)
+      await editorChainItemOpen(entries[0].id)
     }
     run()
   }, [])

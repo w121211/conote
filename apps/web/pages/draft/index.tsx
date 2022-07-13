@@ -1,9 +1,9 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
-import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import { useRouter } from 'next/router'
 import { docGetOrCreate } from '../../frontend/components/block-editor/src/events'
-import SearcherModalButton from '../../frontend/components/search-all-modal/searcher-modal-button'
-import { SearcherProps } from '../../frontend/stores/searcher.repository'
+import SearcherModal from '../../frontend/components/search-all-modal/searcher-modal'
+import type { SearcherProps } from '../../frontend/interfaces'
 import { getDraftPageURL } from '../../frontend/utils'
 
 interface Props {
@@ -16,7 +16,6 @@ interface Props {
 const DraftIndexPage = ({ query }: Props): JSX.Element | null => {
   const router = useRouter(),
     [loading, setLoading] = useState(true)
-  // const [createLink, mCreateLink] = useCreateLinkMutation()
 
   async function redirectToDraftIdPage(symbol: string) {
     setLoading(true)
@@ -42,7 +41,7 @@ const DraftIndexPage = ({ query }: Props): JSX.Element | null => {
   }
   return (
     <div>
-      <SearcherModalButton searcher={searcher} />
+      <SearcherModal searcher={searcher} />
     </div>
   )
 }
