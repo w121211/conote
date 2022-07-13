@@ -6,14 +6,14 @@ const BarChart = ({
   count,
   total,
   voted,
-  checked,
-}: {
+}: // checked,
+{
   content: string
   // value: number
   total: number
   count: number
   voted: boolean
-  checked?: boolean
+  // checked?: boolean
 }): JSX.Element => {
   const persentage = (count: number, total: number) =>
     Math.round((count / total + Number.EPSILON) * 100) || 0
@@ -21,9 +21,7 @@ const BarChart = ({
   return (
     <div className="w-full p-1 text-gray-700">
       <span
-        className={`relative block w-full h-9 rounded bg-gray-200 hover:bg-gray-300 font-bold ${
-          checked ? 'outline outline-blue-300' : ''
-        }`}
+        className={`relative block w-full h-9 rounded bg-gray-200 font-bold `}
       >
         <div
           className={`absolute flex w-full h-9 rounded overflow-hidden bg-blue-500 ${
@@ -35,7 +33,7 @@ const BarChart = ({
             }% 0 0 round 4px) `,
           }}
         >
-          <span className="flex items-center justify-between w-full mx--4 capitalize text-white">
+          <span className="flex items-center justify-between w-full mx-4 capitalize text-white">
             {content}
             <span className="text-white">
               {persentage(count, total)}%({count || 0})

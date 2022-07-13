@@ -133,6 +133,7 @@ export const BlockContent = ({
         overflow-visible
         flex-grow
         [word-break:break-word]
+        leading-[inherit]
         text-gray-700`}
     >
       {(isEditing || showEditableDom) && (

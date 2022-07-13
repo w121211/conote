@@ -19,10 +19,13 @@ const BlockViewerContent = ({
         overflow-visible
         flex-grow
         [word-break:break-word]
+        leading-[inherit]
         text-gray-700`}
     >
       <ParseRenderEl
-        className={`[grid-area:main]
+        className={`
+          [grid-area:main]
+         
           text-inherit
           font-[inherit]
           cursor-text 
@@ -84,8 +87,8 @@ const BlockViewer = ({
           grid-cols-[1fr_auto]
           grid-rows-[0_1fr_0]
           rounded-lg
-          leading-normal
-          my-1
+          leading-relaxed
+          
          '
         >
           {/* {children.length > 0 && (

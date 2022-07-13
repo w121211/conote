@@ -34,7 +34,7 @@ const HitList = ({
       {searchSymbolHits.map((hit, i) => (
         <li
           key={hit.id}
-          className="flex flex-col gap-1 px-2 py-3 rounded hover:cursor-pointer"
+          className=" px-2 py-3 rounded hover:cursor-pointer"
           onMouseLeave={e => onMouseLeave(e, i + 1)}
           onMouseMove={e => onMouseMove(e, i + 1)}
           // onClick={() => setShowModal(false)}
@@ -90,12 +90,13 @@ const SymbolCreate = ({
   if (onClickSymbolCreate) {
     return (
       <button
+        className="block w-full text-left"
         onClick={e => {
           onClickSymbolCreate(symbol)
           setShowModal(false)
         }}
       >
-        <span
+        <div
           className="mt-2 px-2 py-3 rounded hover:cursor-pointer"
           onMouseLeave={e => onMouseLeave(e, 0)}
           onMouseMove={e => onMouseMove(e, 0)}
@@ -109,14 +110,14 @@ const SymbolCreate = ({
           <span className="text-gray-800 dark:text-gray-200 font-bold">
             {inputValue}
           </span>
-        </span>
+        </div>
       </button>
     )
   }
   return (
     <Link href={getDraftPageURLBySymbol(symbol)}>
       <a>
-        <span
+        <div
           className="mt-2 px-2 py-3 rounded hover:cursor-pointer"
           onMouseLeave={e => onMouseLeave(e, 0)}
           onMouseMove={e => onMouseMove(e, 0)}
@@ -130,7 +131,7 @@ const SymbolCreate = ({
           <span className="text-gray-800 dark:text-gray-200 font-bold">
             {inputValue}
           </span>
-        </span>
+        </div>
       </a>
     </Link>
   )

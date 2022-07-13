@@ -60,8 +60,8 @@ const SidebarItemPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
   return (
     <div className=" hidden group-hover:flex items-center z-10">
       {isNil(item.meta.chain?.prevId) ? (
-        <button className=" px-[2px]" onClick={() => commitChain()}>
-          <span className="material-icons-outlined  text-xl text-gray-400 hover:text-gray-500 mix-blend-multiply">
+        <button className="flex px-[2px]" onClick={() => commitChain()}>
+          <span className="material-icons-outlined text-xl leading-none text-gray-400 hover:text-gray-500 mix-blend-multiply">
             cloud_upload
           </span>
         </button>

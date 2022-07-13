@@ -58,21 +58,22 @@ const SidebarSection = ({
               no note :{'('}
             </span>
           )} */}
-
-      {chains_.length > 0
-        ? !folded &&
-          chains_.map(({ first, rest }) => (
-            <SidebarItemChain
-              key={first.id}
-              itemFirst={first}
-              itemsRest={rest}
-            />
-          ))
-        : !folded && (
-            <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow ">
-              {'no note :('}
-            </span>
-          )}
+      <div className="overflow-hidden hover:overflow-y-auto ">
+        {chains_.length > 0
+          ? !folded &&
+            chains_.map(({ first, rest }) => (
+              <SidebarItemChain
+                key={first.id}
+                itemFirst={first}
+                itemsRest={rest}
+              />
+            ))
+          : !folded && (
+              <span className="px-4 inline-block text-sm text-gray-400 text-center italic text-shadow ">
+                {'no note :('}
+              </span>
+            )}
+      </div>
     </div>
   )
 }
