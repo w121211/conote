@@ -62,6 +62,15 @@ const Layout = ({
         {/* <LoginModal>{children}</LoginModal> */}
       </div>
       <Navbar />
+      {/* <button
+        className="fixed z-50"
+        onClick={() => {
+          console.log(childrenRef.current?.scrollTop)
+          childrenRef.current?.scrollTo({ top: 0 })
+        }}
+      >
+        click
+      </button> */}
     </div>
   )
 }
