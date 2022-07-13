@@ -5,7 +5,7 @@ import {
   mockDocBlock_contentBlocks,
 } from '../../frontend/components/block-editor/test/__mocks__/mock-block'
 import type { NoteDocParsed, NoteDraftParsed } from '../../lib/interfaces'
-import { differenceBlocks } from '../../share/block.common'
+import { differenceBlocks } from '../../share/common'
 import { mockBranches } from './mock-branch'
 import { mockDiscusses } from './mock-discuss'
 import { mockLinks } from './mock-link'

@@ -663,7 +663,12 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req)
 
     try {
-      const { commit, noteDocs } = await commitNoteDrafts(noteDraftIds, userId)
+      const { commit, noteDocs, newSyms } = await commitNoteDrafts(
+        noteDraftIds,
+        userId,
+      )
+      newSyms.forEach(e => symSearcher.add(e))
+
       return {
         ...toStringProps(commit),
         noteDocs: noteDocs.map(e =>

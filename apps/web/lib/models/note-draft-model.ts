@@ -4,10 +4,7 @@ import type {
   NoteDraftInput,
   NoteDraftMetaInput,
 } from 'graphql-let/__generated__/__types__'
-import {
-  parseBlockValues,
-  parseGQLContentBodyInput,
-} from '../../share/block.common'
+import { parseBlockValues, parseGQLContentBodyInput } from '../../share/common'
 import { toStringProps } from '../helpers'
 import type {
   NoteDocContentBody,

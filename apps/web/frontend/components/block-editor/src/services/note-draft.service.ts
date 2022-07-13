@@ -33,7 +33,7 @@ import {
   UpdateNoteDraftMutationVariables,
 } from '../../../../../apollo/query.graphql'
 import { getApolloClient } from '../../../../../apollo/apollo-client'
-import { parseGQLBlocks } from '../../../../../share/block.common'
+import { parseGQLBlocks } from '../../../../../share/common'
 import type { Block, Doc } from '../interfaces'
 import { genDocUid, omitTypenameDeep } from '../utils'
 
@@ -125,13 +125,17 @@ class NoteDraftService {
   /**
    *
    */
-  async queryDraft(symbol: string): Promise<NoteDraftFragment | null> {
+  async queryDraft(
+    symbol: string,
+    fetchPolicy?: FetchPolicy,
+  ): Promise<NoteDraftFragment | null> {
     const { data } = await this.apolloClient.query<
       NoteDraftQuery,
       NoteDraftQueryVariables
     >({
       query: NoteDraftDocument,
       variables: { symbol },
+      fetchPolicy,
     })
 
     if (data.noteDraft) {

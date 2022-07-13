@@ -10,7 +10,10 @@ import type {
 } from '@prisma/client'
 import cuid from 'cuid'
 import { differenceWith, intersectionWith } from 'lodash'
-import { differenceContentBody } from '../../share/note-doc.common'
+import {
+  differenceContentBody,
+  validateContentBlocks,
+} from '../../share/common'
 import type { CommitInputErrorItem } from '../interfaces'
 import prisma from '../prisma'
 import { noteDocMergeModel } from './note-doc-merge-model'
@@ -45,7 +48,7 @@ export class CommitInputError extends Error {
 /**
  *
  */
-async function validateDraft(draft: NoteDraft, userId: string) {
+async function validateInput(draft: NoteDraft, userId: string) {
   const sym = await prisma.sym.findUnique({
       where: { symbol: draft.symbol },
     }),
@@ -128,9 +131,15 @@ async function validateDraft(draft: NoteDraft, userId: string) {
       draftParsed.contentBody,
       headDoc.contentBody,
     )
-    if (diffBody.length === 0)
+    if (diffBody.blockChanges.length === 0)
       throw new InputError("Draft's content-body do not change from from-doc")
   }
+
+  const { isContentEmpty } = validateContentBlocks(
+    draftParsed.contentBody.blocks,
+  )
+
+  if (isContentEmpty) throw new InputError("Draft's content is empty")
 
   return {
     draft,
@@ -167,14 +176,16 @@ export async function commitNoteDrafts(
     sym: Sym
     branch: Branch
   })[]
+  newSyms: Sym[]
 }> {
   const symbol_symId: Record<string, string> = {},
     symbol_noteId: Record<string, string> = {},
     promises: PrismaPromise<any>[] = [],
-    commitId = cuid()
+    commitId = cuid(),
+    newSymbolIds: string[] = []
 
   // Validate drafts before commit
-  const validateResults: Awaited<ReturnType<typeof validateDraft>>[] = [],
+  const inputs: Awaited<ReturnType<typeof validateInput>>[] = [],
     errItems: CommitInputError['items'] = []
 
   for (const id of draftIds) {
@@ -184,7 +195,7 @@ export async function commitNoteDrafts(
     }
 
     try {
-      validateResults.push(await validateDraft(draft, userId))
+      inputs.push(await validateInput(draft, userId))
     } catch (err) {
       if (err instanceof InputError) {
         errItems.push({ draftId: id, msg: err.message })
@@ -200,7 +211,7 @@ export async function commitNoteDrafts(
   }
 
   // Loop first run: create syms, connect discusses
-  validateResults.forEach(e => {
+  inputs.forEach(e => {
     const {
         draft,
         // draftParsed,
@@ -221,6 +232,8 @@ export async function commitNoteDrafts(
     // Create Sym and Note if not found
     if (sym === null) {
       const { type } = symModel.parse(symbol)
+
+      newSymbolIds.push(symId)
       promises.push(
         prisma.sym.create({
           data: {
@@ -275,7 +288,7 @@ export async function commitNoteDrafts(
   })
 
   // Loop second run: for each draft, create doc and connect to the note
-  validateResults.forEach(e => {
+  inputs.forEach(e => {
     const { draft, draftParsed } = e,
       symId = symbol_symId[draft.symbol]
 
@@ -314,7 +327,7 @@ export async function commitNoteDrafts(
 
   const notes = (
     await prisma.$transaction(
-      validateResults.map(({ draft }) =>
+      inputs.map(({ draft }) =>
         prisma.note.findUnique({
           where: {
             branchId_symId: {
@@ -338,10 +351,20 @@ export async function commitNoteDrafts(
     } => e !== null,
   )
 
+  const newSyms = (
+    await prisma.$transaction(
+      newSymbolIds.map(e =>
+        prisma.sym.findUnique({
+          where: { id: e },
+        }),
+      ),
+    )
+  ).filter((e): e is Sym => e !== null)
+
   // For each note-doc, try auto merge or create a merge-poll
   const noteDocs_ = await Promise.all(
     noteDocs.map(e => noteDocMergeModel.mergeOnCreate(e)),
   )
 
-  return { symbol_symId, commit, notes, noteDocs: noteDocs_ }
+  return { symbol_symId, commit, notes, noteDocs: noteDocs_, newSyms }
 }

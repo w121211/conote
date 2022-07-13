@@ -5,7 +5,7 @@ import {
   NoteDraftFragment,
   NoteFragment,
 } from '../../../apollo/query.graphql'
-import { parseGQLBlocks } from '../../../share/block.common'
+import { parseGQLBlocks } from '../../../share/common'
 import {
   getDraftPageURL,
   getDraftPageURLBySymbol,

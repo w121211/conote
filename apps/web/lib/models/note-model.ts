@@ -1,5 +1,5 @@
-import { Branch, Link, Note, NoteDoc, Sym } from '@prisma/client'
-import { NoteDocParsed } from '../interfaces'
+import type { Branch, Link, Note, NoteDoc, Sym } from '@prisma/client'
+import type { NoteDocParsed } from '../interfaces'
 import prisma from '../prisma'
 import { noteDocModel } from './note-doc-model'
 

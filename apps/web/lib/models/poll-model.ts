@@ -43,7 +43,7 @@ export class PollModel {
       where: { id },
     })
     if (poll) {
-      console.debug(poll)
+      // console.debug(poll)
       return this.parse(poll)
     }
     return null

@@ -49,11 +49,12 @@ const Layout = ({
         }}
       />
       <div
+        id="layout-children-container"
         className={`
           flex-1  
           [grid-area:children] 
           flex justify-center 
-          scroll-smooth overflow-auto 
+          overflow-auto 
          ${backgroundColor ? backgroundColor : 'bg-gray-50 dark:bg-gray-700'}`}
         onMouseMove={onMouseMove}
         ref={childrenRef}

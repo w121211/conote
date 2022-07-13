@@ -9,7 +9,7 @@ import type {
   Sym,
 } from '@prisma/client'
 import { isEqual } from 'lodash'
-import { differenceContentBody } from '../../share/note-doc.common'
+import { differenceContentBody } from '../../share/common'
 import type { NoteDocMeta } from '../interfaces'
 import prisma from '../prisma'
 import { NoteDocModel } from './note-doc-model'
@@ -98,7 +98,7 @@ class NoteDocMergeModel extends NoteDocModel {
       headDoc = await this.getHeadDoc(branchId, symId),
       // TODO
       contentHead_isEqual = isEqual(doc_.contentHead, fromDoc_.contentHead),
-      contentBody_changes = differenceContentBody(
+      { blockChanges: contentBody_changes } = differenceContentBody(
         doc_.contentBody,
         fromDoc_.contentBody,
       ),

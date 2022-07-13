@@ -259,13 +259,19 @@ export type EditorProps = {
 
   // Only allow to open one tab, so no need to be a list
   tab: {
-    chain: {
+    // Modify by chainItemOpen event
+    curChain: {
       entry: NoteDraftEntryFragment
       docUid: string
     }[]
-    // Modify by chainItemOpen event
-    curDraftId: string | null
-    prevDraftId: string | null
+    curChainItem: {
+      draftId: string
+      docUid: string
+    } | null
+    prevChainItem: {
+      draftId: string
+      docUid: string
+    } | null
     loading: boolean
   }
 }

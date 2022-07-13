@@ -725,10 +725,12 @@ export async function docGetOrCreate(
 
   console.time('noteService.queryNote')
   const [note, draft] = await Promise.all([
-    noteService.queryNote(symbol),
-    noteDraftService.queryDraft(symbol),
+    noteService.queryNote(symbol, 'network-only'),
+    noteDraftService.queryDraft(symbol, 'network-only'),
   ])
   console.timeEnd('noteService.queryNote')
+
+  console.log(note, draft)
 
   if (draft !== null) {
     return docLoadFromDraft(draft, note)
@@ -1176,7 +1178,7 @@ export async function editorChainItemInsert(
     entries = draftEntries.filter(e => e.status === 'EDIT')
 
   // Item is in current's chain
-  if (tab.chain.find(e => e.entry.id === doc.noteDraftCopy.id)) {
+  if (tab.curChain.find(e => e.entry.id === doc.noteDraftCopy.id)) {
     await editorChainItemOpen(doc.noteDraftCopy.id)
     return { draftInserted: doc.noteDraftCopy }
   }
@@ -1195,7 +1197,7 @@ export async function editorChainItemOpen(draftId: string) {
   const chains = await editorChainsRefresh(),
     entries = editorRepo.getChainEntries(chains, draftId),
     docs = await Promise.all(entries.map(e => docGetOrCreate(e.symbol))),
-    chain: EditorProps['tab']['chain'] = zip(entries, docs).map(([a, b]) => {
+    chain: EditorProps['tab']['curChain'] = zip(entries, docs).map(([a, b]) => {
       if (a && b) {
         return {
           entry: a,
@@ -1203,26 +1205,34 @@ export async function editorChainItemOpen(draftId: string) {
         }
       }
       throw new Error()
-    })
+    }),
+    curDoc = docs.find(e => e.noteDraftCopy.id === draftId)
+
+  if (curDoc === undefined) throw new Error('Unexpected error')
 
   editorRepo.setTab({
-    curDraftId: draftId,
-    chain,
+    curChain: chain,
+    curChainItem: {
+      docUid: curDoc.uid,
+      draftId,
+    },
     loading: false,
   })
 
-  return { chain }
+  return { chain, curDoc }
 }
 
 /**
  *
  */
 export async function editorChainCommit(draftId: string) {
-  const { chains } = editorRepo.getValue(),
+  const { chains, tab } = editorRepo.getValue(),
     entries = editorRepo.getChainEntries(chains, draftId)
 
   if (entries[0].id !== draftId)
     throw new Error('Only allow to commit the chain from the first chain item')
+
+  if (tab.curChainItem) await docSave(tab.curChainItem.docUid)
 
   const commit = await commitService.createCommit(entries.map(e => e.id))
   await commitOnFinish(commit.noteDocs)
@@ -1252,8 +1262,9 @@ export async function editorChainItemRemove(entry: NoteDraftEntryFragment) {
   await editorChainsRefresh('network-only')
 
   editorRepo.setTab({
+    // curChainItem: tab.curChainItem?.draftId === id ? null : tab.curChainItem?.draftId,
     ...tab,
-    chain: tab.chain.filter(e => e.entry.id !== entry.id),
+    curChain: tab.curChain.filter(e => e.entry.id !== entry.id),
   })
 }
 

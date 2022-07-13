@@ -4,10 +4,7 @@ import { getEntity, selectEntity, withEntities } from '@ngneat/elf-entities'
 import type { NoteDraftInput } from 'graphql-let/__generated__/__types__'
 import type { NoteFragment } from '../../../../../apollo/query.graphql'
 import type { SymbolParsed } from '../../../../../lib/interfaces'
-import {
-  differenceBlocks,
-  parseGQLBlocks,
-} from '../../../../../share/block.common'
+import { differenceBlocks, parseGQLBlocks } from '../../../../../share/common'
 import type { Block, Doc } from '../interfaces'
 import { allDescendants, rootBlock } from '../op/queries'
 import { genBlockUid, genDocUid, omitTypenameDeep } from '../utils'

@@ -83,18 +83,19 @@ export const EditorChainEl = (): JSX.Element | null => {
   const [tab] = useObservable(editorRepo.tab$)
   // [alert] = useObservable(editorRepo.alter$),
 
-  if (tab.chain.length === 0) {
-    // return <div>chainDocs?.length === 0</div>
+  if (tab.curChain.length === 0) {
     return null
   }
   return (
     <div>
       {/* {alert && <div>{alert.message}</div>} */}
-      {tab.chain.map((e, i) => {
-        const isFocus = e.entry.id === tab.curDraftId,
+      {tab.curChain.map((e, i) => {
+        const isFocus = e.entry.id === tab.curChainItem?.draftId,
           isInSameChain =
             isFocus &&
-            tab.chain.find(a => a.entry.id === tab.prevDraftId) !== undefined,
+            tab.curChain.find(
+              a => a.entry.id === tab.prevChainItem?.draftId,
+            ) !== undefined,
           scrollToThis =
             (i === 0 && isFocus && isInSameChain) || (i > 0 && isFocus)
 
@@ -105,18 +106,22 @@ export const EditorChainEl = (): JSX.Element | null => {
           </div>
         )
       })}
-      {/* <button
+      <button
         onClick={() => {
-          if (div.current) {
-            // div.current.scrollIntoView()
-            div.current.scrollTo({ top: -1000 })
+          // if (div.current) {
+          //   // div.current.scrollIntoView()
+          //   div.current.scrollTo({ top: -1000 })
+          // }
+          const el = document.getElementById('layout-children-container')
+          if (el) {
+            el.scrollTo({ top: 0 })
           }
-          // const body = document.querySelector('body')
+
           // console.log(body)
         }}
       >
         Top
-      </button> */}
+      </button>
     </div>
   )
 }

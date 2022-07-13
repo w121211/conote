@@ -255,7 +255,8 @@ class TreeUtil {
   }
 
   /**
-   * Reconstruct the list to get children-uids
+   * Reconstruct the list to get children-uids, involve validate the list before return
+   * @returns node-body list [root, ...children]
    */
   toTreeNodeBodyList<
     T extends {
@@ -270,7 +271,7 @@ class TreeUtil {
         return { uid, parentUid, order, data: e }
       }),
       root = this.buildFromList(nodes),
-      nodes_ = this.toList(root)
+      nodes_ = this.toPreOrderList(root)
 
     if (nodes_.length !== items.length)
       throw new Error('[toTreeNodeBodyList] list.length !== items.length')

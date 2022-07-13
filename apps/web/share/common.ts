@@ -11,7 +11,16 @@ import type {
   InlineDiscuss,
 } from '../frontend/components/block-editor/src/interfaces'
 import { parse } from '../frontend/components/block-editor/src/parse-render'
-import type { NoteDocContentBody } from '../lib/interfaces'
+import type { NoteDocContentBody, NoteDocContentHead } from '../lib/interfaces'
+
+//
+// Differencers
+//
+//
+//
+//
+//
+//
 
 function isBlockEqual(
   a: Omit<Block, 'childrenUids'>,
@@ -33,6 +42,50 @@ export function differenceBlocks(
     changes = treeNodeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
   return changes
 }
+
+/**
+ * Get changes of content-head
+ *
+ * TODO
+ */
+export function differenceContentHead(
+  final: NoteDocContentHead,
+  start: NoteDocContentHead,
+) {
+  throw new Error('Not implement')
+  // return isEqual(final, start)
+}
+
+/**
+ *
+ */
+export function differenceContentBody(
+  final: NoteDocContentBody,
+  start: NoteDocContentBody,
+) {
+  return {
+    blockChanges: differenceBlocks(final.blocks, start.blocks),
+  }
+}
+
+export function validateContentBlocks(blocks: NoteDocContentBody['blocks']) {
+  // Validate the blocks
+  parseGQLBlocks(blocks)
+
+  // Validate the list, `toTreeNodeBodyList` validate the list before return
+  const nodes = treeUtil.toTreeNodeBodyList(blocks),
+    isContentEmpty = nodes.length <= 1
+  return { nodes, isContentEmpty }
+}
+
+//
+// Pasers
+//
+//
+//
+//
+//
+//
 
 /**
  * Convert gql-blocks to blocks by

@@ -156,7 +156,9 @@ const SearcherModal = ({ searcher }: SearcherProps) => {
     [inputValue, setInputValue] = useState(''),
     [arrowKeyDown, setArrowKeyDown] = useState(false),
     [selectedIdx, setSelectedIdx] = useState(0),
-    [searchSymbol, qSearchSymbol] = useSearchSymbolLazyQuery()
+    [searchSymbol, qSearchSymbol] = useSearchSymbolLazyQuery({
+      fetchPolicy: 'cache-and-network',
+    })
   // const [keyPrefix, setKeyPrefix] = useState('ctrl')
 
   // const onMouseEnter = (e: React.MouseEvent, idx: number) => {
