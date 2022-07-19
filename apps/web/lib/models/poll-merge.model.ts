@@ -3,8 +3,8 @@ import { isEqual } from 'lodash'
 import { MERGE_POLL_V1_0 } from '../../share/constants'
 import type { PollMeta, PollParsed } from '../interfaces'
 import prisma from '../prisma'
-import { PollModel } from './poll-model'
-import { getBotId } from './user-model'
+import { PollModel } from './poll.model'
+import { getBotId } from './user.model'
 
 const defaultMergePollMeta: PollMeta = {
   openInDays: 5,

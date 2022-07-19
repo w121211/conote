@@ -9,7 +9,7 @@ import { noteDraftModel } from '../../lib/models/note-draft-model'
 import { mockBranches } from '../../test/__mocks__/mock-branch'
 import { noteDocModel } from '../../lib/models/note-doc-model'
 import { mockUsers } from '../../test/__mocks__/mock-user'
-import { parseGQLBlocks } from '../../share/block.common'
+import { parseGQLBlocks } from '../../share/utils'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),

@@ -1,6 +1,6 @@
 import { Author, Rate, RateChoice, Sym } from '@prisma/client'
 import prisma from '../prisma'
-import { symModel } from './sym-model'
+import { symModel } from './sym.model'
 
 export type RateBody = {
   comment?: string

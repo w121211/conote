@@ -5,12 +5,12 @@ import {
   mockDocBlock_contentBlocks,
 } from '../../frontend/components/block-editor/test/__mocks__/mock-block'
 import type { NoteDocParsed, NoteDraftParsed } from '../../lib/interfaces'
-import { differenceBlocks } from '../../share/common'
-import { mockBranches } from './mock-branch'
-import { mockDiscusses } from './mock-discuss'
-import { mockLinks } from './mock-link'
-import { mockSyms } from './mock-sym'
-import { mockUsers } from './mock-user'
+import { differenceBlocks } from '../../share/utils'
+import { mockBranches } from './branch.mock'
+import { mockDiscusses } from './discuss.mock'
+import { mockLinks } from './link.mock'
+import { mockSyms } from './sym.mock'
+import { mockUsers } from './user.mock'
 
 const blocksArr: NoteDraftParsed<NoteDraft>['contentBody']['blocks'][] = [
   writeBlocks(mockBlockInputs[0], {

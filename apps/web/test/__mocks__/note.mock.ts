@@ -1,6 +1,6 @@
 import type { Note } from '@prisma/client'
-import { mockBranches } from './mock-branch'
-import { mockSyms } from './mock-sym'
+import { mockBranches } from './branch.mock'
+import { mockSyms } from './sym.mock'
 
 export const mockNotes: Omit<Note, 'linkId'>[] = [
   {

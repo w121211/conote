@@ -192,13 +192,14 @@ Dump to CSV, JSON? Use dump & restore, then access pgadmin and export to csv, js
 
 ```sh
 # Restore to k8s
-# create database if not exist in psql
+
+# (Not require)
 $(psql) CREATE DATABASE prisma;
 
 # !!!Use carefully!!!, for case require to drop database,
 $(psql) DROP DATABASE prisma;
 
-# restore to k8s
+# Restore to k8s
 kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql -C -d postgres -v -p 5432 -U postgresuser -Ft < ${prisma_dump_file.tar}
 
 # restore to local docker

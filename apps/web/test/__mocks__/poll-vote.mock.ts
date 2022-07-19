@@ -1,7 +1,7 @@
 import { PollVote } from '@prisma/client'
-import { MERGE_POLL_CHOICES } from '../../lib/models/poll-merge-model'
-import { mockMergePolls } from './mock-poll'
-import { mockUsers } from './mock-user'
+import { MERGE_POLL_CHOICES } from '../../lib/models/poll-merge.model'
+import { mockMergePolls } from './poll.mock'
+import { mockUsers } from './user.mock'
 
 let countId = 0
 

@@ -9,12 +9,12 @@ import {
 import {
   discussEmojiModel,
   noteEmojiModel,
-} from '../../../lib/models/emoji-model'
+} from '../../../lib/models/emoji.model'
 import prisma from '../../../lib/prisma'
 import { testHelper } from '../../test-helpers'
-import { mockDiscusses } from '../../__mocks__/mock-discuss'
-import { mockNotes } from '../../__mocks__/mock-note'
-import { mockUsers } from '../../__mocks__/mock-user'
+import { mockDiscusses } from '../../__mocks__/discuss.mock'
+import { mockNotes } from '../../__mocks__/note.mock'
+import { mockUsers } from '../../__mocks__/user.mock'
 
 beforeAll(async () => {
   await prisma.$queryRaw`TRUNCATE "Author", "Bullet", "BulletEmoji", 

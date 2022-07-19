@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js'
 import { Sym, SymType } from '@prisma/client'
-import { symModel } from '../models/sym-model'
+import { symModel } from '../models/sym.model'
 
 type FuseDict = {
   all: Fuse<Sym>

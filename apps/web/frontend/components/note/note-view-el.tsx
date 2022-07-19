@@ -1,16 +1,12 @@
-import Link from 'next/link'
 import React from 'react'
+import Link from 'next/link'
 import {
   NoteDocFragment,
   NoteDraftFragment,
   NoteFragment,
 } from '../../../apollo/query.graphql'
-import { parseGQLBlocks } from '../../../share/common'
-import {
-  getDraftPageURL,
-  getDraftPageURLBySymbol,
-  getNotePageURL,
-} from '../../utils'
+import { parseGQLBlocks } from '../../../share/utils'
+import { getDraftPageURLBySymbol } from '../../utils'
 import BlockViewer from '../block-editor/src/components/block/block-viewer'
 import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-padding'
 import NoteAlerts from './note-alerts'

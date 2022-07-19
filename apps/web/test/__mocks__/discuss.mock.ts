@@ -1,6 +1,6 @@
 import faker from '@faker-js/faker'
 import type { Discuss, DiscussPost } from '@prisma/client'
-import { mockUsers } from './mock-user'
+import { mockUsers } from './user.mock'
 
 type DiscussParsed = Omit<Discuss, 'meta'> & {
   meta: object

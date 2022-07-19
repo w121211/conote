@@ -1,5 +1,5 @@
 import { Sym } from '@prisma/client'
-import { mockLinks } from './mock-link'
+import { mockLinks } from './link.mock'
 
 // export const TEST_SYMBOLS = [
 //   { name: '$AAA', cat: SymbolCat.TICKER },

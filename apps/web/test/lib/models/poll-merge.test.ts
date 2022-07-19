@@ -1,10 +1,10 @@
 import { Poll, PollCount, PollVote } from '@prisma/client'
-import { pollMergeModel } from '../../../lib/models/poll-merge-model'
-import { pollVoteModel } from '../../../lib/models/poll-vote-model'
+import { pollMergeModel } from '../../../lib/models/poll-merge.model'
+import { pollVoteModel } from '../../../lib/models/poll-vote.model'
 import prisma from '../../../lib/prisma'
 import { testHelper } from '../../test-helpers'
-import { mockMergePolls } from '../../__mocks__/mock-poll'
-import { mockMergePollVotes } from '../../__mocks__/mock-vote'
+import { mockMergePolls } from '../../__mocks__/poll.mock'
+import { mockMergePollVotes } from '../../__mocks__/poll-vote.mock'
 
 async function createMockMergePolls() {
   return await testHelper.createMergePolls(prisma)

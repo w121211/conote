@@ -2,18 +2,18 @@ import type { NoteDoc } from '@prisma/client'
 import { cloneDeep } from 'lodash'
 import { mockDiffBlocks } from '../../../frontend/components/block-editor/test/__mocks__/mock-diff-blocks'
 import { NoteDocParsed } from '../../../lib/interfaces'
-import { noteDocMergeModel } from '../../../lib/models/note-doc-merge-model'
-import { noteDocModel } from '../../../lib/models/note-doc-model'
+import { noteDocMergeModel } from '../../../lib/models/note-doc-merge.model'
+import { noteDocModel } from '../../../lib/models/note-doc.model'
 import prisma from '../../../lib/prisma'
 import { testHelper } from '../../test-helpers'
-import { mockCommits } from '../../__mocks__/mock-commit'
-import { mockLinks } from '../../__mocks__/mock-link'
-import { mockNotes } from '../../__mocks__/mock-note'
-import { mockNoteDocs } from '../../__mocks__/mock-note-doc'
-import { mockMergePolls } from '../../__mocks__/mock-poll'
-import { mockSyms } from '../../__mocks__/mock-sym'
-import { mockUsers } from '../../__mocks__/mock-user'
-import { mockMergePollVotes } from '../../__mocks__/mock-vote'
+import { mockCommits } from '../../__mocks__/commit.mock'
+import { mockLinks } from '../../__mocks__/link.mock'
+import { mockNotes } from '../../__mocks__/note.mock'
+import { mockNoteDocs } from '../../__mocks__/note-doc.mock'
+import { mockMergePolls } from '../../__mocks__/poll.mock'
+import { mockSyms } from '../../__mocks__/sym.mock'
+import { mockUsers } from '../../__mocks__/user.mock'
+import { mockMergePollVotes } from '../../__mocks__/poll-vote.mock'
 import { createMockVotes } from './poll-merge.test'
 
 /**
@@ -344,37 +344,37 @@ describe('mergeOnCreate()', () => {
   })
 })
 
-// describe('mergePeriodical()', () => {
-//   it('merge if the time is up and ups are more than downs', async () => {
-//     await testHelper.createCandidateCommit(prisma)
-//     // set the time and Poll to be able to merge successfully
-//     const poll = await prisma.poll.findUnique({
-//       where: { id: mockNoteDocs[0].mergePollId },
-//       include: { count: true },
-//     })
-//     await prisma.pollCount.update({
-//       data: { nVotes: [5, 3] },
-//       where: { id: poll?.count?.id },
-//     })
-//     const docMerged = await mergePeriodical(mockNoteDocs[0])
-//     expect(docMerged.status).toMatchInlineSnapshot(`"MERGE"`)
-//   })
-
-//   it('reject if the time is up and downs are more than ups', async () => {
-//     await testHelper.createCandidateCommit(prisma)
-//     // set the time and Poll to be able to reject
-//     const poll = await prisma.poll.findUnique({
-//       where: { id: mockNoteDocs[0].mergePollId },
-//       include: { count: true },
-//     })
-//     await prisma.pollCount.update({
-//       data: { nVotes: [1, 9] },
-//       where: { id: poll?.count?.id },
-//     })
-//     const docMerged = await mergePeriodical(mockNoteDocs[0])
-//     expect(docMerged.status).toMatchInlineSnapshot(`"REJECT"`)
-//   })
-// })
+describe('mergeRoutinely()', () => {
+  // it ('cron job')
+  // it('merge if the time is up and ups are more than downs', async () => {
+  // await testHelper.createCandidateCommit(prisma)
+  // // set the time and Poll to be able to merge successfully
+  // const poll = await prisma.poll.findUnique({
+  //   where: { id: mockNoteDocs[0].mergePollId },
+  //   include: { count: true },
+  // })
+  // await prisma.pollCount.update({
+  //   data: { nVotes: [5, 3] },
+  //   where: { id: poll?.count?.id },
+  // })
+  // const docMerged = await mergePeriodical(mockNoteDocs[0])
+  // expect(docMerged.status).toMatchInlineSnapshot(`"MERGE"`)
+  // })
+  // it('reject if the time is up and downs are more than ups', async () => {
+  //   await testHelper.createCandidateCommit(prisma)
+  //   // set the time and Poll to be able to reject
+  //   const poll = await prisma.poll.findUnique({
+  //     where: { id: mockNoteDocs[0].mergePollId },
+  //     include: { count: true },
+  //   })
+  //   await prisma.pollCount.update({
+  //     data: { nVotes: [1, 9] },
+  //     where: { id: poll?.count?.id },
+  //   })
+  //   const docMerged = await mergePeriodical(mockNoteDocs[0])
+  //   expect(docMerged.status).toMatchInlineSnapshot(`"REJECT"`)
+  // })
+})
 
 // describe('NoteDocMetaModel', () => {
 //   it('NoteDocMetaModel.fromJSON()', async () => {

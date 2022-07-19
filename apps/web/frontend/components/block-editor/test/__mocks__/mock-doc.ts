@@ -23,7 +23,11 @@ const mockNoteDraftCopy: Doc['noteDraftCopy'] = {
     __typename: 'NoteDocContentBody',
     // discussIds: [],
     // symbols: [],
-    blocks: [],
+    // blocks: [],
+    blocks: mockDocBlock_contentBlocks.map(e => ({
+      ...e,
+      __typename: 'Block',
+    })),
     blockDiff: [],
   },
 }

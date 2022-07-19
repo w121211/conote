@@ -1,4 +1,3 @@
-import { TreeNodeChange, treeNodeDifferencer, treeUtil } from '@conote/docdiff'
 import type {
   Branch,
   Note,
@@ -9,11 +8,11 @@ import type {
   Sym,
 } from '@prisma/client'
 import { isEqual } from 'lodash'
-import { differenceContentBody } from '../../share/common'
+import { differenceContentBody } from '../../share/utils'
 import type { NoteDocMeta } from '../interfaces'
 import prisma from '../prisma'
-import { NoteDocModel } from './note-doc-model'
-import { pollMergeModel } from './poll-merge-model'
+import { NoteDocModel } from './note-doc.model'
+import { pollMergeModel } from './poll-merge.model'
 
 type MergeErrorFlag = 'paused-from_doc_not_head' | 'fail_to_auto_merge'
 
@@ -233,13 +232,13 @@ class NoteDocMergeModel extends NoteDocModel {
   }
 
   /**
-   * Merge on periodical checks:
+   * Merge on routine checks:
    * - poll is open for a specific time && ups is higher than downs
    *
-   * Reject on periodical checks:
+   * Reject on routine checks:
    * - poll is open for a specific time && ups is lower than downs
    */
-  async mergePeriodical(
+  async mergeRoutine(
     doc: NoteDoc & {
       fromDoc: NoteDoc | null
       mergePoll: Poll | null

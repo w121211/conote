@@ -327,10 +327,10 @@ function tokenToInlineItem(token: string | Token): InlineItem {
  *
  * @throws Parse error
  */
-export function parse(str: string): InlineItem[] {
+export function parse(str: string) {
   const tokens = tokenize(str, grammar),
     inlineItems = tokens.map(e => tokenToInlineItem(e))
-  return inlineItems
+  return { inlineItems, tokens }
 }
 
 /**

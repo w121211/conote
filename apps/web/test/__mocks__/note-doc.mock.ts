@@ -2,12 +2,12 @@ import { NoteDoc } from '@prisma/client'
 import { mockDocBlock_contentBlocks } from '../../frontend/components/block-editor/test/__mocks__/mock-block'
 import { mockDiffBlocks } from '../../frontend/components/block-editor/test/__mocks__/mock-diff-blocks'
 import { NoteDocContentBody, NoteDocParsed } from '../../lib/interfaces'
-import { mockBranches } from './mock-branch'
-import { mockCommits } from './mock-commit'
-import { mockNoteDrafts } from './mock-note-draft'
-import { mockMergePolls } from './mock-poll'
-import { mockSyms } from './mock-sym'
-import { mockUsers } from './mock-user'
+import { mockBranches } from './branch.mock'
+import { mockCommits } from './commit.mock'
+import { mockNoteDrafts } from './note-draft.mock'
+import { mockMergePolls } from './poll.mock'
+import { mockSyms } from './sym.mock'
+import { mockUsers } from './user.mock'
 
 const contentBody: NoteDocContentBody = {
   discussIds: [],

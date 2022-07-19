@@ -33,7 +33,7 @@ import {
   UpdateNoteDraftMutationVariables,
 } from '../../../../../apollo/query.graphql'
 import { getApolloClient } from '../../../../../apollo/apollo-client'
-import { parseGQLBlocks } from '../../../../../share/common'
+import { parseGQLBlocks } from '../../../../../share/utils'
 import type { Block, Doc } from '../interfaces'
 import { genDocUid, omitTypenameDeep } from '../utils'
 

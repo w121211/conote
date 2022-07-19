@@ -1,10 +1,10 @@
-import type { Branch, NoteDoc, NoteDraft } from '@prisma/client'
+import type { Branch, NoteDraft } from '@prisma/client'
 import type {
   NoteDraft as GQLNoteDraft,
   NoteDraftInput,
   NoteDraftMetaInput,
 } from 'graphql-let/__generated__/__types__'
-import { parseBlockValues, parseGQLContentBodyInput } from '../../share/common'
+import { parseBlockValues, parseGQLContentBodyInput } from '../../share/utils'
 import { toStringProps } from '../helpers'
 import type {
   NoteDocContentBody,
@@ -13,8 +13,8 @@ import type {
   NoteDraftParsed,
 } from '../interfaces'
 import prisma from '../prisma'
-import { noteDocModel } from './note-doc-model'
-import { symModel } from './sym-model'
+import { noteDocModel } from './note-doc.model'
+import { symModel } from './sym.model'
 
 /**
  *

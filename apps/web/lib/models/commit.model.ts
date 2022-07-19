@@ -10,16 +10,13 @@ import type {
 } from '@prisma/client'
 import cuid from 'cuid'
 import { differenceWith, intersectionWith } from 'lodash'
-import {
-  differenceContentBody,
-  validateContentBlocks,
-} from '../../share/common'
+import { differenceContentBody, validateContentBlocks } from '../../share/utils'
 import type { CommitInputErrorItem } from '../interfaces'
 import prisma from '../prisma'
-import { noteDocMergeModel } from './note-doc-merge-model'
-import { noteDocModel } from './note-doc-model'
-import { noteDraftModel } from './note-draft-model'
-import { symModel } from './sym-model'
+import { noteDocMergeModel } from './note-doc-merge.model'
+import { noteDocModel } from './note-doc.model'
+import { noteDraftModel } from './note-draft.model'
+import { symModel } from './sym.model'
 
 class InputError extends Error {
   constructor(msg: string) {

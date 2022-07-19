@@ -1,5 +1,5 @@
 import { Commit } from '@prisma/client'
-import { mockUsers } from './mock-user'
+import { mockUsers } from './user.mock'
 
 export const mockCommits: Commit[] = [
   {

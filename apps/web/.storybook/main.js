@@ -1,8 +1,5 @@
 module.exports = {
-  stories: [
-    '../stories/**/*.stories.tsx',
-    '../components/block-editor/src/**/*.stories.@(js|jsx|ts|tsx)',
-  ],
+  stories: ['../stories/**/*.stories.tsx'],
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-viewport',
@@ -45,7 +42,9 @@ module.exports = {
     'storybook-css-modules',
   ],
   framework: '@storybook/react',
-
+  core: {
+    builder: 'webpack5',
+  },
   webpackFinal: async config => {
     config.module.rules.push({
       test: /\.(tsx|graphql)$/,

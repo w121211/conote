@@ -4,8 +4,8 @@ import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
 import { editorChainItemInsert } from '../../frontend/components/block-editor/src/events'
 import ModalProvider from '../../frontend/components/modal/modal-context'
-import SearcherModal from '../../frontend/components/search-all-modal/_searcher-modal'
-import SearcherModalButton from '../../frontend/components/search-all-modal/_searcher-modal-button'
+import SearcherModal from '../../frontend/components/search-all-modal/searcher-modal'
+// import SearcherModalButton from '../../frontend/components/search-all-modal/searcher-modal-button'
 import { SearcherProps } from '../../frontend/interfaces'
 
 const apolloClient = getApolloClient()
@@ -49,35 +49,32 @@ export const Default = () => {
   }
   return (
     <ApolloProvider client={apolloClient}>
-      <ModalProvider>
-        <SearcherModalButton searcher={searcher} />
-        <SearcherModal />
-      </ModalProvider>
+      <ModalProvider>{/* <SearcherModal /> */}</ModalProvider>
     </ApolloProvider>
   )
 }
 
-export const Chain = () => {
-  const searcher: SearcherProps['searcher'] = {
-    searchRange: 'symbol',
-    onClickHit: hit => {
-      editorChainItemInsert(hit.str, null).then(({ draftInserted }) => {
-        console.debug(draftInserted)
-      })
-    },
-    onClickSymbolCreate: symbol => {
-      editorChainItemInsert(symbol, null).then(({ draftInserted }) => {
-        console.debug(draftInserted)
-      })
-    },
-  }
-  return (
-    <ApolloProvider client={apolloClient}>
-      <ModalProvider>
-        <SearcherModal />
-        <SearcherModalButton searcher={searcher} />
-        <SearcherModalButton searcher={searcher} />
-      </ModalProvider>
-    </ApolloProvider>
-  )
-}
+// export const Chain = () => {
+//   const searcher: SearcherProps['searcher'] = {
+//     searchRange: 'symbol',
+//     onClickHit: hit => {
+//       editorChainItemInsert(hit.str, null).then(({ draftInserted }) => {
+//         console.debug(draftInserted)
+//       })
+//     },
+//     onClickSymbolCreate: symbol => {
+//       editorChainItemInsert(symbol, null).then(({ draftInserted }) => {
+//         console.debug(draftInserted)
+//       })
+//     },
+//   }
+//   return (
+//     <ApolloProvider client={apolloClient}>
+//       <ModalProvider>
+//         <SearcherModal />
+//         <SearcherModalButton searcher={searcher} />
+//         <SearcherModalButton searcher={searcher} />
+//       </ModalProvider>
+//     </ApolloProvider>
+//   )
+// }

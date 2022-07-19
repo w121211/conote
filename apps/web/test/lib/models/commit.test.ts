@@ -4,9 +4,9 @@ import { testHelper } from '../../test-helpers'
 import {
   CommitInputError,
   commitNoteDrafts,
-} from '../../../lib/models/commit-model'
-import { mockNoteDrafts } from '../../__mocks__/mock-note-draft'
-import { mockUsers } from '../../__mocks__/mock-user'
+} from '../../../lib/models/commit.model'
+import { mockNoteDrafts } from '../../__mocks__/note-draft.mock'
+import { mockUsers } from '../../__mocks__/user.mock'
 // import { mockNoteDocs } from '../../__mocks__/mock-note-doc'
 
 beforeAll(async () => {
