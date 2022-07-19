@@ -1,6 +1,7 @@
 import type { TreeNodeChangeType } from '@conote/docdiff'
 import type {
   Block,
+  Doc,
   InlineComment,
   InlineDiscuss,
   InlineFiltertag,
@@ -124,4 +125,17 @@ export type TextCustom = {
 
 export type TextEmpty = {
   text: string
+}
+
+//
+// Stores
+//
+//
+//
+//
+//
+//
+
+export type DocSlate = Doc & {
+  value: ElementLi[]
 }

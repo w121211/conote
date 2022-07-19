@@ -2,7 +2,8 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import React, { useEffect } from 'react'
 import { EditorChainEl } from '../../frontend/components/block-editor/src/components/editor/editor-chain-el'
 import { editorChainItemOpen } from '../../frontend/components/block-editor/src/events'
-import { preventSave } from '../../frontend/components/block-editor/src/listeners'
+import { preventExitWithoutSave } from '../../frontend/components/block-editor/src/listeners'
+import SlateEditorChainEl from '../../frontend/components/slate-editor/src/components/slate-editor-chain-el'
 import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
 
 interface Props {
@@ -12,8 +13,9 @@ interface Props {
 
 const DraftIdPage = ({ draftId }: Props): JSX.Element | null => {
   useEffect(() => {
-    window.addEventListener('beforeunload', preventSave)
-    return () => window.removeEventListener('beforeunload', preventSave)
+    window.addEventListener('beforeunload', preventExitWithoutSave)
+    return () =>
+      window.removeEventListener('beforeunload', preventExitWithoutSave)
   }, [])
 
   useEffect(() => {
@@ -32,7 +34,8 @@ const DraftIdPage = ({ draftId }: Props): JSX.Element | null => {
             />
           )} */}
         </div>
-        <EditorChainEl />
+        {/* <EditorChainEl /> */}
+        <SlateEditorChainEl />
       </div>
     </LayoutChildrenPadding>
   )

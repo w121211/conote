@@ -275,7 +275,7 @@ function blocksToClipboardData(
 /**
  *
  */
-export function preventSave(e: BeforeUnloadEvent) {
+export function preventExitWithoutSave(e: BeforeUnloadEvent) {
   const { main, modal } = editorRepo.getValue().opening
 
   let preventClose = false

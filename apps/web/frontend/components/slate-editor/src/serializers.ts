@@ -142,11 +142,8 @@ function liToTreeNodeBlock(
 }
 
 export function blocksToLiList(blocks: Block[]): ElementLi[] {
-  console.log(blocks)
+  console.debug('blocksToLiList')
   const list = treeUtil.toTreeNodeBodyList(blocks)
-
-  console.log(list)
-
   const root = treeUtil.buildFromList(list),
     liList = root.children.map(blockToLi)
   return liList
@@ -156,17 +153,15 @@ export function blocksToLiList(blocks: Block[]): ElementLi[] {
  * Convert the slate input value (ie, li list) to blocks
  *
  */
-export function liListToBlocks(
-  liList: ElementLi[],
-  rootUid: string,
-): Omit<Block, 'childrenUids'>[] {
-  const nodes = liList.map((e, i) => liToTreeNodeBlock(e, rootUid, i)),
+export function elementLisToBlocks(lis: ElementLi[], rootUid: string): Block[] {
+  const nodes = lis.map((e, i) => liToTreeNodeBlock(e, rootUid, i)),
     nodes_flattens = nodes.map(e => treeUtil.toList(e)),
-    blocks: Omit<Block, 'childrenUids'>[] = []
+    blocks = nodes_flattens
+      .reduce((acc, cur) => [...acc, ...cur], [])
+      .map(e => e.data)
 
-  nodes_flattens.forEach(flattens => {
-    flattens.forEach(e => blocks.push(e.data))
-  })
+  // Add dummy children-uids
+  const blocks_: Block[] = blocks.map(e => ({ ...e, childrenUids: [] }))
 
-  return blocks
+  return blocks_
 }

@@ -17,13 +17,7 @@ import { TokenHelper } from '../../../../../share/token'
 // import { wrapToInlines } from './with-inline'
 // import { isLc } from './with-list'
 
-type Search = {
-  target: 'topic' | 'ticker' | 'author' | 'discuss'
-  term: string // search term without trigger
-  range: Range // include trigger & closer, eg '[[search term]]'
-}
-
-const searchTargets = ['author', 'discuss', 'ticker', 'topic']
+const searchTargets = new Set(['author', 'discuss', 'ticker', 'topic'])
 
 const SUGGESTS = {
   '@': ['@作者', '@me'],
@@ -31,15 +25,15 @@ const SUGGESTS = {
 
 const reTicker = /\$[\w-=]+/ // allow lower case to be searchable
 
-const grammar: Grammar = {
-  discuss: {
-    pattern: /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+#(?=\s|$)/u,
-  },
-  topic: { pattern: reTopic },
-  ticker: { pattern: reTicker },
-  filtertag: { pattern: reFiltertag },
-  author: { pattern: reAuthor },
-}
+// const grammar: Grammar = {
+//   discuss: {
+//     pattern: /(?<=\s|^)#[\d\s\p{Letter}\p{Terminal_Punctuation}-]+#(?=\s|$)/u,
+//   },
+//   topic: { pattern: re },
+//   ticker: { pattern: reTicker },
+//   filtertag: { pattern: reFiltertag },
+//   author: { pattern: reAuthor },
+// }
 
 // const decorateGrammar: Grammar = {
 //   // order matters, mirror -> ticker
@@ -218,59 +212,67 @@ const SearchPanel = ({
   )
 }
 
-const matchSearch = (editor: Editor): Search | null => {
+type Matcher = {
+  type: 'topic' | 'ticker' | 'author' | 'discuss'
+  // term: string // Math inline string
+  range: Range // include trigger & closer, eg '[[search term]]'
+}
+
+function matchInlineItem(editor: Editor): Matcher | null {
   const { selection } = editor
 
   if (selection && Range.isCollapsed(selection)) {
-    const [cursor] = Range.edges(selection)
-    const text = Editor.string(editor, cursor.path)
-    const tokens = prismTokenize(text, grammar)
+    const [cursor] = Range.edges(selection),
+      { offset } = cursor,
+      str = Editor.string(editor, cursor.path),
+      tokens = prismTokenize(str, grammar)
 
-    let token // the token which cursor currently sitting in
-    let tokenStart = 0
+    // The token which cursor currently sitting in
+    let tokenCursorAt
+
+    // Loop tokens to calculate the offset of each token's start and end offset in the string
+    let i_tokenStart = 0
     for (const e of tokens) {
-      const tokenEnd = tokenStart + e.length
-      if (tokenStart < cursor.offset && cursor.offset <= tokenEnd) {
-        token = e
+      const i_tokenEnd = i_tokenStart + e.length
+      if (i_tokenStart < offset && offset <= i_tokenEnd) {
+        tokenCursorAt = e
         break
       }
-      tokenStart = tokenEnd
+      i_tokenStart = i_tokenEnd
     }
 
     if (
-      token &&
-      typeof token !== 'string' &&
-      searchTargets.includes(token.type)
+      tokenCursorAt &&
+      typeof tokenCursorAt !== 'string' &&
+      searchTargets.has(tokenCursorAt.type)
     ) {
-      const tokenStartPoint: BasePoint = {
-        path: cursor.path,
-        offset: tokenStart,
-      }
-      const tokenEndPoint: BasePoint = {
-        path: cursor.path,
-        offset: tokenStart + token.length,
-      }
-      const tokenRange = Editor.range(editor, tokenStartPoint, tokenEndPoint)
-      const tokenStr = TokenHelper.toString(token.content)
-      const tokenStartToCursorStr = tokenStr.substring(
-        0,
-        cursor.offset - tokenStart,
-      )
+      const startPoint: BasePoint = {
+          path: cursor.path,
+          offset: i_tokenStart,
+        },
+        endPoint: BasePoint = {
+          path: cursor.path,
+          offset: i_tokenStart + tokenCursorAt.length,
+        },
+        tokenRange = Editor.range(editor, startPoint, endPoint),
+        tokenStr = TokenHelper.toString(tokenCursorAt.content),
+        tokenStartToCursorStr = tokenStr.substring(0, offset - i_tokenStart)
 
       let search: Search | null = null
-      switch (token.type) {
+
+      switch (tokenCursorAt.type) {
         case 'author':
         case 'discuss':
         case 'ticker':
           search = {
-            target: token.type,
+            target: tokenCursorAt.type,
             term: tokenStartToCursorStr.substring(1), // remove trigger
             range: tokenRange,
           }
           break
         case 'topic':
           search = {
-            target: token.type,
+            target: tokenCursorAt.type,
             term: tokenStartToCursorStr.substring(2),
             range: tokenRange,
           }

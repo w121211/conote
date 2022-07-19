@@ -730,8 +730,6 @@ export async function docGetOrCreate(
   ])
   console.timeEnd('noteService.queryNote')
 
-  console.log(note, draft)
-
   if (draft !== null) {
     return docLoadFromDraft(draft, note)
   } else {
