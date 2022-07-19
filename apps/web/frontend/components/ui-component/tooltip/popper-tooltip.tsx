@@ -2,7 +2,9 @@ import React, { ReactNode, useContext } from 'react'
 import { createPortal } from 'react-dom'
 import { usePopperTooltip } from 'react-popper-tooltip'
 import { TooltipContext } from './tooltip-provider'
-import 'react-popper-tooltip/dist/styles.css'
+// import 'react-popper-tooltip/dist/styles.css'
+import classes from './popper-tooltip.module.css'
+import { detectOverflow } from '@popperjs/core'
 
 /* size */
 const sm = `px-2 py-1 text-xs shadow-md`
@@ -18,14 +20,14 @@ export const PopperTooltip = ({
   label,
   type,
   darkMode,
-  placement = 'top',
+
   size = 'md',
 }: {
   children: ReactNode
   label: ReactNode
   darkMode?: boolean
   type?: 'warning'
-  placement?: 'top'
+
   size?: 'sm' | 'md'
 }) => {
   const tooltipRoot = useContext(TooltipContext)
@@ -36,7 +38,19 @@ export const PopperTooltip = ({
     setTriggerRef,
     visible,
     ...popperProps
-  } = usePopperTooltip({ placement: placement })
+  } =
+    usePopperTooltip()
+    // {},
+    // {
+    //   modifiers: [
+    //     {
+    //       name: 'flip',
+    //       options: {
+    //         boundary: ,
+    //       },
+    //     },
+    //   ],
+    // },
 
   const theme = type === 'warning' ? warning : darkMode ? dark : dark
 
@@ -61,21 +75,19 @@ export const PopperTooltip = ({
           <div
             ref={setTooltipRef}
             {...getTooltipProps({
-              className: `z-50 pointer-events-none whitespace-nowrap 
+              className: `${
+                classes.tooltipContainer
+              } z-50 pointer-events-none whitespace-nowrap 
             border rounded ${theme} ${size === 'sm' ? sm : md} `,
             })}
           >
             <div
               {...getArrowProps({
                 className: ` 
+                ${classes.tooltipArrow}
                 h-4 w-4
                 border-inherit
                 pointer-events-none
-                ${
-                  placement === 'top'
-                    ? 'bottom-0 left-0 -mb-4'
-                    : 'left-0 right-0 -mt-[17px]'
-                }
 
                 before:content-['']
                 before:block
@@ -84,11 +96,7 @@ export const PopperTooltip = ({
                 before:-translate-x-1/2
                 before:border-[7px]
                 before:border-transparent 
-                ${
-                  placement === 'top'
-                    ? ' before:border-t-inherit'
-                    : '  before:border-b-inherit'
-                }
+                
                 after:content-['']
                 after:block
                 after:absolute
@@ -97,19 +105,9 @@ export const PopperTooltip = ({
                 after:-translate-x-1/2
                 after:border-[6px]
                 after:border-transparent
-                ${
-                  placement === 'top'
-                    ? ` ${
-                        type === 'warning'
-                          ? 'after:border-t-inherit'
-                          : 'after:border-t-gray-600'
-                      } `
-                    : `${
-                        type === 'warning'
-                          ? 'after:border-b-inherit'
-                          : 'after:border-b-gray-600'
-                      }`
-                }`,
+                ${type === 'warning' ? classes.warning : ''}
+               
+                `,
               })}
             />
             {label}

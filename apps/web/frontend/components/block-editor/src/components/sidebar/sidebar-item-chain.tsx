@@ -83,7 +83,7 @@ const SidebarItem = ({
     <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-500 ">
       <Link href={href}>
         <a
-          className={`group flex items-center gap-1 pl-4 pr-4 leading-relax ${
+          className={`group flex items-center gap-1 pl-8 pr-4 leading-relax ${
             opening?.main.symbol == symbol
               ? 'bg-gray-200 hover:bg-gray-300/80'
               : 'bg-transparent hover:bg-gray-200'
@@ -116,7 +116,7 @@ const SidebarItemChain = ({
     { symbol, title } = itemFirst
 
   return (
-    <div className="overflow-hidden hover:overflow-y-auto text-sm text-gray-500 ">
+    <div className="text-sm text-gray-500 ">
       <Link href={getDraftPageURL(itemFirst.id, itemFirst.id)}>
         <a
           className={`group flex items-center gap-1 pl-4 pr-4 leading-relax ${
@@ -139,7 +139,6 @@ const SidebarItemChain = ({
         {itemsRest.map(e => (
           <li key={e.id}>
             <span>
-              {'-  '}
               <SidebarItem
                 item={e}
                 href={getDraftPageURL(e.id, itemFirst.id)}

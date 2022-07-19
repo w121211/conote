@@ -121,7 +121,7 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
         flex-shrink-0 
         relative z-[2]
         flex items-center justify-center 
-        w-[1em] h-[1.5em] 
+        w-[1em] h-[1.625em] 
         bg-none 
         border-none 
         p-0 

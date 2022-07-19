@@ -205,7 +205,7 @@ export const BlockEl = ({
         `block-container
         
         ${classes.blockContainer}
-        ${isChild ? 'ml-[1em] [grid-area:body]' : ''}
+        ${isChild ? 'ml-6 [grid-area:body]' : ''}
         ${children.length > 0 && isOpen && 'show-tree-indicator'}
         ${isOpen ? classes.isOpen : classes.isClosed}
         ${isSelected ? classes.isSelected : ''}
@@ -237,8 +237,7 @@ export const BlockEl = ({
           grid-cols-[1em_1em_1fr_auto]
           grid-rows-[0_1fr_0]
           rounded
-          leading-normal
-          my-1
+          leading-relaxed
          '
         //   ref={showPresentUser && setAvatarAnchorEl}
         onMouseEnter={e => {

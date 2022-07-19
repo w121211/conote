@@ -77,7 +77,7 @@ const SidebarEl = forwardRef<
           flex flex-col flex-shrink-0  
           w-72 
           h-full
-          pt-8
+          pt-4
           border-r 
           transition-all 
           duration-300
@@ -135,7 +135,9 @@ const SidebarEl = forwardRef<
       {/* <SidebarSection title="DELETED" items={sidebar.droppedItems} /> */}
 
       <Link href="/draft">
-        <a>New note</a>
+        <a className="block mx-4 mb-4">
+          <button className="btn-primary w-full">New note</button>
+        </a>
       </Link>
 
       <SidebarSection title="EDIT" chains={chains} />

@@ -267,9 +267,9 @@ const SearchAllModal = () => {
                         role="option"
                         aria-selected={selectedIdx === 0}
                       >
-                        <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
+                        <div className="mr-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
                           create symbol
-                        </span>
+                        </div>
                         <span className="text-gray-800 dark:text-gray-200 font-bold">
                           {inputValue}
                         </span>

@@ -100,7 +100,7 @@ export const EditorChainEl = (): JSX.Element | null => {
             (i === 0 && isFocus && isInSameChain) || (i > 0 && isFocus)
 
         return (
-          <div key={e.docUid}>
+          <div key={e.docUid} className="mb-10">
             <ChainDoc docUid={e.docUid} scrollToThis={scrollToThis} />
             <ChainItemInsertButton afterThisDraftId={e.entry.id} />
           </div>

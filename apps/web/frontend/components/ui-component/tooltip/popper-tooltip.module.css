@@ -1,0 +1,75 @@
+.tooltipContainer[data-popper-placement*='bottom'] .tooltipArrow {
+  /* left: 0;
+  margin-top: -0.4rem;
+  top: 0; */
+  @apply left-0 right-0 -mt-[17px];
+}
+
+.tooltipContainer[data-popper-placement*='bottom'] .tooltipArrow::before {
+  /* border-color: transparent transparent var(--tooltipBorder) transparent;
+    border-width: 0 0.5rem 0.4rem 0.5rem;
+    position: absolute;
+    top: -1px; */
+  @apply border-b-inherit;
+}
+
+.tooltipContainer[data-popper-placement*='bottom'] .tooltipArrow::after {
+  @apply border-b-gray-600;
+}
+.tooltipContainer[data-popper-placement*='bottom']
+  .tooltipArrow.warning::after {
+  @apply border-b-inherit;
+}
+
+.tooltipContainer[data-popper-placement*='top'] .tooltipArrow {
+  @apply bottom-0 left-0 -mb-4;
+}
+
+.tooltipContainer[data-popper-placement*='top'] .tooltipArrow::before {
+  /* border-color: var(--tooltipBorder) transparent transparent transparent;
+    border-width: 0.4rem 0.5rem 0 0.5rem;
+    position: absolute;
+    top: 1px; */
+  @apply border-t-inherit;
+}
+
+.tooltipContainer[data-popper-placement*='top'] .tooltipArrow::after {
+  @apply border-t-gray-600;
+}
+.tooltipContainer[data-popper-placement*='top'] .tooltipArrow.warning::after {
+  @apply border-t-inherit;
+}
+
+/* .tooltipContainer[data-popper-placement*='right'] .tooltipArrow {
+  left: 0;
+  margin-left: -0.7rem;
+}
+
+.tooltipContainer[data-popper-placement*='right'] .tooltipArrow::before {
+  border-color: transparent var(--tooltipBorder) transparent transparent;
+  border-width: 0.5rem 0.4rem 0.5rem 0;
+}
+
+.tooltipContainer[data-popper-placement*='right'] .tooltipArrow::after {
+  border-color: transparent var(--tooltipBackground) transparent transparent;
+  border-width: 0.5rem 0.4rem 0.5rem 0;
+  left: 6px;
+  top: 0;
+}
+
+.tooltipContainer[data-popper-placement*='left'] .tooltipArrow {
+  margin-right: -0.7rem;
+  right: 0;
+}
+
+.tooltipContainer[data-popper-placement*='left'] .tooltipArrow::before {
+  border-color: transparent transparent transparent var(--tooltipBorder);
+  border-width: 0.5rem 0 0.5rem 0.4em;
+}
+
+.tooltipContainer[data-popper-placement*='left'] .tooltipArrow::after {
+  border-color: transparent transparent transparent var(--tooltipBackground);
+  border-width: 0.5rem 0 0.5rem 0.4em;
+  left: 3px;
+  top: 0;
+} */
