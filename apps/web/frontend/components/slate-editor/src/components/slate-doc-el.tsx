@@ -1,14 +1,4 @@
-import { useApolloClient } from '@apollo/client'
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
-  CSSProperties,
-  useRef,
-  cloneElement,
-} from 'react'
-// import { cloneDeep } from 'lodash'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import {
   Editor,
   Transforms,
@@ -42,160 +32,67 @@ import { withAutoComplete } from '../with-auto-complete'
 import { Doc } from '../../../block-editor/src/interfaces'
 import { parseGQLBlocks } from '../../../../../share/utils'
 import { blocksToLiList } from '../serializers'
-import { ElementLc, ElementLi, ElementUl } from '../interfaces'
+import type { ElementLc, ElementLi, ElementUl } from '../interfaces'
 import { isLiArray, isUl } from '../utils'
 import { useObservable } from '@ngneat/react-rxjs'
-import {
-  useFloating,
-  FloatingPortal,
-} from '@floating-ui/react-dom-interactions'
-import { nanoid } from 'nanoid'
-import { interval } from 'rxjs'
-import { docSave } from '../events'
+import { docTemplateGenerate, slateDocSave } from '../events'
 import { slateEditorRepo } from '../stores/editor.repository'
-
-const LeafWithPopover = ({
-  attributes,
-  leaf,
-  children,
-  uid,
-}: RenderLeafProps & { uid: string }): JSX.Element => {
-  // const [show, setShow] = useState(false)
-  const { x, y, reference, floating, strategy } = useFloating({
-    placement: 'top',
-  })
-  const [curSelectedElId] = useObservable(slateEditorRepo.curSelectedElId$),
-    // isSelected = curSelectedElId === uid,
-    [show, setShow] = useState(false)
-
-  useEffect(() => {
-    console.log('LeafWithPopover mount')
-    return () => {
-      console.log('LeafWithPopover unmount')
-    }
-  })
-
-  useEffect(() => {
-    // console.log('curSelectedElId', curSelectedElId, isSelected)
-    // Delay 100 ms to avoid the flashing of popover (which is caused by the quick destroy of this element during typing)
-    setTimeout(() => {
-      if (curSelectedElId === uid) {
-        setShow(true)
-      } else {
-        setShow(false)
-      }
-    }, 100)
-  }, [curSelectedElId])
-
-  return (
-    <>
-      <span
-        {...attributes}
-        id={uid}
-        ref={reference}
-        className="text-blue-600"
-        // className={className}
-        data-inline-item={leaf.tokenType}
-      >
-        {children}
-      </span>
-
-      <FloatingPortal>
-        {show && (
-          <div
-            ref={floating}
-            style={{
-              display: 'block',
-              background: 'cyan',
-              position: strategy,
-              top: y ?? 0,
-              left: x ?? 0,
-            }}
-          >
-            <button
-              onClick={e => {
-                console.log('onClick button', uid, curSelectedElId)
-                // e.preventDefault()
-                // e.stopPropagation()
-              }}
-            >
-              Open
-            </button>
-            <span>Tooltip.............</span>
-          </div>
-        )}
-      </FloatingPortal>
-
-      {/* <div
-        ref={floating}
-        style={{
-          display: 'block',
-          background: 'cyan',
-          position: strategy,
-          zIndex: 10,
-          top: y ?? 0,
-          left: x ?? 0,
-        }}
-        onClick={e => {
-          console.log('onClick div')
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-      >
-        <button
-          onClick={e => {
-            console.log('onClick button')
-            e.preventDefault()
-            e.stopPropagation()
-          }}
-        >
-          Open
-        </button>
-        <span>Tooltip.............</span>
-      </div> */}
-    </>
-  )
-}
+import DocPlaceholder from '../../../block-editor/src/components/doc/doc-placeholder'
+import { docValueRepo } from '../stores/doc-value.repository'
+import { editorChainItemSetRendered } from '../../../block-editor/src/events'
+import PopoverLeafDiscuss from './leaf/leaf-discuss'
+import { nanoid } from 'nanoid'
 
 const Leaf = (props: RenderLeafProps): JSX.Element => {
-  const { attributes, leaf, children } = props
-  // const [isPressShift, setIsPressShift] = useState(false)
-  // console.log(isPressShift)
-  // let style: React.CSSProperties = {}
-  let className = ''
+  const { attributes, leaf, children } = props,
+    { blockUid, draftId, inlineItem } = leaf
 
-  switch (leaf.tokenType) {
-    case 'comment': {
+  let className = ''
+  switch (inlineItem.type) {
+    case 'inline-comment': {
       className = 'text-gray-400'
       break
     }
-    // case 'mirror-ticker':
-    // case 'mirror-topic':
-    case 'author':
-    case 'rate':
-    case 'topic':
-    case 'ticker': {
-      // className = 'text-blue-600'
-      // break
-      return <LeafWithPopover {...props} uid={nanoid()} />
-    }
-    case 'discuss-id':
-    case 'mirror-topic-bracket-head':
-    case 'mirror-head':
-    case 'topic-bracket-head':
-    case 'topic-bracket-tail': {
-      className = 'text-gray-400 '
-      break
-    }
-    case 'discuss':
-    case 'discuss-bracket-start':
-    case 'discuss-bracket-end':
-    case 'discuss-new':
-    case 'filtertag':
-    case 'url': {
-      className = 'text-green-600'
-      break
-    }
+    // case 'inline-symbol': {
+    //   const popoverProps: PopoverPanelProps = {
+    //     elId: nanoid(),
+    //     blockUid,
+    //     draftUid,
+    //     inlineItem,
+    //   }
+    //   return (
+    //     <LeafWithPopover
+    //       leafProps={props}
+    //       PopoverPanel={PopoverPanelSymbol}
+    //       popoverPanelProps={popoverProps}
+    //     />
+    //   )
+    // }
+    case 'inline-discuss':
+      return (
+        <PopoverLeafDiscuss
+          leafProps={props}
+          id={nanoid()}
+          blockUid={blockUid}
+          draftId={draftId}
+          inlineItem={inlineItem}
+        />
+      )
+    // case 'discuss-id':
+    // case 'topic-bracket-head':
+    // case 'topic-bracket-tail': {
+    //   className = 'text-gray-400 '
+    //   break
+    // }
+    // case 'discuss':
+    // case 'discuss-bracket-start':
+    // case 'discuss-bracket-end':
+    // case 'discuss-new':
+    // case 'filtertag':
+    // case 'url': {
+    //   className = 'text-green-600'
+    //   break
+    // }
     default: {
       className = 'text-gray-600'
     }
@@ -205,7 +102,7 @@ const Leaf = (props: RenderLeafProps): JSX.Element => {
     <span
       {...attributes}
       className={className}
-      data-inline-item={leaf.tokenType}
+      data-inline-item={inlineItem.type}
       onSelect={() => {
         console.log('onSelect leaf')
       }}
@@ -380,7 +277,7 @@ const Li = ({
                 setUlFolded(ul[0].folded ? undefined : true)
               }
             } catch (err) {
-              // 不用處理
+              // Do nothing
             }
           }}
         >
@@ -389,7 +286,7 @@ const Li = ({
           </span>
         </span> */}
         <span className={`relative flex-grow px-1`}>
-          {/* <span
+          <span
             className={
               `material-icons text-xs scale-[.65] text-gray-600 
             before:content-['']  before:w-5 before:h-5 before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:absolute before:rounded-full before:-z-10 `
@@ -402,7 +299,7 @@ const Li = ({
             }
           >
             fiber_manual_record
-          </span> */}
+          </span>
           {/* {lc.bulletCopy?.id && (
             <BulletPanel bulletId={lc.bulletCopy.id} visible={showPanel} onClose={() => setShowPanel(false)} />
           )} */}
@@ -472,11 +369,13 @@ const CustomElement = ({
 }
 
 const EditorEl = ({
+  docUid,
+  draftId,
   value,
-  setValue,
 }: {
+  docUid: string
+  draftId: string
   value: ElementLi[]
-  setValue: React.Dispatch<React.SetStateAction<ElementLi[]>>
 }) => {
   const editor = useMemo(
       () => withList(withAutoComplete(withHistory(withReact(createEditor())))),
@@ -491,9 +390,11 @@ const EditorEl = ({
       [],
     ),
     decorate_ = useCallback(
-      ([node, path]: NodeEntry) => decorate([node, path]),
+      ([node, path]: NodeEntry) => decorate([node, path], editor, draftId),
       [],
     )
+
+  // const [value, setValue] = useState<ElementLi[]>(initialValue)
 
   // useEffect(() => {
   //   // When doc changed, reset editor value,  https://github.com/ianstormtaylor/slate/issues/713
@@ -527,16 +428,17 @@ const EditorEl = ({
         value={value}
         onChange={v => {
           if (isLiArray(v)) {
-            setValue(v)
+            // setValue(v)
+            docValueRepo.setDocValue(docUid, v)
           } else {
-            throw 'value needs to be li array'
+            throw new Error('Value needs to be li array')
           }
         }}
       >
         <Editable
           autoCapitalize="false"
           autoCorrect="false"
-          autoFocus={true}
+          // autoFocus={true}
           decorate={decorate_}
           // readOnly={readOnly}
           renderElement={renderElement}
@@ -554,7 +456,7 @@ const EditorEl = ({
               ?.anchorNode?.parentElement?.closest('[data-inline-item]')
 
             if (el) {
-              // console.log('onSelect', el)
+              console.log('onSelect', el)
               slateEditorRepo.setCurSelectedElId(el.id)
             } else {
               slateEditorRepo.setCurSelectedElId(null)
@@ -566,31 +468,53 @@ const EditorEl = ({
   )
 }
 
-const SlateEditorEl = ({ doc }: { doc: Doc }): JSX.Element => {
-  const { blocks: gqlBlocks } = doc.noteDraftCopy.contentBody,
-    { blocks } = parseGQLBlocks(gqlBlocks),
-    initialValue = blocksToLiList(blocks),
-    [value, setValue] = useState<ElementLi[]>(initialValue)
-
-  const interval$ = interval(30000)
+const SlateDocEl = (props: { doc: Doc }) => {
+  const { doc } = props,
+    [docValue] = useObservable(docValueRepo.getDocValue$(doc.uid))
 
   useEffect(() => {
-    const sub = interval$.subscribe(async () => {
-      // await docSave(doc.uid)
-      await docSave(doc.uid, value)
-    })
+    const { blocks: gqlBlocks } = doc.noteDraftCopy.contentBody,
+      { blocks } = parseGQLBlocks(gqlBlocks),
+      value = blocksToLiList(blocks)
+    docValueRepo.setDocValue(doc.uid, value)
+    // const interval$ = interval(30000)
+    // const sub = interval$.subscribe(() => docSave(doc.uid))
 
     return () => {
       // console.log('DocEl unmount')
-      sub.unsubscribe()
-      docSave(doc.uid, value).catch(err => {
-        // In case user delete the doc and cause doc-el unmount
-        console.debug(err)
-      })
+      // sub.unsubscribe()
+      slateDocSave(doc.uid).catch(err => console.debug(err))
     }
   }, [])
 
-  return <EditorEl value={value} setValue={setValue} />
+  useEffect(() => {
+    if (docValue !== undefined) {
+      editorChainItemSetRendered(doc.uid)
+    }
+  }, [docValue])
+
+  if (docValue === undefined) return null
+
+  return (
+    <div>
+      {docValue.value.length === 0 ? (
+        <DocPlaceholder
+          doc={doc}
+          templateOnClick={() => {
+            const lis = docTemplateGenerate(doc)
+            docValueRepo.setDocValue(doc.uid, lis)
+          }}
+        />
+      ) : (
+        <EditorEl
+          docUid={doc.uid}
+          draftId={doc.noteDraftCopy.id}
+          value={docValue.value}
+        />
+      )}
+      {/* <button onClick={() => slateDocSave(doc.uid)}>Save</button> */}
+    </div>
+  )
 }
 
-export default SlateEditorEl
+export default SlateDocEl

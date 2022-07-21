@@ -46,12 +46,12 @@ export function insertNextUl(
 
 function removePrevUl(editor: Editor, path: Path) {
   if (!Path.hasPrevious(Path.parent(path))) {
-    console.warn('第一個<li root>無法刪除')
+    // First root li cannot delete
     return
   }
   const next = Editor.next(editor, { at: Path.parent(path) })
   if (next === undefined) {
-    console.warn('最後一個<li root>無法刪除')
+    // Last root li cannot delete
     return
   }
   Transforms.removeNodes(editor, { at: Path.parent(path) })
@@ -129,7 +129,7 @@ export function indent(editor: Editor, entry: NodeEntry<ElementLi>): void {
   const [, path] = entry
   const prev = Editor.previous<ElementLi>(editor, { at: path })
   if (prev === undefined) {
-    console.warn('第一個<li>無法indent')
+    // First li cannot indent, do nothing
     return
   }
 
@@ -534,7 +534,7 @@ export const withList = (editor: Editor): Editor => {
   }
 
   editor.insertData = data => {
-    // @see https://github.com/ianstormtaylor/slate/blob/c1433f56cfe13feb826264989bb4f68a0eefab62/packages/slate-react/src/plugin/with-react.ts
+    // See https://github.com/ianstormtaylor/slate/blob/c1433f56cfe13feb826264989bb4f68a0eefab62/packages/slate-react/src/plugin/with-react.ts
     const text = data.getData('text/plain')
     if (text) {
       const lines = text.trim().split(/\r\n|\r|\n/)

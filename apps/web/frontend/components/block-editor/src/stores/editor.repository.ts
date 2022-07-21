@@ -177,6 +177,17 @@ class EditorRepository {
       setProp('tab', v => ({ ...tab, prevChainItem: v.curChainItem })),
     )
   }
+
+  setTabChainItemRendered(docUid: string) {
+    editorStore.update(
+      setProp('tab', v => {
+        const curChain = v.curChain.map(e =>
+          e.docUid === docUid ? { ...e, rendered: true } : e,
+        )
+        return { ...v, curChain }
+      }),
+    )
+  }
 }
 
 export const editorRepo = new EditorRepository()

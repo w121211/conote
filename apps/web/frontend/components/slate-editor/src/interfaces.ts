@@ -1,10 +1,11 @@
 import type { TreeNodeChangeType } from '@conote/docdiff'
+import type { BaseRange } from 'slate'
 import type {
   Block,
-  Doc,
   InlineComment,
   InlineDiscuss,
   InlineFiltertag,
+  InlineItem,
   InlinePoll,
   InlineRate,
   InlineSymbol,
@@ -53,15 +54,6 @@ export type ElementUl = {
   folded?: true
 }
 
-//
-//
-//
-//
-//
-//
-//
-//
-
 export type InlineElementDiscuss = InlineDiscuss & {
   children: TextCustom[]
   // children: Descendant[]
@@ -101,14 +93,11 @@ export type InlineElementCustom =
   | InlineElementSymbol
   | InlineElementComment
 
-//
-//
-//
-//
-//
-//
-//
-//
+export type RangeCustom = BaseRange & {
+  blockUid: string
+  draftId: string
+  inlineItem: InlineItem
+}
 
 export type TextCustom = {
   bold?: true
@@ -116,11 +105,10 @@ export type TextCustom = {
   code?: true
   text: string
 
-  // Stream type
-  type?: string
-
-  tokenType?: string
-  // placeholder?: boolean
+  // Received from 'RangeCustom' during decorate
+  blockUid: string
+  draftId: string
+  inlineItem: InlineItem
 }
 
 export type TextEmpty = {
@@ -128,7 +116,7 @@ export type TextEmpty = {
 }
 
 //
-// Stores
+// Component props
 //
 //
 //
@@ -136,6 +124,11 @@ export type TextEmpty = {
 //
 //
 
-export type DocSlate = Doc & {
-  value: ElementLi[]
+export type PopoverPanelProps = {
+  // Element id for the popover span, used for query element
+  elId: string
+
+  blockUid: string
+  draftUid: string
+  inlineItem: InlineItem
 }

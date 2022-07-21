@@ -3,7 +3,7 @@ import { parse } from '../src/parse-render'
 import { mockBlockStr } from './__mocks__/mock-block-str'
 
 function parse_(s: string): Omit<InlineItem, 'token'>[] {
-  return parse(s).map(e => {
+  return parse(s).inlineItems.map(e => {
     delete (e as any).token
     return e
   })

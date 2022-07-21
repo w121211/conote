@@ -8,13 +8,8 @@ import React, {
   CSSProperties,
   useRef,
 } from 'react'
-import { useObservable } from 'rxjs-hooks'
 import { RenderElementProps } from 'slate-react'
-import Discuss from '../discuss/_modal-page/modal-page'
-import { InlineFiltertagElement } from '../editor/slate-custom-types'
-import Modal from '../modal/modal'
-import { Doc } from '../workspace/doc'
-import { workspace } from '../workspace/workspace'
+import { InlineElementFiltertag } from '../../interfaces'
 
 // function usePrevious(value: any) {
 //   const ref = useRef()
@@ -28,7 +23,7 @@ const InlineFiltertag = ({
   attributes,
   children,
   element,
-}: RenderElementProps & { element: InlineFiltertagElement }): JSX.Element => {
+}: RenderElementProps & { element: InlineElementFiltertag }): JSX.Element => {
   const [showModal, setShowModal] = useState(false)
   const router = useRouter()
   // const prevRouter = usePrevious(router.query)

@@ -142,7 +142,6 @@ function liToTreeNodeBlock(
 }
 
 export function blocksToLiList(blocks: Block[]): ElementLi[] {
-  console.debug('blocksToLiList')
   const list = treeUtil.toTreeNodeBodyList(blocks)
   const root = treeUtil.buildFromList(list),
     liList = root.children.map(blockToLi)

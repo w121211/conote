@@ -4,8 +4,13 @@ import type { Block, Doc } from '../../block-editor/src/interfaces'
 import { docUpdatePropsOp } from '../../block-editor/src/op/ops'
 import { noteDraftService } from '../../block-editor/src/services/note-draft.service'
 import { docRepo } from '../../block-editor/src/stores/doc.repository'
+import {
+  BlockInput,
+  writeBlocks,
+} from '../../block-editor/src/utils/block-writer'
 import type { ElementLi } from './interfaces'
-import { elementLisToBlocks } from './serializers'
+import { blocksToLiList, elementLisToBlocks } from './serializers'
+import { docValueRepo } from './stores/doc-value.repository'
 
 function toGQLBlocks(blocks: Block[]) {
   return blocks.map(e => {
@@ -55,21 +60,21 @@ function isValueChanged(docUid: string, value: ElementLi[]) {
     changes = differenceBlocks(finalBlocks, startBlocks),
     changed = changes.length > 0
 
-  console.log(changes)
-
   return { changed, changes, doc, noteDraftCopy, input }
 }
 
-export async function docSave(
+export async function slateDocSave(
   docUid: string,
-  value: ElementLi[],
+  // value: ElementLi[],
   newSymbol?: string,
   opts = {
     force: false,
   },
 ) {
-  // console.log('docSave')
+  const { value } = docValueRepo.getDocValue(docUid)
+
   const { changed, input, noteDraftCopy } = isValueChanged(docUid, value)
+  // console.debug('docSave', changed, value)
 
   if (opts.force || changed) {
     const draft = await noteDraftService.updateDraft(
@@ -80,5 +85,33 @@ export async function docSave(
       op = docUpdatePropsOp(docUid, { noteDraftCopy: draft })
 
     docRepo.update(op)
+    // console.debug('docRepo.update')
   }
+}
+
+function genTemplateGeneral(): BlockInput {
+  const general: BlockInput = [
+    'DUMMY_ROOT',
+    [
+      [
+        'Basic',
+        [
+          ['What is ...?', ['']],
+          // ['Explain ... in one picture?', ['']],
+          ['Why and why not ...?', ['']],
+          ['How ...?', ['']],
+          // ['How this research solve?', ['']],
+          ['What difference compared to the others?', ['']],
+        ],
+      ],
+      ['Discuss', ['']],
+    ],
+  ]
+  return general
+}
+
+export function docTemplateGenerate(doc: Doc) {
+  const docBlock = docRepo.getDocBlock(doc),
+    blocks = writeBlocks(genTemplateGeneral(), { docBlock })
+  return blocksToLiList(blocks)
 }

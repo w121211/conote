@@ -25,7 +25,6 @@ const BlockViewerContent = ({
       <ParseRenderEl
         className={`
           [grid-area:main]
-         
           text-inherit
           font-[inherit]
           cursor-text 

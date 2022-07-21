@@ -27,12 +27,12 @@ export function getDraftPageURL(
   draftId: string,
   chainFirstDraftId?: string,
 ): UrlObject {
+  // if (chainFirstDraftId && draftId !== chainFirstDraftId) {
   if (chainFirstDraftId) {
     return {
       pathname: '/draft/[draftid]',
-      query: { draftid: draftId },
-      // query: { draftid: chainFirstDraftId },
-      // hash: draftId,
+      query: { draftid: chainFirstDraftId },
+      hash: draftId,
     }
   }
   return { pathname: '/draft/[draftid]', query: { draftid: draftId } }

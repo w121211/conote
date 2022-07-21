@@ -11,7 +11,13 @@ import { Doc } from '../../interfaces'
 //   return <span className="text-[#AAA]/50">{children}</span>
 // }
 
-export const DocPlaceholder = ({ doc }: { doc: Doc }) => {
+export const DocPlaceholder = ({
+  doc,
+  templateOnClick,
+}: {
+  doc: Doc
+  templateOnClick?: (title: string) => void
+}) => {
   return (
     <div className="inline-flex flex-col ml-9 ">
       {/* <h5 className="text-gray-700 dark:text-gray-200">Similar notes</h5>
@@ -39,7 +45,9 @@ export const DocPlaceholder = ({ doc }: { doc: Doc }) => {
             <button
               key={i}
               className="flex items-center gap-1 mt-2  text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-              onClick={() => docTemplateSet(doc)}
+              onClick={() =>
+                templateOnClick ? templateOnClick(title) : docTemplateSet(doc)
+              }
             >
               <span className="material-icons-outlined text-xl leading-none text-gray-400">
                 description

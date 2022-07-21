@@ -35,6 +35,7 @@ import { buildChains, editorRepo } from './stores/editor.repository'
 import { rfdbRepo } from './stores/rfdb.repository'
 import { genBlockUid } from './utils'
 import { BlockInput, writeBlocks } from './utils/block-writer'
+import { slateDocSave } from '../../slate-editor/src/events'
 
 // const noteService = getNoteService(),
 //   noteDraftService = getNoteDraftService(),
@@ -852,7 +853,7 @@ function genTemplateGeneral(): BlockInput {
 /**
  * Set doc template
  */
-export async function docTemplateSet(doc: Doc) {
+export function docTemplateSet(doc: Doc) {
   const docBlock = docRepo.getDocBlock(doc),
     blocks = writeBlocks(genTemplateGeneral(), { docBlock }),
     [, ...children] = blocks,
@@ -1188,10 +1189,32 @@ export async function editorChainItemInsert(
 }
 
 /**
- *
+ * - If given draftId is in current chain, no call
  */
 export async function editorChainItemOpen(draftId: string) {
+  const { tab } = editorRepo.getValue(),
+    itemInCurChain = tab.curChain.find(e => e.entry.id === draftId)
+
+  if (itemInCurChain) {
+    editorRepo.setTab({
+      ...tab,
+      curChainItem: {
+        docUid: itemInCurChain.docUid,
+        draftId,
+      },
+      loading: false,
+    })
+
+    return { chain: tab.curChain }
+  }
+
   // console.log('editorOpenSymbolInMain', symbol)
+  editorRepo.setTab({
+    curChain: [],
+    curChainItem: null,
+    loading: true,
+  })
+
   const chains = await editorChainsRefresh(),
     entries = editorRepo.getChainEntries(chains, draftId),
     docs = await Promise.all(entries.map(e => docGetOrCreate(e.symbol))),
@@ -1200,6 +1223,7 @@ export async function editorChainItemOpen(draftId: string) {
         return {
           entry: a,
           docUid: b.uid,
+          rendered: false,
         }
       }
       throw new Error()
@@ -1230,7 +1254,8 @@ export async function editorChainCommit(draftId: string) {
   if (entries[0].id !== draftId)
     throw new Error('Only allow to commit the chain from the first chain item')
 
-  if (tab.curChainItem) await docSave(tab.curChainItem.docUid)
+  // if (tab.curChainItem) await docSave(tab.curChainItem.docUid)
+  await Promise.all(tab.curChain.map(e => slateDocSave(e.docUid)))
 
   const commit = await commitService.createCommit(entries.map(e => e.id))
   await commitOnFinish(commit.noteDocs)
@@ -1264,6 +1289,10 @@ export async function editorChainItemRemove(entry: NoteDraftEntryFragment) {
     ...tab,
     curChain: tab.curChain.filter(e => e.entry.id !== entry.id),
   })
+}
+
+export async function editorChainItemSetRendered(docUid: string) {
+  editorRepo.setTabChainItemRendered(docUid)
 }
 
 //

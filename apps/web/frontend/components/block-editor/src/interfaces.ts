@@ -263,6 +263,8 @@ export type EditorProps = {
     curChain: {
       entry: NoteDraftEntryFragment
       docUid: string
+      // The doc component is rendered & visible or not (is used to check if is ready for scrollToView)
+      rendered: boolean
     }[]
     curChainItem: {
       draftId: string

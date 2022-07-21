@@ -12,7 +12,7 @@ import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import { useMeContext } from '../auth/use-me-context'
 import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-padding'
 import { StatusDisplay } from '../ui-component/status-display'
-import { preventSave } from '../block-editor/src/listeners'
+import { preventExitWithoutSave } from '../block-editor/src/listeners'
 import { getLoginPageURL } from '../../utils'
 
 /**
@@ -40,8 +40,9 @@ const NoteEditEl = ({
   }, [me, symbol])
 
   useEffect(() => {
-    window.addEventListener('beforeunload', preventSave)
-    return () => window.removeEventListener('beforeunload', preventSave)
+    window.addEventListener('beforeunload', preventExitWithoutSave)
+    return () =>
+      window.removeEventListener('beforeunload', preventExitWithoutSave)
   }, [])
 
   if (loading) {

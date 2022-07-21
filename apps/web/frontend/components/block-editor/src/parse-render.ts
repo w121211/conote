@@ -1,5 +1,5 @@
 import type { RateChoice } from 'graphql-let/__generated__/__types__'
-import { Grammar, Token, tokenize, TokenStream } from 'prismjs'
+import { GrammarValue, Token, tokenize, TokenStream } from 'prismjs'
 import React from 'react'
 import type { InlineItem } from './interfaces'
 
@@ -122,7 +122,7 @@ const reURL =
 
 const reComment = /\/\/ .+$/m
 
-export const grammar: Grammar = {
+export const grammar: Record<string, GrammarValue> = {
   comment: { pattern: reComment },
 
   poll: { pattern: rePoll },

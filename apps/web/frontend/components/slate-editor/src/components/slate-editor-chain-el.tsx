@@ -1,63 +1,76 @@
-import React, { useCallback } from 'react'
+import { every } from 'lodash'
+import React, { useEffect } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import { isNil } from 'lodash'
 import Link from 'next/link'
 import { editorRepo } from '../../../block-editor/src/stores/editor.repository'
 import { docRepo } from '../../../block-editor/src/stores/doc.repository'
 import { getNotePageURL } from '../../../../utils'
 import ChainItemInsertButton from '../../../block-editor/src/components/editor/chain-item-insert-button'
 import DocHead from '../../../block-editor/src/components/doc/doc-head'
-import SlateEditorEl from './slate-editor-el'
+import SlateDocEl from './slate-doc-el'
+import { editorChainItemOpen } from '../../../block-editor/src/events'
 
-const ChainDoc = ({
-  docUid,
-  scrollToThis,
-}: {
-  docUid: string
-  scrollToThis?: boolean
-}) => {
+const ChainDoc = (props: { docUid: string; draftId: string }) => {
+  const { docUid, draftId } = props
+
   const [doc] = useObservable(docRepo.getDoc$(docUid), {
     initialValue: null,
   })
 
-  // Use useCallback instead of useRef, https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node
-  const ref = useCallback(
-    (node: HTMLElement) => {
-      if (node !== null) {
-        if (scrollToThis) {
-          node.scrollIntoView()
-        }
-      }
-    },
-    [scrollToThis],
-  )
-
-  if (isNil(doc)) {
-    return <div>Loading</div>
-  }
   return (
-    <div>
+    <div id={draftId}>
       {doc && (
-        <div>
+        <div id={docUid}>
           <button>View</button>
           {doc.noteCopy && (
             <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
               <a>View current head note</a>
             </Link>
           )}
+          <DocHead doc={doc} />
+          <SlateDocEl doc={doc} />
+          <ChainItemInsertButton afterThisDraftId={doc.noteDraftCopy.id} />
         </div>
       )}
-      {/* <DocEl doc={doc} /> */}
-      {/* <DocEl doc={doc} ref={ref} /> */}
-      <DocHead doc={doc} />
-      <SlateEditorEl doc={doc} />
     </div>
   )
 }
 
-const SlateEditorChainEl = (): JSX.Element | null => {
+const SlateEditorChainEl = ({
+  draftId,
+  hashDraftId,
+}: {
+  draftId: string
+  hashDraftId: string | null
+}): JSX.Element | null => {
   const [tab] = useObservable(editorRepo.tab$)
-  // [alert] = useObservable(editorRepo.alter$),
+
+  useEffect(() => {
+    const nextDraftId = hashDraftId ?? draftId
+    editorChainItemOpen(nextDraftId)
+  }, [draftId, hashDraftId])
+
+  // useEffect(() => {
+  //   const { curChainItem, curChain, prevChainItem } = tab
+  //   if (curChainItem && curChain.length > 0) {
+  //     const isItemInCurChain =
+  //         curChain.find(e => e.entry.id === prevChainItem?.draftId) !==
+  //         undefined,
+  //       isEveryDocRendered = every(curChain, 'rendered'),
+  //       isFirstItem = curChainItem.draftId === curChain[0].entry.id
+  //     if (isEveryDocRendered && !isItemInCurChain && !isFirstItem) {
+  //       const el = document.getElementById(curChainItem.draftId)
+  //       if (el) {
+  //         el.scrollIntoView()
+  //       }
+  //     } else if (isFirstItem && isItemInCurChain) {
+  //       const el = document.getElementById('layout-children-container')
+  //       if (el) {
+  //         el.scrollTo({ top: 0 })
+  //       }
+  //     }
+  //   }
+  // }, [tab])
 
   if (tab.curChain.length === 0) {
     return null
@@ -67,32 +80,20 @@ const SlateEditorChainEl = (): JSX.Element | null => {
       {/* {alert && <div>{alert.message}</div>} */}
       {tab.curChain.map((e, i) => {
         const isFocus = e.entry.id === tab.curChainItem?.draftId,
-          isInSameChain =
+          isInCurChain =
             isFocus &&
             tab.curChain.find(
               a => a.entry.id === tab.prevChainItem?.draftId,
             ) !== undefined,
           scrollToThis =
-            (i === 0 && isFocus && isInSameChain) || (i > 0 && isFocus)
+            (i === 0 && isFocus && isInCurChain) || (i > 0 && isFocus)
 
         return (
           <div key={e.docUid}>
-            <ChainDoc docUid={e.docUid} scrollToThis={scrollToThis} />
-            <ChainItemInsertButton afterThisDraftId={e.entry.id} />
+            <ChainDoc docUid={e.docUid} draftId={e.entry.id} />
           </div>
         )
       })}
-
-      {/* <button
-        onClick={() => {
-          const el = document.getElementById('layout-children-container')
-          if (el) {
-            el.scrollTo({ top: 0 })
-          }
-        }}
-      >
-        Top
-      </button> */}
     </div>
   )
 }

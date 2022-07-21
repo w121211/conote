@@ -202,7 +202,7 @@ export function parseBlockValues(blocks: Omit<Block, 'childrenUids'>[]) {
 
   blocks.forEach(e => {
     const { uid, str } = e,
-      inlineItems = parse(str)
+      { inlineItems } = parse(str)
 
     inlineItems
       .filter((e): e is InlineDiscuss => e.type === 'inline-discuss')
