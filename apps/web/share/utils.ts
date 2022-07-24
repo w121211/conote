@@ -9,8 +9,8 @@ import type { BlockFragment } from '../apollo/query.graphql'
 import type {
   Block,
   InlineDiscuss,
-} from '../frontend/components/block-editor/src/interfaces'
-import { parse } from '../frontend/components/block-editor/src/parse-render'
+} from '../frontend/components/editor-textarea/src/interfaces'
+import { parse } from '../frontend/components/editor-textarea/src/parse-render'
 import type { NoteDocContentBody, NoteDocContentHead } from '../lib/interfaces'
 
 //

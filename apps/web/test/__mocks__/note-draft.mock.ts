@@ -1,9 +1,9 @@
 import type { Branch, NoteDoc, NoteDraft, Sym } from '@prisma/client'
-import { writeBlocks } from '../../frontend/components/block-editor/src/utils/block-writer'
+import { writeBlocks } from '../../frontend/components/editor-textarea/src/utils/block-writer'
 import {
   mockBlockInputs,
   mockDocBlock_contentBlocks,
-} from '../../frontend/components/block-editor/test/__mocks__/mock-block'
+} from '../../frontend/components/editor-textarea/test/__mocks__/mock-block'
 import type { NoteDocParsed, NoteDraftParsed } from '../../lib/interfaces'
 import { differenceBlocks } from '../../share/utils'
 import { mockBranches } from './branch.mock'

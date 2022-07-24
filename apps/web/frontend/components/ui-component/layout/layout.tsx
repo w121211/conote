@@ -1,7 +1,7 @@
 import { setProp } from '@ngneat/elf'
 import { useObservable } from '@ngneat/react-rxjs'
 import React, { useEffect, useRef, useState } from 'react'
-import SidebarEl from '../../block-editor/src/components/sidebar/sidebar-el'
+import SidebarEl from '../../editor-textarea/src/components/sidebar/sidebar-el'
 import Navbar from '../../navbar'
 import { siderRepo } from '../../../stores/sider.repository'
 

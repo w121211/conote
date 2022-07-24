@@ -7,7 +7,7 @@ import { mockNoteDrafts } from '../../__mocks__/note-draft.mock'
 import { mockSyms } from '../../__mocks__/sym.mock'
 import { mockNoteDocs } from '../../__mocks__/note-doc.mock'
 import { mockDiscusses } from '../../__mocks__/discuss.mock'
-import { mockBlocks } from '../../../frontend/components/block-editor/test/__mocks__/mock-block'
+import { mockBlocks } from '../../../frontend/components/editor-textarea/test/__mocks__/mock-block'
 import { mockNotes } from '../../__mocks__/note.mock'
 
 beforeAll(async () => {

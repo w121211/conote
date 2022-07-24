@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import React, { useEffect } from 'react'
-import { preventExitWithoutSave } from '../../frontend/components/block-editor/src/listeners'
-import SlateEditorChainEl from '../../frontend/components/slate-editor/src/components/slate-editor-chain-el'
+import { preventExitWithoutSave } from '../../frontend/components/editor-textarea/src/listeners'
+import SlateDocChainEl from '../../frontend/components/editor-slate/src/components/slate-doc-chain-el'
 import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
 
 interface Props {
@@ -38,7 +38,7 @@ const DraftIdPage = ({ draftId }: Props): JSX.Element | null => {
           )}
         </div> */}
         {/* <EditorChainEl /> */}
-        <SlateEditorChainEl
+        <SlateDocChainEl
           draftId={draftId}
           hashDraftId={
             window.location.hash !== '' ? window.location.hash.slice(1) : null

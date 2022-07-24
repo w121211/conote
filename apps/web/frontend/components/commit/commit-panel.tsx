@@ -8,7 +8,7 @@ import {
   useMyNoteDraftEntriesQuery,
 } from '../../../apollo/query.graphql'
 import type { CommitInputErrorItem } from '../../../lib/interfaces'
-import { commitOnFinish } from '../block-editor/src/events'
+import { commitOnFinish } from '../editor-textarea/src/events'
 import Modal from '../modal/modal'
 import { styleSymbol } from '../ui-component/style-fc/style-symbol'
 import { getCommitInputErrorItems } from '../../utils'

@@ -75,6 +75,7 @@ describe('treeUtil', () => {
       childrenUids: [],
       order: 0,
       data: {},
+      extraInfo: { depth: 0 },
     })
     expect(() => {
       treeUtil.validateList(bodies)

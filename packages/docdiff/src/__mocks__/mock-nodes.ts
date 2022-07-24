@@ -21,6 +21,7 @@ export const mockTreeNodes: Required<TreeNodeBody<object>>[] = [
     ],
     order: 0,
     data: {},
+    extraInfo: { depth: -1 },
   },
   {
     uid: 'mock-tree-node-body-1',
@@ -28,6 +29,7 @@ export const mockTreeNodes: Required<TreeNodeBody<object>>[] = [
     childrenUids: [],
     order: 0,
     data: {},
+    extraInfo: { depth: -1 },
   },
   {
     uid: 'mock-tree-node-body-2',
@@ -35,6 +37,7 @@ export const mockTreeNodes: Required<TreeNodeBody<object>>[] = [
     childrenUids: ['mock-tree-node-body-4', 'mock-tree-node-body-5'],
     order: 1,
     data: {},
+    extraInfo: { depth: -1 },
   },
   {
     uid: 'mock-tree-node-body-3',
@@ -42,6 +45,7 @@ export const mockTreeNodes: Required<TreeNodeBody<object>>[] = [
     childrenUids: ['mock-tree-node-body-7'],
     order: 2,
     data: {},
+    extraInfo: { depth: -1 },
   },
   {
     uid: 'mock-tree-node-body-4',
@@ -49,6 +53,7 @@ export const mockTreeNodes: Required<TreeNodeBody<object>>[] = [
     childrenUids: ['mock-tree-node-body-6'],
     order: 0,
     data: {},
+    extraInfo: { depth: -1 },
   },
   {
     uid: 'mock-tree-node-body-5',
@@ -56,6 +61,7 @@ export const mockTreeNodes: Required<TreeNodeBody<object>>[] = [
     childrenUids: [],
     order: 1,
     data: {},
+    extraInfo: { depth: -1 },
   },
   {
     uid: 'mock-tree-node-body-6',
@@ -63,6 +69,7 @@ export const mockTreeNodes: Required<TreeNodeBody<object>>[] = [
     childrenUids: [],
     order: 0,
     data: {},
+    extraInfo: { depth: -1 },
   },
   {
     uid: 'mock-tree-node-body-7',
@@ -70,5 +77,6 @@ export const mockTreeNodes: Required<TreeNodeBody<object>>[] = [
     childrenUids: [],
     order: 0,
     data: {},
+    extraInfo: { depth: -1 },
   },
 ]

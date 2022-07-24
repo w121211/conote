@@ -7,7 +7,7 @@ import {
 } from '../../../apollo/query.graphql'
 import { parseGQLBlocks } from '../../../share/utils'
 import { getDraftPageURLBySymbol } from '../../utils'
-import BlockViewer from '../block-editor/src/components/block/block-viewer'
+import BlockViewer from '../editor-textarea/src/components/block/block-viewer'
 import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-padding'
 import NoteAlerts from './note-alerts'
 import NoteHead from './note-head'

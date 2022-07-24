@@ -1,5 +1,5 @@
 import { TreeNode } from '@conote/docdiff'
-import { EditorSerializer } from '../../../frontend/components/slate-editor/serializer'
+import { EditorSerializer } from '../../../frontend/components/editor-slate/serializer'
 
 const bt = (
   id: number,

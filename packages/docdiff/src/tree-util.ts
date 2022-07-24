@@ -231,32 +231,58 @@ class TreeUtil {
   }
 
   /**
+   * Traverse a tree by 1. depth 2. order
    *
    */
-  toPreOrderList<T>(root: TreeNode<T>): Required<TreeNodeBody<T>>[] {
+  toDepthFirstList<T>(root: TreeNode<T>): Required<TreeNodeBody<T>>[] {
     const traversed: Required<TreeNodeBody<T>>[] = [],
-      parents = [root]
+      parents: { node: TreeNode<T>; depth: number }[] = [
+        { node: root, depth: 0 },
+      ]
 
     while (parents.length > 0) {
-      const p = parents.shift()
-      if (p === undefined)
-        throw new Error('[toPreOrderList] p === undefined, unexpected error')
+      // const parent = parents.shift()
+      const parent = parents.pop()
+      if (parent === undefined)
+        throw new Error(
+          '[toPreOrderList] parent === undefined, unexpected error',
+        )
 
-      const { children, ...rest } = p
-      children.forEach((v, i) => {
-        parents.push({ ...v, parentUid: p.uid, order: i })
-      })
+      const { node: p, depth } = parent,
+        { children, ...rest } = p
+
+      for (let i = children.length - 1; i >= 0; i--) {
+        const child = children[i]
+        parents.push({
+          node: { ...child, parentUid: p.uid, order: i },
+          depth: depth + 1,
+        })
+      }
       traversed.push({
         ...rest,
         childrenUids: children.map(e => e.uid),
+        extraInfo: { depth },
       })
+
+      // children.forEach((v, i) => {
+      //   parents.push({
+      //     node: { ...v, parentUid: p.uid, order: i },
+      //     depth: depth + 1,
+      //   })
+      // })
+      // traversed.push({
+      //   ...rest,
+      //   childrenUids: children.map(e => e.uid),
+      //   extraInfo: { depth },
+      // })
     }
     return traversed
   }
 
   /**
    * Reconstruct the list to get children-uids, involve validate the list before return
-   * @returns node-body list [root, ...children]
+   *
+   * @returns node-body pre-order-list [root, ...children]
    */
   toTreeNodeBodyList<
     T extends {
@@ -271,7 +297,7 @@ class TreeUtil {
         return { uid, parentUid, order, data: e }
       }),
       root = this.buildFromList(nodes),
-      nodes_ = this.toPreOrderList(root)
+      nodes_ = this.toDepthFirstList(root)
 
     if (nodes_.length !== items.length)
       throw new Error('[toTreeNodeBodyList] list.length !== items.length')
@@ -288,10 +314,10 @@ class TreeUtil {
   }
 
   /**
-   * Alias of toPreOrderList()
+   * Alias of toDepthFirstList()
    */
-  toList<T>(root: TreeNode<T>): Required<TreeNodeBody<T>>[] {
-    return this.toPreOrderList(root)
+  toList<T>(root: TreeNode<T>) {
+    return this.toDepthFirstList(root)
   }
 
   // toParentChildrenDict<T>(

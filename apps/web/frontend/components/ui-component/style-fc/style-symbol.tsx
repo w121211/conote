@@ -1,7 +1,7 @@
 import { tokenize } from 'prismjs'
 import React, { ReactNode } from 'react'
 import { TokenHelper } from '../../../../share/token'
-import { grammar } from '../../block-editor/src/parse-render'
+import { grammar } from '../../editor-textarea/src/parse-render'
 
 const bracketStyle = `text-gray-400/50 dark:text-gray-400`
 const blueHighlight = `text-blue-600 dark:text-blue-300`

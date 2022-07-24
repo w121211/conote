@@ -1,6 +1,6 @@
 import { NoteDoc } from '@prisma/client'
-import { mockDocBlock_contentBlocks } from '../../frontend/components/block-editor/test/__mocks__/mock-block'
-import { mockDiffBlocks } from '../../frontend/components/block-editor/test/__mocks__/mock-diff-blocks'
+import { mockDocBlock_contentBlocks } from '../../frontend/components/editor-textarea/test/__mocks__/mock-block'
+import { mockDiffBlocks } from '../../frontend/components/editor-textarea/test/__mocks__/mock-diff-blocks'
 import { NoteDocContentBody, NoteDocParsed } from '../../lib/interfaces'
 import { mockBranches } from './branch.mock'
 import { mockCommits } from './commit.mock'

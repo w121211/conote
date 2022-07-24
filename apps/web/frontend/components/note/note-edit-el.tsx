@@ -6,13 +6,13 @@ import {
   NoteDraftFragment,
   NoteFragment,
 } from '../../../apollo/query.graphql'
-import { EditorEl } from '../block-editor/src/components/editor/editor-el'
-import { editorOpenSymbolInMain } from '../block-editor/src/events'
+import { EditorEl } from '../editor-textarea/src/components/editor/editor-el'
+import { editorOpenSymbolInMain } from '../editor-textarea/src/events'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import { useMeContext } from '../auth/use-me-context'
 import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-padding'
 import { StatusDisplay } from '../ui-component/status-display'
-import { preventExitWithoutSave } from '../block-editor/src/listeners'
+import { preventExitWithoutSave } from '../editor-textarea/src/listeners'
 import { getLoginPageURL } from '../../utils'
 
 /**

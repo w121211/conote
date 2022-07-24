@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
-import { docGetOrCreate } from '../../frontend/components/block-editor/src/events'
+import { docGetOrCreate } from '../../frontend/components/editor-textarea/src/events'
 import SearcherModal from '../../frontend/components/search-all-modal/searcher-modal'
 import type { SearcherProps } from '../../frontend/interfaces'
 import { getDraftPageURL } from '../../frontend/utils'

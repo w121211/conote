@@ -8,7 +8,7 @@ import type {
   PollCount,
   SymType,
 } from '@prisma/client'
-import type { Block } from '../frontend/components/block-editor/src/interfaces'
+import type { Block } from '../frontend/components/editor-textarea/src/interfaces'
 
 //
 // Data models
