@@ -42,7 +42,9 @@ const NoteViewEl = ({
             <div className="w-[1px] mx-3 border-l border-gray-200"></div>
 
             <Link href={getDraftPageURLBySymbol(note.sym.symbol)}>
-              <a className="btn-primary-md">EDIT</a>
+              <a className="btn-primary inline-flex items-center text-sm">
+                EDIT
+              </a>
             </Link>
           </div>
 

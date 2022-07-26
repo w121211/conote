@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from 'react'
+import React, { FC, ReactNode, useState } from 'react'
 
 type AlertType = 'warning' | 'error' | 'success' | 'announce'
 
@@ -11,7 +11,7 @@ const errorIcon = `text-red-500 dark:text-red-400`
 const successBg = `bg-green-200/50 dark:bg-green-300/30`
 const successIcon = `text-green-500 dark:text-green-400`
 
-const announceBg = `bg-yellow-300 dark:bg-yellow-400`
+const announceBg = `bg-yellow-200/60 dark:bg-yellow-400`
 // const announceIcon=`text-blue-600 dark:bg-blue-300`
 
 const bg = (type: AlertType) => {
@@ -45,6 +45,11 @@ export const Alert: FC<AlertProps> = ({
   visible = true,
   onClose,
 }) => {
+  const [fold, setFold] = useState(true)
+  const onClickFold = () => {
+    setFold(!fold)
+  }
+
   if (!visible) {
     return null
   }
@@ -74,16 +79,39 @@ export const Alert: FC<AlertProps> = ({
             : ''}
         </span>
 
-        <span className="flex-grow pt-[2px] dark:text-white break-words whitespace-pre-wrap">
+        <span
+          className={`
+          flex-grow 
+          dark:text-white 
+          break-words whitespace-pre-wrap
+          ${fold ? 'line-clamp-1' : ''}
+          `}
+        >
           {action && <span className="font-bold">[{action}]</span>}
           {children}
           <span className="text-gray-400 dark:text-gray-300 text-xs">
             {time}
           </span>
         </span>
+        {React.Children.toArray(children).length > 1 && (
+          <div className="inline-flex mt-0.5 mr-1 ">
+            <span
+              className={`
+            material-icons 
+            h-fit
+            text-lg leading-none text-gray-600 dark:text-gray-200 
+            hover:cursor-pointer
+            ${fold ? '' : 'rotate-180'}
+            `}
+              onClick={onClickFold}
+            >
+              keyboard_arrow_down
+            </span>
+          </div>
+        )}
 
         <span
-          className="material-icons text-base leading-none text-gray-600 dark:text-gray-200 hover:cursor-pointer"
+          className="material-icons inline-flex mt-0.5 text-base leading-none text-gray-600 dark:text-gray-200 hover:cursor-pointer"
           onClick={onClose}
         >
           close

@@ -5,6 +5,7 @@ import type {
   NoteDraftFragment,
   NoteFragment,
 } from '../../../apollo/query.graphql'
+import { Alert } from '../ui-component/alert'
 import NoteDocLink from './note-doc-link'
 
 /**
@@ -25,26 +26,25 @@ const NoteAlerts = ({
   noteDocsToMerge: NoteDocFragment[]
 }) => {
   return (
-    <div>
+    <div className="mb-4">
       {cur.__typename === 'NoteDoc' && note && cur.id !== note.headDoc.id && (
         <div>The current viewing doc is not the head.</div>
       )}
       {noteDocsToMerge.length > 0 && (
-        <div>
+        <Alert type="announce">
           {noteDocsToMerge.map(e => {
             if (e.mergePollId === undefined)
               throw new Error('e.mergePollId === undefined')
             return (
-              <span key={e.id}>
-                <NoteDocLink doc={e} />
-                is requesting to merge.
+              <p key={e.id}>
+                <NoteDocLink doc={e} /> is requesting to merge.
                 <Link href={`/poll/${e.mergePollId}`}>
-                  <a>Go to Poll</a>
+                  <a className="link">Go to Poll</a>
                 </Link>
-              </span>
+              </p>
             )
           })}
-        </div>
+        </Alert>
       )}
     </div>
   )

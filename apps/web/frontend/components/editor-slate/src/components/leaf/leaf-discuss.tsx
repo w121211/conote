@@ -17,6 +17,7 @@ import { indenterTextReplace } from '../../indenter/transforms'
 import type { Editor } from 'slate'
 import { inlineService } from '../../../../editor-textarea/src/services/inline.service'
 import { slateDocSave } from '../../events'
+import { DropdownListItem } from '../../../../ui-component/dropdown-list-item'
 
 /**
  * Update block string when discuss is created
@@ -109,33 +110,37 @@ const LeafDiscuss = ({
       <FloatingPortal>
         {showPopover && (
           <div
+            className="details-menu opacity-100 scale-100 "
             ref={floating}
             style={{
               display: 'block',
-              background: 'cyan',
+
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
             }}
           >
-            <>
-              <button onClick={() => setShowModal(true)}>
-                {discussId ? 'View' : 'Create'}
-              </button>
-              <button
-                onClick={() => {
-                  indenterTextReplace(
-                    editor,
-                    blockUid,
-                    inlineItem.str,
-                    '#hello world!!!#',
-                  )
-                  setShowPopover(false)
-                }}
-              >
-                Replace
-              </button>
-            </>
+            <button
+              className="dropdown-list-item"
+              onClick={() => setShowModal(true)}
+            >
+              {discussId ? 'View' : 'Create'}
+            </button>
+
+            <button
+              className="dropdown-list-item"
+              onClick={() => {
+                indenterTextReplace(
+                  editor,
+                  blockUid,
+                  inlineItem.str,
+                  '#hello world!!!#',
+                )
+                setShowPopover(false)
+              }}
+            >
+              Replace
+            </button>
           </div>
         )}
       </FloatingPortal>
@@ -144,7 +149,7 @@ const LeafDiscuss = ({
         {...attributes}
         id={id}
         ref={reference}
-        className="text-blue-600"
+        className="symbol-link"
         // className={className}
         data-inline-item={inlineItem.type}
       >

@@ -95,7 +95,11 @@
   }
 
   .details-menu {
-    @apply absolute top-full border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 shadow-lg z-50 opacity-0 scale-75 transition-all ease-[cubic-bezier(0.21,0.02,0.28,1.58)];
+    @apply absolute top-full border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 shadow-lg z-50 opacity-0 scale-75 transition-[transform,opacity] ease-[cubic-bezier(0.21,0.02,0.28,1.58)];
+  }
+
+  .dropdown-list-item {
+    @apply block whitespace-nowrap px-4 py-0.5 first:mt-1 last:mb-1  text-sm text-gray-600 hover:bg-gray-100;
   }
 
   .scrollbar::-webkit-scrollbar {

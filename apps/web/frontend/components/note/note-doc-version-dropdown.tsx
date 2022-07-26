@@ -39,7 +39,7 @@ const NoteDocVersionDropdown = ({
     <ToggleMenu
       className="left-full -translate-x-full"
       summary={
-        <span className="btn-normal-md flex items-center">
+        <span className="btn-normal flex items-center text-sm">
           {curLabel}
           <span className="material-icons-outlined ml-1 text-lg leading-none">
             keyboard_arrow_down
@@ -50,23 +50,19 @@ const NoteDocVersionDropdown = ({
       <ul>
         {noteDraft && (
           <Link href={getDraftPageURL(noteDraft.id)}>
-            <a>
-              <DropdownListItem>Draft</DropdownListItem>
-            </a>
+            <a className="dropdown-list-item">Draft</a>
           </Link>
         )}
         {note && (
           <Link href={getNotePageURL(symbol)}>
-            <a>
-              <DropdownListItem>Head</DropdownListItem>
-            </a>
+            <a className="dropdown-list-item">Head</a>
           </Link>
         )}
         {qDocsToMerge.data &&
           qDocsToMerge.data.noteDocsToMergeByNote.map(e => (
             <Link href={getNotePageURL(symbol, e.id)} key={e.id}>
-              <a href="#">
-                <DropdownListItem>#{e.id.slice(-6)}</DropdownListItem>
+              <a className="dropdown-list-item" href="#">
+                #{e.id.slice(-6)}
               </a>
             </Link>
           ))}

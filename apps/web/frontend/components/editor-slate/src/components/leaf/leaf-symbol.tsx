@@ -11,6 +11,7 @@ import { slateEditorRepo } from '../../stores/editor.repository'
 import { LeafPopoverProps } from '../../interfaces'
 import { editorChainItemInsert } from '../../../../editor-textarea/src/events'
 import { getNotePageURL } from '../../../../../utils'
+import { DropdownListItem } from '../../../../ui-component/dropdown-list-item'
 
 const LeafSymbol = ({
   leafProps,
@@ -45,23 +46,26 @@ const LeafSymbol = ({
       <FloatingPortal>
         {show && (
           <div
+            className="details-menu opacity-100 scale-100"
             ref={floating}
             style={{
               display: 'block',
-              background: 'cyan',
+
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
             }}
           >
-            <>
-              <button onClick={e => editorChainItemInsert(symbol, draftId)}>
-                Insert
-              </button>
-              <Link href={getNotePageURL(symbol)}>
-                <a>View</a>
-              </Link>
-            </>
+            <button
+              className="dropdown-list-item"
+              onClick={e => editorChainItemInsert(symbol, draftId)}
+            >
+              Insert
+            </button>
+
+            <Link href={getNotePageURL(symbol)}>
+              <a className="dropdown-list-item">View</a>
+            </Link>
           </div>
         )}
       </FloatingPortal>
@@ -70,7 +74,7 @@ const LeafSymbol = ({
         {...attributes}
         id={id}
         ref={reference}
-        className="text-blue-600"
+        className="symbol-link"
         // className={className}
         data-inline-item={inlineItem.type}
       >
