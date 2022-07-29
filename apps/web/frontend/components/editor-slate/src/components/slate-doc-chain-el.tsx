@@ -22,13 +22,13 @@ const ChainDoc = (props: { docUid: string; draftId: string }) => {
   })
 
   return (
-    <div id={draftId}>
+    <div id={draftId} className="mb-20">
       {doc && (
         <div id={docUid}>
           <button>View</button>
           {doc.noteCopy && (
             <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
-              <a>View current head note</a>
+              <a className="btn-secondary text-sm">View current head note</a>
             </Link>
           )}
           <DocHead doc={doc} />

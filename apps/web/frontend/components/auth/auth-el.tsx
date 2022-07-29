@@ -41,15 +41,11 @@ const AuthItem = () => {
               query: { userId: me.id },
             }}
           >
-            <a>
-              <DropdownListItem>Your Profile</DropdownListItem>
-            </a>
+            <a className="dropdown-list-item">Your Profile</a>
           </Link>
           <DropdownListDivider />
           <Link href={getLoginPageURL()}>
-            <a>
-              <DropdownListItem>Logout</DropdownListItem>
-            </a>
+            <a className="dropdown-list-item">Logout</a>
           </Link>
         </ToggleMenu>
       ) : (

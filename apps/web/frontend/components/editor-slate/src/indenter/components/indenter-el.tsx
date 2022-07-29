@@ -13,7 +13,7 @@ const IndenterEl = (
       data-indent={indent}
       style={{ marginLeft: 24 * (indent + 1) }}
     >
-      <ul style={{ padding: 0, margin: 0 }}>
+      <ul className="list-disc" style={{ padding: 0, margin: 0 }}>
         <li>
           {error && (
             <span

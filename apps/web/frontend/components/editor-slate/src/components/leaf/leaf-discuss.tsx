@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import {
+  autoPlacement,
+  autoUpdate,
+  computePosition,
   FloatingPortal,
+  hide,
   useFloating,
 } from '@floating-ui/react-dom-interactions'
 import { useObservable } from '@ngneat/react-rxjs'
@@ -17,6 +21,7 @@ import { indenterTextReplace } from '../../indenter/transforms'
 import type { Editor } from 'slate'
 import { inlineService } from '../../../../editor-textarea/src/services/inline.service'
 import { slateDocSave } from '../../events'
+// import { DropdownListItem } from '../../../../ui-component/dropdown-list-item'
 
 /**
  * Update block string when discuss is created
@@ -48,8 +53,29 @@ const LeafDiscuss = ({
     { id, blockUid, docUid, draftId, inlineItem } = popoverProps,
     { id: discussId, title, str } = inlineItem
 
+  const updateFloating = () => {
+    const referenceEl = refs.reference.current
+    const floatingEl = refs.floating.current
+    if (referenceEl && floatingEl) {
+      autoUpdate(referenceEl, floatingEl, () => {
+        computePosition(referenceEl, floatingEl, {
+          middleware: [hide()],
+        }).then(({ middlewareData }) => {
+          if (middlewareData.hide) {
+            const { referenceHidden } = middlewareData.hide
+            referenceHidden ? setShowPopover(false) : false
+          }
+        })
+        update()
+      })
+    }
+  }
+
   const [curSelectedElId] = useObservable(slateEditorRepo.curSelectedElId$),
-    { x, y, reference, floating, strategy } = useFloating({ placement: 'top' }),
+    { x, y, reference, floating, strategy, refs, update } = useFloating({
+      middleware: [autoPlacement({ allowedPlacements: ['top', 'bottom'] })],
+      whileElementsMounted: updateFloating,
+    }),
     [showPopover, setShowPopover] = useState(false)
 
   const editor = useSlateStatic()
@@ -109,33 +135,37 @@ const LeafDiscuss = ({
       <FloatingPortal>
         {showPopover && (
           <div
+            className="details-menu opacity-100 scale-100 "
             ref={floating}
             style={{
               display: 'block',
-              background: 'cyan',
+
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
             }}
           >
-            <>
-              <button onClick={() => setShowModal(true)}>
-                {discussId ? 'View' : 'Create'}
-              </button>
-              <button
-                onClick={() => {
-                  indenterTextReplace(
-                    editor,
-                    blockUid,
-                    inlineItem.str,
-                    '#hello world!!!#',
-                  )
-                  setShowPopover(false)
-                }}
-              >
-                Replace
-              </button>
-            </>
+            <button
+              className="dropdown-list-item"
+              onClick={() => setShowModal(true)}
+            >
+              {discussId ? 'View' : 'Create'}
+            </button>
+
+            <button
+              className="dropdown-list-item"
+              onClick={() => {
+                indenterTextReplace(
+                  editor,
+                  blockUid,
+                  inlineItem.str,
+                  '#hello world!!!#',
+                )
+                setShowPopover(false)
+              }}
+            >
+              Replace
+            </button>
           </div>
         )}
       </FloatingPortal>
@@ -144,7 +174,7 @@ const LeafDiscuss = ({
         {...attributes}
         id={id}
         ref={reference}
-        className="text-blue-600"
+        className="symbol-link"
         // className={className}
         data-inline-item={inlineItem.type}
       >

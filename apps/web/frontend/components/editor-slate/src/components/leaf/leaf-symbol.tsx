@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import {
+  autoPlacement,
+  autoUpdate,
+  computePosition,
+  detectOverflow,
+  flip,
   FloatingPortal,
+  hide,
+  MiddlewareArguments,
   useFloating,
 } from '@floating-ui/react-dom-interactions'
 import { useObservable } from '@ngneat/react-rxjs'
@@ -11,6 +18,7 @@ import { slateEditorRepo } from '../../stores/editor.repository'
 import { LeafPopoverProps } from '../../interfaces'
 import { editorChainItemInsert } from '../../../../editor-textarea/src/events'
 import { getNotePageURL } from '../../../../../utils'
+// import { DropdownListItem } from '../../../../ui-component/dropdown-list-item'
 
 const LeafSymbol = ({
   leafProps,
@@ -23,9 +31,30 @@ const LeafSymbol = ({
     { id, blockUid, draftId, inlineItem } = popoverProps,
     { symbol } = inlineItem
 
+  const [show, setShow] = useState(false)
+
+  const updateFloating = () => {
+    const referenceEl = refs.reference.current
+    const floatingEl = refs.floating.current
+    if (referenceEl && floatingEl) {
+      autoUpdate(referenceEl, floatingEl, () => {
+        computePosition(referenceEl, floatingEl, {
+          middleware: [hide()],
+        }).then(({ middlewareData }) => {
+          if (middlewareData.hide) {
+            const { referenceHidden } = middlewareData.hide
+            referenceHidden ? setShow(false) : false
+          }
+        })
+        update()
+      })
+    }
+  }
   const [curSelectedElId] = useObservable(slateEditorRepo.curSelectedElId$),
-    { x, y, reference, floating, strategy } = useFloating({ placement: 'top' }),
-    [show, setShow] = useState(false)
+    { x, y, reference, floating, strategy, refs, update } = useFloating({
+      middleware: [autoPlacement({ allowedPlacements: ['top', 'bottom'] })],
+      whileElementsMounted: updateFloating,
+    })
 
   useEffect(() => {
     // console.debug('curSelectedElId', curSelectedElId, id, curSelectedElId === id)
@@ -45,23 +74,26 @@ const LeafSymbol = ({
       <FloatingPortal id="layout-children-container">
         {show && (
           <div
+            className="details-menu opacity-100 scale-100"
             ref={floating}
             style={{
               display: 'block',
-              background: 'cyan',
+
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
             }}
           >
-            <>
-              <button onClick={e => editorChainItemInsert(symbol, draftId)}>
-                Insert
-              </button>
-              <Link href={getNotePageURL(symbol)}>
-                <a>View</a>
-              </Link>
-            </>
+            <button
+              className="dropdown-list-item"
+              onClick={e => editorChainItemInsert(symbol, draftId)}
+            >
+              Insert
+            </button>
+
+            <Link href={getNotePageURL(symbol)}>
+              <a className="dropdown-list-item">View</a>
+            </Link>
           </div>
         )}
       </FloatingPortal>
@@ -70,7 +102,7 @@ const LeafSymbol = ({
         {...attributes}
         id={id}
         ref={reference}
-        className="text-blue-600"
+        className="symbol-link"
         // className={className}
         data-inline-item={inlineItem.type}
       >
