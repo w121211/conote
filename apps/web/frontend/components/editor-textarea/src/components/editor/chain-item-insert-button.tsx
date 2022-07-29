@@ -7,7 +7,7 @@ const ChainItemInsertButton = ({
   afterThisDraftId,
 }: {
   afterThisDraftId: string
-}): JSX.Element => {
+}) => {
   const [loading, setLoading] = useState(false)
 
   async function insert(symbol: string) {
@@ -23,7 +23,7 @@ const ChainItemInsertButton = ({
   }
 
   if (loading) {
-    return <div>Loading</div>
+    return null
   }
   return <SearcherModal searcher={searcher} />
 }

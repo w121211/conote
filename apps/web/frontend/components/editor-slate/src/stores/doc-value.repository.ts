@@ -5,7 +5,7 @@ import {
   updateEntities,
   withEntities,
 } from '@ngneat/elf-entities'
-import type { ElementIndenter, ElementLi } from '../interfaces'
+import type { ElementIndenter } from '../interfaces'
 
 type DocValue = {
   uid: string
@@ -17,6 +17,10 @@ const docsStore = createStore(
   withEntities<DocValue, 'uid'>({ idKey: 'uid' }),
 )
 
+/**
+ * TODO:
+ * - [] Remove this and use doc repo only
+ */
 class DocValueRepository {
   getDocValue$(uid: string) {
     return docsStore.pipe(selectEntity(uid))

@@ -1,6 +1,6 @@
 import { ApolloError, FetchPolicy } from '@apollo/client'
 import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
-import { isInteger, isNil, zip } from 'lodash'
+import { difference, differenceBy, isInteger, isNil, zip } from 'lodash'
 import type { NextRouter } from 'next/router'
 import type {
   NoteDocFragment,
@@ -9,13 +9,19 @@ import type {
   NoteFragment,
 } from '../../../../apollo/query.graphql'
 import { parseSymbol } from '../../../../share/symbol.common'
-import { editingFocus, routeUpdateShallow, setCursorPosition } from './effects'
+import {
+  editingFocus,
+  routeUpdateShallow,
+  scrollToElement,
+  setCursorPosition,
+} from './effects'
 import type {
   Block,
   DestructTextareaKeyEvent,
   BlockPositionRelation,
   Doc,
   EditorProps,
+  TabChainItem,
 } from './interfaces'
 import { areSameParent, compatPosition } from './op/helpers'
 import * as ops from './op/ops'
@@ -31,7 +37,11 @@ import {
   getBlockChildren,
 } from './stores/block.repository'
 import { docRepo, genNewDoc, isDocChanged } from './stores/doc.repository'
-import { buildChains, editorRepo } from './stores/editor.repository'
+import {
+  buildChains,
+  editorRepo,
+  isChainItem,
+} from './stores/editor.repository'
 import { rfdbRepo } from './stores/rfdb.repository'
 import { genBlockUid } from './utils'
 import { BlockInput, writeBlocks } from './utils/block-writer'
@@ -724,12 +734,12 @@ export async function docGetOrCreate(
   const doc = docRepo.findDoc({ symbol })
   if (doc) return doc
 
-  console.time('noteService.queryNote')
+  // console.time('noteService.queryNote')
   const [note, draft] = await Promise.all([
     noteService.queryNote(symbol, 'network-only'),
     noteDraftService.queryDraft(symbol, 'network-only'),
   ])
-  console.timeEnd('noteService.queryNote')
+  // console.timeEnd('noteService.queryNote')
 
   if (draft !== null) {
     return docLoadFromDraft(draft, note)
@@ -748,7 +758,6 @@ export async function docGetOrCreate(
         : await noteDraftService.createDraft(branch, symbol__, draftInput),
       newDoc = docLoadFromDraft(draft, note)
 
-    // await editorLeftSidebarRefresh('network-only')
     console.time('editorChainsRefresh')
     await editorChainsRefresh('network-only')
     console.timeEnd('editorChainsRefresh')
@@ -1068,21 +1077,21 @@ export async function editorOpenSymbolInMain(
 }
 
 /**
- *
- *
+ * - If insert position is its current position, do nothing
+ * - Disconnect from current position
+ * - Insert to the new position
  */
-async function chainItemLinkInsert(
+async function connectChainItem(
   entries: EditorProps['draftEntries'],
   afterThisDraftId: string | null,
   insertDraft: Doc['noteDraftCopy'],
 ) {
-  // Insert position is its current position, do nothing
-  if (insertDraft.meta.chain?.prevId === afterThisDraftId) return
-
-  // Remove from current chain first
-  chainItemLinkRemove(entries, insertDraft.id)
-
-  // Insert to the new position
+  if (insertDraft.meta.chain?.prevId === afterThisDraftId) {
+    return
+  }
+  if (entries.find(e => e.id === insertDraft.id)) {
+    disconnectChainItem(entries, insertDraft.id)
+  }
   if (afterThisDraftId !== null) {
     const atPrev = entries.find(e => e.id === afterThisDraftId),
       atNext = entries.find(e => e.meta.chain?.prevId === afterThisDraftId)
@@ -1099,7 +1108,7 @@ async function chainItemLinkInsert(
   })
 }
 
-async function chainItemLinkRemove(
+async function disconnectChainItem(
   entries: EditorProps['draftEntries'],
   itemDraftId: string,
 ) {
@@ -1133,141 +1142,78 @@ async function resetChainOrphans(orphans: NoteDraftEntryFragment[]) {
 }
 
 /**
- *
- * Will not update tab.chain here. It is updated by `editorChainItemInsert`, `editorChainItemRemove` events
- */
-export async function editorChainsRefresh(
-  fetchPolicy?: FetchPolicy,
-): Promise<NoteDraftEntryFragment[][]> {
-  try {
-    const entries = await noteDraftService.queryMyAllDraftEntries(fetchPolicy),
-      { chains, orphans } = buildChains(entries, e => e.meta.chain?.prevId)
-
-    if (orphans.length > 0) {
-      console.debug('orphans', orphans)
-      await resetChainOrphans(orphans)
-      await editorChainsRefresh('network-only')
-    }
-
-    editorRepo.setDraftEntries(entries)
-    editorRepo.setChains(chains)
-    return chains
-  } catch (err) {
-    if (err instanceof ApolloError) {
-      // TODO: Handle not authenticated case -> set auth status in editor repo
-      console.debug(err)
-      return []
-    } else {
-      throw err
-    }
-  }
-}
-
-/**
- * If item is in current chain, no insertion happened and only scroll to the item
- * If symbol is existed in chains, remove it and insert
- * If symbol is not existed in chains, insert it
+ * Insert an item into current chain
+ * If item is in current chain, return
+ * If symbol is in other chains, remove it and insert
+ * If symbol is not existed, insert it
  */
 export async function editorChainItemInsert(
   symbol: string,
   afterThisDraftId: string | null,
 ) {
-  const doc = await docGetOrCreate(symbol),
-    { draftEntries, tab } = editorRepo.getValue(),
-    entries = draftEntries.filter(e => e.status === 'EDIT')
+  const { tab, draftEntries } = editorRepo.getValue(),
+    entries = draftEntries.filter(e => e.status === 'EDIT'),
+    doc = docRepo.findDoc({ symbol }),
+    entry = doc && draftEntries.find(e => e.id === doc.noteDraftCopy.id),
+    afterThisDraftIdx = afterThisDraftId
+      ? tab.chain.findIndex(
+          e => isChainItem(e) && e.entry.id === afterThisDraftId,
+        )
+      : null,
+    insertIndex = (afterThisDraftIdx ?? 0) + 1
 
-  // Item is in current's chain
-  if (tab.curChain.find(e => e.entry.id === doc.noteDraftCopy.id)) {
-    await editorChainItemOpen(doc.noteDraftCopy.id)
+  if (afterThisDraftIdx !== null && afterThisDraftIdx < 0) {
+    throw new Error('Not found afterThisDraftId in tab.chain')
+  }
+
+  // Doc is in current chain, do nothing and scroll to the item
+  if (
+    doc &&
+    tab.chain.find(e => isChainItem(e) && e.entry.id === doc.noteDraftCopy.id)
+  ) {
+    scrollToElement(doc.noteDraftCopy.id)
     return { draftInserted: doc.noteDraftCopy }
   }
 
-  await chainItemLinkInsert(entries, afterThisDraftId, doc.noteDraftCopy)
-  await editorChainsRefresh('network-only')
-  await editorChainItemOpen(doc.noteDraftCopy.id)
-  return { draftInserted: doc.noteDraftCopy }
-}
-
-/**
- * - If given draftId is in current chain, no call
- */
-export async function editorChainItemOpen(draftId: string) {
-  const { tab } = editorRepo.getValue(),
-    itemInCurChain = tab.curChain.find(e => e.entry.id === draftId)
-
-  if (itemInCurChain) {
-    editorRepo.setTab({
-      ...tab,
-      curChainItem: {
-        docUid: itemInCurChain.docUid,
-        draftId,
-      },
-      loading: false,
+  // Doc is in other chains
+  if (doc && entry) {
+    tab.chain.splice(insertIndex, 0, {
+      entry,
+      docUid: doc.uid,
+      rendered: true,
     })
-
-    return { chain: tab.curChain }
+    editorRepo.setTab({ chain: tab.chain })
+    scrollToElement(doc.noteDraftCopy.id)
   }
 
-  // console.log('editorOpenSymbolInMain', symbol)
-  editorRepo.setTab({
-    curChain: [],
-    curChainItem: null,
-    loading: true,
+  // Doc is not exist, insert a placeholder first
+  if (doc === null) {
+    tab.chain.splice(insertIndex, 0, { symbol })
+    editorRepo.setTab({ chain: tab.chain })
+  }
+
+  const doc_ = doc ?? (await docGetOrCreate(symbol))
+  await connectChainItem(entries, afterThisDraftId, doc_.noteDraftCopy)
+
+  const { entries: entries_ } = await editorChainsRefresh('network-only'),
+    entry_ = entries_.find(e => e.id === doc_.noteDraftCopy.id)
+
+  if (entry_ === undefined) throw new Error('')
+
+  tab.chain.splice(insertIndex, 1, {
+    entry: entry_,
+    docUid: doc_.uid,
+    rendered: true,
   })
+  editorRepo.setTab({ chain: tab.chain })
 
-  const chains = await editorChainsRefresh(),
-    entries = editorRepo.getChainEntries(chains, draftId),
-    docs = await Promise.all(entries.map(e => docGetOrCreate(e.symbol))),
-    chain: EditorProps['tab']['curChain'] = zip(entries, docs).map(([a, b]) => {
-      if (a && b) {
-        return {
-          entry: a,
-          docUid: b.uid,
-          rendered: false,
-        }
-      }
-      throw new Error()
-    }),
-    curDoc = docs.find(e => e.noteDraftCopy.id === draftId)
-
-  if (curDoc === undefined) throw new Error('Unexpected error')
-
-  editorRepo.setTab({
-    curChain: chain,
-    curChainItem: {
-      docUid: curDoc.uid,
-      draftId,
-    },
-    loading: false,
-  })
-
-  return { chain, curDoc }
+  return { draftInserted: doc_.noteDraftCopy }
 }
 
 /**
- *
- */
-export async function editorChainCommit(draftId: string) {
-  const { chains, tab } = editorRepo.getValue(),
-    entries = editorRepo.getChainEntries(chains, draftId)
-
-  if (entries[0].id !== draftId)
-    throw new Error('Only allow to commit the chain from the first chain item')
-
-  // if (tab.curChainItem) await docSave(tab.curChainItem.docUid)
-  await Promise.all(tab.curChain.map(e => slateDocSave(e.docUid)))
-
-  const commit = await commitService.createCommit(entries.map(e => e.id))
-  await commitOnFinish(commit.noteDocs)
-
-  return commit
-}
-
-/**
- *
+ * @returns true if success
  */
 export async function editorChainItemRemove(entry: NoteDraftEntryFragment) {
-  // console.log('editorOpenSymbolInMain', symbol)
   const { id } = entry,
     { draftEntries, tab } = editorRepo.getValue(),
     entries = draftEntries.filter(e => e.status === 'EDIT'),
@@ -1281,14 +1227,100 @@ export async function editorChainItemRemove(entry: NoteDraftEntryFragment) {
   } else if (entry.status === 'DROP') {
     await noteDraftService.deleteDraft(id)
   }
-  await chainItemLinkRemove(entries, id)
+  await disconnectChainItem(entries, id)
   await editorChainsRefresh('network-only')
 
   editorRepo.setTab({
-    // curChainItem: tab.curChainItem?.draftId === id ? null : tab.curChainItem?.draftId,
-    ...tab,
-    curChain: tab.curChain.filter(e => e.entry.id !== entry.id),
+    chain: tab.chain.filter(e => isChainItem(e) && e.entry.id !== entry.id),
   })
+
+  return true
+}
+
+/**
+ *
+ */
+export async function editorChainCommit(draftId: string) {
+  const { chains, tab } = editorRepo.getValue(),
+    entries = editorRepo.getChainEntries(chains, draftId),
+    entriesInEditing = tab.chain.filter(
+      (a): a is TabChainItem =>
+        entries.find(b => isChainItem(a) && b.id === a.entry.id) !== undefined,
+    )
+
+  if (entries[0].id !== draftId)
+    throw new Error('Only allow to commit the chain from the first chain item')
+
+  // Save current works before commit
+  await Promise.all(entriesInEditing.map(e => slateDocSave(e.docUid)))
+
+  const commit = await commitService.createCommit(entries.map(e => e.id))
+  commitSuccessClean(commit.noteDocs)
+  await editorChainsRefresh('network-only')
+
+  return commit
+}
+
+/**
+ * Open a chain of the given draftId
+ * - [removed] If given draftId is in current chain, no call
+ */
+export async function editorChainOpen(draftId: string) {
+  editorRepo.setTab({ chain: [] })
+
+  const { chains } = await editorChainsRefresh(),
+    entries = editorRepo.getChainEntries(chains, draftId),
+    docs = await Promise.all(entries.map(e => docGetOrCreate(e.symbol))),
+    chain: EditorProps['tab']['chain'] = zip(entries, docs).map(([a, b]) => {
+      if (a && b) {
+        return {
+          entry: a,
+          docUid: b.uid,
+          rendered: false,
+        }
+      }
+      throw new Error()
+    }),
+    curDoc = docs.find(e => e.noteDraftCopy.id === draftId)
+
+  if (curDoc === undefined) throw new Error('Unexpected error')
+
+  editorRepo.setTab({ chain: chain })
+
+  return { chain, curDoc }
+}
+
+/**
+ *
+ * Will not update tab.chain here. It is updated by `editorChainItemInsert`, `editorChainItemRemove` events
+ */
+export async function editorChainsRefresh(fetchPolicy?: FetchPolicy): Promise<{
+  entries: NoteDraftEntryFragment[]
+  chains: NoteDraftEntryFragment[][]
+}> {
+  try {
+    const entries = await noteDraftService.queryMyAllDraftEntries(fetchPolicy),
+      { chains, orphans } = buildChains(entries, e => e.meta.chain?.prevId)
+
+    if (orphans.length > 0) {
+      console.debug('orphans', orphans)
+      await resetChainOrphans(orphans)
+      await editorChainsRefresh('network-only')
+    }
+
+    editorRepo.setDraftEntries(entries)
+    editorRepo.setChains(chains)
+
+    return { entries, chains }
+  } catch (err) {
+    if (err instanceof ApolloError) {
+      // TODO: Handle not authenticated case -> set auth status in editor repo
+      console.debug(err)
+      return { entries: [], chains: [] }
+    } else {
+      throw err
+    }
+  }
 }
 
 export async function editorChainItemSetRendered(docUid: string) {
@@ -1306,19 +1338,18 @@ export async function editorChainItemSetRendered(docUid: string) {
 
 /**
  * Commit is called directly through the apollo-client,
- * here only taking cares of repository mutations after the commit.
+ * here only taking care of repository mutations after the commit.
  *
  * If commit success
- * - remove local docs from doc-repo, sidebar
+ * - Remove local docs from doc-repo, sidebar
  */
-export async function commitOnFinish(resultDocs: NoteDocFragment[]) {
-  resultDocs.forEach(e => {
+export function commitSuccessClean(resultDocs: NoteDocFragment[]) {
+  for (const e of resultDocs) {
     const doc = docRepo.findDoc({ symbol: e.symbol })
     if (doc) {
       const { blockReducers, docReducers } = ops.docRemoveOp(doc)
       blockRepo.update(blockReducers)
       docRepo.update(docReducers)
     }
-  })
-  await editorChainsRefresh('network-only')
+  }
 }

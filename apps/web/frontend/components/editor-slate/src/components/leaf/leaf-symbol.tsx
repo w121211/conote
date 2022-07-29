@@ -42,7 +42,7 @@ const LeafSymbol = ({
 
   return (
     <>
-      <FloatingPortal>
+      <FloatingPortal id="layout-children-container">
         {show && (
           <div
             ref={floating}

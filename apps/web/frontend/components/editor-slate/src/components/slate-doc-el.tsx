@@ -268,8 +268,11 @@ const SlateDocEl = (props: { doc: Doc }) => {
       {docValue.value.length === 0 ? (
         <DocPlaceholder
           doc={doc}
-          templateOnClick={() => {
-            const [rootIndenter, ...bodyIndneteers] = docTemplateGenerate(doc)
+          templateOnClick={title => {
+            const [rootIndenter, ...bodyIndneteers] = docTemplateGenerate(
+              doc,
+              title,
+            )
             docValueRepo.setDocValue(doc.uid, bodyIndneteers)
           }}
         />
@@ -280,7 +283,7 @@ const SlateDocEl = (props: { doc: Doc }) => {
           value={docValue.value}
         />
       )}
-      {/* <button onClick={() => saveDoc(doc.uid)}>Save</button> */}
+      <button onClick={() => saveDoc(doc.uid)}>Save</button>
     </div>
   )
 }

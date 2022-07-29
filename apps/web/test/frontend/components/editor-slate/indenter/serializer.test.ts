@@ -3,10 +3,10 @@ import { Node } from 'slate'
 import {
   blocksToIndenters,
   indentersToBlocks,
-} from '../../../../frontend/components/editor-slate/src/indenter/serializers'
-import { ElementIndenter } from '../../../../frontend/components/editor-slate/src/interfaces'
-import { Block } from '../../../../frontend/components/editor-textarea/src/interfaces'
-import { mockDocBlock_contentBlocks } from '../../../../frontend/components/editor-textarea/test/__mocks__/mock-block'
+} from '../../../../../frontend/components/editor-slate/src/indenter/serializers'
+import { ElementIndenter } from '../../../../../frontend/components/editor-slate/src/interfaces'
+import { Block } from '../../../../../frontend/components/editor-textarea/src/interfaces'
+import { mockDocBlock_contentBlocks } from '../../../../../frontend/components/editor-textarea/test/__mocks__/mock-block'
 
 // function c(d: ElementIndenter) {
 //   const { indent, blockCopy } = d

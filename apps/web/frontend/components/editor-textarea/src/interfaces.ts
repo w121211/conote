@@ -202,6 +202,32 @@ export type CursorProp = {
   } | null
 }
 
+export type TabChainItem = {
+  entry: NoteDraftEntryFragment
+  docUid: string
+
+  // The doc component is rendered & visible or not (is used to check if is ready for scrollToView)
+  rendered: boolean
+}
+
+export type TabChainItemPlaceholder = { symbol: string }
+
+export type Tab = {
+  chain: (TabChainItem | TabChainItemPlaceholder)[]
+
+  // curChainItem: {
+  //   draftId: string
+  //   docUid: string
+  // } | null
+
+  // prevChainItem: {
+  //   draftId: string
+  //   docUid: string
+  // } | null
+
+  // loading: boolean
+}
+
 /**
  * The final single stop to store all required info for the editor
  *
@@ -257,26 +283,8 @@ export type EditorProps = {
   draftEntries: NoteDraftEntryFragment[]
   chains: NoteDraftEntryFragment[][]
 
-  // Only allow to open one tab, so no need to be a list
-  tab: {
-    // Modify by chainItemOpen event
-    curChain: {
-      entry: NoteDraftEntryFragment
-      docUid: string
-
-      // The doc component is rendered & visible or not (is used to check if is ready for scrollToView)
-      rendered: boolean
-    }[]
-    curChainItem: {
-      draftId: string
-      docUid: string
-    } | null
-    prevChainItem: {
-      draftId: string
-      docUid: string
-    } | null
-    loading: boolean
-  }
+  // Currently only allow to open one tab, so no need to be an array
+  tab: Tab
 }
 
 //

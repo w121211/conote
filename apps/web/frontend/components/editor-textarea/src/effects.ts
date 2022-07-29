@@ -93,3 +93,13 @@ export async function routeUpdateShallow(router: NextRouter, url: UrlObject) {
   await router.replace(url, undefined, { shallow: true })
   // await router.replace(url, undefined, { shallow: true })
 }
+
+/**
+ * Scroll to the element by the given element id (native browser js)
+ */
+export function scrollToElement(elId: string) {
+  const el = document.getElementById(elId)
+  if (el) {
+    el.scrollIntoView()
+  }
+}

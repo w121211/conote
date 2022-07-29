@@ -3,10 +3,7 @@ import { ComponentMeta } from '@storybook/react'
 import ModalProvider from '../../frontend/components/modal/modal-context'
 import SlateDocChainEl from '../../frontend/components/editor-slate/src/components/slate-doc-chain-el'
 import { noteDraftService } from '../../frontend/components/editor-textarea/src/services/note-draft.service'
-import {
-  editorChainItemOpen,
-  editorChainsRefresh,
-} from '../../frontend/components/editor-textarea/src/events'
+import { editorChainsRefresh } from '../../frontend/components/editor-textarea/src/events'
 
 export default {
   title: 'EditorSlate/SlateDocChainEl',
@@ -21,7 +18,7 @@ export const Base = () => {
       const entries = await noteDraftService.queryMyAllDraftEntries()
 
       await editorChainsRefresh()
-      await editorChainItemOpen(entries[0].id)
+      // await editorChainItemOpen(entries[0].id)
 
       ref.current = entries[0].id
     }

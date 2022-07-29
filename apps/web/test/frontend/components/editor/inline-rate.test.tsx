@@ -1,8 +1,8 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import RateButton from '../../components/rate-button/rate-button'
-import InlineRate from '../../components/inline/inline-rate'
+import RateButton from '../rate-button/rate-button'
+import InlineRate from '../inline/inline-rate'
 
 const mockOnClick = () => {
   //

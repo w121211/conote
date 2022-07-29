@@ -2,7 +2,11 @@ import { createStore, select, setProp, withProps } from '@ngneat/elf'
 import { differenceBy, flatten, isNil } from 'lodash'
 import { filter, of, switchMap } from 'rxjs'
 import type { NoteDraftEntryFragment } from '../../../../../apollo/query.graphql'
-import type { EditorProps } from '../interfaces'
+import type {
+  EditorProps,
+  TabChainItem,
+  TabChainItemPlaceholder,
+} from '../interfaces'
 import { docRepo } from './doc.repository'
 
 export const editorStore = createStore(
@@ -22,10 +26,7 @@ export const editorStore = createStore(
     draftEntries: [],
     chains: [],
     tab: {
-      curChain: [],
-      curChainItem: null,
-      prevChainItem: null,
-      loading: false,
+      chain: [],
     },
   }),
 )
@@ -87,6 +88,12 @@ export function buildChains<T extends { id: string }>(
   const orphans = differenceBy(entries, chainsEntries, 'id')
 
   return { chains, orphans }
+}
+
+export function isChainItem(
+  v: TabChainItem | TabChainItemPlaceholder,
+): v is TabChainItem {
+  return 'entry' in v
 }
 
 //
@@ -172,16 +179,15 @@ class EditorRepository {
     editorStore.update(setProp('chains', chains))
   }
 
-  setTab(tab: Omit<EditorProps['tab'], 'prevChainItem'>) {
-    editorStore.update(
-      setProp('tab', v => ({ ...tab, prevChainItem: v.curChainItem })),
-    )
+  setTab(v: EditorProps['tab']) {
+    // editorStore.update(setProp('tab', v => ({ ...tab })))
+    editorStore.update(setProp('tab', v))
   }
 
   setTabChainItemRendered(docUid: string) {
     editorStore.update(
       setProp('tab', v => {
-        const curChain = v.curChain.map(e =>
+        const curChain = v.chain.map(e =>
           e.docUid === docUid ? { ...e, rendered: true } : e,
         )
         return { ...v, curChain }

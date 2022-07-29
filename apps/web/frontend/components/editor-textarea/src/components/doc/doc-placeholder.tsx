@@ -1,4 +1,5 @@
 import React from 'react'
+import { templateTitles } from '../../../../editor-slate/src/templates'
 import { styleSymbol } from '../../../../ui-component/style-fc/style-symbol'
 import { docTemplateSet } from '../../events'
 import { Doc } from '../../interfaces'
@@ -39,24 +40,22 @@ export const DocPlaceholder = ({
       )} */}
 
       <h5 className="mt-8 text-gray-700 dark:text-gray-200">Template</h5>
-      {['General', 'Company', 'Research', 'Thing', 'Person', 'Empty'].map(
-        (title, i) => {
-          return (
-            <button
-              key={i}
-              className="flex items-center gap-1 mt-2  text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-              onClick={() =>
-                templateOnClick ? templateOnClick(title) : docTemplateSet(doc)
-              }
-            >
-              <span className="material-icons-outlined text-xl leading-none text-gray-400">
-                description
-              </span>
-              {styleSymbol(title, '')}
-            </button>
-          )
-        },
-      )}
+      {templateTitles.map((title, i) => {
+        return (
+          <button
+            key={i}
+            className="flex items-center gap-1 mt-2  text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+            onClick={() =>
+              templateOnClick ? templateOnClick(title) : docTemplateSet(doc)
+            }
+          >
+            <span className="material-icons-outlined text-xl leading-none text-gray-400">
+              description
+            </span>
+            {styleSymbol(title, '')}
+          </button>
+        )
+      })}
     </div>
   )
 }
