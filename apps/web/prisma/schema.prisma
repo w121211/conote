@@ -1,0 +1,496 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("APP_DATABASE_URL")
+}
+
+model Author {
+  id   String @id @default(cuid())
+  name String @unique
+  meta Json   @default("{}")
+
+  // Editable by the user
+  content Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  rates     Rate[]
+}
+
+model Branch {
+  id         String      @id @default(cuid())
+  name       String      @unique
+  notes      Note[]
+  noteDrafts NoteDraft[]
+  noteDocs   NoteDoc[]
+}
+
+//
+// TODO: This model need to be modified since the definition is changed in Note and Draft model
+//
+model Commit {
+  id         String      @id @default(cuid())
+  userId     String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id])
+  noteDrafts NoteDraft[]
+  noteDocs   NoteDoc[]
+}
+
+model Discuss {
+  id        String        @id @default(cuid())
+  draftId   String
+  userId    String
+  type      DiscussType   @default(DISCUSS)
+  status    DiscussStatus @default(DRAFT)
+  meta      Json          @default("{}")
+  title     String
+  content   String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // The draft that creat this discuss
+  draft NoteDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  user   User           @relation(fields: [userId], references: [id])
+  count  DiscussCount? // 1-to-1
+  emojis DiscussEmoji[]
+  posts  DiscussPost[]
+  notes  Note[]
+  polls  Poll[]
+}
+
+model DiscussCount {
+  id        Int      @id @default(autoincrement())
+  discussId String   @unique
+  nPosts    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  discuss   Discuss  @relation(fields: [discussId], references: [id], onDelete: Cascade)
+}
+
+model DiscussEmoji {
+  id        Int                @id @default(autoincrement())
+  discussId String
+  code      EmojiCode
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  discuss   Discuss            @relation(fields: [discussId], references: [id], onDelete: Cascade)
+  count     DiscussEmojiCount?
+  likes     DiscussEmojiLike[]
+
+  @@unique([code, discussId])
+}
+
+model DiscussEmojiCount {
+  id             Int          @id @default(autoincrement())
+  discussEmojiId Int          @unique
+  nUps           Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id], onDelete: Cascade)
+}
+
+model DiscussEmojiLike {
+  id             Int          @id @default(autoincrement())
+  discussEmojiId Int
+  userId         String
+  liked          Boolean
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  discussEmoji   DiscussEmoji @relation(fields: [discussEmojiId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id])
+
+  @@unique([discussEmojiId, userId])
+}
+
+model DiscussPost {
+  id        Int                @id @default(autoincrement())
+  discussId String
+  userId    String
+  status    DiscussPostStatus  @default(ACTIVE)
+  content   String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  discuss   Discuss            @relation(fields: [discussId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id])
+  emojis    DiscussPostEmoji[]
+
+  // A vote with comment
+  vote PollVote?
+}
+
+model DiscussPostEmoji {
+  id            Int                    @id @default(autoincrement())
+  discussPostId Int
+  code          EmojiCode
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  discussPost   DiscussPost            @relation(fields: [discussPostId], references: [id], onDelete: Cascade)
+  count         DiscussPostEmojiCount?
+  likes         DiscussPostEmojiLike[]
+
+  @@unique([code, discussPostId])
+}
+
+model DiscussPostEmojiCount {
+  id                 Int              @id @default(autoincrement())
+  discussPostEmojiId Int              @unique
+  nUps               Int              @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id], onDelete: Cascade)
+}
+
+model DiscussPostEmojiLike {
+  id                 Int              @id @default(autoincrement())
+  discussPostEmojiId Int              @unique
+  userId             String
+  liked              Boolean
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  discussPostEmoji   DiscussPostEmoji @relation(fields: [discussPostEmojiId], references: [id], onDelete: Cascade)
+  user               User             @relation(fields: [userId], references: [id])
+
+  @@unique([userId, discussPostEmojiId])
+}
+
+model Note {
+  id        String      @id @default(cuid())
+  branchId  String
+  symId     String
+  linkId    String?     @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  link      Link?       @relation(fields: [linkId], references: [id])
+  sym       Sym         @relation(fields: [symId], references: [id])
+  branch    Branch      @relation(fields: [branchId], references: [id])
+  discusses Discuss[]
+  emojis    NoteEmoji[]
+  docs      NoteDoc[]
+  drafts    NoteDraft[]
+
+  @@unique([branchId, symId])
+}
+
+model NoteDoc {
+  id       String @id @default(cuid())
+  branchId String
+  symId    String
+  commitId String
+
+  // The draft used to create this doc. Is unique becuase one doc can only map to one draft.
+  // If draft is updated, update its counter doc instead of creating a new doc
+  // draftId String @unique
+
+  fromDocId String?
+
+  // To determine can the doc merge. Is optional because auto-merge not require a poll
+  mergePollId String?       @unique
+  userId      String
+  status      NoteDocStatus @default(CANDIDATE)
+
+  // Seperated column to enhance searching
+  domain String
+
+  // Used to store meta info of the system, not editable by the user
+  meta Json @default("{}")
+
+  // User created content, editable by the user
+  contentHead Json
+  contentBody Json
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  branch         Branch      @relation(fields: [branchId], references: [id])
+  commit         Commit      @relation(fields: [commitId], references: [id])
+  fromDoc        NoteDoc?    @relation("DocHistory", fields: [fromDocId], references: [id])
+  nextDocs       NoteDoc[]   @relation("DocHistory")
+  mergePoll      Poll?       @relation(fields: [mergePollId], references: [id])
+  note           Note        @relation(fields: [branchId, symId], references: [branchId, symId])
+  // draft          NoteDraft   @relation("DraftToDoc", fields: [draftId], references: [id])
+  draftsFromThis NoteDraft[] @relation("FromDoc")
+  sym            Sym         @relation(fields: [symId], references: [id])
+  user           User        @relation(fields: [userId], references: [id])
+}
+
+model NoteDraft {
+  id String @id @default(cuid())
+
+  // Use as an identifier
+  // Cannot be unique because drafts won't delete from database when user removed the draft
+  symbol String
+
+  branchId  String
+  symId     String?
+  commitId  String?
+  fromDocId String?
+
+  linkId      String?
+  userId      String
+  status      NoteDraftStatus @default(EDIT)
+  domain      String
+  meta        Json            @default("{}")
+  contentHead Json
+  contentBody Json
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  branch      Branch          @relation(fields: [branchId], references: [id])
+  commit      Commit?         @relation(fields: [commitId], references: [id])
+  // commitDoc   NoteDoc?        @relation("DraftToDoc")
+  fromDoc     NoteDoc?        @relation("FromDoc", fields: [fromDocId], references: [id])
+  link        Link?           @relation(fields: [linkId], references: [id])
+  note        Note?           @relation(fields: [branchId, symId], references: [branchId, symId])
+  sym         Sym?            @relation(fields: [symId], references: [id])
+  user        User            @relation(fields: [userId], references: [id])
+
+  // Discusses created by this draft
+  discusses Discuss[]
+}
+
+model NoteEmoji {
+  id        Int             @id @default(autoincrement())
+  // branchId  String
+  // symId     String
+  noteId    String
+  code      EmojiCode
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  count     NoteEmojiCount?
+  likes     NoteEmojiLike[]
+  // note      Note            @relation(fields: [branchId, symId], references: [branchId, symId])
+  note      Note            @relation(fields: [noteId], references: [id])
+
+  // @@unique([branchId, symId, code])
+  @@unique([code, noteId])
+}
+
+model NoteEmojiCount {
+  id          Int       @id @default(autoincrement())
+  noteEmojiId Int       @unique
+  nViews      Int       @default(0)
+  nUps        Int       @default(0)
+  nDowns      Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  noteEmoji   NoteEmoji @relation(fields: [noteEmojiId], references: [id])
+}
+
+model NoteEmojiLike {
+  id          Int       @id @default(autoincrement())
+  noteEmojiId Int
+  userId      String
+  liked       Boolean
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  noteEmoji   NoteEmoji @relation(fields: [noteEmojiId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([noteEmojiId, userId])
+}
+
+model Link {
+  id         String      @id @default(cuid())
+  url        String      @unique
+  domain     String
+  scraped    Json        @default("{}")
+  rates      Rate[]
+  sym        Sym?
+  notes      Note[]
+  noteDrafts NoteDraft[]
+}
+
+model Poll {
+  id        String     @id @default(cuid())
+  discussId String?
+  userId    String
+  type      PollType   @default(FIXED)
+  status    PollStatus @default(OPEN)
+  meta      Json
+
+  // User input content
+  choices String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // A poll can connect to a discuss
+  discuss Discuss? @relation(fields: [discussId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+
+  // This poll is for merge request of the note-doc
+  noteDocToMerge NoteDoc?
+
+  count PollCount?
+  votes PollVote[]
+}
+
+model PollCount {
+  id         Int      @id @default(autoincrement())
+  pollId     String   @unique
+  nVotes     Int[]
+  nJudgments Int[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  poll       Poll     @relation(fields: [pollId], references: [id])
+}
+
+model PollVote {
+  id            Int      @id @default(autoincrement())
+  discussPostId Int?     @unique
+  pollId        String
+  userId        String
+  choiceIdx     Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 1-1, A vote can connect to a post to enable 'comment' while voting
+  discussPost DiscussPost? @relation(fields: [discussPostId], references: [id])
+
+  poll Poll @relation(fields: [pollId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Rate {
+  id        String     @id @default(cuid())
+  linkId    String?
+  userId    String
+  authorId  String?
+  symId     String
+  choice    RateChoice
+  body      Json       @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  author    Author?    @relation(fields: [authorId], references: [id])
+  link      Link?      @relation(fields: [linkId], references: [id])
+  sym       Sym        @relation(fields: [symId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+}
+
+//
+// Why not naming "Symbol"? "Symbol" is a preserved keyword in javascript
+//
+model Sym {
+  id        String      @id @default(cuid())
+  linkId    String?     @unique
+  type      SymType
+  symbol    String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  link      Link?       @relation(fields: [linkId], references: [id])
+  rates     Rate[]
+  drafts    NoteDraft[]
+
+  // A sym can have multiple notes because note use branch-sym as unique key
+  notes    Note[]
+  noteDocs NoteDoc[]
+}
+
+model User {
+  id                    String                 @id
+  email                 String                 @unique
+  commits               Commit[]
+  discusses             Discuss[]
+  discussEmojiLikes     DiscussEmojiLike[]
+  discussPosts          DiscussPost[]
+  discussPostEmojiLikes DiscussPostEmojiLike[]
+  noteEmojiLikes        NoteEmojiLike[]
+  noteDocs              NoteDoc[]
+  noteDrafts            NoteDraft[]
+  polls                 Poll[]
+  rates                 Rate[]
+  votes                 PollVote[]
+}
+
+enum DiscussStatus {
+  DRAFT
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
+}
+
+enum DiscussType {
+  // For discuss
+  DISCUSS
+
+  // For note-doc merge request
+  MERGE
+}
+
+enum DiscussPostStatus {
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
+}
+
+enum EmojiCode {
+  UP
+  DOWN
+  PIN
+  REPORT
+}
+
+enum LikeChoice {
+  UP
+  NEUTRAL
+}
+
+enum NoteDocStatus {
+  // Wait to merge
+  CANDIDATE
+  PAUSE
+  MERGED
+  REJECTED
+}
+
+enum NoteDraftStatus {
+  EDIT
+  COMMIT
+  DROP
+}
+
+enum PollStatus {
+  CLOSE_SUCCESS
+  CLOSE_FAIL
+
+  OPEN
+
+  // If paused, the poll cannot vote
+  PAUSE
+
+  JUDGE
+
+  // In case the poll data is broken and cannot perform jobs, wait for manual checking
+  ABNORMAL
+}
+
+enum PollType {
+  // Poll choices are fixed and not changable after create
+  FIXED
+  ADD
+  ADD_BY_POST
+}
+
+enum RateChoice {
+  LONG
+  SHORT
+  HOLD
+}
+
+enum SymType {
+  TICKER
+  TOPIC
+  URL
+}

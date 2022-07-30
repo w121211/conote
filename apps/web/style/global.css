@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Cantarell:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Noto+Serif+TC:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Mono:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Outlined');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --lg-max-width: 900px;
+  --md-max-width: 720px;
+  --max-width: 425px;
+}
+
+@layer base {
+  body {
+    @apply overflow-hidden bg-gray-50;
+  }
+  h1 {
+    @apply text-4xl font-bold text-gray-800;
+  }
+  h2 {
+    @apply text-3xl font-bold;
+  }
+  h3 {
+    @apply text-2xl font-bold;
+  }
+  h4 {
+    @apply text-xl font-bold;
+  }
+  h5 {
+    @apply font-bold;
+  }
+  button {
+    @apply appearance-none;
+  }
+}
+
+@layer components {
+  .responsive-width {
+    @apply w-[var(--max-width)] md:w-full md:max-w-[var(--md-max-width)] lg:max-w-[var(--lg-max-width)];
+  }
+  .input {
+    @apply p-2 
+      border border-gray-300 
+      rounded 
+      text-sm text-gray-800 
+      hover:bg-gray-50 
+      focus:bg-gray-50 
+      focus:shadow-[0_0_0_2px] focus:shadow-blue-400 
+      focus:outline-none 
+      focus:border-transparent
+      disabled:bg-transparent
+      disabled:border-gray-100
+      disabled:text-gray-500;
+  }
+  /* ---Button--- */
+  .btn-normal {
+    @apply inline-block px-3 py-1 rounded text-gray-600 bg-gray-100 border border-gray-200 transition-all duration-200 hover:bg-gray-200/70 hover:border-gray-300/70 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply inline-block px-3 py-1 rounded text-white bg-blue-600 transition-all duration-200 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+  }
+  .btn-secondary {
+    @apply inline-block px-3 py-1 rounded text-blue-600 bg-blue-100/70 transition-all duration-200 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+  }
+  .btn-normal-md {
+    @apply inline-block px-3 py-2 rounded text-gray-600 bg-gray-100 border border-gray-200 transition-all duration-200 hover:bg-gray-200/70 hover:border-gray-300/70 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+  }
+  .btn-primary-md {
+    @apply inline-block px-3 py-2 rounded text-white bg-blue-600 transition-all duration-200 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+  }
+  .btn-secondary-md {
+    @apply inline-block px-3 py-2 rounded text-blue-600 bg-blue-100/70 transition-all duration-200 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+  }
+  .btn-normal-lg {
+    @apply inline-block px-6 py-3 rounded font-medium text-lg text-gray-600 bg-gray-100 border border-gray-200 transition-all duration-200 hover:bg-gray-200/70 hover:border-gray-300/70 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+  }
+  .btn-primary-lg {
+    @apply inline-block px-6 py-3 rounded font-medium text-lg text-white bg-blue-600 transition-all duration-200 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+  }
+  .btn-secondary-lg {
+    @apply inline-block px-6 py-3 rounded font-medium text-lg text-blue-600 bg-blue-100/70 transition-all duration-200 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-400 disabled:pointer-events-none;
+  }
+
+  .link {
+    @apply text-blue-600 dark:text-blue-300 cursor-pointer hover:underline hover:underline-offset-2;
+  }
+
+  .symbol-link {
+    @apply text-blue-600 dark:text-blue-300 cursor-pointer hover:bg-gray-200/80 dark:hover:bg-gray-600;
+  }
+
+  .details-menu {
+    @apply absolute top-full border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 shadow-lg z-50 opacity-0 scale-75 transition-all ease-[cubic-bezier(0.21,0.02,0.28,1.58)];
+  }
+
+  .scrollbar::-webkit-scrollbar {
+    width: 10px;
+    /* height: 20px; */
+  }
+  .scrollbar::-webkit-scrollbar-track {
+    /* display: none; */
+    @apply bg-transparent rounded-sm;
+  }
+  .scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 dark:bg-gray-800 rounded-sm hover:bg-gray-300 dark:hover:bg-gray-900
+    /* border: 3px solid #f6f7ed; ; */;
+  }
+  /* ---Hide scrollbar for Chrome, Safari and Opera--- */
+  .hide-scrollbar::-webkit-scrollbar {
+    @apply hidden;
+  }
+  .text-shadow::before {
+    content: '';
+    mix-blend-mode: multiply;
+    /* text-shadow: 1px 1px 0 theme('colors.white'); */
+  }
+}
+
+@layer utilities {
+  .shadow-footer {
+    box-shadow: 0 -1px 0 theme('colors.white'),
+      0 -2px 0 theme('colors.gray.200'), 0 -3px 6px theme('colors.gray.300');
+  }
+  .shadow-footer-dark {
+    box-shadow: 0 -1px 0 theme('colors.gray.600'),
+      0 -2px 0 theme('colors.gray.800'), 0 -3px 6px theme('colors.gray.800');
+  }
+  /* ---Hide scrollbar for IE, Edge and Firefox--- */
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}

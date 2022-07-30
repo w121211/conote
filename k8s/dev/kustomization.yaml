@@ -1,0 +1,30 @@
+# @see https://github.com/GoogleCloudPlatform/cloud-code-samples/tree/master/nodejs/nodejs-guestbook/kubernetes-manifests
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - webapp.yaml
+  - managed-cert.yaml
+  # - ingress.yml
+# patchesStrategicMerge:
+#   - env.yml
+secretGenerator:
+  - name: conote-webapp-envlocal
+    envs:
+      - '../../apps/web/.env.local'
+  # - name: postgres-user-pass
+  #   literals:
+  #     - username=postgresuser
+  #     - password=postgrespassword
+  # The secrets file should not be checked into Git. It's published only for demonstration purpose.
+  # - name: postgres-user-pass
+  #   literals:
+  #     - username=postgresuser
+  #     - password=postgrespassword
+  # - name: postgres-database-url
+  #   literals:
+  #     - url=postgresql://postgresuser:postgrespassword@conote-postgres/prisma?schema=public
+# configMapGenerator:
+#   - name: conote-configmap
+#     envs:
+#       - .env

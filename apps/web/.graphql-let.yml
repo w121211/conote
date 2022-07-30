@@ -1,0 +1,15 @@
+schema: apollo/type-defs.graphqls
+documents: '**/*.graphql'
+cacheDir: .cache
+plugins:
+  - typescript-operations
+  - typescript-react-apollo
+config:
+  enumsAsTypes: true
+  # Produce flatten-type, avoid Pick<...>
+  preResolveTypes: true
+  # Mapping to typescript types
+  scalars:
+    BigInt: BigInt
+    JSON: object
+    DateTime: 'string | Date'

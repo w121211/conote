@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.build.json",
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".cache",
+    "dist",
+    "prisma",
+    "__deprecated__",
+    "stories",
+    "test",
+    "./components/block-editor/test"
+  ],
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": true,
+    "declarationMap": true,
+    "rootDir": ".",
+    "outDir": "dist"
+  },
+  "ts-node": {
+    // options are overrides used only by ts-node
+    "compilerOptions": {
+      "module": "commonjs",
+      "allowJs": false
+    }
+  }
+}

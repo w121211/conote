@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // "target": "es5", // set `es5` will jump error, possibly caused by graphql
+    "module": "esnext",
+    // "rootDir": ".",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "downlevelIteration": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "sourceMap": true
+
+    // "allowJs": true,
+    // "jsx": "preserve"
+  },
+  "include": ["src"],
+  "exclude": ["**/__deprecated__", "**/__tests__", "node_modules", ".cache", "devdist", "dist"]
+}

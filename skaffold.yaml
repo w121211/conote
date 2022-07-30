@@ -7,7 +7,7 @@ apiVersion: skaffold/v2beta16
 kind: Config
 build:
   artifacts:
-    - image: conote-web
+    - image: conote-webapp-image
       context: .
 deploy:
   kustomize:
@@ -18,14 +18,14 @@ profiles:
   - name: gcb
     build:
       artifacts:
-        - image: conote-web
+        - image: conote-webapp-image
           context: .
-          kaniko:
-            cache: {}
+          # kaniko:  # Fail with yarn workspace
+          #   cache: {}
       googleCloudBuild:
         # diskSizeGb: 300
         # machineType: N1_HIGHCPU_32
-        projectId: conote-try
+        projectId: conote-web-project
         timeout: 4000s
   - name: minikube
     activation:

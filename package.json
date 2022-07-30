@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "syncpack": "^6.2.0"
+  },
+  "private": true,
+  "scripts": {
+    "build-packages": "yarn --cwd packages/docdiff build & yarn --cwd packages/scraper build",
+    "clean": "find . -type d -name node_modules -prune -exec rm -rf {} \\;",
+    "syncpack": "syncpack fix-mismatches --source \"packages/*/package.json\" --source \"apps/*/package.json\""
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}

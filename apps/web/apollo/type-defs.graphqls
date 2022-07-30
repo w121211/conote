@@ -1,0 +1,884 @@
+#
+# Custom scalars
+# Require to modify './apollo/schema.ts' too
+# @see https://www.graphql-scalars.dev/docs/quick-start
+#
+scalar JSON
+
+# Date use iso-date string instead
+# scalar DateTime
+# scalar BigInt
+
+type Query {
+  # Get by id or name, returns null if not found
+  # NEXT:
+  author(id: ID, name: String): Author
+
+  # Throw error if not found
+  commit(id: ID!): Commit!
+
+  # Get a user's latest commits, used in user's profile page
+  commitsByUser(userId: ID!, afterId: ID): [Commit!]!
+
+  # Throw error if not found
+  discuss(id: ID!): Discuss!
+
+  # Latest discusses created by the user
+  discussesByUser(userId: ID!, afterId: ID): [Discuss!]!
+
+  # Latest discuss-entries
+  discussesLatest(afterId: ID): [Discuss!]!
+
+  discussEmojis(discussId: ID!): [DiscussEmoji!]!
+
+  discussPosts(discussId: ID!): [DiscussPost!]!
+
+  discussPostEmojis(discussPostId: ID!): [DiscussPostEmoji!]!
+
+  # Returns null if not found. This is in favor of using 'url' for searching
+  link(id: ID, url: String): Link
+
+  me: User!
+
+  myNoteEmojiLike(noteEmojiId: ID!): NoteEmojiLike
+
+  # Get user's all drafts for draft-sidebar
+  # Provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
+  myNoteDraftEntries: [NoteDraftEntry!]!
+
+  myDiscussEmojiLike(discussEmojiId: ID!): DiscussEmojiLike
+
+  myDiscussPostEmojiLike(discussPostEmojiId: ID!): DiscussPostEmojiLike
+
+  # Allow vote multiple times on the same poll
+  myPollVotes(pollId: ID!): [PollVote!]!
+
+  # NEXT:
+  myRates(symId: ID!): [Rate!]!
+
+  # Throw error if not found
+  noteById(id: ID!): Note!
+
+  noteByBranchSymbol(branch: String!, symbol: String!): Note
+
+  # Need to modify the input (confirm the prisma)
+  noteEmojis(noteId: ID!): [NoteEmoji!]!
+
+  # Throws error if not found
+  noteDoc(id: ID!): NoteDoc!
+
+  # Latest note docs (merged and not-merged) created by the user
+  noteDocsByUser(userId: ID!, afterId: ID): [NoteDoc!]!
+
+  # All note-docs wait to merge of a note, ie candidates
+  noteDocsToMergeByNote(noteId: ID!): [NoteDoc!]!
+
+  # Latest just merged note-docs
+  noteDocsMergedLatest(afterId: ID): [NoteDoc!]!
+
+  # Latest waiting to merge note-docs
+  noteDocsToMergeLatest(afterId: ID): [NoteDoc!]!
+
+  # Get user's draft
+  # Query either by id, symbol or url
+  noteDraft(id: ID, symbol: String, url: String): NoteDraft
+
+  noteDraftById(id: ID!): NoteDraft!
+
+  # Get all docs from note pull request records including candidates (like Github PR history)
+  noteHistory(noteId: ID!, status: NoteDocStatus): [NoteDocEntry!]!
+
+  # Throws error if not found
+  poll(id: ID!): Poll!
+
+  # NEXT:
+  rate(id: ID!): Rate!
+
+  # NEXT:
+  ratesByAuthor(authorId: ID!, symId: ID!): [Rate!]!
+
+  # NEXT:
+  ratesBySource(linkId: ID!): [Rate!]!
+
+  # NEXT:
+  searchAuthor(term: String!): [SearchHit!]!
+
+  # Fuzzy search discuss title by given term
+  searchDiscuss(term: String!): [SearchHit!]!
+
+  # Fuzzy search symbol name, if 'type' not given, search both ticker & topic
+  searchSymbol(term: String!, type: SymType): [SearchHit!]!
+
+  # userProfile(userId: ID!): [UserProfile!]!
+
+  # TODO: Duplicated with searchSymbol ?
+  # Search note by sym or title, using domain for filtering
+  # searchNote(symbol: String, title: String, domain: String): [Note!]!
+
+  # --- NEXT ---
+
+  # 以 note symbol 找該 note 所有的 active hashtags
+  # hashtags(symbol: String!): [Hashtag!]
+
+  # myCommentLikes(after: String): [CommentLike!]!
+  # myBoardLikes(after: String): [BoardLike!]!
+  # myBulletLikes(after: String): [BulletLike!]!
+  # board(id: ID!): Board!
+  # comments(boardId: ID!, afterId: ID): [Comment!]!
+
+  # 以下note目前暫不考慮
+  # selfnote(id: ID!): Selfnote
+  # mynote(symbolName: String!): Selfnote
+
+  # 專用於顯示
+  # topComments(blockId: ID!, afterId: ID): [CommentWithReplies!]!
+
+  # 所有的comments（含spot），幫助cache，僅含spotReplies
+  # comments(noteId: ID!, afterId: ID): [Comment!]!
+
+  # 用於filter comments的情形（例如：/q, /stage, ...)
+  # commentsBySymbol(pageTitle: String!, symbol: String!, afterId: ID): [Comment!]!
+
+  # 自動標註可能的topic, tickers
+  # automark(text: String!): String!
+
+  # ticks(symbolId: ID!, after: String): [Tick!]!
+
+  # trendTopics: [String!]!
+  # newTopics: [String!]!
+  # newTickers: [String!]!
+
+  # botPolls(symbolName: String): [Poll!]!
+  # latestPolls(symbolId: ID, afterId: String): [Poll!]!
+  # pollHints(symbols: [String], title: String): [Poll!]!
+  # poll(id: ID!): Poll!
+
+  # myPollLikes(afterId: ID): [PollLike!]!
+
+  # latestPosts(symbolId: ID, afterId: String): [Post!]!
+  # repliedPosts(parentId: ID!, afterId: String): [Post!]!
+  # risingPosts(afterId: String): [Post!]!
+  # trendPosts(afterId: String): [Post!]!
+
+  # symbol(name: String!): Symbol!
+
+  # post(id: ID!): Post!
+  # event(id: ID!): Event!
+  # ticker(id: ID, name: String): Ticker!
+
+  # myPostLikes(after: String): [PostLike!]!
+  # myCommentLikes(after: String): [CommentLike!]!
+
+  # myComments(after: String): [ID!]!
+  # myPosts(afterId: String): [Post!]!
+  # myFollows: [Follow!]!
+  # myCommits(after: String): [ID!]!
+  # myCommitReviews(after: String): [CommitReview!]!
+  # myWaitedCommitReviews: [CommitReview!]!
+
+  # tagHints(term: String): [String!]!
+  # tickerHints(term: String): [String!]!
+  # eventHints(term: String): [String!]!
+
+  # fetchPage(url: String!): Page!
+
+  # myBets: [Bet!]!
+  # myNotices: [Notice!]!
+  # mySignals: [Signal]
+  # groups: [Group]
+  # myGroups: [Group]
+  # groupPosts(groupId: ID): [Post]
+}
+
+type Mutation {
+  # NEXT:
+  createAuthor(data: AuthorInput!): Author!
+  # NEXT:
+  updateAuthor(id: ID!, data: AuthorInput!): Author!
+
+  # commit must be created first
+  createCommit(noteDraftIds: [ID!]!): Commit!
+
+  createDiscuss(noteDraftId: ID!, data: DiscussInput!): Discuss!
+
+  updateDiscuss(id: ID!, data: DiscussInput!): Discuss!
+
+  # Either emoji-id or (discuss-id, code) is required
+  upsertDiscussEmojiLike(
+    liked: Boolean!
+    emojiId: Int
+    emojiCode: EmojiCode
+    discussId: String
+  ): [UpsertDiscussEmojiLikeResult!]!
+
+  createDiscussPost(discussId: ID!, data: DiscussPostInput!): DiscussPost!
+
+  updateDiscussPost(id: ID!, data: DiscussPostInput!): DiscussPost!
+
+  upsertDiscussPostEmojiLike(
+    liked: Boolean!
+    emojiId: Int
+    emojiCode: EmojiCode
+    discussPostId: Int
+  ): [UpsertDiscussPostEmojiLikeResult!]!
+
+  # Get or create the link
+  createLink(url: String!): Link!
+
+  upsertNoteEmojiLike(
+    liked: Boolean!
+    emojiId: Int
+    emojiCode: EmojiCode
+    noteId: String
+  ): [UpsertNoteEmojiLikeResult!]!
+
+  # Not sure about the type of meta, which is for creating from existing note
+  createNoteDraft(
+    branch: String!
+    symbol: String!
+    data: NoteDraftInput!
+  ): NoteDraft!
+
+  createNoteDraftByLink(
+    branch: String!
+    linkId: String!
+    data: NoteDraftInput!
+  ): NoteDraft!
+
+  # input not yet decided
+  updateNoteDraft(id: ID!, data: NoteDraftInput!, newSymbol: String): NoteDraft!
+
+  updateNoteDraftMeta(id: ID!, data: NoteDraftMetaInput!): NoteDraft!
+
+  # Update note draft status to 'DROP'
+  dropNoteDraft(id: ID!): NoteDraftDropResponse!
+
+  # Remove note draft from database
+  deleteNoteDraft(id: ID!): Boolean!
+
+  #  NEXT:
+  createPoll(data: PollInput!): Poll!
+
+  #  NEXT:
+  createRate(data: RateInput!): Rate!
+
+  #  NEXT:
+  updateRate(id: ID!, data: RateInput!): Rate!
+
+  # also used for merge verdict
+  createPollVote(pollId: ID!, data: PollVoteInput!): PollVote!
+
+  # updatePollVote(pollId: ID!, data: VoteInput!): PollVote!
+
+  # csrf token not support yet
+  sessionLogin(idToken: String!): User!
+
+  sessionLogout: Boolean!
+
+  # --- NEXT ---
+
+  # createPoll(data: PollInput!): Poll!
+  # createFollow(symbolId: ID!, data: FollowInput!): Follow!
+  # updateFollow(symbolId: ID!, data: FollowInput!): Follow!
+
+  ### upcoming ###
+
+  # uploadImg(): Img
+  # createBet(): Bet
+  # upsertBet(data: BetInput): Bet
+  # createGroup(data: GroupInput): Group
+  # updateGroup(data: GroupInput): Group
+  # joinGroup(id: ID): Boolean
+  # leaveGroup(id: ID): Boolean
+  # inviteJoin(groupId: ID, criteria: String): Boolean
+}
+
+type Author {
+  id: ID!
+  name: String!
+  content: AuthorContent!
+}
+
+type AuthorContent {
+  type: AuthorType!
+  job: String
+  org: String
+  sites: [AuthorContentSite!]!
+}
+
+type AuthorContentSite {
+  name: String!
+  url: String!
+}
+
+type Block {
+  uid: ID!
+  str: String!
+  open: Boolean
+  order: Int!
+  parentUid: String
+  docSymbol: String
+}
+
+type BlockUid_DiscussId {
+  blockUid: String!
+  discussId: String!
+  commitId: String
+}
+
+type Commit {
+  id: String!
+  userId: String!
+  noteDocs: [NoteDoc!]!
+
+  # Consdier to remove
+  # noteDrafts: [NoteDraft!]!
+
+  createdAt: String!
+}
+
+type Discuss {
+  id: ID!
+  userId: String!
+  status: DiscussStatus!
+
+  # TODO: define the content of meta
+  # meta: JSON!
+
+  title: String!
+  content: String
+  createdAt: String!
+  updatedAt: String!
+  count: DiscussCount!
+  noteEntries: [NoteEntry!]!
+}
+
+type DiscussCount {
+  id: ID!
+  nPosts: Int!
+}
+
+type DiscussEmoji {
+  id: ID!
+  code: EmojiCode!
+  count: DiscussEmojiCount!
+}
+
+type DiscussEmojiCount {
+  id: ID!
+  nUps: Int!
+}
+
+type DiscussEmojiLike {
+  id: ID!
+  discussEmojiId: Int!
+  liked: Boolean!
+  updatedAt: String!
+}
+
+type DiscussPost {
+  id: ID!
+  userId: String!
+  status: DiscussPostStatus!
+  content: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type DiscussPostEmoji {
+  id: ID!
+  code: EmojiCode!
+  count: DiscussPostEmojiCount!
+}
+
+type DiscussPostEmojiCount {
+  id: ID!
+  nUps: Int!
+}
+
+type DiscussPostEmojiLike {
+  id: ID!
+  discussPostEmojiId: Int!
+  liked: Boolean!
+  updatedAt: String!
+}
+
+type Link {
+  id: ID!
+  url: String!
+  authorId: String
+  scraped: LinkScrapedResult!
+}
+
+type LinkScrapedResult {
+  domain: String!
+  finalUrl: String!
+  # srcId?: string
+  # srcType: 'video' | 'post' | 'author' | 'other'
+
+  # // metascraper
+  authorId: String
+  authorName: String
+  date: String
+  description: String
+  lang: String
+  title: String
+
+  # // ./packages/scraper
+  keywords: [String!]
+  tickers: [String!]
+  # error?: string
+}
+
+type Note {
+  id: ID!
+  branchName: String!
+
+  sym: Sym!
+  link: Link
+
+  # The latest merged NoteDoc, throw error if there is none
+  # it is impossible to be null because first NoteDoc will auto-merge to the newly-built Note
+  headDoc: NoteDoc!
+
+  updatedAt: String!
+}
+
+type NoteEmoji {
+  id: ID!
+  code: EmojiCode!
+  count: NoteEmojiCount!
+}
+
+type NoteEmojiCount {
+  id: ID!
+  nUps: Int!
+  nDowns: Int!
+}
+
+type NoteEmojiLike {
+  id: ID!
+  noteEmojiId: Int!
+  liked: Boolean!
+  updatedAt: String!
+}
+
+type NoteEntry {
+  id: ID!
+  branchName: String!
+  sym: Sym!
+  link: Link
+}
+
+type NoteDoc {
+  id: ID!
+  # Require bracnh and symbol in cases query note-doc without note
+  branchName: String!
+  symbol: String!
+  commitId: String!
+  fromDocId: String
+  mergePollId: String
+  userId: String!
+  status: NoteDocStatus!
+  meta: NoteDocMeta!
+  domain: String!
+  contentHead: NoteDocContentHead!
+  contentBody: NoteDocContentBody!
+  updatedAt: String!
+}
+
+type NoteDocContentBody {
+  # discussIds: [BlockUid_DiscussId!]!
+  # A symbol-noteId map, so later the cahnge of symbol name won't affect
+  # symbols: [Symbol_SymId!]!
+
+  blocks: [Block!]!
+  # Experimental
+  blockDiff: [TreeNodeChange!]!
+}
+
+type NoteDocContentHead {
+  # If provided, use it to update the current note's symbol when merged
+  symbol: String
+
+  # Use for ticker, webpage symbols to display a title aside with symbol
+  title: String
+
+  # To store Sym.symbols refering to the same note, e.g $BA, [[Boeing]] both to Boeing
+  duplicatedSymbols: [String!]
+
+  # Note keywords
+  keywords: [String!]
+
+  # Used when duplicate symbol exists
+  redirectFroms: [String!]
+
+  redirectTo: String
+
+  webpage: NoteDocContentHeadWebpage
+}
+
+# Meta-data extracted from the webpage, editable
+type NoteDocContentHeadWebpage {
+  authors: [String!]
+
+  # Webpage's title
+  title: String
+
+  # When the webpage content publish at
+  publishedAt: String
+
+  # Tickers mentioned in the webpage content
+  tickers: [String!]
+}
+
+type NoteDocEntry {
+  id: ID!
+}
+
+type NoteDocMeta {
+  mergeState: String!
+}
+
+type NoteDraft {
+  id: ID!
+  branchName: String!
+  # Act as an additional id in front-end
+  symbol: String!
+  commitId: String
+  fromDocId: String
+  linkId: String
+  userId: String!
+  domain: String!
+  status: NoteDraftStatus!
+  meta: NoteDraftMeta!
+  contentHead: NoteDocContentHead!
+  contentBody: NoteDocContentBody!
+  updatedAt: String!
+}
+
+# type NoteDraftCommitResponse {
+#   commitId: String!
+#   docs: [NoteDoc!]! # corresponding to the noteDraft, for the purpose of merge status display
+# }
+
+type NoteDraftDropResponse {
+  response: String!
+}
+
+type NoteDraftEntry {
+  id: ID!
+  status: NoteDraftStatus!
+  symbol: String!
+  meta: NoteDraftMeta!
+
+  # Retrived from 'noteDoc.contentHead.title' and is used for ticker, webpage
+  title: String
+}
+
+type NoteDraftMeta {
+  chain: NoteDraftMetaChain
+}
+
+type NoteDraftMetaChain {
+  prevId: String
+}
+
+type Poll {
+  id: ID!
+  userId: String!
+  status: PollStatus!
+  meta: PollMeta!
+  choices: [String!]!
+  count: PollCount!
+  discuss: Discuss
+  createdAt: String!
+  updatedAt: String!
+  noteDocToMerge: NoteDoc
+}
+
+type PollMeta {
+  openInDays: Int!
+}
+
+type PollCount {
+  id: ID!
+  nVotes: [Int!]!
+  # nJudgements: [Int]
+  # judgeStartedAt: DateTime
+  # judgeEndedAt: DateTime
+  # verdictValid: Boolean
+  # verdictChoice: Int
+  # updatedAt: DateTime!
+  # failedMsg: String
+}
+
+type PollVote {
+  id: ID!
+  pollId: String!
+  choiceIdx: Int!
+  # reward: Float
+  # createdAt: DateTime!
+  # updatedAt: DateTime!
+}
+
+type Rate {
+  id: ID!
+  userId: String!
+  authorId: String
+  linkId: String
+  symId: String!
+  choice: RateChoice!
+  # body: ShotBody
+  createdAt: String!
+  updatedAt: String!
+}
+
+type SearchHit {
+  id: String!
+  str: String!
+}
+
+type Sym {
+  id: ID!
+  type: SymType!
+  symbol: String! # this is mutable
+}
+
+type Symbol_SymId {
+  symbol: String!
+  symId: String
+}
+
+type TreeNodeChange {
+  type: String!
+  uid: String!
+}
+
+type User {
+  id: ID!
+  email: String!
+  # profileImage: String
+  # trips: [Launch]!
+}
+
+type UpsertDiscussEmojiLikeResult {
+  emoji: DiscussEmoji!
+  like: DiscussEmojiLike!
+}
+
+type UpsertDiscussPostEmojiLikeResult {
+  emoji: DiscussPostEmoji!
+  like: DiscussPostEmojiLike!
+}
+
+type UpsertNoteEmojiLikeResult {
+  emoji: NoteEmoji!
+  like: NoteEmojiLike!
+}
+
+# ------ Inputs ------
+
+input AuthorInput {
+  name: String!
+  type: AuthorType!
+  job: String
+  org: String
+  sites: [AuthorContentHeadSiteInput!]!
+}
+
+input AuthorContentHeadSiteInput {
+  name: String!
+  url: String!
+}
+
+input BlockInput {
+  uid: ID!
+  str: String!
+  open: Boolean
+  order: Int!
+  parentUid: String
+  docSymbol: String
+}
+
+input BlockUid_DiscussIdInput {
+  blockUid: String!
+  discussId: String!
+  commitId: String
+}
+
+input CommitInput {
+  noteDraftInputs: [NoteDraftInput!]!
+}
+
+input DiscussInput {
+  title: String!
+  content: String
+}
+
+input DiscussPostInput {
+  content: String!
+}
+
+input LikeInput {
+  choice: LikeChoice!
+}
+
+input NoteDraftInput {
+  # noteId: String   # not using for creating a draft and not this field in db
+  fromDocId: String
+  domain: String!
+  meta: NoteDraftMetaInput
+  contentHead: NoteDocContentHeadInput!
+  contentBody: NoteDocContentBodyInput!
+}
+
+input NoteDraftMetaInput {
+  # Null for no prev-id
+  chainPrevId: String
+}
+
+input NoteDocContentBodyInput {
+  # discussIds: [BlockUid_DiscussIdInput!]!
+  # symbols: [Symbol_SymIdInput!]!
+  blocks: [BlockInput!]!
+  blockDiff: [TreeNodeChangeInput!]!
+}
+
+# Same as NoteDocContentHead
+input NoteDocContentHeadInput {
+  symbol: String
+  title: String
+  duplicatedSymbols: [String!]
+  keywords: [String!]
+  redirectFroms: [String!]
+  redirectTo: String
+  webpage: NoteDocContentHeadWebpageInput
+}
+
+input NoteDocContentHeadWebpageInput {
+  authors: [String!]
+  title: String
+
+  # Datetime in milliseconds
+  publishedAt: String
+
+  tickers: [String!]
+}
+
+input PollInput {
+  # cat: PollCat!
+  choices: [String!]!
+}
+
+input PollVoteInput {
+  choiceIdx: Int!
+}
+
+input RateInput {
+  choice: RateChoice!
+  targetId: ID! # target note id
+  authorId: ID # create author rate required
+  linkId: ID # create author rate required
+}
+
+input Symbol_SymIdInput {
+  symbol: String!
+  symId: String
+}
+
+input TreeNodeChangeInput {
+  type: String!
+  uid: String!
+}
+
+# ------ NEXT ------
+
+# type Tick {
+#   id: ID!
+#   symbolId: Int!
+#   value: Float!
+#   at: DateTime!
+# }
+
+# ------ ENUM ------
+
+enum AuthorType {
+  ORG
+  PERSON
+}
+
+enum DiscussStatus {
+  DRAFT
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
+}
+
+enum DiscussPostStatus {
+  ACTIVE
+  LOCK
+  DELETE
+  ARCHIVE
+  REPORTED
+}
+
+enum EmojiCode {
+  UP
+  DOWN
+  PIN
+  REPORT
+}
+
+enum LikeChoice {
+  UP
+  # DOWN
+  NEUTRAL
+}
+
+enum NoteDocStatus {
+  CANDIDATE
+  PAUSE
+  MERGED
+  REJECTED
+}
+
+enum NoteDraftStatus {
+  EDIT
+  COMMIT
+  DROP
+}
+
+enum PollType {
+  FIXED
+  ADD
+  ADD_BY_POST
+}
+
+enum PollStatus {
+  CLOSE_SUCCESS
+  CLOSE_FAIL
+  OPEN
+
+  # If paused, the poll cannot vote
+  PAUSE
+
+  JUDGE
+
+  # In case the poll data is broken and cannot perform jobs, wait for manual checking
+  ABNORMAL
+}
+
+enum RateChoice {
+  LONG
+  SHORT
+  HOLD
+}
+
+enum SymType {
+  TICKER
+  TOPIC
+  URL
+}

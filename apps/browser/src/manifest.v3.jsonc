@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Conote extension",
+  "description": "A conote extension (under development)",
+  "version": "0.1.0",
+  "background": {
+    "service_worker": "background-script.js"
+    // "persistent": false
+  },
+  "action": {
+    "default_icon": {
+      "16": "icon-16.png",
+      "48": "icon-48.png"
+    },
+    "default_title": "Conote"
+    // "default_popup": "popup.html"  // use background-script to open new window instead
+  },
+  // "content_scripts": [
+  //   {
+  //     "matches": ["<all_urls>"],
+  //     "js": ["content-script-menu.js"]
+  //     // "run_at": "document_end"
+  //   }
+  // ],
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+    // "browser_style": true
+  },
+  "permissions": ["contextMenus", "storage", "tabs"],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://www.konote.one/*" // allow fetch api (avoid CORS), @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/permissions#host_permissions
+  ]
+}

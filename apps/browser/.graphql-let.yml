@@ -1,0 +1,13 @@
+schema: ../web/apollo/type-defs.graphqls
+documents: '**/*.graphql'
+cacheDir: .cache/.cache # prevent generated files in parent folder
+plugins:
+  - typescript-operations
+  - typescript-react-apollo
+config:
+  enumsAsTypes: true
+  preResolveTypes: true # flatten-type, avoid Pick<...> to increase readability
+  scalars: # mapping to typescript types
+    BigInt: BigInt
+    JSON: object
+    DateTime: 'string | Date'

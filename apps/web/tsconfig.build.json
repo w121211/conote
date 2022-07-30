@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", ".next", ".cache", "dist", "prisma", "__deprecated__", "stories", "test"]
+}

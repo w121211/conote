@@ -1,0 +1,50 @@
+//
+// References
+// - https://github.com/vercel/next.js/blob/canary/examples/with-typescript-graphql/tsconfig.json
+// - https://github.com/aleccool213/next-js-typeorm-typegraphql-example
+//
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+
+    // Custom settings
+    "incremental": true,
+    "downlevelIteration": true
+  },
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".cache",
+    "dist",
+    "prisma",
+    "__deprecated__"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "jestsetup.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js"
+  ],
+  "ts-node": {
+    // Options are overrides when use ts-node
+    "compilerOptions": {
+      "module": "commonjs",
+      "allowJs": false
+    },
+    // To load custom .d.ts
+    "files": true
+  }
+}
