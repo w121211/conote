@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import React from 'react'
+import React, { useState } from 'react'
 import type {
   NoteDocFragment,
   NoteDraftFragment,
@@ -25,13 +25,29 @@ const NoteAlerts = ({
   note: NoteFragment | null
   noteDocsToMerge: NoteDocFragment[]
 }) => {
+  const [showAlert, setShowAlert] = useState(true)
+  const [showWarning, setShowWarning] = useState(true)
   return (
-    <div className="mb-4">
+    <div className="flex flex-col gap-2 mb-4">
       {cur.__typename === 'NoteDoc' && note && cur.id !== note.headDoc.id && (
-        <div>The current viewing doc is not the head.</div>
+        <Alert
+          type="warning"
+          visible={showWarning}
+          onClose={() => {
+            setShowWarning(false)
+          }}
+        >
+          The current viewing doc is not the head.
+        </Alert>
       )}
       {noteDocsToMerge.length > 0 && (
-        <Alert type="announce">
+        <Alert
+          type="announce"
+          visible={showAlert}
+          onClose={() => {
+            setShowAlert(false)
+          }}
+        >
           {noteDocsToMerge.map(e => {
             if (e.mergePollId === undefined)
               throw new Error('e.mergePollId === undefined')
@@ -44,6 +60,7 @@ const NoteAlerts = ({
               </p>
             )
           })}
+          <p>fasdf</p>
         </Alert>
       )}
     </div>

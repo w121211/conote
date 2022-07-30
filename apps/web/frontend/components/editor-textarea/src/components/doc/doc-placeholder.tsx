@@ -19,7 +19,7 @@ export const DocPlaceholder = ({
   templateOnClick?: (title: string) => void
 }) => {
   return (
-    <div className="inline-flex flex-col ml-9 ">
+    <div className="inline-flex flex-col ml-9 my-2">
       {/* <h5 className="text-gray-700 dark:text-gray-200">Similar notes</h5>
       {['[[Hello world]]', '[[Hello world (computer science)]]'].map(
         (title, i) => {
@@ -38,7 +38,7 @@ export const DocPlaceholder = ({
         },
       )} */}
 
-      <h5 className="mt-8 text-gray-700 dark:text-gray-200">Template</h5>
+      <h5 className=" text-gray-700 dark:text-gray-200">Template</h5>
       {['General', 'Company', 'Research', 'Thing', 'Person', 'Empty'].map(
         (title, i) => {
           return (

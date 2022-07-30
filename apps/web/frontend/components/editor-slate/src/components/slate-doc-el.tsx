@@ -66,6 +66,7 @@ const Leaf = (
         />
       )
     }
+
     case 'inline-symbol': {
       const id = nanoid()
       return (

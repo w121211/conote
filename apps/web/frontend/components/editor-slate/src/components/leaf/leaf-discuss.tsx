@@ -21,6 +21,8 @@ import { indenterTextReplace } from '../../indenter/transforms'
 import type { Editor } from 'slate'
 import { inlineService } from '../../../../editor-textarea/src/services/inline.service'
 import { slateDocSave } from '../../events'
+import { PopperTooltip } from '../../../../ui-component/tooltip/popper-tooltip'
+
 // import { DropdownListItem } from '../../../../ui-component/dropdown-list-item'
 
 /**
@@ -145,41 +147,64 @@ const LeafDiscuss = ({
               left: x ?? 0,
             }}
           >
-            <button
-              className="dropdown-list-item"
-              onClick={() => setShowModal(true)}
-            >
-              {discussId ? 'View' : 'Create'}
-            </button>
+            <div className=" flex flex-col text-left">
+              <button
+                className="dropdown-list-item"
+                onClick={() => setShowModal(true)}
+              >
+                {discussId ? 'View' : 'Create'}
+              </button>
 
-            <button
-              className="dropdown-list-item"
-              onClick={() => {
-                indenterTextReplace(
-                  editor,
-                  blockUid,
-                  inlineItem.str,
-                  '#hello world!!!#',
-                )
-                setShowPopover(false)
-              }}
-            >
-              Replace
-            </button>
+              <button
+                className="dropdown-list-item"
+                onClick={() => {
+                  indenterTextReplace(
+                    editor,
+                    blockUid,
+                    inlineItem.str,
+                    '#hello world!!!#',
+                  )
+                  setShowPopover(false)
+                }}
+              >
+                Replace
+              </button>
+            </div>
           </div>
         )}
       </FloatingPortal>
 
-      <span
-        {...attributes}
-        id={id}
-        ref={reference}
-        className="symbol-link"
-        // className={className}
-        data-inline-item={inlineItem.type}
-      >
-        {children}
-      </span>
+      {discussId ? (
+        <span
+          {...attributes}
+          id={id}
+          ref={reference}
+          className="symbol-link"
+          // className={className}
+          data-inline-item={inlineItem.type}
+        >
+          {children}
+        </span>
+      ) : (
+        <PopperTooltip
+          label="⚠ Click to create the discuss"
+          size="sm"
+          type="warning"
+        >
+          <span
+            // 'relative' is required for clickable and hover effect
+            {...attributes}
+            id={id}
+            ref={reference}
+            className=" text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
+            onClick={() => setShowModal(true)}
+            data-inline-item={inlineItem.type}
+            role="button"
+          >
+            {children}
+          </span>
+        </PopperTooltip>
+      )}
     </>
   )
 }

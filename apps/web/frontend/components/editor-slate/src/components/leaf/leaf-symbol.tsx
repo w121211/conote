@@ -68,7 +68,6 @@ const LeafSymbol = ({
       }
     }, 100)
   }, [curSelectedElId])
-
   return (
     <>
       <FloatingPortal>

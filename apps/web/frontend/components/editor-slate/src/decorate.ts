@@ -32,6 +32,7 @@ export const decorate = (
       inlineItem: e,
       blockUid,
     })
+    // console.log(e.type, e.token)
     start = end
   }
 
