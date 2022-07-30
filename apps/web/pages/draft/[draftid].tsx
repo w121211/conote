@@ -11,19 +11,13 @@ interface Props {
 
 const DraftIdPage = ({ draftId }: Props): JSX.Element | null => {
   useEffect(() => {
+    console.log('DraftIdPage mount')
     window.addEventListener('beforeunload', preventExitWithoutSave)
-    return () =>
+    return () => {
+      console.log('DraftIdPage unmount')
       window.removeEventListener('beforeunload', preventExitWithoutSave)
+    }
   }, [])
-
-  // useEffect(() => {
-  //   if (window.location.hash) {
-  //     console.log(window.location.hash)
-  //     editorChainItemOpen(window.location.hash.slice(1))
-  //   } else {
-  //     editorChainItemOpen(draftId)
-  //   }
-  // }, [draftId])
 
   return (
     <LayoutChildrenPadding>
@@ -37,7 +31,7 @@ const DraftIdPage = ({ draftId }: Props): JSX.Element | null => {
             />
           )}
         </div> */}
-        {/* <EditorChainEl /> */}
+
         <SlateDocChainEl
           draftId={draftId}
           hashDraftId={

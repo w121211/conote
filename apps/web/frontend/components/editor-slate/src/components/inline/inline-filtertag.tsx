@@ -49,17 +49,17 @@ const InlineFiltertag = ({
         className=" text-green-600 hover:underline-offset-2 hover:underline"
         onClick={() => {
           // setShowModal(true)
-          router.push(
-            // { pathname: '/discuss/[discussId]', query: { discussId: element.str } },
-            {
-              pathname: router.pathname,
-              query: { symbol: router.query.symbol, discuss: element.str },
-            },
-            `/discuss/${encodeURIComponent(element.str)}`,
-            {
-              shallow: true,
-            },
-          )
+          // router.push(
+          //   // { pathname: '/discuss/[discussId]', query: { discussId: element.str } },
+          //   {
+          //     pathname: router.pathname,
+          //     query: { symbol: router.query.symbol, discuss: element.str },
+          //   },
+          //   `/discuss/${encodeURIComponent(element.str)}`,
+          //   {
+          //     shallow: true,
+          //   },
+          // )
         }}
       >
         {children}

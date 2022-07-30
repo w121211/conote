@@ -70,7 +70,7 @@ const LeafSymbol = ({
   }, [curSelectedElId])
   return (
     <>
-      <FloatingPortal>
+      <FloatingPortal id="layout-children-container">
         {show && (
           <div
             className="details-menu opacity-100 scale-100"

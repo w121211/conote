@@ -53,10 +53,6 @@ const NoteViewEl = ({
 
         <div className="-ml-4">
           <NoteHead symbol={doc.symbol} doc={doc} />
-
-          {/* <div>Content head</div> */}
-          {/* <NoteHead /> */}
-
           <BlockViewer blocks={blocks} uid={docBlock.uid} omitParent />
         </div>
       </div>

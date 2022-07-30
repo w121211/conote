@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { usePrevious } from 'react-use'
 import {
   textareaBlur,
   textareaChange,
@@ -15,14 +16,6 @@ import type {
 } from '../../interfaces'
 import { UndoManager } from '../../utils/undo-manager'
 import ParseRenderEl from '../inline/parse-render-el'
-
-function usePrevious<T>(value: T) {
-  const ref = useRef<T>()
-  useEffect(() => {
-    ref.current = value
-  })
-  return ref.current
-}
 
 /**
  * TODO:

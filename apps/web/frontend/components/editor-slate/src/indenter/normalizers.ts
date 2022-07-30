@@ -1,5 +1,5 @@
 import { every } from 'lodash'
-import { Editor, Element, Node, Text, Transforms } from 'slate'
+import { Editor, Element, Node, NodeEntry, Text, Transforms } from 'slate'
 import { ElementIndenter } from '../interfaces'
 import { getEditorSons } from './queries'
 
@@ -31,6 +31,32 @@ export function validateIndenters(indenters: ElementIndenter[]) {
 }
 
 /**
+ * Process every line one by one to ensure all lines follow the tree structure indentation
+ *
+ * TODO: Not done yet
+ * - undo/redo
+ */
+export function normalizeIndent(
+  editor: Editor,
+  indenters: NodeEntry<ElementIndenter>[],
+) {
+  // Editor.withoutNormalizing(()
+  for (let i = 0; i < indenters.length; i++) {
+    const [n, p] = indenters[i],
+      prev = i > 0 && indenters[i - 1],
+      maxIndent = prev && prev[0].indent + 1
+
+    if (maxIndent && n.indent > maxIndent) {
+      Transforms.setNodes<ElementIndenter>(
+        editor,
+        { indent: maxIndent },
+        { at: p },
+      )
+    }
+  }
+}
+
+/**
  * Indenter value is a plain array of indenters instead of tree.
  *
  * Check every node by
@@ -49,9 +75,6 @@ export function indenterNoramalize(editor: Editor): {
     const [n, p] = sons[i],
       prev = i > 0 && sons[i - 1]
 
-    if (!Element.isElement(n)) {
-      throw new Error('Editor son should be an element')
-    }
     if (!Element.isElementType<ElementIndenter>(n, 'indenter')) {
       // throw new Error('Editor son should be an indenter')
       console.debug('Editor son is not an indenter', n, p)

@@ -6,13 +6,6 @@ module.exports = {
   setupFiles: ['<rootDir>/test/setup-tests.ts'],
   silent: false,
   testEnvironment: 'node',
-  // testPathIgnorePatterns: [
-  //   '<rootDir>[/\\\\](node_modules|.next|dist|.cache|prisma|components|pages)[/\\\\]',
-  //   // '<rootDir>[/\\\\](components)[/\\\\]',
-  //   // '<rootDir>/test/components',
-  //   // '<rootDir>/test/pages',
-  //   // '/components/',
-  // ],
   testPathPattern: ['<rootDir>/test/lib'],
   transform: {
     ...tsjPreset.transform,

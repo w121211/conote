@@ -16,11 +16,11 @@ const ParseRenderEl = ({
   const inlines = useMemo(() => parse(str), [str]),
     { inlineItems } = inlines
   return (
-    <div className={className}>
+    <span className={className}>
       {inlineItems.map((e, i) => (
         <InlineEl key={i} blockUid={blockUid} inline={e} isViewer={isViewer} />
       ))}
-    </div>
+    </span>
   )
 }
 

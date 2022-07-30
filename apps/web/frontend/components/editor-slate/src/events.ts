@@ -9,9 +9,10 @@ import {
   writeBlocks,
 } from '../../editor-textarea/src/utils/block-writer'
 import { blocksToIndenters, indentersToBlocks } from './indenter/serializers'
-import type { ElementIndenter, ElementLi } from './interfaces'
+import type { ElementIndenter } from './interfaces'
 // import { blocksToLiList, elementLisToBlocks } from './serializers'
 import { docValueRepo } from './stores/doc-value.repository'
+import { genTemplateBlocks } from './templates'
 
 function toGQLBlocks(blocks: Block[]) {
   return blocks.map(e => {
@@ -20,14 +21,18 @@ function toGQLBlocks(blocks: Block[]) {
   })
 }
 
-function toNoteDraftInput(doc: Doc, value: ElementIndenter[]): NoteDraftInput {
+export function toNoteDraftInput(
+  doc: Doc,
+  value: ElementIndenter[],
+): NoteDraftInput {
   const { blockUid: docBlockUid, noteCopy, noteDraftCopy, contentHead } = doc,
     docBlock = docRepo.getDocBlock(doc),
-    // bodyBlocks = elementLisToBlocks(value, blockUid),
     bodyBlocks = indentersToBlocks(value, docBlockUid),
     bodyBlocks_: Block[] = bodyBlocks.map(e => ({ ...e, childrenUids: [] })),
     blocks = [docBlock, ...bodyBlocks_],
     blocks_ = toGQLBlocks(blocks)
+
+  console.debug(blocks_)
 
   // Null is a valide input for differencer, but '[]' is not
   const startBlocks = noteCopy
@@ -59,8 +64,11 @@ function isValueChanged(docUid: string, value: ElementIndenter[]) {
 
   const input = toNoteDraftInput(doc, value),
     { blocks: startBlocks } = parseGQLBlocks(noteDraftCopy.contentBody.blocks),
-    { blocks: finalBlocks } = parseGQLBlocks(input.contentBody.blocks),
-    changes = differenceBlocks(finalBlocks, startBlocks),
+    { blocks: finalBlocks } = parseGQLBlocks(input.contentBody.blocks)
+
+  // console.debug(finalBlocks, startBlocks)
+
+  const changes = differenceBlocks(finalBlocks, startBlocks),
     changed = changes.length > 0
 
   return { changed, changes, doc, noteDraftCopy, input }
@@ -73,7 +81,6 @@ function isValueChanged(docUid: string, value: ElementIndenter[]) {
  */
 export async function slateDocSave(
   docUid: string,
-  // value: ElementLi[],
   newSymbol?: string,
   opts = {
     force: false,
@@ -97,30 +104,9 @@ export async function slateDocSave(
   return false
 }
 
-function genTemplateGeneral(): BlockInput {
-  const general: BlockInput = [
-    'DUMMY_ROOT',
-    [
-      [
-        'Basic',
-        [
-          ['What is ...?', ['']],
-          // ['Explain ... in one picture?', ['']],
-          ['Why and why not ...?', ['']],
-          ['How ...?', ['']],
-          // ['How this research solve?', ['']],
-          ['What difference compared to the others?', ['']],
-        ],
-      ],
-      ['Discuss', ['']],
-    ],
-  ]
-  return general
-}
-
-export function docTemplateGenerate(doc: Doc) {
+export function docTemplateGenerate(doc: Doc, title: string) {
   const docBlock = docRepo.getDocBlock(doc),
-    blocks = writeBlocks(genTemplateGeneral(), { docBlock }),
+    blocks = genTemplateBlocks(title.toLowerCase(), docBlock),
     indenters = blocksToIndenters(blocks)
 
   return indenters

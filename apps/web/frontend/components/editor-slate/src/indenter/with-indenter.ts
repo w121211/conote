@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid'
 import { Editor, Element, NodeEntry, Transforms } from 'slate'
 import { ElementIndenter } from '../interfaces'
+import { normalizeIndent } from './normalizers'
 
 function findIndenters(
   editor: Editor,
@@ -46,9 +47,8 @@ export function withIndenter(editor: Editor): Editor {
   // }
 
   /**
-   * Cases for normalize
-   * - Copy, cut, paste
-   * - Split node (when enter)
+   * Ensure
+   * - If uid is duplicated, assign a new uid
    *
    * TODO:
    * - 'normalizeNode' calls on everey change (heavy), may shift to check only on insertions
@@ -57,15 +57,28 @@ export function withIndenter(editor: Editor): Editor {
     const [n, p] = entry
 
     if (Element.isElementType<ElementIndenter>(n, 'indenter')) {
+      // If uid is duplicated, assign a new uid
       if (n.uid === undefined) throw new Error('n.uid === undefined')
-
       const sameUids = findIndenters(editor, n.uid)
       if (sameUids.length > 1) {
         Transforms.setNodes(editor, { uid: nanoid() }, { at: p })
       }
-
-      return normalizeNode(entry)
     }
+
+    return normalizeNode(entry)
+
+    //   const entries = Editor.nodes<ElementIndenter>(editor, {
+    //       // Start from the root
+    //       at: [],
+    //       // Only find nodes at the first depth
+    //       match: (n, p) =>
+    //         p.length === 1 &&
+    //         Element.isElementType<ElementIndenter>(n, 'indenter'),
+    //       // Once found a match, stop going deeper
+    //       mode: 'highest',
+    //     }),
+    //     entries_ = Array.from(entries)
+    //   normalizeIndent(editor, entries_)
   }
 
   return editor

@@ -7,7 +7,7 @@ const input0: BlockInput = [
   '[[Firefox]]',
   [
     [
-      'About',
+      '# About',
       [
         'Official site: https://www.mozilla.org/en-US/firefox/new/',
         'Super fast and fiercely independent. Get the only browser that works to make the internet better for everyone.',

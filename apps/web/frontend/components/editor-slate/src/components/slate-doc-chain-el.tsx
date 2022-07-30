@@ -1,13 +1,18 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
 import Link from 'next/link'
-import { editorRepo } from '../../../editor-textarea/src/stores/editor.repository'
+import {
+  editorRepo,
+  isChainItem,
+} from '../../../editor-textarea/src/stores/editor.repository'
 import { docRepo } from '../../../editor-textarea/src/stores/doc.repository'
 import { getNotePageURL } from '../../../../utils'
 import ChainItemInsertButton from '../../../editor-textarea/src/components/editor/chain-item-insert-button'
 import DocHead from '../../../editor-textarea/src/components/doc/doc-head'
 import SlateDocEl from './slate-doc-el'
-import { editorChainItemOpen } from '../../../editor-textarea/src/events'
+import { usePrevious } from 'react-use'
+import { editorChainOpen } from '../../../editor-textarea/src/events'
+import { scrollToElement } from '../../../editor-textarea/src/effects'
 
 const ChainDoc = (props: { docUid: string; draftId: string }) => {
   const { docUid, draftId } = props
@@ -35,54 +40,47 @@ const ChainDoc = (props: { docUid: string; draftId: string }) => {
   )
 }
 
-const SlateDocChainEl = ({
-  draftId,
-  hashDraftId,
-}: {
+const SlateDocChainEl = (props: {
   draftId: string
   hashDraftId: string | null
 }): JSX.Element | null => {
-  const [tab] = useObservable(editorRepo.tab$)
+  const { draftId, hashDraftId } = props,
+    prevProps = usePrevious(props),
+    [loading, setLoading] = useState(true),
+    [tab] = useObservable(editorRepo.tab$)
 
   useEffect(() => {
-    const nextDraftId = hashDraftId ?? draftId
-    editorChainItemOpen(nextDraftId)
+    if (prevProps === undefined || prevProps.draftId !== draftId) {
+      setLoading(true)
+      editorChainOpen(draftId).then(d => {
+        setLoading(false)
+      })
+    }
   }, [draftId, hashDraftId])
 
   // useEffect(() => {
-  //   const { curChainItem, curChain, prevChainItem } = tab
-  //   if (curChainItem && curChain.length > 0) {
-  //     const isItemInCurChain =
-  //         curChain.find(e => e.entry.id === prevChainItem?.draftId) !==
-  //         undefined,
-  //       isEveryDocRendered = every(curChain, 'rendered'),
-  //       isFirstItem = curChainItem.draftId === curChain[0].entry.id
-  //     if (isEveryDocRendered && !isItemInCurChain && !isFirstItem) {
-  //       const el = document.getElementById(curChainItem.draftId)
-  //       if (el) {
-  //         el.scrollIntoView()
-  //       }
-  //     } else if (isFirstItem && isItemInCurChain) {
-  //       const el = document.getElementById('layout-children-container')
-  //       if (el) {
-  //         el.scrollTo({ top: 0 })
-  //       }
+  //   if (hashDraftId) {
+  //     const el = document.getElementById(hashDraftId)
+  //     if (el) {
+  //       el.scrollIntoView()
   //     }
   //   }
-  // }, [tab])
+  // }, [loading])
 
-  if (tab.curChain.length === 0) {
+  if (loading) {
     return null
   }
   return (
     <div>
-      {/* {alert && <div>{alert.message}</div>} */}
-      {tab.curChain.map((e, i) => {
-        return (
-          <div key={e.docUid}>
-            <ChainDoc docUid={e.docUid} draftId={e.entry.id} />
-          </div>
-        )
+      {tab.chain.map((e, i) => {
+        if (isChainItem(e)) {
+          return (
+            <div key={e.docUid}>
+              <ChainDoc docUid={e.docUid} draftId={e.entry.id} />
+            </div>
+          )
+        }
+        return <div key={e.symbol}>Opening {e.symbol}</div>
       })}
     </div>
   )
