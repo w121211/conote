@@ -32,7 +32,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
 
       <div className="relative mb-3">
         <span className="symbol-link" onClick={() => setShowModal(true)}>
-          <h1 className=" line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
+          <h2 className="line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
             {/* {link && (
             <span className="material-icons text-blue-400 text-4xl align-bottom">
             language
@@ -43,7 +43,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
               doc.contentHead.webpage?.title ?? undefined,
             )}
             {newSymbol && `-> ${newSymbol}`}
-          </h1>
+          </h2>
         </span>
       </div>
 

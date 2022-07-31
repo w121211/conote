@@ -53,6 +53,8 @@ const LeafDiscuss = ({
     { id, blockUid, docUid, draftId, inlineItem } = popoverProps,
     { id: discussId, title, str } = inlineItem
 
+  console.log(inlineItem)
+
   const updateFloating = () => {
     const referenceEl = refs.reference.current
     const floatingEl = refs.floating.current
@@ -87,7 +89,7 @@ const LeafDiscuss = ({
       <Link
         href={{
           pathname: '/discuss/[discussId]',
-          query: { discussId: id },
+          query: { discussId },
         }}
       >
         <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
@@ -115,7 +117,6 @@ const LeafDiscuss = ({
         visible={showModal}
         onClose={() => setShowModal(false)}
         topRightBtn={modalTopRightBtn}
-        // buttons={modalButtons}
       >
         {discussId ? (
           <div className="px-10">
@@ -139,20 +140,37 @@ const LeafDiscuss = ({
             ref={floating}
             style={{
               display: 'block',
-
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
             }}
           >
-            <button
-              className="dropdown-list-item"
-              onClick={() => setShowModal(true)}
-            >
-              {discussId ? 'View' : 'Create'}
-            </button>
-
-            <button
+            <div className="dropdown-list-item">
+              {discussId ? (
+                <button
+                  onClick={() => {
+                    setShowModal(true)
+                    setShowPopover(false)
+                  }}
+                >
+                  <span className="material-symbols-outlined">
+                    open_in_browser
+                  </span>
+                  Open
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowModal(true)
+                    setShowPopover(false)
+                  }}
+                >
+                  <span className="material-symbols-outlined">add</span>
+                  Create
+                </button>
+              )}
+            </div>
+            {/* <button
               className="dropdown-list-item"
               onClick={() => {
                 indenterTextReplace(
@@ -165,7 +183,7 @@ const LeafDiscuss = ({
               }}
             >
               Replace
-            </button>
+            </button> */}
           </div>
         )}
       </FloatingPortal>

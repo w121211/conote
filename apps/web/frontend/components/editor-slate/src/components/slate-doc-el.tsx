@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import React, { useState, useMemo, useCallback, useEffect } from 'react'
+import React, { useMemo, useCallback, useEffect } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
 import { createEditor, NodeEntry } from 'slate'
 import {
@@ -214,7 +214,7 @@ const EditorEl = ({
 }
 
 /**
- * Include error handling
+ * A local save doc function, include error handling
  */
 async function saveDoc(docUid: string) {
   try {
@@ -233,7 +233,6 @@ async function saveDoc(docUid: string) {
 }
 
 const SlateDocEl = (props: { doc: Doc }) => {
-  // console.log('SlateDocEl')
   const { doc } = props,
     [docValue] = useObservable(docValueRepo.getDocValue$(doc.uid))
 
@@ -283,7 +282,7 @@ const SlateDocEl = (props: { doc: Doc }) => {
           value={docValue.value}
         />
       )}
-      <button onClick={() => saveDoc(doc.uid)}>Save</button>
+      {/* <button onClick={() => saveDoc(doc.uid)}>Save</button> */}
     </div>
   )
 }

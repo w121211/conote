@@ -88,11 +88,15 @@ const LeafSymbol = ({
               className="dropdown-list-item"
               onClick={e => editorChainItemInsert(symbol, draftId)}
             >
+              <span className="material-symbols-outlined">note_add</span>
               Insert
             </button>
 
             <Link href={getNotePageURL(symbol)}>
-              <a className="dropdown-list-item">View</a>
+              <a className="dropdown-list-item">
+                <span className="material-symbols-outlined">open_in_new</span>
+                View
+              </a>
             </Link>
           </div>
         )}
