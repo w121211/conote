@@ -13,8 +13,8 @@ const IndenterEl = (
       data-indent={indent}
       style={{ marginLeft: 24 * (indent + 1) }}
     >
-      <ul className="list-disc" style={{ padding: 0, margin: 0 }}>
-        <li>
+      <ul style={{ padding: 0, margin: 0 }}>
+        <li className='before:content-["-"] before:mr-2'>
           {error && (
             <span
               contentEditable={false}

@@ -14,6 +14,7 @@ import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-pa
 import { StatusDisplay } from '../ui-component/status-display'
 import { preventExitWithoutSave } from '../editor-textarea/src/listeners'
 import { getLoginPageURL } from '../../utils'
+import NoteAlerts from './note-alerts'
 
 /**
  * Loads the given draft or open a blank note in the editor
@@ -22,6 +23,7 @@ const NoteEditEl = ({
   symbol,
   note,
   noteDraft,
+  noteDocsToMerge,
 }: {
   symbol: string
   note: NoteFragment | null
@@ -84,6 +86,13 @@ const NoteEditEl = ({
   return (
     <LayoutChildrenPadding>
       <div className="pb-32">
+        {noteDraft && noteDocsToMerge && (
+          <NoteAlerts
+            cur={noteDraft}
+            note={note}
+            noteDocsToMerge={noteDocsToMerge}
+          />
+        )}
         <div className="flex">
           <div className="flex-1">Editing</div>
           {note && (

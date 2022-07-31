@@ -5,6 +5,7 @@ import { docGetOrCreate } from '../../frontend/components/editor-textarea/src/ev
 import SearcherModal from '../../frontend/components/search-all-modal/searcher-modal'
 import type { SearcherProps } from '../../frontend/interfaces'
 import { getDraftPageURL } from '../../frontend/utils'
+import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
 
 interface Props {
   query: {
@@ -40,9 +41,9 @@ const DraftIndexPage = ({ query }: Props): JSX.Element | null => {
     return null
   }
   return (
-    <div>
+    <LayoutChildrenPadding>
       <SearcherModal searcher={searcher} />
-    </div>
+    </LayoutChildrenPadding>
   )
 }
 

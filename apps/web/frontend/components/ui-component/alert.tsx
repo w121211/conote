@@ -1,3 +1,4 @@
+import moment from 'moment'
 import React, { FC, ReactNode, useState } from 'react'
 
 type AlertType = 'warning' | 'error' | 'success' | 'announce'
@@ -32,7 +33,7 @@ interface AlertProps {
   children: ReactNode
   type: AlertType
   action?: string
-  time?: string // to do: change to Date type
+  time?: Date // to do: change to Date type
   onClose?: () => void
   visible?: boolean
 }
@@ -65,7 +66,9 @@ export const Alert: FC<AlertProps> = ({
         <span
           className={`
             material-icons
-            mx-2  
+            flex items-center
+            mx-2
+            text-lg  
             leading-none
             ${icon(type)}
             `}
@@ -89,9 +92,11 @@ export const Alert: FC<AlertProps> = ({
         >
           {action && <span className="font-bold">[{action}]</span>}
           {children}
-          <span className="text-gray-400 dark:text-gray-300 text-xs">
-            {time}
-          </span>
+          {time && (
+            <span className="text-gray-400 dark:text-gray-300 text-xs">
+              {moment(time).calendar()}
+            </span>
+          )}
         </span>
         {React.Children.toArray(children).length > 1 && (
           <div className="inline-flex mt-0.5 mr-1 ">
@@ -110,12 +115,14 @@ export const Alert: FC<AlertProps> = ({
           </div>
         )}
 
-        <span
-          className="material-icons inline-flex mt-0.5 text-base leading-none text-gray-600 dark:text-gray-200 hover:cursor-pointer"
-          onClick={onClose}
-        >
-          close
-        </span>
+        {onClose !== undefined && (
+          <span
+            className="material-icons inline-flex mt-0.5 text-base leading-none text-gray-600 dark:text-gray-200 hover:cursor-pointer"
+            onClick={onClose}
+          >
+            close
+          </span>
+        )}
       </p>
     </div>
   )

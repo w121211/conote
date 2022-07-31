@@ -16,7 +16,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   // const newSymbol = doc.noteCopy && doc.contentHead.symbol !== doc.symbol ?
 
   return (
-    <div className="ml-4 mb-5">
+    <div className="ml-6 mb-5">
       <div className="flex items-center gap-2 mb-4">
         {/* <DomainSelect /> */}
         {/* {isNew && (
@@ -31,20 +31,20 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
       {/* <DomainSelect /> */}
 
       <div className="relative mb-3">
-        <span className="symbol-link" onClick={() => setShowModal(true)}>
-          <h2 className="line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
-            {/* {link && (
+        <h1 className=" line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
+          {/* {link && (
             <span className="material-icons text-blue-400 text-4xl align-bottom">
             language
             </span>
           )} */}
+          <span className="symbol-link" onClick={() => setShowModal(true)}>
             {styleSymbol(
               doc.noteDraftCopy.symbol,
               doc.contentHead.webpage?.title ?? undefined,
             )}
             {newSymbol && `-> ${newSymbol}`}
-          </h2>
-        </span>
+          </span>
+        </h1>
       </div>
 
       <Modal
