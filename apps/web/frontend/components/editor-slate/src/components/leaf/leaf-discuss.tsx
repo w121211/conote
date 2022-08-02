@@ -55,8 +55,6 @@ const LeafDiscuss = ({
     { id, blockUid, docUid, draftId, inlineItem } = popoverProps,
     { id: discussId, title, str } = inlineItem
 
-  console.log(inlineItem)
-
   const updateFloating = () => {
     const referenceEl = refs.reference.current
     const floatingEl = refs.floating.current
@@ -91,7 +89,7 @@ const LeafDiscuss = ({
       <Link
         href={{
           pathname: '/discuss/[discussId]',
-          query: { discussId },
+          query: { discussId: id },
         }}
       >
         <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
@@ -119,6 +117,7 @@ const LeafDiscuss = ({
         visible={showModal}
         onClose={() => setShowModal(false)}
         topRightBtn={modalTopRightBtn}
+        // buttons={modalButtons}
       >
         {discussId ? (
           <div className="px-10">
@@ -142,21 +141,22 @@ const LeafDiscuss = ({
             ref={floating}
             style={{
               display: 'block',
+
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
             }}
           >
-            <div className=" flex flex-col text-left">
+            <div className=" flex ">
               <button
-                className="dropdown-list-item"
+                className="dropdown-list-item first:m-0 first:rounded-l last:m-0 last:rounded-r"
                 onClick={() => setShowModal(true)}
               >
                 {discussId ? 'View' : 'Create'}
               </button>
 
               <button
-                className="dropdown-list-item"
+                className="dropdown-list-item first:m-0 first:rounded-l last:m-0 last:rounded-r"
                 onClick={() => {
                   indenterTextReplace(
                     editor,
