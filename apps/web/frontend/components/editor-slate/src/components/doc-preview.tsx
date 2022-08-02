@@ -10,6 +10,8 @@ const IndenterPreview = ({ indenter }: { indenter: ElementIndenter }) => {
     str = Node.string(indenter)
 
   const components: ReactMarkdownOptions['components'] = {
+    h1: 'h2',
+    h2: 'h3',
     p: ({ node, children, ...props }) => {
       return (
         <p {...props}>

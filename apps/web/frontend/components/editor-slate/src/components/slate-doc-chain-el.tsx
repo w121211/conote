@@ -12,10 +12,11 @@ import DocHead from '../../../editor-textarea/src/components/doc/doc-head'
 import SlateDocEl from './slate-doc-el'
 import { usePrevious } from 'react-use'
 import { editorChainOpen } from '../../../editor-textarea/src/events'
-import { scrollToElement } from '../../../editor-textarea/src/effects'
+import DocPreview from './doc-preview'
 
 const ChainDoc = (props: { docUid: string; draftId: string }) => {
   const { docUid, draftId } = props
+  const [showPreview, setShowPreview] = useState(false)
 
   const [doc] = useObservable(docRepo.getDoc$(docUid), {
     initialValue: null,
@@ -25,14 +26,21 @@ const ChainDoc = (props: { docUid: string; draftId: string }) => {
     <div id={draftId} className="mb-20">
       {doc && (
         <div id={docUid}>
-          <button>View</button>
+          <button onClick={() => setShowPreview(!showPreview)}>Preview</button>
+
           {doc.noteCopy && (
             <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
               <a className="btn-secondary text-sm">View current head note</a>
             </Link>
           )}
           <DocHead doc={doc} />
-          <SlateDocEl doc={doc} />
+
+          {showPreview ? (
+            <DocPreview docUid={docUid} />
+          ) : (
+            <SlateDocEl doc={doc} />
+          )}
+
           <ChainItemInsertButton afterThisDraftId={doc.noteDraftCopy.id} />
         </div>
       )}

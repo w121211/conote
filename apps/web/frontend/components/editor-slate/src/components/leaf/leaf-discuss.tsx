@@ -55,6 +55,8 @@ const LeafDiscuss = ({
     { id, blockUid, docUid, draftId, inlineItem } = popoverProps,
     { id: discussId, title, str } = inlineItem
 
+  console.log(inlineItem)
+
   const updateFloating = () => {
     const referenceEl = refs.reference.current
     const floatingEl = refs.floating.current
@@ -89,7 +91,7 @@ const LeafDiscuss = ({
       <Link
         href={{
           pathname: '/discuss/[discussId]',
-          query: { discussId: id },
+          query: { discussId },
         }}
       >
         <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
@@ -117,7 +119,6 @@ const LeafDiscuss = ({
         visible={showModal}
         onClose={() => setShowModal(false)}
         topRightBtn={modalTopRightBtn}
-        // buttons={modalButtons}
       >
         {discussId ? (
           <div className="px-10">
@@ -141,7 +142,6 @@ const LeafDiscuss = ({
             ref={floating}
             style={{
               display: 'block',
-
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
