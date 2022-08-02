@@ -14,7 +14,7 @@ const IndenterEl = (
       style={{ marginLeft: 24 * (indent + 1) }}
     >
       <ul style={{ padding: 0, margin: 0 }}>
-        <li className='before:content-["-"] before:mr-2'>
+        <li className='before:content-["-"] before:absolute before:-translate-x-full before:pr-2'>
           {error && (
             <span
               contentEditable={false}
