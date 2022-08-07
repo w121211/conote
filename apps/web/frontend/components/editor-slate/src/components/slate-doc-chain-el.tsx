@@ -25,24 +25,36 @@ const ChainDoc = (props: { docUid: string; draftId: string }) => {
   return (
     <div id={draftId} className="mb-20">
       {doc && (
-        <div id={docUid}>
-          <button onClick={() => setShowPreview(!showPreview)}>Preview</button>
+        <>
+          <div
+            id={docUid}
+            // className="bg-gray-100 rounded-lg p-5"
+          >
+            <button
+              className={`btn-ghost`}
+              onClick={() => setShowPreview(!showPreview)}
+            >
+              {!showPreview ? 'Preview' : 'Edit'}
+            </button>
 
-          {doc.noteCopy && (
-            <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
-              <a className="btn-secondary text-sm">View current head note</a>
-            </Link>
-          )}
-          <DocHead doc={doc} />
+            {doc.noteCopy && (
+              <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
+                <a className="btn-ghost">Head</a>
+              </Link>
+            )}
 
-          {showPreview ? (
-            <DocPreview docUid={docUid} />
-          ) : (
-            <SlateDocEl doc={doc} />
-          )}
+            <DocHead doc={doc} />
 
-          <ChainItemInsertButton afterThisDraftId={doc.noteDraftCopy.id} />
-        </div>
+            {showPreview ? (
+              <DocPreview docUid={docUid} />
+            ) : (
+              <SlateDocEl doc={doc} />
+            )}
+          </div>
+          <div className="my-10">
+            <ChainItemInsertButton afterThisDraftId={doc.noteDraftCopy.id} />
+          </div>
+        </>
       )}
     </div>
   )

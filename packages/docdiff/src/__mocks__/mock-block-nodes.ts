@@ -33,6 +33,7 @@ export function isBlockEqual(a: Block, b: Block) {
  * - 2
  *   - 4
  *     - 6
+ *     - 8
  *   - 5
  * - 3
  *   - 7
@@ -60,6 +61,7 @@ export const mockBlockNodes: Required<TreeNodeBody<Block>>[] =
  * - 2
  *   - 4
  *     - 6* delete
+ *     - 8* delete
  *   - 5
  * - 3* delete
  *   - 7* delete
@@ -82,20 +84,20 @@ mockBlockNodes_updates[2].data.str = `${mockBlockNodes_updates[2].data.str}-upda
 mockBlockNodes_updates[7].data.str = `${mockBlockNodes_updates[7].data.str}-update`
 
 /**
- * 0
+ * 0* update
  * - 1
- * - 2* update
+ * - 2
  *   - 4
  *     - 6
  *   - 5
  * - 3
- *   - 7* update
+ *   - 7
  */
 export const mockBlockNodes_updateRoot = cloneDeep(mockBlockNodes)
 mockBlockNodes_updateRoot[0].data.str = `${mockBlockNodes_updateRoot[0].data.str}-update`
 
 /**
- * Assume mockBlockNodes_deletes as the start-value
+ * Use mockBlockNodes_deletes as the start value
  *
  * 0
  * - 1

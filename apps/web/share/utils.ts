@@ -1,7 +1,7 @@
 import {
   isTreeNodeChangeType,
+  treeDifferencer,
   TreeNodeBody,
-  treeNodeDifferencer,
   treeUtil,
 } from '@conote/docdiff'
 import type { NoteDocContentBodyInput } from 'graphql-let/__generated__/__types__'
@@ -39,7 +39,7 @@ export function differenceBlocks(
 ) {
   const f_blocks = treeUtil.toTreeNodeBodyList(final),
     s_blocks = start && treeUtil.toTreeNodeBodyList(start),
-    changes = treeNodeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
+    changes = treeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
   return changes
 }
 

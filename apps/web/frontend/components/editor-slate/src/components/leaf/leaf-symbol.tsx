@@ -105,7 +105,7 @@ const LeafSymbol = ({
         {...attributes}
         id={id}
         ref={reference}
-        className="symbol-link"
+        className="symbol-link cursor-text"
         // className={className}
         data-inline-item={inlineItem.type}
       >

@@ -55,8 +55,6 @@ const LeafDiscuss = ({
     { id, blockUid, docUid, draftId, inlineItem } = popoverProps,
     { id: discussId, title, str } = inlineItem
 
-  console.log(inlineItem)
-
   const updateFloating = () => {
     const referenceEl = refs.reference.current
     const floatingEl = refs.floating.current
@@ -147,27 +145,27 @@ const LeafDiscuss = ({
               left: x ?? 0,
             }}
           >
-            <div className=" flex flex-col text-left">
-              <button
-                className="dropdown-list-item"
-                onClick={() => setShowModal(true)}
-              >
-                {discussId ? 'View' : 'Create'}
-              </button>
-
+            <div className="flex">
               <button
                 className="dropdown-list-item"
                 onClick={() => {
-                  indenterTextReplace(
-                    editor,
-                    blockUid,
-                    inlineItem.str,
-                    '#hello world!!!#',
-                  )
+                  setShowModal(true)
                   setShowPopover(false)
                 }}
               >
-                Replace
+                {discussId ? (
+                  <>
+                    <span className="material-symbols-outlined">
+                      open_in_browser
+                    </span>
+                    Open
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined">add</span>
+                    Create
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -194,8 +192,6 @@ const LeafDiscuss = ({
           <span
             // 'relative' is required for clickable and hover effect
             {...attributes}
-            id={id}
-            ref={reference}
             className=" text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
             onClick={() => setShowModal(true)}
             data-inline-item={inlineItem.type}

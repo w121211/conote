@@ -1,5 +1,6 @@
 import { cloneDeep } from 'lodash'
-import { treeNodeDifferencer } from '../diff'
+import { treeDifferencer } from '../tree-differencer'
+import { treeUtil } from '../tree-util'
 import {
   isBlockEqual,
   mockBlockNodes,
@@ -19,80 +20,88 @@ import {
  */
 
 it('Start is null', () => {
-  expect(treeNodeDifferencer.difference(mockBlockNodes, null, isBlockEqual))
+  expect(treeDifferencer.difference(mockBlockNodes, null, isBlockEqual))
     .toMatchInlineSnapshot(`
     Array [
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-0",
+        "uid": "0",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-1",
+        "uid": "1",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-2",
+        "uid": "2",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-3",
+        "uid": "3",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-4",
+        "uid": "4",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-5",
+        "uid": "5",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-6",
+        "uid": "6",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-7",
+        "uid": "7",
+      },
+      Object {
+        "type": "insert",
+        "uid": "8",
       },
     ]
   `)
 })
 
 it('Start is an empty array', () => {
-  expect(treeNodeDifferencer.difference(mockBlockNodes, [], isBlockEqual))
+  expect(treeDifferencer.difference(mockBlockNodes, [], isBlockEqual))
     .toMatchInlineSnapshot(`
     Array [
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-0",
+        "uid": "0",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-1",
+        "uid": "1",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-2",
+        "uid": "2",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-3",
+        "uid": "3",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-4",
+        "uid": "4",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-5",
+        "uid": "5",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-6",
+        "uid": "6",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-7",
+        "uid": "7",
+      },
+      Object {
+        "type": "insert",
+        "uid": "8",
       },
     ]
   `)
@@ -101,16 +110,12 @@ it('Start is an empty array', () => {
 it('Final has only the root ', () => {
   console.debug(mockBlockNodes[0])
   expect(
-    treeNodeDifferencer.difference(
-      mockBlockNodes.slice(0, 1),
-      [],
-      isBlockEqual,
-    ),
+    treeDifferencer.difference(mockBlockNodes.slice(0, 1), [], isBlockEqual),
   ).toMatchInlineSnapshot(`
     Array [
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-0",
+        "uid": "0",
       },
     ]
   `)
@@ -118,7 +123,7 @@ it('Final has only the root ', () => {
 
 it('no changes', () => {
   expect(
-    treeNodeDifferencer.difference(
+    treeDifferencer.difference(
       mockBlockNodes,
       cloneDeep(mockBlockNodes),
       isBlockEqual,
@@ -128,7 +133,7 @@ it('no changes', () => {
 
 it('insertions', () => {
   expect(
-    treeNodeDifferencer.difference(
+    treeDifferencer.difference(
       mockBlockNodes,
       mockBlockNodes_deletes,
       isBlockEqual,
@@ -137,15 +142,19 @@ it('insertions', () => {
     Array [
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-3",
+        "uid": "3",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-6",
+        "uid": "6",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-7",
+        "uid": "7",
+      },
+      Object {
+        "type": "insert",
+        "uid": "8",
       },
     ]
   `)
@@ -153,7 +162,7 @@ it('insertions', () => {
 
 it('get delete changes', () => {
   expect(
-    treeNodeDifferencer.difference(
+    treeDifferencer.difference(
       mockBlockNodes_deletes,
       mockBlockNodes,
       isBlockEqual,
@@ -162,15 +171,19 @@ it('get delete changes', () => {
     Array [
       Object {
         "type": "delete",
-        "uid": "mock-tree-node-body-3",
+        "uid": "3",
       },
       Object {
         "type": "delete",
-        "uid": "mock-tree-node-body-6",
+        "uid": "6",
       },
       Object {
         "type": "delete",
-        "uid": "mock-tree-node-body-7",
+        "uid": "7",
+      },
+      Object {
+        "type": "delete",
+        "uid": "8",
       },
     ]
   `)
@@ -178,7 +191,7 @@ it('get delete changes', () => {
 
 it('get update changes', () => {
   expect(
-    treeNodeDifferencer.difference(
+    treeDifferencer.difference(
       mockBlockNodes_updates,
       mockBlockNodes,
       isBlockEqual,
@@ -187,17 +200,17 @@ it('get update changes', () => {
     Array [
       Object {
         "type": "update",
-        "uid": "mock-tree-node-body-2",
+        "uid": "2",
       },
       Object {
         "type": "update",
-        "uid": "mock-tree-node-body-7",
+        "uid": "7",
       },
     ]
   `)
 
   expect(
-    treeNodeDifferencer.difference(
+    treeDifferencer.difference(
       mockBlockNodes_updateRoot,
       mockBlockNodes,
       isBlockEqual,
@@ -206,7 +219,7 @@ it('get update changes', () => {
     Array [
       Object {
         "type": "update",
-        "uid": "mock-tree-node-body-0",
+        "uid": "0",
       },
     ]
   `)
@@ -226,7 +239,7 @@ it('get change-parent-update changes', () => {
 
 it('get mixed changes', () => {
   expect(
-    treeNodeDifferencer.difference(
+    treeDifferencer.difference(
       mockBlockNodes_mix,
       mockBlockNodes_deletes,
       isBlockEqual,
@@ -235,28 +248,102 @@ it('get mixed changes', () => {
     Array [
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-3",
+        "uid": "3",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-6",
+        "uid": "6",
       },
       Object {
         "type": "insert",
-        "uid": "mock-tree-node-body-7",
+        "uid": "7",
+      },
+      Object {
+        "type": "insert",
+        "uid": "8",
       },
       Object {
         "type": "delete",
-        "uid": "mock-tree-node-body-5",
+        "uid": "5",
       },
       Object {
         "type": "update",
-        "uid": "mock-tree-node-body-2",
+        "uid": "2",
       },
       Object {
         "type": "update",
-        "uid": "mock-tree-node-body-4",
+        "uid": "4",
       },
+    ]
+  `)
+})
+
+//
+// Merge
+//
+//
+//
+//
+
+it('_mergeDeletions() only deletions', () => {
+  const final = mockBlockNodes_deletes,
+    start = mockBlockNodes,
+    changes = treeDifferencer.difference(final, start, isBlockEqual),
+    f_root = treeUtil.buildFromList(final),
+    s_root = treeUtil.buildFromList(start)
+
+  treeDifferencer._mergeDeletions(f_root, s_root, changes)
+  expect(treeUtil.toString(f_root)).toMatchInlineSnapshot(`
+    "- 0
+      - 1
+      - 2
+        - 4
+          - 6
+          - 8
+        - 5
+      - 3
+        - 7"
+  `)
+})
+
+it('_mergeDeletions() mix', () => {
+  const final = mockBlockNodes_mix,
+    start = mockBlockNodes_deletes,
+    changes = treeDifferencer.difference(final, start, isBlockEqual),
+    deletes = changes.filter(e => e.type === 'delete'),
+    f_root = treeUtil.buildFromList(final),
+    s_root = treeUtil.buildFromList(start)
+
+  treeDifferencer._mergeDeletions(f_root, s_root, deletes)
+  expect(treeUtil.toString(f_root)).toMatchInlineSnapshot(`
+    "- 0
+      - 1
+      - 2
+        - 4
+          - 6
+          - 8
+        - 5
+      - 3
+        - 7"
+  `)
+})
+
+it('merge() only deletions', () => {
+  expect(
+    treeDifferencer
+      .merge(mockBlockNodes_mix, mockBlockNodes_deletes, isBlockEqual)
+      .map(([a, b]) => `${a.uid} ${b?.type ?? 'null'}`),
+  ).toMatchInlineSnapshot(`
+    Array [
+      "0 null",
+      "1 null",
+      "2 update",
+      "4 update",
+      "6 insert",
+      "8 insert",
+      "5 delete",
+      "3 insert",
+      "7 insert",
     ]
   `)
 })

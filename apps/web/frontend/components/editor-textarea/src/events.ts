@@ -948,22 +948,6 @@ async function saveCurDoc(docUid: string) {
     // In some cases (eg remove doc), the doc will not be found
     console.debug(err)
   }
-
-  // const doc = curSymbol ? getDoc(curSymbol) : null
-
-  // const f_blocks = treeUtil.toTreeNodeBodyList(final.blocks),
-  //   s_blocks = treeUtil.toTreeNodeBodyList(start.blocks),
-  //   changes = treeNodeDifferencer.difference(f_blocks, s_blocks, isBlockEqual)
-
-  // if (doc) {
-  //   if (doc.noteDraftCopy) {
-  //     await docSave(doc)
-  //     // } else if (curDoc.noteCopy & diff(curDoc)) {
-  //     // TODO: Show 'not save' warnning before remove
-  //   } else {
-  //     await docRemove(doc)
-  //   }
-  // }
 }
 
 /**

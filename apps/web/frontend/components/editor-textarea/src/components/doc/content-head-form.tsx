@@ -122,7 +122,6 @@ export const ContentHeadForm = ({
           required: true,
           pattern: /\[\[[^\]\n]+\]\]/u,
           validate: v => {
-            console.log('validate')
             try {
               const s = parseSymbol(v)
               return s.type === 'TOPIC'

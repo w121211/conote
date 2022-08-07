@@ -2,12 +2,7 @@ import React from 'react'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import ReactMarkdown from 'react-markdown'
 import { ReactMarkdownOptions } from 'react-markdown/lib/react-markdown'
-import { visit } from 'unist-util-visit'
-import { Plugin, Transformer } from 'unified'
-import { Root } from 'hast'
 import ParseRenderEl from '../../frontend/components/editor-textarea/src/components/inline/parse-render-el'
-import { parse } from '../../frontend/components/editor-textarea/src/parse-render'
-import InlineEl from '../../frontend/components/editor-textarea/src/components/inline/inline-el'
 
 export default {
   title: 'parsers/ReactMarkdown',

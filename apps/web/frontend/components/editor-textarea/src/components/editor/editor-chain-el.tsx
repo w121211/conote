@@ -72,7 +72,7 @@ const ChainDoc = ({
           <button>View</button>
           {doc.noteCopy && (
             <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
-              <a className="btn-primary">View current head note</a>
+              <a className="btn-primary">Head</a>
             </Link>
           )}
         </div>

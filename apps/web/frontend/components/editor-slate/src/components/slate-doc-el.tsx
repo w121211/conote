@@ -92,7 +92,7 @@ const Leaf = (
     //   break
     // }
     default: {
-      className = 'text-gray-600'
+      className = 'text-gray-700 leading-7'
     }
   }
 
@@ -169,48 +169,46 @@ const EditorEl = ({
   // }, [searchAllResult])
 
   return (
-    <div className="text-gray-800">
-      <Slate
-        editor={editor}
-        value={value}
-        onChange={v => {
-          if (isIndenterArray(v)) {
-            docValueRepo.setDocValue(docUid, v)
+    <Slate
+      editor={editor}
+      value={value}
+      onChange={v => {
+        if (isIndenterArray(v)) {
+          docValueRepo.setDocValue(docUid, v)
+        } else {
+          throw new Error('Value needs to be indenter array')
+        }
+      }}
+    >
+      <Editable
+        autoCapitalize="false"
+        // autoCorrect="false"
+        // autoFocus={true}
+        decorate={decorate_}
+        // readOnly={readOnly}
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+        spellCheck={false}
+        onKeyDown={e => {
+          indenterOnKeyDown(e, editor)
+        }}
+        // onKeyUp={event => {
+        //   onKeyUpBindSearchPanel(event, editor)
+        // }}
+        onSelect={e => {
+          const el = window
+            .getSelection()
+            ?.anchorNode?.parentElement?.closest('[data-inline-item]')
+
+          if (el) {
+            // console.log('onSelect', el)
+            slateEditorRepo.setCurSelectedElId(el.id)
           } else {
-            throw new Error('Value needs to be indenter array')
+            slateEditorRepo.setCurSelectedElId(null)
           }
         }}
-      >
-        <Editable
-          autoCapitalize="false"
-          // autoCorrect="false"
-          // autoFocus={true}
-          decorate={decorate_}
-          // readOnly={readOnly}
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          spellCheck={false}
-          onKeyDown={e => {
-            indenterOnKeyDown(e, editor)
-          }}
-          // onKeyUp={event => {
-          //   onKeyUpBindSearchPanel(event, editor)
-          // }}
-          onSelect={e => {
-            const el = window
-              .getSelection()
-              ?.anchorNode?.parentElement?.closest('[data-inline-item]')
-
-            if (el) {
-              // console.log('onSelect', el)
-              slateEditorRepo.setCurSelectedElId(el.id)
-            } else {
-              slateEditorRepo.setCurSelectedElId(null)
-            }
-          }}
-        />
-      </Slate>
-    </div>
+      />
+    </Slate>
   )
 }
 

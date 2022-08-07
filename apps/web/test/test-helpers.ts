@@ -165,8 +165,8 @@ class TestHelper {
     return { sym, note, commit, noteDoc }
   }
 
-  async createDiscusses(prisma: PrismaClient, draftId: string): Promise<void> {
-    await prisma.$transaction([
+  async createDiscusses(prisma: PrismaClient, draftId: string) {
+    return await prisma.$transaction([
       ...mockDiscusses(draftId).map(e =>
         prisma.discuss.create({
           data: { ...e, count: { create: {} } },

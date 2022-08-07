@@ -1,6 +1,7 @@
 import { isNil } from 'lodash'
 import React, { useState } from 'react'
 import Modal from '../../../../modal/modal'
+import { Alert } from '../../../../ui-component/alert'
 import { styleSymbol } from '../../../../ui-component/style-fc/style-symbol'
 import type { Doc } from '../../interfaces'
 import { ContentHeadForm } from './content-head-form'
@@ -16,35 +17,38 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   // const newSymbol = doc.noteCopy && doc.contentHead.symbol !== doc.symbol ?
 
   return (
-    <div className="ml-6 mb-5">
-      <div className="flex items-center gap-2 mb-4">
-        {/* <DomainSelect /> */}
-        {/* {isNew && (
+    <div className="mb-5">
+      {/* <div className="flex items-center gap-2 mb-4">
+        <DomainSelect />
+        {isNew && (
           <Badge
             content="new"
             bgClassName="bg-yellow-200/60"
             textClassName="font-bold text-xl"
           />
-        )} */}
-      </div>
-
-      {/* <DomainSelect /> */}
+        )}
+      </div> */}
 
       <div className="relative mb-3">
-        <h1 className=" line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
+        <h3 className="text-gray-800 dark:text-gray-100 leading-tight line-clamp-2 break-words">
           {/* {link && (
             <span className="material-icons text-blue-400 text-4xl align-bottom">
             language
             </span>
           )} */}
-          <span className="symbol-link" onClick={() => setShowModal(true)}>
+          <span
+            // className="flex-1 p-1 select-none rounded-md hover:bg-gray-200/80 dark:hover:bg-gray-600"
+            className="symbol-link"
+            onClick={() => setShowModal(true)}
+            // role='button'
+          >
             {styleSymbol(
               doc.noteDraftCopy.symbol,
               doc.contentHead.webpage?.title ?? undefined,
             )}
             {newSymbol && `-> ${newSymbol}`}
           </span>
-        </h1>
+        </h3>
       </div>
 
       <Modal
@@ -129,18 +133,20 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
       )} */}
 
       {/* ---notification block--- */}
-      {/* <div className="flex flex-col gap-2 mt-4 text-gray-800 dark:text-gray-100 text-sm">
-        <Alert
+      <div className="flex flex-col gap-2 mt-4 text-gray-800 dark:text-gray-100 text-sm">
+        {/* <Alert
           type="warning"
-          action="merg"
-          str="A new commit 9031jd2 is waiting to merge "
-          time="(5 hours ago)"
-          visible={showAlert[0]}
-          onClose={() => {
-            setShowAlert({ ...showAlert, 0: false })
-          }}
-        />
-        <Alert
+          action="merge"
+          // str="A new commit 9031jd2 is waiting to merge "
+          // time="(5 hours ago)"
+          // visible={showAlert[0]}
+          // onClose={() => {
+          //   setShowAlert({ ...showAlert, 0: false })
+          // }}
+        >
+          <span>Hello world</span>
+        </Alert> */}
+        {/* <Alert
           type="success"
           action="rename"
           str="Agree rename this note to [[Awesome Tailwind css]] ? "
@@ -149,8 +155,8 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
           onClose={() => {
             setShowAlert({ ...showAlert, 1: false })
           }}
-        />
-      </div> */}
+        /> */}
+      </div>
     </div>
   )
 }

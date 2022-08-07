@@ -1,3 +1,4 @@
+import moment from 'moment'
 import React, { useState } from 'react'
 import { NoteDocFragment } from '../../../apollo/query.graphql'
 import Modal from '../modal/modal'
@@ -7,37 +8,16 @@ import { ContentHeadReadonlyForm } from './content-head-readonly-form'
 const NoteHead = ({
   symbol,
   doc,
+  isHeadDoc,
 }: {
   symbol: string
   doc: NoteDocFragment
+  isHeadDoc: boolean
 }): JSX.Element | null => {
   const [showModal, setShowModal] = useState(false)
+
   return (
-    <div className="ml-4 mb-5">
-      <div className="flex items-center gap-2 mb-4">
-        {/* <DomainSelect /> */}
-        {/* {isNew && (
-          <Badge
-            content="new"
-            bgClassName="bg-yellow-200/60"
-            textClassName="font-bold text-xl"
-          />
-        )} */}
-      </div>
-
-      <div className="relative mb-3 ">
-        <h1 className="line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
-          {/* {link && (
-            <span className="material-icons text-blue-400 text-4xl align-bottom">
-            language
-            </span>
-          )} */}
-          <span className="symbol-link" onClick={() => setShowModal(true)}>
-            {styleSymbol(symbol, doc.contentHead.webpage?.title ?? undefined)}
-          </span>
-        </h1>
-      </div>
-
+    <>
       <Modal
         sectionClassName=""
         visible={showModal}
@@ -53,7 +33,42 @@ const NoteHead = ({
         </div>
       </Modal>
 
-      {/* {(fetchTime || link) && (
+      <div className="ml-4 mb-5">
+        {/* <div className="flex items-center gap-2 mb-4">
+          <DomainSelect />
+          {isNew && (
+          <Badge
+            content="new"
+            bgClassName="bg-yellow-200/60"
+            textClassName="font-bold text-xl"
+          />
+        )}
+        </div> */}
+
+        <div className="relative mb-3 ">
+          <h1 className="line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
+            {/* {link && (
+            <span className="material-icons text-blue-400 text-4xl align-bottom">
+            language
+            </span>
+          )} */}
+            <span className="symbol-link" onClick={() => setShowModal(true)}>
+              {styleSymbol(symbol, doc.contentHead.webpage?.title ?? undefined)}
+
+              <span className="ml-2 text-gray-400/50 dark:text-gray-400 font-light">
+                {!isHeadDoc && `#${doc.id.slice(-6)}`}
+              </span>
+            </span>
+          </h1>
+        </div>
+
+        <div className="flex flex-col text-gray-400 text-sm ">
+          <p className="first-letter:capitalize">
+            @someone - {moment(doc.updatedAt).format('L')}
+          </p>
+        </div>
+
+        {/* {(fetchTime || link) && (
         <div className="flex flex-col text-gray-400 text-sm italic">
           {link && (
             <p className="truncate first-letter:capitalize">
@@ -76,9 +91,9 @@ const NoteHead = ({
         </div>
       )} */}
 
-      {/* {doc.noteCopy && <NoteEmojis noteId={doc.noteCopy.id} />} */}
+        {/* {doc.noteCopy && <NoteEmojis noteId={doc.noteCopy.id} />} */}
 
-      {/* {noteMetaData?.noteMeta.keywords && (
+        {/* {noteMetaData?.noteMeta.keywords && (
         <div className={classes.headerKw}>
           {noteMetaData?.noteMeta.keywords.map((e, i) => {
             if (i < 5) {
@@ -122,8 +137,8 @@ const NoteHead = ({
         </div>
       )} */}
 
-      {/* ---notification block--- */}
-      {/* <div className="flex flex-col gap-2 mt-4 text-gray-800 dark:text-gray-100 text-sm">
+        {/* ---notification block--- */}
+        {/* <div className="flex flex-col gap-2 mt-4 text-gray-800 dark:text-gray-100 text-sm">
         <Alert
           type="warning"
           action="merg"
@@ -145,7 +160,8 @@ const NoteHead = ({
           }}
         />
       </div> */}
-    </div>
+      </div>
+    </>
   )
 }
 
