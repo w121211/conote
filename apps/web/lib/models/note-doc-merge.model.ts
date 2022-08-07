@@ -1,4 +1,4 @@
-import type {
+import {
   Branch,
   Note,
   NoteDoc,
@@ -9,10 +9,11 @@ import type {
 } from '@prisma/client'
 import { isEqual } from 'lodash'
 import { differenceContentBody } from '../../share/utils'
-import type { NoteDocMeta } from '../interfaces'
+import type { NoteDocMeta, NoteDocParsed } from '../interfaces'
 import prisma from '../prisma'
 import { NoteDocModel } from './note-doc.model'
 import { pollMergeModel } from './poll-merge.model'
+import { symModel } from './sym.model'
 
 type MergeErrorFlag = 'paused-from_doc_not_head' | 'fail_to_auto_merge'
 
@@ -54,14 +55,62 @@ class NoteDocMergeModel extends NoteDocModel {
       include: { mergePoll: true },
     })
 
-    if (doc_ === null) throw new Error('[_createMergePoll] Unexpected error')
-    if (doc_.mergePoll !== null)
-      throw new Error('[_createMergePoll] Doc already has a merge poll')
+    if (doc_ === null) throw new Error('Unexpected error')
+    if (doc_.mergePoll !== null) throw new Error('Doc already has a merge poll')
 
     const poll = await pollMergeModel.createMergePoll(doc_),
-      doc__ = this._update(doc_.id, 'CANDIDATE', 'wait_to_merge-by_poll')
+      doc__ = this._update(doc_, 'CANDIDATE', 'wait_to_merge-by_poll')
 
     return doc__
+  }
+
+  /**
+   * Do the merge
+   * - Update doc's status to 'MERGED'
+   * - If content-head symbol got modified, update symbol's name
+   *
+   */
+  async _mergeAccept(
+    doc: NoteDocParsed<
+      NoteDoc & {
+        sym: Sym
+        fromDoc: NoteDoc | null
+        mergePoll: Poll | null
+      }
+    >,
+    mergeState: NoteDocMeta['mergeState'],
+  ) {
+    if (doc.contentHead.symbol && doc.contentHead.symbol !== doc.sym.symbol) {
+      // Content-head symbol changed, update sym
+      await symModel.update(doc.symId, doc.contentHead.symbol)
+    }
+    return this._update(doc, NoteDocStatus.MERGED, mergeState)
+  }
+
+  async _mergePause(
+    doc: NoteDocParsed<
+      NoteDoc & {
+        sym: Sym
+        fromDoc: NoteDoc | null
+        mergePoll: Poll | null
+      }
+    >,
+    mergeState: NoteDocMeta['mergeState'],
+  ) {
+    const { mergePoll } = doc
+
+    if (mergePoll) {
+      await prisma.poll.update({
+        data: { status: 'PAUSE' },
+        where: { id: mergePoll.id },
+      })
+    }
+
+    return this._update(doc, NoteDocStatus.PAUSE, mergeState)
+  }
+
+  async _mergeReject(doc: NoteDoc, mergeState: NoteDocMeta['mergeState']) {
+    return this._update(doc, NoteDocStatus.REJECTED, mergeState)
   }
 
   /**
@@ -82,23 +131,28 @@ class NoteDocMergeModel extends NoteDocModel {
    *
    */
   async _mergeAuto(
-    doc: NoteDoc & { fromDoc: NoteDoc | null; mergePoll: Poll | null },
+    doc: NoteDoc & {
+      sym: Sym
+      fromDoc: NoteDoc | null
+      mergePoll: Poll | null
+    },
   ): Promise<NoteDoc & { branch: Branch; sym: Sym; mergePoll: Poll | null }> {
-    this._validateOnMerge(doc)
+    const { docParsed } = await this._validateOnMerge(doc),
+      { branchId, symId, fromDoc } = docParsed
 
-    if (doc.fromDoc === null) {
-      return await this._update(doc.id, 'MERGED', 'merged_auto-initial_commit')
-    }
+    if (fromDoc === null)
+      return this._mergeAccept(docParsed, 'merged_auto-initial_commit')
 
-    const { branchId, symId, fromDoc } = doc,
-      doc_ = this.parse(doc),
-      fromDoc_ = this.parse(fromDoc),
-      waitingDocs = await this.getCandidates(doc),
+    const fromDoc_ = this.parse(fromDoc),
+      waitingCndidates = await this.getCandidates(docParsed),
       headDoc = await this.getHeadDoc(branchId, symId),
-      // TODO
-      contentHead_isEqual = isEqual(doc_.contentHead, fromDoc_.contentHead),
+      // TODO: Content head is insert only?
+      contentHead_isEqual = isEqual(
+        docParsed.contentHead,
+        fromDoc_.contentHead,
+      ),
       { blockChanges: contentBody_changes } = differenceContentBody(
-        doc_.contentBody,
+        docParsed.contentBody,
         fromDoc_.contentBody,
       ),
       contentBody_inserts = contentBody_changes.filter(
@@ -109,37 +163,27 @@ class NoteDocMergeModel extends NoteDocModel {
         contentBody_inserts.length === contentBody_changes.length
 
     if (contentHead_isEqual && contentBody_changes.length === 0) {
-      console.debug(contentBody_changes)
-      return await this._update(doc.id, 'REJECTED', 'rejected_auto-no_changes')
+      return this._mergeReject(docParsed, 'rejected_auto-no_changes')
     }
 
-    if (waitingDocs.length <= 1) {
-      if (headDoc && headDoc.userId === doc.userId)
-        return await this._update(doc.id, 'MERGED', 'merged_auto-same_user')
-
+    if (waitingCndidates.length <= 1) {
+      if (headDoc && headDoc.userId === docParsed.userId)
+        return this._mergeAccept(docParsed, 'merged_auto-same_user')
       if (contentHead_isEqual && contentBody_onlyInserts)
-        return await this._update(
-          doc.id,
-          'MERGED',
-          'merged_auto-only_insertions',
-        )
+        return this._mergeAccept(docParsed, 'merged_auto-only_insertions')
     }
     // console.debug(waitingDocs, contentBody_changes, contentBody_inserts)
     throw new MergeError('fail_to_auto_merge')
   }
 
   /**
-   * Throws
-   * - If from-doc is behind head-doc, 'paused'
-   *
-   * If merge-poll is finished and
-   * - If number of accepts more than rejects, 'merged', otherwise 'rejected'
+   * Use the merge poll result to accept or reject merge
    */
   async _mergeByPoll(
     doc: NoteDoc & {
+      sym: Sym
       fromDoc: NoteDoc | null
-      mergePoll: Poll | null
-      note: Note
+      mergePoll: Poll
     },
   ): Promise<
     NoteDoc & {
@@ -150,84 +194,77 @@ class NoteDocMergeModel extends NoteDocModel {
     const doc_ = this.parse(doc),
       { meta, mergePoll } = doc_
 
-    if (mergePoll === null) {
-      throw new Error('[_mergeByPoll] mergePoll === null')
-    }
-    if (meta.mergeState !== 'wait_to_merge-by_poll') {
-      throw new Error(
-        '[_mergeByPoll] meta.mergeState !== wait_to_merge-by_poll',
-      )
-    }
+    if (meta.mergeState !== 'wait_to_merge-by_poll')
+      throw new Error('meta.mergeState !== wait_to_merge-by_poll')
+
     try {
-      await this._validateOnMerge(doc)
+      const { docParsed } = await this._validateOnMerge(doc)
+      const { result } = await pollMergeModel.verdict(mergePoll)
+
+      return result === 'accept'
+        ? this._mergeAccept(docParsed, 'merged_poll')
+        : this._mergeReject(docParsed, 'rejected_poll')
     } catch (err) {
       if (err instanceof MergeError && err.updatedNoteDoc) {
         return err.updatedNoteDoc
       }
       throw err
     }
-
-    const { result } = await pollMergeModel.verdict(mergePoll)
-
-    if (result === 'accept') {
-      return await this._update(doc.id, 'MERGED', 'merged_poll')
-    } else {
-      return await this._update(doc.id, 'REJECTED', 'rejected_poll')
-    }
   }
 
   _update(
-    id: string,
+    doc: NoteDoc,
     status: NoteDocStatus,
     mergeState: NoteDocMeta['mergeState'],
-    // mergePoll?: Poll,
-  ): PrismaPromise<
-    NoteDoc & { branch: Branch; sym: Sym; mergePoll: Poll | null }
-  > {
+  ) {
     const meta: NoteDocMeta = {
         mergeState,
       },
-      doc = prisma.noteDoc.update({
+      doc_ = prisma.noteDoc.update({
         data: { status, meta },
-        where: { id },
+        where: { id: doc.id },
         include: { branch: true, sym: true, mergePoll: true },
       })
-    return doc
+    return doc_
   }
 
   /**
-   * Throws
+   * @throws
    * - If doc is not candidate
-   * - If rom-doc is not the head -> pause merge
+   * - If from-doc is not the head -> pause merge
    */
   async _validateOnMerge(
-    doc: NoteDoc & { fromDoc: NoteDoc | null; mergePoll: Poll | null },
-  ): Promise<void> {
-    const doc_ = this.parse(doc),
-      { fromDoc, status, meta, mergePoll } = doc_,
+    doc: NoteDoc & {
+      sym: Sym
+      fromDoc: NoteDoc | null
+      mergePoll: Poll | null
+    },
+  ) {
+    const docParsed = this.parse(doc),
+      { fromDoc, status, meta } = docParsed,
       headDoc = fromDoc && (await this.getHeadDoc(doc.branchId, doc.symId))
 
-    if (status !== 'CANDIDATE')
-      throw new Error('[_validateOnMerge] Doc.status not CANDIDATE')
-    if (!['before_merge', 'wait_to_merge-by_poll'].includes(meta.mergeState))
+    if (status !== 'CANDIDATE') {
+      throw new Error('Doc.status not CANDIDATE')
+    }
+    if (!['before_merge', 'wait_to_merge-by_poll'].includes(meta.mergeState)) {
       throw new Error(
-        '[_validateOnMerge] Doc.status is CANDIDATE but Doc.meta.mergeState is not either "before_merge",  "wait_to_merge-by_poll"',
+        'Doc.status is CANDIDATE but Doc.meta.mergeState is not either "before_merge",  "wait_to_merge-by_poll"',
       )
+    }
     if (fromDoc) {
       if (headDoc === null || headDoc.id !== fromDoc.id) {
-        if (mergePoll) {
-          await prisma.poll.update({
-            data: { status: 'PAUSE' },
-            where: { id: mergePoll.id },
-          })
-        }
-        const doc_ = await this._update(
-          doc.id,
-          'PAUSE',
+        const doc_ = await this._mergePause(
+          docParsed,
           'paused-from_doc_not_head',
         )
         throw new MergeError('paused-from_doc_not_head', doc_)
       }
+    }
+
+    return {
+      docParsed,
+      headDoc,
     }
   }
 
@@ -237,22 +274,39 @@ class NoteDocMergeModel extends NoteDocModel {
    *
    * Reject on routine checks:
    * - poll is open for a specific time && ups is lower than downs
+   *
+   * TODO:
+   * - [] Insert to activty feed
    */
-  async mergeRoutine(
-    doc: NoteDoc & {
-      fromDoc: NoteDoc | null
-      mergePoll: Poll | null
-      note: Note
-    },
-  ): Promise<NoteDoc & { branch: Branch; sym: Sym }> {
-    return await this._mergeByPoll(doc)
+  async mergeSchedule() {
+    const mergePolls = await pollMergeModel.getMergePollsReadyToVerdict()
+    const res: (NoteDoc & { branch: Branch; sym: Sym })[] = []
+
+    for (const mergePoll of mergePolls) {
+      const { noteDocToMerge } = mergePoll
+
+      if (noteDocToMerge === null) throw new Error('noteDocToMerge === null')
+
+      try {
+        const doc = await this._mergeByPoll({ ...noteDocToMerge, mergePoll })
+        res.push(doc)
+      } catch (err) {
+        console.debug(err)
+      }
+    }
+
+    return res
   }
 
   /**
    * For the given note-doc, try auto merge, if failed create a merge poll for it
    */
   async mergeOnCreate(
-    doc: NoteDoc & { fromDoc: NoteDoc | null; mergePoll: Poll | null },
+    doc: NoteDoc & {
+      sym: Sym
+      fromDoc: NoteDoc | null
+      mergePoll: Poll | null
+    },
   ): Promise<NoteDoc & { branch: Branch; sym: Sym; mergePoll: Poll | null }> {
     try {
       return await this._mergeAuto(doc)

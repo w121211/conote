@@ -17,7 +17,6 @@ const basicBlocks = writeBlocks(['a', ['b', 'c', 'helloworld']])
 const apolloClient = getApolloClient()
 
 export default {
-  title: 'BlockEditor/BlockEl',
   component: BlockEl,
 } as ComponentMeta<typeof BlockEl>
 

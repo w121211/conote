@@ -62,7 +62,7 @@ export const LatestDiscussTile = ({ data }: Props): JSX.Element => {
                   </Link>
                 ))}
                 <span className="text-gray-400">
-                  {moment(createdAt).subtract(10, 'days').format('ll')}
+                  {moment(createdAt).utc().format('ll')}
                 </span>
               </div>
             </div>
@@ -72,30 +72,3 @@ export const LatestDiscussTile = ({ data }: Props): JSX.Element => {
     </Box>
   )
 }
-
-// type Hashtags = '#討論' | '#機會' | '#Battle' | '#事件'
-
-// const orderOptions = [
-//   { label: '依熱門度', value: 'popularity' },
-//   { label: '最後更新時間(新->舊)', value: 'newToOld' },
-// ]
-
-// function isHashtags(tag: string): tag is Hashtags {
-//   return ['#討論', '#機會', '#Battle', '#事件'].includes(tag)
-// }
-
-// const filtertags = ['全部', '#討論', '#機會', '#Battle', '#事件']
-
-// const [listData, setListData] = useState<ListElement[]>(dummyList)
-// const [currentTab, setCurrentHashtag] = useState(filtertags[0])
-
-// const handleFilter = (tag: string) => {
-//   if (tag === '全部') {
-//     setListData(dummyList)
-//     setCurrentHashtag(tag)
-//   } else if (isHashtags(tag)) {
-//     const newList = JSON.parse(JSON.stringify(dummyList)) as ListElement[]
-//     setListData(newList.filter(e => e.hashtags.includes(tag)))
-//     setCurrentHashtag(tag)
-//   }
-// }

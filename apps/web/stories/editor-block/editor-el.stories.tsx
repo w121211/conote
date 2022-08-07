@@ -21,7 +21,6 @@ import { noteDraftService } from '../../frontend/components/editor-textarea/src/
 import { editorOpenSymbolInMain } from '../../frontend/components/editor-textarea/src/events'
 
 export default {
-  title: 'BlockEditor/EditorEl',
   component: EditorEl,
 } as ComponentMeta<typeof EditorEl>
 

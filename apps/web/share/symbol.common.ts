@@ -1,12 +1,11 @@
 import type { SymbolParsed } from '../lib/interfaces'
 
-const reTicker = /^\$[A-Z0-9]+$/
+export const reTicker = /^\$[A-Z0-9]+$/
 
-const reTopic = /^\[\[[^\]]+\]\]$/
+export const reTopic = /^\[\[[^[\]\n]+\]\]$/
 
 /**
  * Check is given sting a url
- *
  * @reference https://stackoverflow.com/a/43467144/2293778
  */
 function isURL(str: string) {
@@ -37,7 +36,8 @@ export function parseSymbol(symbol: string): SymbolParsed {
       ? { type: 'URL', symbol, url: str }
       : { type: 'TOPIC', symbol }
   }
-  throw new Error('[parseSymbol] Symbol format is not recognized, ' + symbol)
+
+  throw new Error('Symbol format is not recognized: ' + symbol)
 }
 
 export function removeTopicPrefixSuffix(topicSymbol: string): string {

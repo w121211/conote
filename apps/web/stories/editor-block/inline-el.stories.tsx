@@ -8,7 +8,6 @@ import InlineEl from '../../frontend/components/editor-textarea/src/components/i
 // blockRepo.update([setEntities(mockLocalDoc.blocks)])
 
 export default {
-  title: 'BlockEditor/InlineEl',
   component: InlineEl,
 } as ComponentMeta<typeof InlineEl>
 

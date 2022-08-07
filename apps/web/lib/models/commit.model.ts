@@ -10,6 +10,7 @@ import type {
 } from '@prisma/client'
 import cuid from 'cuid'
 import { differenceWith, intersectionWith } from 'lodash'
+import { CommitInputErrorCode } from '../../share/constants'
 import { differenceContentBody, validateContentBlocks } from '../../share/utils'
 import type { CommitInputErrorItem } from '../interfaces'
 import prisma from '../prisma'
@@ -18,32 +19,36 @@ import { noteDocModel } from './note-doc.model'
 import { noteDraftModel } from './note-draft.model'
 import { symModel } from './sym.model'
 
-class InputError extends Error {
-  constructor(msg: string) {
-    super(msg)
-    // this.name = 'MergeError'
-
-    // Set the prototype explicitly.
-    // See https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html#example
-    // Object.setPrototypeOf(this, InputError.prototype)
-    Object.setPrototypeOf(this, new.target.prototype)
-  }
-}
-
+/**
+ * Error cause by the user, not system
+ * Use it to show error message to the user
+ *
+ */
 export class CommitInputError extends Error {
   items: CommitInputErrorItem[]
 
   constructor(items: CommitInputErrorItem[]) {
-    const msg = items.map(e => `(${e.draftId}) ${e.msg}`).join(', ')
-
+    const msg = items
+      .map(({ draftId, code }) => `${code}::#${draftId}`)
+      .join(', ')
     super(msg)
+
+    // Set the prototype explicitly. See https://stackoverflow.com/questions/31626231/custom-error-class-in-typescript
     Object.setPrototypeOf(this, new.target.prototype)
+
     this.items = items
   }
 }
 
 /**
- *
+ * @throws
+ * - [x] If user is not the owner of draft
+ * - [x] If draftId cannot be found
+ * - [x] If fromDoc is empty but there is a latest doc
+ * - [x] If fromDoc does not match
+ * - [] If the draft content is the same as from-doc
+ * - [x] If discuss(es) not created
+ * - [] If found orphan discusses
  */
 async function validateInput(draft: NoteDraft, userId: string) {
   const sym = await prisma.sym.findUnique({
@@ -57,7 +62,7 @@ async function validateInput(draft: NoteDraft, userId: string) {
           branchId_symId: { branchId: headDoc.branchId, symId: headDoc.symId },
         },
       })),
-    draftParsed = noteDraftModel.parseReal(draft),
+    { draftParsed, inlineDiscusses } = noteDraftModel.parseDeep(draft),
     discussesCreated = await prisma.discuss.findMany({
       where: { draftId: draft.id },
     }),
@@ -91,6 +96,8 @@ async function validateInput(draft: NoteDraft, userId: string) {
   //     ),
   //   ))
 
+  const errCodes: CommitInputErrorCode[] = []
+
   // console.log(`existing discuss ${existingDiscusses?.length}`)
   if (sym && headDoc === null) {
     throw new Error('Unexpected error: found sym but not found headDoc')
@@ -103,41 +110,46 @@ async function validateInput(draft: NoteDraft, userId: string) {
   }
 
   if (draft.userId !== userId) {
-    throw new InputError('User is not the owner of the draft')
+    throw new Error('User is not the owner of the draft')
   }
   if (draft.symId !== null && draft.symId !== sym?.id) {
-    throw new InputError("Draft's symbol does not match its sym-id")
+    throw new Error("Draft's symbol does not match its sym-id")
   }
   if (draft.fromDocId) {
     if (headDoc === null)
-      throw new InputError("Draft's from-doc does not match current head-doc")
-    if (headDoc && headDoc.id !== draft.fromDocId)
-      throw new InputError("Draft's from-doc does not match current head-doc")
+      throw new Error('Draft has from-doc but current head-doc is null')
+    if (headDoc.id !== draft.fromDocId)
+      errCodes.push(CommitInputErrorCode.FROM_DOC_NOTE_HEAD)
   }
   if (draft.fromDocId === null && headDoc !== null) {
-    throw new InputError(
-      'Draft does not have a from-doc, but a head-doc is exist',
-    )
+    errCodes.push(CommitInputErrorCode.FROM_DOC_NOTE_HEAD)
   }
-  if (draft.fromDocId !== null && headDoc) {
-    // const domainChanged = draft.domain === curDoc!.domain
-    // const metaChanged = metaDiff(curDoc!.meta as unknown as NoteDocMeta, draftParsed.meta)
-    // const contentChanged = getContentDiff(curDoc!.content as unknown as NoteDocContent, draftParsed.content)
 
-    const diffBody = differenceContentBody(
-      draftParsed.contentBody,
-      headDoc.contentBody,
-    )
-    if (diffBody.blockChanges.length === 0)
-      throw new InputError("Draft's content-body do not change from from-doc")
-  }
+  // const domainChanged = draft.domain === curDoc!.domain
+  // const metaChanged = metaDiff(curDoc!.meta as unknown as NoteDocMeta, draftParsed.meta)
+  // const contentChanged = getContentDiff(curDoc!.content as unknown as NoteDocContent, draftParsed.content)
 
   const { isContentEmpty } = validateContentBlocks(
-    draftParsed.contentBody.blocks,
-  )
+      draftParsed.contentBody.blocks,
+    ),
+    diffBody =
+      headDoc &&
+      differenceContentBody(draftParsed.contentBody, headDoc.contentBody),
+    inlineDiscussesNoId = inlineDiscusses.filter(e => e.id === undefined)
 
-  if (isContentEmpty) throw new InputError("Draft's content is empty")
+  if (isContentEmpty) errCodes.push(CommitInputErrorCode.CONTENT_EMPTY)
+  if (diffBody !== null && diffBody.blockChanges.length === 0)
+    errCodes.push(CommitInputErrorCode.CONTENT_NOT_CHANGE)
+  if (inlineDiscussesNoId.length > 0)
+    errCodes.push(CommitInputErrorCode.DISCUSS_NOT_CREATE)
 
+  if (errCodes.length > 0) {
+    const items: CommitInputErrorItem[] = errCodes.map(code => ({
+      draftId: draft.id,
+      code,
+    }))
+    throw new CommitInputError(items)
+  }
   return {
     draft,
     draftParsed,
@@ -151,13 +163,12 @@ async function validateInput(draft: NoteDraft, userId: string) {
 }
 
 /**
- *
  * After commit, how to known the note-doc's corresponding note-draft?
  * - If draft has sym, use sym.id (both exist on draft and doc)
  * - If draft has symbol, use symbol to match doc.sym.symbol
  *
  * TODO:
- * - [ ] For each commit, input note-draft should have unique symbol/sym
+ * - [] For each commit, input note-draft should have unique symbol/sym
  */
 export async function commitNoteDrafts(
   draftIds: string[],
@@ -182,8 +193,9 @@ export async function commitNoteDrafts(
     newSymbolIds: string[] = []
 
   // Validate drafts before commit
-  const inputs: Awaited<ReturnType<typeof validateInput>>[] = [],
-    errItems: CommitInputError['items'] = []
+  const inputs: Awaited<ReturnType<typeof validateInput>>[] = []
+
+  let errItems: CommitInputErrorItem[] = []
 
   for (const id of draftIds) {
     const draft = await prisma.noteDraft.findUnique({ where: { id } })
@@ -194,8 +206,8 @@ export async function commitNoteDrafts(
     try {
       inputs.push(await validateInput(draft, userId))
     } catch (err) {
-      if (err instanceof InputError) {
-        errItems.push({ draftId: id, msg: err.message })
+      if (err instanceof CommitInputError) {
+        errItems = errItems.concat(err.items)
       } else {
         throw err
       }
@@ -258,6 +270,12 @@ export async function commitNoteDrafts(
         }),
       )
     })
+    if (discussesCreated_unfoundInBlocks.length > 0) {
+      console.debug(
+        'Discusses created but not found in blocks, delete',
+        discussesCreated_unfoundInBlocks.map(e => e.id),
+      )
+    }
 
     // Connect discusses to the note and update their status to "ACITVE" if possible
     discussesCreated_foundInBlocks.forEach(e => {

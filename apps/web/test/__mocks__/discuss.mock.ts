@@ -23,7 +23,6 @@ export const mockDiscusses = (
   {
     ...base,
     id: 'mock_discuss_0_active',
-    // draftId: mockNoteDrafts[0].id,
     draftId,
     userId: mockUsers[0].id,
     status: 'ACTIVE',
@@ -33,7 +32,6 @@ export const mockDiscusses = (
   {
     ...base,
     id: 'mock_discuss_1_draft',
-    // draftId: mockNoteDrafts[0].id,
     draftId,
     userId: mockUsers[1].id,
     status: 'DRAFT',
@@ -43,7 +41,6 @@ export const mockDiscusses = (
   {
     ...base,
     id: 'mock_discuss_2_archive',
-    // draftId: mockNoteDrafts[0].id,
     draftId,
     userId: mockUsers[2].id,
     status: 'ARCHIVE',
@@ -52,7 +49,7 @@ export const mockDiscusses = (
   },
 ]
 
-const mockDiscusses_ = mockDiscusses('')
+const mockDiscusses_ = mockDiscusses('a temp value')
 
 export const mockDiscussPosts: DiscussPost[] = [
   {

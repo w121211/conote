@@ -20,4 +20,16 @@ export const mockMergePolls: Omit<PollParsed<Poll>, 'count'>[] = [
     ...mergePollBase,
     id: '0-merge_poll',
   },
+  {
+    ...mergePollBase,
+    id: '1-merge_poll',
+    createdAt: new Date(2022, 1, 1),
+    updatedAt: new Date(2022, 1, 1),
+  },
+  {
+    ...mergePollBase,
+    id: '2-merge_poll',
+    createdAt: new Date(2022, 1, 2),
+    updatedAt: new Date(2022, 1, 2),
+  },
 ]

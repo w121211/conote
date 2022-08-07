@@ -1,9 +1,9 @@
 import { InlineItem } from '../src/interfaces'
-import { parse } from '../src/parse-render'
+import { parseBlockString } from '../src/parse-render'
 import { mockBlockStr } from './__mocks__/mock-block-str'
 
 function parse_(s: string): Omit<InlineItem, 'token'>[] {
-  return parse(s).inlineItems.map(e => {
+  return parseBlockString(s).inlineItems.map(e => {
     delete (e as any).token
     return e
   })

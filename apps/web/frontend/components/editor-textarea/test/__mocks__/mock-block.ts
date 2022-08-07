@@ -9,20 +9,20 @@ const input0: BlockInput = [
       '# Basic',
       [
         [
-          'What is Next.js?',
+          '__What is Next.js?__',
           ['A javascript backend framework, use React.js for SSR.'],
         ],
         [
-          '#Why use Next.js?#',
+          '__#Why use Next.js?#__',
           [
-            'Simple and straightforward.',
-            'Very popular backend framework for javascript, its github repository has over 90k stars.',
-            'Suitable for front-end developers who want to develop a full stack app.',
+            '* Simple and straightforward.',
+            '* Very popular backend framework for javascript, its github repository has over 90k stars.',
+            '* Suitable for front-end developers who want to develop a full stack app.',
             '',
           ],
         ],
         [
-          '#Why not use Next.js?#',
+          '__#Why not use Next.js?#__',
           [
             'Lack of official support of higher level features, e.g. authentication.',
             'Mix of frontend and backend codes may be difficult to organize, e.g. writing test code.',
@@ -33,11 +33,21 @@ const input0: BlockInput = [
     [
       '# Versus',
       [
-        ['Nuxt.js', ['Similar to Next.js, use Vue instead of React']],
+        [
+          'Nuxt.js  Next.js v.s. Nuxt.js?',
+          ['Similar to Next.js, use Vue instead of React'],
+        ],
         ['Nest.js', ['']],
       ],
     ],
-    ['# Discuss', ['']],
+    [
+      '# Discuss',
+      [
+        ['#How to use next.js?-mock_discuss_0_active#', ['']],
+        ['#How to use next.js?-mock_discuss_1_draft#', ['']],
+        ['#How to use next.js?-mock_discuss_2_archive#', ['']],
+      ],
+    ],
     ['# Link', ['']],
   ],
 ]

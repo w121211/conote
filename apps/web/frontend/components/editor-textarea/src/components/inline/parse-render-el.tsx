@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { parse } from '../../parse-render'
+import { parseBlockString } from '../../parse-render'
 import InlineEl from './inline-el'
 
 const ParseRenderEl = ({
@@ -13,7 +13,7 @@ const ParseRenderEl = ({
   className?: string
   isViewer?: true
 }) => {
-  const inlines = useMemo(() => parse(str), [str]),
+  const inlines = useMemo(() => parseBlockString(str), [str]),
     { inlineItems } = inlines
   return (
     <span className={className}>

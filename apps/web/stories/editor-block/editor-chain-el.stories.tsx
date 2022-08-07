@@ -6,7 +6,6 @@ import { editorChainsRefresh } from '../../frontend/components/editor-textarea/s
 import { EditorChainEl } from '../../frontend/components/editor-textarea/src/components/editor/editor-chain-el'
 
 export default {
-  title: 'BlockEditor/EditorChainEl',
   component: EditorChainEl,
 } as ComponentMeta<typeof EditorChainEl>
 

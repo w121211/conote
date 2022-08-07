@@ -1,4 +1,4 @@
-import { Poll, PollCount, PollVote } from '@prisma/client'
+import { Poll, PollCount, PollStatus, PollVote } from '@prisma/client'
 import { pollMergeModel } from '../../../lib/models/poll-merge.model'
 import { pollVoteModel } from '../../../lib/models/poll-vote.model'
 import prisma from '../../../lib/prisma'
@@ -6,35 +6,26 @@ import { testHelper } from '../../test-helpers'
 import { mockMergePolls } from '../../__mocks__/poll.mock'
 import { mockMergePollVotes } from '../../__mocks__/poll-vote.mock'
 
-async function createMockMergePolls() {
-  return await testHelper.createMergePolls(prisma)
+async function createMockMergePolls(mockPolls = mockMergePolls) {
+  return await Promise.all(
+    mockPolls.map(e => testHelper.createMergePoll(prisma, e)),
+  )
 }
 
 export async function createMockVotes(votes: PollVote[]) {
+  const votes_: PollVote[] = []
+
   for (const e of votes) {
-    const { choiceIdx, pollId, userId } = e
-    await pollVoteModel.create({
-      choiceIdx,
-      pollId,
-      userId,
-    })
+    const { choiceIdx, pollId, userId } = e,
+      v = await pollVoteModel.create({
+        choiceIdx,
+        pollId,
+        userId,
+      })
+    votes_.push(v)
   }
-  // await Promise.all([
-  //   ...mockMergePollVotes.accepts.map(({ choiceIdx, pollId, userId }) =>
-  //     pollVoteModel.create({
-  //       choiceIdx,
-  //       pollId,
-  //       userId,
-  //     }),
-  //   ),
-  //   ...mockMergePollVotes.rejects.map(({ choiceIdx, pollId, userId }) =>
-  //     pollVoteModel.create({
-  //       choiceIdx,
-  //       pollId,
-  //       userId,
-  //     }),
-  //   ),
-  // ])
+
+  return votes_
 }
 
 function c<T extends Poll & { count: PollCount }>(poll: T) {
@@ -74,7 +65,7 @@ describe('verdict()', () => {
 
   it('accepts if number of accepts > rejects', async () => {
     const polls = await createMockMergePolls()
-    await createMockVotes(mockMergePollVotes.accepts)
+    const votes = await createMockVotes(mockMergePollVotes.accepts)
     await createMockVotes(mockMergePollVotes.rejects.slice(0, 1))
 
     const { poll, ...rest } = await pollMergeModel.verdict(polls[0])
@@ -88,7 +79,7 @@ describe('verdict()', () => {
     `)
     expect(c(poll)).toMatchInlineSnapshot(`
       Object {
-        "count": "2,1,0,0",
+        "count": "2,0,1,0,0,0,0,0",
         "status": "CLOSE_SUCCESS",
       }
     `)
@@ -110,7 +101,7 @@ describe('verdict()', () => {
     `)
     expect(c(poll)).toMatchInlineSnapshot(`
       Object {
-        "count": "2,1,0,1",
+        "count": "2,0,1,0,0,0,0,1",
         "status": "CLOSE_SUCCESS",
       }
     `)
@@ -132,7 +123,7 @@ describe('verdict()', () => {
     `)
     expect(c(poll)).toMatchInlineSnapshot(`
       Object {
-        "count": "1,1,0,1",
+        "count": "1,0,1,0,0,0,0,1",
         "status": "CLOSE_SUCCESS",
       }
     `)
@@ -151,9 +142,37 @@ describe('verdict()', () => {
     `)
     expect(c(poll)).toMatchInlineSnapshot(`
       Object {
-        "count": "0,0,0,0",
+        "count": "0,0,0,0,0,0,0,0",
         "status": "CLOSE_SUCCESS",
       }
+    `)
+  })
+})
+
+describe('getMergePollsReadyToVerdict()', () => {
+  it('get merge polls ready to verdict', async () => {
+    const polls = [
+      ...mockMergePolls,
+      {
+        ...mockMergePolls[0],
+        id: '98-before_deadline',
+        createdAt: new Date(),
+      },
+      {
+        ...mockMergePolls[0],
+        id: '99-after_deadline_but_the_poll_is_not_open',
+        createdAt: new Date(2022, 1, 1),
+        status: PollStatus.CLOSE_FAIL,
+      },
+    ]
+    await createMockMergePolls(polls)
+    const result = await pollMergeModel.getMergePollsReadyToVerdict()
+
+    expect(result.map(e => e.id)).toMatchInlineSnapshot(`
+      Array [
+        "1-merge_poll",
+        "2-merge_poll",
+      ]
     `)
   })
 })

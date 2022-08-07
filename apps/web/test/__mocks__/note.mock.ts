@@ -24,4 +24,18 @@ export const mockNotes: Omit<Note, 'linkId'>[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+  {
+    id: '3',
+    symId: mockSyms[3].id,
+    branchId: mockBranches[0].id,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '4',
+    symId: mockSyms[4].id,
+    branchId: mockBranches[0].id,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
 ]

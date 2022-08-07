@@ -374,7 +374,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         where: { userId: userId, status: 'EDIT' },
         orderBy: { createdAt: 'asc' },
       }),
-      parsed = drafts.map(e => noteDraftModel.parse(e)),
+      parsed = drafts.map(e => noteDraftModel.parseShallow(e)),
       entries = parsed.map(
         ({ id, meta, status, symbol, contentHead: { title } }) => ({
           id,

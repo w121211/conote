@@ -10,7 +10,6 @@ import { InitStoreForStorybook } from './helper-components/init-store-for-storyb
 import { TooltipProvider } from '../../frontend/components/ui-component/tooltip/tooltip-provider'
 
 export default {
-  title: 'BlockEditor/DocEl',
   component: DocEl,
 } as ComponentMeta<typeof DocEl>
 

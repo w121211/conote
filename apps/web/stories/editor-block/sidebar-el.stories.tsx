@@ -4,7 +4,6 @@ import SidebarEl from '../../frontend/components/editor-textarea/src/components/
 import { ThemeProvider } from '../../frontend/components/theme/theme-provider'
 
 export default {
-  title: 'BlockEditor/SidebarEl',
   component: SidebarEl,
 } as ComponentMeta<typeof SidebarEl>
 

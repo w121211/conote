@@ -45,30 +45,29 @@ async function main() {
         },
       },
     )
-  const res = await testHelper.createDiscusses(prisma, draft0_.id)
-  console.log(res)
+
+  await testHelper.createDiscusses(prisma, draft0_.id)
 
   const { noteDocs } = await commitNoteDrafts([draft0_.id], draft0_.userId)
-  console.log(noteDocs)
 
   // const { blocks, docBlock } = parseGQLBlocks(
   //   noteDocModel.parse(noteDocs[0]).contentBody.blocks,
   // )
 
   // Warnning! This is the wrong way to create merge polls. Only used for the testing.
-  // await testHelper.createMergePolls(prisma, noteDocs[0])
+  await testHelper.createMergePolls(prisma, noteDocs[0])
 
   // 2. Simulate create a draft from the head doc
 
-  // const fromDoc = noteDocs[0],
-  //   fromDoc_ = noteDocModel.parse(fromDoc),
-  //   drafts_gotFromDoc = mockNoteDrafts_gotFromDoc(mockUsers[4].id, fromDoc_)
+  const fromDoc = noteDocs[0],
+    fromDoc_ = noteDocModel.parse(fromDoc),
+    drafts_gotFromDoc = mockNoteDrafts_gotFromDoc(mockUsers[4].id, fromDoc_)
 
-  // await testHelper.createNoteDrafts(prisma, drafts_gotFromDoc)
-  // await commitNoteDrafts(
-  //   drafts_gotFromDoc.map(e => e.id),
-  //   mockUsers[4].id,
-  // )
+  await testHelper.createNoteDrafts(prisma, drafts_gotFromDoc)
+  await commitNoteDrafts(
+    drafts_gotFromDoc.map(e => e.id),
+    mockUsers[4].id,
+  )
 
   // 3. Simulate a draft got from doc but the from doc is behind the head doc
   // TODO

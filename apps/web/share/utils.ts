@@ -9,8 +9,9 @@ import type { BlockFragment } from '../apollo/query.graphql'
 import type {
   Block,
   InlineDiscuss,
+  InlineSymbol,
 } from '../frontend/components/editor-textarea/src/interfaces'
-import { parse } from '../frontend/components/editor-textarea/src/parse-render'
+import { parseBlockString } from '../frontend/components/editor-textarea/src/parse-render'
 import type { NoteDocContentBody, NoteDocContentHead } from '../lib/interfaces'
 
 //
@@ -197,19 +198,33 @@ export function parseGQLContentBodyInput(
  * - [] Parse symbols
  */
 export function parseBlockValues(blocks: Omit<Block, 'childrenUids'>[]) {
-  const discussIds: NoteDocContentBody['discussIds'] = [],
-    symbols: NoteDocContentBody['symbols'] = []
-
-  blocks.forEach(e => {
-    const { uid, str } = e,
-      { inlineItems } = parse(str)
-
-    inlineItems
-      .filter((e): e is InlineDiscuss => e.type === 'inline-discuss')
-      .forEach(e => {
-        if (e.id) discussIds.push({ blockUid: uid, discussId: e.id })
-      })
+  const blocksParsed = blocks.map(e => {
+    return { ...e, blockParsed: parseBlockString(e.str) }
   })
 
-  return { discussIds, symbols }
+  const discussIds: NoteDocContentBody['discussIds'] = [],
+    symbols: NoteDocContentBody['symbols'] = [],
+    inlineDiscusses: InlineDiscuss[] = [],
+    inlineSymbols: InlineSymbol[] = []
+
+  for (const { uid, blockParsed } of blocksParsed) {
+    const { inlineItems } = blockParsed
+
+    for (const e of inlineItems) {
+      switch (e.type) {
+        case 'inline-discuss': {
+          if (e.id) {
+            discussIds.push({ blockUid: uid, discussId: e.id })
+          }
+          inlineDiscusses.push(e)
+          break
+        }
+        case 'inline-symbol':
+          inlineSymbols.push(e)
+          break
+      }
+    }
+  }
+
+  return { blocksParsed, discussIds, symbols, inlineDiscusses, inlineSymbols }
 }

@@ -2,7 +2,7 @@
  * Mainly copy from: https://github.com/ianstormtaylor/slate/blob/main/site/examples/code-highlighting.tsx
  */
 import { Editor, Element, NodeEntry, Text } from 'slate'
-import { parse } from '../../editor-textarea/src/parse-render'
+import { parseBlockString } from '../../editor-textarea/src/parse-render'
 import type { ElementIndenter, RangeCustom } from './interfaces'
 
 export const decorate = (
@@ -19,7 +19,7 @@ export const decorate = (
   })
   if (entry === undefined) throw new Error('Indenter not found.')
 
-  const { inlineItems } = parse(node.text),
+  const { inlineItems } = parseBlockString(node.text),
     [n] = entry,
     { uid: blockUid } = n
 

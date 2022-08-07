@@ -1,4 +1,4 @@
-import type { NoteDoc, NoteDraft, PrismaClient } from '@prisma/client'
+import type { NoteDoc, NoteDraft, Poll, PrismaClient } from '@prisma/client'
 import { mockDiscusses, mockDiscussPosts } from './__mocks__/discuss.mock'
 import { mockBotUser, mockUsers } from './__mocks__/user.mock'
 import { mockBranches } from './__mocks__/branch.mock'
@@ -9,7 +9,7 @@ import { mockCommits } from './__mocks__/commit.mock'
 import { mockNoteDocs } from './__mocks__/note-doc.mock'
 import { mockLinks } from './__mocks__/link.mock'
 import { mockMergePolls } from './__mocks__/poll.mock'
-import type { NoteDraftParsed } from '../lib/interfaces'
+import type { NoteDraftParsed, PollParsed } from '../lib/interfaces'
 
 // fake incremental id
 let i = 0
@@ -100,8 +100,8 @@ class TestHelper {
   }
 
   /**
-   * Simulating a commit created, which includes creating
-   * the note-draft, sym, note, note-doc
+   * Simulate creating a commit, includes creating the note-draft, sym, note, note-doc
+   *
    */
   async createMergeCommit(prisma: PrismaClient) {
     const noteDraft = await prisma.noteDraft.create({
@@ -135,35 +135,35 @@ class TestHelper {
     // })
   }
 
-  async createCandidateCommit(prisma: PrismaClient) {
-    const sym = await prisma.sym.create({
-        data: mockSyms[0],
-      }),
-      note = await prisma.note.create({
-        data: mockNotes[0],
-      }),
-      // Need to create commit before note-doc so the note-doc can connect to it
-      commit = await prisma.commit.create({
-        data: mockCommits[0],
-      }),
-      // poll = await prisma.poll.create({
-      //   data: {
-      //     ...mockPolls[0],
-      //     // id: mockPolls[0].id,
-      //     // user: {connect: {id: mockPolls[0].userId}},
-      //     // choices: mockPolls[0].choices,
-      //     meta: mockPolls[0].meta as unknown as object,
-      //     count: { create: { nVotes: mockPolls[0].choices.map(e => 0) } },
-      //   },
-      // }),
-      noteDoc = await prisma.noteDoc.create({
-        data: {
-          ...mockNoteDocs[0],
-          meta: {},
-        },
-      })
-    return { sym, note, commit, noteDoc }
-  }
+  // async createCandidateCommit(prisma: PrismaClient) {
+  //   const sym = await prisma.sym.create({
+  //       data: mockSyms[0],
+  //     }),
+  //     note = await prisma.note.create({
+  //       data: mockNotes[0],
+  //     }),
+  //     // Need to create commit before note-doc so the note-doc can connect to it
+  //     commit = await prisma.commit.create({
+  //       data: mockCommits[0],
+  //     }),
+  //     // poll = await prisma.poll.create({
+  //     //   data: {
+  //     //     ...mockPolls[0],
+  //     //     // id: mockPolls[0].id,
+  //     //     // user: {connect: {id: mockPolls[0].userId}},
+  //     //     // choices: mockPolls[0].choices,
+  //     //     meta: mockPolls[0].meta as unknown as object,
+  //     //     count: { create: { nVotes: mockPolls[0].choices.map(e => 0) } },
+  //     //   },
+  //     // }),
+  //     noteDoc = await prisma.noteDoc.create({
+  //       data: {
+  //         ...mockNoteDocs[0],
+  //         meta: {},
+  //       },
+  //     })
+  //   return { sym, note, commit, noteDoc }
+  // }
 
   async createDiscusses(prisma: PrismaClient, draftId: string) {
     return await prisma.$transaction([
@@ -172,7 +172,7 @@ class TestHelper {
           data: { ...e, count: { create: {} } },
         }),
       ),
-      ...mockDiscussPosts.map(e => prisma.discussPost.create({ data: e })),
+      // ...mockDiscussPosts.map(e => prisma.discussPost.create({ data: e })),
     ])
   }
 
@@ -185,19 +185,22 @@ class TestHelper {
   /**
    * Warnning! This method not follow the correct steps to create merge polls
    *  and should only use for test only
+   * noteDocToMerge needs to be created before create the merge-poll
    */
-  async createMergePolls(prisma: PrismaClient, noteDocToMerge: NoteDoc) {
-    return await prisma.$transaction(
-      mockMergePolls.map(e =>
-        prisma.poll.create({
-          data: {
-            ...e,
-            count: { create: { nVotes: e.choices.map(_ => 0) } },
-            noteDocToMerge: { connect: { id: noteDocToMerge.id } },
-          },
-        }),
-      ),
-    )
+  async createMergePoll(
+    prisma: PrismaClient,
+    mockPoll: Omit<PollParsed<Poll>, 'count'>,
+    noteDocToMerge?: NoteDoc,
+  ) {
+    return prisma.poll.create({
+      data: {
+        ...mockPoll,
+        count: { create: { nVotes: mockPoll.choices.map(_ => 0) } },
+        noteDocToMerge: noteDocToMerge
+          ? { connect: { id: noteDocToMerge.id } }
+          : undefined,
+      },
+    })
   }
 
   async createNoteDrafts(

@@ -48,16 +48,6 @@ class SymModel {
     })
   }
 
-  /**
-   * Attempt to parse a symbol
-   *
-   * @throws Symbol format is not recognized
-   *
-   * TODOS:
-   * - [] Not able to distinguish bettween [[topic]] vs [[https://...]],
-   *      while [[https://...]] should be parsed as URL?
-   * - [] Not able to recognize author
-   */
   parse(symbol: string): SymbolParsed {
     return parseSymbol(symbol)
   }
@@ -73,12 +63,10 @@ class SymModel {
     const parsedOld = this.parse(sym.symbol)
     const parsedNew = this.parse(newSymbol)
 
-    if (parsedOld.type === 'URL') {
-      throw 'Not support update URL symbol'
-    }
-    if (parsedOld.type !== parsedNew.type) {
-      throw 'Not support update symbol to different type'
-    }
+    if (parsedOld.type === 'URL')
+      throw new Error('Not support update URL symbol')
+    if (parsedOld.type !== parsedNew.type)
+      throw new Error('Not support update symbol to different type')
 
     return await prisma.sym.update({
       data: {

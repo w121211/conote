@@ -193,9 +193,10 @@ model NoteDoc {
   fromDocId String?
 
   // To determine can the doc merge. Is optional because auto-merge not require a poll
-  mergePollId String?       @unique
-  userId      String
-  status      NoteDocStatus @default(CANDIDATE)
+  mergePollId String? @unique
+
+  userId String
+  status NoteDocStatus @default(CANDIDATE)
 
   // Seperated column to enhance searching
   domain String

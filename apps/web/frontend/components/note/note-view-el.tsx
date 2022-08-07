@@ -11,6 +11,7 @@ import { LayoutChildrenPadding } from '../ui-component/layout/layout-children-pa
 import NoteAlerts from './note-alerts'
 import NoteHead from './note-head'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
+import BlocksViewer from '../editor-textarea/src/components/block/blocks-viewer'
 
 /**
  * Read only note doc
@@ -52,7 +53,7 @@ const NoteViewEl = ({
 
         <div className="ml-4">
           <NoteHead symbol={doc.symbol} doc={doc} isHeadDoc={isHeadDoc} />
-          {/* <BlockViewer blocks={blocks} uid={docBlock.uid} omitParent /> */}
+          <BlocksViewer blocks={blocks} />
         </div>
       </div>
     </LayoutChildrenPadding>

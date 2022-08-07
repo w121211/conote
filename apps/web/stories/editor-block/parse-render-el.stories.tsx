@@ -4,7 +4,6 @@ import ParseRenderEl from '../../frontend/components/editor-textarea/src/compone
 import { mockBlockStr } from '../../frontend/components/editor-textarea/test/__mocks__/mock-block-str'
 
 export default {
-  title: 'BlockEditor/ParseRenderEl',
   component: ParseRenderEl,
 } as ComponentMeta<typeof ParseRenderEl>
 

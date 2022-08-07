@@ -71,6 +71,15 @@ export const mockNoteDocs: NoteDocParsed<NoteDoc>[] = [
       blocks: mockDiffBlocks.initial,
     },
   },
+  {
+    ...base,
+    id: '3-merged_auto-initial_commit',
+    symId: mockSyms[4].id,
+    status: 'MERGED',
+    meta: {
+      mergeState: 'merged_auto-initial_commit',
+    },
+  },
   // {
   //   ...base,
   //   id: '3-candidate_got_from_doc__diff_no_changes',

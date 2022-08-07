@@ -237,9 +237,9 @@ class NoteDraftModel {
   }
 
   /**
-   * Parse shallow
+   *
    */
-  parse<T extends NoteDraft>(draft: T): NoteDraftParsed<T> {
+  parseShallow<T extends NoteDraft>(draft: T): NoteDraftParsed<T> {
     return {
       ...draft,
       meta: draft.meta as unknown as NoteDraftMeta,
@@ -251,11 +251,11 @@ class NoteDraftModel {
   /**
    * TODO: validate content head, content body
    */
-  parseReal<T extends NoteDraft>(draft: T): NoteDraftParsed<T> {
-    const draft_ = this.parse(draft),
-      { discussIds } = parseBlockValues(draft_.contentBody.blocks)
+  parseDeep<T extends NoteDraft>(draft: T) {
+    const draft_ = this.parseShallow(draft),
+      { discussIds, ...rest } = parseBlockValues(draft_.contentBody.blocks)
 
-    return {
+    const draftParsed: NoteDraftParsed<T> = {
       ...draft,
       meta: draft.meta as unknown as NoteDraftMeta,
       contentHead: draft.contentHead as unknown as NoteDocContentHead,
@@ -264,25 +264,27 @@ class NoteDraftModel {
         discussIds,
       },
     }
+
+    return {
+      draftParsed,
+      ...rest,
+    }
   }
 
   /**
    * Parse using block values, used before commit
    */
   toMeta(input?: NoteDraftMetaInput): NoteDraftMeta {
-    return {
-      chain: input
-        ? {
-            prevId: input.chainPrevId ?? null,
-          }
-        : undefined,
+    const meta: NoteDraftMeta = {
+      chain: input ? { prevId: input.chainPrevId ?? null } : undefined,
     }
+    return meta
   }
 
   toGQLNoteDraft(draft: NoteDraft & { branch: Branch | null }): GQLNoteDraft {
     if (draft.branch === null) throw new Error('draft.branch ==== null')
     const draft_ = {
-      ...this.parse(draft),
+      ...this.parseShallow(draft),
       branchName: draft.branch.name,
     }
     return toStringProps(draft_)

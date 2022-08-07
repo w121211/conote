@@ -7,8 +7,8 @@ import { PollModel } from './poll.model'
 import { getBotId } from './user.model'
 
 const defaultMergePollMeta: PollMeta = {
-  openInDays: 5,
   spec: MERGE_POLL_V1_0.spec,
+  openInDays: MERGE_POLL_V1_0.openInDays,
 }
 
 const defaultChoices = MERGE_POLL_V1_0.codes.map(e => e[0])
@@ -28,9 +28,33 @@ class PollMergeModel extends PollModel {
   }
 
   /**
+   *
+   */
+  async getMergePollsReadyToVerdict() {
+    const d = new Date()
+
+    // TODO: Should use poll meta's openInDays
+    d.setDate(d.getDate() - defaultMergePollMeta.openInDays)
+
+    const polls = await prisma.poll.findMany({
+      where: {
+        AND: [{ status: 'OPEN' }, { createdAt: { lt: d } }],
+      },
+      include: {
+        noteDocToMerge: {
+          include: { sym: true, fromDoc: true },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    return polls
+  }
+
+  /**
    * Determine a merge-poll to accept or reject
    *
-   * Throws
+   * @throws
    * - If the poll has not ended
    * - If the poll's choices not equal to the merge-poll's choices (may happen if the choices got updated)
    *
@@ -39,11 +63,8 @@ class PollMergeModel extends PollModel {
    * - Number of accepts >= rejects
    * - Has zero vote is taken as 'accept'
    *
-   *
-   *
    * TODOS
    * - [] Check 'count' is correct
-   *
    */
   async verdict(mergePoll: Poll): Promise<{
     poll: PollParsed<Poll>

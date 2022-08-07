@@ -9,6 +9,7 @@ import type {
   SymType,
 } from '@prisma/client'
 import type { Block } from '../frontend/components/editor-textarea/src/interfaces'
+import { CommitInputErrorCode } from '../share/constants'
 
 //
 // Data models
@@ -21,7 +22,8 @@ import type { Block } from '../frontend/components/editor-textarea/src/interface
 
 export type CommitInputErrorItem = {
   draftId: string
-  msg: string
+  code: CommitInputErrorCode
+  // msg: string
 }
 
 export type DiscussMeta = {
@@ -70,18 +72,15 @@ export type NoteDocMeta = {
 }
 
 export type NoteDocMetaMergeState =
-  // Not apply the merge yet, happens when doc is just created
-  | 'before_merge'
-  // A merge poll is open and waiting to merge by poll
-  | 'wait_to_merge-by_poll'
+  | 'before_merge' // Not apply the merge yet, happens when doc is just created
+  | 'wait_to_merge-by_poll' // A merge poll is open and waiting to merge by poll
   | 'merged_auto-same_user'
   | 'merged_auto-initial_commit'
   | 'merged_auto-only_insertions'
   | 'merged_poll'
   | 'rejected_auto-no_changes'
   | 'rejected_poll'
-  // Merge poll is paused because the from-doc is not the current's head
-  | 'paused-from_doc_not_head'
+  | 'paused-from_doc_not_head' // Merge poll is paused because the from-doc is not the current's head
 
 export type NoteDocContentHead = {
   // If provided, use it to update the current note's symbol when merged

@@ -71,7 +71,6 @@ const Playground = () => {
 }
 
 export default {
-  title: 'BlockEditor/Textarea',
   component: Playground,
 } as ComponentMeta<typeof Playground>
 

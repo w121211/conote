@@ -86,10 +86,9 @@ function inlineItemsToStr(inlines: InlineItem[]): string {
 
 /**
  * Regex References:
- *
- * unicode  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Unicode_Property_Escapes
- * url      https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
- * hashtag  https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
+ * - Unicode  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Unicode_Property_Escapes
+ * - URL      https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
+ * - Hashtag  https://stackoverflow.com/questions/38506598/regular-expression-to-match-hashtag-but-not-hashtag-with-semicolon
  */
 
 const reAuthor = /\B@[\p{L}\d_]+\b/u
@@ -327,7 +326,7 @@ function tokenToInlineItem(token: string | Token): InlineItem {
  *
  * @throws Parse error
  */
-export function parse(str: string) {
+export function parseBlockString(str: string) {
   const tokens = tokenize(str, grammar),
     inlineItems = tokens.map(e => tokenToInlineItem(e))
   return { inlineItems, tokens }

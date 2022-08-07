@@ -14,7 +14,7 @@ type Props = {
   discussesLatest: DiscussFragment[]
 }
 
-const HomePage = ({ discussesLatest }: Props): JSX.Element => {
+const HomePage = ({ discussesLatest }: Props) => {
   return (
     <LayoutChildrenPadding>
       <div className="flex justify-center pb-[9vh]">
