@@ -89,7 +89,7 @@ const LeafDiscuss = ({
       <Link
         href={{
           pathname: '/discuss/[discussId]',
-          query: { discussId },
+          query: { discussId: id },
         }}
       >
         <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
@@ -117,6 +117,7 @@ const LeafDiscuss = ({
         visible={showModal}
         onClose={() => setShowModal(false)}
         topRightBtn={modalTopRightBtn}
+        // buttons={modalButtons}
       >
         {discussId ? (
           <div className="px-10">
@@ -140,32 +141,33 @@ const LeafDiscuss = ({
             ref={floating}
             style={{
               display: 'block',
+
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
             }}
           >
-            <div className="flex">
+            <div className=" flex ">
               <button
-                className="dropdown-list-item"
+                className="dropdown-list-item first:m-0 first:rounded-l last:m-0 last:rounded-r"
+                onClick={() => setShowModal(true)}
+              >
+                {discussId ? 'View' : 'Create'}
+              </button>
+
+              <button
+                className="dropdown-list-item first:m-0 first:rounded-l last:m-0 last:rounded-r"
                 onClick={() => {
-                  setShowModal(true)
+                  indenterTextReplace(
+                    editor,
+                    blockUid,
+                    inlineItem.str,
+                    '#hello world!!!#',
+                  )
                   setShowPopover(false)
                 }}
               >
-                {discussId ? (
-                  <>
-                    <span className="material-symbols-outlined">
-                      open_in_browser
-                    </span>
-                    Open
-                  </>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined">add</span>
-                    Create
-                  </>
-                )}
+                Replace
               </button>
             </div>
           </div>
@@ -192,6 +194,8 @@ const LeafDiscuss = ({
           <span
             // 'relative' is required for clickable and hover effect
             {...attributes}
+            id={id}
+            ref={reference}
             className=" text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
             onClick={() => setShowModal(true)}
             data-inline-item={inlineItem.type}

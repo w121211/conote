@@ -83,20 +83,20 @@ const LeafSymbol = ({
               left: x ?? 0,
             }}
           >
-            <button
-              className="dropdown-list-item"
-              onClick={e => editorChainItemInsert(symbol, draftId)}
-            >
-              <span className="material-symbols-outlined">note_add</span>
-              Insert
-            </button>
+            <div className="flex items-center">
+              <button
+                className="dropdown-list-item first:m-0 first:rounded-l last:m-0 last:rounded-r"
+                onClick={e => editorChainItemInsert(symbol, draftId)}
+              >
+                Insert
+              </button>
 
-            <Link href={getNotePageURL(symbol)}>
-              <a className="dropdown-list-item">
-                <span className="material-symbols-outlined">open_in_new</span>
-                View
-              </a>
-            </Link>
+              <Link href={getNotePageURL(symbol)}>
+                <a className="dropdown-list-item first:m-0 first:rounded-l last:m-0 last:rounded-r">
+                  View
+                </a>
+              </Link>
+            </div>
           </div>
         )}
       </FloatingPortal>

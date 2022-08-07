@@ -5,19 +5,16 @@ const IndenterEl = (
   props: Omit<RenderElementProps, 'element'> & { element: ElementIndenter },
 ) => {
   const { attributes, children, element } = props,
-    { indent, error } = element,
-    marginLeft = 32 * indent // pixel
+    { indent, error } = element
 
   return (
     <div
       {...attributes}
       data-indent={indent}
-      // className={`ml-1`}
-      // className={`ml-[${marginLeft}px]`}
-      style={{ marginLeft }}
+      style={{ marginLeft: 24 * (indent + 1) }}
     >
-      <ul>
-        <li className='before:content-["-"] before:mr-2'>
+      <ul style={{ padding: 0, margin: 0 }}>
+        <li className='before:content-["-"] before:absolute before:-translate-x-full before:pr-2'>
           {error && (
             <span
               contentEditable={false}
