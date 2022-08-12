@@ -3,4 +3,4 @@
 // export * from './helper'
 export * from './interfaces'
 export * from './tree-util'
-export * from './diff'
+export * from './tree-differencer'

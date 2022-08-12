@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Modal from '../modal/modal'
 import classes from './search-all-modal.module.css'
-import { styleSymbol } from '../ui-component/style-fc/style-symbol'
+import { styleSymbol } from '../ui/style-fc/style-symbol'
 import { useSearchSymbolLazyQuery } from '../../../apollo/query.graphql'
 import { getNotePageURL } from '../../utils'
 import Link from 'next/link'
@@ -267,9 +267,9 @@ const SearchAllModal = () => {
                         role="option"
                         aria-selected={selectedIdx === 0}
                       >
-                        <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
+                        <div className="mr-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
                           create symbol
-                        </span>
+                        </div>
                         <span className="text-gray-800 dark:text-gray-200 font-bold">
                           {inputValue}
                         </span>

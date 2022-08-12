@@ -72,7 +72,7 @@ const RadioInput = ({
           total={total ?? 0}
           count={count ?? 0}
           voted={myVote?.choiceIdx.toString() === value}
-          checked={checked}
+          // checked={checked}
         />
       </label>
     </LoginRequireModal>

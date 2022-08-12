@@ -4,7 +4,7 @@ import { useNoteEmojisQuery } from '../../../apollo/query.graphql'
 import UpdateNoteEmojiBtn from './_update-note-emoji-btn'
 import { EmojiCode } from '@prisma/client'
 import { EmojisDropdownBtn } from './emojis-dropdown-btn'
-import ToggleMenu from '../ui-component/toggle-menu'
+import ToggleMenu from '../ui/toggle-menu'
 
 const NoteEmojis = ({ noteId }: { noteId: string }): JSX.Element | null => {
   const [showTooltip, setShowTooltip] = useState(false)

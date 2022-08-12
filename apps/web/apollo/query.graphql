@@ -1,5 +1,5 @@
 fragment author on Author {
-  __typename
+  # __typename
   id
   name
   content {
@@ -14,7 +14,7 @@ fragment author on Author {
 }
 
 fragment block on Block {
-  __typename
+  # __typename
   uid
   str
   open
@@ -24,7 +24,7 @@ fragment block on Block {
 }
 
 fragment commit on Commit {
-  __typename
+  # __typename
   id
   userId
   noteDocs {
@@ -34,7 +34,7 @@ fragment commit on Commit {
 }
 
 fragment discuss on Discuss {
-  __typename
+  # __typename
   id
   userId
   status
@@ -52,7 +52,7 @@ fragment discuss on Discuss {
 }
 
 fragment discussEmoji on DiscussEmoji {
-  __typename
+  # __typename
   id
   code
   count {
@@ -61,13 +61,13 @@ fragment discussEmoji on DiscussEmoji {
 }
 
 fragment discussEmojiCount on DiscussEmojiCount {
-  __typename
+  # __typename
   id
   nUps
 }
 
 fragment discussEmojiLike on DiscussEmojiLike {
-  __typename
+  # __typename
   id
   discussEmojiId
   liked
@@ -75,7 +75,7 @@ fragment discussEmojiLike on DiscussEmojiLike {
 }
 
 fragment discussPost on DiscussPost {
-  __typename
+  # __typename
   id
   userId
   status
@@ -85,7 +85,7 @@ fragment discussPost on DiscussPost {
 }
 
 fragment discussPostEmoji on DiscussPostEmoji {
-  __typename
+  # __typename
   id
   code
   count {
@@ -94,13 +94,13 @@ fragment discussPostEmoji on DiscussPostEmoji {
 }
 
 fragment discussPostEmojiCount on DiscussPostEmojiCount {
-  __typename
+  # __typename
   id
   nUps
 }
 
 fragment discussPostEmojiLike on DiscussPostEmojiLike {
-  __typename
+  # __typename
   id
   discussPostEmojiId
   liked
@@ -108,7 +108,7 @@ fragment discussPostEmojiLike on DiscussPostEmojiLike {
 }
 
 fragment link on Link {
-  __typename
+  # __typename
   id
   url
   authorId
@@ -127,7 +127,7 @@ fragment link on Link {
 }
 
 fragment note on Note {
-  __typename
+  # __typename
   id
   branchName
   sym {
@@ -143,7 +143,7 @@ fragment note on Note {
 }
 
 fragment noteDoc on NoteDoc {
-  __typename
+  # __typename
   id
   branchName
   symbol
@@ -166,7 +166,7 @@ fragment noteDoc on NoteDoc {
 }
 
 fragment noteDocContentBody on NoteDocContentBody {
-  __typename
+  # __typename
   # discussIds {
   #   blockUid
   #   discussId
@@ -186,7 +186,7 @@ fragment noteDocContentBody on NoteDocContentBody {
 }
 
 fragment noteDocContentHead on NoteDocContentHead {
-  __typename
+  # __typename
   symbol
   title
   duplicatedSymbols
@@ -199,7 +199,7 @@ fragment noteDocContentHead on NoteDocContentHead {
 }
 
 fragment noteDocContentHeadWebpage on NoteDocContentHeadWebpage {
-  __typename
+  # __typename
   authors
   title
   publishedAt
@@ -207,17 +207,17 @@ fragment noteDocContentHeadWebpage on NoteDocContentHeadWebpage {
 }
 
 fragment noteDocEntry on NoteDocEntry {
-  __typename
+  # __typename
   id
 }
 
 fragment noteDocMeta on NoteDocMeta {
-  __typename
+  # __typename
   mergeState
 }
 
 fragment noteDraft on NoteDraft {
-  __typename
+  # __typename
   id
   branchName
   symbol
@@ -240,12 +240,12 @@ fragment noteDraft on NoteDraft {
 }
 
 fragment noteDraftDropResponse on NoteDraftDropResponse {
-  __typename
+  # __typename
   response
 }
 
 fragment noteDraftEntry on NoteDraftEntry {
-  __typename
+  # __typename
   id
   meta {
     ...noteDraftMeta
@@ -256,14 +256,14 @@ fragment noteDraftEntry on NoteDraftEntry {
 }
 
 fragment noteDraftMeta on NoteDraftMeta {
-  __typename
+  # __typename
   chain {
     prevId
   }
 }
 
 fragment noteEmoji on NoteEmoji {
-  __typename
+  # __typename
   id
   code
   count {
@@ -272,14 +272,14 @@ fragment noteEmoji on NoteEmoji {
 }
 
 fragment noteEmojiCount on NoteEmojiCount {
-  __typename
+  # __typename
   id
   nUps
   nDowns
 }
 
 fragment noteEmojiLike on NoteEmojiLike {
-  __typename
+  # __typename
   id
   noteEmojiId
   liked
@@ -287,7 +287,7 @@ fragment noteEmojiLike on NoteEmojiLike {
 }
 
 fragment noteEntry on NoteEntry {
-  __typename
+  # __typename
   id
   branchName
   sym {
@@ -299,7 +299,7 @@ fragment noteEntry on NoteEntry {
 }
 
 fragment poll on Poll {
-  __typename
+  # __typename
   id
   userId
   choices
@@ -318,14 +318,14 @@ fragment poll on Poll {
 }
 
 fragment pollVote on PollVote {
-  __typename
+  # __typename
   id
   pollId
   choiceIdx
 }
 
 fragment rate on Rate {
-  __typename
+  # __typename
   id
   userId
   authorId
@@ -342,14 +342,14 @@ fragment searchHit on SearchHit {
 }
 
 fragment sym on Sym {
-  __typename
+  # __typename
   id
   type
   symbol
 }
 
 fragment user on User {
-  __typename
+  # __typename
   id
   email
 }

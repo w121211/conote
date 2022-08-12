@@ -1,6 +1,10 @@
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 // import browser from 'webextension-polyfill'
-import { LinkDocument, LinkQuery, LinkQueryVariables } from '../../../web/apollo/query.graphql'
+import {
+  LinkDocument,
+  LinkQuery,
+  LinkQueryVariables,
+} from '../../../web/apollo/query.graphql'
 import apolloClient from '../apollo-client'
 
 const RateMenu = {
@@ -131,6 +135,10 @@ const SearchMenu = {
 //   }
 // })
 
+/**
+ * when tab's url changed or new tab opened, query conote server and get url specified note, then change extension badge
+ *
+ */
 const setupBadge = (client: ApolloClient<NormalizedCacheObject>): void => {
   // browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   //   if (changeInfo.url) {
@@ -138,11 +146,6 @@ const setupBadge = (client: ApolloClient<NormalizedCacheObject>): void => {
   //   }
   // })
 
-  /**
-   * when tab's url changed or new tab opened, query conote server and get url specified note,
-   * then change extension badge
-   *
-   */
   chrome.tabs.onActivated.addListener(async info => {
     // console.log('Tab ' + info.tabId + ' was activated')
     // browser.tabs.query({ currentWindow: true, active: true }).then(tabs => {
@@ -172,36 +175,53 @@ const setupBadge = (client: ApolloClient<NormalizedCacheObject>): void => {
   })
 }
 
-const setupBrowserActions = (): void => {
+/**
+ * when user click extension-icon, get current tab's url, title and open a new window to navigate to conote's site
+ *
+ */
+function setupBrowserActions() {
   // browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   //   if (changeInfo.url) {
   //     console.log('Tab: ' + tabId + ' URL changed to ' + changeInfo.url)
   //   }
   // })
 
-  /**
-   * when user click extension-icon,
-   * get current tab's url, title and open a new window to navigate to conote's site
-   */
   chrome.action.onClicked.addListener(async tab => {
-    console.log(tab)
+    // console.log(tab)
 
-    const params = new URLSearchParams({
-      url: tab.url ?? '',
-      title: tab.title ?? '',
-    })
-    // const tabUrl = encodeURIComponent(tab.url ?? '')
+    if (tab.url) {
+      const params = new URLSearchParams({
+        s: `[[${tab.url}]]`,
+        ext: '1',
+      })
+      // const tabUrl = encodeURIComponent(tab.url ?? '')
 
-    const window = await chrome.windows.create({
-      // type: 'popup',
-      // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
-      // url: 'http://localhost:3000/card/' + encodeUri,
-      url: `${process.env.APP_BASE_URL}/card?${params.toString()}`,
-      // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
-      width: 500,
-      height: 900,
-      left: 100,
-    })
+      const window = await chrome.windows.create({
+        url: `${process.env.APP_BASE_URL}/draft?${params.toString()}`,
+        width: 500,
+        height: 900,
+        left: 100,
+      })
+    } else {
+      console.debug('tab.url is undefined')
+    }
+
+    //   const params = new URLSearchParams({
+    //     s: tab.url ?? '',
+    //     title: tab.title ?? '',
+    //   })
+    //   // const tabUrl = encodeURIComponent(tab.url ?? '')
+
+    //   const window = await chrome.windows.create({
+    //     // type: 'popup',
+    //     // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
+    //     // url: 'http://localhost:3000/card/' + encodeUri,
+    //     url: `${process.env.APP_BASE_URL}/card?${params.toString()}`,
+    //     // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
+    //     width: 500,
+    //     height: 900,
+    //     left: 100,
+    //   })
   })
 }
 
@@ -217,10 +237,13 @@ const setupBrowserActions = (): void => {
 //   }
 // })
 
-const setup = (): void => {
+/**
+ * Main entry
+ */
+function main(): void {
   // setupBadge(apolloClient)
   setupBrowserActions()
   SearchMenu.setup()
 }
 
-setup()
+main()

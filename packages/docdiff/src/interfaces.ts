@@ -24,6 +24,11 @@ export type TreeNodeBody<T> = {
   // Record change-event lively
   // TODO: If 'a' move to 'b' and move to 'a', should it detect as not moved?
   // change?: TreeNodeChangeType
+
+  // Extra information for reading only
+  extraInfo?: {
+    depth: number
+  }
 }
 
 export type TreeNodeChange = {

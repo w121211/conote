@@ -1,5 +1,5 @@
 import React from 'react'
-import { RateTable } from '../ui-component/rate-table'
+import { RateTable } from '../ui/rate-table'
 
 export type TableData = {
   title?: string

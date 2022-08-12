@@ -1,10 +1,9 @@
 import React from 'react'
 import Link from 'next/link'
-import ToggleMenu from '../ui-component/toggle-menu'
+import ToggleMenu from '../ui/toggle-menu'
 import { LoggedInUser } from './auth.service'
 import LogoutButton from './logout-button'
-import { DropdownListDivider } from '../ui-component/dropdown-list-divider'
-import { DropdownListItem } from '../ui-component/dropdown-list-item'
+import { DropdownListDivider } from '../ui/dropdown-list-divider'
 import { useMeContext } from './use-me-context'
 import { getLoginPageURL } from '../../utils'
 import { useRouter } from 'next/router'
@@ -22,7 +21,7 @@ const AuthItem = () => {
           className=" py-1 -translate-x-full left-full"
           summary={
             <div className="flex items-center p-1 rounded hover:bg-gray-100">
-              <span className="material-icons text-xl leading-none text-gray-500">
+              <span className="material-icons leading-none text-gray-500">
                 account_circle
               </span>
               <span className="material-icons-outlined text-base leading-none text-gray-400 group-hover:text-gray-600">
@@ -41,15 +40,11 @@ const AuthItem = () => {
               query: { userId: me.id },
             }}
           >
-            <a>
-              <DropdownListItem>Your Profile</DropdownListItem>
-            </a>
+            <a className="dropdown-list-item">Your Profile</a>
           </Link>
           <DropdownListDivider />
           <Link href={getLoginPageURL()}>
-            <a>
-              <DropdownListItem>Logout</DropdownListItem>
-            </a>
+            <a className="dropdown-list-item">Logout</a>
           </Link>
         </ToggleMenu>
       ) : (

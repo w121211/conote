@@ -7,13 +7,13 @@ import {
   CommitQuery,
   CommitQueryVariables,
 } from '../../apollo/query.graphql'
-import Layout from '../../frontend/components/ui-component/layout/layout'
+import Layout from '../../frontend/components/ui/layout/lay-out'
 import { getNotePageURL } from '../../frontend/utils'
 import Link from 'next/link'
 import moment from 'moment'
 import UserLink from '../../frontend/components/user/user-link'
-import { styleSymbol } from '../../frontend/components/ui-component/style-fc/style-symbol'
-import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
+import { styleSymbol } from '../../frontend/components/ui/style-fc/style-symbol'
+import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 
 interface Props {
   commit: CommitFragment

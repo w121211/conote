@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React, { useState } from 'react'
-import { Alert } from '../../frontend/components/ui-component/alert'
+import { Alert } from '../../frontend/components/ui/alert'
 
 export default {
   component: Alert,

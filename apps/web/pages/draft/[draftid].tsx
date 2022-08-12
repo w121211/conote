@@ -1,38 +1,44 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import React, { useEffect } from 'react'
-import { EditorChainEl } from '../../frontend/components/block-editor/src/components/editor/editor-chain-el'
-import { editorChainItemOpen } from '../../frontend/components/block-editor/src/events'
-import { preventSave } from '../../frontend/components/block-editor/src/listeners'
-import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
+import { preventExitWithoutSave } from '../../frontend/components/editor-textarea/src/listeners'
+import SlateDocChainEl from '../../frontend/components/editor-slate/src/components/DocChainEl'
+import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 
 interface Props {
   draftId: string
   protected: boolean
 }
 
-const DraftIdPage = ({ draftId }: Props): JSX.Element | null => {
+const DraftIdPage = ({ draftId }: Props) => {
   useEffect(() => {
-    window.addEventListener('beforeunload', preventSave)
-    return () => window.removeEventListener('beforeunload', preventSave)
-  }, [])
+    // console.debug('DraftIdPage mount')
+    window.addEventListener('beforeunload', preventExitWithoutSave)
 
-  useEffect(() => {
-    editorChainItemOpen(draftId)
-  }, [draftId])
+    return () => {
+      // console.debug('DraftIdPage unmount')
+      window.removeEventListener('beforeunload', preventExitWithoutSave)
+    }
+  }, [])
 
   return (
     <LayoutChildrenPadding>
       <div className="pb-32">
-        <div className="flex">
-          {/* {note && (
+        {/* <div className="flex">
+          {note && (
             <NoteDocVersionDropdown
               cur={noteDraft}
               note={note}
               noteDraft={noteDraft}
             />
-          )} */}
-        </div>
-        <EditorChainEl />
+          )}
+        </div> */}
+
+        <SlateDocChainEl
+          leadDraftId={draftId}
+          hashDraftId={
+            window.location.hash !== '' ? window.location.hash.slice(1) : null
+          }
+        />
       </div>
     </LayoutChildrenPadding>
   )

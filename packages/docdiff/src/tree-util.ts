@@ -59,8 +59,51 @@ class TreeUtil {
     })
   }
 
+  //
+  // Query
+  //
+  //
+  //
+  //
+
   /**
-   * @returns root-tree-node
+   * Get previous sibling of the node (by uid)
+   * Returns null if it has no previous sibling (ie, the first child)
+   */
+  getPrevSibling<T>(root: TreeNode<T>, uid: string): TreeNode<T> | null {
+    const parent = this.searchByBreadthFirst(
+      root,
+      n => n.children.findIndex(e => e.uid === uid) >= 0,
+    )
+    if (parent === null) throw new Error('Node not found by uid')
+
+    const idx = parent.children.findIndex(e => e.uid === uid)
+
+    if (idx === 0) {
+      return null
+    }
+    return parent.children[idx - 1]
+  }
+
+  /**
+   *
+   */
+  getNode<T>(root: TreeNode<T>, uid: string): TreeNode<T> {
+    const node = this.searchBreadthFirst(root, uid)
+
+    if (node === null) throw new Error('Node not found by uid')
+    return node
+  }
+
+  //
+  // Build a tree
+  //
+  //
+  //
+  //
+
+  /**
+   * @returns Root node of the tree
    */
   buildFromList<T>(nodes: TreeNodeBody<T>[]): TreeNode<T> {
     const parent_children: Record<string, TreeNodeBody<T>[]> =
@@ -95,14 +138,14 @@ class TreeUtil {
    */
   buildFromParentChildrenDict<T>(
     parent_children: Record<string, TreeNodeBody<T>[]>,
-    rootNode: TreeNodeBody<T>,
+    rootNodeBody: TreeNodeBody<T>,
   ): TreeNode<T> {
-    if (!(rootNode.uid in parent_children))
+    if (!(rootNodeBody.uid in parent_children))
       throw new Error(
         '[buildFromParentChildrenDict] no tempRootUid in parent-children-dict',
       )
 
-    const { uid, data } = rootNode,
+    const { uid, data } = rootNodeBody,
       root: TreeNode<T> = {
         uid,
         order: 0,
@@ -146,6 +189,43 @@ class TreeUtil {
     }
 
     return root
+  }
+
+  /**
+   * Inplace insert the node at the specified position.
+   * If prevSiblingUid is null, need to provide the parentUid, the node will be inserted as the first child of the parent
+   */
+  insert<T>(
+    root: TreeNode<T>,
+    insertItem: TreeNodeBody<T>,
+    at: { prevSiblingUid: string | null; parentUid?: string },
+  ) {
+    const { prevSiblingUid, parentUid } = at,
+      insertNode: TreeNode<T> = { ...insertItem, children: [] }
+
+    if (prevSiblingUid !== null) {
+      const parent = this.searchByBreadthFirst(
+          root,
+          node =>
+            node.children.find(e => e.uid === prevSiblingUid) !== undefined,
+        ),
+        prevSiblingIdx =
+          parent && parent.children.findIndex(e => e.uid === prevSiblingUid)
+      if (parent === null || prevSiblingIdx === null)
+        throw new Error("Not found prev sibling node's parent")
+
+      parent.children.splice(prevSiblingIdx + 1, 0, insertNode)
+    } else if (parentUid !== undefined) {
+      const parent = this.searchByBreadthFirst(
+        root,
+        node => node.uid === parentUid,
+      )
+      if (parent === null) throw new Error("Not found parentUid's node")
+
+      parent.children.splice(0, 0, insertNode)
+    } else {
+      throw new Error('prevSiblingUid is null, require to provide parentUid')
+    }
   }
 
   // insert<T>(
@@ -199,6 +279,17 @@ class TreeUtil {
     return node.parentUid === null
   }
 
+  toString<T>(root: TreeNode<T>): string {
+    const nodeBodies = this.toList(root),
+      lines: string[] = []
+
+    for (const { uid, extraInfo } of nodeBodies) {
+      lines.push('  '.repeat(extraInfo.depth) + '- ' + uid)
+    }
+
+    return lines.join('\n')
+  }
+
   /**
    * BFS search
    */
@@ -213,9 +304,31 @@ class TreeUtil {
         throw new Error(
           '[searchBreadthFirst] p === undefined, unexpected error',
         )
-      if (p.uid === findUid) {
-        return p
-      }
+      if (p.uid === findUid) return p
+
+      p.children.forEach(e => {
+        parents.push(e)
+      })
+    }
+    return null
+  }
+
+  /**
+   *
+   */
+  searchByBreadthFirst<T>(
+    root: TreeNode<T>,
+    searchFn: (n: TreeNode<T>) => boolean,
+  ): TreeNode<T> | null {
+    const parents: TreeNode<T>[] = [root]
+    while (parents.length > 0) {
+      const p = parents.shift()
+      if (p === undefined)
+        throw new Error(
+          '[searchBreadthFirst] p === undefined, unexpected error',
+        )
+      if (searchFn(p)) return p
+
       p.children.forEach(e => {
         parents.push(e)
       })
@@ -231,32 +344,63 @@ class TreeUtil {
   }
 
   /**
+   * Traverse a tree by 1. depth 2. order
    *
    */
-  toPreOrderList<T>(root: TreeNode<T>): Required<TreeNodeBody<T>>[] {
+  toDepthFirstList<T>(root: TreeNode<T>): Required<TreeNodeBody<T>>[] {
     const traversed: Required<TreeNodeBody<T>>[] = [],
-      parents = [root]
+      parents: { node: TreeNode<T>; depth: number }[] = [
+        { node: root, depth: 0 },
+      ]
 
     while (parents.length > 0) {
-      const p = parents.shift()
-      if (p === undefined)
-        throw new Error('[toPreOrderList] p === undefined, unexpected error')
+      // const parent = parents.shift()
+      const parent = parents.pop()
+      if (parent === undefined)
+        throw new Error(
+          '[toPreOrderList] parent === undefined, unexpected error',
+        )
 
-      const { children, ...rest } = p
-      children.forEach((v, i) => {
-        parents.push({ ...v, parentUid: p.uid, order: i })
-      })
+      const { node: p, depth } = parent,
+        { children, ...rest } = p
+
+      for (let i = children.length - 1; i >= 0; i--) {
+        const child = children[i]
+        parents.push({
+          node: { ...child, parentUid: p.uid, order: i },
+          depth: depth + 1,
+        })
+      }
       traversed.push({
         ...rest,
         childrenUids: children.map(e => e.uid),
+        extraInfo: { depth },
       })
+
+      // children.forEach((v, i) => {
+      //   parents.push({
+      //     node: { ...v, parentUid: p.uid, order: i },
+      //     depth: depth + 1,
+      //   })
+      // })
+      // traversed.push({
+      //   ...rest,
+      //   childrenUids: children.map(e => e.uid),
+      //   extraInfo: { depth },
+      // })
     }
     return traversed
   }
 
+  toTreeNodeBody<T>(node: TreeNode<T>): TreeNodeBody<T> {
+    const { children, ...rest } = node
+    return { ...rest }
+  }
+
   /**
    * Reconstruct the list to get children-uids, involve validate the list before return
-   * @returns node-body list [root, ...children]
+   *
+   * @returns node-body pre-order-list [root, ...children]
    */
   toTreeNodeBodyList<
     T extends {
@@ -271,7 +415,7 @@ class TreeUtil {
         return { uid, parentUid, order, data: e }
       }),
       root = this.buildFromList(nodes),
-      nodes_ = this.toPreOrderList(root)
+      nodes_ = this.toDepthFirstList(root)
 
     if (nodes_.length !== items.length)
       throw new Error('[toTreeNodeBodyList] list.length !== items.length')
@@ -288,37 +432,36 @@ class TreeUtil {
   }
 
   /**
-   * Alias of toPreOrderList()
+   * Alias of toDepthFirstList()
    */
-  toList<T>(root: TreeNode<T>): Required<TreeNodeBody<T>>[] {
-    return this.toPreOrderList(root)
+  toList<T>(root: TreeNode<T>) {
+    return this.toDepthFirstList(root)
   }
 
-  // toParentChildrenDict<T>(
-  //   children: TreeNode<T>[],
-  // ): Record<string, TreeNodeBody<T>[]> {
-  //   const nodeDict = this.toDict(children)
-  //   const dict: Record<string, TreeNodeBody<T>[]> = Object.fromEntries(
-  //     Object.entries(nodeDict).map(([k]): [string, TreeNodeBody<T>[]] => [
-  //       k,
-  //       [],
-  //     ]),
-  //   )
-  //   dict[this.tempRootCid] = []
-  //   Object.entries(nodeDict).forEach(([, node]) => {
-  //     const { parentCid } = node
-  //     if (parentCid === undefined) {
-  //       throw `[docdiff] parentCid === undefined`
-  //     }
-  //     if (dict[parentCid]) {
-  //       dict[parentCid].push(node)
-  //     } else {
-  //       dict[parentCid] = [node]
-  //     }
-  //   })
-  //   this.sortParentChildrenDict_(dict)
-  //   return dict
-  // }
+  /**
+   *
+   */
+  toParentChildrenDict<T>(
+    nodes: TreeNodeBody<T>[],
+  ): Record<string, TreeNodeBody<T>[]> {
+    const parent_children: Record<string, TreeNodeBody<T>[]> =
+      Object.fromEntries(
+        nodes.map((e): [string, TreeNodeBody<T>[]] => [e.uid, []]),
+      )
+
+    for (const e of nodes) {
+      const { parentUid } = e
+
+      if (parentUid === null) {
+        // Do nothing
+      } else if (parent_children[parentUid]) {
+        parent_children[parentUid].push(e)
+      } else {
+        parent_children[parentUid] = [e]
+      }
+    }
+    return parent_children
+  }
 
   /**
    * Should

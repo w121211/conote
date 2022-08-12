@@ -4,7 +4,7 @@ import { serialize } from 'cookie'
 import { auth } from 'firebase-admin'
 import { DecodedIdToken } from 'firebase-admin/auth'
 import { getFirebaseAdmin } from './firebase-admin'
-import { mockUsers } from '../../test/__mocks__/mock-user'
+import { mockUsers } from '../../test/__mocks__/user.mock'
 
 const TOKEN_NAME = 'session'
 
@@ -24,7 +24,7 @@ export async function isAuthenticated(
     process.env.NODE_ENV === 'development' &&
     process.env.DEV_WITH_STORYBOOK === 'true'
   ) {
-    // Mock authenticated user
+    // Mock an authenticated user
     return {
       email: mockUsers[0].email,
       userId: mockUsers[0].id,

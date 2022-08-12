@@ -1,15 +1,14 @@
 import { PrismaClient } from '@prisma/client'
-import { commitNoteDrafts } from '../../lib/models/commit-model'
+import { commitNoteDrafts } from '../../lib/models/commit.model'
+import { noteDraftModel } from '../../lib/models/note-draft.model'
+import { noteDocModel } from '../../lib/models/note-doc.model'
+import { mockBranches } from '../../test/__mocks__/branch.mock'
 import {
   mockNoteDrafts,
   mockNoteDrafts_gotFromDoc,
-} from '../../test/__mocks__/mock-note-draft'
+} from '../../test/__mocks__/note-draft.mock'
+import { mockUsers } from '../../test/__mocks__/user.mock'
 import { testHelper } from '../../test/test-helpers'
-import { noteDraftModel } from '../../lib/models/note-draft-model'
-import { mockBranches } from '../../test/__mocks__/mock-branch'
-import { noteDocModel } from '../../lib/models/note-doc-model'
-import { mockUsers } from '../../test/__mocks__/mock-user'
-import { parseGQLBlocks } from '../../share/block.common'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),
@@ -26,49 +25,74 @@ async function main() {
 
   await testHelper.createUsers(prisma)
   await testHelper.createBranches(prisma)
-
   // await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
 
-  const mockDraft = mockNoteDrafts[0],
-    { symbol, userId, contentBody, meta, ...rest } = mockDraft,
-    draft = await noteDraftModel.create(mockBranches[0].name, symbol, userId, {
-      ...rest,
-      contentBody: {
-        blocks: contentBody.blocks,
-        blockDiff: [],
-        // discussIds: [],
-        // symbols: [],
+  //
+  // 1. Simulate creating a draft (topic-note), discuss, and commit
+  //
+  //
+
+  const draft0 = mockNoteDrafts[0],
+    { symbol, userId, contentBody, meta, ...rest } = draft0,
+    draft0_ = await noteDraftModel.create(
+      mockBranches[0].name,
+      symbol,
+      userId,
+      {
+        ...rest,
+        contentBody: {
+          blocks: contentBody.blocks,
+          blockDiff: [],
+          // discussIds: [],
+          // symbols: [],
+        },
       },
-    })
+    )
 
-  await testHelper.createDiscusses(prisma, draft.id)
-  // const draft_ = await noteDraftModel.update(draft.id, draft.userId, {
-  //   ...rest,
-  //   contentBody: {
-  //     blocks: contentBody.blocks,
-  //     discussIds: [],
-  // symbols: [],
-  //   },
-  // })
-
-  const { noteDocs } = await commitNoteDrafts([draft.id], draft.userId)
-
-  const { blocks, docBlock } = parseGQLBlocks(
-    noteDocModel.parse(noteDocs[0]).contentBody.blocks,
-  )
+  await testHelper.createDiscusses(prisma, draft0_.id)
+  const { noteDocs } = await commitNoteDrafts([draft0_.id], draft0_.userId)
 
   // Warnning! This is the wrong way to create merge polls. Only used for the testing.
-  await testHelper.createMergePolls(prisma, noteDocs[0])
+  // await testHelper.createMergePoll(prisma, noteDocs[0])
+
+  //
+  // 2. Simulate create a draft has from-doc
+  //
+  //
 
   const fromDoc = noteDocs[0],
     fromDoc_ = noteDocModel.parse(fromDoc),
-    drafts = mockNoteDrafts_gotFromDoc(mockUsers[4].id, fromDoc_)
+    drafts_gotFromDoc = mockNoteDrafts_gotFromDoc(mockUsers[4].id, fromDoc_)
 
-  await testHelper.createNoteDrafts(prisma, drafts)
+  await testHelper.createNoteDrafts(prisma, drafts_gotFromDoc)
   await commitNoteDrafts(
-    drafts.map(e => e.id),
+    drafts_gotFromDoc.map(e => e.id),
     mockUsers[4].id,
   )
+
+  //
+  // 3. Simulate creating a draft of web-note
+  //
+  //
+
+  await testHelper.createLinks(prisma)
+  const draft4 = mockNoteDrafts[4]
+
+  if (draft4.linkId) {
+    const { userId, contentBody, meta, linkId, ...rest } = draft4
+    const draft4_ = await noteDraftModel.createByLink(
+      mockBranches[0].name,
+      draft4.linkId,
+      userId,
+      {
+        ...rest,
+        contentBody: { blocks: contentBody.blocks, blockDiff: [] },
+      },
+    )
+    await commitNoteDrafts([draft4_.id], userId)
+  } else {
+    throw new Error('draft4.linkId is null')
+  }
 }
 
 main()

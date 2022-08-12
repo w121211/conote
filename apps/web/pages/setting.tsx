@@ -1,7 +1,6 @@
 import React from 'react'
 import Select, { GroupBase, OptionsOrGroups } from 'react-select'
-import Layout from '../frontend/components/ui-component/layout/layout'
-import { LayoutChildrenPadding } from '../frontend/components/ui-component/layout/layout-children-padding'
+import { LayoutChildrenPadding } from '../frontend/components/ui/layout/layout-children-padding'
 
 type Option = {
   value: string

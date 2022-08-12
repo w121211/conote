@@ -1,8 +1,7 @@
+// const path = require('path')
+
 module.exports = {
-  stories: [
-    '../stories/**/*.stories.tsx',
-    '../components/block-editor/src/**/*.stories.@(js|jsx|ts|tsx)',
-  ],
+  stories: ['../stories/**/*.stories.tsx'],
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-viewport',
@@ -38,15 +37,15 @@ module.exports = {
         },
       },
     },
-    'storybook-tailwind-dark-mode',
+    // 'storybook-tailwind-dark-mode',
     'storybook-addon-next-router',
-    'storybook-css-modules',
-    // 'storybook-addon-apollo-client',
     'storybook-css-modules',
   ],
   framework: '@storybook/react',
-
-  webpackFinal: async config => {
+  core: {
+    builder: 'webpack5',
+  },
+  webpackFinal: config => {
     config.module.rules.push({
       test: /\.(tsx|graphql)$/,
       use: [

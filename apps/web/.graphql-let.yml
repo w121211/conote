@@ -6,8 +6,10 @@ plugins:
   - typescript-react-apollo
 config:
   enumsAsTypes: true
+
   # Produce flatten-type, avoid Pick<...>
   preResolveTypes: true
+
   # Mapping to typescript types
   scalars:
     BigInt: BigInt

@@ -1,14 +1,14 @@
 import { NoteDraftInput } from 'graphql-let/__generated__/__types__'
 import prisma from '../../../lib/prisma'
 import { testHelper } from '../../test-helpers'
-import { noteDraftModel } from '../../../lib/models/note-draft-model'
-import { mockBranches } from '../../__mocks__/mock-branch'
-import { mockNoteDrafts } from '../../__mocks__/mock-note-draft'
-import { mockSyms } from '../../__mocks__/mock-sym'
-import { mockNoteDocs } from '../../__mocks__/mock-note-doc'
-import { mockDiscusses } from '../../__mocks__/mock-discuss'
-import { mockBlocks } from '../../../frontend/components/block-editor/test/__mocks__/mock-block'
-import { mockNotes } from '../../__mocks__/mock-note'
+import { noteDraftModel } from '../../../lib/models/note-draft.model'
+import { mockBranches } from '../../__mocks__/branch.mock'
+import { mockNoteDrafts } from '../../__mocks__/note-draft.mock'
+import { mockSyms } from '../../__mocks__/sym.mock'
+import { mockNoteDocs } from '../../__mocks__/note-doc.mock'
+import { mockDiscusses } from '../../__mocks__/discuss.mock'
+import { mockBlocks } from '../../../frontend/components/editor-textarea/test/__mocks__/mock-block'
+import { mockNotes } from '../../__mocks__/note.mock'
 
 beforeAll(async () => {
   await prisma.$queryRaw`TRUNCATE "Author", "Branch", "User" CASCADE;`

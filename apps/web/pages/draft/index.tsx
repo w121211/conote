@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
-import { docGetOrCreate } from '../../frontend/components/block-editor/src/events'
+import { docGetOrCreate } from '../../frontend/components/editor-textarea/src/events'
 import SearcherModal from '../../frontend/components/search-all-modal/searcher-modal'
-import type { SearcherProps } from '../../frontend/interfaces'
+import type { AppPageProps, SearcherProps } from '../../frontend/interfaces'
 import { getDraftPageURL } from '../../frontend/utils'
+import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 
-interface Props {
+type Props = AppPageProps & {
   query: {
     symbol?: string
+    extension?: boolean // Open this page by extension
   }
-  protected: boolean
 }
 
 const DraftIndexPage = ({ query }: Props): JSX.Element | null => {
@@ -40,22 +41,24 @@ const DraftIndexPage = ({ query }: Props): JSX.Element | null => {
     return null
   }
   return (
-    <div>
+    <LayoutChildrenPadding>
       <SearcherModal searcher={searcher} />
-    </div>
+    </LayoutChildrenPadding>
   )
 }
 
 export async function getServerSideProps({
   query,
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> {
-  const { s } = query,
-    query_ = typeof s === 'string' ? { symbol: s } : {}
+  const { s, ext } = query,
+    symbol = typeof s === 'string' ? s : undefined,
+    extension = ext === '1'
 
   return {
     props: {
-      query: query_,
+      query: { symbol, extension },
       protected: true,
+      sidebarPinned: !extension,
     },
   }
 }

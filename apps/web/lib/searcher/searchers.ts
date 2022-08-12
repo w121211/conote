@@ -1,6 +1,6 @@
 import { Author, Discuss } from '@prisma/client'
-import { authorModel } from '../models/author-model'
-import { discussModel } from '../models/discuss-model'
+import { authorModel } from '../models/author.model'
+import { discussModel } from '../models/discuss.model'
 import { BaseSearcher } from './base-searcher'
 import { SymSearcher } from './sym-searcher'
 

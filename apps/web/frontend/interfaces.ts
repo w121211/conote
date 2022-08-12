@@ -7,8 +7,16 @@
 //
 //
 
-export type AppPageProps = {
+import {
+  NoteDocFragment,
+  NoteDraftFragment,
+  NoteFragment,
+} from '../apollo/query.graphql'
+
+export interface AppPageProps {
+  initialApolloState?: any
   protected?: true
+  sidebarPinned?: boolean
 }
 
 //
@@ -31,4 +39,13 @@ export interface SearcherProps {
     // If provide, the symbol-create will be a button instead of a link
     onClickSymbolCreate?: (symbol: string) => void
   }
+}
+
+export interface NoteDocElProps {
+  // The opening doc
+  doc: NoteDocFragment
+
+  note: NoteFragment
+
+  noteDocsToMerge: NoteDocFragment[]
 }

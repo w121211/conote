@@ -4,7 +4,7 @@ import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
 import { ApolloProvider } from '@apollo/client'
 // import { mockDiscussPosts } from '../../test/__mocks__/mock-discuss'
-import { TooltipProvider } from '../../frontend/components/ui-component/tooltip/tooltip-provider'
+import { TooltipProvider } from '../../frontend/components/ui/tooltip/tooltip-provider'
 import DiscussPostTile from '../../frontend/components/discuss-post/discuss-post-tile'
 
 const apolloClient = getApolloClient()

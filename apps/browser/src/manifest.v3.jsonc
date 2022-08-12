@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Conote extension",
+  "name": "Konote extension",
   "description": "A conote extension (under development)",
   "version": "0.1.0",
   "background": {
@@ -12,7 +12,7 @@
       "16": "icon-16.png",
       "48": "icon-48.png"
     },
-    "default_title": "Conote"
+    "default_title": "Konote"
     // "default_popup": "popup.html"  // use background-script to open new window instead
   },
   // "content_scripts": [
@@ -35,6 +35,8 @@
   "permissions": ["contextMenus", "storage", "tabs"],
   "host_permissions": [
     "http://localhost:3000/*",
-    "https://www.konote.one/*" // allow fetch api (avoid CORS), @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/permissions#host_permissions
+
+    // Allow fetch api (avoid CORS), @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/permissions#host_permissions
+    "https://www.konote.one/*"
   ]
 }

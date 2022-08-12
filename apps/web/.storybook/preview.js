@@ -1,4 +1,5 @@
 import { RouterContext } from 'next/dist/shared/lib/router-context'
+import 'react-toastify/dist/ReactToastify.css'
 import '../style/global.css'
 
 export const parameters = {

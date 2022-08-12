@@ -24,9 +24,9 @@ import {
 } from 'graphql-let/__generated__/__types__'
 import { isAuthenticated, sessionLogin, sessionLogout } from '../lib/auth/auth'
 import { hasCount, toStringProps } from '../lib/helpers'
-import { authorModel } from '../lib/models/author-model'
-import { rateModel } from '../lib/models/rate-model'
-import { getOrCreateUser } from '../lib/models/user-model'
+import { authorModel } from '../lib/models/author.model'
+import { rateModel } from '../lib/models/rate.model'
+import { getOrCreateUser } from '../lib/models/user.model'
 import prisma from '../lib/prisma'
 import {
   authorSearcher,
@@ -37,15 +37,15 @@ import {
   discussEmojiModel,
   discussPostEmojiModel,
   noteEmojiModel,
-} from '../lib/models/emoji-model'
-import { CommitInputError, commitNoteDrafts } from '../lib/models/commit-model'
-import { noteDraftModel } from '../lib/models/note-draft-model'
-import { noteModel } from '../lib/models/note-model'
-import { pollModel } from '../lib/models/poll-model'
-import { noteDocModel } from '../lib/models/note-doc-model'
-import { pollVoteModel } from '../lib/models/poll-vote-model'
+} from '../lib/models/emoji.model'
+import { CommitInputError, commitNoteDrafts } from '../lib/models/commit.model'
+import { noteDraftModel } from '../lib/models/note-draft.model'
+import { noteModel } from '../lib/models/note.model'
+import { pollModel } from '../lib/models/poll.model'
+import { noteDocModel } from '../lib/models/note-doc.model'
+import { pollVoteModel } from '../lib/models/poll-vote.model'
 import { isNil } from 'lodash'
-import { linkModel } from '../lib/models/link-model'
+import { linkModel } from '../lib/models/link.model'
 import { LinkParsed } from '../lib/interfaces'
 
 export type ResolverContext = {
@@ -374,7 +374,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         where: { userId: userId, status: 'EDIT' },
         orderBy: { createdAt: 'asc' },
       }),
-      parsed = drafts.map(e => noteDraftModel.parse(e)),
+      parsed = drafts.map(e => noteDraftModel.parseShallow(e)),
       entries = parsed.map(
         ({ id, meta, status, symbol, contentHead: { title } }) => ({
           id,

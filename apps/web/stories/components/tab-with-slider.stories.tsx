@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import userEvent from '@testing-library/user-event'
 import React, { useState } from 'react'
-import TabsWithSlider from '../../frontend/components/ui-component/tabs-with-slider'
+import TabsWithSlider from '../../frontend/components/ui/tabs-with-slider'
 
 export default {
   component: TabsWithSlider,
