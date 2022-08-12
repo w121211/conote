@@ -8,7 +8,7 @@ import {
 import type { SearcherProps } from '../../interfaces'
 import { getDraftPageURLBySymbol, getNotePageURL } from '../../utils'
 import Modal from '../modal/modal'
-import { styleSymbol } from '../ui-component/style-fc/style-symbol'
+import { styleSymbol } from '../ui/style-fc/style-symbol'
 import classes from './search-all-modal.module.css'
 
 interface HitItemProps {

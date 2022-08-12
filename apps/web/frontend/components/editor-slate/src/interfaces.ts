@@ -52,7 +52,7 @@ export type ElementIndenter = {
   uid: string
 
   // Keep the original copy
-  blockCopy?: Block
+  blockCopy?: Omit<Block, 'childrenUids'>
 
   // Record change-event lively
   change?: TreeNodeChangeType

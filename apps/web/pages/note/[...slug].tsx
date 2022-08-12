@@ -15,7 +15,7 @@ import {
   useNoteDraftQuery,
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
-import NoteViewEl from '../../frontend/components/note/note-view-el'
+import NoteDocEl from '../../frontend/components/note/NoteDocEl'
 
 interface Props {
   query: {
@@ -35,7 +35,7 @@ interface Props {
  * - Hydrate apollo by received props
  */
 const NoteSlugPage = ({
-  query: { symbol, url, docId },
+  query: { symbol, url },
   note,
   noteDocById,
   noteDocsToMerge,
@@ -54,12 +54,12 @@ const NoteSlugPage = ({
 
   if (note && noteDocById && Array.isArray(noteDocsToMerge)) {
     return (
-      <NoteViewEl {...{ ...props, doc: noteDocById, note, noteDocsToMerge }} />
+      <NoteDocEl {...{ ...props, doc: noteDocById, note, noteDocsToMerge }} />
     )
   }
   if (note && Array.isArray(noteDocsToMerge)) {
     return (
-      <NoteViewEl {...{ ...props, doc: note.headDoc, note, noteDocsToMerge }} />
+      <NoteDocEl {...{ ...props, doc: note.headDoc, note, noteDocsToMerge }} />
     )
   }
   if (symbol) {
@@ -68,6 +68,7 @@ const NoteSlugPage = ({
   if (url) {
     return <div>Note on {url} is not found, create one.</div>
   }
+
   throw new Error('')
 }
 

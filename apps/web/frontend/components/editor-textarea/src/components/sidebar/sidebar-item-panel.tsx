@@ -30,7 +30,7 @@ const CommitInputErrorMsg = ({
     <div>
       {items_.map(e => (
         <div key={e.draftId}>
-          {e.symbol} - {e.msg}
+          {e.symbol} - {e.code}
         </div>
       ))}
     </div>

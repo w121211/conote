@@ -124,15 +124,22 @@ export const mockNoteDrafts: Omit<
   },
   {
     ...base,
-    id: '4-got-linkId',
-    symbol: mockLinks[0].url,
-    userId: mockUsers[1].id,
+    id: '4-got_linkId_as_web_note',
+    symbol: `[[${mockLinks[0].url}]]`,
+    userId: mockUsers[0].id,
     linkId: mockLinks[0].id,
+    contentHead: {
+      webpage: {
+        title: mockLinks[0].scraped.title,
+      },
+    },
     contentBody: {
       discussIds: [],
       symbols: [],
-      blocks: mockDocBlock_contentBlocks,
-      blockDiff: differenceBlocks(mockDocBlock_contentBlocks, null),
+      blocks: writeBlocks(mockBlockInputs[1], {
+        docSymbol: `[[${mockLinks[0].url}]]`,
+      }),
+      blockDiff: [],
     },
   },
 ]

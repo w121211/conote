@@ -1,8 +1,10 @@
 import { isNil } from 'lodash'
 import React, { useState } from 'react'
+import { parseSymbol } from '../../../../../../share/symbol.common'
 import Modal from '../../../../modal/modal'
-import { Alert } from '../../../../ui-component/alert'
-import { styleSymbol } from '../../../../ui-component/style-fc/style-symbol'
+import SymbolDecorate from '../../../../symbol/SymbolDecorate'
+import { Alert } from '../../../../ui/alert'
+import { styleSymbol } from '../../../../ui/style-fc/style-symbol'
 import type { Doc } from '../../interfaces'
 import { ContentHeadForm } from './content-head-form'
 
@@ -14,43 +16,14 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
     doc.contentHead.symbol !== doc.noteDraftCopy.symbol
       ? doc.contentHead.symbol
       : null
+
+  const symbol = doc.noteDraftCopy.symbol,
+    symbolParsed = parseSymbol(symbol)
+
   // const newSymbol = doc.noteCopy && doc.contentHead.symbol !== doc.symbol ?
 
   return (
-    <div className="mb-5">
-      {/* <div className="flex items-center gap-2 mb-4">
-        <DomainSelect />
-        {isNew && (
-          <Badge
-            content="new"
-            bgClassName="bg-yellow-200/60"
-            textClassName="font-bold text-xl"
-          />
-        )}
-      </div> */}
-
-      <div className="relative mb-3">
-        <h3 className="text-gray-800 dark:text-gray-100 leading-tight line-clamp-2 break-words">
-          {/* {link && (
-            <span className="material-icons text-blue-400 text-4xl align-bottom">
-            language
-            </span>
-          )} */}
-          <span
-            // className="flex-1 p-1 select-none rounded-md hover:bg-gray-200/80 dark:hover:bg-gray-600"
-            className="symbol-link"
-            onClick={() => setShowModal(true)}
-            // role='button'
-          >
-            {styleSymbol(
-              doc.noteDraftCopy.symbol,
-              doc.contentHead.webpage?.title ?? undefined,
-            )}
-            {newSymbol && `-> ${newSymbol}`}
-          </span>
-        </h3>
-      </div>
-
+    <>
       <Modal
         sectionClassName=""
         visible={showModal}
@@ -63,7 +36,62 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         </div>
       </Modal>
 
-      {/* {(fetchTime || link) && (
+      <div className="mb-1">
+        {/* <div className="flex items-center gap-2 mb-4">
+        <DomainSelect />
+        {isNew && (
+          <Badge
+            content="new"
+            bgClassName="bg-yellow-200/60"
+            textClassName="font-bold text-xl"
+          />
+        )}
+      </div> */}
+
+        <div className="relative mb-1">
+          <h3 className="text-gray-800 dark:text-gray-100 leading-tight line-clamp-2 break-words">
+            {/* {link && (
+            <span className="material-icons text-blue-400 text-4xl align-bottom">
+            language
+            </span>
+          )} */}
+            <span
+              className="symbol-link"
+              onClick={() => setShowModal(true)}
+              // role='button'
+            >
+              {/* {styleSymbol(
+                doc.noteDraftCopy.symbol,
+                doc.contentHead.webpage?.title ?? undefined,
+              )} */}
+              <SymbolDecorate
+                symbolStr={doc.noteDraftCopy.symbol}
+                title={doc.contentHead.webpage?.title ?? undefined}
+              />
+
+              {newSymbol && (
+                <>
+                  <span className="text-gray-300 mx-2">→</span>
+                  {styleSymbol(newSymbol)}
+                </>
+              )}
+            </span>
+
+            {symbolParsed.url && (
+              <a
+                href={symbolParsed.url.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="material-symbols-outlined align-middle ml-2 text-xl text-gray-600">
+                  open_in_new
+                </span>
+              </a>
+            )}
+          </h3>
+        </div>
+
+        {/* {(fetchTime || link) && (
         <div className="flex flex-col text-gray-400 text-sm italic">
           {link && (
             <p className="truncate first-letter:capitalize">
@@ -86,9 +114,9 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         </div>
       )} */}
 
-      {/* {doc.noteCopy && <NoteEmojis noteId={doc.noteCopy.id} />} */}
+        {/* {doc.noteCopy && <NoteEmojis noteId={doc.noteCopy.id} />} */}
 
-      {/* {noteMetaData?.noteMeta.keywords && (
+        {/* {noteMetaData?.noteMeta.keywords && (
         <div className={classes.headerKw}>
           {noteMetaData?.noteMeta.keywords.map((e, i) => {
             if (i < 5) {
@@ -132,8 +160,8 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         </div>
       )} */}
 
-      {/* ---notification block--- */}
-      <div className="flex flex-col gap-2 mt-4 text-gray-800 dark:text-gray-100 text-sm">
+        {/* ---notification block--- */}
+        {/* <div className="flex flex-col gap-2 mt-4 text-gray-800 dark:text-gray-100 text-sm"> */}
         {/* <Alert
           type="warning"
           action="merge"
@@ -156,8 +184,9 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
             setShowAlert({ ...showAlert, 1: false })
           }}
         /> */}
+        {/* </div> */}
       </div>
-    </div>
+    </>
   )
 }
 

@@ -25,11 +25,7 @@ const ChainItemInsertButton = ({
   if (loading) {
     return null
   }
-  return (
-    <div className="mt-4">
-      <SearcherModal searcher={searcher} />
-    </div>
-  )
+  return <SearcherModal searcher={searcher} />
 }
 
 export default ChainItemInsertButton

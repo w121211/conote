@@ -3,16 +3,15 @@ import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta } from '@storybook/react'
 import { mockDocs } from '../../frontend/components/editor-textarea/test/__mocks__/mock-doc'
 import ModalProvider from '../../frontend/components/modal/modal-context'
-import SlateDocEl from '../../frontend/components/editor-slate/src/components/slate-doc-el'
+import DocEl from '../../frontend/components/editor-slate/src/components/DocEl'
 import { getApolloClient } from '../../apollo/apollo-client'
 import { ToastContainer } from 'react-toastify'
 
 const apolloClient = getApolloClient()
 
 export default {
-  title: 'EditorSlate/SlateDocEl',
-  component: SlateDocEl,
-} as ComponentMeta<typeof SlateDocEl>
+  component: DocEl,
+} as ComponentMeta<typeof DocEl>
 
 export const Base = () => {
   return (
@@ -25,7 +24,7 @@ export const Base = () => {
         draggable={false}
       />
       <ModalProvider>
-        <SlateDocEl doc={mockDocs[0]} />
+        <DocEl doc={mockDocs[0]} />
       </ModalProvider>
     </>
   )
@@ -44,7 +43,7 @@ export const PopoverLeaf = () => {
   return (
     <ApolloProvider client={apolloClient}>
       <ModalProvider>
-        <SlateDocEl doc={mockDocs[0]} />
+        <DocEl doc={mockDocs[0]} />
       </ModalProvider>
     </ApolloProvider>
   )

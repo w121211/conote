@@ -11,10 +11,12 @@ const IndenterEl = (
     <div
       {...attributes}
       data-indent={indent}
-      style={{ marginLeft: 24 * (indent + 1) }}
+      style={{ marginLeft: 28 * (indent + 1) }}
+      className="pt-2"
     >
-      <ul style={{ padding: 0, margin: 0 }}>
-        <li className='before:content-["-"] before:absolute before:-translate-x-full before:pr-2'>
+      <ul className="list-disc text-gray-600">
+        <li>
+          {/* <li className='before:content-["-"] before:absolute before:-translate-x-full '> */}
           {error && (
             <span
               contentEditable={false}

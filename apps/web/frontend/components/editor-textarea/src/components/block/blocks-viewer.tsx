@@ -45,15 +45,17 @@ function buildComponents(blockUid: string) {
       )
     },
     ul: ({ node, children, ...props }) => {
+      const { ordered, ...rest } = props // Remove ordered prop to settle the React.js warning
       return (
-        <ul {...props} className="list-disc">
+        <ul {...rest} className="list-disc">
           {children}
         </ul>
       )
     },
     li: ({ node, children, ...props }) => {
+      const { ordered, ...rest } = props // Remove ordered prop to settle the React.js warning
       return (
-        <li {...props}>
+        <li {...rest}>
           <p>{children}</p>
         </li>
       )
@@ -76,18 +78,13 @@ const Indenter = ({ indenter }: { indenter: ElementIndenter }) => {
       style={{ marginLeft }}
       // className="relative rounded-lg leading-relaxed"
     >
-      {/* <div
-        className={`
-        place-items-stretch place-content-stretch
-        relative z-[2]
-        overflow-visible
-        flex-grow
-        [word-break:break-word]
-        leading-[inherit]
-        text-gray-700`}
-      > */}
-      <ReactMarkdown components={buildComponents(uid)}>{str}</ReactMarkdown>
-      {/* </div> */}
+      {str === '' ? (
+        <span className="text-gray-400">...</span>
+      ) : (
+        // <ReactMarkdown>{str}</ReactMarkdown>
+        <ReactMarkdown components={buildComponents(uid)}>{str}</ReactMarkdown>
+        // <div>{str}</div>
+      )}
     </div>
   )
 }
@@ -96,10 +93,12 @@ const Indenter = ({ indenter }: { indenter: ElementIndenter }) => {
  * Assume input blocks are sorted in depth-first order
  *
  */
-const BlocksViewer = ({ blocks }: { blocks: Block[] }): JSX.Element => {
-  // const [root, ...rest] = blocks
+const BlocksViewer = ({
+  blocks,
+}: {
+  blocks: Omit<Block, 'childrenUids'>[]
+}): JSX.Element => {
   const [root, ...rest] = blocksToIndenters(blocks)
-
   // const nodes = treeUtil.toTreeNodeBodyList(blocks)
   // const root = treeUtil.buildFromList(nodes)
 

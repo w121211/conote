@@ -8,7 +8,7 @@ import { BlockEl } from '../../frontend/components/editor-textarea/src/component
 import { mockBlocks } from '../../frontend/components/editor-textarea/test/__mocks__/mock-block'
 import ModalProvider from '../../frontend/components/modal/modal-context'
 import { InitStoreForStorybook } from './helper-components/init-store-for-storybook'
-import { TooltipProvider } from '../../frontend/components/ui-component/tooltip/tooltip-provider'
+import { TooltipProvider } from '../../frontend/components/ui/tooltip/tooltip-provider'
 import { writeBlocks } from '../../frontend/components/editor-textarea/src/utils/block-writer'
 
 // Need to place outside, otherwise the storybook result weird behavior

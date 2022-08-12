@@ -1,10 +1,10 @@
 import moment from 'moment'
-import React, { FC, ReactNode, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 
-type AlertType = 'warning' | 'error' | 'success' | 'announce'
+type AlertType = 'warnning' | 'error' | 'success' | 'announce'
 
-const warningBg = `bg-orange-200/50 dark:bg-orange-300/30`
-const warningIcon = `text-yellow-500 dark:text-yellow-400`
+const warnningBg = `bg-orange-200/50 dark:bg-orange-300/30`
+const warnningIcon = `text-yellow-500 dark:text-yellow-400`
 
 const errorBg = `bg-red-200/50 dark:bg-red-300/30`
 const errorIcon = `text-red-500 dark:text-red-400`
@@ -16,42 +16,51 @@ const announceBg = `bg-yellow-200/60 dark:bg-yellow-400`
 // const announceIcon=`text-blue-600 dark:bg-blue-300`
 
 const bg = (type: AlertType) => {
-  if (type === 'warning') return warningBg
+  if (type === 'warnning') return warnningBg
   if (type === 'error') return errorBg
   if (type === 'success') return successBg
   if (type === 'announce') return announceBg
 }
 
 const icon = (type: AlertType) => {
-  if (type === 'warning') return warningIcon
+  if (type === 'warnning') return warnningIcon
   if (type === 'error') return errorIcon
   if (type === 'success') return successIcon
   if (type === 'announce') return ''
 }
 
-interface AlertProps {
+type Props = {
   children: ReactNode
   type: AlertType
   action?: string
   time?: Date // to do: change to Date type
   onClose?: () => void
   visible?: boolean
+  closable?: boolean
 }
 
-export const Alert: FC<AlertProps> = ({
+/**
+ * @reference https://flowbite.com/docs/components/alerts/
+ */
+export const Alert: React.FC<Props> = ({
   type,
   children,
   action,
   time,
   visible = true,
-  onClose,
+  // onClose,
+  closable = false,
 }) => {
   const [fold, setFold] = useState(true)
   const onClickFold = () => {
     setFold(!fold)
   }
+  const [show, setShow] = useState(true)
 
   if (!visible) {
+    return null
+  }
+  if (!show) {
     return null
   }
   return (
@@ -73,8 +82,8 @@ export const Alert: FC<AlertProps> = ({
             ${icon(type)}
             `}
         >
-          {type === 'warning'
-            ? 'warning'
+          {type === 'warnning'
+            ? 'warnning'
             : type === 'error'
             ? 'error'
             : type === 'success'
@@ -93,7 +102,7 @@ export const Alert: FC<AlertProps> = ({
           {action && <span className="font-bold">[{action}]</span>}
           {children}
           {time && (
-            <span className="text-gray-400 dark:text-gray-300 text-xs">
+            <span className="text-amber-400 dark:text-amber-300 text-xs">
               {moment(time).calendar()}
             </span>
           )}
@@ -104,7 +113,7 @@ export const Alert: FC<AlertProps> = ({
               className={`
             material-icons 
             h-fit
-            text-lg leading-none text-gray-600 dark:text-gray-200 
+            text-lg leading-none text-amber-600 dark:text-amber-200 
             hover:cursor-pointer
             ${fold ? '' : 'rotate-180'}
             `}
@@ -115,10 +124,11 @@ export const Alert: FC<AlertProps> = ({
           </div>
         )}
 
-        {onClose !== undefined && (
+        {closable && (
           <span
-            className="material-icons inline-flex mt-0.5 text-base leading-none text-gray-600 dark:text-gray-200 hover:cursor-pointer"
-            onClick={onClose}
+            className="material-icons inline-flex mt-0.5 text-base leading-none text-amber-600 dark:text-amber-200 hover:cursor-pointer"
+            // onClick={onClose}
+            onClick={() => setShow(false)}
           >
             close
           </span>

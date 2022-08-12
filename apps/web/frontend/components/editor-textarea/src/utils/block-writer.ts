@@ -13,10 +13,7 @@ export type BlockInput = [string, BlockInput[]] | string
 //
 //
 
-export const blankLines: BlockInput = [
-  'DUMMY_ROOT',
-  ['', '', '', '', '', '', '', '', '', '', '', ''],
-]
+export const blankLines: BlockInput = ['DUMMY_ROOT', ['', '', '']]
 
 //
 //

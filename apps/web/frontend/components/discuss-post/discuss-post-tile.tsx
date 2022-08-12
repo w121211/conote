@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { DiscussPostFragment } from '../../../apollo/query.graphql'
 import OptionsMenu from '../discuss/options-menu'
 import DiscussPostEmojis from './discuss-post-emojis'
-import { Box } from '../ui-component/box'
+import { Box } from '../ui/box'
 import { useMeContext } from '../auth/use-me-context'
 
 const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Tooltip } from '../ui-component/tooltip/tooltip'
+import { Tooltip } from '../ui/tooltip/tooltip'
 
 export const EmojisDropdownBtn = ({ disable }: { disable?: boolean }) => {
   const dropdownBtn = (

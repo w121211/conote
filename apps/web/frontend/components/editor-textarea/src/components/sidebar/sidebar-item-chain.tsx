@@ -84,17 +84,19 @@ const SidebarItem = ({
       <Link href={href}>
         <a
           className={`group flex items-center gap-1 pl-8 pr-4 leading-relax ${
-            tab.curChainItem?.draftId === id
+            tab.openingDraftId === id
               ? 'bg-gray-200 hover:bg-gray-300/80'
               : 'bg-transparent hover:bg-gray-200'
-          } `}
+          }`}
         >
           <span className="material-icons text-lg text-[20px] text-gray-400/60">
             {symbol.startsWith('@') ? 'language' : 'notes'}
           </span>
+
           <span className="inline-block min-w-0 flex-1 truncate ">
             <ItemLabel symbol={symbol} title={title ?? undefined} />
           </span>
+
           <SidebarItemPanel item={item} />
         </a>
       </Link>
@@ -120,7 +122,7 @@ const SidebarItemChain = ({
       <Link href={getDraftPageURL(itemFirst.id, itemFirst.id)}>
         <a
           className={`group flex items-center gap-1 pl-4 pr-4 leading-relax ${
-            tab.curChainItem?.draftId == id
+            tab.openingDraftId == id
               ? 'bg-gray-200 hover:bg-gray-300/80'
               : 'bg-transparent hover:bg-gray-200'
           } `}
@@ -128,9 +130,11 @@ const SidebarItemChain = ({
           <span className="material-icons text-lg text-[20px] text-gray-400/60">
             {symbol.startsWith('@') ? 'language' : 'notes'}
           </span>
+
           <span className="inline-block min-w-0 flex-1 truncate ">
             <ItemLabel symbol={symbol} title={title ?? undefined} />
           </span>
+
           <SidebarItemPanel item={itemFirst} />
         </a>
       </Link>

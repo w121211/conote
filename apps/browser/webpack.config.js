@@ -1,9 +1,10 @@
 /**
- * @see
- * https://github.com/pmmmwh/react-refresh-webpack-plugin/blob/main/examples/typescript-without-babel/webpack.config.js
- * https://github.com/aeksco/react-typescript-web-extension-starter/blob/master/webpack.common.js
- * https://github.com/aeksco/react-typescript-web-extension-starter/blob/master/webpack.dev.js
+ * References
+ * - https://github.com/pmmmwh/react-refresh-webpack-plugin/blob/main/examples/typescript-without-babel/webpack.config.js
+ * - https://github.com/aeksco/react-typescript-web-extension-starter/blob/master/webpack.common.js
+ * - https://github.com/aeksco/react-typescript-web-extension-starter/blob/master/webpack.dev.js
  */
+
 const path = require('path')
 // const ReactRefreshPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
@@ -30,13 +31,16 @@ module.exports = {
     // 'background-script': isManifestV3
     //   ? path.resolve(__dirname, 'src/chrome/background.ts')
     //   : path.resolve(__dirname, 'src/scripts/background-script.ts'),
+
     'background-script': path.resolve(__dirname, 'src/chrome/background.ts'),
+
     // 'content-script': path.resolve(__dirname, 'src/scripts/content-script.ts'),
     // 'content-script': path.resolve(__dirname, 'src/annotate/content-script.ts'),
-    'content-script-menu': path.resolve(
-      __dirname,
-      'src/scripts/content-script-menu.ts',
-    ),
+
+    // 'content-script-menu': path.resolve(
+    //   __dirname,
+    //   'src/scripts/content-script-menu.ts',
+    // ),
     // popup: path.resolve(__dirname, 'src/popup/index.tsx'),
     // main: path.resolve(__dirname, 'src/index.tsx'),
   },
@@ -120,8 +124,11 @@ module.exports = {
   //   writeToDisk: true,
   // },
   plugins: [
-    new Dotenv({ path: './.env' }), // warnning! no secerts should store in .env file @see https://github.com/mrsteele/dotenv-webpack
+    // Warning! no secerts should store in .env file @see https://github.com/mrsteele/dotenv-webpack
+    new Dotenv({ path: './.env' }),
+
     // isDevelopment && new ReactRefreshPlugin(),
+
     new ForkTsCheckerWebpackPlugin({
       typescript: {
         diagnosticOptions: {
@@ -131,6 +138,7 @@ module.exports = {
         mode: 'write-references',
       },
     }),
+
     new CopyWebpackPlugin({
       patterns: [
         // {

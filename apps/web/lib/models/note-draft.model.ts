@@ -44,8 +44,7 @@ class NoteDraftModel {
   ) {
     if (symbol) {
       const symbol_ = symModel.parse(symbol)
-      if (symbol_.type !== 'TOPIC')
-        throw new Error('[validateCreateInput] symbol type is not TOPIC')
+      if (symbol_.type !== 'TOPIC') throw new Error('Symbol type is not TOPIC')
     }
 
     const branch = await prisma.branch.findUnique({
@@ -63,19 +62,13 @@ class NoteDraftModel {
     //   : null
 
     if (symbol === undefined && linkId === undefined)
-      throw new Error(
-        '[validateCreateInput] Param require either symbol or linkId.',
-      )
-    if (branch === null)
-      throw new Error('[validateCreateInput] Branch not found.')
+      throw new Error('Param require either symbol or linkId.')
+    if (branch === null) throw new Error('Branch not found.')
     if (fromDocId && fromDocId !== headDoc?.id)
-      throw new Error('[validateCreateInput] From-doc is not the head-doc.')
+      throw new Error('From-doc is not the head-doc.')
     if (sym && fromDocId === undefined)
-      throw new Error(
-        '[validateCreateInput] Sym is found but not has from-doc.',
-      )
-    if (linkId && link === null)
-      throw new Error('[validateCreateInput] Link not found.')
+      throw new Error('Sym is found but not has from-doc.')
+    if (linkId && link === null) throw new Error('Link not found.')
     // if (fromDocId && fromDoc === null)
     //   throw new Error('[NoteDraftModel.createByLink] From-doc not found.')
 
@@ -87,7 +80,10 @@ class NoteDraftModel {
   }
 
   /**
+   * Meanwhile only accept topic-symbol as input, url-symbol need to create through `createByLink()`.
+   *
    * TODO
+   * - [] Parse content head
    * - [] Swap block-uid for new inserted blocks to prevent directly using the client generated uids -> do this when creating the doc
    */
   async create(
@@ -125,39 +121,48 @@ class NoteDraftModel {
     return this.toGQLNoteDraft(draft)
   }
 
+  /**
+   * TODO: parse content head
+   */
   async createByLink(
     branchName: string,
     linkId: string,
     userId: string,
-    { fromDocId, domain, contentHead, contentBody }: NoteDraftInput,
+    {
+      fromDocId,
+      domain,
+      contentHead,
+      contentBody: contentBodyInput,
+    }: NoteDraftInput,
   ): Promise<GQLNoteDraft> {
     const { branch, fromDoc, link } = await this.validateCreateInput(
-        branchName,
-        undefined,
-        fromDocId ?? undefined,
-        linkId,
-      ),
-      draft =
-        link &&
-        (await prisma.noteDraft.create({
-          data: {
-            symbol: `[[${link.url}]]`,
-            branch: { connect: { id: branch.id } },
-            sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
-            fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
-            link: { connect: { id: link.id } },
-            user: { connect: { id: userId } },
-            domain,
-            contentHead,
-            contentBody,
-          },
-          include: { branch: true },
-        }))
+      branchName,
+      undefined,
+      fromDocId ?? undefined,
+      linkId,
+    )
 
-    if (draft) {
-      return this.toGQLNoteDraft(draft)
-    }
-    throw new Error()
+    if (link === null) throw new Error('link === null')
+
+    const symbol = `[[${link.url}]]`,
+      contentBody = parseGQLContentBodyInput(symbol, contentBodyInput),
+      // TODO: Parse content head
+      draft = await prisma.noteDraft.create({
+        data: {
+          symbol,
+          branch: { connect: { id: branch.id } },
+          sym: fromDoc ? { connect: { id: fromDoc.symId } } : undefined,
+          fromDoc: fromDocId ? { connect: { id: fromDocId } } : undefined,
+          link: { connect: { id: link.id } },
+          user: { connect: { id: userId } },
+          domain,
+          contentHead,
+          contentBody,
+        },
+        include: { branch: true },
+      })
+
+    return this.toGQLNoteDraft(draft)
   }
 
   /**

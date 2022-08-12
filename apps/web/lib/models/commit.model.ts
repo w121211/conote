@@ -119,10 +119,10 @@ async function validateInput(draft: NoteDraft, userId: string) {
     if (headDoc === null)
       throw new Error('Draft has from-doc but current head-doc is null')
     if (headDoc.id !== draft.fromDocId)
-      errCodes.push(CommitInputErrorCode.FROM_DOC_NOTE_HEAD)
+      errCodes.push(CommitInputErrorCode.FROM_DOC_NOT_HEAD)
   }
   if (draft.fromDocId === null && headDoc !== null) {
-    errCodes.push(CommitInputErrorCode.FROM_DOC_NOTE_HEAD)
+    errCodes.push(CommitInputErrorCode.FROM_DOC_NOT_HEAD)
   }
 
   // const domainChanged = draft.domain === curDoc!.domain
@@ -140,8 +140,10 @@ async function validateInput(draft: NoteDraft, userId: string) {
   if (isContentEmpty) errCodes.push(CommitInputErrorCode.CONTENT_EMPTY)
   if (diffBody !== null && diffBody.blockChanges.length === 0)
     errCodes.push(CommitInputErrorCode.CONTENT_NOT_CHANGE)
-  if (inlineDiscussesNoId.length > 0)
+  if (inlineDiscussesNoId.length > 0) {
+    console.debug(inlineDiscussesNoId)
     errCodes.push(CommitInputErrorCode.DISCUSS_NOT_CREATE)
+  }
 
   if (errCodes.length > 0) {
     const items: CommitInputErrorItem[] = errCodes.map(code => ({

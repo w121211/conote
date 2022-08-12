@@ -1,8 +1,8 @@
-import { setProp } from '@ngneat/elf'
+import { setProp, setProps } from '@ngneat/elf'
 import { useObservable } from '@ngneat/react-rxjs'
 import React, { useEffect, useRef, useState } from 'react'
 import SidebarEl from '../../editor-textarea/src/components/sidebar/sidebar-el'
-import Navbar from '../../navbar'
+import Navbar from '../../nav-bar'
 import { siderRepo } from '../../../stores/sider.repository'
 
 const Layout = ({
@@ -10,11 +10,13 @@ const Layout = ({
   buttonRight,
   backgroundColor,
   navColor,
+  sidebarPinned,
 }: {
   children: React.ReactNode
   buttonRight?: React.ReactNode
   backgroundColor?: string
   navColor?: string
+  sidebarPinned?: boolean
 }): JSX.Element => {
   const [siderIsOpen] = useObservable(siderRepo.isOpen$),
     [siderIsPinned] = useObservable(siderRepo.isPinned$)
@@ -24,10 +26,10 @@ const Layout = ({
     timeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
   function onMouseMove(e: React.MouseEvent) {
-    if (e.clientX < 45 && !siderIsOpen) {
+    if (e.clientX < 30 && !siderIsOpen) {
       siderRepo.update(setProp('isOpen', true))
     } else if (
-      e.clientX >= 45 &&
+      e.clientX >= 30 &&
       !siderIsPinned &&
       siderIsOpen &&
       !siderRef.current?.contains(e.currentTarget)
@@ -35,9 +37,16 @@ const Layout = ({
       clearTimeout(timeoutRef?.current)
       timeoutRef.current = setTimeout(() => {
         siderRepo.update(setProp('isOpen', false))
-      }, 200)
+      }, 50)
     }
   }
+
+  useEffect(() => {
+    if (sidebarPinned === false) {
+      siderRepo.update(setProps({ isPinned: false, isOpen: false }))
+    }
+    // Else: Do nothing, sidebar is pinned by default
+  }, [])
 
   return (
     <div className="flex-1 relative min-h-0 grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] [grid-template-areas:'nav_nav''sider_children'] w-screen">
@@ -50,12 +59,9 @@ const Layout = ({
       />
       <div
         id="layout-children-container"
-        className={`
-          flex-1  
-          [grid-area:children] 
-          flex justify-center 
-          overflow-auto 
-         ${backgroundColor ? backgroundColor : 'bg-gray-50 dark:bg-gray-700'}`}
+        className={`flex-1 [grid-area:children] flex justify-center overflow-auto ${
+          backgroundColor ? backgroundColor : 'bg-gray-50 dark:bg-gray-700'
+        }`}
         onMouseMove={onMouseMove}
         ref={childrenRef}
       >

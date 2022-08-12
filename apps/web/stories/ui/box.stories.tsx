@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { Box } from '../../frontend/components/ui-component/box'
+import { Box } from '../../frontend/components/ui/box'
 
 export default {
   component: Box,

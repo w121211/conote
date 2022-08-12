@@ -8,12 +8,15 @@ export const reTopic = /^\[\[[^[\]\n]+\]\]$/
  * Check is given sting a url
  * @reference https://stackoverflow.com/a/43467144/2293778
  */
-function isURL(str: string) {
+function parseURL(str: string): URL | null {
   try {
     const url = new URL(str)
-    return url.protocol === 'http:' || url.protocol === 'https:'
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      return url
+    }
+    return null
   } catch (err) {
-    return false
+    return null
   }
 }
 
@@ -32,9 +35,12 @@ export function parseSymbol(symbol: string): SymbolParsed {
   }
   if (symbol.match(reTopic) !== null) {
     const str = symbol.slice(2, -2)
-    return isURL(str)
-      ? { type: 'URL', symbol, url: str }
-      : { type: 'TOPIC', symbol }
+    const url = parseURL(str)
+
+    if (url) {
+      return { type: 'URL', symbol, url }
+    }
+    return { type: 'TOPIC', symbol }
   }
 
   throw new Error('Symbol format is not recognized: ' + symbol)

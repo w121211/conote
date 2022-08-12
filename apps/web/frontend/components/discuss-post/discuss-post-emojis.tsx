@@ -5,7 +5,7 @@ import {
   useDiscussPostEmojisQuery,
 } from '../../../apollo/query.graphql'
 import { EmojisDropdownBtn } from '../emoji/emojis-dropdown-btn'
-import ToggleMenu from '../ui-component/toggle-menu'
+import ToggleMenu from '../ui/toggle-menu'
 import DiscussPostEmojiUpsertBtn from './discuss-post-emoji-upsert-btn'
 
 const DiscussPostEmojis = ({

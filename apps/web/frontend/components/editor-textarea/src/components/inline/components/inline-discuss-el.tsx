@@ -8,7 +8,7 @@ import { Doc, InlineDiscuss } from '../../../interfaces'
 import { inlineService } from '../../../services/inline.service'
 import { InlineElProps } from '../inline-el'
 import DiscussModalPageEl from '../../../../../discuss/discuss-modal-page-el'
-import { PopperTooltip } from '../../../../../ui-component/tooltip/popper-tooltip'
+import { PopperTooltip } from '../../../../../ui/tooltip/popper-tooltip'
 import { getDocByBlock } from '../../../stores/doc.repository'
 
 /**

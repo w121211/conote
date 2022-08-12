@@ -1,20 +1,21 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import React, { useEffect } from 'react'
 import { preventExitWithoutSave } from '../../frontend/components/editor-textarea/src/listeners'
-import SlateDocChainEl from '../../frontend/components/editor-slate/src/components/slate-doc-chain-el'
-import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
+import SlateDocChainEl from '../../frontend/components/editor-slate/src/components/DocChainEl'
+import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 
 interface Props {
   draftId: string
   protected: boolean
 }
 
-const DraftIdPage = ({ draftId }: Props): JSX.Element | null => {
+const DraftIdPage = ({ draftId }: Props) => {
   useEffect(() => {
-    console.log('DraftIdPage mount')
+    // console.debug('DraftIdPage mount')
     window.addEventListener('beforeunload', preventExitWithoutSave)
+
     return () => {
-      console.log('DraftIdPage unmount')
+      // console.debug('DraftIdPage unmount')
       window.removeEventListener('beforeunload', preventExitWithoutSave)
     }
   }, [])
@@ -33,7 +34,7 @@ const DraftIdPage = ({ draftId }: Props): JSX.Element | null => {
         </div> */}
 
         <SlateDocChainEl
-          draftId={draftId}
+          leadDraftId={draftId}
           hashDraftId={
             window.location.hash !== '' ? window.location.hash.slice(1) : null
           }

@@ -8,7 +8,7 @@ import {
 } from '../apollo/query.graphql'
 import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
 import { LatestDiscussTile } from '../frontend/components/latest-discuss-tile'
-import { LayoutChildrenPadding } from '../frontend/components/ui-component/layout/layout-children-padding'
+import { LayoutChildrenPadding } from '../frontend/components/ui/layout/layout-children-padding'
 
 type Props = {
   discussesLatest: DiscussFragment[]

@@ -3,8 +3,8 @@ import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
 import type { TableData } from '../../frontend/components/user/user-rate-table'
 import UserNoteTable from '../../frontend/components/user/user-note-table'
-import { NoteData } from '../../frontend/components/ui-component/note-list'
-import { ListElement } from '../../frontend/components/ui-component/list'
+import { NoteData } from '../../frontend/components/ui/note-list'
+import { ListElement } from '../../frontend/components/ui/list'
 import {
   DiscussesByUserDocument,
   DiscussesByUserQuery,
@@ -17,7 +17,7 @@ import {
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import { LatestDiscussTile } from '../../frontend/components/latest-discuss-tile'
-import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
+import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 
 export const mockRateData: TableData[] = [
   {
@@ -160,12 +160,12 @@ const UserPage = ({
     <LayoutChildrenPadding>
       <div className="flex flex-col gap-8 ">
         <div className="flex">
-          <span className="material-icons mr-2 text-[120px] leading-none text-gray-300 dark:text-gray-400">
+          {/* <span className="material-icons mr-2 leading-none text-xl text-gray-300 dark:text-gray-400">
             account_circle
-          </span>
+          </span> */}
           <div className="truncate">
             <h1 className="truncate mb-2 font-medium text-gray-800 dark:text-gray-100">
-              @{userId}
+              @{userId.slice(-6)}
             </h1>
             {/* <div className="mb-2 text-lg text-gray-500 dark:text-gray-400">
               建築師

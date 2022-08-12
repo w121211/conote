@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Modal from '../modal/modal'
 import classes from './search-all-modal.module.css'
-import { styleSymbol } from '../ui-component/style-fc/style-symbol'
+import { styleSymbol } from '../ui/style-fc/style-symbol'
 import { useSearchSymbolLazyQuery } from '../../../apollo/query.graphql'
 import { getNotePageURL } from '../../utils'
 import Link from 'next/link'

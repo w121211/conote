@@ -4,14 +4,22 @@ import {
   TreeNodeBody,
   treeUtil,
 } from '@conote/docdiff'
-import type { NoteDocContentBodyInput } from 'graphql-let/__generated__/__types__'
-import type { BlockFragment } from '../apollo/query.graphql'
+import type {
+  NoteDocContentBodyInput,
+  NoteDocContentHeadInput,
+} from 'graphql-let/__generated__/__types__'
+import { isEqual } from 'lodash'
+import type {
+  BlockFragment,
+  NoteDocContentHeadFragment,
+} from '../apollo/query.graphql'
 import type {
   Block,
   InlineDiscuss,
   InlineSymbol,
 } from '../frontend/components/editor-textarea/src/interfaces'
 import { parseBlockString } from '../frontend/components/editor-textarea/src/parse-render'
+import { omitTypenameDeep } from '../frontend/components/editor-textarea/src/utils'
 import type { NoteDocContentBody, NoteDocContentHead } from '../lib/interfaces'
 
 //
@@ -47,14 +55,15 @@ export function differenceBlocks(
 /**
  * Get changes of content-head
  *
- * TODO
+ * TODO:
  */
 export function differenceContentHead(
   final: NoteDocContentHead,
-  start: NoteDocContentHead,
+  start: NoteDocContentHeadFragment,
 ) {
-  throw new Error('Not implement')
-  // return isEqual(final, start)
+  const start_ = omitTypenameDeep(start)
+
+  return !isEqual(final, start_)
 }
 
 /**

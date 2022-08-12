@@ -1,15 +1,16 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import NoteViewEl from '../../frontend/components/note/note-view-el'
+import NoteDocEl from '../../frontend/components/note/NoteDocEl'
 import { NoteFragment } from '../../apollo/query.graphql'
 import { mockNoteFragments } from '../../test/__mocks__/note-fragment.mock'
 import { mockNoteDocFragments } from '../../test/__mocks__/note-doc-fragment.mock'
 
 export default {
-  component: NoteViewEl,
-} as ComponentMeta<typeof NoteViewEl>
+  component: NoteDocEl,
+} as ComponentMeta<typeof NoteDocEl>
 
 // const apolloClient = getApolloClient()
+
 // const Template: ComponentStory<typeof NoteViewEl> = args => (
 //   <ApolloProvider client={apolloClient}>
 //     <ModalProvider>
@@ -31,5 +32,5 @@ export const Base = () => {
     noteDocsToMerge: [],
     noteDraft: null,
   }
-  return <NoteViewEl {...props} />
+  return <NoteDocEl {...props} />
 }

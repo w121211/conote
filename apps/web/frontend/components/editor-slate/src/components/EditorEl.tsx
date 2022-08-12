@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid'
 import React, { useMemo, useCallback, useEffect } from 'react'
-import { useObservable } from '@ngneat/react-rxjs'
 import { createEditor, NodeEntry } from 'slate'
 import {
   Editable,
@@ -10,25 +9,23 @@ import {
   withReact,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
-import { parseGQLBlocks } from '../../../../../share/utils'
-import DocPlaceholder from '../../../editor-textarea/src/components/doc/doc-placeholder'
-import { Doc } from '../../../editor-textarea/src/interfaces'
-import { docTemplateGenerate, slateDocSave } from '../events'
 import { slateEditorRepo } from '../stores/editor.repository'
-import { docValueRepo } from '../stores/doc-value.repository'
-import { editorChainItemSetRendered } from '../../../editor-textarea/src/events'
+import { docEditorValueRepo } from '../stores/doc-editor-value.repository'
 import { withAutoComplete } from '../auto-complete/with-auto-complete'
 import { decorate } from '../decorate'
 import { isIndenterArray } from '../indenter/normalizers'
 import { indenterOnKeyDown } from '../indenter/onkeydown-indenter'
-import { blocksToIndenters } from '../indenter/serializers'
 import { withIndenter } from '../indenter/with-indenter'
 import type { ElementIndenter } from '../interfaces'
 import IndenterEl from '../indenter/components/indenter-el'
 import LeafDiscuss from './leaf/leaf-discuss'
 import LeafSymbol from './leaf/leaf-symbol'
-import { toast } from 'react-toastify'
-import { interval } from 'rxjs'
+import { useObservable } from '@ngneat/react-rxjs'
+import { docTemplateGenerate, editorValueUpdate } from '../events'
+import DocPlaceholder from '../../../editor-textarea/src/components/doc/doc-placeholder'
+import { docRepo } from '../../../editor-textarea/src/stores/doc.repository'
+import { indentersToBlocks } from '../indenter/serializers'
+import BlocksViewer from '../../../editor-textarea/src/components/block/blocks-viewer'
 
 const Leaf = (
   props: RenderLeafProps & { docUid: string; draftId: string },
@@ -123,15 +120,33 @@ const CustomElement = (props: RenderElementProps) => {
   }
 }
 
+const Preview = ({ docUid }: { docUid: string }) => {
+  const { value } = docEditorValueRepo.getValue(docUid),
+    doc = docRepo.getDoc(docUid),
+    docBlock = docRepo.getDocBlock(doc),
+    bodyBlocks = indentersToBlocks(value, docBlock.uid),
+    blocks = [docBlock, ...bodyBlocks]
+
+  return <BlocksViewer blocks={blocks} />
+}
+
 const EditorEl = ({
   docUid,
   draftId,
-  value,
+  initialValue,
+  preview = false,
 }: {
   docUid: string
   draftId: string
-  value: ElementIndenter[]
+  initialValue: ElementIndenter[]
+  preview?: boolean
 }) => {
+  const [value] = useObservable(docEditorValueRepo.getValue$(docUid))
+
+  useEffect(() => {
+    editorValueUpdate(docUid, initialValue)
+  }, [])
+
   const editor = useMemo(
       () =>
         withIndenter(withAutoComplete(withHistory(withReact(createEditor())))),
@@ -168,13 +183,35 @@ const EditorEl = ({
   //   }
   // }, [searchAllResult])
 
+  if (preview) {
+    return <Preview docUid={docUid} />
+  }
+
+  if (value === undefined) {
+    return null
+  }
+  if (value.value.length === 0) {
+    return (
+      <DocPlaceholder
+        docUid={docUid}
+        templateOnClick={title => {
+          const [rootIndenter, ...bodyIndneters] = docTemplateGenerate(
+            docUid,
+            title,
+          )
+          editorValueUpdate(docUid, bodyIndneters)
+        }}
+      />
+    )
+    // return <div>Placeholder</div>
+  }
   return (
     <Slate
       editor={editor}
-      value={value}
+      value={value.value}
       onChange={v => {
         if (isIndenterArray(v)) {
-          docValueRepo.setDocValue(docUid, v)
+          editorValueUpdate(docUid, v)
         } else {
           throw new Error('Value needs to be indenter array')
         }
@@ -185,13 +222,10 @@ const EditorEl = ({
         // autoCorrect="false"
         // autoFocus={true}
         decorate={decorate_}
-        // readOnly={readOnly}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         spellCheck={false}
-        onKeyDown={e => {
-          indenterOnKeyDown(e, editor)
-        }}
+        onKeyDown={e => indenterOnKeyDown(e, editor)}
         // onKeyUp={event => {
         //   onKeyUpBindSearchPanel(event, editor)
         // }}
@@ -212,78 +246,4 @@ const EditorEl = ({
   )
 }
 
-/**
- * A local save doc function, include error handling
- */
-async function saveDoc(docUid: string) {
-  try {
-    await slateDocSave(docUid)
-  } catch (err) {
-    if (err instanceof Error && err.message === 'indent_oversize') {
-      toast.error(
-        <div>
-          The draft cannot be saved. Please fix the indentation error(s).
-        </div>,
-      )
-    } else {
-      throw err
-    }
-  }
-}
-
-const SlateDocEl = (props: { doc: Doc }) => {
-  const { doc } = props,
-    [docValue] = useObservable(docValueRepo.getDocValue$(doc.uid))
-
-  useEffect(() => {
-    const { blocks: gqlBlocks } = doc.noteDraftCopy.contentBody,
-      { blocks } = parseGQLBlocks(gqlBlocks),
-      [rootIndenter, ...bodyIndenters] = blocksToIndenters(blocks)
-
-    docValueRepo.setDocValue(doc.uid, bodyIndenters)
-
-    const interval$ = interval(30000),
-      sub = interval$.subscribe(() => saveDoc(doc.uid))
-
-    return () => {
-      sub.unsubscribe()
-
-      // When the doc is committed or deleted, it will trigger the component unmount and thus throws 'doc not found' error
-      saveDoc(doc.uid).catch(err => console.debug(err))
-    }
-  }, [])
-
-  useEffect(() => {
-    if (docValue !== undefined) {
-      editorChainItemSetRendered(doc.uid)
-    }
-  }, [docValue])
-
-  if (docValue === undefined) return null
-
-  return (
-    <div>
-      {docValue.value.length === 0 ? (
-        <DocPlaceholder
-          doc={doc}
-          templateOnClick={title => {
-            const [rootIndenter, ...bodyIndneteers] = docTemplateGenerate(
-              doc,
-              title,
-            )
-            docValueRepo.setDocValue(doc.uid, bodyIndneteers)
-          }}
-        />
-      ) : (
-        <EditorEl
-          docUid={doc.uid}
-          draftId={doc.noteDraftCopy.id}
-          value={docValue.value}
-        />
-      )}
-      {/* <button onClick={() => saveDoc(doc.uid)}>Save</button> */}
-    </div>
-  )
-}
-
-export default SlateDocEl
+export default EditorEl

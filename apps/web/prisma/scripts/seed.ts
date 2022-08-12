@@ -27,7 +27,10 @@ async function main() {
   await testHelper.createBranches(prisma)
   // await testHelper.createNoteDrafts(prisma, mockNoteDrafts.slice(0, 2))
 
-  // 1. Simulate create a draft, discuss, and commit
+  //
+  // 1. Simulate creating a draft (topic-note), discuss, and commit
+  //
+  //
 
   const draft0 = mockNoteDrafts[0],
     { symbol, userId, contentBody, meta, ...rest } = draft0,
@@ -47,17 +50,15 @@ async function main() {
     )
 
   await testHelper.createDiscusses(prisma, draft0_.id)
-
   const { noteDocs } = await commitNoteDrafts([draft0_.id], draft0_.userId)
 
-  // const { blocks, docBlock } = parseGQLBlocks(
-  //   noteDocModel.parse(noteDocs[0]).contentBody.blocks,
-  // )
-
   // Warnning! This is the wrong way to create merge polls. Only used for the testing.
-  await testHelper.createMergePolls(prisma, noteDocs[0])
+  // await testHelper.createMergePoll(prisma, noteDocs[0])
 
-  // 2. Simulate create a draft from the head doc
+  //
+  // 2. Simulate create a draft has from-doc
+  //
+  //
 
   const fromDoc = noteDocs[0],
     fromDoc_ = noteDocModel.parse(fromDoc),
@@ -69,8 +70,29 @@ async function main() {
     mockUsers[4].id,
   )
 
-  // 3. Simulate a draft got from doc but the from doc is behind the head doc
-  // TODO
+  //
+  // 3. Simulate creating a draft of web-note
+  //
+  //
+
+  await testHelper.createLinks(prisma)
+  const draft4 = mockNoteDrafts[4]
+
+  if (draft4.linkId) {
+    const { userId, contentBody, meta, linkId, ...rest } = draft4
+    const draft4_ = await noteDraftModel.createByLink(
+      mockBranches[0].name,
+      draft4.linkId,
+      userId,
+      {
+        ...rest,
+        contentBody: { blocks: contentBody.blocks, blockDiff: [] },
+      },
+    )
+    await commitNoteDrafts([draft4_.id], userId)
+  } else {
+    throw new Error('draft4.linkId is null')
+  }
 }
 
 main()

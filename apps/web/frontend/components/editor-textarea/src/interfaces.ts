@@ -1,14 +1,12 @@
 import type { Token } from 'prismjs'
-import type {
-  NoteDocContentBodyInput,
-  NoteDocContentHeadInput,
-} from 'graphql-let/__generated__/__types__'
+import type { NoteDocContentBodyInput } from 'graphql-let/__generated__/__types__'
 import type {
   NoteDraftEntryFragment,
   NoteDraftFragment,
   NoteFragment,
   SearchHitFragment,
 } from '../../../../apollo/query.graphql'
+import { NoteDocContentHead } from '../../../../lib/interfaces'
 
 //
 // Component State - commonly used in various components & handlers
@@ -177,7 +175,7 @@ export type Doc = {
   // domain: string
 
   // Note-doc-content-head is editable and stores here
-  contentHead: NoteDocContentHeadInput
+  contentHead: NoteDocContentHead
 
   // Use 'input' instead of 'fragment' for updating the note-draft
   contentBody: Omit<NoteDocContentBodyInput, 'blocks'>
@@ -214,6 +212,9 @@ export type TabChainItemPlaceholder = { symbol: string }
 
 export type Tab = {
   chain: (TabChainItem | TabChainItemPlaceholder)[]
+
+  // Todo: Change to focus item based on user's screen scroll
+  openingDraftId: string | null
 
   // curChainItem: {
   //   draftId: string

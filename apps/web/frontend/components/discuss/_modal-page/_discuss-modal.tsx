@@ -6,7 +6,8 @@ import DiscussModalPageEl from '../discuss-modal-page-el'
 
 const DiscussModal = () => {
   const router = useRouter()
-  console.log(router.query)
+  // console.log(router.query)
+
   if (typeof router.query.discuss === 'string') {
     return (
       <Modal

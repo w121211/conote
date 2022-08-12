@@ -76,6 +76,27 @@ export function getNotePageURL(symbol: string, docId?: string): UrlObject {
   return { pathname, query: { slug: [symbol] } }
 }
 
+/**
+ *
+ */
+export function getPollPageURL(pollId: string): UrlObject {
+  return { pathname: '/poll/[pollid]', query: { pollid: pollId } }
+}
+
+/**
+ *
+ */
+export function getUserPageURL(userId: string): UrlObject {
+  return { pathname: '/user/[userid]', query: { userid: userId } }
+}
+
+//
+//
+//
+//
+//
+//
+
 export function getCommitInputErrorItems(
   err: ApolloError,
 ): CommitInputErrorItem[] | null {

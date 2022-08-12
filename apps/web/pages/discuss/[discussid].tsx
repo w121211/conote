@@ -16,7 +16,7 @@ import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import DiscussTile from '../../frontend/components/discuss/discuss-tile'
 import DiscussPostTiles from '../../frontend/components/discuss-post/discuss-post-tiles'
 import DiscussPostForm from '../../frontend/components/discuss-post/discuss-post-form'
-import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
+import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 
 interface Props {
   initialApolloState: any

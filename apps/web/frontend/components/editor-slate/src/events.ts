@@ -1,18 +1,29 @@
 import type { NoteDraftInput } from 'graphql-let/__generated__/__types__'
-import { differenceBlocks, parseGQLBlocks } from '../../../../share/utils'
+import { isEqual } from 'lodash'
+import { NoteDocFragment } from '../../../../apollo/query.graphql'
+import type { NoteDocContentHead } from '../../../../lib/interfaces'
+import {
+  differenceBlocks,
+  differenceContentHead,
+  parseGQLBlocks,
+} from '../../../../share/utils'
 import type { Block, Doc } from '../../editor-textarea/src/interfaces'
 import { docUpdatePropsOp } from '../../editor-textarea/src/op/ops'
 import { noteDraftService } from '../../editor-textarea/src/services/note-draft.service'
 import { docRepo } from '../../editor-textarea/src/stores/doc.repository'
-import {
-  BlockInput,
-  writeBlocks,
-} from '../../editor-textarea/src/utils/block-writer'
 import { blocksToIndenters, indentersToBlocks } from './indenter/serializers'
 import type { ElementIndenter } from './interfaces'
-// import { blocksToLiList, elementLisToBlocks } from './serializers'
-import { docValueRepo } from './stores/doc-value.repository'
+import { docEditorValueRepo } from './stores/doc-editor-value.repository'
 import { genTemplateBlocks } from './templates'
+
+//
+// Utils
+//
+//
+//
+//
+//
+//
 
 function toGQLBlocks(blocks: Block[]) {
   return blocks.map(e => {
@@ -26,13 +37,11 @@ export function toNoteDraftInput(
   value: ElementIndenter[],
 ): NoteDraftInput {
   const { blockUid: docBlockUid, noteCopy, noteDraftCopy, contentHead } = doc,
-    docBlock = docRepo.getDocBlock(doc),
     bodyBlocks = indentersToBlocks(value, docBlockUid),
     bodyBlocks_: Block[] = bodyBlocks.map(e => ({ ...e, childrenUids: [] })),
-    blocks = [docBlock, ...bodyBlocks_],
-    blocks_ = toGQLBlocks(blocks)
-
-  console.debug(blocks_)
+    docBlock = docRepo.getDocBlock(doc),
+    finalBlocks = [docBlock, ...bodyBlocks_],
+    finalBlocks_ = toGQLBlocks(finalBlocks)
 
   // Null is a valide input for differencer, but '[]' is not
   const startBlocks = noteCopy
@@ -43,40 +52,52 @@ export function toNoteDraftInput(
           docSymbol: e.docSymbol ?? undefined,
         }))
       : null,
-    blockDiff = differenceBlocks(blocks_, startBlocks),
-    input: NoteDraftInput = {
-      fromDocId: noteCopy?.headDoc.id,
-      domain: noteDraftCopy.domain,
-      contentHead,
-      contentBody: {
-        // discussIds: [],
-        // symbols: [],
-        blocks: blocks_,
-        blockDiff: blockDiff,
-      },
-    }
+    blockDiff = differenceBlocks(finalBlocks_, startBlocks)
+
+  const input: NoteDraftInput = {
+    fromDocId: noteCopy?.headDoc.id,
+    domain: noteDraftCopy.domain,
+    contentHead,
+    contentBody: {
+      // discussIds: [],
+      // symbols: [],
+      blocks: finalBlocks_,
+      blockDiff: blockDiff,
+    },
+  }
+
   return input
 }
 
-function isValueChanged(docUid: string, value: ElementIndenter[]) {
+/**
+ * Compare difference between saved draft and current value, used to determine should update draft or not
+ *
+ */
+function isDraftValueChanged(docUid: string, value: ElementIndenter[]) {
   const doc = docRepo.getDoc(docUid),
-    { noteDraftCopy } = doc
+    { noteDraftCopy: start } = doc
 
   const input = toNoteDraftInput(doc, value),
-    { blocks: startBlocks } = parseGQLBlocks(noteDraftCopy.contentBody.blocks),
+    { blocks: startBlocks } = parseGQLBlocks(start.contentBody.blocks),
     { blocks: finalBlocks } = parseGQLBlocks(input.contentBody.blocks)
 
-  // console.debug(finalBlocks, startBlocks)
+  const diffBlocks = differenceBlocks(finalBlocks, startBlocks),
+    diffContentHead = differenceContentHead(doc.contentHead, start.contentHead)
 
-  const changes = differenceBlocks(finalBlocks, startBlocks),
-    changed = changes.length > 0
-
-  return { changed, changes, doc, noteDraftCopy, input }
+  return { doc, noteDraftCopy: start, input, diffBlocks, diffContentHead }
 }
+
+//
+// Slate doc events
+//
+//
+//
+//
+//
+//
 
 /**
  * @returns true if doc is saved, returns false if doc is not perform save (eg, content not change)
- *
  * @throws Value validation error, eg 'indent_oversize'
  */
 export async function slateDocSave(
@@ -86,10 +107,11 @@ export async function slateDocSave(
     force: false,
   },
 ) {
-  const { value } = docValueRepo.getDocValue(docUid)
-  const { changed, input, noteDraftCopy } = isValueChanged(docUid, value)
+  const { value } = docEditorValueRepo.getValue(docUid)
+  const { input, noteDraftCopy, diffBlocks, diffContentHead } =
+    isDraftValueChanged(docUid, value)
 
-  if (opts.force || changed) {
+  if (opts.force || diffBlocks.length > 0 || diffContentHead) {
     const draft = await noteDraftService.updateDraft(
         noteDraftCopy.id,
         input,
@@ -104,10 +126,28 @@ export async function slateDocSave(
   return false
 }
 
-export function docTemplateGenerate(doc: Doc, title: string) {
-  const docBlock = docRepo.getDocBlock(doc),
+export function docTemplateGenerate(docUid: string, title: string) {
+  const doc = docRepo.getDoc(docUid),
+    docBlock = docRepo.getDocBlock(doc),
     blocks = genTemplateBlocks(title.toLowerCase(), docBlock),
     indenters = blocksToIndenters(blocks)
 
   return indenters
+}
+
+//
+// Editor events
+//
+//
+//
+//
+//
+//
+
+export function editorValueUpdate(docUid: string, value: ElementIndenter[]) {
+  docEditorValueRepo.updateValue(docUid, value)
+}
+
+export function editorAlertRefresh() {
+  //
 }

@@ -1,5 +1,4 @@
 import { ApolloError, FetchPolicy } from '@apollo/client'
-import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
 import { difference, differenceBy, isInteger, isNil, zip } from 'lodash'
 import type { NextRouter } from 'next/router'
 import type {
@@ -46,6 +45,7 @@ import { rfdbRepo } from './stores/rfdb.repository'
 import { genBlockUid } from './utils'
 import { BlockInput, writeBlocks } from './utils/block-writer'
 import { slateDocSave } from '../../editor-slate/src/events'
+import type { NoteDocContentHead } from '../../../../lib/interfaces'
 
 // const noteService = getNoteService(),
 //   noteDraftService = getNoteDraftService(),
@@ -747,20 +747,25 @@ export async function docGetOrCreate(
     const symbol_ = parseSymbol(symbol),
       link =
         symbol_.url !== undefined &&
-        (await linkService.createLink(symbol_.url)),
+        (await linkService.createLink(symbol_.url.href)),
       symbol__ = link ? `[[${link.url}]]` : symbol_.symbol
 
-    // Create a temporary doc (without draft) and use it to create the draft,
-    // then save the doc to the repo with the just created draft.
-    const { draftInput } = genNewDoc(symbol__, symbol_.type, domain, note),
+    // Create a temporary doc (without draft) and use it to create the draft, then save the doc to the repo with the just created draft.
+    const { draftInput } = genNewDoc(
+        symbol__,
+        symbol_.type,
+        domain,
+        note,
+        link ? link : undefined,
+      ),
       draft = link
         ? await noteDraftService.createDraftByLink(branch, link.id, draftInput)
         : await noteDraftService.createDraft(branch, symbol__, draftInput),
       newDoc = docLoadFromDraft(draft, note)
 
-    console.time('editorChainsRefresh')
+    // console.time('editorChainsRefresh')
     await editorChainsRefresh('network-only')
-    console.timeEnd('editorChainsRefresh')
+    // console.timeEnd('editorChainsRefresh')
 
     return newDoc
   }
@@ -862,8 +867,9 @@ function genTemplateGeneral(): BlockInput {
 /**
  * Set doc template
  */
-export function docTemplateSet(doc: Doc) {
-  const docBlock = docRepo.getDocBlock(doc),
+export function docTemplateSet(docUid: string) {
+  const doc = docRepo.getDoc(docUid),
+    docBlock = docRepo.getDocBlock(doc),
     blocks = writeBlocks(genTemplateGeneral(), { docBlock }),
     [, ...children] = blocks,
     op = ops.blocksInsertOp(docBlock, children)
@@ -876,7 +882,7 @@ export function docTemplateSet(doc: Doc) {
  */
 export async function docContentHeadUpdate(
   doc: Doc,
-  newContentHead: NoteDocContentHeadInput,
+  newContentHead: NoteDocContentHead,
   router?: NextRouter,
 ) {
   const { symbol } = newContentHead,
@@ -1166,7 +1172,10 @@ export async function editorChainItemInsert(
       docUid: doc.uid,
       rendered: true,
     })
-    editorRepo.setTab({ chain: tab.chain })
+    editorRepo.setTab({
+      chain: tab.chain,
+      openingDraftId: entry.id,
+    })
     scrollToElement(doc.noteDraftCopy.id)
   }
 
@@ -1189,7 +1198,10 @@ export async function editorChainItemInsert(
     docUid: doc_.uid,
     rendered: true,
   })
-  editorRepo.setTab({ chain: tab.chain })
+  editorRepo.setTab({
+    chain: tab.chain,
+    openingDraftId: entry_.id,
+  })
 
   return { draftInserted: doc_.noteDraftCopy }
 }
@@ -1249,8 +1261,13 @@ export async function editorChainCommit(draftId: string) {
  * Open a chain of the given draftId
  * - [removed] If given draftId is in current chain, no call
  */
-export async function editorChainOpen(draftId: string) {
-  editorRepo.setTab({ chain: [] })
+export async function editorChainOpen(
+  leadDraftId: string,
+  hashDraftId?: string,
+) {
+  const draftId = hashDraftId ?? leadDraftId
+
+  editorRepo.setTab({ chain: [], openingDraftId: draftId })
 
   const { chains } = await editorChainsRefresh(),
     entries = editorRepo.getChainEntries(chains, draftId),
@@ -1267,11 +1284,18 @@ export async function editorChainOpen(draftId: string) {
     }),
     curDoc = docs.find(e => e.noteDraftCopy.id === draftId)
 
-  if (curDoc === undefined) throw new Error('Unexpected error')
+  if (curDoc === undefined)
+    throw new Error('Unexpected error: curDoc === undefined')
 
-  editorRepo.setTab({ chain: chain })
+  editorRepo.setTab({ chain })
 
   return { chain, curDoc }
+}
+
+export function editorChainItemScrollTo(hashDraftId: string) {
+  editorRepo.setTab({
+    openingDraftId: hashDraftId,
+  })
 }
 
 /**
@@ -1308,7 +1332,7 @@ export async function editorChainsRefresh(fetchPolicy?: FetchPolicy): Promise<{
 }
 
 export async function editorChainItemSetRendered(docUid: string) {
-  editorRepo.setTabChainItemRendered(docUid)
+  // editorRepo.setTabChainItemRendered(docUid)
 }
 
 //

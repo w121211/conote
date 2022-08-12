@@ -27,6 +27,7 @@ export const editorStore = createStore(
     chains: [],
     tab: {
       chain: [],
+      openingDraftId: null,
     },
   }),
 )
@@ -179,21 +180,21 @@ class EditorRepository {
     editorStore.update(setProp('chains', chains))
   }
 
-  setTab(v: EditorProps['tab']) {
-    // editorStore.update(setProp('tab', v => ({ ...tab })))
-    editorStore.update(setProp('tab', v))
+  setTab(props: Partial<EditorProps['tab']>) {
+    editorStore.update(setProp('tab', v => ({ ...v, ...props })))
+    // editorStore.update(setProp('tab', v))
   }
 
-  setTabChainItemRendered(docUid: string) {
-    editorStore.update(
-      setProp('tab', v => {
-        const curChain = v.chain.map(e =>
-          e.docUid === docUid ? { ...e, rendered: true } : e,
-        )
-        return { ...v, curChain }
-      }),
-    )
-  }
+  // setTabChainItemRendered(docUid: string) {
+  //   editorStore.update(
+  //     setProp('tab', v => {
+  //       const curChain = v.chain.map(e =>
+  //         e.docUid === docUid ? { ...e, rendered: true } : e,
+  //       )
+  //       return { ...v, curChain }
+  //     }),
+  //   )
+  // }
 }
 
 export const editorRepo = new EditorRepository()

@@ -1,10 +1,10 @@
-import type { NoteDocContentHeadInput } from 'graphql-let/__generated__/__types__'
 import { isNil } from 'lodash'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { components, ControlProps } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
+import type { NoteDocContentHead } from '../../../../../../lib/interfaces'
 import { parseSymbol } from '../../../../../../share/symbol.common'
 import { docContentHeadUpdate } from '../../events'
 import type { Doc } from '../../interfaces'
@@ -97,7 +97,7 @@ export const ContentHeadForm = ({
 
   async function onSubmit(input: FormValues) {
     const { symbol: symbolInput, title, keywords, duplicatedSymbols } = input,
-      contentHead_: NoteDocContentHeadInput = {
+      contentHead_: NoteDocContentHead = {
         ...contentHead,
         symbol: symbolInput === noteDraftCopy.symbol ? undefined : symbolInput,
         keywords: keywords.map(e => e.value),

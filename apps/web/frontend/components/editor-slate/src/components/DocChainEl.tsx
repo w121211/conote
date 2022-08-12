@@ -1,82 +1,71 @@
 import React, { useEffect, useState } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import Link from 'next/link'
 import {
   editorRepo,
   isChainItem,
 } from '../../../editor-textarea/src/stores/editor.repository'
 import { docRepo } from '../../../editor-textarea/src/stores/doc.repository'
-import { getNotePageURL } from '../../../../utils'
 import ChainItemInsertButton from '../../../editor-textarea/src/components/editor/chain-item-insert-button'
-import DocHead from '../../../editor-textarea/src/components/doc/doc-head'
-import SlateDocEl from './slate-doc-el'
 import { usePrevious } from 'react-use'
-import { editorChainOpen } from '../../../editor-textarea/src/events'
-import DocPreview from './doc-preview'
+import {
+  editorChainItemScrollTo,
+  editorChainOpen,
+} from '../../../editor-textarea/src/events'
+import DocEl from './DocEl'
 
-const ChainDoc = (props: { docUid: string; draftId: string }) => {
+const DocItem = (props: { docUid: string; draftId: string }) => {
   const { docUid, draftId } = props
-  const [showPreview, setShowPreview] = useState(false)
-
   const [doc] = useObservable(docRepo.getDoc$(docUid), {
     initialValue: null,
   })
 
   return (
-    <div id={draftId} className="mb-20">
+    <div id={draftId}>
       {doc && (
         <>
-          <div
-            id={docUid}
-            // className="bg-gray-100 rounded-lg p-5"
-          >
-            <button
-              className={`btn-ghost`}
-              onClick={() => setShowPreview(!showPreview)}
-            >
-              {!showPreview ? 'Preview' : 'Edit'}
-            </button>
-
-            {doc.noteCopy && (
-              <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
-                <a className="btn-ghost">Head</a>
-              </Link>
-            )}
-
-            <DocHead doc={doc} />
-
-            {showPreview ? (
-              <DocPreview docUid={docUid} />
-            ) : (
-              <SlateDocEl doc={doc} />
-            )}
-          </div>
+          <DocEl doc={doc} />
           <div className="my-10">
             <ChainItemInsertButton afterThisDraftId={doc.noteDraftCopy.id} />
           </div>
+
+          {/* <div className="relative flex py-5 mt-10 items-center">
+            <div className="flex-grow border-t border-gray-400"></div>
+            <div className="flex-shrink mx-4">
+              <ChainItemInsertButton afterThisDraftId={doc.noteDraftCopy.id} />
+            </div>
+            <div className="flex-grow border-t border-gray-400"></div>
+          </div> */}
         </>
       )}
     </div>
   )
 }
 
-const SlateDocChainEl = (props: {
-  draftId: string
+const DocChainEl = (props: {
+  leadDraftId: string
   hashDraftId: string | null
 }): JSX.Element | null => {
-  const { draftId, hashDraftId } = props,
+  const { leadDraftId, hashDraftId } = props,
     prevProps = usePrevious(props),
     [loading, setLoading] = useState(true),
     [tab] = useObservable(editorRepo.tab$)
 
   useEffect(() => {
-    if (prevProps === undefined || prevProps.draftId !== draftId) {
+    if (prevProps === undefined || prevProps.leadDraftId !== leadDraftId) {
       setLoading(true)
-      editorChainOpen(draftId).then(d => {
+      editorChainOpen(leadDraftId, hashDraftId ?? undefined).then(d => {
         setLoading(false)
       })
+      return
     }
-  }, [draftId, hashDraftId])
+    if (
+      hashDraftId !== null &&
+      prevProps !== undefined &&
+      prevProps.hashDraftId !== hashDraftId
+    ) {
+      editorChainItemScrollTo(hashDraftId)
+    }
+  }, [leadDraftId, hashDraftId])
 
   // useEffect(() => {
   //   if (hashDraftId) {
@@ -96,7 +85,7 @@ const SlateDocChainEl = (props: {
         if (isChainItem(e)) {
           return (
             <div key={e.docUid}>
-              <ChainDoc docUid={e.docUid} draftId={e.entry.id} />
+              <DocItem docUid={e.docUid} draftId={e.entry.id} />
             </div>
           )
         }
@@ -106,4 +95,4 @@ const SlateDocChainEl = (props: {
   )
 }
 
-export default SlateDocChainEl
+export default DocChainEl

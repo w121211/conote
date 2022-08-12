@@ -2,8 +2,14 @@ import type { TreeNodeChange } from '@conote/docdiff'
 import { createStore, Reducer } from '@ngneat/elf'
 import { getEntity, selectEntity, withEntities } from '@ngneat/elf-entities'
 import type { NoteDraftInput } from 'graphql-let/__generated__/__types__'
-import type { NoteFragment } from '../../../../../apollo/query.graphql'
-import type { SymbolParsed } from '../../../../../lib/interfaces'
+import type {
+  LinkFragment,
+  NoteFragment,
+} from '../../../../../apollo/query.graphql'
+import type {
+  NoteDocContentHead,
+  SymbolParsed,
+} from '../../../../../lib/interfaces'
 import { differenceBlocks, parseGQLBlocks } from '../../../../../share/utils'
 import type { Block, Doc } from '../interfaces'
 import { allDescendants, rootBlock } from '../op/queries'
@@ -154,13 +160,16 @@ export function genNewDoc(
   symbolType: SymbolParsed['type'],
   domain: string,
   note: NoteFragment | null,
+  link?: LinkFragment,
 ): {
   newDoc: Omit<Doc, 'noteDraftCopy'>
   newBlocks: Block[]
   draftInput: NoteDraftInput
 } {
   if (docRepo.findDoc({ symbol }) !== null)
-    throw new Error('[genNewDoc] Doc is already existed')
+    throw new Error('Doc already existed')
+  if (symbolType === 'URL' && link === undefined)
+    throw new Error('Link is required for url-symbol')
 
   let newDoc: Omit<Doc, 'noteDraftCopy'>
   let newBlocks: Block[]
@@ -190,14 +199,25 @@ export function genNewDoc(
       parentUid: null,
       childrenUids: [],
     }
-    newBlocks =
-      symbolType === 'URL'
-        ? writeBlocks(blankLines, { docBlock: newDocBlock })
-        : [newDocBlock]
+    newBlocks = link
+      ? writeBlocks(blankLines, { docBlock: newDocBlock })
+      : [newDocBlock]
+
+    const contentHead: NoteDocContentHead = link
+      ? {
+          keywords: link.scraped.keywords ?? undefined,
+          webpage: {
+            // authors?: string[]
+            title: link.scraped.title ?? undefined,
+            // publishedAt: link.scraped.date,
+            tickers: link.scraped.tickers ?? undefined,
+          },
+        }
+      : {}
     newDoc = {
       uid: genDocUid(),
       noteCopy: null,
-      contentHead: {},
+      contentHead,
       contentBody: {
         // discussIds: [],
         // symbols: [],

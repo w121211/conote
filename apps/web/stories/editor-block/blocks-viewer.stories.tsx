@@ -16,6 +16,8 @@ export default {
 //   isEditable: true,
 // }
 
-export const Basic = () => {
-  return <BlocksViewer blocks={mockDocBlock_contentBlocks} />
-}
+export const Basic = () => (
+  <div className="container mx-auto p-[100px]">
+    <BlocksViewer blocks={mockDocBlock_contentBlocks} />
+  </div>
+)

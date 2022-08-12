@@ -11,7 +11,7 @@ import {
 } from '../../apollo/query.graphql'
 import NoteDocLink from '../../frontend/components/note/note-doc-link'
 import MergePollVoteForm from '../../frontend/components/poll/merge-poll-vote-form'
-import { LayoutChildrenPadding } from '../../frontend/components/ui-component/layout/layout-children-padding'
+import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 import UserLink from '../../frontend/components/user/user-link'
 import { AppPageProps } from '../../frontend/interfaces'
 

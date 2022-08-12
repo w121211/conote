@@ -69,9 +69,7 @@ class SymModel {
       throw new Error('Not support update symbol to different type')
 
     return await prisma.sym.update({
-      data: {
-        symbol: newSymbol,
-      },
+      data: { symbol: newSymbol },
       where: { id },
     })
   }

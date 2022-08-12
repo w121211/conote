@@ -12,7 +12,7 @@ import {
 } from '../../../apollo/query.graphql'
 import { MERGE_POLL_V1_0 } from '../../../share/constants'
 import BarChart from '../bar/bar'
-import { FormSubmitBtn } from '../ui-component/form/form-submit-btn'
+import { FormSubmitBtn } from '../ui/form/form-submit-btn'
 
 const MergePollResult = ({
   poll,
@@ -148,6 +148,7 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
                       type="radio"
                       name="choice"
                       value="agree"
+                      className="mr-1"
                     />
                     Agree
                   </label>
@@ -158,6 +159,7 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
                       type="radio"
                       name="choice"
                       value="disagree"
+                      className="mr-1"
                     />
                     Disagree
                   </label>
@@ -172,6 +174,7 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
                               type="radio"
                               name="rejectCode"
                               value={code}
+                              className="mr-1"
                             />
                             {desc}
                           </label>

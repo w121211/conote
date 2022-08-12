@@ -8,7 +8,7 @@ import {
 import './github-markdown-light.module.css'
 import LoginRequireModal from '../auth/login-require-modal'
 import { useMeContext } from '../auth/use-me-context'
-import { FormSubmitBtn } from '../ui-component/form/form-submit-btn'
+import { FormSubmitBtn } from '../ui/form/form-submit-btn'
 
 interface FormInput {
   content: string

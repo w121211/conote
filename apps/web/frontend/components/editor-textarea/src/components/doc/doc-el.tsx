@@ -280,7 +280,7 @@ const DocEl = forwardRef<HTMLElement, DocProps>(
               ))}
             </div>
           ) : (
-            <DocPlaceholder doc={doc} />
+            <DocPlaceholder docUid={doc.uid} />
           )
         }
       </article>

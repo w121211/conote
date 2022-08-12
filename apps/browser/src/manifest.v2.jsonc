@@ -34,9 +34,11 @@
   },
   "permissions": [
     "contextMenus",
-    "storage", 
-    "tabs", 
+    "storage",
+    "tabs",
     "http://localhost:3000/*",
-    "https://www.konote.one/*" // allow fetch api (avoid CORS), @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/permissions#host_permissions
-  ]  
+
+    // Allow fetch api (avoid CORS), @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/permissions#host_permissions
+    "https://www.konote.one/*"
+  ]
 }

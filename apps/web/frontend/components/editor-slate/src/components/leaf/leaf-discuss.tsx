@@ -21,7 +21,7 @@ import { indenterTextReplace } from '../../indenter/transforms'
 import type { Editor } from 'slate'
 import { inlineService } from '../../../../editor-textarea/src/services/inline.service'
 import { slateDocSave } from '../../events'
-import { PopperTooltip } from '../../../../ui-component/tooltip/popper-tooltip'
+import { PopperTooltip } from '../../../../ui/tooltip/popper-tooltip'
 
 // import { DropdownListItem } from '../../../../ui-component/dropdown-list-item'
 

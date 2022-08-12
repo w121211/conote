@@ -8,9 +8,9 @@ import {
   useMyNoteDraftEntriesQuery,
 } from '../../../apollo/query.graphql'
 import type { CommitInputErrorItem } from '../../../lib/interfaces'
-import { commitOnFinish } from '../editor-textarea/src/events'
+import { commitSuccessClean } from '../editor-textarea/src/events'
 import Modal from '../modal/modal'
-import { styleSymbol } from '../ui-component/style-fc/style-symbol'
+import { styleSymbol } from '../ui/style-fc/style-symbol'
 import { getCommitInputErrorItems } from '../../utils'
 
 type FormValue = {
@@ -25,7 +25,7 @@ export const CommitPanel = (): JSX.Element | null => {
     qMyDrafts = useMyNoteDraftEntriesQuery(),
     [createCommit] = useCreateCommitMutation({
       onCompleted: async data => {
-        await commitOnFinish(data.createCommit.noteDocs)
+        commitSuccessClean(data.createCommit.noteDocs)
         setShowModal(false)
         router.push(`/commit/${data.createCommit.id}`)
       },
@@ -137,7 +137,7 @@ export const CommitPanel = (): JSX.Element | null => {
       <div>
         {errorItems.map(e => (
           <div key={e.draftId}>
-            {e.symbol} {e.msg}
+            {e.symbol} {e.code}
           </div>
         ))}
       </div>

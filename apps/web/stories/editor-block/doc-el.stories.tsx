@@ -7,7 +7,7 @@ import { mockDocs } from '../../frontend/components/editor-textarea/test/__mocks
 import ModalProvider from '../../frontend/components/modal/modal-context'
 import { getApolloClient } from '../../apollo/apollo-client'
 import { InitStoreForStorybook } from './helper-components/init-store-for-storybook'
-import { TooltipProvider } from '../../frontend/components/ui-component/tooltip/tooltip-provider'
+import { TooltipProvider } from '../../frontend/components/ui/tooltip/tooltip-provider'
 
 export default {
   component: DocEl,

@@ -10,7 +10,9 @@ import { getParentIndenter, getPrevSiblings } from './queries'
  *
  * @returns [rootIndenter, ...restIndenters] Indenters are in depth-first order
  */
-export function blocksToIndenters(blocks: Block[]): ElementIndenter[] {
+export function blocksToIndenters(
+  blocks: Omit<Block, 'childrenUids'>[],
+): ElementIndenter[] {
   const nodes = treeUtil.toTreeNodeBodyList(blocks)
 
   const indenters = nodes.map((e): ElementIndenter => {

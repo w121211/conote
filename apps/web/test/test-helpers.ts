@@ -218,12 +218,6 @@ class TestHelper {
       mockUsers.map(e => prisma.user.create({ data: e })),
     )
   }
-
-  async createLink(prisma: PrismaClient) {
-    return await prisma.$transaction(
-      mockLinks.map(e => prisma.link.create({ data: e })),
-    )
-  }
 }
 
 export const testHelper = new TestHelper()

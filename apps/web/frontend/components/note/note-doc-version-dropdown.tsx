@@ -7,7 +7,7 @@ import {
   useNoteDocsToMergeByNoteQuery,
 } from '../../../apollo/query.graphql'
 import { getDraftPageURL, getNotePageURL } from '../../utils'
-import ToggleMenu from '../ui-component/toggle-menu'
+import ToggleMenu from '../ui/toggle-menu'
 
 /**
  * Only show if note is created

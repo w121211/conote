@@ -1,3 +1,5 @@
+// const path = require('path')
+
 module.exports = {
   stories: ['../stories/**/*.stories.tsx'],
   addons: [
@@ -43,7 +45,7 @@ module.exports = {
   core: {
     builder: 'webpack5',
   },
-  webpackFinal: async config => {
+  webpackFinal: config => {
     config.module.rules.push({
       test: /\.(tsx|graphql)$/,
       use: [

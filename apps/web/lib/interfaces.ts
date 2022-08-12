@@ -190,5 +190,5 @@ export type PollParsed<T extends Poll> = Omit<
 export type SymbolParsed = {
   type: SymType
   symbol: string
-  url?: string
+  url?: URL
 }

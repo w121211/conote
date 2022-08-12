@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import ToggleMenu from '../ui-component/toggle-menu'
+import ToggleMenu from '../ui/toggle-menu'
 import { ThemeContext } from './theme-provider'
 
 export const ThemeToggle = () => {

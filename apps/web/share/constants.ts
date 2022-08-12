@@ -19,12 +19,15 @@ export const MERGE_POLL_V1_0 = {
 export enum CommitInputErrorCode {
   CONTENT_EMPTY = 'CONTENT_EMPTY',
   CONTENT_NOT_CHANGE = 'CONTENT_NOT_CHANGE',
-  FROM_DOC_NOTE_HEAD = 'FROM_DOC_NOTE_HEAD',
+  FROM_DOC_NOT_HEAD = 'FROM_DOC_NOT_HEAD',
   DISCUSS_NOT_CREATE = 'DISCUSS_NOT_CREATE',
 }
 
 export enum EditorAlertCode {
+  // Share with note-doc alert
   DOC_WAIT_MERGE = 'DOC_WAIT_MERGE',
   FROM_DOC_NOTE_HEAD = 'FROM_DOC_NOTE_HEAD',
+
+  // Editor only
   MISS_INDENT = 'MISS_INDENT',
 }
