@@ -4,13 +4,13 @@ const plugin = require('tailwindcss/plugin')
 module.exports = {
   // @see https://tailwindcss.com/docs/upcoming-changes
   future: {
-    // removeDeprecatedGapUtilities: true,
-    // purgeLayersByDefault: true,
+    removeDeprecatedGapUtilities: true,
+    purgeLayersByDefault: true,
   },
   content: [
     './pages/**/*.{js,ts,jsx,tsx}',
     './frontend/components/**/*.{js,ts,jsx,tsx}',
-    './layout/**/*.{js,ts,jsx,tsx}',
+    // './layout/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -78,7 +78,6 @@ module.exports = {
     // plugin(function ({ addComponents }) {
     //   addComponents({
     //     '.text-shadow': {
-
     //     },
     //   })
     // }),

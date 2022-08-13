@@ -10,20 +10,28 @@ FROM node:18-bullseye
 # RUN apk add --no-cache libc6-compat
 # RUN apk add --no-cache libc6-compat python3 make g++ 
 
+COPY . /workspace/
 WORKDIR /workspace
 # COPY package.json yarn.lock tsconfig.base.json ./
-COPY package.json tsconfig.base.json ./
-COPY packages/docdiff ./packages/docdiff
-# COPY packages/editor ./packages/editor
-COPY packages/scraper ./packages/scraper
-COPY apps/web ./apps/web
+
+# COPY package.json tsconfig.base.json ./
+# COPY packages/docdiff ./packages/docdiff
+# # COPY packages/editor ./packages/editor
+# COPY packages/scraper ./packages/scraper
+# COPY apps/web ./apps/web
 
 # Require dev environment also use AMD64 architecture for yarn.lock to work, otherwise build may fail
 # RUN yarn install --frozen-lockfile  
 RUN yarn install
 
 RUN yarn build-packages
-RUN cd /workspace/apps/web && yarn build
+
+# RUN cd /workspace/apps/web
+# WORKDIR /workspace/apps/web
+# RUN yarn install
+# RUN yarn build
+
+RUN yarn --cwd apps/web build
 
 WORKDIR /workspace/apps/web
 

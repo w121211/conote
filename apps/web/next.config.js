@@ -1,10 +1,13 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const withReactSvg = require('next-react-svg')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path')
 
-module.exports = withReactSvg({
+/**
+ * @type {import('next').NextConfig}
+ */
+const nextConfig = {
+  /* config options here */
   include: path.resolve(__dirname, 'assets/svg'),
+
   typescript: {
     tsconfigPath: 'tsconfig.build.json',
   },
@@ -32,4 +35,6 @@ module.exports = withReactSvg({
     // })
     return config
   },
-})
+}
+
+module.exports = withReactSvg(nextConfig)

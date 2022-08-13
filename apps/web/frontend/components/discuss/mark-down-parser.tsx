@@ -1,6 +1,5 @@
 import React, { ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 
 export const MarkDownParser = ({ text }: { text: string }) => {
   return (
