@@ -37,9 +37,9 @@ const SidebarSection = ({
         >
           <div className="flex items-center">
             {folded ? (
-              <span className="material-icons ">chevron_right</span>
+              <span className="material-icons-outlined">chevron_right</span>
             ) : (
-              <span className="material-icons">expand_more</span>
+              <span className="material-icons-outlined">expand_more</span>
             )}
             <span className="flex items-center gap-1 font-medium">
               {title}

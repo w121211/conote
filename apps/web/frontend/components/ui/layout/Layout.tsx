@@ -2,7 +2,7 @@ import { setProp, setProps } from '@ngneat/elf'
 import { useObservable } from '@ngneat/react-rxjs'
 import React, { useEffect, useRef, useState } from 'react'
 import SidebarEl from '../../editor-textarea/src/components/sidebar/sidebar-el'
-import Navbar from '../../nav-bar'
+import Navbar from '../../Navbar'
 import { siderRepo } from '../../../stores/sider.repository'
 
 const Layout = ({

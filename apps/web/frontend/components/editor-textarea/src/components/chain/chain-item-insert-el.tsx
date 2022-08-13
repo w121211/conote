@@ -44,7 +44,7 @@ const ChainItemInsertEl = ({
             setValue('')
           }}
         >
-          <span className="material-symbols-outlined">add_circle</span>
+          <span className="material-icons-outlined">add_circle</span>
         </button>
       </div> */}
       {/* <div>

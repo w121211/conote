@@ -3,7 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
 import ModalProvider from '../../frontend/components/modal/modal-context'
-import Layout from '../../frontend/components/ui/layout/lay-out'
+import Layout from '../../frontend/components/ui/layout/Layout'
 
 const apolloClient = getApolloClient()
 

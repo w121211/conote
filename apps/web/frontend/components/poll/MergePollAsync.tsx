@@ -48,7 +48,7 @@ const MergePollAsync = ({
 
       <p className="mb-4 text-sm text-gray-400">
         {/* Committer <UserLink userId={noteDocToMerge.userId} />{' '} */}
-        {/* <span className="material-symbols-outlined mr-1 text-sm align-middle">
+        {/* <span className="material-icons-outlined mr-1 text-sm align-middle">
           schedule
         </span> */}
       </p>

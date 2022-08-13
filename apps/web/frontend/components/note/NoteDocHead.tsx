@@ -59,7 +59,7 @@ function renderMergeState(
   if (desc) {
     return (
       <>
-        <span className="material-symbols-outlined text-base mr-1 align-middle">
+        <span className="material-icons-outlined text-base mr-1 align-middle">
           merge
         </span>
         {desc}
@@ -135,7 +135,7 @@ const NoteDocHead = ({
 
         <div className="flex flex-col text-gray-600 space-y-1">
           <p className="text-sm">
-            <span className="material-symbols-outlined mr-1 text-base align-middle">
+            <span className="material-icons-outlined mr-1 text-base align-middle">
               draft
             </span>
             <Link href={getUserPageURL(doc.userId)}>

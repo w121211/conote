@@ -168,14 +168,14 @@ import React from 'react'
 //               }
 //             }}
 //           >
-//             <span className={`material-icons w-4 text-lg leading-none`}>
+//             <span className={`material-icons-outlined w-4 text-lg leading-none`}>
 //               {ulFolded === undefined ? 'arrow_drop_down' : 'arrow_right'}
 //             </span>
 //           </span> */}
 //         <span className={`relative flex-grow px-1`}>
 //           <span
 //             className={
-//               `material-icons text-xs scale-[.65] text-gray-600
+//               `material-icons-outlined text-xs scale-[.65] text-gray-600
 //               before:content-['']  before:w-5 before:h-5 before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:absolute before:rounded-full before:-z-10 `
 //               // ${
 //               //   ulFolded === undefined

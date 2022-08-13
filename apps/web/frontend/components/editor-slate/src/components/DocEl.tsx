@@ -83,7 +83,7 @@ const DocEl = (props: { doc: Doc }) => {
             className="px-2 py-1 inline-flex justify-center items-center gap-1 rounded-md text-sm text-gray-500 font-normal align-middle hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800"
             onClick={() => setShowPreview(!showPreview)}
           >
-            <span className="material-symbols-outlined text-sm">adjust</span>
+            <span className="material-icons-outlined text-sm">adjust</span>
             Preview
           </button>
         ) : (
@@ -91,7 +91,7 @@ const DocEl = (props: { doc: Doc }) => {
             className="px-3 py-1 inline-flex justify-center items-center gap-1 rounded-md text-gray-500 text-sm font-normal align-middle hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800"
             onClick={() => setShowPreview(!showPreview)}
           >
-            <span className="material-symbols-outlined text-sm">edit</span>
+            <span className="material-icons-outlined text-sm">edit</span>
             Edit
           </button>
         )}
@@ -99,7 +99,7 @@ const DocEl = (props: { doc: Doc }) => {
         {doc.noteCopy && (
           <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
             <a className="px-2 py-1 inline-flex justify-center items-center gap-1 rounded-md text-sm text-gray-500 font-normal align-middle hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-600 dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800">
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-icons-outlined text-sm">
                 north_east
               </span>
               Head

@@ -45,9 +45,9 @@ export const EmojiIcon = ({
           } ${className ?? ''}`}
         >
           <span
-            className={`material-icons text-lg leading-none ${liked ? 'favorite text-rose-600' : 'favorite_border  '} ${
-              pinClassName ?? ''
-            }`}
+            className={`material-icons-outlined text-lg leading-none ${
+              liked ? 'favorite text-rose-600' : 'favorite_border  '
+            } ${pinClassName ?? ''}`}
           >
             {liked ? 'favorite' : 'favorite_border'}
           </span>
@@ -61,7 +61,13 @@ export const EmojiIcon = ({
             isColumn ? 'flex-col' : 'flex-row'
           } ${className ?? ''}`}
         >
-          <span className={`leading-none ${upDownClassName ? upDownClassName : ''} `}>👍</span>
+          <span
+            className={`leading-none ${
+              upDownClassName ? upDownClassName : ''
+            } `}
+          >
+            👍
+          </span>
           {showText && text}
         </span>
       )

@@ -21,7 +21,7 @@ const AuthItem = () => {
           className=" py-1 -translate-x-full left-full"
           summary={
             <div className="flex items-center p-1 rounded hover:bg-gray-100">
-              <span className="material-icons leading-none text-gray-500">
+              <span className="material-icons-outlined leading-none text-gray-500">
                 account_circle
               </span>
               <span className="material-icons-outlined text-base leading-none text-gray-400 group-hover:text-gray-600">

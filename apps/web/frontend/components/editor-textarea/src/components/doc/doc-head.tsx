@@ -51,7 +51,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         <div className="relative mb-1">
           <h3 className="text-gray-800 dark:text-gray-100 leading-tight line-clamp-2 break-words">
             {/* {link && (
-            <span className="material-icons text-blue-400 text-4xl align-bottom">
+            <span className="material-icons-outlined text-blue-400 text-4xl align-bottom">
             language
             </span>
           )} */}
@@ -83,7 +83,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span className="material-symbols-outlined align-middle ml-2 text-xl text-gray-600">
+                <span className="material-icons-outlined align-middle ml-2 text-xl text-gray-600">
                   open_in_new
                 </span>
               </a>

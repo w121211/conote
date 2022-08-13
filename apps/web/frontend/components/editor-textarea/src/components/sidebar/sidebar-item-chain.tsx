@@ -89,7 +89,7 @@ const SidebarItem = ({
               : 'bg-transparent hover:bg-gray-200'
           }`}
         >
-          <span className="material-icons text-lg text-[20px] text-gray-400/60">
+          <span className="material-icons-outlined text-lg text-[20px] text-gray-400/60">
             {symbol.startsWith('@') ? 'language' : 'notes'}
           </span>
 
@@ -127,7 +127,7 @@ const SidebarItemChain = ({
               : 'bg-transparent hover:bg-gray-200'
           } `}
         >
-          <span className="material-icons text-lg text-[20px] text-gray-400/60">
+          <span className="material-icons-outlined text-lg text-[20px] text-gray-400/60">
             {symbol.startsWith('@') ? 'language' : 'notes'}
           </span>
 

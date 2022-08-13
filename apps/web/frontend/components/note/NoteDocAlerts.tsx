@@ -45,7 +45,7 @@ function renderAlert({
       return (
         <Alert type="announce">
           <p>
-            <span className="material-symbols-outlined mr-1 text-base align-middle">
+            <span className="material-icons-outlined mr-1 text-base align-middle">
               merge
             </span>
             This doc is requesting to merge.{' '}
@@ -64,7 +64,7 @@ function renderAlert({
       return (
         <Alert type="announce">
           <p>
-            <span className="material-symbols-outlined mr-1 text-base align-middle">
+            <span className="material-icons-outlined mr-1 text-base align-middle">
               merge
             </span>
             {/* <span>Waititing to merge, see the </span> */}

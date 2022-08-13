@@ -30,7 +30,7 @@ const DiscussModal = () => {
             }}
           >
             <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
-              <span className="material-icons text-lg text-gray-500 hover:text-gray-700">
+              <span className="material-icons-outlined text-lg text-gray-500 hover:text-gray-700">
                 open_in_full
               </span>
             </a>

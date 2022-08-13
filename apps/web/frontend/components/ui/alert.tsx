@@ -74,7 +74,7 @@ export const Alert: React.FC<Props> = ({
       <p className="flex">
         <span
           className={`
-            material-icons
+            material-icons-outlined
             flex items-center
             mx-2
             text-lg  
@@ -111,7 +111,7 @@ export const Alert: React.FC<Props> = ({
           <div className="inline-flex mt-0.5 mr-1 ">
             <span
               className={`
-            material-icons 
+            material-icons-outlined
             h-fit
             text-lg leading-none text-amber-600 dark:text-amber-200 
             hover:cursor-pointer
@@ -126,7 +126,7 @@ export const Alert: React.FC<Props> = ({
 
         {closable && (
           <span
-            className="material-icons inline-flex mt-0.5 text-base leading-none text-amber-600 dark:text-amber-200 hover:cursor-pointer"
+            className="material-icons-outlined inline-flex mt-0.5 text-base leading-none text-amber-600 dark:text-amber-200 hover:cursor-pointer"
             // onClick={onClose}
             onClick={() => setShow(false)}
           >

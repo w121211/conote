@@ -62,7 +62,7 @@ export const EditorEl = (): JSX.Element | null => {
         //     }}
         //   >
         //     <a className="flex items-center p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
-        //       <span className="material-icons text-lg leading-none">
+        //       <span className="material-icons-outlined text-lg leading-none">
         //         open_in_full
         //       </span>
         //     </a>
@@ -72,7 +72,7 @@ export const EditorEl = (): JSX.Element | null => {
         //   <div className="flex ">
         //     {modalDoc?.doc && <NoteMetaModal doc={modalDoc.doc} modal />}
         //     {/* <button className=" text-gray-500 hover:text-gray-700">
-        //       <span className="material-icons text-lg leading-none ">edit_note</span>
+        //       <span className="material-icons-outlined text-lg leading-none ">edit_note</span>
         //     </button> */}
         //     <button className=" p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100">
         //       <span className="material-icons-outlined text-lg leading-none ">

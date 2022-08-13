@@ -14,7 +14,7 @@ const Navbar = ({ rightBtn }: { rightBtn?: ReactNode }) => {
     <nav className="sticky z-50 [grid-area:nav] flex items-center justify-between w-screen top-0 py-2 border-b border-gray-200 bg-gray-50 dark:bg-gray-700">
       <div className="flex items-center gap-2 ml-2">
         <span
-          className="material-icons p-1 rounded leading-none text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 hover:cursor-pointer"
+          className="material-icons-outlined p-1 rounded leading-none text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 hover:cursor-pointer"
           onClick={() => {
             const { isPinned } = siderRepo.getValue()
             if (isPinned) {
@@ -53,7 +53,7 @@ const Navbar = ({ rightBtn }: { rightBtn?: ReactNode }) => {
 
         <Link href="/setting">
           <a className="leading-none">
-            <span className="material-icons text-xl leading-none p-1 rounded hover:bg-gray-200 text-gray-500 dark:text-gray-300">
+            <span className="material-icons-outlined text-xl leading-none p-1 rounded hover:bg-gray-200 text-gray-500 dark:text-gray-300">
               settings
             </span>
           </a>

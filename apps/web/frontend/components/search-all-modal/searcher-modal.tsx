@@ -305,7 +305,7 @@ const SearcherModal = ({ searcher }: SearcherProps) => {
           capitalize"
         onClick={() => setShowModal(true)}
       >
-        <span className="material-icons mr-1 text-xl text-gray-400 leading-none">
+        <span className="material-icons-outlined mr-1 text-xl text-gray-400 leading-none">
           add
         </span>
         <div className="flex-1 flex">
@@ -330,7 +330,7 @@ const SearcherModal = ({ searcher }: SearcherProps) => {
         <div className="flex flex-col h-full border-gray-200 dark:border-gray-500">
           {/* --- input --- */}
           <div className="flex items-center mx-4 border-b border-inherit">
-            <span className="material-icons text-xl text-gray-400 leading-none">
+            <span className="material-icons-outlined text-xl text-gray-400 leading-none">
               search
             </span>
             <input
