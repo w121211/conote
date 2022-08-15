@@ -14,7 +14,7 @@ interface FormInput {
   content: string
 }
 
-const DiscussPostForm = ({
+const DiscussPostCreateForm = ({
   discussId,
   isModal,
   onSubmitted,
@@ -24,38 +24,37 @@ const DiscussPostForm = ({
   onSubmitted?: () => void
 }) => {
   const { me } = useMeContext()
-  const [showTextarea, setShowTextarea] = useState(true)
-  const { register, handleSubmit, getValues, watch, reset, formState } =
-    useForm<FormInput>({
-      defaultValues: { content: '' },
-    })
-  const { isSubmitting } = formState
-  const submitRef = useRef<HTMLButtonElement>(null)
-  const formRef = useRef<HTMLFormElement>(null)
-
-  const [createPost] = useCreateDiscussPostMutation({
+  const [createPost, { loading: isLoading }] = useCreateDiscussPostMutation({
     refetchQueries: [{ query: DiscussPostsDocument, variables: { discussId } }],
     onCompleted(data) {
-      if (submitRef.current && data.createDiscussPost) {
-        reset({ content: '' })
-        submitRef.current.blur()
-      }
+      reset({ content: '' })
+      if (submitRef.current) submitRef.current.blur()
       if (onSubmitted) onSubmitted()
     },
   })
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    watch,
+    reset,
+    formState: { isDirty, errors },
+  } = useForm<FormInput>({
+    defaultValues: { content: '' },
+  })
+  const watchContent = watch('content')
+  const contentRef = register('content').ref
+  const submitRef = useRef<HTMLButtonElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+  const [showTextarea, setShowTextarea] = useState(true)
+  const maxTextareaHeight = isModal ? 100 : 300
 
-  const onSubmit = (d: FormInput) => {
+  function onSubmit(d: FormInput) {
     createPost({
       variables: { discussId, data: { content: d.content.trim() } },
     })
   }
 
-  const watchContent = watch('content')
-
-  const formClassName = `relative w-full text-sm scroll-mb-10 shadow-sm`
-
-  const maxTextareaHeight = isModal ? 100 : 300
-  const contentRef = register('content').ref
   let textareaTest: HTMLTextAreaElement | null = null
 
   useEffect(() => {
@@ -72,7 +71,7 @@ const DiscussPostForm = ({
 
   return (
     <form
-      className={formClassName}
+      className="relative w-full text-sm scroll-mb-10 shadow-sm"
       onSubmit={handleSubmit(onSubmit)}
       autoComplete="off"
       ref={formRef}
@@ -80,16 +79,11 @@ const DiscussPostForm = ({
       <div className="pt-2 border-x border-t border-gray-300 rounded-t bg-gray-100">
         <div className="relative z-[1] mb-[-1px] ml-2 text-sm " role="tablist">
           <button
-            className={`
-            px-4 py-2
-            border-x border-t
-            rounded-t
-            ${
+            className={`px-4 py-2 border-x border-t rounded-t ${
               showTextarea
-                ? ' border-gray-300 text-gray-700 bg-white hover:bg-white '
+                ? 'border-gray-300 text-gray-700 bg-white hover:bg-white'
                 : 'border-transparent text-gray-400 bg-transparent hover:text-gray-700'
-            }
-            `}
+            }`}
             onClick={() => setShowTextarea(true)}
             role="tab"
             type="button"
@@ -97,11 +91,7 @@ const DiscussPostForm = ({
             Edit
           </button>
           <button
-            className={`
-            
-            px-4 py-2
-            border-x border-t
-            rounded-t
+            className={`px-4 py-2 border-x border-t rounded-t
             ${
               !showTextarea
                 ? ' border-gray-300 text-gray-700 bg-white hover:bg-white '
@@ -121,60 +111,59 @@ const DiscussPostForm = ({
           <div className="m-2">
             <LoginRequireModal>
               <textarea
-                {...register('content')}
-                className={`
-              w-full 
-              ${isModal ? 'min-h-[18px]' : 'min-h-[120px]'} 
-              max-h-${'[' + maxTextareaHeight + ']'}px] 
-              resize-none 
-              p-2 
-              border border-gray-300 
-              rounded 
-              text-gray-700
-              align-top 
-              bg-gray-100 
-              outline-offset-2 
-
-              focus:border-blue-400
-              focus:outline-blue-300
-            `}
+                {...register('content', {
+                  required: {
+                    value: true,
+                    message: 'Content is empty.',
+                  },
+                  minLength: {
+                    value: 30,
+                    message: 'Content requires minimum of 30 chars.',
+                  },
+                  maxLength: {
+                    value: 2000,
+                    message: 'Content exceeds maximum of 2000 chars.',
+                  },
+                })}
+                className={`w-full ${
+                  isModal ? 'min-h-[18px]' : 'min-h-[120px]'
+                } max-h-[${maxTextareaHeight}]px] resize-none p-2 border border-gray-300 rounded text-gray-700 align-top bg-gray-100 outline-offset-2 focus:border-blue-400 focus:outline-blue-300`}
                 placeholder="Leave a comment"
                 ref={e => {
                   contentRef(e)
                   textareaTest = e
                 }}
-                disabled={!me}
+                disabled={me === null}
               />
             </LoginRequireModal>
+
+            {errors.content && (
+              <div className="mt-2 text-red-600">
+                <span className="material-icons-outlined text-sm mr-1">
+                  error_outline
+                </span>
+                {errors.content.message}
+              </div>
+            )}
           </div>
         ) : (
           <div
-            className={`
-            block 
-            ${isModal ? 'min-h-[18px]' : 'min-h-[120px]'} 
-            m-2
-            p-2
-            border-b
-            border-gray-300
-            `}
+            className={`block ${
+              isModal ? 'min-h-[18px]' : 'min-h-[120px]'
+            } m-2 p-2 border-b border-gray-300`}
           >
             <MarkDownParser text={getValues('content')} />
           </div>
         )}
+
         <div className="text-right m-2 mt-4">
-          <FormSubmitBtn isLoading={isSubmitting}>Comment</FormSubmitBtn>
-          {/* <button
-            type="submit"
-            className="btn-primary font-medium "
-            disabled={watchContent.length === 0 || isSubmitSuccessful}
-            ref={submitRef}
-          >
+          <FormSubmitBtn isDirty={isDirty} isLoading={isLoading}>
             Comment
-          </button> */}
+          </FormSubmitBtn>
         </div>
       </div>
     </form>
   )
 }
 
-export default DiscussPostForm
+export default DiscussPostCreateForm

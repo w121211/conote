@@ -753,18 +753,36 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     _info,
   ) {
     const { userId } = await isAuthenticated(req)
+    const discuss = await prisma.discuss.findUnique({
+      where: { id: discussId },
+    })
+
+    if (discuss === null) throw new Error('discuss === null')
+
+    const subj = {
+      subjId: discussId,
+      userId: discuss.userId,
+      code: emojiCode ?? undefined,
+    }
+
     let results
     if (!isNil(emojiId)) {
-      results = await discussEmojiModel.upsertLike({ userId, liked, emojiId })
+      results = await discussEmojiModel.upsertLike({
+        userId,
+        liked,
+        emojiId,
+        subj,
+      })
     } else if (discussId && emojiCode) {
       results = await discussEmojiModel.upsertLike({
         userId,
         liked,
-        subj: { subjId: discussId, code: emojiCode },
+        subj,
       })
     } else {
       throw new Error('Input error')
     }
+
     return results.map(({ emoji, count, like }) => ({
       emoji: {
         ...toStringProps(emoji),
@@ -810,18 +828,31 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     _info,
   ) {
     const { userId } = await isAuthenticated(req)
+    const post = await prisma.discussPost.findUnique({
+      where: { id: discussPostId },
+    })
+
+    if (post === null) throw new Error('post === null')
+
+    const subj = {
+      subjId: post.id,
+      userId: post.userId,
+      code: emojiCode ?? undefined,
+    }
+
     let results
     if (!isNil(emojiId)) {
       results = await discussPostEmojiModel.upsertLike({
         userId,
         liked,
         emojiId,
+        subj,
       })
     } else if (!isNil(discussPostId) && emojiCode) {
       results = await discussPostEmojiModel.upsertLike({
         userId,
         liked,
-        subj: { subjId: discussPostId, code: emojiCode },
+        subj,
       })
     } else {
       throw new Error('Input error')
@@ -909,30 +940,31 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     { req },
     _info,
   ) {
-    const { userId } = await isAuthenticated(req)
-    let results
-    if (!isNil(emojiId)) {
-      results = await noteEmojiModel.upsertLike({
-        userId,
-        liked,
-        emojiId,
-      })
-    } else if (noteId && emojiCode) {
-      results = await noteEmojiModel.upsertLike({
-        userId,
-        liked,
-        subj: { subjId: noteId, code: emojiCode },
-      })
-    } else {
-      throw new Error('Input error')
-    }
-    return results.map(({ emoji, count, like }) => ({
-      emoji: {
-        ...toStringProps(emoji),
-        count: toStringProps(count),
-      },
-      like: toStringProps(like),
-    }))
+    throw new Error('To be deprecated')
+    // const { userId } = await isAuthenticated(req)
+    // let results
+    // if (!isNil(emojiId)) {
+    //   results = await noteEmojiModel.upsertLike({
+    //     userId,
+    //     liked,
+    //     emojiId,
+    //   })
+    // } else if (noteId && emojiCode) {
+    //   results = await noteEmojiModel.upsertLike({
+    //     userId,
+    //     liked,
+    //     subj: { subjId: noteId, code: emojiCode },
+    //   })
+    // } else {
+    //   throw new Error('Input error')
+    // }
+    // return results.map(({ emoji, count, like }) => ({
+    //   emoji: {
+    //     ...toStringProps(emoji),
+    //     count: toStringProps(count),
+    //   },
+    //   like: toStringProps(like),
+    // }))
   },
 
   async createPoll(_parent, { data }, { req }, _info) {

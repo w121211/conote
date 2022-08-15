@@ -133,33 +133,3 @@ export function genDocUid(): string {
 export function isDocBlock(block: Block): boolean {
   return block.docSymbol !== undefined && block.parentUid === null
 }
-
-//
-// Graphql
-//
-//
-//
-//
-//
-//
-//
-
-export function omitTypename<T extends { __typename?: string }>(v: T) {
-  const { __typename, ...rest } = v
-  return rest
-}
-
-/**
- * Recursively omit '__typename' of the given value
- */
-export function omitTypenameDeep(
-  value: Record<string, unknown>,
-): Record<string, unknown> {
-  return cloneDeepWith(value, v => {
-    if (v?.__typename) {
-      const { __typename, ...rest } = v
-      return omitTypenameDeep(rest)
-    }
-    return undefined
-  })
-}

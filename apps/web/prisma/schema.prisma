@@ -151,7 +151,7 @@ model DiscussPostEmojiCount {
 
 model DiscussPostEmojiLike {
   id                 Int              @id @default(autoincrement())
-  discussPostEmojiId Int              @unique
+  discussPostEmojiId Int
   userId             String
   liked              Boolean
   createdAt          DateTime         @default(now())

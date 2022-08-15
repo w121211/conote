@@ -208,7 +208,7 @@ type Mutation {
     liked: Boolean!
     emojiId: Int
     emojiCode: EmojiCode
-    discussId: String
+    discussId: String!
   ): [UpsertDiscussEmojiLikeResult!]!
 
   createDiscussPost(discussId: ID!, data: DiscussPostInput!): DiscussPost!
@@ -219,7 +219,7 @@ type Mutation {
     liked: Boolean!
     emojiId: Int
     emojiCode: EmojiCode
-    discussPostId: Int
+    discussPostId: Int!
   ): [UpsertDiscussPostEmojiLikeResult!]!
 
   # Get or create the link
@@ -229,7 +229,7 @@ type Mutation {
     liked: Boolean!
     emojiId: Int
     emojiCode: EmojiCode
-    noteId: String
+    noteId: String!
   ): [UpsertNoteEmojiLikeResult!]!
 
   # Not sure about the type of meta, which is for creating from existing note

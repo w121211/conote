@@ -6,32 +6,33 @@ import {
 } from '../../../apollo/query.graphql'
 import { EmojisDropdownBtn } from '../emoji/emojis-dropdown-btn'
 import ToggleMenu from '../ui/toggle-menu'
-import DiscussPostEmojiUpsertBtn from './discuss-post-emoji-upsert-btn'
+import DiscussPostEmojiUpsertBtn from './DiscussPostEmojiUpsertBtn'
 
 const DiscussPostEmojis = ({
   discussPostId,
-  disable,
+  disabled,
 }: {
   discussPostId: string
-  disable?: boolean
+  disabled?: boolean
 }): JSX.Element | null => {
-  const { data: emojisData } = useDiscussPostEmojisQuery({
+  const { data: emojisData, refetch } = useDiscussPostEmojisQuery({
     variables: { discussPostId },
   })
-
   const emojis: EmojiCode[] = ['UP', 'DOWN']
 
-  const shouldShowEmojiIcons = (
-    data: DiscussPostEmojiFragment[] | undefined,
-  ) => {
+  function shouldShowEmojiIcons(data: DiscussPostEmojiFragment[] | undefined) {
     return data && data.length > 0 && data.some(e => e.count.nUps > 0)
   }
+  function onMutationCreateCompleted() {
+    refetch()
+  }
+
   return (
     <div className="flex items-center">
       <ToggleMenu
         className="flex p-1"
-        summary={<EmojisDropdownBtn disable={disable} />}
-        disabled={disable}
+        summary={<EmojisDropdownBtn disabled={disabled} />}
+        disabled={disabled}
       >
         {emojis.map(code => {
           const data = emojisData?.discussPostEmojis.find(
@@ -44,14 +45,17 @@ const DiscussPostEmojis = ({
               discussPostId={discussPostId}
               emojiCode={code}
               type="panel"
+              disabled={disabled}
+              onMutationCreateCompleted={onMutationCreateCompleted}
             />
           )
         })}
       </ToggleMenu>
+
       {shouldShowEmojiIcons(emojisData?.discussPostEmojis) &&
         emojis.map(code => {
           const data = emojisData?.discussPostEmojis.find(e => e.code === code)
-          if (data?.count.nUps === 0 || !data) {
+          if (data === undefined || data.count.nUps === 0) {
             return null
           }
           return (
@@ -61,6 +65,8 @@ const DiscussPostEmojis = ({
               discussPostId={discussPostId}
               emojiCode={code}
               type="normal"
+              disabled={disabled}
+              onMutationCreateCompleted={onMutationCreateCompleted}
             />
           )
         })}

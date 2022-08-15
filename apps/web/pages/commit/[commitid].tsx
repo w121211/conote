@@ -7,13 +7,11 @@ import {
   CommitQuery,
   CommitQueryVariables,
 } from '../../apollo/query.graphql'
-import Layout from '../../frontend/components/ui/layout/Layout'
 import { getNotePageURL } from '../../frontend/utils'
 import Link from 'next/link'
 import moment from 'moment'
 import UserLink from '../../frontend/components/user/user-link'
 import { styleSymbol } from '../../frontend/components/ui/style-fc/style-symbol'
-import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 
 interface Props {
   commit: CommitFragment
@@ -55,7 +53,7 @@ const MergeStateLabel = ({
 
 const CommitPage = ({ commit }: Props) => {
   return (
-    <LayoutChildrenPadding>
+    <>
       <h1 className="mb-1 text-gray-900">Commit #{commit.id.slice(-6)}</h1>
       <div className="text-gray-700">
         by <UserLink userId={commit.userId} />
@@ -92,7 +90,7 @@ const CommitPage = ({ commit }: Props) => {
           ))}
         </ul>
       </div>
-    </LayoutChildrenPadding>
+    </>
   )
 }
 

@@ -8,6 +8,7 @@ import {
   FloatingPortal,
   hide,
   MiddlewareArguments,
+  offset,
   useFloating,
 } from '@floating-ui/react-dom-interactions'
 import { useObservable } from '@ngneat/react-rxjs'
@@ -52,7 +53,9 @@ const LeafSymbol = ({
   }
   const [curSelectedElId] = useObservable(slateEditorRepo.curSelectedElId$),
     { x, y, reference, floating, strategy, refs, update } = useFloating({
-      middleware: [autoPlacement({ allowedPlacements: ['top', 'bottom'] })],
+      placement: 'top',
+      // middleware: [autoPlacement({ allowedPlacements: ['top', 'bottom'] })],
+      middleware: [offset(10)],
       whileElementsMounted: updateFloating,
     })
 
@@ -77,13 +80,12 @@ const LeafSymbol = ({
             ref={floating}
             style={{
               display: 'block',
-
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
             }}
           >
-            <div className="flex items-center">
+            <div className="flex">
               <button
                 className="dropdown-list-item first:m-0 first:rounded-l last:m-0 last:rounded-r"
                 onClick={e => editorChainItemInsert(symbol, draftId)}

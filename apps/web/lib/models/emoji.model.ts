@@ -314,8 +314,8 @@ class EmojiModelFactory<
     if (curCount === null)
       throw new Error('Database unexpected error: curCount === null')
 
-    const curLike = await this.helper.emojiLikeFindUnique(emojiId, userId),
-      nextLike = curLike
+    const curLike = await this.helper.emojiLikeFindUnique(emojiId, userId)
+    const nextLike = curLike
         ? await this.helper.emojiLikeUpdate(curLike.id, liked)
         : await this.helper.emojiLikeCreate(emojiId, userId, liked),
       { dUp } = compareEmojiLike(nextLike),
@@ -373,11 +373,10 @@ class EmojiModelFactory<
 
   /**
    * Upsert like on an emoji, if emoji-id is not given, try to create an emoji by the given subj
+   * @returns mutate emojis (with corresponding count and like)
    *
    * Special cases:
-   * - like an 'upvote-emoji' will automatically unlike 'downvote-emoji' if possible, and vice versa
-   *
-   * @returns mutate emojis (with corresponding count and like)
+   * - Like an 'upvote-emoji' will automatically unlike 'downvote-emoji' if possible, and vice versa
    *
    */
   async upsertLike({
@@ -389,9 +388,10 @@ class EmojiModelFactory<
     userId: string
     liked: boolean
     emojiId?: number
-    subj?: {
+    subj: {
       subjId: string | number
-      code: EmojiCode
+      userId: string
+      code?: EmojiCode
     }
   }): Promise<
     {
@@ -400,13 +400,15 @@ class EmojiModelFactory<
       like: TEmojiLike
     }[]
   > {
+    if (subj.userId === userId)
+      throw new Error('Not allow to like emoji on self-creation')
     if (emojiId === undefined && subj === undefined)
       throw new Error('emojiId === undefined && subj === undefined')
 
     let emoji: TEmoji | null | undefined
     if (emojiId) {
       emoji = await this.helper.emojiFindById(emojiId)
-    } else if (emojiId === undefined && subj) {
+    } else if (emojiId === undefined && subj.code) {
       const { subjId, code } = subj,
         found = await this.helper.emojiFindUnique(subjId, code)
       emoji = found ?? (await this.helper.emojiCreate(subjId, code))

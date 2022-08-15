@@ -42,7 +42,7 @@ export class UndoManager {
           this.states.push(e)
           this.curStateIdx += 1
 
-          console.log(this.states)
+          // console.log(this.states)
         }),
       )
       .subscribe()
@@ -54,13 +54,13 @@ export class UndoManager {
   }
 
   undo(): string | null {
-    console.log(this.curStateIdx, this.states)
+    // console.log(this.curStateIdx, this.states)
     if (this.curStateIdx === 0) {
       return null
     }
     if (this.curStateIdx > 0) {
       this.curStateIdx -= 1
-      console.log(this.curStateIdx, this.states, this.states[this.curStateIdx])
+      // console.log(this.curStateIdx, this.states, this.states[this.curStateIdx])
       return this.states[this.curStateIdx]
     }
 

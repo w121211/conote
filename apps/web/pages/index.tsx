@@ -8,7 +8,6 @@ import {
 } from '../apollo/query.graphql'
 import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
 import { LatestDiscussTile } from '../frontend/components/latest-discuss-tile'
-import { LayoutChildrenPadding } from '../frontend/components/ui/layout/layout-children-padding'
 
 type Props = {
   discussesLatest: DiscussFragment[]
@@ -16,14 +15,12 @@ type Props = {
 
 const HomePage = ({ discussesLatest }: Props) => {
   return (
-    <LayoutChildrenPadding>
-      <div className="flex justify-center pb-[9vh]">
-        <div className="flex-1 flex flex-col items-center md:items-start md:flex-row md:justify-between  gap-6">
-          <LatestDiscussTile data={discussesLatest} />
-          {/* <UserRateTable data={mockRateData} /> */}
-        </div>
+    <div className="flex justify-center pb-[9vh]">
+      <div className="flex-1 flex flex-col items-center md:items-start md:flex-row md:justify-between  gap-6">
+        <LatestDiscussTile data={discussesLatest} />
+        {/* <UserRateTable data={mockRateData} /> */}
       </div>
-    </LayoutChildrenPadding>
+    </div>
   )
 }
 

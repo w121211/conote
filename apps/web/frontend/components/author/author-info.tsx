@@ -6,9 +6,9 @@ const AuthorInfo = () => {
       <h2 className="mb-6 text-gray-800 text-lg ">簡介</h2>
       <div className="flex flex-col gap-2">
         {[
-          { title: '網站', value: 'http://www.youtube.com/xxx...' },
+          { title: 'Website', value: 'http://www.youtube.com/xxx...' },
           {
-            title: '平台',
+            title: 'Platform',
             value: 'Youtube',
           },
         ].map(({ title, value }, i) => {

@@ -17,7 +17,6 @@ import {
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import { LatestDiscussTile } from '../../frontend/components/latest-discuss-tile'
-import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 
 export const mockRateData: TableData[] = [
   {
@@ -157,7 +156,7 @@ const UserPage = ({
   // }
 
   return (
-    <LayoutChildrenPadding>
+    <>
       <div className="flex flex-col gap-8 ">
         <div className="flex">
           {/* <span className="material-icons mr-2 leading-none text-xl text-gray-300 dark:text-gray-400">
@@ -203,7 +202,7 @@ const UserPage = ({
           <LatestDiscussTile data={discussesByUser} />
         </div>
       </div>
-    </LayoutChildrenPadding>
+    </>
   )
 }
 

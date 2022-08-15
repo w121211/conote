@@ -5,7 +5,7 @@ import { docGetOrCreate } from '../../frontend/components/editor-textarea/src/ev
 import SearcherModal from '../../frontend/components/search-all-modal/searcher-modal'
 import type { AppPageProps, SearcherProps } from '../../frontend/interfaces'
 import { getDraftPageURL } from '../../frontend/utils'
-import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
+import { omitBy } from 'lodash'
 
 type Props = AppPageProps & {
   query: {
@@ -40,11 +40,7 @@ const DraftIndexPage = ({ query }: Props): JSX.Element | null => {
   if (loading) {
     return null
   }
-  return (
-    <LayoutChildrenPadding>
-      <SearcherModal searcher={searcher} />
-    </LayoutChildrenPadding>
-  )
+  return <SearcherModal searcher={searcher} />
 }
 
 export async function getServerSideProps({
@@ -52,11 +48,13 @@ export async function getServerSideProps({
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> {
   const { s, ext } = query,
     symbol = typeof s === 'string' ? s : undefined,
-    extension = ext === '1'
+    extension = ext === '1',
+    query_ = { symbol, extension },
+    query__ = omitBy(query_, v => v === undefined)
 
   return {
     props: {
-      query: { symbol, extension },
+      query: query__,
       protected: true,
       sidebarPinned: !extension,
     },

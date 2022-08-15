@@ -20,8 +20,6 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   const symbol = doc.noteDraftCopy.symbol,
     symbolParsed = parseSymbol(symbol)
 
-  // const newSymbol = doc.noteCopy && doc.contentHead.symbol !== doc.symbol ?
-
   return (
     <>
       <Modal
@@ -36,7 +34,7 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         </div>
       </Modal>
 
-      <div className="mb-1">
+      <div className="mb-2">
         {/* <div className="flex items-center gap-2 mb-4">
         <DomainSelect />
         {isNew && (
@@ -50,20 +48,11 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
 
         <div className="relative mb-1">
           <h3 className="text-gray-800 dark:text-gray-100 leading-tight line-clamp-2 break-words">
-            {/* {link && (
-            <span className="material-icons-outlined text-blue-400 text-4xl align-bottom">
-            language
-            </span>
-          )} */}
             <span
               className="symbol-link"
               onClick={() => setShowModal(true)}
               // role='button'
             >
-              {/* {styleSymbol(
-                doc.noteDraftCopy.symbol,
-                doc.contentHead.webpage?.title ?? undefined,
-              )} */}
               <SymbolDecorate
                 symbolStr={doc.noteDraftCopy.symbol}
                 title={doc.contentHead.webpage?.title ?? undefined}

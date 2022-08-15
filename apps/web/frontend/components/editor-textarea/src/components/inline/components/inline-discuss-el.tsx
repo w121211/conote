@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { DiscussFragment } from '../../../../../../../apollo/query.graphql'
-import DiscussForm from '../../../../../discuss/discuss-form'
+import DiscussCreateForm from '../../../../../discuss/DiscussCreateForm'
 import Modal from '../../../../../modal/modal'
 import { blockStrReplace, docSave } from '../../../events'
 import { Doc, InlineDiscuss } from '../../../interfaces'
@@ -149,7 +149,7 @@ const InlineDiscussEl = (
             <DiscussModalPageEl id={id} />
           </div>
         ) : doc ? (
-          <DiscussForm
+          <DiscussCreateForm
             noteDraftId={doc.noteDraftCopy.id}
             title={title}
             onCreate={d => onCreateDiscuss(blockUid, inline, d, doc)}

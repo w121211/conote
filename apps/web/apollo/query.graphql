@@ -601,7 +601,7 @@ mutation UpsertDiscussEmojiLike(
   $liked: Boolean!
   $emojiId: Int
   $emojiCode: EmojiCode
-  $discussId: String
+  $discussId: String!
 ) {
   upsertDiscussEmojiLike(
     liked: $liked
@@ -634,7 +634,7 @@ mutation UpsertDiscussPostEmojiLike(
   $liked: Boolean!
   $emojiId: Int
   $emojiCode: EmojiCode
-  $discussPostId: Int
+  $discussPostId: Int!
 ) {
   upsertDiscussPostEmojiLike(
     liked: $liked
@@ -703,7 +703,7 @@ mutation UpsertNoteEmojiLike(
   $liked: Boolean!
   $emojiId: Int
   $emojiCode: EmojiCode
-  $noteId: String
+  $noteId: String!
 ) {
   upsertNoteEmojiLike(
     liked: $liked

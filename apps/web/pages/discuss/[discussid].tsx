@@ -13,10 +13,9 @@ import {
   useDiscussQuery,
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
-import DiscussTile from '../../frontend/components/discuss/discuss-tile'
-import DiscussPostTiles from '../../frontend/components/discuss-post/discuss-post-tiles'
-import DiscussPostForm from '../../frontend/components/discuss-post/discuss-post-form'
-import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
+import DiscussEl from '../../frontend/components/discuss/DiscussEl'
+import DiscussPostEls from '../../frontend/components/discuss-post/DiscussPostEls'
+import DiscussPostCreateForm from '../../frontend/components/discuss-post/DiscussPostCreateForm'
 
 interface Props {
   initialApolloState: any
@@ -25,7 +24,7 @@ interface Props {
 }
 
 /**
- * Recall queries so that we can enjoy extra features of `useQuery`, eg update
+ * Recall queries to enjoy extra features of `useQuery`, eg update
  */
 const DiscussPage = ({ discuss }: Props) => {
   const qDiscuss = useDiscussQuery({
@@ -41,13 +40,11 @@ const DiscussPage = ({ discuss }: Props) => {
     return null
   }
   return (
-    <LayoutChildrenPadding>
-      <div className="flex flex-col gap-4 pb-32">
-        <DiscussTile data={qDiscuss.data.discuss} />
-        <DiscussPostTiles posts={qPosts.data.discussPosts} />
-        <DiscussPostForm discussId={qDiscuss.data.discuss.id} />
-      </div>
-    </LayoutChildrenPadding>
+    <div className="flex flex-col gap-4 pb-32">
+      <DiscussEl data={qDiscuss.data.discuss} />
+      <DiscussPostEls discussId={discuss.id} posts={qPosts.data.discussPosts} />
+      <DiscussPostCreateForm discussId={qDiscuss.data.discuss.id} />
+    </div>
   )
 }
 

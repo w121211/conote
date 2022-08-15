@@ -2,7 +2,6 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import React, { useEffect } from 'react'
 import { preventExitWithoutSave } from '../../frontend/components/editor-textarea/src/listeners'
 import SlateDocChainEl from '../../frontend/components/editor-slate/src/components/DocChainEl'
-import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 
 interface Props {
   draftId: string
@@ -21,9 +20,8 @@ const DraftIdPage = ({ draftId }: Props) => {
   }, [])
 
   return (
-    <LayoutChildrenPadding>
-      <div className="pb-32">
-        {/* <div className="flex">
+    <div className="pb-32">
+      {/* <div className="flex">
           {note && (
             <NoteDocVersionDropdown
               cur={noteDraft}
@@ -33,14 +31,13 @@ const DraftIdPage = ({ draftId }: Props) => {
           )}
         </div> */}
 
-        <SlateDocChainEl
-          leadDraftId={draftId}
-          hashDraftId={
-            window.location.hash !== '' ? window.location.hash.slice(1) : null
-          }
-        />
-      </div>
-    </LayoutChildrenPadding>
+      <SlateDocChainEl
+        leadDraftId={draftId}
+        hashDraftId={
+          window.location.hash !== '' ? window.location.hash.slice(1) : null
+        }
+      />
+    </div>
   )
 }
 

@@ -27,14 +27,14 @@ const youtubeApi = google.youtube({
   auth: process.env.YOUTUBE_API_KEY,
 })
 
-const parseUrl = (url: string): { vid: string } => {
+function parseUrl(url: string): { vid: string } {
   for (const e of reYoutube.video_id) {
     const result = e.exec(url)
     if (result) {
       return { vid: result[1] }
     }
   }
-  throw new DomainNotFitError(`not found youtube video id: ${url}`)
+  throw new DomainNotFitError(`Not found youtube video id: ${url}`)
 }
 
 export const youtube: DomainFetchFunction = async url => {
@@ -63,5 +63,5 @@ export const youtube: DomainFetchFunction = async url => {
     return res
   }
 
-  throw new Error(`youtube fetcher failed: ${url}`)
+  throw new Error(`Youtube fetcher failed: ${url}`)
 }

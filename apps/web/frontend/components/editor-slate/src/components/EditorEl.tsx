@@ -88,9 +88,9 @@ const Leaf = (
     //   className = 'text-green-600'
     //   break
     // }
-    default: {
-      className = 'text-gray-700 leading-7'
-    }
+    // default: {
+    //   className = 'text-gray-700'
+    // }
   }
 
   return (
@@ -98,9 +98,6 @@ const Leaf = (
       {...attributes}
       className={className}
       data-inline-item={inlineItem.type}
-      onSelect={() => {
-        console.log('onSelect leaf')
-      }}
     >
       {children}
     </span>

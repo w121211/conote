@@ -6,33 +6,36 @@ import {
 } from '../../../apollo/query.graphql'
 import { EmojisDropdownBtn } from '../emoji/emojis-dropdown-btn'
 import ToggleMenu from '../ui/toggle-menu'
-import DiscussEmojiUpsertBtn from './discuss-emoji-upsert-btn'
+import DiscussEmojiUpsertBtn from './DiscussEmojiUpsertBtn'
 
 const DiscussEmojis = ({
   discussId,
-  disable,
+  disabled,
 }: {
   discussId: string
-  disable?: boolean
+  disabled?: boolean
 }): JSX.Element | null => {
-  const { data: emojisData } = useDiscussEmojisQuery({
+  const { data: emojisData, refetch } = useDiscussEmojisQuery({
     variables: { discussId },
   })
-  const shouldShowEmojiIcons = (data: DiscussEmojiFragment[] | undefined) => {
+  const emojis: EmojiCode[] = ['UP', 'DOWN']
+
+  function shouldShowEmojiIcons(data: DiscussEmojiFragment[] | undefined) {
     return data && data.length > 0 && data.some(e => e.count.nUps > 0)
   }
-  const emojis: EmojiCode[] = ['UP', 'DOWN']
+  function onMutationCreateCompleted() {
+    refetch()
+  }
 
   return (
     <div className="flex items-center">
       <ToggleMenu
         className="flex p-1"
-        summary={<EmojisDropdownBtn disable={disable} />}
-        disabled={disable}
+        summary={<EmojisDropdownBtn disabled={disabled} />}
+        disabled={disabled}
       >
         {emojis.map(code => {
           const data = emojisData?.discussEmojis.find(el => el.code === code)
-
           return (
             <DiscussEmojiUpsertBtn
               key={code}
@@ -40,6 +43,8 @@ const DiscussEmojis = ({
               emojiCode={code}
               discussEmoji={data}
               type="panel"
+              disabled={disabled}
+              onMutationCreateCompleted={onMutationCreateCompleted}
             />
           )
         })}
@@ -58,6 +63,8 @@ const DiscussEmojis = ({
               emojiCode={code}
               discussEmoji={data}
               type="normal"
+              disabled={disabled}
+              onMutationCreateCompleted={onMutationCreateCompleted}
             />
           )
         })}

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Conote extension",
-  "description": "A conote extension (under development)",
+  "description": "A konote extension (under development)",
   "version": "0.1.0",
   "background": {
     "scripts": ["background-script.js"]

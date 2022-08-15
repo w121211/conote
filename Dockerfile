@@ -1,12 +1,14 @@
+# 
 # Reference: https://github.com/vercel/next.js/tree/canary/examples/with-docker
 # 
-# $ docker build --progress=plain . # for testing
+# Test this dockerfile: $ docker build --progress=plain .
+# 
+# 
 
-# Install dependencies only when needed
 FROM node:18-bullseye
 
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine 
-# to understand why libc6-compat might be needed.
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+# 
 # RUN apk add --no-cache libc6-compat
 # RUN apk add --no-cache libc6-compat python3 make g++ 
 
@@ -21,16 +23,14 @@ WORKDIR /workspace
 # COPY apps/web ./apps/web
 
 # Require dev environment also use AMD64 architecture for yarn.lock to work, otherwise build may fail
-# RUN yarn install --frozen-lockfile  
+# 
+# RUN yarn install --frozen-lockfile
 RUN yarn install
 
 RUN yarn build-packages
 
-# RUN cd /workspace/apps/web
-# WORKDIR /workspace/apps/web
-# RUN yarn install
-# RUN yarn build
-
+# Use '--cwd' to avoid workspace package not found error
+# 
 RUN yarn --cwd apps/web build
 
 WORKDIR /workspace/apps/web

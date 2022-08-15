@@ -4,11 +4,8 @@ import {
   TreeNodeBody,
   treeUtil,
 } from '@conote/docdiff'
-import type {
-  NoteDocContentBodyInput,
-  NoteDocContentHeadInput,
-} from 'graphql-let/__generated__/__types__'
-import { isEqual } from 'lodash'
+import type { NoteDocContentBodyInput } from 'graphql-let/__generated__/__types__'
+import { cloneDeepWith, isEqual } from 'lodash'
 import type {
   BlockFragment,
   NoteDocContentHeadFragment,
@@ -19,8 +16,34 @@ import type {
   InlineSymbol,
 } from '../frontend/components/editor-textarea/src/interfaces'
 import { parseBlockString } from '../frontend/components/editor-textarea/src/parse-render'
-import { omitTypenameDeep } from '../frontend/components/editor-textarea/src/utils'
 import type { NoteDocContentBody, NoteDocContentHead } from '../lib/interfaces'
+
+//
+// Helpers
+//
+//
+//
+//
+
+export function omitTypename<T extends { __typename?: string }>(v: T) {
+  const { __typename, ...rest } = v
+  return rest
+}
+
+/**
+ * Recursively omit '__typename' of the given value
+ */
+export function omitTypenameDeep(
+  value: Record<string, unknown>,
+): Record<string, unknown> {
+  return cloneDeepWith(value, v => {
+    if (v?.__typename) {
+      const { __typename, ...rest } = v
+      return omitTypenameDeep(rest)
+    }
+    return undefined
+  })
+}
 
 //
 // Differencers

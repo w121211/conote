@@ -1,6 +1,5 @@
 import React from 'react'
 import Select, { GroupBase, OptionsOrGroups } from 'react-select'
-import { LayoutChildrenPadding } from '../frontend/components/ui/layout/layout-children-padding'
 
 type Option = {
   value: string
@@ -42,45 +41,43 @@ const mockData = [
 
 const SettingPage = () => {
   return (
-    <LayoutChildrenPadding>
-      <div className="pb-32">
-        <h2 className="py-3 border-b border-gray-300 text-gray-900 text-2xl">
-          Settings
-        </h2>
-        {/* --- setting form --- */}
-        {mockData.map(({ title, inputs }) => {
-          if (isSelectOptions(inputs)) {
-            return (
-              <form key={title} className="text-sm">
-                <dl className="my-8">
-                  <dt className="mb-2 font-bold text-gray-700">{title}</dt>
-                  <dd>
-                    <Select
-                      defaultValue={inputs[0]}
-                      options={inputs}
-                      styles={{
-                        container: base => ({ ...base, width: 'fit-content' }),
-                      }}
-                    />
-                  </dd>
-                </dl>
-              </form>
-            )
-          }
+    <div className="pb-32">
+      <h2 className="py-3 border-b border-gray-300 text-gray-900 text-2xl">
+        Settings
+      </h2>
+      {/* --- setting form --- */}
+      {mockData.map(({ title, inputs }) => {
+        if (isSelectOptions(inputs)) {
           return (
-            <form key={title}>
+            <form key={title} className="text-sm">
               <dl className="my-8">
                 <dt className="mb-2 font-bold text-gray-700">{title}</dt>
                 <dd>
-                  {inputs}
-                  {/* <input type="text" value={inputs}/> */}
+                  <Select
+                    defaultValue={inputs[0]}
+                    options={inputs}
+                    styles={{
+                      container: base => ({ ...base, width: 'fit-content' }),
+                    }}
+                  />
                 </dd>
               </dl>
             </form>
           )
-        })}
-      </div>
-    </LayoutChildrenPadding>
+        }
+        return (
+          <form key={title}>
+            <dl className="my-8">
+              <dt className="mb-2 font-bold text-gray-700">{title}</dt>
+              <dd>
+                {inputs}
+                {/* <input type="text" value={inputs}/> */}
+              </dd>
+            </dl>
+          </form>
+        )
+      })}
+    </div>
   )
 }
 

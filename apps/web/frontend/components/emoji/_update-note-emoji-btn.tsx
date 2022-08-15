@@ -4,7 +4,7 @@ import {
   useMyNoteEmojiLikeQuery,
   useUpsertNoteEmojiLikeMutation,
 } from '../../../apollo/query.graphql'
-import { EmojiBtn } from './emoji-btn'
+import EmojiBtn from './EmojiBtn'
 
 const UpdateNoteEmojiBtn = ({
   noteEmoji,

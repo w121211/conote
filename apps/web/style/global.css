@@ -40,6 +40,7 @@
   .responsive-width {
     @apply w-[var(--max-width)] md:w-full md:max-w-[var(--md-max-width)] lg:max-w-[var(--lg-max-width)];
   }
+
   .input {
     @apply p-2 
       border border-gray-300 
@@ -92,7 +93,7 @@
   }
 
   .details-menu {
-    @apply absolute top-full border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 shadow-lg z-50 opacity-0 scale-75 transition-[transform,opacity] ease-[cubic-bezier(0.21,0.02,0.28,1.58)];
+    @apply absolute top-full border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 shadow z-50 scale-75 ease-[cubic-bezier(0.21,0.02,0.28,1.58)];
   }
 
   .dropdown-list-item {

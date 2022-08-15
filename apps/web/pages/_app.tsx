@@ -40,56 +40,46 @@ const App = ({ Component, pageProps }: AppProps) => {
   //   )
   // }
   return (
-    <>
-      <Head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
-        />
-      </Head>
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <ToastContainer
-          position="top-center"
-          autoClose={false}
-          hideProgressBar
-          closeOnClick
-          draggable={false}
-        />
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <ToastContainer
+        position="top-center"
+        autoClose={false}
+        hideProgressBar
+        closeOnClick
+        draggable={false}
+      />
 
-        <ApolloProvider client={apolloClient}>
-          <MeProvider>
-            <TooltipProvider>
-              <ModalProvider>
-                <div className="flex flex-col h-screen">
-                  {showAnnounce && (
-                    <Alert type="announce" onClose={() => setAnnounce(false)}>
-                      <span className="flex-grow flex items-center justify-center  gap-2 ">
-                        <span className="material-icons-outlined">
-                          campaign
-                        </span>
-                        <span className="truncate">new announcement!</span>
-                      </span>
-                    </Alert>
+      <ApolloProvider client={apolloClient}>
+        <MeProvider>
+          <TooltipProvider>
+            <ModalProvider>
+              <div className="flex flex-col h-screen">
+                {showAnnounce && (
+                  <Alert type="announce" onClose={() => setAnnounce(false)}>
+                    <span className="flex-grow flex items-center justify-center  gap-2 ">
+                      <span className="material-icons-outlined">campaign</span>
+                      <span className="truncate">new announcement!</span>
+                    </span>
+                  </Alert>
+                )}
+                <Layout sidebarPinned={appProps.sidebarPinned}>
+                  {appProps.protected && !loading && me === null ? (
+                    <StatusDisplay str="Login require">
+                      <Link href={getLoginPageURL(router)}>
+                        <a className="btn-primary-lg">Login</a>
+                      </Link>
+                    </StatusDisplay>
+                  ) : (
+                    <Component {...pageProps} />
                   )}
-                  <Layout sidebarPinned={appProps.sidebarPinned}>
-                    {appProps.protected && !loading && me === null ? (
-                      <StatusDisplay str="Login require">
-                        <Link href={getLoginPageURL(router)}>
-                          <a className="btn-primary-lg">Login</a>
-                        </Link>
-                      </StatusDisplay>
-                    ) : (
-                      <Component {...pageProps} />
-                    )}
-                    {/* <Component {...pageProps} /> */}
-                  </Layout>
-                </div>
-              </ModalProvider>
-            </TooltipProvider>
-          </MeProvider>
-        </ApolloProvider>
-      </ErrorBoundary>
-    </>
+                  {/* <Component {...pageProps} /> */}
+                </Layout>
+              </div>
+            </ModalProvider>
+          </TooltipProvider>
+        </MeProvider>
+      </ApolloProvider>
+    </ErrorBoundary>
   )
 }
 

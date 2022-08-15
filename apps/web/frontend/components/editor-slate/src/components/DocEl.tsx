@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 import { interval, skip } from 'rxjs'
 import EditorEl from './EditorEl'
 import Link from 'next/link'
-import DocHead from '../../../editor-textarea/src/components/doc/doc-head'
+import DocHead from '../../../editor-textarea/src/components/doc/DocHead'
 import { docRepo } from '../../../editor-textarea/src/stores/doc.repository'
 import BlocksViewer from '../../../editor-textarea/src/components/block/blocks-viewer'
 import { getNotePageURL } from '../../../../utils'
@@ -77,7 +77,7 @@ const DocEl = (props: { doc: Doc }) => {
       id={doc.uid}
       // className="bg-gray-100 rounded-lg p-5"
     >
-      <div className="py-3">
+      <div className="pt-2">
         {!showPreview ? (
           <button
             className="px-2 py-1 inline-flex justify-center items-center gap-1 rounded-md text-sm text-gray-500 font-normal align-middle hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800"

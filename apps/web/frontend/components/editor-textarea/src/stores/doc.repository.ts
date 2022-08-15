@@ -10,10 +10,14 @@ import type {
   NoteDocContentHead,
   SymbolParsed,
 } from '../../../../../lib/interfaces'
-import { differenceBlocks, parseGQLBlocks } from '../../../../../share/utils'
+import {
+  differenceBlocks,
+  omitTypenameDeep,
+  parseGQLBlocks,
+} from '../../../../../share/utils'
 import type { Block, Doc } from '../interfaces'
 import { allDescendants, rootBlock } from '../op/queries'
-import { genBlockUid, genDocUid, omitTypenameDeep } from '../utils'
+import { genBlockUid, genDocUid } from '../utils'
 import { blankLines, writeBlocks } from '../utils/block-writer'
 import { getBlock } from './block.repository'
 

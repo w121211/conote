@@ -14,7 +14,7 @@ const IndenterEl = (
       style={{ marginLeft: 28 * (indent + 1) }}
       className="pt-2"
     >
-      <ul className="list-disc text-gray-600">
+      <ul className="list-disc text-gray-600 text-sm">
         <li>
           {/* <li className='before:content-["-"] before:absolute before:-translate-x-full '> */}
           {error && (

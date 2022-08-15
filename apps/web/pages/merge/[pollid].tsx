@@ -11,7 +11,6 @@ import {
 } from '../../apollo/query.graphql'
 import NoteDocLink from '../../frontend/components/note/note-doc-link'
 import MergePollVoteForm from '../../frontend/components/poll/merge-poll-vote-form'
-import { LayoutChildrenPadding } from '../../frontend/components/ui/layout/layout-children-padding'
 import UserLink from '../../frontend/components/user/user-link'
 import { AppPageProps } from '../../frontend/interfaces'
 
@@ -28,7 +27,7 @@ const MergePage = ({ poll }: Props): JSX.Element | null => {
     throw new Error('Currently only support merge poll')
 
   return (
-    <LayoutChildrenPadding>
+    <>
       <h4 className="mb-4">Merge request</h4>
       <p>
         <NoteDocLink doc={noteDocToMerge} /> wants to merge.
@@ -40,7 +39,7 @@ const MergePage = ({ poll }: Props): JSX.Element | null => {
         </span>
       </p>
       <MergePollVoteForm poll={poll} />
-    </LayoutChildrenPadding>
+    </>
   )
 }
 

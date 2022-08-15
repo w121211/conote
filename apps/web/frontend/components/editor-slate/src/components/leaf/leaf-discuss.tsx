@@ -10,7 +10,7 @@ import {
 import { useObservable } from '@ngneat/react-rxjs'
 import Link from 'next/link'
 import { RenderLeafProps, useSlateStatic } from 'slate-react'
-import DiscussForm from '../../../../discuss/discuss-form'
+import DiscussFormCreate from '../../../../discuss/DiscussCreateForm'
 import DiscussModalPageEl from '../../../../discuss/discuss-modal-page-el'
 import Modal from '../../../../modal/modal'
 import { slateEditorRepo } from '../../stores/editor.repository'
@@ -84,32 +84,32 @@ const LeafDiscuss = ({
 
   const [showModal, setShowModal] = useState(false),
     // [showWarnTooltip, setShowWarnTooltip] = useState(false),
-    isDiscussCreated = id !== undefined,
+    isDiscussCreated = discussId !== undefined,
     modalTopRightBtn = isDiscussCreated && (
       <Link
         href={{
           pathname: '/discuss/[discussId]',
-          query: { discussId: id },
+          query: { discussId },
         }}
       >
         <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
-          <span className="material-icons text-lg text-gray-500 hover:text-gray-700">
+          <span className="material-icons-outlined text-lg text-gray-500 hover:text-gray-700">
             open_in_full
           </span>
         </a>
       </Link>
     )
 
-  useEffect(() => {
-    // Delay 100 ms to avoid the flashing of popover (which is caused by the quick destroy of this element during typing)
-    setTimeout(() => {
-      if (curSelectedElId === id) {
-        setShowPopover(true)
-      } else {
-        setShowPopover(false)
-      }
-    }, 100)
-  }, [curSelectedElId])
+  // useEffect(() => {
+  //   // Delay 100 ms to avoid the flashing of popover (which is caused by the quick destroy of this element during typing)
+  //   setTimeout(() => {
+  //     if (curSelectedElId === id) {
+  //       setShowPopover(true)
+  //     } else {
+  //       setShowPopover(false)
+  //     }
+  //   }, 100)
+  // }, [curSelectedElId])
 
   return (
     <>
@@ -124,7 +124,7 @@ const LeafDiscuss = ({
             <DiscussModalPageEl id={discussId} />
           </div>
         ) : (
-          <DiscussForm
+          <DiscussFormCreate
             noteDraftId={draftId}
             title={title}
             onCreate={d =>
@@ -134,45 +134,29 @@ const LeafDiscuss = ({
         )}
       </Modal>
 
-      <FloatingPortal>
+      {/* <FloatingPortal id="layout-children-container">
         {showPopover && (
           <div
             className="details-menu opacity-100 scale-100 "
             ref={floating}
             style={{
               display: 'block',
-
               position: strategy,
               top: y ?? 0,
               left: x ?? 0,
             }}
           >
-            <div className=" flex ">
+            <div className="flex">
               <button
                 className="dropdown-list-item first:m-0 first:rounded-l last:m-0 last:rounded-r"
                 onClick={() => setShowModal(true)}
               >
-                {discussId ? 'View' : 'Create'}
-              </button>
-
-              <button
-                className="dropdown-list-item first:m-0 first:rounded-l last:m-0 last:rounded-r"
-                onClick={() => {
-                  indenterTextReplace(
-                    editor,
-                    blockUid,
-                    inlineItem.str,
-                    '#hello world!!!#',
-                  )
-                  setShowPopover(false)
-                }}
-              >
-                Replace
+                View
               </button>
             </div>
           </div>
         )}
-      </FloatingPortal>
+      </FloatingPortal> */}
 
       {discussId ? (
         <span
@@ -182,6 +166,8 @@ const LeafDiscuss = ({
           className="symbol-link"
           // className={className}
           data-inline-item={inlineItem.type}
+          role="button"
+          onClick={() => setShowModal(true)}
         >
           {children}
         </span>
@@ -196,10 +182,10 @@ const LeafDiscuss = ({
             {...attributes}
             id={id}
             ref={reference}
-            className=" text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
-            onClick={() => setShowModal(true)}
+            className="text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800"
             data-inline-item={inlineItem.type}
             role="button"
+            onClick={() => setShowModal(true)}
           >
             {children}
           </span>

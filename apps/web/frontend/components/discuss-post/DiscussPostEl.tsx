@@ -1,14 +1,40 @@
 import moment from 'moment'
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { DiscussPostFragment } from '../../../apollo/query.graphql'
-import OptionsMenu from '../discuss/options-menu'
-import DiscussPostEmojis from './discuss-post-emojis'
+import OptionsMenu from '../discuss/OptionsMenu'
+import DiscussPostEmojis from './DiscussPostEmojis'
 import { Box } from '../ui/box'
 import { useMeContext } from '../auth/use-me-context'
+import DiscussPostUpdateForm from './DiscussPostUpdateForm'
 
-const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {
+type Props = {
+  // discussId: string
+  post: DiscussPostFragment
+}
+
+const DiscussPostTile = (props: Props) => {
+  const { post } = props
   const { me } = useMeContext()
+  const [showForm, setShowForm] = useState(false)
+  const isMeOwner = me?.id === post.userId
+
+  // function onClickDelete() {
+  // if (isMeOwner) {}
+  // }
+  function onClickEdit() {
+    if (isMeOwner) setShowForm(true)
+  }
+  // function onClickReport() {
+  //   if (!isMeOwner) setShowForm(true)
+  // }
+
+  function onSubmitCompleted() {
+    setShowForm(false)
+  }
+  function onClickCancel() {
+    setShowForm(false)
+  }
 
   return (
     <Box padding="sm">
@@ -32,23 +58,30 @@ const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {
             >
               <a className="link inline-block min-w-0 text-sm font-medium truncate ">
                 @{post.userId.slice(-6)}
-                {me?.id === post.userId ? '(you)' : null}
+                {me?.id === post.userId ? ' / Me' : null}
               </a>
             </Link>
             {/* <span className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate"></span> */}
             <span className="inline-block text-gray-400 text-xs">
-              {moment(post.createdAt).subtract(10, 'days').format('ll')}
+              {moment(post.createdAt).format('ll')}
             </span>
           </div>
-          <p className=" pr-2 py-2 whitespace-pre-wrap [word-break:break-word] text-gray-700 text-sm">
-            {post.content.trim()}
-          </p>
+
+          {showForm ? (
+            <DiscussPostUpdateForm
+              {...{ ...props, onSubmitCompleted, onClickCancel }}
+            />
+          ) : (
+            <p className="pr-2 py-2 whitespace-pre-wrap [word-break:break-word] text-gray-700 text-sm">
+              {post.content}
+            </p>
+          )}
 
           <div className="flex items-center pt-1 border-t border-gray-200">
             <div className="flex-grow">
               <DiscussPostEmojis
                 discussPostId={post.id}
-                disable={me?.id === post.userId || !me}
+                disabled={me === null || isMeOwner}
               />
             </div>
             {/* <button className="flex items-center p-1 rounded text-gray-500 text-sm leading-none hover:bg-gray-100 hover:text-gray-700">
@@ -56,8 +89,8 @@ const DiscussPostTile = ({ post }: { post: DiscussPostFragment }) => {
                 reply
               </span>
               Reply
-            </button>
-            <OptionsMenu isMyPost={me?.id === post.userId} /> */}
+            </button> */}
+            {isMeOwner && <OptionsMenu {...{ isMeOwner, onClickEdit }} />}
           </div>
         </div>
       </div>

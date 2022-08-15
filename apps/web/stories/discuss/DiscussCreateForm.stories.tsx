@@ -2,24 +2,17 @@ import { ApolloProvider } from '@apollo/client'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
-import CreateDiscussPostForm from '../../frontend/components/discuss-post/discuss-post-form'
+import DiscussCreateForm from '../../frontend/components/discuss/DiscussCreateForm'
 import Modal from '../../frontend/components/modal/modal'
 import ModalProvider from '../../frontend/components/modal/modal-context'
 
 const apolloClient = getApolloClient()
 
 export default {
-  component: CreateDiscussPostForm,
-  decorators: [
-    Story => (
-      <div style={{ margin: '3rem' }}>
-        <Story />
-      </div>
-    ),
-  ],
-} as ComponentMeta<typeof CreateDiscussPostForm>
+  component: DiscussCreateForm,
+} as ComponentMeta<typeof DiscussCreateForm>
 
-const Template: ComponentStory<typeof CreateDiscussPostForm> = args => (
+export const Template: ComponentStory<typeof DiscussCreateForm> = args => (
   <ApolloProvider client={apolloClient}>
     <ModalProvider>
       <Modal
@@ -28,13 +21,8 @@ const Template: ComponentStory<typeof CreateDiscussPostForm> = args => (
           //
         }}
       >
-        <CreateDiscussPostForm {...args} />
+        <DiscussCreateForm {...args} />
       </Modal>
     </ModalProvider>
   </ApolloProvider>
 )
-
-export const Default = Template.bind({})
-Default.args = {
-  discussId: '1233',
-}

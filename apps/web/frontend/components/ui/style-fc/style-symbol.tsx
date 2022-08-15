@@ -11,8 +11,6 @@ export function styleSymbol(
   title?: string | null,
   // lightBracket?: boolean,
 ) {
-  console.log(title)
-
   const tokens = tokenize(str, grammar)
   const renderArr: (string | ReactNode)[] = []
 

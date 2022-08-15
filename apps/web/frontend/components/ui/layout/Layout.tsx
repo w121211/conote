@@ -51,23 +51,27 @@ const Layout = ({
   return (
     <div className="flex-1 relative min-h-0 grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] [grid-template-areas:'nav_nav''sider_children'] w-screen">
       <SidebarEl
-        backgroundColor={backgroundColor}
         ref={siderRef}
+        backgroundColor={backgroundColor}
         onMouseEnter={() => {
           if (!siderIsPinned) clearTimeout(timeoutRef?.current)
         }}
       />
+
       <div
         id="layout-children-container"
+        ref={childrenRef}
         className={`flex-1 [grid-area:children] flex justify-center overflow-auto ${
           backgroundColor ? backgroundColor : 'bg-gray-50 dark:bg-gray-700'
         }`}
         onMouseMove={onMouseMove}
-        ref={childrenRef}
       >
-        {children}
+        <div className="responsive-width px-8 pt-8">{children}</div>
+        {/* {children} */}
       </div>
+
       <Navbar />
+
       {/* <button
         className="fixed z-50"
         onClick={() => {

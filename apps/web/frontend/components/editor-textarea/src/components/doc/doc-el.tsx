@@ -12,7 +12,7 @@ import type { Doc } from '../../interfaces'
 import { hotkey, multiBlockSelection } from '../../listeners'
 import { blockRepo } from '../../stores/block.repository'
 import { BlockEl } from '../block/block-el'
-import DocHead from './doc-head'
+import DocHead from './DocHead'
 import DocPlaceholder from './doc-placeholder'
 
 interface DocProps {

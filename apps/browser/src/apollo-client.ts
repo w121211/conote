@@ -1,4 +1,8 @@
-import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
+import {
+  ApolloClient,
+  InMemoryCache,
+  NormalizedCacheObject,
+} from '@apollo/client'
 
 // const prismaClientPropertyName = `__prevent-name-collision__prisma`
 
@@ -19,17 +23,18 @@ import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/clie
 //   }
 // }
 
+/**
+ * Important! To avoid CORS errors, server side needs to set 'Access-Control-Allow-Origin *'
+ *
+ */
 const getApolloClient = (): ApolloClient<NormalizedCacheObject> => {
   const cache = new InMemoryCache()
-
-  /**
-   * For CORS errors, server side needs to set 'Access-Control-Allow-Origin *'
-   *
-   */
   const client = new ApolloClient({
     cache: cache,
     uri: `${process.env.APP_BASE_URL}/api/graphql`,
-    credentials: 'omit', // avoid CORS, @see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
+
+    // Avoid CORS. See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
+    credentials: 'omit',
   })
 
   return client

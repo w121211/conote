@@ -12,17 +12,23 @@ interface FormInput {
   content?: string
 }
 
+type Props = {
+  // noteId?: string
+  noteDraftId: string
+  title: string
+  onCreate: (data: DiscussFragment) => void
+  // onEdit: (data: DiscussFragment) => void
+}
+
+/**
+ * If `disucss` is given, the form is to edit the discuss. Otherwise, the form is in creation.
+ */
 const DiscussForm = ({
   // noteId,
   noteDraftId,
   title,
   onCreate,
-}: {
-  // noteId?: string
-  noteDraftId: string
-  title: string
-  onCreate: (data: DiscussFragment) => void
-}) => {
+}: Props) => {
   const [createDiscuss] = useCreateDiscussMutation({
       onCompleted(data) {
         if (data.createDiscuss) {
@@ -72,10 +78,10 @@ const DiscussForm = ({
   return (
     <form
       // id="create-discuss-form"
-      className=" grid auto-rows-min w-full px-10 py-5 gap-4"
+      className="grid auto-rows-min w-full px-10 py-5 gap-4"
       onSubmit={handleSubmit(onSubmit)}
-      autoComplete="off"
-      spellCheck="false"
+      // autoComplete="off"
+      // spellCheck="false"
     >
       <div className="relative before:content-['#'] before:absolute before:-translate-x-full before:-ml-1 before:pt-2 before:text-gray-400 before:font-medium before:text-xl">
         <textarea
