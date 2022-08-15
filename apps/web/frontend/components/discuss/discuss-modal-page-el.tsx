@@ -22,11 +22,9 @@ const DiscussModalPageEl = ({ id }: { id: string }) => {
     return null
   }
 
-  const isMeOwner = me?.id === qDiscuss.data.discuss.userId
-
   return (
     <div className="flex flex-col gap-3 w-full pb-5">
-      <DiscussEl data={qDiscuss.data.discuss} isMeOwner={isMeOwner} />
+      <DiscussEl data={qDiscuss.data.discuss} />
       <DiscussPostEls posts={qPosts.data.discussPosts} />
       <DiscussPostCreateForm discussId={qDiscuss.data.discuss.id} />
     </div>

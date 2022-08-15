@@ -91,7 +91,7 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
     {
       register,
       handleSubmit,
-      formState: { isSubmitting, isValid },
+      formState: { isDirty, isSubmitting, isValid },
       watch,
     } = methods,
     watchChoice = watch('choice'),
@@ -190,7 +190,8 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
               </div>
             </div>
             <FormSubmitBtn
-              isDisable={
+              isDirty={isDirty}
+              isDisabled={
                 myVote !== undefined ||
                 !isNil(qMyPollVotes.error) ||
                 isSubmitting ||

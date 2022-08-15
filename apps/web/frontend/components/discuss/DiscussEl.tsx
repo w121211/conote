@@ -13,7 +13,7 @@ import OptionsMenu from './OptionsMenu'
 const Content = ({
   data: { id, userId, title, content, createdAt, noteEntries },
   isMeOwner,
-}: Props) => (
+}: Props & { isMeOwner: boolean }) => (
   <>
     <h3 className="my-2 text-gray-800 font-medium">
       <span className="text-gray-300 mr-1">#</span>
@@ -82,7 +82,6 @@ const Content = ({
 
 interface Props {
   data: DiscussFragment
-  isMeOwner: boolean
 }
 
 const DiscussEl = ({ data }: Props): JSX.Element => {

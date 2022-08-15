@@ -42,7 +42,7 @@ const DiscussPage = ({ discuss }: Props) => {
   return (
     <div className="flex flex-col gap-4 pb-32">
       <DiscussEl data={qDiscuss.data.discuss} />
-      <DiscussPostEls discussId={discuss.id} posts={qPosts.data.discussPosts} />
+      <DiscussPostEls posts={qPosts.data.discussPosts} />
       <DiscussPostCreateForm discussId={qDiscuss.data.discuss.id} />
     </div>
   )

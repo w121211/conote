@@ -39,7 +39,7 @@ const DiscussForm = ({
     {
       handleSubmit,
       register,
-      formState: { isSubmitting },
+      formState: { isDirty, isSubmitting },
       watch,
     } = useForm<FormInput>({
       defaultValues: { title },
@@ -113,7 +113,9 @@ const DiscussForm = ({
         disabled={isSubmitting}
       />
       <div className=" text-center">
-        <FormSubmitBtn size="lg">Create the discuss</FormSubmitBtn>
+        <FormSubmitBtn size="lg" isDirty={isDirty}>
+          Create Discuss
+        </FormSubmitBtn>
         {/* <button
           // form="create-discuss-form"
           className={`btn-primary-lg `}

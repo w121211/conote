@@ -1,4 +1,3 @@
-import { ErrorMessage } from '@hookform/error-message'
 import { title } from 'process'
 import React, { useEffect, useState, useContext } from 'react'
 import {
@@ -89,7 +88,7 @@ const PollCreateForm = ({
               <li className="mb-2" key={choice.id}>
                 <input
                   {...register(`choices.${idx}.choice`, {
-                    required: '請輸入選項!',
+                    required: 'Enter option',
                   })}
                   type="text"
                   style={{
@@ -99,16 +98,16 @@ const PollCreateForm = ({
                         : 'transparent'
                     }`,
                   }}
-                  placeholder="新選項"
+                  placeholder="New option"
                 />
                 <button
                   className="btn-secondary ml-2"
                   type="button"
                   onClick={() => remove(idx)}
                 >
-                  刪除
+                  Delete
                 </button>
-                <ErrorMessage
+                {/* <ErrorMessage
                   errors={errors}
                   name={`choices.${idx}.choice`}
                   render={({ message }) => (
@@ -116,7 +115,7 @@ const PollCreateForm = ({
                       {message}
                     </span>
                   )}
-                />
+                /> */}
               </li>
             )
           })}
@@ -125,12 +124,12 @@ const PollCreateForm = ({
             type="button"
             onClick={() => append({ choice: '' })}
           >
-            新增
+            Add
           </button>
         </ul>
 
         <button className="btn-primary" type="submit">
-          送出
+          Submit
         </button>
       </form>
     </div>
