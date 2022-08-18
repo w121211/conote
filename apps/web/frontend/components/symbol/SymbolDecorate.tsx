@@ -1,25 +1,29 @@
 import React from 'react'
 import { parseSymbol } from '../../../share/symbol.common'
 
-const bracketLeft = 'text-gray-400 dark:text-gray-400 font-light'
-const bracketRight = 'text-gray-400 dark:text-gray-400 font-light'
-const blueHighlight = `text-blue-600 dark:text-blue-300`
+const bracketLeft = 'text-gray-300 dark:text-gray-300 font-light'
+const bracketRight = 'text-gray-300 dark:text-gray-300 font-light'
 
 const SymbolDecorate = ({
   symbolStr,
   title,
+  gray,
 }: {
   symbolStr: string
   title?: string
+  gray?: true
 }) => {
   const { type, symbol, url } = parseSymbol(symbolStr)
+  const symbolColor = gray
+    ? 'text-gray-600 dark:text-gray-300'
+    : 'text-blue-600 dark:text-blue-300'
 
   switch (type) {
     case 'TOPIC':
       return (
         <>
           <span className={bracketLeft}>{'[['}</span>
-          <span className={blueHighlight}>
+          <span className={symbolColor}>
             {symbol.substring(2, symbol.length - 2)}
           </span>
           <span className={bracketRight}>{']]'}</span>
@@ -46,7 +50,7 @@ const SymbolDecorate = ({
         )
       }
       return (
-        <span className={blueHighlight} title={url.href}>
+        <span className={symbolColor} title={url.href}>
           <span className={bracketLeft}>{'[['}</span>
           {url_}
           <span className={bracketRight}>{']]'}</span>
@@ -56,7 +60,7 @@ const SymbolDecorate = ({
 
     case 'TICKER':
       return (
-        <span className={blueHighlight}>
+        <span className={symbolColor}>
           <span className={bracketLeft}>{'[['}</span>
           {symbol.substring(2, symbol.length - 2)}
           <span className={bracketRight}>{']]'}</span>

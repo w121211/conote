@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import SearcherModal from '../../../../search-all-modal/searcher-modal'
+import SearcherModal from '../../../../search-all-modal/SearcherModal'
 import { editorChainItemInsert } from '../../events'
 import { SearcherProps } from '../../../../../interfaces'
 
@@ -25,7 +25,7 @@ const ChainItemInsertButton = ({
   if (loading) {
     return null
   }
-  return <SearcherModal searcher={searcher} />
+  return <SearcherModal searcher={searcher} createMode />
 }
 
 export default ChainItemInsertButton

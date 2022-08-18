@@ -1,10 +1,5 @@
 import React from 'react'
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
-import { useRouter } from 'next/router'
-import type { TableData } from '../../frontend/components/user/user-rate-table'
-import UserNoteTable from '../../frontend/components/user/user-note-table'
-import { NoteData } from '../../frontend/components/ui/note-list'
-import { ListElement } from '../../frontend/components/ui/list'
 import {
   DiscussesByUserDocument,
   DiscussesByUserQuery,
@@ -16,125 +11,12 @@ import {
   NoteDocsByUserQueryVariables,
 } from '../../apollo/query.graphql'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
-import { LatestDiscussTile } from '../../frontend/components/latest-discuss-tile'
-
-export const mockRateData: TableData[] = [
-  {
-    ticker: '$TSLA',
-    title: 'Tesla Inc.',
-    srcSym: '@http://www.youtube.com/xxx',
-    rate: 'LONG',
-  },
-  {
-    ticker: '$F',
-    title: 'Ford Motor Company',
-    srcSym: '@http://www.youtube.com/xwef',
-    rate: 'LONG',
-  },
-  {
-    ticker: '$AAPL',
-    title: 'Apple Inc.',
-    srcSym: '@http://www.youtube.com/sdjd',
-    rate: 'LONG',
-  },
-  {
-    ticker: '$NDVA',
-    title: 'Nvidia Corporation',
-    srcSym: '@http://www.youtube.com/ndewe',
-    rate: 'HOLD',
-  },
-  {
-    ticker: '$NFLX',
-    title: '',
-    srcSym: '@http://www.youtube.com/nflw',
-    rate: 'SHORT',
-  },
-]
-
-const mockList: ListElement[] = [
-  {
-    title: '原油 vs 天然氣，哪個比較適合投資？',
-    href: '#',
-    source: '[[原油]]',
-    hashtags: ['#討論'],
-  },
-  {
-    title:
-      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
-    href: '#',
-    source: '[[原油]]',
-    hashtags: ['#討論', '#機會'],
-  },
-  {
-    title:
-      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
-    href: '#',
-    source: '[[原油]]',
-    hashtags: ['#Battle'],
-  },
-  {
-    title:
-      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
-    href: '#',
-    source: '[[原油]]',
-    hashtags: ['#Battle', '#事件'],
-  },
-  {
-    title: '原油 vs 天然氣，哪個比較適合投資？',
-    href: '#',
-    source: '[[原油]]',
-    hashtags: ['#討論'],
-  },
-  {
-    title:
-      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
-    href: '#',
-    source: '[[原油]]',
-    hashtags: ['#討論', '#機會'],
-  },
-  {
-    title:
-      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
-    href: '#',
-    source: '[[原油]]',
-    hashtags: ['#Battle'],
-  },
-  {
-    title:
-      '全球能源緊缺，能源價格攀升，若再碰到嚴冬對天然氣需求增加，天然氣概念股短線或可一搏？($WTI#多 @匿名)',
-    href: '#',
-    source: '[[原油]]',
-    hashtags: ['#Battle', '#事件'],
-  },
-]
-
-const mockNoteList: NoteData[] = [
-  {
-    title: '',
-    symbol: '[[保險]]',
-    updatedAt: Date.now(),
-  },
-  {
-    title: '',
-    symbol: '[[Awesome Tailwind CSS]]',
-    updatedAt: Date.now(),
-  },
-  {
-    title: '',
-    symbol: '$NDVA',
-    updatedAt: Date.now(),
-  },
-  {
-    title: '',
-    symbol: '$NDVA',
-    updatedAt: Date.now(),
-  },
-  {
-    title: '園藝公司被奧客拖欠工程款，最後怒把對方的花園整個砸爛',
-    symbol: '@園藝公司被奧客拖欠工程款，最後怒把對方的花園整個砸爛',
-    updatedAt: Date.now(),
-  },
-]
+import { getNotePageURL, shortenUserId } from '../../frontend/utils'
+import { useMeContext } from '../../frontend/components/auth/use-me-context'
+import Link from 'next/link'
+import SymbolDecorate from '../../frontend/components/symbol/SymbolDecorate'
+import moment from 'moment'
+import CardList from '../../frontend/components/ui/CardList'
 
 interface Props {
   userId: string
@@ -147,60 +29,137 @@ const UserPage = ({
   noteDocsByUser,
   discussesByUser,
 }: Props): JSX.Element | null => {
+  const { me } = useMeContext()
   // console.log(noteDocsByUser, discussesByUser)
-
   // const [showMentionedPopup, setShowMentionedPopup] = useState(false)
-
   // if (!data === undefined || error || loading) {
   //   return null
   // }
 
   return (
     <>
-      <div className="flex flex-col gap-8 ">
-        <div className="flex">
+      <div className="flex flex-col gap-12">
+        <div className="flex flex-col">
           {/* <span className="material-icons mr-2 leading-none text-xl text-gray-300 dark:text-gray-400">
             account_circle
           </span> */}
+
           <div className="truncate">
-            <h1 className="truncate mb-2 font-medium text-gray-800 dark:text-gray-100">
-              @{userId.slice(-6)}
+            <h1 className="text-4xl">
+              {shortenUserId(userId, me)}
+              <span className="pl-3 text-gray-500 font-light">Anonymous</span>
             </h1>
             {/* <div className="mb-2 text-lg text-gray-500 dark:text-gray-400">
-              建築師
+              Architect
               </div>
               <p className="flex text-sm text-gray-500 dark:text-gray-400">
               <span className="material-icons text-base leading-none">
               cake
               </span>
-              10年會員
+              10 year member
             </p> */}
           </div>
         </div>
-        {/* <div>
-          <h2 className="mb-2 text-sm text-gray-500 dark:text-gray-400 font-medium tracking-widest">
-          ABOUT
-          </h2>
-          <p className="text-sm text-gray-800 dark:text-gray-100">
-          日本鳥取縣出身的男性聲優，於2019年4月1日加入由好友立花慎之介及福山潤所創立的BLACK
-          SHIP，以前是AIR AGENCY所屬。身高173cm，體重65kg，血型是A型。
-          </p>
-        </div> */}
+
+        <CardList
+          header="Commits"
+          items={noteDocsByUser}
+          renderItem={({ id, symbol, meta, updatedAt, contentHead }) => (
+            <>
+              <div className="flex-1 min-w-0">
+                <Link href={getNotePageURL(symbol, id)}>
+                  <a className="text-gray-900 dark:text-white hover:underline">
+                    <SymbolDecorate
+                      symbolStr={symbol}
+                      title={contentHead.title ?? undefined}
+                    />
+                    <span className="pl-0.5 font-light text-gray-400 dark:text-white hover:underline">
+                      #{id.slice(-6)}
+                    </span>
+                  </a>
+                </Link>
+                <p className="pt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                  <span className="material-icons-outlined px-0.5 text-sm align-bottom">
+                    check_circle
+                  </span>
+                  {/* {mergeState_text[meta.mergeState]} */}
+                </p>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 align-right">
+                {moment(updatedAt).format('L')}
+              </p>
+            </>
+          )}
+        />
+
+        <CardList
+          header={
+            <>
+              <h1 className="leading-none">Latest Discussions</h1>
+              <a
+                href="#"
+                className="text-sm text-blue-600 hover:underline dark:text-blue-500"
+              >
+                View all
+              </a>
+            </>
+          }
+          items={discussesByUser}
+          renderItem={({ id, updatedAt, title, noteEntries }) => (
+            <>
+              <div className="flex-1 min-w-0">
+                <Link href={'#'}>
+                  <a className="text-blue-700 dark:text-white hover:underline">
+                    <span className="pr-0.5 text-gray-300">#</span>
+                    {title}
+                    <span className="pl-0.5 text-gray-300">#</span>
+
+                    {/* <SymbolDecorate
+                      symbolStr={symbol}
+                      title={contentHead.title ?? undefined}
+                    />
+                    <span className="pl-0.5 font-light text-gray-400 dark:text-white hover:underline">
+                      #{id.slice(-6)}
+                    </span> */}
+                  </a>
+                </Link>
+
+                <p className="pt-1 text-sm text-gray-500 dark:text-gray-400">
+                  {/* <span className="material-icons-outlined px-0.5 text-sm align-bottom">
+                    check_circle
+                  </span> */}
+                  {/* {mergeState_text[meta.mergeState]} */}
+                  {/* {noteEntries.map(({ id, sym }) => (
+                    <span key={id}>{sym.symbol}</span>
+                    // <SymbolDecorate key={id} symbolStr={sym.symbol} />
+                  ))} */}
+                  <span className="text-gray-300">[[</span>Web3
+                  <span className="text-gray-300">]]</span> ·{' '}
+                  <span className="text-gray-300">[[</span>Etherum
+                  <span className="text-gray-300">]]</span>
+                </p>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 align-right">
+                {moment(updatedAt).format('L')}
+              </p>
+            </>
+          )}
+        />
 
         {/* {data?.author?.meta} */}
-        <div className="flex gap-6">
+        {/* <div className="flex gap-6">
           <div className="w-1/2">
             <UserNoteTable data={noteDocsByUser} />
           </div>
-          {/* <div className="w-1/2">
+          <div className="w-1/2">
             <UserRateTable data={mockRateData} />
-          </div> */}
-        </div>
+          </div>
+        </div> */}
 
-        <div className="mt-8">
+        {/* <div className="mt-8">
           <h4 className="mb-2 text-gray-700 tracking-widest">DISCUSSES</h4>
-          <LatestDiscussTile data={discussesByUser} />
-        </div>
+          <DiscussEntryListGroup data={discussesByUser} />
+        </div> */}
       </div>
     </>
   )

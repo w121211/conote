@@ -1,9 +1,9 @@
 import { useObservable } from '@ngneat/react-rxjs'
 import Link from 'next/link'
 import React from 'react'
-import { NoteDraftEntryFragment } from '../../../../../../apollo/query.graphql'
-import { getNotePageURL } from '../../../../../utils'
-import { editorRepo } from '../../stores/editor.repository'
+import { NoteDraftEntryFragment } from '../../../apollo/query.graphql'
+import { getNotePageURL } from '../../utils'
+import { editorRepo } from '../editor-textarea/src/stores/editor.repository'
 import SidebarItemPanel from './sidebar-item-panel'
 
 const ItemLabel = ({

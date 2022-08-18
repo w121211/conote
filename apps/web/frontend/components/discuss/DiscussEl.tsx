@@ -2,7 +2,8 @@ import moment from 'moment'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { DiscussFragment } from '../../../apollo/query.graphql'
-import { getNotePageURL } from '../../utils'
+import { getNotePageURL, shortenUserId } from '../../utils'
+import { LoggedInUser } from '../auth/auth.service'
 import { useMeContext } from '../auth/use-me-context'
 import SymbolDecorate from '../symbol/SymbolDecorate'
 import { Box } from '../ui/box'
@@ -12,8 +13,9 @@ import OptionsMenu from './OptionsMenu'
 
 const Content = ({
   data: { id, userId, title, content, createdAt, noteEntries },
+  me,
   isMeOwner,
-}: Props & { isMeOwner: boolean }) => (
+}: Props & { me: LoggedInUser | null; isMeOwner: boolean }) => (
   <>
     <h3 className="my-2 text-gray-800 font-medium">
       <span className="text-gray-300 mr-1">#</span>
@@ -45,8 +47,7 @@ const Content = ({
           }}
         >
           <a className="link inline-block min-w-0 text-sm font-medium truncate ">
-            @{userId.slice(-6)}
-            {isMeOwner ? ' / Me' : null}
+            {shortenUserId(userId, me)}
           </a>
         </Link>
         {/* <span className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate"></span> */}
@@ -121,7 +122,7 @@ const DiscussEl = ({ data }: Props): JSX.Element => {
           onSubmitCompleted={() => setShowForm(false)}
         />
       ) : (
-        <Content data={data} isMeOwner={isMeOwner} />
+        <Content data={data} me={me} isMeOwner={isMeOwner} />
       )}
 
       <div className="flex mt-2 pt-1 border-t border-gray-200">

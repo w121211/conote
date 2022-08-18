@@ -1,6 +1,6 @@
 import { sumBy } from 'lodash'
 import React, { useState } from 'react'
-import type { NoteDraftEntryFragment } from '../../../../../../apollo/query.graphql'
+import type { NoteDraftEntryFragment } from '../../../apollo/query.graphql'
 import SidebarItemChain from './sidebar-item-chain'
 
 const SidebarSection = ({

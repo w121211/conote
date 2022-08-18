@@ -3,7 +3,7 @@ import { ComponentMeta } from '@storybook/react'
 import React from 'react'
 import { getApolloClient } from '../../apollo/apollo-client'
 import ModalProvider from '../../frontend/components/modal/modal-context'
-import SearcherModal from '../../frontend/components/search-all-modal/searcher-modal'
+import SearcherModal from '../../frontend/components/search-all-modal/SearcherModal'
 // import SearcherModalButton from '../../frontend/components/search-all-modal/searcher-modal-button'
 import { SearcherProps } from '../../frontend/interfaces'
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { LoadingSvg } from '../../loading-circle'
+import Spinner from '../Spinner'
 
 const btnClass = {
   sm: 'btn-primary',
@@ -40,7 +40,10 @@ export const FormSubmitBtn = ({
   >
     <div className="flex">
       {children}
-      {isLoading && <LoadingSvg svgClassName="w-5 h-5 ml-2 !text-white" />}
+      {isLoading && (
+        // <Spinner svgClassName="w-5 h-5 ml-2 !text-white" />
+        <Spinner />
+      )}
     </div>
   </button>
 )

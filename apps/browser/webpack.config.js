@@ -124,7 +124,7 @@ module.exports = {
   //   writeToDisk: true,
   // },
   plugins: [
-    // Warning! no secerts should store in .env file @see https://github.com/mrsteele/dotenv-webpack
+    // Warning! No secerts should store in .env file. See https://github.com/mrsteele/dotenv-webpack
     new Dotenv({ path: './.env' }),
 
     // isDevelopment && new ReactRefreshPlugin(),
@@ -157,14 +157,15 @@ module.exports = {
           from: manifestPath,
           to: path.resolve(__dirname, outDist, 'manifest.json'),
           transform(content, path) {
-            const manifest = JSONC.parse(content.toString()) // use jsonc parser, https://github.com/microsoft/node-jsonc-parser
-            // var manifest = JSON.parse(content.toString()) // copy-webpack-plugin passes a buffer
+            const manifest = JSONC.parse(content.toString()) // Use jsonc parser, https://github.com/microsoft/node-jsonc-parser
+            // var manifest = JSON.parse(content.toString()) // Copy-webpack-plugin passes a buffer
             // manifest.version = package.version // make any modifications you like, such as
-            return JSON.stringify(manifest, null, 2) // pretty print to JSON with two spaces
+            return JSON.stringify(manifest, null, 2) // Pretty print to JSON with two spaces
           },
         },
       ],
     }),
+
     // new HtmlWebpackPlugin({
     //   filename: './index.html',
     //   template: './public/index.html',

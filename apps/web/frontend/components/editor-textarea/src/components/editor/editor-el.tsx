@@ -5,7 +5,7 @@ import { editorRepo } from '../../stores/editor.repository'
 import DocEl from '../doc/doc-el'
 import { useRouter } from 'next/router'
 import { editorOpenSymbolInMain, editorOpenSymbolInModal } from '../../events'
-import { LoadingSvg } from '../../../../loading-circle'
+import Spinner from '../../../../ui/Spinner'
 
 /**
  * When component mount, EditorEl loads the current main-doc in the repo.
@@ -119,7 +119,7 @@ export const EditorEl = (): JSX.Element | null => {
         ) : (
           <div className="flex items-center justify-center w-full h-80">
             <div className="w-10 h-10">
-              <LoadingSvg />
+              <Spinner />
             </div>
           </div>
         )}

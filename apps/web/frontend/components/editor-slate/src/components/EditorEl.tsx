@@ -25,7 +25,7 @@ import { docTemplateGenerate, editorValueUpdate } from '../events'
 import DocPlaceholder from '../../../editor-textarea/src/components/doc/doc-placeholder'
 import { docRepo } from '../../../editor-textarea/src/stores/doc.repository'
 import { indentersToBlocks } from '../indenter/serializers'
-import BlocksViewer from '../../../editor-textarea/src/components/block/blocks-viewer'
+import BlocksViewer from '../../../editor-textarea/src/components/block/BlocksViewer'
 
 const Leaf = (
   props: RenderLeafProps & { docUid: string; draftId: string },

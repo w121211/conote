@@ -39,6 +39,9 @@ export interface SearcherProps {
     // If provide, the symbol-create will be a button instead of a link
     onClickSymbolCreate?: (symbol: string) => void
   }
+
+  // If enabled, searcher will create the draft when click the hit
+  createMode?: true
 }
 
 export interface NoteDocElProps {

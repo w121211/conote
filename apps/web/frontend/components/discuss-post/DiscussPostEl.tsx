@@ -7,6 +7,7 @@ import DiscussPostEmojis from './DiscussPostEmojis'
 import { Box } from '../ui/box'
 import { useMeContext } from '../auth/use-me-context'
 import DiscussPostUpdateForm from './DiscussPostUpdateForm'
+import { shortenUserId } from '../../utils'
 
 type Props = {
   // discussId: string
@@ -57,8 +58,7 @@ const DiscussPostTile = (props: Props) => {
               }}
             >
               <a className="link inline-block min-w-0 text-sm font-medium truncate ">
-                @{post.userId.slice(-6)}
-                {me?.id === post.userId ? ' / Me' : null}
+                {shortenUserId(post.userId, me)}
               </a>
             </Link>
             {/* <span className="inline-block min-w-0 text-sm text-blue-400 font-medium truncate"></span> */}

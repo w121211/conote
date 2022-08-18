@@ -17,40 +17,6 @@ interface Props {
   commit: CommitFragment
 }
 
-const mergeState_text: Record<string, string | undefined> = {
-  before_merge: '',
-  'wait_to_merge-by_poll': 'A merge poll is open',
-  'merged_auto-same_user': 'Auto merged (same user rule)',
-  'merged_auto-initial_commit': 'Auto merged (first commit rule)',
-  'merged_auto-only_insertions': 'Auto merged (only insertions rule)',
-  merged_poll: 'Merged by poll',
-  'rejected_auto-no_changes': 'rejected_auto-no_changes',
-  rejected_poll: 'rejected_poll',
-  'paused-from_doc_not_head': 'paused-from_doc_not_head',
-}
-
-const MergeStateLabel = ({
-  mergeState,
-  mergePollId,
-}: {
-  mergeState: string
-  mergePollId?: string
-}): JSX.Element => {
-  const t = mergeState_text[mergeState]
-
-  if (t === undefined)
-    throw new Error('[reableMergeState] Merge state not found')
-
-  if (mergePollId) {
-    return (
-      <Link href={`/poll/${mergePollId}`}>
-        <a className="link text-xs italic">{styleSymbol(t)}</a>
-      </Link>
-    )
-  }
-  return <span className="text-gray-400 text-xs italic">{t}</span>
-}
-
 const CommitPage = ({ commit }: Props) => {
   return (
     <>

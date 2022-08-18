@@ -3,15 +3,18 @@ import { isNil } from 'lodash'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
-import type { NoteDraftEntryFragment } from '../../../../../../apollo/query.graphql'
-import { CommitInputErrorItem } from '../../../../../../lib/interfaces'
+import type {
+  CommitFragment,
+  NoteDraftEntryFragment,
+} from '../../../apollo/query.graphql'
+import { CommitInputErrorItem } from '../../../lib/interfaces'
+import { getCommitInputErrorItems, getCommitPageURL } from '../../utils'
+import Spinner from '../ui/Spinner'
 import {
-  getCommitInputErrorItems,
-  getCommitPageURL,
-} from '../../../../../utils'
-import { LoadingSvg } from '../../../../loading-circle'
-import { editorChainCommit, editorChainItemRemove } from '../../events'
-import { editorRepo } from '../../stores/editor.repository'
+  editorChainCommit,
+  editorChainItemRemove,
+} from '../editor-textarea/src/events'
+import { editorRepo } from '../editor-textarea/src/stores/editor.repository'
 
 const CommitInputErrorMsg = ({
   items,
@@ -37,7 +40,12 @@ const CommitInputErrorMsg = ({
   )
 }
 
-const SidebarItemPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
+type Props = {
+  item: NoteDraftEntryFragment
+  onCommitCompleted?: (data: CommitFragment) => void
+}
+
+const SidebarItemPanel = ({ item, onCommitCompleted }: Props) => {
   const router = useRouter(),
     [isCommting, setIsCommiting] = useState(false),
     [isDeleting, setIsDeleting] = useState(false)
@@ -49,7 +57,13 @@ const SidebarItemPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
     try {
       setIsCommiting(true)
       const commit = await editorChainCommit(item.id)
-      router.push(getCommitPageURL(commit.id))
+
+      if (onCommitCompleted) onCommitCompleted(commit)
+
+      router.push({
+        pathname: '/user/commit/[userid]',
+        query: { userid: commit.userId },
+      })
     } catch (err) {
       if (err instanceof ApolloError) {
         const items = getCommitInputErrorItems(err)
@@ -65,10 +79,11 @@ const SidebarItemPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
   }
 
   return (
-    <div className=" hidden group-hover:flex items-center z-10">
+    <div className="hidden group-hover:flex items-center z-10">
       {isNil(item.meta.chain?.prevId) &&
         (isCommting ? (
-          <LoadingSvg svgClassName="w-5 h-5 mr-2 !text-white" />
+          // <Spinner svgClassName="w-5 h-5 mr-2 !text-white" />
+          <Spinner />
         ) : (
           <button className="flex px-[2px]" onClick={() => commitChain()}>
             <span className="material-icons-outlined text-xl leading-none text-gray-400 hover:text-gray-500 mix-blend-multiply">
@@ -78,7 +93,8 @@ const SidebarItemPanel = ({ item }: { item: NoteDraftEntryFragment }) => {
         ))}
 
       {isDeleting ? (
-        <LoadingSvg svgClassName="w-5 h-5 mr-2 !text-white" />
+        // <Spinner svgClassName="w-5 h-5 mr-2 !text-white" />
+        <Spinner />
       ) : (
         <button
           className="flex-1 flex px-[2px] !pointer-events-auto disabled:bg-transparent disabled:!cursor-not-allowed text-gray-400 disabled:text-gray-300 hover:text-gray-500 

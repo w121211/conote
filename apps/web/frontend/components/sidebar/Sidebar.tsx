@@ -5,12 +5,19 @@ import React, {
   useRef,
 } from 'react'
 import { useObservable } from '@ngneat/react-rxjs'
-import { editorChainsRefresh } from '../../events'
-import { editorRepo } from '../../stores/editor.repository'
+import {
+  docGetOrCreate,
+  editorChainsRefresh,
+} from '../editor-textarea/src/events'
+import { editorRepo } from '../editor-textarea/src/stores/editor.repository'
 import SidebarSection from './sidebar-section'
-import { siderRepo } from '../../../../../stores/sider.repository'
+import { siderRepo } from '../../stores/sider.repository'
 import { setProps } from '@ngneat/elf'
 import Link from 'next/link'
+import { SearcherProps } from '../../interfaces'
+import { useRouter } from 'next/router'
+import { getDraftPageURL } from '../../utils'
+import SearcherModal from '../search-all-modal/SearcherModal'
 
 /**
  * Call 'editorLeftSidebarRefresh' event on component mount to query required data.
@@ -18,15 +25,16 @@ import Link from 'next/link'
  * TODOS:
  * [] draft-entries sort by ?
  */
-const SidebarEl = forwardRef<
+const Sidebar = forwardRef<
   HTMLDivElement,
   {
     backgroundColor?: string
     onMouseEnter: (e: React.MouseEvent) => void
   }
 >((props, ref): JSX.Element | null => {
-  const { backgroundColor, onMouseEnter } = props,
-    [sidebar] = useObservable(editorRepo.leftSidebar$, {
+  const { backgroundColor, onMouseEnter } = props
+  const router = useRouter()
+  const [sidebar] = useObservable(editorRepo.leftSidebar$, {
       initialValue: null,
     }),
     [isOpen] = useObservable(siderRepo.isOpen$),
@@ -65,6 +73,17 @@ const SidebarEl = forwardRef<
 
   if (sidebar === null) return null
   if (chains === null) return null
+
+  async function redirectToDraftIdPage(symbol: string) {
+    // setLoading(true)
+    const doc = await docGetOrCreate(symbol)
+    router.push(getDraftPageURL(doc.noteDraftCopy.id))
+  }
+
+  const searcher: SearcherProps['searcher'] = {
+    searchRange: 'symbol',
+    onClickHit: hit => redirectToDraftIdPage(hit.str),
+  }
 
   return (
     <div
@@ -134,17 +153,20 @@ const SidebarEl = forwardRef<
 
       {/* <SidebarSection title="DELETED" items={sidebar.droppedItems} /> */}
 
-      <Link href="/draft">
+      {/* <Link href="/draft">
         <a className="block mx-4 mb-4">
           <button className="btn-primary w-full">New note</button>
         </a>
-      </Link>
+      </Link> */}
+      <div className="block mx-4 mb-4">
+        <SearcherModal searcher={searcher} createMode />
+      </div>
 
       <SidebarSection title="EDIT" chains={chains} />
     </div>
   )
 })
 
-SidebarEl.displayName = 'SidebarEl'
+Sidebar.displayName = 'Sidebar'
 
-export default SidebarEl
+export default Sidebar

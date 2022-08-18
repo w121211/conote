@@ -12,24 +12,12 @@ import ParseRenderEl from '../inline/parse-render-el'
 
 function buildComponents(blockUid: string) {
   const components: ReactMarkdownOptions['components'] = {
-    h1: ({ children, ...props }) => {
-      return (
-        <h2 {...props} className="text-gray-600 mb-4">
-          {children}
-        </h2>
-      )
-    },
-    h2: 'h3',
-    strong: ({ children, ...props }) => {
-      return (
-        <strong {...props} className="text-gray-600">
-          {children}
-        </strong>
-      )
-    },
+    h4: 'h3',
+    h5: 'h3',
+    h6: 'h3',
     p: ({ node, children, ...props }) => {
       return (
-        <p {...props} className="mt-0 mb-3 text-gray-700 leading-5">
+        <p {...props}>
           {children.map((e, i) => {
             if (typeof e === 'string') {
               return (
@@ -75,14 +63,16 @@ const Indenter = ({ indenter }: { indenter: ElementIndenter }) => {
 
   return (
     <div
-      style={{ marginLeft }}
-      // className="relative rounded-lg leading-relaxed"
+    // style={{ marginLeft }}
+    // className="relative rounded-lg leading-relaxed"
     >
       {str === '' ? (
         <span className="text-gray-400">...</span>
       ) : (
         // <ReactMarkdown>{str}</ReactMarkdown>
-        <ReactMarkdown components={buildComponents(uid)}>{str}</ReactMarkdown>
+        <ReactMarkdown components={buildComponents(uid)} className="markdown">
+          {str}
+        </ReactMarkdown>
         // <div>{str}</div>
       )}
     </div>
@@ -97,10 +87,32 @@ const BlocksViewer = ({
   blocks,
 }: {
   blocks: Omit<Block, 'childrenUids'>[]
-}): JSX.Element => {
+}) => {
   const [root, ...rest] = blocksToIndenters(blocks)
   // const nodes = treeUtil.toTreeNodeBodyList(blocks)
   // const root = treeUtil.buildFromList(nodes)
+
+  // const s = rest
+  //   .map(
+  //     ({ blockCopy, indent }) =>
+  //       '&nbsp;&nbsp;'.repeat(indent) + blockCopy?.str ?? '',
+  //   )
+  //   .join('\n\n')
+  const s = rest
+    .map(({ blockCopy, indent }) => {
+      if (blockCopy && blockCopy.str.length > 0) {
+        return blockCopy.str
+      }
+      return '...'
+    })
+    .join('\n\n\n')
+  // console.log(s)
+
+  return (
+    <ReactMarkdown components={buildComponents('uid')} className="markdown">
+      {s}
+    </ReactMarkdown>
+  )
 
   return (
     <>

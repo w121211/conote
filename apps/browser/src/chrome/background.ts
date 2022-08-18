@@ -1,104 +1,104 @@
-import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
+import type { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 // import browser from 'webextension-polyfill'
 import {
   LinkDocument,
   LinkQuery,
   LinkQueryVariables,
 } from '../../../web/apollo/query.graphql'
-import apolloClient from '../apollo-client'
+// import apolloClient from '../apollo-client'
 
-const RateMenu = {
-  id: 'conote-menu-rate',
+// const RateMenu = {
+//   id: 'conote-menu-rate',
 
-  setup(): void {
-    chrome.contextMenus.create(
-      {
-        id: this.id,
-        // title: browser.i18n.getMessage('menuItemRemoveMe'),
-        title: 'rate',
-        contexts: ['selection'], // show only if selection exist
-      },
-      () => {
-        console.log('menu created')
-      },
-    )
+//   setup(): void {
+//     chrome.contextMenus.create(
+//       {
+//         id: this.id,
+//         // title: browser.i18n.getMessage('menuItemRemoveMe'),
+//         title: 'rate',
+//         contexts: ['selection'], // show only if selection exist
+//       },
+//       () => {
+//         console.log('menu created')
+//       },
+//     )
 
-    /**
-     * when user click menu, get user's selection
-     *
-     */
-    chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-      console.log(info, tab)
-      if (info.menuItemId === 'conote-rate') {
-        console.log(info, tab)
-        console.log(info.selectionText, info.pageUrl)
-      }
+//     /**
+//      * when user click menu, get user's selection
+//      *
+//      */
+//     chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+//       console.log(info, tab)
+//       if (info.menuItemId === 'conote-rate') {
+//         console.log(info, tab)
+//         console.log(info.selectionText, info.pageUrl)
+//       }
 
-      const params = new URLSearchParams({
-        url: info.pageUrl ?? '',
-        text: info.selectionText ?? '',
-      })
-      // const tabUrl = encodeURIComponent(tab.url ?? '')
+//       const params = new URLSearchParams({
+//         url: info.pageUrl ?? '',
+//         text: info.selectionText ?? '',
+//       })
+//       // const tabUrl = encodeURIComponent(tab.url ?? '')
 
-      const window = await chrome.windows.create({
-        // type: 'popup',
-        // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
-        // url: 'http://localhost:3000/card/' + encodeUri,
-        url: `${process.env.APP_BASE_URL}/lab/rate?${params.toString()}`,
-        // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
-        width: 500,
-        height: 900,
-        left: 100,
-      })
+//       const window = await chrome.windows.create({
+//         // type: 'popup',
+//         // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
+//         // url: 'http://localhost:3000/card/' + encodeUri,
+//         url: `${process.env.APP_BASE_URL}/lab/rate?${params.toString()}`,
+//         // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
+//         width: 500,
+//         height: 900,
+//         left: 100,
+//       })
 
-      // browser.search.search({
-      //   query: info.selectionText ?? '',
-      //   engine: info.menuItemId,
-      // })
-    })
-  },
-}
+//       // browser.search.search({
+//       //   query: info.selectionText ?? '',
+//       //   engine: info.menuItemId,
+//       // })
+//     })
+//   },
+// }
 
-const SearchMenu = {
-  id: 'conote-menu-search',
+// const SearchMenu = {
+//   id: 'conote-menu-search',
 
-  setup(): void {
-    chrome.contextMenus.create(
-      {
-        id: this.id,
-        title: 'Search [[%s]]',
-        contexts: ['selection'], // show only if selection exist
-      },
-      () => {
-        console.log('menu created')
-      },
-    )
+//   setup(): void {
+//     chrome.contextMenus.create(
+//       {
+//         id: this.id,
+//         title: 'Search [[%s]]',
+//         contexts: ['selection'], // show only if selection exist
+//       },
+//       () => {
+//         console.log('menu created')
+//       },
+//     )
 
-    chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-      // console.log(info, tab)
-      // if (info.menuItemId === this.id) {
-      //   console.log(info, tab)
-      //   console.log(info.selectionText, info.pageUrl)
-      // }
+//     chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+//       // console.log(info, tab)
+//       // if (info.menuItemId === this.id) {
+//       //   console.log(info, tab)
+//       //   console.log(info.selectionText, info.pageUrl)
+//       // }
 
-      if (info.menuItemId === this.id && info.selectionText) {
-        // const params = new URLSearchParams({
-        //   url: info.pageUrl ?? '',
-        //   text: info.selectionText ?? '',
-        // })
-        // const tabUrl = encodeURIComponent(tab.url ?? '')
-        const window = await chrome.windows.create({
-          // type: 'popup',
-          // url: encodeURIComponent(`${process.env.APP_BASE_URL}/card/[[${info.selectionText}]]`),
-          url: `${process.env.APP_BASE_URL}/card/[[${info.selectionText}]]`,
-          width: 500,
-          height: 900,
-          left: 100,
-        })
-      }
-    })
-  },
-}
+//       if (info.menuItemId === this.id && info.selectionText) {
+//         // const params = new URLSearchParams({
+//         //   url: info.pageUrl ?? '',
+//         //   text: info.selectionText ?? '',
+//         // })
+//         // const tabUrl = encodeURIComponent(tab.url ?? '')
+//         const window = await chrome.windows.create({
+//           // type: 'popup',
+//           // url: encodeURIComponent(`${process.env.APP_BASE_URL}/card/[[${info.selectionText}]]`),
+//           url: `${process.env.APP_BASE_URL}/card/[[${info.selectionText}]]`,
+//           width: 500,
+//           height: 900,
+//           left: 100,
+//         })
+//       }
+//     })
+//   },
+// }
 
 // let menuId: number | string | null = null // ID to manage the context menu entry
 
@@ -132,6 +132,18 @@ const SearchMenu = {
 //         menuId = browser.menus.create(options)
 //       }
 //     }
+//   }
+// })
+
+/**
+ * Listen for messages sent from other parts of the extension
+ */
+// browser.runtime.onMessage.addListener((request: { popupMounted: boolean }) => {
+//   // Log statement if request.popupMounted is true
+//   // NOTE: this request is sent in `popup/component.tsx`
+//   if (request.popupMounted) {
+//     console.log('backgroundPage notified that Popup.tsx has mounted.')
+//     console.log('hello world')
 //   }
 // })
 
@@ -205,45 +217,16 @@ function setupBrowserActions() {
     } else {
       console.debug('tab.url is undefined')
     }
-
-    //   const params = new URLSearchParams({
-    //     s: tab.url ?? '',
-    //     title: tab.title ?? '',
-    //   })
-    //   // const tabUrl = encodeURIComponent(tab.url ?? '')
-
-    //   const window = await chrome.windows.create({
-    //     // type: 'popup',
-    //     // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
-    //     // url: 'http://localhost:3000/card/' + encodeUri,
-    //     url: `${process.env.APP_BASE_URL}/card?${params.toString()}`,
-    //     // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
-    //     width: 500,
-    //     height: 900,
-    //     left: 100,
-    //   })
   })
 }
-
-/**
- * Listen for messages sent from other parts of the extension
- */
-// browser.runtime.onMessage.addListener((request: { popupMounted: boolean }) => {
-//   // Log statement if request.popupMounted is true
-//   // NOTE: this request is sent in `popup/component.tsx`
-//   if (request.popupMounted) {
-//     console.log('backgroundPage notified that Popup.tsx has mounted.')
-//     console.log('hello world')
-//   }
-// })
 
 /**
  * Main entry
  */
 function main(): void {
   // setupBadge(apolloClient)
+  // SearchMenu.setup()
   setupBrowserActions()
-  SearchMenu.setup()
 }
 
 main()

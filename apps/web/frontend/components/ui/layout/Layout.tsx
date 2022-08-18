@@ -1,7 +1,7 @@
 import { setProp, setProps } from '@ngneat/elf'
 import { useObservable } from '@ngneat/react-rxjs'
 import React, { useEffect, useRef, useState } from 'react'
-import SidebarEl from '../../editor-textarea/src/components/sidebar/sidebar-el'
+import Sidebar from '../../sidebar/Sidebar'
 import Navbar from '../../Navbar'
 import { siderRepo } from '../../../stores/sider.repository'
 
@@ -50,7 +50,7 @@ const Layout = ({
 
   return (
     <div className="flex-1 relative min-h-0 grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] [grid-template-areas:'nav_nav''sider_children'] w-screen">
-      <SidebarEl
+      <Sidebar
         ref={siderRef}
         backgroundColor={backgroundColor}
         onMouseEnter={() => {

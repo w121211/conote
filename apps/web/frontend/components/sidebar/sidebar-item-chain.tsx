@@ -2,9 +2,12 @@ import { useObservable } from '@ngneat/react-rxjs'
 import Link from 'next/link'
 import React from 'react'
 import { UrlObject } from 'url'
-import { NoteDraftEntryFragment } from '../../../../../../apollo/query.graphql'
-import { getDraftPageURL } from '../../../../../utils'
-import { editorRepo } from '../../stores/editor.repository'
+import {
+  CommitFragment,
+  NoteDraftEntryFragment,
+} from '../../../apollo/query.graphql'
+import { getDraftPageURL } from '../../utils'
+import { editorRepo } from '../editor-textarea/src/stores/editor.repository'
 import SidebarItemPanel from './sidebar-item-panel'
 
 const ItemLabel = ({
@@ -104,16 +107,20 @@ const SidebarItem = ({
   )
 }
 
+type Props = {
+  itemFirst: NoteDraftEntryFragment
+  itemsRest: NoteDraftEntryFragment[]
+  onCommitCompleted?: (data: CommitFragment) => void
+}
+
 /**
  *
  */
 const SidebarItemChain = ({
   itemFirst,
   itemsRest,
-}: {
-  itemFirst: NoteDraftEntryFragment
-  itemsRest: NoteDraftEntryFragment[]
-}): JSX.Element | null => {
+  onCommitCompleted,
+}: Props): JSX.Element | null => {
   const [tab] = useObservable(editorRepo.tab$),
     { symbol, title, id } = itemFirst
 
@@ -135,7 +142,10 @@ const SidebarItemChain = ({
             <ItemLabel symbol={symbol} title={title ?? undefined} />
           </span>
 
-          <SidebarItemPanel item={itemFirst} />
+          <SidebarItemPanel
+            item={itemFirst}
+            onCommitCompleted={onCommitCompleted}
+          />
         </a>
       </Link>
 

@@ -1,15 +1,15 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import SidebarEl from '../../frontend/components/editor-textarea/src/components/sidebar/sidebar-el'
+import Sidebar from '../../frontend/components/sidebar/Sidebar'
 import { ThemeProvider } from '../../frontend/components/theme/theme-provider'
 
 export default {
-  component: SidebarEl,
-} as ComponentMeta<typeof SidebarEl>
+  component: Sidebar,
+} as ComponentMeta<typeof Sidebar>
 
-const Template: ComponentStory<typeof SidebarEl> = args => (
+const Template: ComponentStory<typeof Sidebar> = args => (
   // <ThemeProvider>
-  <SidebarEl {...args} />
+  <Sidebar {...args} />
   // </ThemeProvider>
 )
 

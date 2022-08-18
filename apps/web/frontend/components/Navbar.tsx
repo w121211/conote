@@ -2,10 +2,10 @@ import { setProps } from '@ngneat/elf'
 import React, { ReactNode } from 'react'
 import Link from 'next/link'
 import { siderRepo } from '../stores/sider.repository'
-import { CommitPanel } from './commit/commit-panel'
-import AuthItem from './auth/auth-el'
+import CommitSubmitModal from './commit/CommitSubmitModal'
+import AuthDropdownMenu from './auth/AuthDropdownMenu'
 import { useMeContext } from './auth/use-me-context'
-import SearcherModal from './search-all-modal/searcher-modal'
+import SearcherModal from './search-all-modal/SearcherModal'
 
 const Navbar = ({ rightBtn }: { rightBtn?: ReactNode }) => {
   const { me } = useMeContext()
@@ -34,19 +34,17 @@ const Navbar = ({ rightBtn }: { rightBtn?: ReactNode }) => {
           {/* <SearchAllModal /> */}
         </div>
       </div>
-      {/* {navPath} */}
 
       <div className="flex items-center gap-2 mr-4 right-0">
         {rightBtn}
 
         {me ? (
           <div className="flex items-center gap-4 text-sm">
-            {/* <button className="btn-primary">Commit</button> */}
-            <CommitPanel />
-            <AuthItem />
+            <CommitSubmitModal />
+            <AuthDropdownMenu />
           </div>
         ) : (
-          <AuthItem />
+          <AuthDropdownMenu />
         )}
 
         {/* <ThemeToggle /> */}

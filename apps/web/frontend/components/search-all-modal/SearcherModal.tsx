@@ -124,8 +124,8 @@ const SymbolCreate = ({
           role="option"
           aria-selected={selectedIdx === 0}
         >
-          <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
-            create symbol
+          <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 font-bold">
+            CREATE DRAFT
           </span>
           <span className="text-gray-800 dark:text-gray-200 font-bold">
             {inputValue}
@@ -149,7 +149,7 @@ const SymbolCreate = ({
  * If provide `onClick-` events, searcher renders hit items to buttons, otherwise renders to href links.
  *
  */
-const SearcherModal = ({ searcher }: SearcherProps) => {
+const SearcherModal = ({ searcher, createMode }: SearcherProps) => {
   const { onClickHit, onClickSymbolCreate } = searcher
 
   const router = useRouter(),
@@ -279,49 +279,18 @@ const SearcherModal = ({ searcher }: SearcherProps) => {
     // setKeyArrow(false)
   }, [arrowKeyDown, inputValue])
 
-  const props: HitItemProps = {
-    inputValue,
-    searchSymbolHits: qSearchSymbol.data?.searchSymbol ?? [],
-    selectedIdx,
-    onMouseLeave,
-    onMouseMove,
-    setShowModal,
-  }
+  const searchSymbolHits = qSearchSymbol.data?.searchSymbol ?? [],
+    props: HitItemProps = {
+      inputValue,
+      searchSymbolHits,
+      selectedIdx,
+      onMouseLeave,
+      onMouseMove,
+      setShowModal,
+    }
 
   return (
     <>
-      <button
-        className="
-          flex items-center 
-          w-full
-          p-1
-          border-gray-200 dark:border-gray-500
-          rounded
-          
-          hover:bg-gray-200/70
-          transition-['background-color']
-          duration-200
-          text-sm
-          capitalize"
-        onClick={() => setShowModal(true)}
-      >
-        <span className="material-icons-outlined mr-1 text-xl text-gray-400 leading-none">
-          add
-        </span>
-        <div className="flex-1 flex">
-          <span className="flex-grow mr-10 text-left text-gray-400">
-            Add note
-          </span>
-          {/* <span className="text-gray-500 dark:text-gray-300">
-            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
-              {keyPrefix}
-            </kbd>
-            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
-              K
-            </kbd>
-          </span> */}
-        </div>
-      </button>
       <Modal
         sectionClassName={`dark:bg-gray-700 !w-[600px] searchModal ${classes.searchModal}`}
         visible={showModal}
@@ -359,7 +328,7 @@ const SearcherModal = ({ searcher }: SearcherProps) => {
                 </>
               ) : (
                 // TODO
-                <div>Empty</div>
+                <div className="h-10" />
               )}
               {/* ) : (
                 // recent list
@@ -416,6 +385,35 @@ const SearcherModal = ({ searcher }: SearcherProps) => {
           </footer>
         </div>
       </Modal>
+
+      <button
+        className="flex items-center min-w-full p-1 border-gray-200 rounded dark:border-gray-500 hover:bg-gray-200/70 transition-['background-color'] duration-200 text-sm"
+        onClick={() => setShowModal(true)}
+      >
+        {createMode ? (
+          <span className="material-icons-outlined mr-1 text-xl text-gray-400 leading-none">
+            add
+          </span>
+        ) : (
+          <span className="material-icons-outlined mr-1 text-xl text-gray-400 leading-none">
+            search
+          </span>
+        )}
+
+        <div className="flex-1 flex">
+          <span className="flex-grow mr-10 text-left text-gray-400">
+            {createMode ? 'New Draft' : 'Search'}
+          </span>
+          {/* <span className="text-gray-500 dark:text-gray-300">
+            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
+              {keyPrefix}
+            </kbd>
+            <kbd className="inline-flex justify-center min-w-[20px] mr-[2px] px-1 py-[2px] rounded-sm bg-gray-300/70 dark:bg-gray-600 font-sans text-xs leading-none">
+              K
+            </kbd>
+          </span> */}
+        </div>
+      </button>
     </>
   )
 }

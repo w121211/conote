@@ -7,7 +7,7 @@ import {
   DiscussFragment,
 } from '../apollo/query.graphql'
 import { getApolloClientSSR } from '../apollo/apollo-client-ssr'
-import { LatestDiscussTile } from '../frontend/components/latest-discuss-tile'
+import DiscussList from '../frontend/components/discuss/DiscussList'
 
 type Props = {
   discussesLatest: DiscussFragment[]
@@ -16,10 +16,12 @@ type Props = {
 const HomePage = ({ discussesLatest }: Props) => {
   return (
     <div className="flex justify-center pb-[9vh]">
-      <div className="flex-1 flex flex-col items-center md:items-start md:flex-row md:justify-between  gap-6">
-        <LatestDiscussTile data={discussesLatest} />
-        {/* <UserRateTable data={mockRateData} /> */}
+      {/* <div className="flex-1 flex flex-col items-center md:items-start md:flex-row md:justify-between gap-6"> */}
+      <div className="flex-1 flex flex-col items-start md:justify-between gap-6">
+        <DiscussList discusses={discussesLatest} />
       </div>
+      {/* <UserRateTable data={mockRateData} /> */}
+      {/* </div> */}
     </div>
   )
 }
@@ -28,7 +30,7 @@ export async function getServerSideProps({
   res,
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> {
   const client = getApolloClientSSR(),
-    { data } = await client.query<
+    qDiscussesLatest = await client.query<
       DiscussesLatestQuery,
       DiscussesLatestQueryVariables
     >({ query: DiscussesLatestDocument })
@@ -41,7 +43,7 @@ export async function getServerSideProps({
 
   return {
     props: {
-      discussesLatest: data.discussesLatest,
+      discussesLatest: qDiscussesLatest.data.discussesLatest,
     },
   }
 }

@@ -2,6 +2,7 @@ import type { ApolloError } from '@apollo/client'
 import type { NextRouter } from 'next/router'
 import type { UrlObject } from 'url'
 import type { CommitInputErrorItem } from '../lib/interfaces'
+import type { LoggedInUser } from './components/auth/auth.service'
 
 //
 // Page URLs
@@ -108,4 +109,10 @@ export function getCommitInputErrorItems(
     return items
   }
   return null
+}
+
+export function shortenUserId(userId: string, me: LoggedInUser | null): string {
+  const isMe = me?.id === userId
+
+  return `@${userId.slice(-6)}${isMe ? ' / You' : ''}`
 }

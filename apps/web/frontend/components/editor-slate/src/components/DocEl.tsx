@@ -11,7 +11,7 @@ import EditorEl from './EditorEl'
 import Link from 'next/link'
 import DocHead from '../../../editor-textarea/src/components/doc/DocHead'
 import { docRepo } from '../../../editor-textarea/src/stores/doc.repository'
-import BlocksViewer from '../../../editor-textarea/src/components/block/blocks-viewer'
+import BlocksViewer from '../../../editor-textarea/src/components/block/BlocksViewer'
 import { getNotePageURL } from '../../../../utils'
 
 /**

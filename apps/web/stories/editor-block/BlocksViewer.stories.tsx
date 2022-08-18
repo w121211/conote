@@ -1,6 +1,6 @@
 import { ComponentMeta } from '@storybook/react'
 import React from 'react'
-import BlocksViewer from '../../frontend/components/editor-textarea/src/components/block/blocks-viewer'
+import BlocksViewer from '../../frontend/components/editor-textarea/src/components/block/BlocksViewer'
 import { mockDocBlock_contentBlocks } from '../../frontend/components/editor-textarea/test/__mocks__/mock-block'
 
 export default {
@@ -18,6 +18,7 @@ export default {
 
 export const Basic = () => (
   <div className="container mx-auto p-[100px]">
-    <BlocksViewer blocks={mockDocBlock_contentBlocks} />
+    {/* <BlocksViewer blocks={mockDocBlock_contentBlocks} /> */}
+    <button className="btn-normal">ABC</button>
   </div>
 )
