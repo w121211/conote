@@ -1,10 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { AuthenticationError } from 'apollo-server-micro'
+import { ApolloError, AuthenticationError } from 'apollo-server-micro'
 import { serialize } from 'cookie'
-import { auth } from 'firebase-admin'
+import { auth, firestore } from 'firebase-admin'
 import { DecodedIdToken } from 'firebase-admin/auth'
 import { getFirebaseAdmin } from './firebase-admin'
 import { mockUsers } from '../../test/__mocks__/user.mock'
+
+class InvitationError extends ApolloError {
+  constructor(message: string) {
+    super(message, 'NOT_INVITED')
+    Object.defineProperty(this, 'name', { value: 'InvitationError' })
+  }
+}
 
 const TOKEN_NAME = 'session'
 
@@ -49,6 +56,20 @@ export async function isAuthenticated(
 
 /**
  *
+ * References:
+ * - Firestore API https://googleapis.dev/nodejs/firestore/latest/
+ * - Example code https://github.com/firebase/snippets-node/blob/master/firestore/main/index.js
+ */
+async function isUserInvited(email: string) {
+  const docRef = firestore().doc(`invitedEmails/${email}`)
+  const doc = await docRef.get()
+  console.log(doc)
+
+  return doc.exists
+}
+
+/**
+ *
  */
 export async function sessionLogin(
   req: NextApiRequest,
@@ -73,6 +94,13 @@ export async function sessionLogin(
   // The session cookie will have the same claims as the ID token.
   // We could also choose to enforce that the ID token auth_time is recent.
   const decodedClaims = await auth().verifyIdToken(idToken)
+
+  // Check is user invited, if not return error
+  if (decodedClaims.email && (await isUserInvited(decodedClaims.email))) {
+    // Do nothing, proceed
+  } else {
+    throw new InvitationError('Not invited')
+  }
 
   // In this case, we are enforcing that the user signed in in the last 5 minutes.
   if (new Date().getTime() / 1000 - decodedClaims.auth_time < 5 * 60) {

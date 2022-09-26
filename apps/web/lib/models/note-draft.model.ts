@@ -48,18 +48,19 @@ class NoteDraftModel {
     }
 
     const branch = await prisma.branch.findUnique({
-        where: { name: branchName },
-      }),
-      sym = symbol && (await prisma.sym.findUnique({ where: { symbol } })),
-      headDoc =
-        branch && sym ? await noteDocModel.getHeadDoc(branch.id, sym.id) : null,
-      link = linkId
-        ? await prisma.link.findUnique({ where: { id: linkId } })
-        : null
-
-    // const fromDoc = fromDocId
-    //   ? await prisma.noteDoc.findUnique({ where: { id: fromDocId } })
-    //   : null
+      where: { name: branchName },
+    })
+    const link = linkId
+      ? await prisma.link.findUnique({
+          where: { id: linkId },
+          include: { sym: true },
+        })
+      : null
+    const sym = symbol
+      ? await prisma.sym.findUnique({ where: { symbol } })
+      : link && link.sym
+    const headDoc =
+      branch && sym ? await noteDocModel.getHeadDoc(branch.id, sym.id) : null
 
     if (symbol === undefined && linkId === undefined)
       throw new Error('Param require either symbol or linkId.')
@@ -69,8 +70,6 @@ class NoteDraftModel {
     if (sym && fromDocId === undefined)
       throw new Error('Sym is found but not has from-doc.')
     if (linkId && link === null) throw new Error('Link not found.')
-    // if (fromDocId && fromDoc === null)
-    //   throw new Error('[NoteDraftModel.createByLink] From-doc not found.')
 
     return {
       branch,
@@ -244,7 +243,7 @@ class NoteDraftModel {
   /**
    *
    */
-  parseShallow<T extends NoteDraft>(draft: T): NoteDraftParsed<T> {
+  parseLazy<T extends NoteDraft>(draft: T): NoteDraftParsed<T> {
     return {
       ...draft,
       meta: draft.meta as unknown as NoteDraftMeta,
@@ -254,10 +253,10 @@ class NoteDraftModel {
   }
 
   /**
-   * TODO: validate content head, content body
+   * TODO: Validate content head, content body
    */
-  parseDeep<T extends NoteDraft>(draft: T) {
-    const draft_ = this.parseShallow(draft),
+  parseReal<T extends NoteDraft>(draft: T) {
+    const draft_ = this.parseLazy(draft),
       { discussIds, ...rest } = parseBlockValues(draft_.contentBody.blocks)
 
     const draftParsed: NoteDraftParsed<T> = {
@@ -289,7 +288,7 @@ class NoteDraftModel {
   toGQLNoteDraft(draft: NoteDraft & { branch: Branch | null }): GQLNoteDraft {
     if (draft.branch === null) throw new Error('draft.branch ==== null')
     const draft_ = {
-      ...this.parseShallow(draft),
+      ...this.parseLazy(draft),
       branchName: draft.branch.name,
     }
     return toStringProps(draft_)

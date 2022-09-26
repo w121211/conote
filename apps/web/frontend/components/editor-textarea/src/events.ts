@@ -7,7 +7,7 @@ import type {
   NoteDraftFragment,
   NoteFragment,
 } from '../../../../apollo/query.graphql'
-import { parseSymbol } from '../../../../share/symbol.common'
+import { parseSymbol, toURLSymbol } from '../../../../share/symbol.common'
 import {
   editingFocus,
   routeUpdateShallow,
@@ -716,6 +716,37 @@ function docLoadFromDraft(draft: NoteDraftFragment, note: NoteFragment | null) {
   return doc
 }
 
+async function getOrCreateDocByUrl(
+  url: URL,
+  branch = 'default',
+  domain = 'domain',
+) {
+  const link = await linkService.getOrCreateLink(url.href)
+  const symbol = toURLSymbol(link.url)
+
+  const doc = docRepo.findDoc({ symbol })
+  if (doc !== null) return doc
+
+  const [queriedNote, queriedDraft] = await Promise.all([
+    noteService.queryNote(symbol, 'network-only'),
+    noteDraftService.queryDraft(symbol, 'network-only'),
+  ])
+  if (queriedDraft !== null) return docLoadFromDraft(queriedDraft, queriedNote)
+
+  const symbolParsed = parseSymbol(symbol)
+  const { draftInput } = genNewDoc(symbolParsed, domain, queriedNote, link)
+  const draft = await noteDraftService.createDraftByLink(
+    branch,
+    link.id,
+    draftInput,
+  )
+  const newDoc = docLoadFromDraft(draft, queriedNote)
+
+  await editorChainsRefresh('network-only')
+
+  return newDoc
+}
+
 /**
  * If doc is found in the repository (local memory), no need to query,
  *  otherwise, query remote's note, note-draft and then create a doc,
@@ -731,44 +762,34 @@ export async function docGetOrCreate(
   branch = 'default',
   domain = 'domain',
 ): Promise<Doc> {
+  // If local-doc found, do nothing.
+  //
   const doc = docRepo.findDoc({ symbol })
-  if (doc) return doc
+  if (doc !== null) return doc
 
-  // console.time('noteService.queryNote')
-  const [note, draft] = await Promise.all([
+  // If local-doc not found, find remote's draft.
+  //
+  const [queriedNote, queriedDraft] = await Promise.all([
     noteService.queryNote(symbol, 'network-only'),
     noteDraftService.queryDraft(symbol, 'network-only'),
   ])
-  // console.timeEnd('noteService.queryNote')
+  if (queriedDraft !== null) return docLoadFromDraft(queriedDraft, queriedNote)
 
-  if (draft !== null) {
-    return docLoadFromDraft(draft, note)
-  } else {
-    const symbol_ = parseSymbol(symbol),
-      link =
-        symbol_.url !== undefined &&
-        (await linkService.createLink(symbol_.url.href)),
-      symbol__ = link ? `[[${link.url}]]` : symbol_.symbol
+  // If remote's draft not found, create draft & local-doc from note's head-doc.
+  //
+  const symbolParsed = parseSymbol(symbol)
 
-    // Create a temporary doc (without draft) and use it to create the draft, then save the doc to the repo with the just created draft.
-    const { draftInput } = genNewDoc(
-        symbol__,
-        symbol_.type,
-        domain,
-        note,
-        link ? link : undefined,
-      ),
-      draft = link
-        ? await noteDraftService.createDraftByLink(branch, link.id, draftInput)
-        : await noteDraftService.createDraft(branch, symbol__, draftInput),
-      newDoc = docLoadFromDraft(draft, note)
+  if (symbolParsed.url)
+    return getOrCreateDocByUrl(symbolParsed.url, branch, domain)
 
-    // console.time('editorChainsRefresh')
-    await editorChainsRefresh('network-only')
-    // console.timeEnd('editorChainsRefresh')
+  // Create a temporary doc (without draft) and use it to create the draft, then save the doc to the repo with the just created draft.
+  const { draftInput } = genNewDoc(symbolParsed, domain, queriedNote)
+  const draft = await noteDraftService.createDraft(branch, symbol, draftInput)
+  const newDoc = docLoadFromDraft(draft, queriedNote)
 
-    return newDoc
-  }
+  await editorChainsRefresh('network-only')
+
+  return newDoc
 }
 
 /**
@@ -1253,6 +1274,7 @@ export async function editorChainCommit(draftId: string) {
   const commit = await commitService.createCommit(entries.map(e => e.id))
   commitSuccessClean(commit.noteDocs)
   await editorChainsRefresh('network-only')
+  await commitService.queryCommitsByUser(commit.userId)
 
   return commit
 }

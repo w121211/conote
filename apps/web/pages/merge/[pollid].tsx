@@ -1,6 +1,7 @@
 import { isNil } from 'lodash'
 import moment from 'moment'
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import Link from 'next/link'
 import React from 'react'
 import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import {
@@ -9,10 +10,10 @@ import {
   PollQuery,
   PollQueryVariables,
 } from '../../apollo/query.graphql'
-import NoteDocLink from '../../frontend/components/note/note-doc-link'
+import { useMeContext } from '../../frontend/components/auth/use-me-context'
 import MergePollVoteForm from '../../frontend/components/poll/merge-poll-vote-form'
-import UserLink from '../../frontend/components/user/user-link'
 import { AppPageProps } from '../../frontend/interfaces'
+import { getNotePageURL, shortenUserId } from '../../frontend/utils'
 
 type Props = AppPageProps & {
   poll: PollFragment
@@ -21,6 +22,7 @@ type Props = AppPageProps & {
 }
 
 const MergePage = ({ poll }: Props): JSX.Element | null => {
+  const { me } = useMeContext()
   const { noteDocToMerge } = poll
 
   if (isNil(noteDocToMerge))
@@ -28,16 +30,52 @@ const MergePage = ({ poll }: Props): JSX.Element | null => {
 
   return (
     <>
-      <h4 className="mb-4">Merge request</h4>
-      <p>
-        <NoteDocLink doc={noteDocToMerge} /> wants to merge.
-      </p>
-      <p className="mb-4">
-        Committer <UserLink userId={noteDocToMerge.userId} />{' '}
-        <span className="text-sm text-gray-400">
+      <h1 className="mt-6 mb-4">
+        <span className="material-icons-outlined text-3xl align-bottom">
+          merge
+        </span>{' '}
+        Merge Request
+      </h1>
+
+      <div className="flex flex-col pb-4 gap-3 text-gray-800 dark:text-gray-400">
+        <p>
+          <span className="material-icons-outlined align-bottom mr-1">
+            description
+          </span>
+          <Link href={getNotePageURL(noteDocToMerge.symbol, noteDocToMerge.id)}>
+            <a className="link">
+              {noteDocToMerge.symbol}#{noteDocToMerge.id.slice(-6)}
+            </a>
+          </Link>
+
+          <span className="text-gray-500 italic">
+            {' '}
+            Click to see differences
+          </span>
+        </p>
+
+        <p>
+          <span className="material-icons-outlined align-bottom mr-1">
+            person
+          </span>
+          <Link
+            href={{
+              pathname: '/user/[userid]',
+              query: { userid: noteDocToMerge.userId },
+            }}
+          >
+            <a className="link">{shortenUserId(noteDocToMerge.userId, me)}</a>
+          </Link>
+        </p>
+
+        <p className="text-gray-600">
+          <span className="material-icons-outlined align-bottom mr-1">
+            schedule
+          </span>
           {moment(poll.createdAt).fromNow()}
-        </span>
-      </p>
+        </p>
+      </div>
+
       <MergePollVoteForm poll={poll} />
     </>
   )

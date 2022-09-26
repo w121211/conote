@@ -13,7 +13,7 @@ const MergePollAsync = ({
   mergePollId: string
 }): JSX.Element | null => {
   const { me } = useMeContext()
-  const { data, loading, error } = usePollQuery({
+  const { data, loading } = usePollQuery({
     variables: { id: mergePollId },
   })
 
@@ -29,7 +29,6 @@ const MergePollAsync = ({
 
   if (loading) return null
   if (data === undefined) throw new Error('data === undefined')
-  if (error) throw error
 
   const { poll } = data,
     { noteDocToMerge } = poll

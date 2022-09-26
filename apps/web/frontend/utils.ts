@@ -114,5 +114,5 @@ export function getCommitInputErrorItems(
 export function shortenUserId(userId: string, me: LoggedInUser | null): string {
   const isMe = me?.id === userId
 
-  return `@${userId.slice(-6)}${isMe ? ' / You' : ''}`
+  return `@${userId.slice(-6)}${isMe ? '(You)' : ''}`
 }

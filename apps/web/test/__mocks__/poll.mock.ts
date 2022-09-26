@@ -9,7 +9,7 @@ const mergePollBase: Omit<PollParsed<Poll>, 'count'> = {
   userId: mockBotUser.id,
   type: PollType.FIXED,
   status: PollStatus.OPEN,
-  meta: { openInDays: 5 },
+  meta: { openInDays: MERGE_POLL_V1_0.openInDays },
   choices: MERGE_POLL_V1_0.codes.map(e => e[0]),
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -19,6 +19,8 @@ export const mockMergePolls: Omit<PollParsed<Poll>, 'count'>[] = [
   {
     ...mergePollBase,
     id: '0-merge_poll',
+    createdAt: new Date(2022, 1, 1),
+    updatedAt: new Date(2022, 1, 1),
   },
   {
     ...mergePollBase,

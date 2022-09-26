@@ -1,0 +1,13 @@
+name: daily-cron
+on:
+  schedule:
+    - cron: '0 1 * * *' # Run daily at 1:00
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call API cron job
+        run: |
+          curl --request POST \
+          --url 'https://konote.one/api/cron' \
+          --header 'Authorization: Bearer ${{ secrets.APP_API_SECRET_CRON }}'

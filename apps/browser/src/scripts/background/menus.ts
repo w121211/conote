@@ -1,10 +1,8 @@
-import browser, { Menus, Tabs } from 'webextension-polyfill'
-
 const RateMenu = {
   id: 'conote-menu-rate',
 
   setup(): void {
-    browser.contextMenus.create(
+    chrome.contextMenus.create(
       {
         id: this.id,
         // title: browser.i18n.getMessage('menuItemRemoveMe'),
@@ -20,35 +18,35 @@ const RateMenu = {
      * when user click menu, get user's selection
      *
      */
-    browser.menus.onClicked.addListener(async (info, tab) => {
-      console.log(info, tab)
-      if (info.menuItemId === 'conote-rate') {
-        console.log(info, tab)
-        console.log(info.selectionText, info.pageUrl)
-      }
+    // chrome.menus.onClicked.addListener(async (info, tab) => {
+    //   console.log(info, tab)
+    //   if (info.menuItemId === 'conote-rate') {
+    //     console.log(info, tab)
+    //     console.log(info.selectionText, info.pageUrl)
+    //   }
 
-      const params = new URLSearchParams({
-        url: info.pageUrl ?? '',
-        text: info.selectionText ?? '',
-      })
-      // const tabUrl = encodeURIComponent(tab.url ?? '')
+    //   const params = new URLSearchParams({
+    //     url: info.pageUrl ?? '',
+    //     text: info.selectionText ?? '',
+    //   })
+    //   // const tabUrl = encodeURIComponent(tab.url ?? '')
 
-      const window = await browser.windows.create({
-        // type: 'popup',
-        // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
-        // url: 'http://localhost:3000/card/' + encodeUri,
-        url: `${process.env.APP_BASE_URL}/lab/rate?${params.toString()}`,
-        // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
-        width: 500,
-        height: 900,
-        left: 100,
-      })
+    //   const window = await chrome.windows.create({
+    //     // type: 'popup',
+    //     // url: browser.runtime.getURL('popup.html') + '?' + params.toString(),
+    //     // url: 'http://localhost:3000/card/' + encodeUri,
+    //     url: `${process.env.APP_BASE_URL}/lab/rate?${params.toString()}`,
+    //     // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
+    //     width: 500,
+    //     height: 900,
+    //     left: 100,
+    //   })
 
-      // browser.search.search({
-      //   query: info.selectionText ?? '',
-      //   engine: info.menuItemId,
-      // })
-    })
+    //   // browser.search.search({
+    //   //   query: info.selectionText ?? '',
+    //   //   engine: info.menuItemId,
+    //   // })
+    // })
   },
 }
 
@@ -56,7 +54,7 @@ const SearchMenu = {
   id: 'conote-menu-search',
 
   setup(): void {
-    browser.contextMenus.create(
+    chrome.contextMenus.create(
       {
         id: this.id,
         title: 'Search [[%s]]',
@@ -67,29 +65,31 @@ const SearchMenu = {
       // },
     )
 
-    browser.menus.onClicked.addListener(async (info, tab) => {
-      // console.log(info, tab)
-      // if (info.menuItemId === this.id) {
-      //   console.log(info, tab)
-      //   console.log(info.selectionText, info.pageUrl)
-      // }
+    // chrome.menus.onClicked.addListener(async (info, tab) => {
+    //   // console.log(info, tab)
+    //   // if (info.menuItemId === this.id) {
+    //   //   console.log(info, tab)
+    //   //   console.log(info.selectionText, info.pageUrl)
+    //   // }
 
-      if (info.menuItemId === this.id && info.selectionText) {
-        // const params = new URLSearchParams({
-        //   url: info.pageUrl ?? '',
-        //   text: info.selectionText ?? '',
-        // })
-        // const tabUrl = encodeURIComponent(tab.url ?? '')
-        const window = await browser.windows.create({
-          // type: 'popup',
-          // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
-          url: encodeURIComponent(`${process.env.APP_BASE_URL}/card/[[${info.selectionText}]]`),
-          width: 500,
-          height: 900,
-          left: 100,
-        })
-      }
-    })
+    //   if (info.menuItemId === this.id && info.selectionText) {
+    //     // const params = new URLSearchParams({
+    //     //   url: info.pageUrl ?? '',
+    //     //   text: info.selectionText ?? '',
+    //     // })
+    //     // const tabUrl = encodeURIComponent(tab.url ?? '')
+    //     const window = await browser.windows.create({
+    //       // type: 'popup',
+    //       // url: `${process.env.APP_BASE_URL}/card/${tabUrl}`,
+    //       url: encodeURIComponent(
+    //         `${process.env.APP_BASE_URL}/card/[[${info.selectionText}]]`,
+    //       ),
+    //       width: 500,
+    //       height: 900,
+    //       left: 100,
+    //     })
+    //   }
+    // })
   },
 }
 

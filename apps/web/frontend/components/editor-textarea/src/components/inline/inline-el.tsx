@@ -4,33 +4,39 @@ import { renderToken } from '../../parse-render'
 import InlineDiscussEl from './components/inline-discuss-el'
 import InlineSymbolEl from './components/inline-symbol-el'
 
-export type InlineElProps = {
+const el = React.createElement
+
+export interface InlineElProps {
   // (BUG) Add undefined to avoid type error when using React.createElement(...)
   children?: React.ReactNode
 
   blockUid: string
-  inline: InlineItem
+
+  inlineItem: InlineItem
 
   // If not given, assume the note is in editing
   isViewer?: true
 }
 
-const InlineEl = (props: InlineElProps): JSX.Element => {
-  const { inline, children, ...rest } = props,
-    { type, str } = inline,
-    token = useMemo(() => renderToken(inline.token), [inline]),
-    el = React.createElement
+const InlineEl = (props: InlineElProps) => {
+  const { inlineItem, isViewer, ...rest } = props
+  const { type, str } = inlineItem
+  const token = useMemo(
+    () => renderToken(inlineItem.token, isViewer),
+    [inlineItem, isViewer],
+  )
 
   switch (type) {
     case 'inline-discuss':
-      return el(InlineDiscussEl, { inline, ...rest }, token)
+      return el(InlineDiscussEl, { inlineItem, isViewer, ...rest }, token)
     case 'inline-symbol':
-      return el(InlineSymbolEl, { inline, ...rest }, token)
+      return el(InlineSymbolEl, { inlineItem, isViewer, ...rest }, token)
+    case 'inline-comment':
     case 'text':
-      return <span>{str}</span>
+      return token
     default: {
-      console.debug('[InlineEl] Not processed type: ' + type)
-      return <span>{str}</span>
+      console.debug('Not handled type: ' + type)
+      return token
     }
   }
 }

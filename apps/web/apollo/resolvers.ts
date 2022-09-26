@@ -1,5 +1,6 @@
 import type {
   Branch,
+  Commit,
   Discuss,
   DiscussCount,
   DiscussEmoji,
@@ -36,7 +37,6 @@ import {
 import {
   discussEmojiModel,
   discussPostEmojiModel,
-  noteEmojiModel,
 } from '../lib/models/emoji.model'
 import { CommitInputError, commitNoteDrafts } from '../lib/models/commit.model'
 import { noteDraftModel } from '../lib/models/note-draft.model'
@@ -46,7 +46,6 @@ import { noteDocModel } from '../lib/models/note-doc.model'
 import { pollVoteModel } from '../lib/models/poll-vote.model'
 import { isNil } from 'lodash'
 import { linkModel } from '../lib/models/link.model'
-import { LinkParsed } from '../lib/interfaces'
 
 export type ResolverContext = {
   req: NextApiRequest
@@ -134,20 +133,54 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     throw new Error('Commit not found')
   },
 
-  async commitsByUser(_parent, { userId, afterId }, _context, _info) {
-    const commits = await prisma.commit.findMany({
-      where: { userId },
-      include: { noteDocs: { include: { branch: true, sym: true } } },
-      orderBy: { createdAt: 'desc' },
-      cursor: afterId ? { id: afterId } : undefined,
-      take: 10,
-      skip: afterId ? 1 : 0,
-    })
-    return commits.map(commit => {
+  async commitsByUser(_parent, { userId, afterId, beforeId }, _context, _info) {
+    let commits: (Commit & {
+      noteDocs: (NoteDoc & { branch: Branch; sym: Sym })[]
+    })[]
+    let hasPrevious: boolean
+    let hasNext: boolean
+
+    if (afterId) {
+      commits = await prisma.commit.findMany({
+        where: { userId },
+        include: { noteDocs: { include: { branch: true, sym: true } } },
+        orderBy: { createdAt: 'desc' },
+        cursor: { id: afterId },
+        take: 11,
+        skip: 1,
+      })
+      hasPrevious = true
+      hasNext = commits.length === 11
+    } else if (beforeId) {
+      commits = await prisma.commit.findMany({
+        where: { userId },
+        include: { noteDocs: { include: { branch: true, sym: true } } },
+        orderBy: { createdAt: 'asc' },
+        cursor: { id: beforeId },
+        take: 11,
+        skip: 1,
+      })
+      commits.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // In-place sort result in descending order
+      hasPrevious = commits.length === 11
+      hasNext = true
+    } else {
+      commits = await prisma.commit.findMany({
+        where: { userId },
+        include: { noteDocs: { include: { branch: true, sym: true } } },
+        orderBy: { createdAt: 'desc' },
+        take: 11,
+      })
+      hasPrevious = false
+      hasNext = commits.length === 11
+    }
+
+    const commits_ = commits.map(commit => {
       const { noteDocs, ...rest } = toStringProps(commit),
         noteDocs_ = noteDocs.map(e => toGQLNoteDoc(e))
       return { ...rest, noteDocs: noteDocs_ }
     })
+
+    return { commits: commits_, hasNext, hasPrevious }
   },
 
   async discuss(_parent, { id }, _context, _info) {
@@ -164,46 +197,135 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     throw new Error('Discuss not found')
   },
 
-  async discussesByUser(_parent, { userId, afterId }, _context, _info) {
-    const discusses = await prisma.discuss.findMany({
+  async discussesByUser(
+    _parent,
+    { userId, afterId, beforeId },
+    _context,
+    _info,
+  ) {
+    let discussions: (Discuss & {
+      count: DiscussCount | null
+      notes: (Note & {
+        branch: Branch
+        sym: Sym
+        link: Link | null
+      })[]
+    })[]
+    let hasPrevious: boolean
+    let hasNext: boolean
+
+    if (afterId) {
+      discussions = await prisma.discuss.findMany({
         where: { userId },
         include: {
           count: true,
           notes: { include: { sym: true, branch: true, link: true } },
         },
-        orderBy: { updatedAt: 'desc' },
-        cursor: afterId ? { id: afterId } : undefined,
-        take: 10,
-        skip: afterId ? 1 : 0,
-      }),
-      discusses_ = discusses.map(discuss => {
-        if (discuss) {
-          return toGQLDiscuss(discuss)
-        }
-        throw new Error('Discuss not found')
+        orderBy: { createdAt: 'desc' },
+        cursor: { id: afterId },
+        take: 11,
+        skip: 1,
       })
-    return discusses_
+      hasPrevious = true
+      hasNext = discussions.length === 11
+    } else if (beforeId) {
+      discussions = await prisma.discuss.findMany({
+        where: { userId },
+        include: {
+          count: true,
+          notes: { include: { sym: true, branch: true, link: true } },
+        },
+        orderBy: { createdAt: 'asc' },
+        cursor: { id: beforeId },
+        take: 11,
+        skip: 1,
+      })
+      discussions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // In-place sort result in descending order
+      hasPrevious = discussions.length === 11
+      hasNext = true
+    } else {
+      discussions = await prisma.discuss.findMany({
+        where: { userId },
+        include: {
+          count: true,
+          notes: { include: { sym: true, branch: true, link: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 11,
+      })
+      hasPrevious = false
+      hasNext = discussions.length === 11
+    }
+
+    const discussions_ = discussions.map(discuss => {
+      if (discuss) return toGQLDiscuss(discuss)
+      throw new Error('Discuss not found')
+    })
+
+    return { discusses: discussions_, hasNext, hasPrevious }
   },
 
-  async discussesLatest(_parent, { afterId }, _context, _info) {
-    const discusses = await prisma.discuss.findMany({
+  async discussesLatest(_parent, { afterId, beforeId }, _context, _info) {
+    let discussions: (Discuss & {
+      count: DiscussCount | null
+      notes: (Note & {
+        branch: Branch
+        sym: Sym
+        link: Link | null
+      })[]
+    })[]
+    let hasPrevious: boolean
+    let hasNext: boolean
+
+    if (afterId) {
+      discussions = await prisma.discuss.findMany({
         where: { status: 'ACTIVE' },
         include: {
           count: true,
           notes: { include: { sym: true, branch: true, link: true } },
         },
-        orderBy: { updatedAt: 'desc' },
-        cursor: afterId ? { id: afterId } : undefined,
-        take: 10,
-        skip: afterId ? 1 : 0,
-      }),
-      discusses_ = discusses.map(discuss => {
-        if (discuss) {
-          return toGQLDiscuss(discuss)
-        }
-        throw new Error('Discuss not found')
+        orderBy: { createdAt: 'desc' },
+        cursor: { id: afterId },
+        take: 11,
+        skip: 1,
       })
-    return discusses_
+      hasPrevious = true
+      hasNext = discussions.length === 11
+    } else if (beforeId) {
+      discussions = await prisma.discuss.findMany({
+        where: { status: 'ACTIVE' },
+        include: {
+          count: true,
+          notes: { include: { sym: true, branch: true, link: true } },
+        },
+        orderBy: { createdAt: 'asc' },
+        cursor: { id: beforeId },
+        take: 11,
+        skip: 1,
+      })
+      discussions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // In-place sort result in descending order
+      hasPrevious = discussions.length === 11
+      hasNext = true
+    } else {
+      discussions = await prisma.discuss.findMany({
+        where: { status: 'ACTIVE' },
+        include: {
+          count: true,
+          notes: { include: { sym: true, branch: true, link: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 11,
+      })
+      hasPrevious = false
+      hasNext = discussions.length === 11
+    }
+
+    const discussions_ = discussions.map(discuss => {
+      if (discuss) return toGQLDiscuss(discuss)
+      throw new Error('Discuss not found')
+    })
+
+    return { discusses: discussions_, hasNext, hasPrevious }
   },
 
   async discussEmojis(_parent, { discussId }, _context, _info) {
@@ -374,7 +496,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         where: { userId: userId, status: 'EDIT' },
         orderBy: { createdAt: 'asc' },
       }),
-      parsed = drafts.map(e => noteDraftModel.parseShallow(e)),
+      parsed = drafts.map(e => noteDraftModel.parseLazy(e)),
       entries = parsed.map(
         ({ id, meta, status, symbol, contentHead: { title } }) => ({
           id,
@@ -481,6 +603,20 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     ).map(e =>
       toStringProps(noteDocModel.attachBranchSymbol(noteDocModel.parse(e))),
     )
+    return docs
+  },
+
+  async noteDocsLatest(_parent, { afterId }, _context, _info) {
+    const docs = (
+      await prisma.noteDoc.findMany({
+        where: { OR: [{ status: 'MERGED' }, { status: 'CANDIDATE' }] },
+        include: { branch: true, sym: true },
+        orderBy: { createdAt: 'desc' },
+        cursor: afterId ? { id: afterId } : undefined,
+        take: 30,
+        skip: afterId ? 1 : 0,
+      })
+    ).map(e => toGQLNoteDoc(e))
     return docs
   },
 
@@ -663,11 +799,18 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     const { userId } = await isAuthenticated(req)
 
     try {
-      const { commit, noteDocs, newSyms } = await commitNoteDrafts(
-        noteDraftIds,
-        userId,
-      )
+      const {
+        commit,
+        noteDocs,
+        newSyms,
+        drafts_discussesCreated_foundInBlocks,
+      } = await commitNoteDrafts(noteDraftIds, userId)
+
+      // Add new created items to searchers
       newSyms.forEach(e => symSearcher.add(e))
+      for (const a of drafts_discussesCreated_foundInBlocks) {
+        for (const b of a) discussSearcher.add(b)
+      }
 
       return {
         ...toStringProps(commit),
@@ -687,23 +830,23 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createDiscuss(_parent, { noteDraftId, data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      { title, content } = data,
-      discuss = await prisma.discuss.create({
-        data: {
-          user: { connect: { id: userId } },
-          // notes: noteId ? { connect: [{ id: noteId }] } : undefined,
-          draft: { connect: { id: noteDraftId } },
-          meta: {},
-          title,
-          content,
-          count: { create: {} },
-        },
-        include: {
-          count: true,
-          notes: { include: { branch: true, sym: true, link: true } },
-        },
-      })
+    const { userId } = await isAuthenticated(req)
+    const { title, content } = data
+    const discuss = await prisma.discuss.create({
+      data: {
+        user: { connect: { id: userId } },
+        // notes: noteId ? { connect: [{ id: noteId }] } : undefined,
+        draft: { connect: { id: noteDraftId } },
+        meta: {},
+        title,
+        content,
+        count: { create: {} },
+      },
+      include: {
+        count: true,
+        notes: { include: { branch: true, sym: true, link: true } },
+      },
+    })
 
     // TODO: Add to searchDiscussService
 
@@ -866,7 +1009,7 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     }))
   },
 
-  async createLink(_parent, { url }, { req }, _info) {
+  async getOrCreateLink(_parent, { url }, { req }, _info) {
     const { userId } = await isAuthenticated(req),
       [link] = await linkModel.getOrCreateLink(url)
     return link
@@ -977,23 +1120,19 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createPollVote(_parent, { pollId, data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      vote = await pollVoteModel.create({
-        choiceIdx: data.choiceIdx,
-        pollId,
-        userId,
-      })
+    const { userId } = await isAuthenticated(req)
+    const vote = await pollVoteModel.create(pollId, data.choiceIdx, userId)
     return toStringProps(vote)
   },
 
   async createRate(_parent, { data }, { req }, _info) {
     const { userId } = await isAuthenticated(req)
     const { choice, targetId, authorId, linkId } = data
-
     const note = await prisma.note.findUnique({
       where: { id: targetId },
       include: { sym: true },
     })
+
     if (note === null) throw 'Target note not found'
 
     const rate = await rateModel.create({

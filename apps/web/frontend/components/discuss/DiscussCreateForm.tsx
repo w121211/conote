@@ -12,22 +12,21 @@ interface FormInput {
   content?: string
 }
 
-type Props = {
+interface Props {
   // noteId?: string
   noteDraftId: string
   title: string
   onCreate: (data: DiscussFragment) => void
   // onEdit: (data: DiscussFragment) => void
+  onChangeTitleInput?: (v: string) => void
 }
 
-/**
- * If `disucss` is given, the form is to edit the discuss. Otherwise, the form is in creation.
- */
-const DiscussForm = ({
+const DiscussCreateForm = ({
   // noteId,
   noteDraftId,
   title,
   onCreate,
+  onChangeTitleInput,
 }: Props) => {
   const [createDiscuss] = useCreateDiscussMutation({
       onCompleted(data) {
@@ -87,24 +86,19 @@ const DiscussForm = ({
         <textarea
           {...register('title', { required: true })}
           className="input w-full text-gray-800 text-xl font-medium resize-none "
-          placeholder="Title"
+          placeholder="Your question"
           autoFocus
           disabled={isSubmitting}
+          onChange={e => {
+            if (onChangeTitleInput) onChangeTitleInput(e.target.value)
+          }}
         />
       </div>
       <textarea
         {...register('content')}
-        className={`
-              input
-              w-full 
-              min-h-[18px]
-              max-h-${'[' + maxTextareaHeight + ']'}px] 
-              resize-none 
-              align-top 
-              bg-gray-100 
-              hover:bg-gray-100
-             
-            `}
+        className={`input w-full min-h-[18px] max-h-${
+          '[' + maxTextareaHeight + ']'
+        }px] resize-none align-top bg-gray-100 hover:bg-gray-100`}
         placeholder="Add information to your question (optional)."
         ref={e => {
           contentRef(e)
@@ -114,7 +108,7 @@ const DiscussForm = ({
       />
       <div className=" text-center">
         <FormSubmitBtn size="lg" isDirty={isDirty}>
-          Create Discuss
+          Create discussion
         </FormSubmitBtn>
         {/* <button
           // form="create-discuss-form"
@@ -128,4 +122,4 @@ const DiscussForm = ({
   )
 }
 
-export default DiscussForm
+export default DiscussCreateForm

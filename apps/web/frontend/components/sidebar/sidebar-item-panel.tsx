@@ -7,38 +7,18 @@ import type {
   CommitFragment,
   NoteDraftEntryFragment,
 } from '../../../apollo/query.graphql'
-import { CommitInputErrorItem } from '../../../lib/interfaces'
-import { getCommitInputErrorItems, getCommitPageURL } from '../../utils'
+import { getCommitInputErrorItems } from '../../utils'
 import Spinner from '../ui/Spinner'
 import {
   editorChainCommit,
   editorChainItemRemove,
 } from '../editor-textarea/src/events'
 import { editorRepo } from '../editor-textarea/src/stores/editor.repository'
-
-const CommitInputErrorMsg = ({
-  items,
-  entries,
-}: {
-  items: CommitInputErrorItem[]
-  entries: NoteDraftEntryFragment[]
-}) => {
-  const items_ = items.map(e => {
-    const entry = entries.find(a => a.id === e.draftId)
-    if (entry === undefined)
-      throw new Error('Unexpected error: entry === undefined')
-    return { ...e, ...entry }
-  })
-  return (
-    <div>
-      {items_.map(e => (
-        <div key={e.draftId}>
-          {e.symbol} - {e.code}
-        </div>
-      ))}
-    </div>
-  )
-}
+import {
+  IndenterFormatError,
+  IndenterFormatErrorCode,
+} from '../editor-slate/src/indenter/normalizers'
+import CommitInputErrorMsg from '../commit/CommitInputErrorMsg'
 
 type Props = {
   item: NoteDraftEntryFragment
@@ -56,23 +36,38 @@ const SidebarItemPanel = ({ item, onCommitCompleted }: Props) => {
 
     try {
       setIsCommiting(true)
+
       const commit = await editorChainCommit(item.id)
 
       if (onCommitCompleted) onCommitCompleted(commit)
 
       router.push({
-        pathname: '/user/commit/[userid]',
+        pathname: '/user/commits/[userid]',
         query: { userid: commit.userId },
       })
     } catch (err) {
-      if (err instanceof ApolloError) {
+      if (err instanceof IndenterFormatError) {
+        switch (err.code) {
+          case IndenterFormatErrorCode.IndenterOverSize:
+            toast.error(
+              <p>
+                Wrong indentation in , please fix Indentation before commit.
+              </p>,
+            )
+            break
+          default:
+            throw err
+        }
+      } else if (err instanceof ApolloError) {
         const items = getCommitInputErrorItems(err)
         if (items) {
           toast.error(<CommitInputErrorMsg items={items} entries={entries} />)
-          return
+        } else {
+          throw err
         }
+      } else {
+        throw err
       }
-      throw err
     } finally {
       setIsCommiting(false)
     }

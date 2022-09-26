@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { useApolloClient } from '@apollo/client'
+import { ApolloError, useApolloClient } from '@apollo/client'
 import {
   EmailAuthProvider,
   getAuth,
   GoogleAuthProvider,
   UserCredential,
 } from '@firebase/auth'
+import { doc, getDoc, getFirestore } from '@firebase/firestore'
 import firebaseui from 'firebaseui'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import { useSessionLoginMutation } from '../../../apollo/query.graphql'
@@ -80,23 +81,23 @@ const makeUIConfig = (
 
 /**
  * TODO:
- * - (bug) Flash of login panel after succesffuly signed in
+ * - (bug) Login panel will blink after sign in succesffuly
  */
 const LoginPanel = ({
   redirectPathAfterLogin,
 }: {
   redirectPathAfterLogin?: string
 }): JSX.Element | null => {
-  const firebaseClient = useFirebaseClient(),
-    firebaseAuth = getAuth(firebaseClient),
-    apolloClient = useApolloClient(),
-    [sessionLogin, mSessionLogin] = useSessionLoginMutation(),
-    [error, setError] = useState<string | null>(null)
+  const firebaseClient = useFirebaseClient()
+  const firebaseAuth = getAuth(firebaseClient)
+  const apolloClient = useApolloClient()
+  const [sessionLogin, mSessionLogin] = useSessionLoginMutation()
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSignedInUser(authResult: UserCredential) {
     // Session login endpoint is queried and the session cookie is set.
     // CSRF token should be sent along with request.
-    // const csrfToken = getCookie('csrfToken'),
+    // const csrfToken = getCookie('csrfToken')
     const idToken = await authResult.user.getIdToken()
 
     try {
@@ -113,8 +114,19 @@ const LoginPanel = ({
         setError('Login fail')
       }
     } catch (err) {
-      console.debug(err)
-      setError('Login fail')
+      // TODO: Handle not authenticated case -> set auth status in editor repo
+      if (err instanceof ApolloError) {
+        for (const e of err.graphQLErrors) {
+          if (e.extensions.code === 'NOT_INVITED') {
+            setError('Oops! You are not yet on the invitation list.')
+            return
+          }
+        }
+        console.debug(err)
+        setError('Oops! Login fail')
+      } else {
+        throw err
+      }
     }
   }
 

@@ -1,5 +1,5 @@
 import { addEntities, getAllEntities } from '@ngneat/elf-entities'
-import { validateChildrenUids } from '../../src/op/helpers'
+import { validateChildrenUids } from '../../src/utils'
 import { blockRemoveOp } from '../../src/op/ops'
 import { blockRepo, blocksStore } from '../../src/stores/block.repository'
 import { blocks, getAllBlockUids } from '../helpers'

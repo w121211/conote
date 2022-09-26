@@ -17,15 +17,20 @@ import { isIndenterArray } from '../indenter/normalizers'
 import { indenterOnKeyDown } from '../indenter/onkeydown-indenter'
 import { withIndenter } from '../indenter/with-indenter'
 import type { ElementIndenter } from '../interfaces'
-import IndenterEl from '../indenter/components/indenter-el'
+import IndenterEl from '../indenter/components/IndenterEl'
 import LeafDiscuss from './leaf/leaf-discuss'
 import LeafSymbol from './leaf/leaf-symbol'
 import { useObservable } from '@ngneat/react-rxjs'
-import { docTemplateGenerate, editorValueUpdate } from '../events'
+import {
+  docTemplateGenerate,
+  editorValueReset,
+  editorValueUpdate,
+} from '../events'
 import DocPlaceholder from '../../../editor-textarea/src/components/doc/doc-placeholder'
 import { docRepo } from '../../../editor-textarea/src/stores/doc.repository'
 import { indentersToBlocks } from '../indenter/serializers'
 import BlocksViewer from '../../../editor-textarea/src/components/block/BlocksViewer'
+import { toast } from 'react-toastify'
 
 const Leaf = (
   props: RenderLeafProps & { docUid: string; draftId: string },
@@ -187,21 +192,33 @@ const EditorEl = ({
   if (value === undefined) {
     return null
   }
+
   if (value.value.length === 0) {
     return (
       <DocPlaceholder
         docUid={docUid}
-        templateOnClick={title => {
+        templateOnClick={templateName => {
           const [rootIndenter, ...bodyIndneters] = docTemplateGenerate(
             docUid,
-            title,
+            templateName,
           )
           editorValueUpdate(docUid, bodyIndneters)
+          toast.info(
+            <div className="flex">
+              <p className="flex-1 py-2">Template set.</p>
+              <button
+                className="btn-ghost-blue"
+                onClick={() => editorValueReset(docUid)}
+              >
+                Undo
+              </button>
+            </div>,
+          )
         }}
       />
     )
-    // return <div>Placeholder</div>
   }
+
   return (
     <Slate
       editor={editor}

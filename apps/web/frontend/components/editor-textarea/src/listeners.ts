@@ -13,7 +13,7 @@ import {
   selectionDelete,
   unindentMulti,
 } from './events'
-import { Block, BlockWithChildren } from './interfaces'
+import { Block, BlockWithChildren, TabChainItem } from './interfaces'
 import { isDocChanged } from './stores/doc.repository'
 import { editorRepo } from './stores/editor.repository'
 import { rfdbRepo, rfdbStore } from './stores/rfdb.repository'
@@ -271,41 +271,6 @@ function blocksToClipboardData(
 //     }
 //   })
 // }
-
-/**
- *
- */
-export function preventExitWithoutSave(e: BeforeUnloadEvent) {
-  const { main, modal } = editorRepo.getValue().opening
-
-  let preventClose = false
-
-  if (main.docUid) {
-    const { changed } = isDocChanged(main.docUid)
-    if (changed) {
-      docSave(main.docUid)
-      preventClose = true
-    }
-  }
-  if (modal.docUid) {
-    const { changed } = isDocChanged(modal.docUid)
-    if (changed) {
-      docSave(modal.docUid)
-      preventClose = true
-    }
-  }
-
-  if (preventClose) {
-    window.confirm(
-      "Konote hasn't finished saving yet. " +
-        'Try refreshing or quitting again later.',
-    )
-    e.preventDefault()
-    e.returnValue =
-      'Setting e.returnValue to string prevents exit for some browsers.'
-    return 'Returning a string also prevents exit on other browsers.'
-  }
-}
 
 // function init() {
 //   document.addEventListener('mousedown', unfocus)

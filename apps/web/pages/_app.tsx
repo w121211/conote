@@ -1,7 +1,6 @@
 import { ApolloProvider } from '@apollo/client'
 import React, { useState } from 'react'
 import { AppProps } from 'next/app'
-import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -21,11 +20,11 @@ import 'react-toastify/dist/ReactToastify.css'
 import '../style/global.css'
 
 const App = ({ Component, pageProps }: AppProps) => {
-  const router = useRouter(),
-    appProps: AppPageProps = pageProps,
-    apolloClient = useApolloClientInitial(appProps.initialApolloState),
-    { me, loading } = useMe(),
-    [showAnnounce, setAnnounce] = useState(false)
+  const router = useRouter()
+  const appProps: AppPageProps = pageProps
+  const apolloClient = useApolloClientInitial(appProps.initialApolloState)
+  const { me, loading } = useMe()
+  const [showAnnounce, setAnnounce] = useState(false)
 
   if (appProps.protected && loading) {
     return null

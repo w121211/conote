@@ -5,7 +5,7 @@ import {
   treeUtil,
 } from '@conote/docdiff'
 import type { NoteDocContentBodyInput } from 'graphql-let/__generated__/__types__'
-import { cloneDeepWith, isEqual } from 'lodash'
+import { cloneDeepWith, every, isEqual } from 'lodash'
 import type {
   BlockFragment,
   NoteDocContentHeadFragment,
@@ -101,13 +101,18 @@ export function differenceContentBody(
   }
 }
 
+/**
+ * @returns isContentEmpty True if all children blocks excepting the root block have empty string
+ */
 export function validateContentBlocks(blocks: NoteDocContentBody['blocks']) {
-  // Validate the blocks
+  // This involves validate the blocks
   parseGQLBlocks(blocks)
 
   // Validate the list, `toTreeNodeBodyList` validate the list before return
-  const nodes = treeUtil.toTreeNodeBodyList(blocks),
-    isContentEmpty = nodes.length <= 1
+  const nodes = treeUtil.toTreeNodeBodyList(blocks)
+  const [root, ...children] = nodes
+  const isContentEmpty = every(children, e => e.data.str === '')
+
   return { nodes, isContentEmpty }
 }
 
@@ -209,10 +214,10 @@ export function parseGQLContentBodyInput(
 
   if (docBlock.docSymbol === undefined)
     throw new Error('docBlock.docSymbol === undefined')
-  if (docBlock.docSymbol !== docBlock.str)
-    throw new Error('docBlock.docSymbol !== docBlock.str')
-  if (symbol !== docBlock.docSymbol)
-    throw new Error('symbol !== docBlock.docSymbol')
+  // if (docBlock.docSymbol !== docBlock.str)
+  //   throw new Error('docBlock.docSymbol !== docBlock.str')
+  // if (symbol !== docBlock.docSymbol)
+  //   throw new Error('symbol !== docBlock.docSymbol')
 
   return {
     ...r,

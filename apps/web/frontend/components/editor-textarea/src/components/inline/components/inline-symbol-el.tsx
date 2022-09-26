@@ -9,23 +9,23 @@ import type { InlineElProps } from '../inline-el'
 const InlineSymbolEl = ({
   blockUid,
   children,
-  inline: { symbol },
+  inlineItem: { symbol },
   isViewer,
 }: InlineElProps & {
-  inline: InlineSymbol
+  inlineItem: InlineSymbol
 }): JSX.Element => {
   if (isViewer) {
     return (
       <Link href={getNotePageURL(symbol)}>
         <a>
-          <span className="relative symbol-link">{children}</span>
+          <span className="relative symbol-input">{children}</span>
         </a>
       </Link>
     )
   }
   return (
     <span
-      className="relative symbol-link"
+      className="relative symbol-input"
       onClick={e => {
         const doc = getDocByBlock(blockUid)
         return editorChainItemInsert(symbol, doc.noteDraftCopy.id)

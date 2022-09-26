@@ -279,7 +279,9 @@ class NoteDocMergeModel extends NoteDocModel {
    * - [] Insert to activty feed
    */
   async mergeSchedule() {
+    console.debug('Merge schedule start...')
     const mergePolls = await pollMergeModel.getMergePollsReadyToVerdict()
+
     const res: (NoteDoc & { branch: Branch; sym: Sym })[] = []
 
     for (const mergePoll of mergePolls) {
@@ -295,6 +297,7 @@ class NoteDocMergeModel extends NoteDocModel {
       }
     }
 
+    console.debug('Merge schedule finish.', res)
     return res
   }
 

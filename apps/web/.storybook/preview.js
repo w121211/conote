@@ -14,19 +14,8 @@ export const parameters = {
       date: /Date$/,
     },
   },
-  options: {
-    storySort: {
-      order: [
-        'Intro',
-        'Pages',
-        ['Home', 'Login', 'Admin'],
-        'Components',
-        '*',
-        'WIP',
-      ],
-    },
-  },
 }
+
 export const globalTypes = {
   darkMode: true,
 }

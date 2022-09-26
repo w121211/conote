@@ -17,11 +17,7 @@ export async function createMockVotes(votes: PollVote[]) {
 
   for (const e of votes) {
     const { choiceIdx, pollId, userId } = e,
-      v = await pollVoteModel.create({
-        choiceIdx,
-        pollId,
-        userId,
-      })
+      v = await pollVoteModel.create(pollId, choiceIdx, userId)
     votes_.push(v)
   }
 
@@ -67,7 +63,6 @@ describe('verdict()', () => {
     const polls = await createMockMergePolls()
     const votes = await createMockVotes(mockMergePollVotes.accepts)
     await createMockVotes(mockMergePollVotes.rejects.slice(0, 1))
-
     const { poll, ...rest } = await pollMergeModel.verdict(polls[0])
 
     expect(rest).toMatchInlineSnapshot(`

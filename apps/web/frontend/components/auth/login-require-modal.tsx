@@ -4,9 +4,9 @@ import Modal from '../modal/modal'
 import { useMeContext } from './use-me-context'
 
 const LoginRequireModal = ({ children }: { children?: ReactNode }) => {
-  const [showLoginModal, setShowLoginModal] = useState(false),
-    { me } = useMeContext()
-  // const searchParams = new URLSearchParams({})
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const { me } = useMeContext()
+
   return (
     <>
       <div
@@ -23,7 +23,6 @@ const LoginRequireModal = ({ children }: { children?: ReactNode }) => {
         visible={showLoginModal}
         buttons={
           <button className="btn-primary">
-            {/* <a href="/login">Login</a> */}
             <a href={getLoginPageURL()}>Login</a>
           </button>
         }

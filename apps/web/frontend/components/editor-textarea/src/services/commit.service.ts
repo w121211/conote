@@ -1,5 +1,8 @@
 import { getApolloClient } from '../../../../../apollo/apollo-client'
 import {
+  CommitsByUserDocument,
+  CommitsByUserQuery,
+  CommitsByUserQueryVariables,
   CreateCommitDocument,
   CreateCommitMutation,
   CreateCommitMutationVariables,
@@ -52,6 +55,20 @@ class CommitService {
       throw new Error('[createCommit] mutation error')
     }
     throw new Error('[createCommit] no return data')
+  }
+
+  /**
+   * This is a lazy way to update the cache after commit is completed
+   */
+  async queryCommitsByUser(userId: string) {
+    await this.apolloClient.query<
+      CommitsByUserQuery,
+      CommitsByUserQueryVariables
+    >({
+      query: CommitsByUserDocument,
+      variables: { userId },
+      fetchPolicy: 'network-only',
+    })
   }
 }
 

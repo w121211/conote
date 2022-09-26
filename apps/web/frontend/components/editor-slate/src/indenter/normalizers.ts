@@ -3,12 +3,27 @@ import { Editor, Element, Node, NodeEntry, Text, Transforms } from 'slate'
 import { ElementIndenter } from '../interfaces'
 import { getEditorSons } from './queries'
 
+export enum IndenterFormatErrorCode {
+  IndenterOverSize = 'IndenterOverSize',
+}
+
+export class IndenterFormatError extends Error {
+  public code: IndenterFormatErrorCode
+
+  constructor(code: IndenterFormatErrorCode) {
+    super(code) // 'Error' breaks prototype chain here
+    Object.setPrototypeOf(this, IndenterFormatError.prototype) // Restore prototype chain
+
+    this.code = code
+  }
+}
+
 export function isIndenterArray(v: Node[]): v is ElementIndenter[] {
   return every(v, e => Element.isElementType<ElementIndenter>(e, 'indenter'))
 }
 
 /**
- * @throws indent error
+ * @throws IndenterFormatError
  */
 export function validateIndenters(indenters: ElementIndenter[]) {
   for (let i = 0; i < indenters.length; i++) {
@@ -19,12 +34,12 @@ export function validateIndenters(indenters: ElementIndenter[]) {
 
     if (prev) {
       if (cur.indent - prev.indent > 1) {
-        throw new Error('indent_oversize')
+        throw new IndenterFormatError(IndenterFormatErrorCode.IndenterOverSize)
       }
     } else {
       if (cur.indent > 0) {
         console.debug(cur, prev)
-        throw new Error('indent_oversize')
+        throw new IndenterFormatError(IndenterFormatErrorCode.IndenterOverSize)
       }
     }
   }
@@ -66,10 +81,10 @@ export function normalizeIndent(
  *
  */
 export function indenterNoramalize(editor: Editor): {
-  error: ElementIndenter['error'] | null
+  errorCode: ElementIndenter['errorCode'] | null
 } {
   const sons = getEditorSons(editor)
-  let error: ElementIndenter['error'] | null = null
+  let errorCode: ElementIndenter['errorCode'] | null = null
 
   for (let i = 0; i < sons.length; i++) {
     const [n, p] = sons[i],
@@ -97,12 +112,8 @@ export function indenterNoramalize(editor: Editor): {
     }
     if (!prev) {
       if (n.indent > 0) {
-        Transforms.setNodes<ElementIndenter>(
-          editor,
-          { error: 'indent_oversize' },
-          { at: p },
-        )
-        error = 'indent_oversize'
+        errorCode = IndenterFormatErrorCode.IndenterOverSize
+        Transforms.setNodes<ElementIndenter>(editor, { errorCode }, { at: p })
       }
     }
     if (prev) {
@@ -112,15 +123,11 @@ export function indenterNoramalize(editor: Editor): {
         throw new Error('Unexpect error: Prev-son is not the indenter')
       }
       if (n.indent - prevN.indent > 1) {
-        Transforms.setNodes<ElementIndenter>(
-          editor,
-          { error: 'indent_oversize' },
-          { at: p },
-        )
-        error = 'indent_oversize'
+        errorCode = IndenterFormatErrorCode.IndenterOverSize
+        Transforms.setNodes<ElementIndenter>(editor, { errorCode }, { at: p })
       }
     }
   }
 
-  return { error }
+  return { errorCode }
 }

@@ -1,6 +1,6 @@
 import { treeUtil } from '@conote/docdiff'
 import { cloneDeep } from 'lodash'
-import { Block } from '../../src/interfaces'
+import type { Block } from '../../src/interfaces'
 
 /**
  *  a0

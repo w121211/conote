@@ -6,7 +6,7 @@ import {
   enterSplitBlock,
 } from '../../src/events'
 // import { diff } from 'deep-object-diff'
-import { validateChildrenUids } from '../../src/op/helpers'
+import { validateChildrenUids } from '../../src/utils'
 import {
   blockRepo,
   blocksStore,

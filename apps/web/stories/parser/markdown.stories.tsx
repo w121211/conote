@@ -3,6 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react'
 import ReactMarkdown from 'react-markdown'
 import { ReactMarkdownOptions } from 'react-markdown/lib/react-markdown'
 import ParseRenderEl from '../../frontend/components/editor-textarea/src/components/inline/parse-render-el'
+import { fromMarkdown } from 'mdast-util-from-markdown'
 
 export default {
   title: 'parsers/ReactMarkdown',
@@ -25,9 +26,11 @@ export default {
 // }
 
 export const Base = () => {
-  const markdown = `A paragraph with *emphasis* and **strong importance**. [[hello world]]
+  const markdown = `A paragraph with *emphasis* and **strong importance**.
 
-#this is something cool-123456789#
+[[hello world]]
+
+#This is something cool-123456789#
 
 #Which browser is best at keeping things confidential?-mock_discuss_0_active#
 
@@ -37,11 +40,26 @@ export const Base = () => {
 * [ ] todo
 * [x] done
 
+
+Lists
+
+* Lists
+
+  * Item 1
+
+  * Hello
+
+    * World  
+An indented line (need to use break + double space)
+
 A table:
 
 | a | b |
 | - | - |
 `
+
+  const tree = fromMarkdown('')
+  console.log(tree)
 
   const components: ReactMarkdownOptions['components'] = {
     p: ({ node, children, ...props }) => {
@@ -61,5 +79,9 @@ A table:
     },
   }
 
-  return <ReactMarkdown components={components}>{markdown}</ReactMarkdown>
+  return (
+    <div className="markdown">
+      <ReactMarkdown components={components}>{markdown}</ReactMarkdown>
+    </div>
+  )
 }

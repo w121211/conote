@@ -129,6 +129,7 @@ export const mockNoteDrafts: Omit<
     userId: mockUsers[0].id,
     linkId: mockLinks[0].id,
     contentHead: {
+      title: mockLinks[0].scraped.title,
       webpage: {
         title: mockLinks[0].scraped.title,
       },
@@ -136,7 +137,7 @@ export const mockNoteDrafts: Omit<
     contentBody: {
       discussIds: [],
       symbols: [],
-      blocks: writeBlocks(mockBlockInputs[1], {
+      blocks: writeBlocks(mockBlockInputs[0], {
         docSymbol: `[[${mockLinks[0].url}]]`,
       }),
       blockDiff: [],
@@ -150,7 +151,7 @@ export function mockNoteDrafts_gotFromDoc(
 ): Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'>[] {
   const { id, branchId, symId, sym, domain, contentHead, contentBody } =
       fromDoc,
-    blocks = writeBlocks(mockBlockInputs[1], {
+    blocks = writeBlocks(mockBlockInputs[0], {
       docSymbol: fromDoc.sym.symbol,
     }),
     base: Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'> = {

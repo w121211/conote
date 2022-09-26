@@ -33,7 +33,7 @@ const HitList = ({
       {searchSymbolHits.map((hit, i) => (
         <li
           key={hit.id}
-          className=" px-2 py-3 rounded hover:cursor-pointer"
+          className="rounded hover:cursor-pointer"
           onMouseLeave={e => onMouseLeave(e, i + 1)}
           onMouseMove={e => onMouseMove(e, i + 1)}
           // onClick={() => setShowModal(false)}
@@ -42,14 +42,15 @@ const HitList = ({
         >
           {onClickHit ? (
             <button
+              className="flex w-full px-2 py-3"
               onClick={e => {
                 onClickHit(hit)
                 setShowModal(false)
               }}
             >
-              <h5 className="font-medium leading-relaxed">
+              <span className="font-medium leading-relaxed">
                 {styleSymbol(hit.str, '')}
-              </h5>
+              </span>
               {/* <p className="flex text-xs text-blue-500/80 dark:text-blue-300/80 gap-1 ">
                               {domain.map(keyword => {
                                 return styleSymbol(keyword, '')
@@ -57,18 +58,23 @@ const HitList = ({
                             </p> */}
             </button>
           ) : (
-            <Link href={getNotePageURL(hit.str)}>
-              <a onClick={() => setShowModal(false)}>
-                <h5 className="font-medium leading-relaxed">
-                  {styleSymbol(hit.str, '')}
-                </h5>
-                {/* <p className="flex text-xs text-blue-500/80 dark:text-blue-300/80 gap-1 ">
+            <div className="flex">
+              <Link href={getNotePageURL(hit.str)}>
+                <a
+                  onClick={() => setShowModal(false)}
+                  className="w-full px-2 py-3"
+                >
+                  <span className="font-medium leading-relaxed">
+                    {styleSymbol(hit.str, '')}
+                  </span>
+                  {/* <p className="flex text-xs text-blue-500/80 dark:text-blue-300/80 gap-1 ">
                               {domain.map(keyword => {
                                 return styleSymbol(keyword, '')
                               })}
                             </p> */}
-              </a>
-            </Link>
+                </a>
+              </Link>
+            </div>
           )}
         </li>
       ))}
@@ -85,6 +91,23 @@ const SymbolCreate = ({
   setShowModal,
 }: Pick<SearcherProps['searcher'], 'onClickSymbolCreate'> & HitItemProps) => {
   const symbol = `[[${inputValue}]]`
+  const content = (
+    <div
+      className="mt-2 px-2 py-3 rounded hover:cursor-pointer"
+      onMouseLeave={e => onMouseLeave(e, 0)}
+      onMouseMove={e => onMouseMove(e, 0)}
+      onClick={() => setShowModal(false)}
+      role="option"
+      aria-selected={selectedIdx === 0}
+    >
+      <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 font-bold">
+        CREATE DRAFT
+      </span>
+      <span className="text-gray-800 dark:text-gray-200 font-bold">
+        [[{inputValue}]]
+      </span>
+    </div>
+  )
 
   if (onClickSymbolCreate) {
     return (
@@ -95,43 +118,13 @@ const SymbolCreate = ({
           setShowModal(false)
         }}
       >
-        <div
-          className="mt-2 px-2 py-3 rounded hover:cursor-pointer"
-          onMouseLeave={e => onMouseLeave(e, 0)}
-          onMouseMove={e => onMouseMove(e, 0)}
-          // onClick={() => setShowModal(false)}
-          role="option"
-          aria-selected={selectedIdx === 0}
-        >
-          <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">
-            create symbol
-          </span>
-          <span className="text-gray-800 dark:text-gray-200 font-bold">
-            {inputValue}
-          </span>
-        </div>
+        {content}
       </button>
     )
   }
   return (
     <Link href={getDraftPageURLBySymbol(symbol)}>
-      <a>
-        <div
-          className="mt-2 px-2 py-3 rounded hover:cursor-pointer"
-          onMouseLeave={e => onMouseLeave(e, 0)}
-          onMouseMove={e => onMouseMove(e, 0)}
-          onClick={() => setShowModal(false)}
-          role="option"
-          aria-selected={selectedIdx === 0}
-        >
-          <span className="mr-2 text-xs text-gray-500 dark:text-gray-400 font-bold">
-            CREATE DRAFT
-          </span>
-          <span className="text-gray-800 dark:text-gray-200 font-bold">
-            {inputValue}
-          </span>
-        </div>
-      </a>
+      <a>{content}</a>
     </Link>
   )
 }

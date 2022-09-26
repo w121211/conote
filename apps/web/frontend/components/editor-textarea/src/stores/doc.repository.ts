@@ -10,6 +10,7 @@ import type {
   NoteDocContentHead,
   SymbolParsed,
 } from '../../../../../lib/interfaces'
+import { parseSymbol, toURLSymbol } from '../../../../../share/symbol.common'
 import {
   differenceBlocks,
   omitTypenameDeep,
@@ -160,8 +161,7 @@ export function docToNoteDraftInput(doc: Doc): NoteDraftInput {
  *
  */
 export function genNewDoc(
-  symbol: string,
-  symbolType: SymbolParsed['type'],
+  symbolParsed: SymbolParsed,
   domain: string,
   note: NoteFragment | null,
   link?: LinkFragment,
@@ -170,10 +170,13 @@ export function genNewDoc(
   newBlocks: Block[]
   draftInput: NoteDraftInput
 } {
+  const { symbol, type } = symbolParsed
   if (docRepo.findDoc({ symbol }) !== null)
     throw new Error('Doc already existed')
-  if (symbolType === 'URL' && link === undefined)
+  if (type === 'URL' && link === undefined)
     throw new Error('Link is required for url-symbol')
+  if (link && symbol !== toURLSymbol(link.url))
+    throw new Error('link && symbol !== toURLSymbol(link.url)')
 
   let newDoc: Omit<Doc, 'noteDraftCopy'>
   let newBlocks: Block[]
@@ -209,6 +212,7 @@ export function genNewDoc(
 
     const contentHead: NoteDocContentHead = link
       ? {
+          title: link.scraped.title ?? undefined,
           keywords: link.scraped.keywords ?? undefined,
           webpage: {
             // authors?: string[]
@@ -269,14 +273,16 @@ export function isDocChanged(docUid: string): {
   input: NoteDraftInput
   noteDraftCopy: Doc['noteDraftCopy']
 } {
-  const doc = docRepo.getDoc(docUid),
-    { noteDraftCopy } = doc
+  const doc = docRepo.getDoc(docUid)
+  const { noteDraftCopy } = doc
 
-  const input = docToNoteDraftInput(doc),
-    { blocks: startBlocks } = parseGQLBlocks(noteDraftCopy.contentBody.blocks),
-    { blocks: finalBlocks } = parseGQLBlocks(input.contentBody.blocks),
-    changes = differenceBlocks(finalBlocks, startBlocks),
-    changed = changes.length > 0
+  const input = docToNoteDraftInput(doc)
+  const { blocks: startBlocks } = parseGQLBlocks(
+    noteDraftCopy.contentBody.blocks,
+  )
+  const { blocks: finalBlocks } = parseGQLBlocks(input.contentBody.blocks)
+  const changes = differenceBlocks(finalBlocks, startBlocks)
+  const changed = changes.length > 0
 
   return { changed, changes, doc, noteDraftCopy, input }
 }

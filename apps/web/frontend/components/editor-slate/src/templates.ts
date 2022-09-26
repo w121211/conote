@@ -1,10 +1,11 @@
+import { parseSymbol } from '../../../../share/symbol.common'
 import { Block } from '../../editor-textarea/src/interfaces'
 import {
   BlockInput,
   writeBlocks,
 } from '../../editor-textarea/src/utils/block-writer'
 
-export const templateTitles = [
+export const templateNames = [
   'General',
   //   'Company',
   //   'Research',
@@ -13,38 +14,58 @@ export const templateTitles = [
   'Blank',
 ]
 
-function templateGeneral(): BlockInput {
+function templateGeneral(symbol: string): BlockInput {
+  // const symbolParsed = parseSymbol(symbol)
+  const symbolTrim = symbol.slice(2, -2)
+
   const input: BlockInput = [
     '__DUMMY_ROOT__',
     [
       [
-        'Basic',
+        '# Basics',
         [
-          ['What is ...?', ['']],
-          // ['Explain ... in one picture?', ['']],
-          ['Why ...?', ['']],
-          ['Why not ...?', ['']],
-          ['How ...?', ['']],
-          // ['How this research solve?', ['']],
-          ['What difference compared to the others?', ['']],
+          [`### What is ${symbolTrim}?`, ['']],
+          [`### Explain ${symbolTrim} in one picture?`, ['']],
+          [`### Why ... ${symbolTrim}?`, ['']],
+          [`### Why not ... ${symbolTrim}?`, ['']],
+          [`### How to ... ${symbolTrim}?`, ['']],
+          // ['### What difference compared to the others?', ['']],
         ],
       ],
-      ['Discuss', ['']],
+      ['# Versus', ['// List of alternatives, compertitors', '', '']],
+      [
+        '# Discussions',
+        [
+          [
+            '// List of questions and answer, eg #How to mine Bitcoin?#',
+            [
+              '// Provide the answer to the question if possible, or just left it as blank!',
+              '// See detail guideline here, https://....',
+            ],
+          ],
+          '',
+          '',
+        ],
+      ],
     ],
   ]
   return input
 }
 
-export function genTemplateBlocks(title: string, docBlock: Block) {
+export function genTemplateBlocks(
+  templateName: string,
+  docBlock: Block,
+  symbol: string,
+) {
   let input: BlockInput
 
-  switch (title) {
+  switch (templateName) {
     case 'general':
-      input = templateGeneral()
+      input = templateGeneral(symbol)
       break
     case 'blank':
     default:
-      input = ['__DUMMY_ROOT__', ['', '', '', '', '', '', '', '']]
+      input = ['__DUMMY_ROOT__', ['', '', '']]
       break
   }
 

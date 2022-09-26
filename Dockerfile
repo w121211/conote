@@ -24,7 +24,7 @@ WORKDIR /workspace
 
 # Require dev environment also use AMD64 architecture for yarn.lock to work, otherwise build may fail
 # 
-# RUN yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile
 # RUN rm yarn.lock
 
 RUN yarn install

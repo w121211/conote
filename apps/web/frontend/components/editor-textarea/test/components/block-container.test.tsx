@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event'
 // import { BlockContainer } from '../../src/components/block/_block-container'
 import { blockRepo, blocksStore } from '../../src/stores/block.repository'
 import { blocks } from '../helpers'
-import { validateChildrenUids } from '../../src/op/helpers'
+import { validateChildrenUids } from '../../src/utils'
 // import Fetch from '../fetch'
 
 // const server = setupServer(

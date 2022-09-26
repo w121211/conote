@@ -4,11 +4,12 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import { NoteDocFragment } from '../../../apollo/query.graphql'
 import { NoteDocMetaMergeState } from '../../../lib/interfaces'
+import { parseSymbol } from '../../../share/symbol.common'
 import { getUserPageURL } from '../../utils'
+import { decorateId } from '../decorators'
+import ContentHeadFormReadonly from '../editor-textarea/src/components/doc/ContentHeadFormReadonly'
 import Modal from '../modal/modal'
-import SymbolDecorate from '../symbol/SymbolDecorate'
-import { styleSymbol } from '../ui/style-fc/style-symbol'
-import { ContentHeadReadonlyForm } from './content-head-readonly-form'
+import { styleSymbol } from '../symbol/SymbolDecorate'
 
 function renderMergeState(
   doc: NoteDocFragment,
@@ -69,19 +70,24 @@ function renderMergeState(
   return null
 }
 
-const NoteDocHead = ({
-  symbol,
-  doc,
-  isHeadDoc,
-  setShowMergePollModal,
-}: {
+interface Props {
   symbol: string
   doc: NoteDocFragment
   isHeadDoc: boolean
   setShowMergePollModal: React.Dispatch<React.SetStateAction<boolean>>
-}): JSX.Element | null => {
-  const [showModal, setShowModal] = useState(false),
-    mergeState = renderMergeState(doc, setShowMergePollModal)
+}
+
+const NoteDocElHead = ({
+  symbol,
+  doc,
+  isHeadDoc,
+  setShowMergePollModal,
+}: Props): JSX.Element | null => {
+  const [showModal, setShowModal] = useState(false)
+  const mergeState = renderMergeState(doc, setShowMergePollModal)
+  const symbolParsed = parseSymbol(symbol)
+  const { bracketLeftSpan, bracketRightSpan, symbolSpan, urlTitleSpan } =
+    styleSymbol(symbolParsed, doc.contentHead.title ?? null)
 
   return (
     <>
@@ -94,9 +100,9 @@ const NoteDocHead = ({
           {/* <h2 className="mt-0 mb-4 sm:mb-6 font-bold text-gray-800">
             Note meta
           </h2> */}
-          {/* TODO: A read onlyl form */}
-          <ContentHeadReadonlyForm doc={doc} />
-          {/* <div>A read onlyl form</div> */}
+          {/* <ContentHeadReadonlyForm doc={doc} /> */}
+          {/* <ContentHeadForm doc={doc} /> */}
+          <ContentHeadFormReadonly noteDoc={doc} />
         </div>
       </Modal>
 
@@ -112,31 +118,22 @@ const NoteDocHead = ({
         )}
         </div> */}
 
-        <div className="relative mb-3 ">
-          <h1 className="line-clamp-2 break-words text-gray-800 dark:text-gray-100 leading-tight">
-            {/* {link && (
-            <span className="material-icons text-blue-400 text-4xl align-bottom">
-            language
-            </span>
-          )} */}
-            <span className="symbol-link" onClick={() => setShowModal(true)}>
-              {/* {styleSymbol(symbol, doc.contentHead.webpage?.title)} */}
-              <SymbolDecorate
-                symbolStr={symbol}
-                title={doc.contentHead.webpage?.title ?? undefined}
-              />
-
-              <span className="ml-2 text-gray-400/50 dark:text-gray-400 font-light">
-                {!isHeadDoc && `#${doc.id.slice(-6)}`}
-              </span>
+        <div className="mb-3">
+          <h1 className="leading-tight line-clamp-2 break-words">
+            <span className="symbol-input" onClick={() => setShowModal(true)}>
+              {bracketLeftSpan}
+              {symbolSpan}
+              {bracketRightSpan}
+              {urlTitleSpan}
+              {!isHeadDoc && decorateId(doc.id)}
             </span>
           </h1>
         </div>
 
-        <div className="flex flex-col text-gray-600 space-y-1">
+        <div className="flex text-gray-600 space-x-4">
           <p className="text-sm">
             <span className="material-icons-outlined mr-1 text-base align-middle">
-              edit_note
+              description
             </span>
             <Link href={getUserPageURL(doc.userId)}>
               <a className="link">@{doc.userId.slice(-6)}</a>
@@ -245,4 +242,4 @@ const NoteDocHead = ({
   )
 }
 
-export default NoteDocHead
+export default NoteDocElHead

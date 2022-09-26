@@ -10,18 +10,22 @@ import {
 import { useObservable } from '@ngneat/react-rxjs'
 import Link from 'next/link'
 import { RenderLeafProps, useSlateStatic } from 'slate-react'
-import DiscussFormCreate from '../../../../discuss/DiscussCreateForm'
+import DiscussCreateForm from '../../../../discuss/DiscussCreateForm'
 import DiscussModalPageEl from '../../../../discuss/discuss-modal-page-el'
 import Modal from '../../../../modal/modal'
 import { slateEditorRepo } from '../../stores/editor.repository'
 import { LeafPopoverProps } from '../../interfaces'
 import { InlineDiscuss } from '../../../../editor-textarea/src/interfaces'
-import { DiscussFragment } from '../../../../../../apollo/query.graphql'
+import {
+  DiscussFragment,
+  useSearchDiscussQuery,
+} from '../../../../../../apollo/query.graphql'
 import { indenterTextReplace } from '../../indenter/transforms'
 import type { Editor } from 'slate'
 import { inlineService } from '../../../../editor-textarea/src/services/inline.service'
 import { slateDocSave } from '../../events'
 import { PopperTooltip } from '../../../../ui/tooltip/popper-tooltip'
+import { usePrevious } from 'react-use'
 
 // import { DropdownListItem } from '../../../../ui-component/dropdown-list-item'
 
@@ -32,7 +36,7 @@ function discussOnCreate(
   editor: Editor,
   blockUid: string,
   inlineDiscuss: InlineDiscuss,
-  discuss: DiscussFragment,
+  discuss: DiscussFragment | { id: string; title: string },
   docUid: string,
 ): void {
   indenterTextReplace(
@@ -42,6 +46,48 @@ function discussOnCreate(
     inlineService.toInlineDiscussString(discuss.id, discuss.title),
   )
   slateDocSave(docUid)
+}
+
+const DiscussSearchHits = ({
+  title,
+  onClickHit,
+}: {
+  title: string
+  onClickHit: (id: string, title: string) => void
+}) => {
+  const { data, refetch } = useSearchDiscussQuery({
+    variables: { term: title },
+  })
+  const prevTitle = usePrevious(title)
+
+  useEffect(() => {
+    if (title !== prevTitle) refetch({ term: title })
+  }, [title])
+
+  return (
+    <>
+      <h3 className="pb-2">Search similar discussions</h3>
+      <div className="flex flex-col space-y-1">
+        {data && data.searchDiscuss.length > 0 ? (
+          data.searchDiscuss.map(({ id, str }) => (
+            <div key={id}>
+              <span
+                role="button"
+                className="text-blue-600 hover:underline"
+                onClick={() => onClickHit(id, str)}
+              >
+                <span className="text-gray-400">#</span>
+                {str}
+                <span className="text-gray-400">#</span>
+              </span>
+            </div>
+          ))
+        ) : (
+          <div>Found nothing...</div>
+        )}
+      </div>
+    </>
+  )
 }
 
 const LeafDiscuss = ({
@@ -72,13 +118,12 @@ const LeafDiscuss = ({
       })
     }
   }
-
-  const [curSelectedElId] = useObservable(slateEditorRepo.curSelectedElId$),
-    { x, y, reference, floating, strategy, refs, update } = useFloating({
-      middleware: [autoPlacement({ allowedPlacements: ['top', 'bottom'] })],
-      whileElementsMounted: updateFloating,
-    }),
-    [showPopover, setShowPopover] = useState(false)
+  const { x, y, reference, floating, strategy, refs, update } = useFloating({
+    middleware: [autoPlacement({ allowedPlacements: ['top', 'bottom'] })],
+    whileElementsMounted: updateFloating,
+  })
+  const [showPopover, setShowPopover] = useState(false)
+  const [titleInput, setTitleInput] = useState(title)
 
   const editor = useSlateStatic()
 
@@ -113,27 +158,6 @@ const LeafDiscuss = ({
 
   return (
     <>
-      <Modal
-        visible={showModal}
-        onClose={() => setShowModal(false)}
-        topRightBtn={modalTopRightBtn}
-        // buttons={modalButtons}
-      >
-        {discussId ? (
-          <div className="px-10">
-            <DiscussModalPageEl id={discussId} />
-          </div>
-        ) : (
-          <DiscussFormCreate
-            noteDraftId={draftId}
-            title={title}
-            onCreate={d =>
-              discussOnCreate(editor, blockUid, inlineItem, d, docUid)
-            }
-          />
-        )}
-      </Modal>
-
       {/* <FloatingPortal id="layout-children-container">
         {showPopover && (
           <div
@@ -158,12 +182,50 @@ const LeafDiscuss = ({
         )}
       </FloatingPortal> */}
 
+      <Modal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        topRightBtn={modalTopRightBtn}
+        // buttons={modalButtons}
+      >
+        {discussId ? (
+          <div className="px-10">
+            <DiscussModalPageEl id={discussId} />
+          </div>
+        ) : (
+          <>
+            <DiscussCreateForm
+              noteDraftId={draftId}
+              title={title}
+              onCreate={d =>
+                discussOnCreate(editor, blockUid, inlineItem, d, docUid)
+              }
+              onChangeTitleInput={v => setTitleInput(v)}
+            />
+            <div className="m-10">
+              <DiscussSearchHits
+                title={titleInput}
+                onClickHit={(id, title) =>
+                  discussOnCreate(
+                    editor,
+                    blockUid,
+                    inlineItem,
+                    { id, title },
+                    docUid,
+                  )
+                }
+              />
+            </div>
+          </>
+        )}
+      </Modal>
+
       {discussId ? (
         <span
           {...attributes}
           id={id}
           ref={reference}
-          className="symbol-link"
+          className="symbol-input text-blue-600"
           // className={className}
           data-inline-item={inlineItem.type}
           role="button"

@@ -7,10 +7,16 @@ import {
   differenceContentHead,
   parseGQLBlocks,
 } from '../../../../share/utils'
-import type { Block, Doc } from '../../editor-textarea/src/interfaces'
+import type {
+  Block,
+  Doc,
+  TabChainItem,
+} from '../../editor-textarea/src/interfaces'
 import { docUpdatePropsOp } from '../../editor-textarea/src/op/ops'
 import { noteDraftService } from '../../editor-textarea/src/services/note-draft.service'
 import { docRepo } from '../../editor-textarea/src/stores/doc.repository'
+import { editorRepo } from '../../editor-textarea/src/stores/editor.repository'
+import { validateIndenters } from './indenter/normalizers'
 import { blocksToIndenters, indentersToBlocks } from './indenter/serializers'
 import type { ElementIndenter } from './interfaces'
 import { docEditorValueRepo } from './stores/doc-editor-value.repository'
@@ -74,15 +80,18 @@ export function toNoteDraftInput(
  *
  */
 function isDraftValueChanged(docUid: string, value: ElementIndenter[]) {
-  const doc = docRepo.getDoc(docUid),
-    { noteDraftCopy: start } = doc
+  const doc = docRepo.getDoc(docUid)
+  const { noteDraftCopy: start } = doc
 
-  const input = toNoteDraftInput(doc, value),
-    { blocks: startBlocks } = parseGQLBlocks(start.contentBody.blocks),
-    { blocks: finalBlocks } = parseGQLBlocks(input.contentBody.blocks)
+  const input = toNoteDraftInput(doc, value)
+  const { blocks: startBlocks } = parseGQLBlocks(start.contentBody.blocks)
+  const { blocks: finalBlocks } = parseGQLBlocks(input.contentBody.blocks)
 
-  const diffBlocks = differenceBlocks(finalBlocks, startBlocks),
-    diffContentHead = differenceContentHead(doc.contentHead, start.contentHead)
+  const diffBlocks = differenceBlocks(finalBlocks, startBlocks)
+  const diffContentHead = differenceContentHead(
+    doc.contentHead,
+    start.contentHead,
+  )
 
   return { doc, noteDraftCopy: start, input, diffBlocks, diffContentHead }
 }
@@ -98,7 +107,7 @@ function isDraftValueChanged(docUid: string, value: ElementIndenter[]) {
 
 /**
  * @returns true if doc is saved, returns false if doc is not perform save (eg, content not change)
- * @throws Value validation error, eg 'indent_oversize'
+ * @throws IndenterFormatError
  */
 export async function slateDocSave(
   docUid: string,
@@ -109,7 +118,7 @@ export async function slateDocSave(
 ) {
   const { value } = docEditorValueRepo.getValue(docUid)
   const { input, noteDraftCopy, diffBlocks, diffContentHead } =
-    isDraftValueChanged(docUid, value)
+    isDraftValueChanged(docUid, value) // This method involve validate indenter value
 
   if (opts.force || diffBlocks.length > 0 || diffContentHead) {
     const draft = await noteDraftService.updateDraft(
@@ -126,11 +135,15 @@ export async function slateDocSave(
   return false
 }
 
-export function docTemplateGenerate(docUid: string, title: string) {
-  const doc = docRepo.getDoc(docUid),
-    docBlock = docRepo.getDocBlock(doc),
-    blocks = genTemplateBlocks(title.toLowerCase(), docBlock),
-    indenters = blocksToIndenters(blocks)
+export function docTemplateGenerate(docUid: string, templateName: string) {
+  const doc = docRepo.getDoc(docUid)
+  const docBlock = docRepo.getDocBlock(doc)
+  const blocks = genTemplateBlocks(
+    templateName.toLowerCase(),
+    docBlock,
+    doc.noteDraftCopy.symbol,
+  )
+  const indenters = blocksToIndenters(blocks)
 
   return indenters
 }
@@ -148,6 +161,51 @@ export function editorValueUpdate(docUid: string, value: ElementIndenter[]) {
   docEditorValueRepo.updateValue(docUid, value)
 }
 
+/**
+ * Used to trigger template reset
+ */
+export function editorValueReset(docUid: string) {
+  docEditorValueRepo.updateValue(docUid, [])
+}
+
 export function editorAlertRefresh() {
   //
+}
+
+function preventExitWithoutSave(e: BeforeUnloadEvent) {
+  const {
+    tab: { chain },
+  } = editorRepo.getValue()
+
+  let preventClose = false
+
+  for (const e of chain) {
+    const { docUid } = e as TabChainItem
+    if (docUid) {
+      const { value } = docEditorValueRepo.getValue(docUid)
+      const { diffBlocks, diffContentHead } = isDraftValueChanged(docUid, value)
+      if (diffBlocks.length > 0 || diffContentHead) {
+        slateDocSave(docUid)
+        preventClose = true
+      }
+    }
+  }
+
+  if (preventClose) {
+    window.confirm(
+      "Konote hasn't finished saving yet. " +
+        'Try refreshing or quitting again later.',
+    )
+    e.preventDefault()
+    e.returnValue =
+      'Setting e.returnValue to string prevents exit for some browsers.'
+    return 'Returning a string also prevents exit on other browsers.'
+  }
+}
+
+/**
+ * Listen to before unload event, used for prevent exit without save
+ */
+export function pageBeforeUnload(e: BeforeUnloadEvent) {
+  preventExitWithoutSave(e)
 }

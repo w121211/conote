@@ -45,13 +45,27 @@ const AuthDropdownMenu = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLoginPageURL()}>
-                    <a className={menuItemClass}>Your commits</a>
+                  <Link
+                    href={{
+                      pathname: '/user/commits/[userid]',
+                      query: { userid: me.id },
+                    }}
+                  >
+                    <a className={menuItemClass} onClick={close}>
+                      Your commits
+                    </a>
                   </Link>
                 </li>
                 <li>
-                  <Link href={getLoginPageURL()}>
-                    <a className={menuItemClass}>Your discussions</a>
+                  <Link
+                    href={{
+                      pathname: '/user/discussions/[userid]',
+                      query: { userid: me.id },
+                    }}
+                  >
+                    <a className={menuItemClass} onClick={close}>
+                      Your discussions
+                    </a>
                   </Link>
                 </li>
               </ul>

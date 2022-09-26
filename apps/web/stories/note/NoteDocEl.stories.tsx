@@ -4,26 +4,20 @@ import NoteDocEl from '../../frontend/components/note/NoteDocEl'
 import { NoteFragment } from '../../apollo/query.graphql'
 import { mockNoteFragments } from '../../test/__mocks__/note-fragment.mock'
 import { mockNoteDocFragments } from '../../test/__mocks__/note-doc-fragment.mock'
+import { ApolloProvider } from '@apollo/client'
+import ModalProvider from '../../frontend/components/modal/modal-context'
+import { getApolloClient } from '../../apollo/apollo-client'
 
 export default {
   component: NoteDocEl,
 } as ComponentMeta<typeof NoteDocEl>
 
-// const apolloClient = getApolloClient()
-
-// const Template: ComponentStory<typeof NoteViewEl> = args => (
-//   <ApolloProvider client={apolloClient}>
-//     <ModalProvider>
-//       <NoteViewEl {...args} />
-//     </ModalProvider>
-//   </ApolloProvider>
-// )
+const apolloClient = getApolloClient()
 
 export const Base = () => {
-  // BUG: When import mockNoteDocFragments, storybook will not render -> unknow reason
-  const doc = mockNoteDocFragments[0]
+  const doc = mockNoteDocFragments[1]
   const note: NoteFragment = {
-    ...mockNoteFragments[0],
+    ...mockNoteFragments[1],
     headDoc: doc,
   }
   const props = {
@@ -32,5 +26,13 @@ export const Base = () => {
     noteDocsToMerge: [],
     noteDraft: null,
   }
-  return <NoteDocEl {...props} />
+  return (
+    <ApolloProvider client={apolloClient}>
+      <ModalProvider>
+        <div className="max-w-2xl container mx-auto">
+          <NoteDocEl {...props} />
+        </div>
+      </ModalProvider>
+    </ApolloProvider>
+  )
 }

@@ -183,8 +183,7 @@ class TestHelper {
   }
 
   /**
-   * Warnning! This method not follow the correct steps to create merge polls
-   *  and should only use for test only
+   * Warnning! This method not follow the correct steps to create merge polls and should only use for test only
    * noteDocToMerge needs to be created before create the merge-poll
    */
   async createMergePoll(

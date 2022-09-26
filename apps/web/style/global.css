@@ -13,10 +13,10 @@
     @apply overflow-hidden bg-gray-50;
   } */
   h1 {
-    @apply text-2xl font-bold text-gray-800 dark:text-white;
+    @apply text-3xl font-bold text-gray-800 dark:text-white;
   }
   h2 {
-    @apply text-lg font-semibold text-gray-800 dark:text-white;
+    @apply text-xl font-semibold text-gray-800 dark:text-white;
   }
   h3 {
     @apply font-bold text-gray-800 dark:text-white;
@@ -33,9 +33,9 @@
 }
 
 @layer components {
-  .responsive-width {
+  /* .responsive-width {
     @apply w-[var(--max-width)] md:w-full md:max-w-[var(--md-max-width)] lg:max-w-[var(--lg-max-width)];
-  }
+  } */
 
   .input {
     @apply p-2 
@@ -83,8 +83,8 @@
     @apply text-blue-600 dark:text-blue-300 cursor-pointer hover:underline hover:underline-offset-2;
   }
 
-  .symbol-link {
-    @apply text-blue-600 dark:text-blue-300 hover:bg-gray-200/80 dark:hover:bg-gray-600;
+  .symbol-input {
+    @apply hover:bg-gray-200/80 dark:hover:bg-gray-600;
   }
 
   .details-menu {
@@ -130,7 +130,8 @@
   }
 
   .markdown > * + * {
-    @apply mt-0 mb-4;
+    /* @apply mt-0 mb-4; */
+    @apply mt-0 mb-2;
   }
 
   .markdown li + li {
@@ -220,6 +221,12 @@
   /* Override pygments style background color. */
   .markdown .highlight pre {
     @apply bg-gray-100 !important;
+  }
+
+  /* Preline components https://preline.co/docs/index.html */
+
+  .btn-ghost-blue {
+    @apply py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold text-blue-500 hover:bg-blue-100 text-sm;
   }
 }
 

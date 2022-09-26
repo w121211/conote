@@ -55,8 +55,8 @@ const SidebarItem = ({
 }: {
   item: NoteDraftEntryFragment
 }): JSX.Element | null => {
-  const [opening] = useObservable(editorRepo.opening$, { initialValue: null }),
-    { symbol, title } = item
+  const [opening] = useObservable(editorRepo.opening$, { initialValue: null })
+  const { symbol, title } = item
 
   if (opening === null) {
     return null

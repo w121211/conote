@@ -10,7 +10,7 @@ import { omitBy } from 'lodash'
 type Props = AppPageProps & {
   query: {
     symbol?: string
-    extension?: boolean // Open this page by extension
+    isFromExtension?: boolean // Open this page by extension
   }
 }
 
@@ -46,17 +46,17 @@ const DraftIndexPage = ({ query }: Props): JSX.Element | null => {
 export async function getServerSideProps({
   query,
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> {
-  const { s, ext } = query,
-    symbol = typeof s === 'string' ? s : undefined,
-    extension = ext === '1',
-    query_ = { symbol, extension },
-    query__ = omitBy(query_, v => v === undefined)
+  const { s, from } = query
+  const symbol = typeof s === 'string' ? s : undefined
+  const isFromExtension = from === 'extension'
+  const query_ = { symbol, isFromExtension }
+  const query__ = omitBy(query_, v => v === undefined)
 
   return {
     props: {
       query: query__,
       protected: true,
-      sidebarPinned: !extension,
+      sidebarPinned: !isFromExtension,
     },
   }
 }

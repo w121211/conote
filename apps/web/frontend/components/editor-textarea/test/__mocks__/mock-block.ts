@@ -6,27 +6,31 @@ const input0: BlockInput = [
   '[[Next.js]]',
   [
     [
-      '# Basic',
+      '# Basics',
       [
         [
-          '__What is Next.js?__',
+          '### What is Next.js?',
           ['A javascript backend framework, use React.js for SSR.'],
         ],
         [
-          '__#Why use Next.js?#__',
+          '### Why use Next.js?',
           [
-            '* Simple and straightforward.',
-            '* Very popular backend framework for javascript, its github repository has over 90k stars.',
-            '* Suitable for front-end developers who want to develop a full stack app.',
+            'Simple and straightforward.',
+            'Very popular backend framework for javascript, its github repository has over 90k stars.',
+            'Suitable for front-end developers who want to develop a full stack app.',
             '',
           ],
         ],
         [
-          '__#Why not use Next.js?#__',
+          '### #Why not use Next.js?-mock_discuss_0_active#',
           [
             'Lack of official support of higher level features, e.g. authentication.',
             'Mix of frontend and backend codes may be difficult to organize, e.g. writing test code.',
           ],
+        ],
+        [
+          '### Test of multi lines in a single block',
+          ['This is the first line.\n  This is the second line.'],
         ],
       ],
     ],
@@ -34,14 +38,17 @@ const input0: BlockInput = [
       '# Versus',
       [
         [
-          'Nuxt.js  Next.js v.s. Nuxt.js?',
-          ['Similar to Next.js, use Vue instead of React'],
+          '### Nuxt.js ',
+          [
+            '#Next.js v.s. Nuxt.js?-mock_discuss_0_active#',
+            'Similar to Next.js, use Vue instead of React',
+          ],
         ],
-        ['Nest.js', ['']],
+        ['### Nest.js', ['']],
       ],
     ],
     [
-      '# Discuss',
+      '# Discussions',
       [
         ['#How to use next.js?-mock_discuss_0_active#', ['']],
         ['#How to use next.js?-mock_discuss_1_draft#', ['']],
@@ -53,49 +60,86 @@ const input0: BlockInput = [
 ]
 
 const input1: BlockInput = [
-  '[[Firefox]]',
+  '[[A sample for testing preview render]]',
   [
     [
-      '# About',
+      '# H1 heading',
       [
-        'Official site: https://www.mozilla.org/en-US/firefox/new/',
-        'Super fast and fiercely independent. Get the only browser that works to make the internet better for everyone.',
-        'Backed by the non-profit that puts people first',
         [
-          'Latest Firefox features',
+          '## H2 heading',
           [
-            '[[Picture-in-Picture]]\n' +
-              'Pop a video out of the browser window so you can stream and multitask.',
-            'Choose your color\n' +
-              'Personalize your experience with new colorways.',
-            'An extra layer of protection\n' +
-              '[[DNS over HTTPS (DoH)]] helps keep internet service providers from selling your data.',
+            [
+              'Excepteur sint occaecat *cupidatat* non **proident**.',
+              [
+                'Pellentesque habitant morbi tristique senectus et netus et.  \nVitae elementum curabitur vitae nunc.',
+                'Eu non diam phasellus vestibulum lorem. Non curabitur gravida arcu ac tortor dignissim convallis aenean et. Vitae elementum curabitur vitae nunc sed velit dignissim sodales. Volutpat est velit egestas dui id ornare arcu.',
+              ],
+            ],
+            [
+              '### H3 heading',
+              [
+                ['Paragraph node.', ['Indented node.']],
+                'A line break is `space + space + \\n`  \nThis is second line.',
+                'Inline code `inline code`',
+              ],
+            ],
+          ],
+        ],
+        [
+          '### H3 heading',
+          [
+            [
+              'Paragraph node.',
+              ['Indented paragraph node. https://finance.yahoo.com/'],
+            ],
+          ],
+        ],
+        [
+          '### List',
+          [
+            ['List item.', ['Indented paragraph node.']],
+            ['List item.', ['Indented paragraph node.']],
+            ['List item.', ['Indented paragraph node.']],
           ],
         ],
       ],
     ],
     [
-      'Discuss',
+      '# Syntax mix',
       [
+        '### Heading + #A discussion with id, where id should not render.-cl7dhm6rn000h2e6d83bt99am#',
+        '### Heading + [[symbol]]',
+        '### Heading + // Comment ...',
         [
-          'How Firefox compares to other browsers?',
+          '### Paragraph + X',
           [
-            'https://www.mozilla.org/en-US/firefox/browsers/compare/',
-            'A great internet browser should have the functionality you need, portability across devices, and the privacy you deserve.',
+            'Paragraph + #discussion with id-cl7dhm6rn000h2e6d83bt99am# ...',
+            'Paragraph + #discussion without id# ...',
+            'Paragraph + [[symbol]] ...',
+            'Paragraph + ...  // Comment ...',
           ],
         ],
         [
-          '#Which browser is best at keeping things confidential?-mock_discuss_0_active#',
-          [
-            'Its not unreasonable to expect a high level of data protection and privacy from the products we regularly use to get online.',
-            'At a minimum, a browser should offer some version of “private browsing mode” that automatically deletes your history and search history so other users on the same computer cant access it.',
-            'In this area, all seven of the browsers compared here score points.',
-          ],
+          '### X + Paragraph',
+          ['#discussion# paragraph ...', '[[symbol]] paragraph ...'],
         ],
-        ['#One more discuss?-mock_discuss_1_draft#', ['']],
-        ['#Two more discuss?-mock_discuss_2_archive#', ['']],
       ],
     ],
+    [
+      '# Paragraph follow by heading // This is prompt to be a wrong style, only testing the render result.',
+      [
+        'Paragraph',
+        [
+          '### Paragraph child 1 as heading // Heading should ignore the indent',
+          [['Paragraph reset the indent', ['Paragraph follow by its parent']]],
+        ],
+        [
+          'Paragraph child 2',
+          ['#discussion# paragraph ...', '[[symbol]] paragraph ...'],
+        ],
+      ],
+    ],
+    ['# Debug format', ['##', ['a', [['b', ['[[c]]']]]]]],
   ],
 ]
 

@@ -18,16 +18,16 @@ type Query {
   commit(id: ID!): Commit!
 
   # Get a user's latest commits, used in user's profile page
-  commitsByUser(userId: ID!, afterId: ID): [Commit!]!
+  commitsByUser(userId: ID!, afterId: ID, beforeId: ID): CommitListResult!
 
   # Throw error if not found
   discuss(id: ID!): Discuss!
 
   # Latest discusses created by the user
-  discussesByUser(userId: ID!, afterId: ID): [Discuss!]!
+  discussesByUser(userId: ID!, afterId: ID, beforeId: ID): DiscussListResult!
 
   # Latest discuss-entries
-  discussesLatest(afterId: ID): [Discuss!]!
+  discussesLatest(afterId: ID, beforeId: ID): DiscussListResult!
 
   discussEmojis(discussId: ID!): [DiscussEmoji!]!
 
@@ -68,7 +68,7 @@ type Query {
   noteDoc(id: ID!): NoteDoc!
 
   # Latest note docs (merged and not-merged) created by the user
-  noteDocsByUser(userId: ID!, afterId: ID): [NoteDoc!]!
+  noteDocsByUser(userId: ID!, afterId: ID, beforeId: ID): [NoteDoc!]!
 
   # All note-docs wait to merge of a note, ie candidates
   noteDocsToMergeByNote(noteId: ID!): [NoteDoc!]!
@@ -78,6 +78,9 @@ type Query {
 
   # Latest waiting to merge note-docs
   noteDocsToMergeLatest(afterId: ID): [NoteDoc!]!
+
+  # Include merged and wait-to-merge note docs
+  noteDocsLatest(afterId: ID): [NoteDoc!]!
 
   # Get user's draft
   # Query either by id, symbol or url
@@ -222,8 +225,7 @@ type Mutation {
     discussPostId: Int!
   ): [UpsertDiscussPostEmojiLikeResult!]!
 
-  # Get or create the link
-  createLink(url: String!): Link!
+  getOrCreateLink(url: String!): Link!
 
   upsertNoteEmojiLike(
     liked: Boolean!
@@ -675,6 +677,18 @@ type UpsertDiscussPostEmojiLikeResult {
 type UpsertNoteEmojiLikeResult {
   emoji: NoteEmoji!
   like: NoteEmojiLike!
+}
+
+type CommitListResult {
+  commits: [Commit!]!
+  hasPrevious: Boolean!
+  hasNext: Boolean!
+}
+
+type DiscussListResult {
+  discusses: [Discuss!]!
+  hasPrevious: Boolean!
+  hasNext: Boolean!
 }
 
 # ------ Inputs ------

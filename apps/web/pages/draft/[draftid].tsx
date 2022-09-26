@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import React, { useEffect } from 'react'
-import { preventExitWithoutSave } from '../../frontend/components/editor-textarea/src/listeners'
 import SlateDocChainEl from '../../frontend/components/editor-slate/src/components/DocChainEl'
+import { pageBeforeUnload } from '../../frontend/components/editor-slate/src/events'
 
 interface Props {
   draftId: string
@@ -11,11 +11,11 @@ interface Props {
 const DraftIdPage = ({ draftId }: Props) => {
   useEffect(() => {
     // console.debug('DraftIdPage mount')
-    window.addEventListener('beforeunload', preventExitWithoutSave)
+    window.addEventListener('beforeunload', pageBeforeUnload, { capture: true })
 
     return () => {
       // console.debug('DraftIdPage unmount')
-      window.removeEventListener('beforeunload', preventExitWithoutSave)
+      window.removeEventListener('beforeunload', pageBeforeUnload)
     }
   }, [])
 

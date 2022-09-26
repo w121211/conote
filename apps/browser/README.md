@@ -1,3 +1,9 @@
+# Description
+
+A chrome/firefox extension that allows user to easily use current browsing wenpage's url as the note title in konote.one.
+
+How it works? When user click the extension icon, it first get the current browsing webpage's url and use this url to open a tab and loads the page of konote.
+
 # Development
 
 ```sh

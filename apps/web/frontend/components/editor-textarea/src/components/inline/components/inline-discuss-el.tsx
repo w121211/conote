@@ -28,105 +28,69 @@ function onCreateDiscuss(
   docSave(doc.uid)
 }
 
-const InlineDiscussViewer = ({
-  children,
-  blockUid,
-  inline,
-  isViewer,
-}: {
-  inline: InlineDiscuss
-} & InlineElProps): JSX.Element => {
-  const { id, title, str } = inline,
-    [showModal, setShowModal] = useState(false),
-    isDiscussCreated = id !== undefined,
-    modalTopRightBtn = isDiscussCreated && (
+const InlineDiscussViewer = ({ children, inlineItem }: Props): JSX.Element => {
+  const { id, title, str } = inlineItem
+  if (id) {
+    return (
       <Link
         href={{
           pathname: '/discuss/[discussId]',
           query: { discussId: id },
         }}
       >
-        <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
-          <span className="material-icons-outlined text-lg text-gray-500 hover:text-gray-700">
-            open_in_full
-          </span>
-        </a>
+        <a className="relative symbol-input text-blue-600">{children}</a>
       </Link>
     )
-
+  }
   return (
-    <>
-      {id && (
-        <Modal
-          visible={showModal}
-          onClose={() => setShowModal(false)}
-          topRightBtn={modalTopRightBtn}
-          // buttons={modalButtons}
-        >
-          <div className="px-10">
-            <DiscussModalPageEl id={id} />
-          </div>
-        </Modal>
-      )}
-      {isDiscussCreated ? (
-        <span
-          className="relative symbol-link"
-          onClick={() => setShowModal(true)}
-          role="button"
-        >
-          {children}
-        </span>
-      ) : (
-        <PopperTooltip
-          label="⚠ Discuss has not created yet"
-          // visible={showWarnTooltip}
-          // visible={showWarnTooltip}
-          // onClose={() => setShowWarnTooltip(false)}
-          size="sm"
-          type="warning"
-        >
-          <span
-            // 'relative' is required for clickable and hover effect
-            className="relative text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
-            // onClick={() => setShowModal(true)}
-            // role="button"
-          >
-            {children}
-            {/* <span>(click to create)</span> */}
-          </span>
-        </PopperTooltip>
-      )}
-    </>
+    <PopperTooltip
+      label="⚠ Discuss has not created yet"
+      // visible={showWarnTooltip}
+      // visible={showWarnTooltip}
+      // onClose={() => setShowWarnTooltip(false)}
+      size="sm"
+      type="warning"
+    >
+      <span
+        // 'relative' is required for clickable and hover effect
+        className="relative text-red-600 dark:text-red-200 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 "
+        // onClick={() => setShowModal(true)}
+        // role="button"
+      >
+        {children}
+        {/* <span>(click to create)</span> */}
+      </span>
+    </PopperTooltip>
   )
+}
+
+interface Props extends InlineElProps {
+  inlineItem: InlineDiscuss
 }
 
 /**
  *
  */
-const InlineDiscussEl = (
-  props: {
-    inline: InlineDiscuss
-  } & InlineElProps,
-): JSX.Element => {
-  const { children, blockUid, inline, isViewer } = props,
-    { id, title, str } = inline,
-    [showModal, setShowModal] = useState(false),
-    // [showWarnTooltip, setShowWarnTooltip] = useState(false),
-    isDiscussCreated = id !== undefined,
-    modalTopRightBtn = isDiscussCreated && (
-      <Link
-        href={{
-          pathname: '/discuss/[discussId]',
-          query: { discussId: id },
-        }}
-      >
-        <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
-          <span className="material-icons-outlined text-lg text-gray-500 hover:text-gray-700">
-            open_in_full
-          </span>
-        </a>
-      </Link>
-    )
+const InlineDiscussEl = (props: Props): JSX.Element => {
+  const { children, blockUid, inlineItem, isViewer } = props
+  const { id, title, str } = inlineItem
+  const [showModal, setShowModal] = useState(false)
+  // [showWarnTooltip, setShowWarnTooltip] = useState(false),
+  const isDiscussCreated = id !== undefined
+  const modalTopRightBtn = isDiscussCreated && (
+    <Link
+      href={{
+        pathname: '/discuss/[discussId]',
+        query: { discussId: id },
+      }}
+    >
+      <a className="flex items-center text-sm text-gray-900 hover:text-gray-600">
+        <span className="material-icons-outlined text-lg text-gray-500 hover:text-gray-700">
+          open_in_full
+        </span>
+      </a>
+    </Link>
+  )
 
   if (isViewer) {
     return <InlineDiscussViewer {...props} />
@@ -152,7 +116,7 @@ const InlineDiscussEl = (
           <DiscussCreateForm
             noteDraftId={doc.noteDraftCopy.id}
             title={title}
-            onCreate={d => onCreateDiscuss(blockUid, inline, d, doc)}
+            onCreate={d => onCreateDiscuss(blockUid, inlineItem, d, doc)}
           />
         ) : (
           <div>You</div>
@@ -161,7 +125,7 @@ const InlineDiscussEl = (
 
       {isDiscussCreated ? (
         <span
-          className="relative symbol-link"
+          className="relative symbol-input text-red-600"
           onClick={() => setShowModal(true)}
           role="button"
         >

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * References
  * - https://github.com/pmmmwh/react-refresh-webpack-plugin/blob/main/examples/typescript-without-babel/webpack.config.js
@@ -13,9 +14,14 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 // const TransformRuntimePlugin = require('@babel/plugin-transform-runtime')
 const Dotenv = require('dotenv-webpack')
 const JSONC = require('jsonc-parser')
+require('dotenv').config({ path: './.env' })
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const isManifestV3 = process.env.USE_MANIFEST_V3 !== 'true'
+const isManifestV3 = process.env.MANIFEST_V3 !== undefined
+
+console.log(
+  `Webpack build params: isManifestV3 ${isManifestV3} isDevelopment ${isDevelopment}`,
+)
 
 const manifestPath = isManifestV3
   ? path.resolve(__dirname, 'src/manifest.v3.jsonc')
@@ -28,19 +34,9 @@ module.exports = {
   devtool: 'inline-source-map', // ts-loader, chrome-extension requires this
   context: __dirname,
   entry: {
-    // 'background-script': isManifestV3
-    //   ? path.resolve(__dirname, 'src/chrome/background.ts')
-    //   : path.resolve(__dirname, 'src/scripts/background-script.ts'),
-
     'background-script': path.resolve(__dirname, 'src/chrome/background.ts'),
 
     // 'content-script': path.resolve(__dirname, 'src/scripts/content-script.ts'),
-    // 'content-script': path.resolve(__dirname, 'src/annotate/content-script.ts'),
-
-    // 'content-script-menu': path.resolve(
-    //   __dirname,
-    //   'src/scripts/content-script-menu.ts',
-    // ),
     // popup: path.resolve(__dirname, 'src/popup/index.tsx'),
     // main: path.resolve(__dirname, 'src/index.tsx'),
   },
@@ -56,7 +52,7 @@ module.exports = {
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader', // use babel-lodaer instead, ts-loader encounter type-checking error (while tsc run successfully, unknwon reason)
+        loader: 'babel-loader', // Use babel-lodaer instead, ts-loader encounter type-checking error (while tsc run successfully, unknwon reason)
       },
       {
         test: /\.css$/i,

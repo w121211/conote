@@ -97,8 +97,9 @@ const reTicker = /\$[A-Z-=]+/
 
 const reTopic = /\[\[[^\]\n]+\]\]/u
 
-// const reDiscuss =
-//   /(?<=\s|^)#([\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-(c[a-z0-9]{24,29})#(?=\s|$)/u
+// const reDiscussId = /-(c[a-z0-9]{24,29})$/
+const reDiscussId = /-([a-z0-9_]{12,29})$/
+
 const reDiscuss =
   /(?<=\s|^)#([$[\]\d\s\p{Letter}\p{Terminal_Punctuation}-]+)-([a-z0-9_]{12,29})#(?=\s|$)/u
 
@@ -137,7 +138,7 @@ export const grammar: Record<string, GrammarValue> = {
     inside: {
       'discuss-bracket-start': /^#/,
       'discuss-bracket-end': /#$/,
-      'discuss-id': /-(c[a-z0-9]{24,29})$/,
+      'discuss-id': reDiscussId,
     },
   },
 
@@ -146,7 +147,7 @@ export const grammar: Record<string, GrammarValue> = {
     inside: {
       'discuss-bracket-start': /^#/,
       'discuss-bracket-end': /#$/,
-      'discuss-id': /-(c[a-z0-9]{24,29})$/,
+      'discuss-id': reDiscussId,
     },
   },
 
@@ -315,9 +316,10 @@ function tokenToInlineItem(token: string | Token): InlineItem {
     case 'comment': {
       return { type: 'inline-comment', str, token }
     }
+    default:
+      console.error(token)
+      throw new Error('Token not catched')
   }
-  console.error(token)
-  throw new Error('[tokenToInlineItem] Token not catched')
 }
 
 /**
@@ -327,15 +329,18 @@ function tokenToInlineItem(token: string | Token): InlineItem {
  * @throws Parse error
  */
 export function parseBlockString(str: string) {
-  const tokens = tokenize(str, grammar),
-    inlineItems = tokens.map(e => tokenToInlineItem(e))
+  const tokens = tokenize(str, grammar)
+  const inlineItems = tokens.map(e => tokenToInlineItem(e))
   return { inlineItems, tokens }
 }
 
 /**
  *
  */
-export function renderToken(token: Token | string): JSX.Element {
+export function renderToken(
+  token: Token | string,
+  isViewer?: true,
+): JSX.Element {
   const el = React.createElement
 
   if (typeof token === 'string') {
@@ -344,23 +349,35 @@ export function renderToken(token: Token | string): JSX.Element {
   if (typeof token.content === 'string') {
     switch (token.type) {
       case 'comment':
-        return el('span', { className: 'text-gray-400' }, token.content)
-      case 'discuss-bracket-start':
-      case 'discuss-bracket-end':
+        return el(
+          'span',
+          { className: 'text-gray-400 font-normal' },
+          token.content,
+        )
       case 'discuss-id':
-      case 'topic-bracket-head':
-      case 'topic-bracket-tail':
+        if (isViewer) {
+          return el('span', { style: { display: 'none' } }, token.content)
+        }
         return el(
           'span',
           { className: 'text-gray-400/70 dark:text-gray-500' },
           token.content,
         )
+      // case 'discuss-bracket-start':
+      // case 'discuss-bracket-end':
+      // case 'topic-bracket-head':
+      // case 'topic-bracket-tail':
+      //   return el(
+      //     'span',
+      //     { className: 'text-gray-400/70 dark:text-gray-500' },
+      //     token.content,
+      //   )
       default:
         return el('span', null, token.content)
     }
   }
   if (Array.isArray(token.content)) {
-    const tokenEls = token.content.map(e => renderToken(e))
+    const tokenEls = token.content.map(e => renderToken(e, isViewer))
     return el(React.Fragment, null, ...tokenEls)
   }
 

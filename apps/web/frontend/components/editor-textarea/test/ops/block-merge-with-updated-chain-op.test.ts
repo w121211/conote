@@ -1,5 +1,5 @@
 import { setEntities } from '@ngneat/elf-entities'
-import { validateChildrenUids } from '../../src/op/helpers'
+import { validateChildrenUids } from '../../src/utils'
 import { blockMergeWithUpdatedChainOp } from '../../src/op/ops'
 import {
   blockRepo,

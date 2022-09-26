@@ -6,7 +6,7 @@ import SymbolDecorate from '../../../../symbol/SymbolDecorate'
 import { Alert } from '../../../../ui/alert'
 import { styleSymbol } from '../../../../ui/style-fc/style-symbol'
 import type { Doc } from '../../interfaces'
-import { ContentHeadForm } from './content-head-form'
+import ContentHeadForm from './ContentHeadForm'
 
 const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
   const [showModal, setShowModal] = useState(false)
@@ -49,13 +49,13 @@ const DocHead = ({ doc }: { doc: Doc }): JSX.Element | null => {
         <div className="relative mb-1">
           <h3 className="text-gray-800 dark:text-gray-100 leading-tight line-clamp-2 break-words">
             <span
-              className="symbol-link"
+              className="symbol-input"
               onClick={() => setShowModal(true)}
               // role='button'
             >
               <SymbolDecorate
-                symbolStr={doc.noteDraftCopy.symbol}
-                title={doc.contentHead.webpage?.title ?? undefined}
+                symbol={doc.noteDraftCopy.symbol}
+                title={doc.contentHead.webpage?.title ?? null}
               />
 
               {newSymbol && (

@@ -23,6 +23,10 @@ import { CommitInputErrorCode } from '../share/constants'
 export type CommitInputErrorItem = {
   draftId: string
   code: CommitInputErrorCode
+  info?: {
+    blockUid?: string
+    discussId?: string
+  }
   // msg: string
 }
 

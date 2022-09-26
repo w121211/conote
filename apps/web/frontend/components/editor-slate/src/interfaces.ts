@@ -10,6 +10,7 @@ import type {
   InlineRate,
   InlineSymbol,
 } from '../../editor-textarea/src/interfaces'
+import { IndenterFormatErrorCode } from './indenter/normalizers'
 
 //
 // Component props
@@ -46,7 +47,7 @@ export type ElementIndenter = {
   // Indicate the current level of indent, start from 1, since 0 represent no indent
   indent: number
 
-  error?: 'indent_oversize'
+  errorCode?: IndenterFormatErrorCode
 
   // Client-side id
   uid: string
@@ -56,6 +57,9 @@ export type ElementIndenter = {
 
   // Record change-event lively
   change?: TreeNodeChangeType
+
+  // For markdown render
+  markdownIndent?: number
 }
 
 export type ElementLic = {

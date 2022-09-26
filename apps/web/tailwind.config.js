@@ -2,7 +2,7 @@ const colors = require('tailwindcss/colors')
 const plugin = require('tailwindcss/plugin')
 
 module.exports = {
-  // @see https://tailwindcss.com/docs/upcoming-changes
+  // See https://tailwindcss.com/docs/upcoming-changes
   future: {
     removeDeprecatedGapUtilities: true,
     purgeLayersByDefault: true,
@@ -73,7 +73,7 @@ module.exports = {
     require('tailwindcss'),
     require('precss'),
     require('autoprefixer'),
-    // require('@tailwindcss/line-clamp'),
+    require('@tailwindcss/line-clamp'),
     // require('@tailwindcss/typography'),
     // plugin(function ({ addComponents }) {
     //   addComponents({

@@ -1,5 +1,7 @@
-import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import React from 'react'
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import Link from 'next/link'
+import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import {
   NoteByBranchSymbolDocument,
   NoteByBranchSymbolQuery,
@@ -13,11 +15,38 @@ import {
   NoteDocsToMergeByNoteQueryVariables,
   NoteFragment,
   useNoteDraftQuery,
+  useSearchSymbolQuery,
 } from '../../apollo/query.graphql'
-import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import NoteDocEl from '../../frontend/components/note/NoteDocEl'
+import { getDraftPageURLBySymbol, getNotePageURL } from '../../frontend/utils'
+import { AppPageProps } from '../../frontend/interfaces'
 
-interface Props {
+const SearchSymbolResult = ({ term }: { term: string }) => {
+  const { data } = useSearchSymbolQuery({
+    variables: { term },
+  })
+  if (data) {
+    return (
+      <>
+        <div className="pb-2">Similar notes</div>
+        <div className="flex flex-col space-y-1">
+          {data && data.searchSymbol.length > 0 ? (
+            data.searchSymbol.map(({ id, str }) => (
+              <Link key={id} href={getNotePageURL(str)}>
+                <a className="link">{str}</a>
+              </Link>
+            ))
+          ) : (
+            <div>Found nothing...</div>
+          )}
+        </div>
+      </>
+    )
+  }
+  return null
+}
+
+interface Props extends AppPageProps {
   query: {
     symbol?: string
     url?: string
@@ -63,10 +92,23 @@ const NoteSlugPage = ({
     )
   }
   if (symbol) {
-    return <div>Note {symbol} is not found, create one.</div>
+    return (
+      <div>
+        <h2 className="pb-6">{symbol} is not found.</h2>
+        <div className="pb-6">
+          <SearchSymbolResult term={symbol} />
+        </div>
+        <div>
+          Or create a draft{' '}
+          <Link href={getDraftPageURLBySymbol(symbol)}>
+            <a className="link">{symbol}</a>
+          </Link>{' '}
+        </div>
+      </div>
+    )
   }
   if (url) {
-    return <div>Note on {url} is not found, create one.</div>
+    return <div>Note for {url} is not found.</div>
   }
 
   throw new Error('')
@@ -141,6 +183,7 @@ export async function getServerSideProps({
 
   return {
     props: {
+      protected: true,
       query: { symbol, docId },
       note: qNote.data.noteByBranchSymbol ?? null,
       noteDocById: qDoc ? qDoc.data.noteDoc : null,

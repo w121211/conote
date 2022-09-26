@@ -366,9 +366,13 @@ query Commit($id: ID!) {
   }
 }
 
-query CommitsByUser($userId: ID!, $afterId: ID) {
-  commitsByUser(userId: $userId, afterId: $afterId) {
-    ...commit
+query CommitsByUser($userId: ID!, $afterId: ID, $beforeId: ID) {
+  commitsByUser(userId: $userId, afterId: $afterId, beforeId: $beforeId) {
+    commits {
+      ...commit
+    }
+    hasPrevious
+    hasNext
   }
 }
 
@@ -378,15 +382,23 @@ query Discuss($id: ID!) {
   }
 }
 
-query DiscussesByUser($userId: ID!, $afterId: ID) {
-  discussesByUser(userId: $userId, afterId: $afterId) {
-    ...discuss
+query DiscussesByUser($userId: ID!, $afterId: ID, $beforeId: ID) {
+  discussesByUser(userId: $userId, afterId: $afterId, beforeId: $beforeId) {
+    discusses {
+      ...discuss
+    }
+    hasNext
+    hasPrevious
   }
 }
 
-query DiscussesLatest($afterId: ID) {
-  discussesLatest(afterId: $afterId) {
-    ...discuss
+query DiscussesLatest($afterId: ID, $beforeId: ID) {
+  discussesLatest(afterId: $afterId, beforeId: $beforeId) {
+    discusses {
+      ...discuss
+    }
+    hasNext
+    hasPrevious
   }
 }
 
@@ -474,8 +486,8 @@ query NoteDoc($id: ID!) {
   }
 }
 
-query NoteDocsByUser($userId: ID!, $afterId: ID) {
-  noteDocsByUser(userId: $userId, afterId: $afterId) {
+query NoteDocsByUser($userId: ID!, $afterId: ID, $beforeId: ID) {
+  noteDocsByUser(userId: $userId, afterId: $afterId, beforeId: $beforeId) {
     ...noteDoc
   }
 }
@@ -494,6 +506,12 @@ query NoteDocsMergedLatest($afterId: ID) {
 
 query NoteDocsToMergeLatest($afterId: ID) {
   noteDocsToMergeLatest(afterId: $afterId) {
+    ...noteDoc
+  }
+}
+
+query NoteDocsLatest($afterId: ID) {
+  noteDocsLatest(afterId: $afterId) {
     ...noteDoc
   }
 }
@@ -651,8 +669,8 @@ mutation UpsertDiscussPostEmojiLike(
   }
 }
 
-mutation CreateLink($url: String!) {
-  createLink(url: $url) {
+mutation GetOrCreateLink($url: String!) {
+  getOrCreateLink(url: $url) {
     ...link
   }
 }

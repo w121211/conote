@@ -1,11 +1,23 @@
 import type { RenderElementProps } from 'slate-react'
 import type { ElementIndenter } from '../../interfaces'
+import { IndenterFormatErrorCode } from '../normalizers'
+
+function renderErrorCode(code: IndenterFormatErrorCode) {
+  switch (code) {
+    case IndenterFormatErrorCode.IndenterOverSize:
+      return (
+        <span contentEditable={false} style={{ color: 'red', marginRight: 6 }}>
+          Wrong indentation. Press Shift+Tab to fix.
+        </span>
+      )
+  }
+}
 
 const IndenterEl = (
   props: Omit<RenderElementProps, 'element'> & { element: ElementIndenter },
 ) => {
   const { attributes, children, element } = props,
-    { indent, error } = element
+    { indent, errorCode } = element
 
   return (
     <div
@@ -17,14 +29,7 @@ const IndenterEl = (
       <ul className="list-disc text-gray-600 text-sm">
         <li>
           {/* <li className='before:content-["-"] before:absolute before:-translate-x-full '> */}
-          {error && (
-            <span
-              contentEditable={false}
-              style={{ color: 'red', marginRight: 6 }}
-            >
-              Miss indent!
-            </span>
-          )}
+          {errorCode && renderErrorCode(errorCode)}
           <span>{children}</span>
         </li>
       </ul>

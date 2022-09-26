@@ -107,8 +107,8 @@ const DiscussEl = ({ data }: Props): JSX.Element => {
         {noteEntries?.map(({ sym: { symbol } }, i) => {
           return (
             <Link key={i} href={getNotePageURL(symbol)}>
-              <a className={`symbol-link last:mr-0 tracking-wide text-sm`}>
-                <SymbolDecorate symbolStr={symbol} />
+              <a className={`symbol-input last:mr-0 tracking-wide text-sm`}>
+                <SymbolDecorate symbol={symbol} title={null} />
               </a>
             </Link>
           )

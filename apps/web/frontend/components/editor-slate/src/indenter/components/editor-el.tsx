@@ -6,7 +6,7 @@ import { ElementIndenter } from '../../interfaces'
 import { isIndenterArray } from '../normalizers'
 import { indenterOnKeyDown } from '../onkeydown-indenter'
 import { withIndenter } from '../with-indenter'
-import IndenterEl from './indenter-el'
+import IndenterEl from './IndenterEl'
 
 const CustomElement = (props: RenderElementProps) => {
   const { element, ...restProps } = props

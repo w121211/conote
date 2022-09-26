@@ -21,11 +21,11 @@ const NoteDocVersionDropdown = ({
   note: NoteFragment
   noteDraft: NoteDraftFragment | null
 }): JSX.Element => {
-  const { symbol } = note.sym,
-    qDocsToMerge = useNoteDocsToMergeByNoteQuery({
-      variables: { noteId: note.id },
-    }),
-    [hide, setHide] = useState(true)
+  const { symbol } = note.sym
+  const qDocsToMerge = useNoteDocsToMergeByNoteQuery({
+    variables: { noteId: note.id },
+  })
+  const [hide, setHide] = useState(true)
 
   let curLabel = ''
   if (cur === null || cur.__typename === 'NoteDraft') {

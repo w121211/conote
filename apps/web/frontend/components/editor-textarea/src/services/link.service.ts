@@ -1,8 +1,8 @@
 import { getApolloClient } from '../../../../../apollo/apollo-client'
 import {
-  CreateLinkDocument,
-  CreateLinkMutation,
-  CreateLinkMutationVariables,
+  GetOrCreateLinkDocument,
+  GetOrCreateLinkMutation,
+  GetOrCreateLinkMutationVariables,
   LinkFragment,
   LinkQuery,
   LinkQueryVariables,
@@ -18,16 +18,16 @@ class LinkService {
   /**
    * Get or create a link
    */
-  async createLink(url: string): Promise<LinkFragment> {
+  async getOrCreateLink(url: string): Promise<LinkFragment> {
     const { data } = await this.apolloClient.mutate<
-      CreateLinkMutation,
-      CreateLinkMutationVariables
+      GetOrCreateLinkMutation,
+      GetOrCreateLinkMutationVariables
     >({
-      mutation: CreateLinkDocument,
+      mutation: GetOrCreateLinkDocument,
       variables: { url },
     })
-    if (data?.createLink) {
-      return data.createLink
+    if (data?.getOrCreateLink) {
+      return data.getOrCreateLink
     }
     throw new Error('[createLink] No return data')
   }

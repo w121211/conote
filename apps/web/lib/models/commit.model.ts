@@ -9,10 +9,10 @@ import type {
   Sym,
 } from '@prisma/client'
 import cuid from 'cuid'
-import { differenceWith, intersectionWith } from 'lodash'
+import { differenceWith, intersectionWith, zip } from 'lodash'
 import { CommitInputErrorCode } from '../../share/constants'
 import { differenceContentBody, validateContentBlocks } from '../../share/utils'
-import type { CommitInputErrorItem } from '../interfaces'
+import type { CommitInputErrorItem, NoteDraftParsed } from '../interfaces'
 import prisma from '../prisma'
 import { noteDocMergeModel } from './note-doc-merge.model'
 import { noteDocModel } from './note-doc.model'
@@ -29,7 +29,7 @@ export class CommitInputError extends Error {
 
   constructor(items: CommitInputErrorItem[]) {
     const msg = items
-      .map(({ draftId, code }) => `${code}::#${draftId}`)
+      .map(({ draftId, code }) => `${code}#${draftId}`)
       .join(', ')
     super(msg)
 
@@ -41,62 +41,69 @@ export class CommitInputError extends Error {
 }
 
 /**
+ * Discuss
+ * - `fromDoc_discussIds_`
+ *   - Found in blocks -> Do nothing
+ *   - Not found in blocks, ie removed by current draft -> Do nothing
+ * - `discussesCreated_` Discusses created by this draft (ps. each discuss is connected to a unique draft-id)
+ *   - Found in blocks -> Connect to note
+ *   - Not found in blocks -> Delete the discuss record
+ * - `inlineDiscusses_` Inline discusses parsed by blocks
+ *   - `inlineDiscusses_noId` Has no id -> throw error
+ *   - `inlineDiscussIds_outside` Inline discusses not from doc, nor created by this draft (possibly by copy-paste) -> Check id is valid
+ *
  * @throws
  * - [x] If user is not the owner of draft
  * - [x] If draftId cannot be found
- * - [x] If fromDoc is empty but there is a latest doc
- * - [x] If fromDoc does not match
- * - [] If the draft content is the same as from-doc
- * - [x] If discuss(es) not created
- * - [] If found orphan discusses
+ * - [x] If from-doc is null but head-doc existed
+ * - [x] Discuss not create
+ * - [] Discuss id not found
+ * - [x] Content is the same as from-doc
+ * - [x] Content is empty
  */
 async function validateInput(draft: NoteDraft, userId: string) {
   const sym = await prisma.sym.findUnique({
-      where: { symbol: draft.symbol },
-    }),
-    headDoc = sym && (await noteDocModel.getHeadDoc(draft.branchId, sym.id)),
-    note =
-      headDoc &&
-      (await prisma.note.findUnique({
-        where: {
-          branchId_symId: { branchId: headDoc.branchId, symId: headDoc.symId },
-        },
-      })),
-    { draftParsed, inlineDiscusses } = noteDraftModel.parseDeep(draft),
-    discussesCreated = await prisma.discuss.findMany({
-      where: { draftId: draft.id },
-    }),
-    discussesCreated_foundInBlocks = intersectionWith(
-      discussesCreated,
-      draftParsed.contentBody.discussIds,
-      (a, b) => a.id === b.discussId,
-    ),
-    discussesCreated_unfoundInBlocks = differenceWith(
-      discussesCreated,
-      discussesCreated_foundInBlocks,
-      (a, b) => a.id === b.id,
-    )
+    where: { symbol: draft.symbol },
+  })
+  const headDoc = sym && (await noteDocModel.getHeadDoc(draft.branchId, sym.id))
+  const note =
+    headDoc &&
+    (await prisma.note.findUnique({
+      where: {
+        branchId_symId: { branchId: headDoc.branchId, symId: headDoc.symId },
+      },
+    }))
+  const { draftParsed, inlineDiscusses } = noteDraftModel.parseReal(draft)
+  const inlineDiscusses_noId = inlineDiscusses.filter(e => e.id === undefined)
+  const inlineDiscussIds = draftParsed.contentBody.discussIds
 
-  // discussesCreated.filter(
-  //   e => !discussIdsInBlocks.includes(e.id),
-  // )
+  const discussesCreated = await prisma.discuss.findMany({
+    where: { draftId: draft.id },
+  })
+  const discussesCreated_foundInBlocks = intersectionWith(
+    discussesCreated,
+    inlineDiscussIds,
+    (a, b) => a.id === b.discussId,
+  )
+  const discussesCreated_unfoundInBlocks = differenceWith(
+    discussesCreated,
+    discussesCreated_foundInBlocks,
+    (a, b) => a.id === b.id,
+  )
+  const inlineDiscussIds_minus_discussesCreated = differenceWith(
+    inlineDiscussIds,
+    discussesCreated,
+    (a, b) => a.discussId === b.id,
+  )
+  const inlineDiscussIds_outside = headDoc
+    ? differenceWith(
+        inlineDiscussIds_minus_discussesCreated,
+        headDoc.contentBody.discussIds,
+        (a, b) => a.discussId === b.discussId,
+      )
+    : inlineDiscussIds_minus_discussesCreated
 
-  // discussesInConcentBlocks =
-
-  // newJoinedDiscussIds = draftParsed.contentBody.discussIds.filter(
-  //   e => e.commitId === undefined,
-  // ),
-  // newJoinedDiscusses =
-  //   newJoinedDiscussIds &&
-  //   (await prisma.$transaction(
-  //     newJoinedDiscussIds.map(e =>
-  //       prisma.discuss.findUnique({
-  //         where: { id: e.discussId },
-  //       }),
-  //     ),
-  //   ))
-
-  const errCodes: CommitInputErrorCode[] = []
+  const errors: CommitInputErrorItem[] = []
 
   // console.log(`existing discuss ${existingDiscusses?.length}`)
   if (sym && headDoc === null) {
@@ -108,7 +115,6 @@ async function validateInput(draft: NoteDraft, userId: string) {
   if (note && headDoc === null) {
     throw new Error('Unexpected error: found note but not found head-doc')
   }
-
   if (draft.userId !== userId) {
     throw new Error('User is not the owner of the draft')
   }
@@ -119,10 +125,16 @@ async function validateInput(draft: NoteDraft, userId: string) {
     if (headDoc === null)
       throw new Error('Draft has from-doc but current head-doc is null')
     if (headDoc.id !== draft.fromDocId)
-      errCodes.push(CommitInputErrorCode.FROM_DOC_NOT_HEAD)
+      errors.push({
+        draftId: draft.id,
+        code: CommitInputErrorCode.FROM_DOC_NOT_HEAD,
+      })
   }
   if (draft.fromDocId === null && headDoc !== null) {
-    errCodes.push(CommitInputErrorCode.FROM_DOC_NOT_HEAD)
+    errors.push({
+      draftId: draft.id,
+      code: CommitInputErrorCode.FROM_DOC_NOT_HEAD,
+    })
   }
 
   // const domainChanged = draft.domain === curDoc!.domain
@@ -130,27 +142,48 @@ async function validateInput(draft: NoteDraft, userId: string) {
   // const contentChanged = getContentDiff(curDoc!.content as unknown as NoteDocContent, draftParsed.content)
 
   const { isContentEmpty } = validateContentBlocks(
-      draftParsed.contentBody.blocks,
-    ),
-    diffBody =
-      headDoc &&
-      differenceContentBody(draftParsed.contentBody, headDoc.contentBody),
-    inlineDiscussesNoId = inlineDiscusses.filter(e => e.id === undefined)
+    draftParsed.contentBody.blocks,
+  )
+  const diffBody =
+    headDoc &&
+    differenceContentBody(draftParsed.contentBody, headDoc.contentBody)
 
-  if (isContentEmpty) errCodes.push(CommitInputErrorCode.CONTENT_EMPTY)
+  if (isContentEmpty)
+    errors.push({
+      draftId: draft.id,
+      code: CommitInputErrorCode.CONTENT_EMPTY,
+    })
   if (diffBody !== null && diffBody.blockChanges.length === 0)
-    errCodes.push(CommitInputErrorCode.CONTENT_NOT_CHANGE)
-  if (inlineDiscussesNoId.length > 0) {
-    console.debug(inlineDiscussesNoId)
-    errCodes.push(CommitInputErrorCode.DISCUSS_NOT_CREATE)
+    errors.push({
+      draftId: draft.id,
+      code: CommitInputErrorCode.CONTENT_NOT_CHANGE,
+    })
+  if (inlineDiscusses_noId.length > 0) {
+    console.debug(inlineDiscusses_noId)
+    errors.push({
+      draftId: draft.id,
+      code: CommitInputErrorCode.DISCUSS_NOT_CREATE,
+    })
   }
 
-  if (errCodes.length > 0) {
-    const items: CommitInputErrorItem[] = errCodes.map(code => ({
-      draftId: draft.id,
-      code,
-    }))
-    throw new CommitInputError(items)
+  const inlineDiscussIds_outside_result = await prisma.$transaction(
+    inlineDiscussIds_outside.map(({ discussId }) =>
+      prisma.discuss.findUnique({ where: { id: discussId } }),
+    ),
+  )
+  inlineDiscussIds_outside_result.forEach((e, i) => {
+    if (e === null) {
+      const { blockUid, discussId } = inlineDiscussIds_outside[i]
+      errors.push({
+        draftId: draft.id,
+        code: CommitInputErrorCode.DISCUSS_ID_NOT_FOUND,
+        info: { blockUid, discussId },
+      })
+    }
+  })
+
+  if (errors.length > 0) {
+    throw new CommitInputError(errors)
   }
   return {
     draft,
@@ -187,12 +220,13 @@ export async function commitNoteDrafts(
     branch: Branch
   })[]
   newSyms: Sym[]
+  drafts_discussesCreated_foundInBlocks: Discuss[][]
 }> {
-  const symbol_symId: Record<string, string> = {},
-    symbol_noteId: Record<string, string> = {},
-    promises: PrismaPromise<any>[] = [],
-    commitId = cuid(),
-    newSymbolIds: string[] = []
+  const symbol_symId: Record<string, string> = {}
+  const symbol_noteId: Record<string, string> = {}
+  const promises: PrismaPromise<any>[] = []
+  const commitId = cuid()
+  const newSymbolIds: string[] = []
 
   // Validate drafts before commit
   const inputs: Awaited<ReturnType<typeof validateInput>>[] = []
@@ -222,23 +256,23 @@ export async function commitNoteDrafts(
   }
 
   // Loop first run: create syms, connect discusses
-  inputs.forEach(e => {
+  const drafts_discussesCreated_foundInBlocks: Discuss[][] = []
+  for (const e of inputs) {
     const {
-        draft,
-        // draftParsed,
-        // fromDoc,
-        sym,
-        note,
-        discussesCreated_foundInBlocks,
-        discussesCreated_unfoundInBlocks,
-      } = e,
-      { branchId, linkId, symbol } = draft,
-      symId = sym ? sym.id : cuid(),
-      noteId = note ? note.id : cuid()
+      draft,
+      sym,
+      note,
+      discussesCreated_foundInBlocks,
+      discussesCreated_unfoundInBlocks,
+    } = e
+    const { branchId, linkId, symbol } = draft
+    const symId = sym ? sym.id : cuid()
+    const noteId = note ? note.id : cuid()
 
     // drafts.push(draft)
     symbol_symId[symbol] = symId
     symbol_noteId[symbol] = noteId
+    drafts_discussesCreated_foundInBlocks.push(discussesCreated_foundInBlocks)
 
     // Create Sym and Note if not found
     if (sym === null) {
@@ -251,6 +285,7 @@ export async function commitNoteDrafts(
             id: symId,
             type,
             symbol,
+            link: linkId ? { connect: { id: linkId } } : undefined,
             notes: {
               create: {
                 id: noteId,
@@ -263,8 +298,7 @@ export async function commitNoteDrafts(
       )
     }
 
-    // Delete discusses that are not found in the blocks.
-    // These are discusses created by the draft but get removed from blocks.
+    // Delete discusses that are not found in the blocks. These are discusses created by the draft but get removed from blocks.
     discussesCreated_unfoundInBlocks.forEach(e => {
       promises.push(
         prisma.discuss.delete({
@@ -302,12 +336,12 @@ export async function commitNoteDrafts(
         )
       }
     })
-  })
+  }
 
   // Loop second run: for each draft, create doc and connect to the note
   inputs.forEach(e => {
-    const { draft, draftParsed } = e,
-      symId = symbol_symId[draft.symbol]
+    const { draft, draftParsed } = e
+    const symId = symbol_symId[draft.symbol]
 
     if (symId === null) throw new Error('Unexpected error: symId === null')
 
@@ -383,5 +417,12 @@ export async function commitNoteDrafts(
     noteDocs.map(e => noteDocMergeModel.mergeOnCreate(e)),
   )
 
-  return { symbol_symId, commit, notes, noteDocs: noteDocs_, newSyms }
+  return {
+    symbol_symId,
+    commit,
+    notes,
+    noteDocs: noteDocs_,
+    newSyms,
+    drafts_discussesCreated_foundInBlocks,
+  }
 }

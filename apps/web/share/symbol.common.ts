@@ -49,3 +49,7 @@ export function parseSymbol(symbol: string): SymbolParsed {
 export function removeTopicPrefixSuffix(topicSymbol: string): string {
   return topicSymbol.substring(2, topicSymbol.length - 2)
 }
+
+export function toURLSymbol(url: string): string {
+  return `[[${url}]]`
+}

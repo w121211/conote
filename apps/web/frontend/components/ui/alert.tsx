@@ -1,7 +1,7 @@
 import moment from 'moment'
 import React, { ReactNode, useState } from 'react'
 
-type AlertType = 'warnning' | 'error' | 'success' | 'announce'
+type AlertType = 'warning' | 'error' | 'success' | 'announce'
 
 const warnningBg = `bg-orange-200/50 dark:bg-orange-300/30`
 const warnningIcon = `text-yellow-500 dark:text-yellow-400`
@@ -16,14 +16,14 @@ const announceBg = `bg-yellow-200/60 dark:bg-yellow-400`
 // const announceIcon=`text-blue-600 dark:bg-blue-300`
 
 const bg = (type: AlertType) => {
-  if (type === 'warnning') return warnningBg
+  if (type === 'warning') return warnningBg
   if (type === 'error') return errorBg
   if (type === 'success') return successBg
   if (type === 'announce') return announceBg
 }
 
 const icon = (type: AlertType) => {
-  if (type === 'warnning') return warnningIcon
+  if (type === 'warning') return warnningIcon
   if (type === 'error') return errorIcon
   if (type === 'success') return successIcon
   if (type === 'announce') return ''
@@ -82,7 +82,7 @@ export const Alert: React.FC<Props> = ({
             ${icon(type)}
             `}
         >
-          {type === 'warnning'
+          {type === 'warning'
             ? 'warnning'
             : type === 'error'
             ? 'error'

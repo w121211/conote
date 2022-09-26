@@ -4,6 +4,7 @@ import React, {
   useImperativeHandle,
   useRef,
 } from 'react'
+import { setProps } from '@ngneat/elf'
 import { useObservable } from '@ngneat/react-rxjs'
 import {
   docGetOrCreate,
@@ -12,8 +13,6 @@ import {
 import { editorRepo } from '../editor-textarea/src/stores/editor.repository'
 import SidebarSection from './sidebar-section'
 import { siderRepo } from '../../stores/sider.repository'
-import { setProps } from '@ngneat/elf'
-import Link from 'next/link'
 import { SearcherProps } from '../../interfaces'
 import { useRouter } from 'next/router'
 import { getDraftPageURL } from '../../utils'

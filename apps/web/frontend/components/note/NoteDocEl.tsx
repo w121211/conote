@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { differenceBlocks, parseGQLBlocks } from '../../../share/utils'
 import { getDraftPageURLBySymbol } from '../../utils'
-import NoteDocAlerts from './NoteDocAlerts'
-import NoteDocHead from './NoteDocHead'
+import NoteDocElAlerts from './NoteDocElAlerts'
+import NoteDocElHead from './NoteDocElHead'
 import NoteDocVersionDropdown from './note-doc-version-dropdown'
 import BlocksViewer from '../editor-textarea/src/components/block/BlocksViewer'
 import { NoteDocElProps } from '../../interfaces'
@@ -33,7 +33,7 @@ const NoteDocEl = (props: NoteDocElProps) => {
 
       <div className="pb-32">
         <div className="flex flex-col gap-2 mb-4">
-          <NoteDocAlerts
+          <NoteDocElAlerts
             {...{ ...props, setShowMergePollModal: setShowModal }}
           />
         </div>
@@ -51,7 +51,7 @@ const NoteDocEl = (props: NoteDocElProps) => {
           </Link>
         </div>
 
-        <NoteDocHead
+        <NoteDocElHead
           symbol={doc.symbol}
           doc={doc}
           isHeadDoc={isHeadDoc}

@@ -13,12 +13,18 @@ const ParseRenderEl = ({
   className?: string
   isViewer?: true
 }) => {
-  const inlines = useMemo(() => parseBlockString(str), [str]),
-    { inlineItems } = inlines
+  const parsed = useMemo(() => parseBlockString(str), [str])
+  const { inlineItems } = parsed
+
   return (
     <span className={className}>
       {inlineItems.map((e, i) => (
-        <InlineEl key={i} blockUid={blockUid} inline={e} isViewer={isViewer} />
+        <InlineEl
+          key={i}
+          blockUid={blockUid}
+          inlineItem={e}
+          isViewer={isViewer}
+        />
       ))}
     </span>
   )

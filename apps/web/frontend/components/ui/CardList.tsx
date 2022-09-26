@@ -11,7 +11,7 @@ function CardList<T extends { id: string }>({
   renderItem: (item: T) => JSX.Element
 }) {
   return (
-    <div className="w-full max-w-2xl dark:bg-gray-800 dark:border-gray-700">
+    <div className="-full max-w-2xl dark:bg-gray-800 dark:bowrder-gray-700">
       <div className="flex justify-between items-center mb-4">{header}</div>
       <div>
         {items.length > 0 ? (

@@ -53,6 +53,8 @@ export const mockNoteDocs: NoteDocParsed<NoteDoc>[] = [
     id: '1-rejected',
     symId: mockSyms[1].id,
     status: 'REJECTED',
+    contentHead: mockNoteDrafts[4].contentHead,
+    contentBody: mockNoteDrafts[4].contentBody,
     meta: {
       mergeState: 'rejected_auto-no_changes',
     },
@@ -78,6 +80,15 @@ export const mockNoteDocs: NoteDocParsed<NoteDoc>[] = [
     status: 'MERGED',
     meta: {
       mergeState: 'merged_auto-initial_commit',
+    },
+  },
+  {
+    ...base,
+    id: '4-merged_auto-initial_commit',
+    symId: mockSyms[4].id,
+    status: 'CANDIDATE',
+    meta: {
+      mergeState: 'wait_to_merge-by_poll',
     },
   },
   // {

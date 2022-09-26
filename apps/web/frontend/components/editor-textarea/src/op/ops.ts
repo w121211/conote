@@ -518,10 +518,10 @@ export function docLoadOp(
   if (docRepo.findDoc({ symbol }))
     throw new Error('[docLoadOp] Doc is already existed')
 
-  if (symbol !== data.docBlock.docSymbol) {
-    console.debug(symbol, data.docBlock.docSymbol)
-    throw new Error('[docLoadOp] symbol !== docBlock.docSymbol')
-  }
+  // if (symbol !== data.docBlock.docSymbol) {
+  //   console.debug(symbol, data.docBlock.docSymbol)
+  //   throw new Error('[docLoadOp] symbol !== docBlock.docSymbol')
+  // }
   return {
     blockReducers: [addEntities(data.blocks)],
     docReducers: [addEntities(data.doc)],

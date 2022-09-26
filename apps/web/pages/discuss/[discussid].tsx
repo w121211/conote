@@ -16,8 +16,9 @@ import { getApolloClientSSR } from '../../apollo/apollo-client-ssr'
 import DiscussEl from '../../frontend/components/discuss/DiscussEl'
 import DiscussPostEls from '../../frontend/components/discuss-post/DiscussPostEls'
 import DiscussPostCreateForm from '../../frontend/components/discuss-post/DiscussPostCreateForm'
+import { AppPageProps } from '../../frontend/interfaces'
 
-interface Props {
+interface Props extends AppPageProps {
   initialApolloState: any
   discuss: DiscussFragment
   discussPosts: DiscussPostFragment[]
@@ -73,6 +74,7 @@ export async function getServerSideProps({
   )
   return {
     props: {
+      protected: true,
       initialApolloState: client.cache.extract(),
       discuss: qDiscuss.data.discuss,
       discussPosts: qPosts.data.discussPosts,

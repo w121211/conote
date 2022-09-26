@@ -102,58 +102,6 @@ export function validatePosition({
   }
 }
 
-/**
- * Exaustively check every block's children-uids is matching the children's parent
- *
- * @param dict key: block-uid, value: block
- *
- */
-export function validateChildrenUids(dict: Record<string, Block>): void {
-  Object.entries(dict).forEach(([k, v]) => {
-    const { childrenUids, uid } = v
-
-    childrenUids.forEach((e, i) => {
-      const child = dict[e]
-
-      if (child === undefined) {
-        console.error(dict, childrenUids, child)
-        throw new Error(
-          '[validateChildrenUids] child not found by children-uid',
-        )
-      }
-      if (child.parentUid !== uid) {
-        console.error(dict, childrenUids, child)
-        throw new Error(
-          "[validateChildrenUids] children-uids not match child's parent-uid",
-        )
-      }
-      if (child.order !== i) {
-        console.error(dict, childrenUids, child)
-        throw new Error(
-          "[validateChildrenUids] children-uids not match child's order",
-        )
-      }
-    })
-  })
-
-  // Reverse check
-  Object.entries(dict).forEach(([k, v]) => {
-    const { parentUid, order, uid } = v,
-      parent = parentUid ? dict[parentUid] : null
-
-    if (parent) {
-      if (parent.childrenUids[order] !== uid) {
-        console.error(dict, parent, v)
-        throw new Error(
-          "[validateChildrenUids] child's parent-uid, order not match children-uids",
-        )
-      }
-    }
-  })
-
-  // Check orphans
-}
-
 export function validateUid(newUid: string): void {
   if (blocksStore.query(hasEntity(newUid))) {
     throw new Error('[validateUid] Given uid is not unique')

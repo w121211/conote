@@ -11,6 +11,7 @@ import {
   useMyPollVotesQuery,
 } from '../../../apollo/query.graphql'
 import { MERGE_POLL_V1_0 } from '../../../share/constants'
+import { useMeContext } from '../auth/use-me-context'
 import BarChart from '../bar/bar'
 import { FormSubmitBtn } from '../ui/form/form-submit-btn'
 
@@ -71,31 +72,33 @@ const agreeCode = MERGE_POLL_V1_0.codes[0],
   rejectCodes = MERGE_POLL_V1_0.codes.slice(1)
 
 const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
-  const pollId = poll.id,
-    router = useRouter(),
-    qMyPollVotes = useMyPollVotesQuery({ variables: { pollId } }),
-    [createVote] = useCreatePollVoteMutation({
-      update(cache, { data }) {
-        const res = cache.readQuery<MyPollVotesQuery>({
+  const pollId = poll.id
+  const { me } = useMeContext()
+  const isOwner = me?.id === poll.noteDocToMerge?.userId
+  const router = useRouter()
+  const qMyPollVotes = useMyPollVotesQuery({ variables: { pollId } })
+  const [createVote] = useCreatePollVoteMutation({
+    update(cache, { data }) {
+      const res = cache.readQuery<MyPollVotesQuery>({
+        query: MyPollVotesDocument,
+      })
+      if (data?.createPollVote && res?.myPollVotes) {
+        cache.writeQuery({
           query: MyPollVotesDocument,
+          data: { myVotes: res.myPollVotes.concat([data.createPollVote]) },
         })
-        if (data?.createPollVote && res?.myPollVotes) {
-          cache.writeQuery({
-            query: MyPollVotesDocument,
-            data: { myVotes: res.myPollVotes.concat([data.createPollVote]) },
-          })
-        }
-      },
-    }),
-    methods = useForm<FormInputs>({ mode: 'onChange' }),
+      }
+    },
+  })
+  const methods = useForm<FormInputs>({ mode: 'onChange' }),
     {
       register,
       handleSubmit,
       formState: { isDirty, isSubmitting, isValid },
       watch,
-    } = methods,
-    watchChoice = watch('choice'),
-    watchRejectCode = watch('rejectCode')
+    } = methods
+  const watchChoice = watch('choice')
+  const watchRejectCode = watch('rejectCode')
 
   async function onSubmit(d: FormInputs) {
     let choice: string | undefined
@@ -136,51 +139,49 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
       <FormProvider {...methods}>
         <div>
           <form
-            className="flex flex-col mt-4 mb-8"
+            className="flex flex-col my-4"
             onSubmit={handleSubmit(onSubmit)}
           >
             <div className="mb-4 last:mb-0">
               <div>
-                <div className="flex flex-col">
-                  <label>
+                <div className="flex flex-col gap-2">
+                  <label className="font-semibold">
                     <input
                       {...register('choice', { required: true })}
                       type="radio"
                       name="choice"
                       value="agree"
-                      className="mr-1"
+                      className="mr-2"
                     />
                     Agree
                   </label>
 
-                  <label>
+                  <label className="font-semibold">
                     <input
                       {...register('choice')}
                       type="radio"
                       name="choice"
                       value="disagree"
-                      className="mr-1"
+                      className="mr-2"
                     />
                     Disagree
                   </label>
 
                   {watchChoice === 'disagree' && (
-                    <div>
+                    <>
                       {rejectCodes.map(([code, desc]) => (
-                        <div key={code}>
-                          <label>
-                            <input
-                              {...register('rejectCode')}
-                              type="radio"
-                              name="rejectCode"
-                              value={code}
-                              className="mr-1"
-                            />
-                            {desc}
-                          </label>
-                        </div>
+                        <label key={code}>
+                          <input
+                            {...register('rejectCode')}
+                            type="radio"
+                            name="rejectCode"
+                            value={code}
+                            className="mr-2"
+                          />
+                          {desc}
+                        </label>
                       ))}
-                    </div>
+                    </>
                   )}
                 </div>
 
@@ -192,6 +193,7 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
             <FormSubmitBtn
               isDirty={isDirty}
               isDisabled={
+                isOwner ||
                 myVote !== undefined ||
                 !isNil(qMyPollVotes.error) ||
                 isSubmitting ||
@@ -201,6 +203,11 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
             >
               Submit
             </FormSubmitBtn>
+            {isOwner && (
+              <span className="text-red-600">
+                Not able to vote your own request.
+              </span>
+            )}
           </form>
         </div>
       </FormProvider>

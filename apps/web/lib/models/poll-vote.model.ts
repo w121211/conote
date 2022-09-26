@@ -64,6 +64,31 @@ function updateNVotes(
 //   return vote
 // }
 
+async function validateBeforeCreate(
+  pollId: string,
+  choiceIdx: number,
+  userId: string,
+) {
+  const prevVote = await prisma.pollVote.findFirst({
+    where: { userId, pollId },
+  })
+  if (prevVote) throw new Error('User has voted')
+
+  const poll = await prisma.poll.findUnique({
+    where: { id: pollId },
+    include: { count: true },
+  })
+
+  if (poll === null) throw new Error('Poll not found')
+  if (poll.userId === userId) throw new Error('Owner cannot vote self poll')
+  if (poll.count === null) throw new Error('poll.count === null')
+  if (poll.status !== 'OPEN') throw new Error('poll.status !== OPEN')
+  if (choiceIdx < 0 || choiceIdx >= poll.choices.length)
+    throw new Error('Choice index is out of range')
+
+  return { poll, count: poll.count }
+}
+
 /**
  * TODO:
  * - [] (Bug) If call in parellel, the count result may be wrong
@@ -71,69 +96,37 @@ function updateNVotes(
  */
 class PollVoteModel {
   /**
-   * Create a basic vote, cannot vote more than once for the same poll,
-   * cannot update the vote
+   * Create a basic vote, cannot vote more than once for the same poll, cannot update the vote
    */
-  async create({
-    choiceIdx,
-    pollId,
-    userId,
-  }: {
-    choiceIdx: number
-    pollId: string
-    userId: string
-  }): Promise<PollVote> {
-    // TODO:
-    const prevVote = await prisma.pollVote.findFirst({
-      where: { userId, pollId },
-    })
-    if (prevVote) throw new Error('[create] User has voted')
-
-    const poll = await prisma.poll.findUnique({
-      where: { id: pollId },
-      include: { count: true },
-    })
-
-    if (poll === null) throw new Error('[create] Poll not found')
-    if (poll.count === null) throw new Error('[create] poll.count === null')
-    if (poll.status !== 'OPEN') throw new Error('[create] poll.status !== OPEN')
-    if (choiceIdx < 0 || choiceIdx >= poll.choices.length)
-      throw new Error('[create] Choice index is out of range')
-
+  async create(
+    pollId: string,
+    choiceIdx: number,
+    userId: string,
+  ): Promise<PollVote> {
+    const { poll, count } = await validateBeforeCreate(
+      pollId,
+      choiceIdx,
+      userId,
+    )
     const vote = await prisma.pollVote.create({
-        data: {
-          choiceIdx,
-          user: { connect: { id: userId } },
-          poll: { connect: { id: poll.id } },
-        },
-      }),
-      // TODO: (Bug) If call in parellel, the count result may be wrong
-      count = await prisma.pollCount.update({
-        data: {
-          nVotes: updateNVotes(
-            poll.count.nVotes,
-            choiceIdx,
-            poll.choices.length,
-          ),
-        },
-        where: { pollId },
-      })
+      data: {
+        choiceIdx,
+        user: { connect: { id: userId } },
+        poll: { connect: { id: poll.id } },
+      },
+    })
+
+    // TODO: (Bug) If call in parellel, the count result may be wrong
+    const count_ = await prisma.pollCount.update({
+      data: {
+        nVotes: updateNVotes(count.nVotes, choiceIdx, poll.choices.length),
+      },
+      where: { pollId },
+    })
 
     // console.debug(choiceIdx, pollId, userId, count)
 
     return vote
-  }
-
-  async validateBeforeCreate({
-    choiceIdx,
-    pollId,
-    userId,
-  }: {
-    choiceIdx: number
-    pollId: string
-    userId: string
-  }) {
-    // TODO:
   }
 }
 

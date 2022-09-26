@@ -31,7 +31,7 @@ export function setIndent(editor: Editor, { offset = 1 }: SetIndentOptions) {
       } else {
         Transforms.setNodes<ElementIndenter>(
           editor,
-          { indent: newIndent, error: undefined },
+          { indent: newIndent, errorCode: undefined },
           { at: path },
         )
       }

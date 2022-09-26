@@ -66,7 +66,7 @@ export class NoteDocModel {
   }
 
   /**
-   * TODO: validate on create
+   * TODO: Validate on create -> eg use draft-validated as input param
    *
    * @param incomingSymbolsDict { [symbol]: sym-id } dict
    */

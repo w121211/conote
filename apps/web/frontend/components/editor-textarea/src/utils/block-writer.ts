@@ -1,6 +1,5 @@
-import { Block } from '../interfaces'
-import { validateChildrenUids } from '../op/helpers'
-import { genBlockUid } from '../utils'
+import type { Block } from '../interfaces'
+import { genBlockUid, validateChildrenUids } from '../utils'
 
 export type BlockInput = [string, BlockInput[]] | string
 

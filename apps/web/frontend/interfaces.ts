@@ -1,17 +1,14 @@
-//
-// Page props
-//
-//
-//
-//
-//
-//
+import { NoteDocFragment, NoteFragment } from '../apollo/query.graphql'
+import { Doc } from './components/editor-textarea/src/interfaces'
 
-import {
-  NoteDocFragment,
-  NoteDraftFragment,
-  NoteFragment,
-} from '../apollo/query.graphql'
+//
+// Page props (for sharing)
+// Used to avoid cyclic import
+//
+//
+//
+//
+//
 
 export interface AppPageProps {
   initialApolloState?: any
@@ -20,7 +17,7 @@ export interface AppPageProps {
 }
 
 //
-// Component props (in sharing)
+// Component props (for sharing components)
 //
 //
 //
@@ -42,6 +39,10 @@ export interface SearcherProps {
 
   // If enabled, searcher will create the draft when click the hit
   createMode?: true
+}
+
+export interface DocElProps {
+  doc: Doc
 }
 
 export interface NoteDocElProps {

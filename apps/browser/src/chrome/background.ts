@@ -1,11 +1,12 @@
-import type { ApolloClient, NormalizedCacheObject } from '@apollo/client'
+// import type { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 // import browser from 'webextension-polyfill'
-import {
-  LinkDocument,
-  LinkQuery,
-  LinkQueryVariables,
-} from '../../../web/apollo/query.graphql'
+// import {
+//   LinkDocument,
+//   LinkQuery,
+//   LinkQueryVariables,
+// } from '../../../web/apollo/query.graphql'
 // import apolloClient from '../apollo-client'
+import { openSiteByCurrentTabUrl } from '../listeners'
 
 // const RateMenu = {
 //   id: 'conote-menu-rate',
@@ -151,73 +152,56 @@ import {
  * when tab's url changed or new tab opened, query conote server and get url specified note, then change extension badge
  *
  */
-const setupBadge = (client: ApolloClient<NormalizedCacheObject>): void => {
-  // browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
-  //   if (changeInfo.url) {
-  //     console.log('Tab: ' + tabId + ' URL changed to ' + changeInfo.url)
-  //   }
-  // })
+// const setupBadge = (client: ApolloClient<NormalizedCacheObject>): void => {
+//   // browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
+//   //   if (changeInfo.url) {
+//   //     console.log('Tab: ' + tabId + ' URL changed to ' + changeInfo.url)
+//   //   }
+//   // })
 
-  chrome.tabs.onActivated.addListener(async info => {
-    // console.log('Tab ' + info.tabId + ' was activated')
-    // browser.tabs.query({ currentWindow: true, active: true }).then(tabs => {
-    //   const tab = tabs[0] // Safe to assume there will only be one result
-    //   console.log(tab.url)
-    //   onTabActivated(tab)
-    // }, console.error)
-    const tabs = await chrome.tabs.query({ currentWindow: true, active: true })
-    const tab = tabs[0] // Safe to assume there will only be one result
-    // await onTabActivated(tab)
+//   chrome.tabs.onActivated.addListener(async info => {
+//     // console.log('Tab ' + info.tabId + ' was activated')
+//     // browser.tabs.query({ currentWindow: true, active: true }).then(tabs => {
+//     //   const tab = tabs[0] // Safe to assume there will only be one result
+//     //   console.log(tab.url)
+//     //   onTabActivated(tab)
+//     // }, console.error)
+//     const tabs = await chrome.tabs.query({ currentWindow: true, active: true })
+//     const tab = tabs[0] // Safe to assume there will only be one result
+//     // await onTabActivated(tab)
 
-    if (tab.url) {
-      // const link = await queryLink(client, tab.url)
-      const { data } = await client.query<LinkQuery, LinkQueryVariables>({
-        query: LinkDocument,
-        variables: { url: tab.url },
-      })
-      if (data.link) {
-        chrome.action.setBadgeText({ text: '1' })
-      } else {
-        chrome.action.setBadgeText({ text: '0' })
-      }
-    }
-    // else {
-    //   browser.browserAction.disable()
-    // }
-  })
-}
+//     if (tab.url) {
+//       // const link = await queryLink(client, tab.url)
+//       const { data } = await client.query<LinkQuery, LinkQueryVariables>({
+//         query: LinkDocument,
+//         variables: { url: tab.url },
+//       })
+//       if (data.link) {
+//         chrome.action.setBadgeText({ text: '1' })
+//       } else {
+//         chrome.action.setBadgeText({ text: '0' })
+//       }
+//     }
+//     // else {
+//     //   browser.browserAction.disable()
+//     // }
+//   })
+// }
 
 /**
  * when user click extension-icon, get current tab's url, title and open a new window to navigate to conote's site
  *
  */
-function setupBrowserActions() {
+function initBrowserActions() {
   // browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   //   if (changeInfo.url) {
   //     console.log('Tab: ' + tabId + ' URL changed to ' + changeInfo.url)
   //   }
   // })
 
-  chrome.action.onClicked.addListener(async tab => {
-    // console.log(tab)
+  const action = process.env.MANIFEST_V3 ? chrome.action : chrome.browserAction
 
-    if (tab.url) {
-      const params = new URLSearchParams({
-        s: `[[${tab.url}]]`,
-        ext: '1',
-      })
-      // const tabUrl = encodeURIComponent(tab.url ?? '')
-
-      const window = await chrome.windows.create({
-        url: `${process.env.APP_BASE_URL}/draft?${params.toString()}`,
-        width: 500,
-        height: 900,
-        left: 100,
-      })
-    } else {
-      console.debug('tab.url is undefined')
-    }
-  })
+  action.onClicked.addListener(openSiteByCurrentTabUrl)
 }
 
 /**
@@ -226,7 +210,8 @@ function setupBrowserActions() {
 function main(): void {
   // setupBadge(apolloClient)
   // SearchMenu.setup()
-  setupBrowserActions()
+
+  initBrowserActions()
 }
 
 main()

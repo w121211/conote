@@ -26,5 +26,5 @@ export const ErrorDisplay = ({
   error: string
   children?: React.ReactNode
 }) => {
-  return <StatusDisplay str={`Ooops!${error}`}>{children}</StatusDisplay>
+  return <StatusDisplay str={`${error}`}>{children}</StatusDisplay>
 }

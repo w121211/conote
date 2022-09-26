@@ -1,30 +1,28 @@
-import React, { useMemo, useCallback, useEffect, useState } from 'react'
-import { useObservable } from '@ngneat/react-rxjs'
+import React, { useEffect, useState } from 'react'
 import { parseGQLBlocks } from '../../../../../share/utils'
-import { Doc } from '../../../editor-textarea/src/interfaces'
-import { docTemplateGenerate, slateDocSave } from '../events'
-import { docEditorValueRepo } from '../stores/doc-editor-value.repository'
-import { blocksToIndenters, indentersToBlocks } from '../indenter/serializers'
+import { slateDocSave } from '../events'
+import { blocksToIndenters } from '../indenter/serializers'
 import { toast } from 'react-toastify'
 import { interval, skip } from 'rxjs'
 import EditorEl from './EditorEl'
 import Link from 'next/link'
-import DocHead from '../../../editor-textarea/src/components/doc/DocHead'
-import { docRepo } from '../../../editor-textarea/src/stores/doc.repository'
-import BlocksViewer from '../../../editor-textarea/src/components/block/BlocksViewer'
 import { getNotePageURL } from '../../../../utils'
+import { DocElProps } from '../../../../interfaces'
+import DocElHead from './DocElHead'
+import DocElAlertList from './DocElAlertList'
+import { IndenterFormatError } from '../indenter/normalizers'
 
 /**
  * A local save doc function, include error handling
  */
-async function saveDoc(docUid: string) {
+async function saveDoc(docUid: string, docSymbol: string) {
   try {
     await slateDocSave(docUid)
   } catch (err) {
-    if (err instanceof Error && err.message === 'indent_oversize') {
+    if (err instanceof IndenterFormatError) {
       toast.error(
         <div>
-          The draft cannot be saved. Please fix the indentation error(s).
+          Draft {docSymbol} cannot be saved. Please fix the indentation error.
         </div>,
       )
     } else {
@@ -33,7 +31,7 @@ async function saveDoc(docUid: string) {
   }
 }
 
-const DocEl = (props: { doc: Doc }) => {
+const DocEl = (props: DocElProps) => {
   const { doc } = props
   const [showPreview, setShowPreview] = useState(false)
   const { blocks: gqlBlocks } = doc.noteDraftCopy.contentBody,
@@ -44,13 +42,17 @@ const DocEl = (props: { doc: Doc }) => {
 
   useEffect(() => {
     const interval$ = interval(30000),
-      sub = interval$.pipe(skip(1)).subscribe(() => saveDoc(doc.uid))
+      sub = interval$
+        .pipe(skip(1))
+        .subscribe(() => saveDoc(doc.uid, doc.noteDraftCopy.symbol))
 
     return () => {
       sub.unsubscribe()
 
       // When the doc is committed or deleted, it will trigger the component unmount and thus throws 'doc not found' error
-      saveDoc(doc.uid).catch(err => console.debug(err))
+      saveDoc(doc.uid, doc.noteDraftCopy.symbol).catch(err =>
+        console.debug(err),
+      )
     }
   }, [])
 
@@ -75,30 +77,28 @@ const DocEl = (props: { doc: Doc }) => {
   return (
     <div
       id={doc.uid}
-      // className="bg-gray-100 rounded-lg p-5"
+      className="border border-gray-200 rounded px-12 pt-8 pb-24"
     >
-      <div className="pt-2">
-        {!showPreview ? (
-          <button
-            className="px-2 py-1 inline-flex justify-center items-center gap-1 rounded-md text-sm text-gray-500 font-normal align-middle hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800"
-            onClick={() => setShowPreview(!showPreview)}
-          >
-            <span className="material-icons-outlined text-sm">adjust</span>
-            Preview
-          </button>
-        ) : (
-          <button
-            className="px-3 py-1 inline-flex justify-center items-center gap-1 rounded-md text-gray-500 text-sm font-normal align-middle hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800"
-            onClick={() => setShowPreview(!showPreview)}
-          >
-            <span className="material-icons-outlined text-sm">edit</span>
-            Edit
-          </button>
-        )}
+      <div className="mb-4">
+        <DocElAlertList {...props} />
+      </div>
+
+      <div className="pb-4">
+        <button
+          className={
+            showPreview
+              ? 'px-2 py-1 inline-flex justify-center items-center gap-1 rounded-md text-sm text-white border border-transparent bg-blue-500 hover:bg-blue-600'
+              : 'px-2 py-1 inline-flex justify-center items-center gap-1 rounded-md text-sm text-gray-500 border border-transparent hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white'
+          }
+          onClick={() => setShowPreview(!showPreview)}
+        >
+          <span className="material-icons-outlined text-sm">adjust</span>
+          Preview
+        </button>
 
         {doc.noteCopy && (
           <Link href={getNotePageURL(doc.noteCopy.sym.symbol)}>
-            <a className="px-2 py-1 inline-flex justify-center items-center gap-1 rounded-md text-sm text-gray-500 font-normal align-middle hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-600 dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800">
+            <a className="px-2 py-1 inline-flex justify-center items-center gap-1 rounded-md text-sm text-gray-500 border border-transparent hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white">
               <span className="material-icons-outlined text-sm">
                 north_east
               </span>
@@ -108,7 +108,8 @@ const DocEl = (props: { doc: Doc }) => {
         )}
       </div>
       {/* <button onClick={() => saveDoc(doc.uid)}>Save</button> */}
-      <DocHead doc={doc} />
+
+      <DocElHead doc={doc} />
       {/* {showPreview ? (
         <DocBodyPreview docUid={doc.uid} />
       ) : (

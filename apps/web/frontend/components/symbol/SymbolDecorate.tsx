@@ -1,72 +1,86 @@
 import React from 'react'
+import { SymbolParsed } from '../../../lib/interfaces'
 import { parseSymbol } from '../../../share/symbol.common'
+import { decorateId } from '../decorators'
 
 const bracketLeft = 'text-gray-300 dark:text-gray-300 font-light'
 const bracketRight = 'text-gray-300 dark:text-gray-300 font-light'
 
-const SymbolDecorate = ({
-  symbolStr,
-  title,
-  gray,
-}: {
-  symbolStr: string
-  title?: string
-  gray?: true
-}) => {
-  const { type, symbol, url } = parseSymbol(symbolStr)
-  const symbolColor = gray
-    ? 'text-gray-600 dark:text-gray-300'
-    : 'text-blue-600 dark:text-blue-300'
+export function styleSymbol(
+  symbolParsed: SymbolParsed,
+  urlTitle: string | null,
+  opts: {
+    color?: 'gray' | 'blue'
+  } = { color: 'blue' },
+): {
+  bracketLeftSpan: JSX.Element | null
+  bracketRightSpan: JSX.Element | null
+  symbolSpan: JSX.Element
+  urlTitleSpan: JSX.Element | null
+} {
+  const { symbol, type, url } = symbolParsed
+  const symbolCls =
+    opts.color === 'gray'
+      ? 'text-gray-600 dark:text-gray-300 whitespace-pre-wrap'
+      : 'text-blue-600 dark:text-blue-300 whitespace-pre-wrap'
+
+  const bracketLeftSpan = <span className={bracketLeft}>{'[['}</span>
+  const bracketRightSpan = <span className={bracketRight}>{']]'}</span>
+  const symbolSpan = (
+    <span className={symbolCls}>{symbol.substring(2, symbol.length - 2)}</span>
+  )
 
   switch (type) {
     case 'TOPIC':
-      return (
-        <>
-          <span className={bracketLeft}>{'[['}</span>
-          <span className={symbolColor}>
-            {symbol.substring(2, symbol.length - 2)}
-          </span>
-          <span className={bracketRight}>{']]'}</span>
-        </>
-      )
+      return {
+        bracketLeftSpan,
+        bracketRightSpan,
+        symbolSpan,
+        urlTitleSpan: null,
+      }
     case 'URL': {
       if (url === undefined) throw new Error('url === undefined')
 
       const url_ =
         url.href.length > 50 ? `${url.href.slice(0, 50)}...` : url.href
-
-      if (title) {
-        return (
-          <>
-            <span className={bracketLeft}>{'[['}</span>
-            {/* <span className="text-blue-600">{title}</span>
-            <span className="text-gray-400 font-light ml-1">{url_}</span> */}
-            <span className="text-blue-600">{url_}</span>
-            <span className={bracketRight}>{']]'}</span>
-            <span className="text-gray-500 font-light ml-2">{title}</span>
-          </>
-          // <span className={blueHighlight} title={url.href}>
-          // </span>
-        )
+      return {
+        bracketLeftSpan,
+        bracketRightSpan,
+        symbolSpan: <span className={symbolCls}>{url_}</span>,
+        urlTitleSpan: (
+          <span className="text-gray-600 font-light">{urlTitle}</span>
+        ),
       }
-      return (
-        <span className={symbolColor} title={url.href}>
-          <span className={bracketLeft}>{'[['}</span>
-          {url_}
-          <span className={bracketRight}>{']]'}</span>
-        </span>
-      )
     }
-
-    case 'TICKER':
-      return (
-        <span className={symbolColor}>
-          <span className={bracketLeft}>{'[['}</span>
-          {symbol.substring(2, symbol.length - 2)}
-          <span className={bracketRight}>{']]'}</span>
-        </span>
-      )
+    default:
+      throw new Error('Unhandle symbol type: ' + type)
   }
+}
+
+const SymbolDecorate = ({
+  symbol,
+  title,
+  id,
+  gray,
+}: {
+  symbol: string
+  title?: string | null
+  id?: string
+  gray?: true
+}) => {
+  const symbolParsed = parseSymbol(symbol)
+  const { bracketLeftSpan, bracketRightSpan, symbolSpan, urlTitleSpan } =
+    styleSymbol(symbolParsed, title ?? null, gray && { color: 'gray' })
+
+  return (
+    <>
+      {bracketLeftSpan}
+      {symbolSpan}
+      {bracketRightSpan}
+      {urlTitleSpan}
+      {id && decorateId(id)}
+    </>
+  )
 }
 
 export default SymbolDecorate

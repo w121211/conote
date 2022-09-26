@@ -1,5 +1,5 @@
-import browser, { Storage } from 'webextension-polyfill'
-// import React, { useCallback, useEffect, useState } from 'react'
+// import browser, { Storage } from 'webextension-polyfill'
+import React, { useCallback, useEffect, useState } from 'react'
 // import { ApolloClient, ApolloProvider, createHttpLink, NormalizedCacheObject } from '@apollo/client'
 // import { setContext } from '@apollo/client/link/context'
 // // import { CachePersistor, PersistentStorage, LocalStorageWrapper } from 'apollo3-cache-persist'
