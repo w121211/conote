@@ -450,6 +450,14 @@ query MyNoteDraftEntries {
   }
 }
 
+query MyNoteDocsExport {
+  myNoteDocsExport
+}
+
+query MyNoteDraftsExport {
+  myNoteDraftsExport
+}
+
 query MyNoteEmojiLike($noteEmojiId: ID!) {
   myNoteEmojiLike(noteEmojiId: $noteEmojiId) {
     ...noteEmojiLike

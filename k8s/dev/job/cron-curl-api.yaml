@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: conote-curl-api-cronjob
+spec:
+  schedule: '20 */4 * * *' # At minute 20 past every 4th hour.
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: conote-curl-api-cronjob
+              image: curlimages/curl:7.84.0
+              envFrom:
+                - secretRef:
+                    name: conote-webapp-envlocal
+              command: ['/bin/sh']
+              args:
+                - -c
+                - 'curl conote-webapp-service:50000/api/cron --verbose --request POST --header "Authorization: Bearer ${APP_API_SECRET}"'
+          restartPolicy: OnFailure

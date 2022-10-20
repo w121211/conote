@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from 'react'
 import { ComponentMeta } from '@storybook/react'
 import ModalProvider from '../../frontend/components/modal/modal-context'
-import SlateDocChainEl from '../../frontend/components/editor-slate/src/components/DocChainEl'
+import DocChainEl from '../../frontend/components/editor-slate/src/components/DocChainEl'
 import { noteDraftService } from '../../frontend/components/editor-textarea/src/services/note-draft.service'
 import { editorChainsRefresh } from '../../frontend/components/editor-textarea/src/events'
 
 export default {
-  component: SlateDocChainEl,
-} as ComponentMeta<typeof SlateDocChainEl>
+  component: DocChainEl,
+} as ComponentMeta<typeof DocChainEl>
 
 export const Base = () => {
   const ref = useRef<string | null>(null)
@@ -27,7 +27,7 @@ export const Base = () => {
   return (
     <ModalProvider>
       {ref.current && (
-        <SlateDocChainEl draftId={ref.current} hashDraftId={ref.current} />
+        <DocChainEl leadDraftId={ref.current} anchorDraftId={ref.current} />
       )}
     </ModalProvider>
   )

@@ -65,5 +65,8 @@
     }
   ],
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "editor.bracketPairColorization.enabled": true
+  "editor.bracketPairColorization.enabled": true,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  }
 }

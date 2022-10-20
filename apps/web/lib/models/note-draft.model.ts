@@ -4,6 +4,7 @@ import type {
   NoteDraftInput,
   NoteDraftMetaInput,
 } from 'graphql-let/__generated__/__types__'
+import { blocksToText } from '../../share/converters'
 import { parseBlockValues, parseGQLContentBodyInput } from '../../share/utils'
 import { toStringProps } from '../helpers'
 import type {
@@ -292,6 +293,29 @@ class NoteDraftModel {
       branchName: draft.branch.name,
     }
     return toStringProps(draft_)
+  }
+
+  /**
+   * Convert a note-doc to text. Used for export purpose.
+   */
+  toText<T extends NoteDraft>(doc: NoteDraftParsed<T>): string {
+    const {
+      symbol,
+      contentHead,
+      contentBody: { blocks },
+      createdAt,
+    } = doc
+
+    let t =
+      symbol +
+      ' ' +
+      createdAt.toISOString().split('T')[0] +
+      // ' ' +
+      // JSON.stringify(contentHead) +
+      '\n\n'
+    t += blocksToText(blocks) + '\n'
+
+    return t
   }
 }
 

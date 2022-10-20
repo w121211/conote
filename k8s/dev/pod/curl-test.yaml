@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: curl-test
+  namespace: default
+spec:
+  containers:
+    - name: curl-test
+      image: curlimages/curl:7.84.0
+      envFrom:
+        - secretRef:
+            name: conote-webapp-envlocal
+      # command: ['sleep', 'infinity']
+      command: ['/bin/sh']
+      args:
+        - -c
+        - 'curl conote-webapp-service:50000/api/cron --verbose --request POST --header "Authorization: Bearer ${APP_API_SECRET}"'

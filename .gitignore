@@ -97,3 +97,6 @@ __generated__
 src/web/prisma/seeds/_local-cache.dump.json
 
 gke_conote_prisma_dump-*
+
+# Secrets
+*.key.json

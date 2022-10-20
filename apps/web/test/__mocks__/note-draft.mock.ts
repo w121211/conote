@@ -12,7 +12,7 @@ import { mockLinks } from './link.mock'
 import { mockSyms } from './sym.mock'
 import { mockUsers } from './user.mock'
 
-const blocksArr: NoteDraftParsed<NoteDraft>['contentBody']['blocks'][] = [
+const blocksZoo: NoteDraftParsed<NoteDraft>['contentBody']['blocks'][] = [
   writeBlocks(mockBlockInputs[0], {
     docSymbol: mockSyms[0].symbol,
   }),
@@ -43,8 +43,8 @@ const base: Omit<NoteDraftParsed<NoteDraft>, 'createdAt' | 'updatedAt'> = {
       { symbol: '[[Google]]', symId: null },
       { symbol: '$BA', symId: null },
     ],
-    blocks: blocksArr[0],
-    blockDiff: differenceBlocks(blocksArr[0], null),
+    blocks: blocksZoo[0],
+    blockDiff: differenceBlocks(blocksZoo[0], null),
   },
 }
 
@@ -65,8 +65,8 @@ export const mockNoteDrafts: Omit<
         { symbol: '[[Google]]', symId: null },
         { symbol: '$BA', symId: null },
       ],
-      blocks: blocksArr[0],
-      blockDiff: differenceBlocks(blocksArr[0], null),
+      blocks: blocksZoo[0],
+      blockDiff: differenceBlocks(blocksZoo[0], null),
     },
   },
   {
@@ -81,8 +81,8 @@ export const mockNoteDrafts: Omit<
         { blockUid: 'uid-1', discussId: mockDiscusses_[2].id },
       ],
       symbols: [],
-      blocks: blocksArr[1],
-      blockDiff: differenceBlocks(blocksArr[1], null),
+      blocks: blocksZoo[1],
+      blockDiff: differenceBlocks(blocksZoo[1], null),
     },
   },
   {
@@ -94,8 +94,8 @@ export const mockNoteDrafts: Omit<
     contentBody: {
       discussIds: [],
       symbols: [],
-      blocks: blocksArr[2],
-      blockDiff: differenceBlocks(blocksArr[2], null),
+      blocks: blocksZoo[2],
+      blockDiff: differenceBlocks(blocksZoo[2], null),
     },
   },
   {

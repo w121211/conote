@@ -1,14 +1,20 @@
-# @see
+# References
 # - https://github.com/GoogleCloudPlatform/microservices-demo
 # - https://github.com/GoogleCloudPladtform/solutions-modern-cicd-anthos/blob/master/starter-repos/online-boutique/skaffold.yaml
-# - helm: https://github.com/GoogleContainerTools/skaffold/tree/main/examples/helm-remote-repo
+# - helm https://github.com/GoogleContainerTools/skaffold/tree/main/examples/helm-remote-repo
 
-apiVersion: skaffold/v2beta16
+apiVersion: skaffold/v2beta28
 kind: Config
 build:
   artifacts:
     - image: conote-webapp-image
       context: .
+      docker:
+        dockerfile: './k8s/images/Dockerfile.webapp'
+    # - image: conote-dbbackup-image
+    #   # context: './k8s/images'
+    #   docker:
+    #     dockerfile: './Dockerfile.dbbackup'
 deploy:
   kustomize:
     paths:
@@ -17,15 +23,13 @@ deploy:
 profiles:
   - name: gcb
     build:
-      artifacts:
-        - image: conote-webapp-image
-          context: .
-          # kaniko:  # Fail with yarn workspace
-          #   cache: {}
+      # artifacts:
+      # - image: conote-webapp-image
+      #   context: .
+      #   kaniko:  # Fail with yarn workspace
+      #     cache: {}
       googleCloudBuild:
-        # diskSizeGb: 300
-        # machineType: N1_HIGHCPU_32
-        projectId: conote-web-project
+        projectId: conote-webapp
         timeout: 4000s
   - name: minikube
     activation:

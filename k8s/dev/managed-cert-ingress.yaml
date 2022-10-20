@@ -1,4 +1,4 @@
-# @see https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs
+# See https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs
 
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
@@ -14,7 +14,7 @@ kind: Ingress
 metadata:
   name: conote-managed-cert-ingress
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: conote-https-static-ip # match gcloud static ip name
+    kubernetes.io/ingress.global-static-ip-name: conote-https-static-ip # Match gcloud static ip name
     networking.gke.io/managed-certificates: conote-managed-cert
     kubernetes.io/ingress.class: 'gce'
 spec:

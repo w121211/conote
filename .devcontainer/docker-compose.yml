@@ -15,7 +15,7 @@ services:
 
     # Use docker-sync instead, defined in docker-compose-dev.yml
     # volumes:
-    #   - ../..:/workspace:delegated
+    #   - ..:/workspace:delegated
 
     ports:
       - 3000:3000
@@ -30,7 +30,7 @@ services:
     # - twint_default
 
   postgresql:
-    image: bitnami/postgresql:11.13.0-debian-10-r21
+    image: bitnami/postgresql:14-debian-11
     environment:
       POSTGRESQL_USERNAME: postgresuser
       POSTGRESQL_PASSWORD: postgrespassword
@@ -44,14 +44,14 @@ services:
       PGADMIN_DEFAULT_EMAIL: pgadmin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
 
-  redis:
-    image: redis:6.2-alpine
-    volumes:
-      # - data02:/data
-      - ./library-scripts/redis.conf:/usr/local/etc/redis/redis.conf
-    # ports:
-    #   - 6379:6379
-    command: redis-server /usr/local/etc/redis/redis.conf
+  # redis:
+  #   image: redis:6.2-alpine
+  #   volumes:
+  #     # - data02:/data
+  #     - ./library-scripts/redis.conf:/usr/local/etc/redis/redis.conf
+  #   # ports:
+  #   #   - 6379:6379
+  #   command: redis-server /usr/local/etc/redis/redis.conf
 # volumes:
 #   data01:
 #   data02:

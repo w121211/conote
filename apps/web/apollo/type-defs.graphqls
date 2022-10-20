@@ -40,15 +40,21 @@ type Query {
 
   me: User!
 
+  myDiscussEmojiLike(discussEmojiId: ID!): DiscussEmojiLike
+
+  myDiscussPostEmojiLike(discussPostEmojiId: ID!): DiscussPostEmojiLike
+
   myNoteEmojiLike(noteEmojiId: ID!): NoteEmojiLike
 
   # Get user's all drafts for draft-sidebar
   # Provide id and some necessary info for sidebar to display, avoid offering unnecessary info in one go
   myNoteDraftEntries: [NoteDraftEntry!]!
 
-  myDiscussEmojiLike(discussEmojiId: ID!): DiscussEmojiLike
+  # Collect all note-docs of the user and return the download link
+  myNoteDocsExport: String!
 
-  myDiscussPostEmojiLike(discussPostEmojiId: ID!): DiscussPostEmojiLike
+  # Collect all note-drafts of the user and return the download link
+  myNoteDraftsExport: String!
 
   # Allow vote multiple times on the same poll
   myPollVotes(pollId: ID!): [PollVote!]!

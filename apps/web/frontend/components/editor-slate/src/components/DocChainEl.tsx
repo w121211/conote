@@ -22,11 +22,11 @@ const DocItem = (props: { docUid: string; draftId: string }) => {
   return (
     <div id={draftId}>
       {doc && (
-        <>
+        <div className="mb-10">
           <DocEl doc={doc} />
-          <div className="my-10">
+          {/* <div className="my-10">
             <ChainItemInsertButton afterThisDraftId={doc.noteDraftCopy.id} />
-          </div>
+          </div> */}
 
           {/* <div className="relative flex py-5 mt-10 items-center">
             <div className="flex-grow border-t border-gray-400"></div>
@@ -35,50 +35,49 @@ const DocItem = (props: { docUid: string; draftId: string }) => {
             </div>
             <div className="flex-grow border-t border-gray-400"></div>
           </div> */}
-        </>
+        </div>
       )}
     </div>
   )
 }
 
-const DocChainEl = (props: {
+interface Props {
+  // The id of the first item in the chain
   leadDraftId: string
-  hashDraftId: string | null
-}): JSX.Element | null => {
-  const { leadDraftId, hashDraftId } = props,
-    prevProps = usePrevious(props),
-    [loading, setLoading] = useState(true),
-    [tab] = useObservable(editorRepo.tab$)
+
+  // The id of the anchor item in the chain, specified in the URL's hash part (ie, anchor)
+  anchorDraftId: string | null
+}
+
+const DocChainEl = (props: Props): JSX.Element | null => {
+  const { leadDraftId, anchorDraftId } = props
+  const prevProps = usePrevious(props)
+  const [loading, setLoading] = useState(true)
+  const [tab] = useObservable(editorRepo.tab$)
 
   useEffect(() => {
     if (prevProps === undefined || prevProps.leadDraftId !== leadDraftId) {
       setLoading(true)
-      editorChainOpen(leadDraftId, hashDraftId ?? undefined).then(d => {
+      editorChainOpen(leadDraftId, anchorDraftId ?? undefined).then(d => {
         setLoading(false)
       })
       return
     }
     if (
-      hashDraftId !== null &&
+      anchorDraftId !== null &&
       prevProps !== undefined &&
-      prevProps.hashDraftId !== hashDraftId
+      prevProps.anchorDraftId !== anchorDraftId
     ) {
-      editorChainItemScrollTo(hashDraftId)
+      editorChainItemScrollTo(anchorDraftId)
     }
-  }, [leadDraftId, hashDraftId])
-
-  // useEffect(() => {
-  //   if (hashDraftId) {
-  //     const el = document.getElementById(hashDraftId)
-  //     if (el) {
-  //       el.scrollIntoView()
-  //     }
-  //   }
-  // }, [loading])
+  }, [leadDraftId, anchorDraftId])
 
   if (loading) {
     return null
   }
+
+  const lastChainItem = tab.chain[tab.chain.length - 1]
+
   return (
     <div>
       {tab.chain.map((e, i) => {
@@ -91,6 +90,10 @@ const DocChainEl = (props: {
         }
         return <div key={e.symbol}>Opening {e.symbol}</div>
       })}
+
+      {lastChainItem && isChainItem(lastChainItem) && (
+        <ChainItemInsertButton afterThisDraftId={lastChainItem.entry.id} />
+      )}
     </div>
   )
 }

@@ -1,39 +1,9 @@
-import { treeUtil } from '@conote/docdiff'
 import { Node } from 'slate'
+import { blocksToIndenters } from '../../../../../share/converters'
 import type { Block } from '../../../editor-textarea/src/interfaces'
 import type { ElementIndenter } from '../interfaces'
 import { validateIndenters } from './normalizers'
 import { getParentIndenter, getPrevSiblings } from './queries'
-
-/**
- * Input blocks require the root block.
- *
- * @returns [rootIndenter, ...restIndenters] Indenters are in depth-first order
- */
-export function blocksToIndenters(
-  blocks: Omit<Block, 'childrenUids'>[],
-): ElementIndenter[] {
-  const nodes = treeUtil.toTreeNodeBodyList(blocks)
-
-  const indenters = nodes.map((e): ElementIndenter => {
-    const {
-      uid,
-      data,
-      extraInfo: { depth },
-    } = e
-    const el: ElementIndenter = {
-      type: 'indenter',
-      children: [{ text: data.str }],
-      indent: depth - 1,
-      uid,
-      blockCopy: data,
-    }
-
-    return el
-  })
-
-  return indenters
-}
 
 /**
  * Convert the slate input value (ie, li list) to blocks
@@ -66,3 +36,5 @@ export function indentersToBlocks(
 
   return blocks
 }
+
+export { blocksToIndenters }

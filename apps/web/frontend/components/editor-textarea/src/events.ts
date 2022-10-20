@@ -1285,9 +1285,9 @@ export async function editorChainCommit(draftId: string) {
  */
 export async function editorChainOpen(
   leadDraftId: string,
-  hashDraftId?: string,
+  anchorDraftId?: string,
 ) {
-  const draftId = hashDraftId ?? leadDraftId
+  const draftId = anchorDraftId ?? leadDraftId
 
   editorRepo.setTab({ chain: [], openingDraftId: draftId })
 
@@ -1314,9 +1314,9 @@ export async function editorChainOpen(
   return { chain, curDoc }
 }
 
-export function editorChainItemScrollTo(hashDraftId: string) {
+export function editorChainItemScrollTo(anchorDraftId: string) {
   editorRepo.setTab({
-    openingDraftId: hashDraftId,
+    openingDraftId: anchorDraftId,
   })
 }
 

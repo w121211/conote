@@ -124,9 +124,22 @@ const NoteDocElHead = ({
               {bracketLeftSpan}
               {symbolSpan}
               {bracketRightSpan}
-              {urlTitleSpan}
               {!isHeadDoc && decorateId(doc.id)}
             </span>
+
+            {symbolParsed.url && (
+              <a
+                href={symbolParsed.url.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                <span className="material-icons-outlined pl-1 align-middle text-gray-500">
+                  open_in_new
+                </span>
+                {urlTitleSpan}
+              </a>
+            )}
           </h1>
         </div>
 

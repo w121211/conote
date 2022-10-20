@@ -132,8 +132,6 @@ const BlocksViewer = ({
 
   setMarkdownIndent_(rest)
 
-  console.log(rest)
-
   const lines: string[] = rest.map(e => {
     // const line =
     //   e.blockCopy?.str && e.blockCopy.str.length > 0 ? e.blockCopy.str : '...'

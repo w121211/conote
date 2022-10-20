@@ -1,6 +1,6 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import React, { useEffect } from 'react'
-import SlateDocChainEl from '../../frontend/components/editor-slate/src/components/DocChainEl'
+import DocChainEl from '../../frontend/components/editor-slate/src/components/DocChainEl'
 import { pageBeforeUnload } from '../../frontend/components/editor-slate/src/events'
 
 interface Props {
@@ -31,9 +31,9 @@ const DraftIdPage = ({ draftId }: Props) => {
           )}
         </div> */}
 
-      <SlateDocChainEl
+      <DocChainEl
         leadDraftId={draftId}
-        hashDraftId={
+        anchorDraftId={
           window.location.hash !== '' ? window.location.hash.slice(1) : null
         }
       />

@@ -42,10 +42,10 @@ const App = ({ Component, pageProps }: AppProps) => {
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <ToastContainer
         position="top-center"
-        autoClose={false}
-        hideProgressBar
-        closeOnClick
+        autoClose={30000}
+        closeOnClick={false}
         draggable={false}
+        // hideProgressBar
       />
 
       <ApolloProvider client={apolloClient}>

@@ -1,4 +1,4 @@
-# @see
+# See
 # - https://github.com/Azure-Samples/payara-on-aks/blob/main/payara-cafe.yml
 # - https://github.com/GoogleCloudPlatform/cloud-code-samples/blob/master/nodejs/nodejs-guestbook/kubernetes-manifests/guestbook-backend.deployment.yaml
 # - https://github.com/GoogleCloudPlatform/solutions-modern-cicd-anthos/blob/master/starter-repos/shared-kustomize-bases/online-boutique/emailservice.yaml
@@ -31,15 +31,8 @@ spec:
       #       - name: PG_USER
       #         value: 'postgres'
       containers:
-        # - name: tester
-        #   image: node:14-alpine
-        #   command: ['sleep', 'infinity']
         - name: conote-webapp-container
           image: conote-webapp-image
-          command: ['/bin/sh', '-c']
-          args: ['yarn run start']
-          ports:
-            - containerPort: 3000 # The port that the container exposes
           envFrom:
             - secretRef:
                 name: conote-webapp-envlocal
@@ -55,31 +48,10 @@ spec:
                   key: password
             - name: APP_DATABASE_URL
               value: 'postgresql://postgresuser:$(POSTGRES_PASSWORD)@conote-release-postgresql:5432/prisma?schema=public'
-          #     - name: DATABASE_URL
-          #       valueFrom:
-          #         secretKeyRef:
-          #           name: postgres-database-url
-          #           key: url
-          #   - name: ALT_GREETING
-          #     valueFrom:
-          #       configMapKeyRef:
-          #         name: conote-configmap
-          #         key: ALT_GREETING
-          #   - name: ENABLE_RISKY
-          #       valueFrom:
-          #         configMapKeyRef:
-          #           name: conote-configmap
-          #           key: ENABLE_RISKY
-          #   - name: SPRING_DATASOURCE_USERNAME # Name of the environment variable
-          #     valueFrom: # Get the value of environment variable from kubernetes secrets
-          #       secretKeyRef:
-          #         name: mysql-user-pass
-          #         key: username
-          #   - name: SPRING_DATASOURCE_PASSWORD
-          #     valueFrom:
-          #       secretKeyRef:
-          #         name: mysql-user-pass
-          #         key: password
+          ports:
+            - containerPort: 3000 # The port that the container exposes
+          # command: ['/bin/sh']
+          # args: ['-c', 'yarn run start']
 
           # readinessProbe:
           #   initialDelaySeconds: 10
@@ -107,24 +79,18 @@ spec:
           #   limits:
           #     cpu: 200m
           #     memory: 128Mi
+      serviceAccountName: storage-api-consumer-ksa
+      nodeSelector:
+        iam.gke.io/gke-metadata-server-enabled: 'true'
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: conote-webapp-service
 spec:
-  # type: ClusterIP
-  type: NodePort
+  type: ClusterIP
   selector:
     app: conote-webapp
-  # ports:
-  # - port: 31251
-  #   targetPort: 3000
-  #   nodePort: 31251 # GKE needs to open firewall @see https://stackoverflow.com/questions/68452384/how-can-i-visit-nodeport-service-in-gke
-  # ports:
-  #   - name: http
-  #     port: 80
-  #     targetPort: 3000
   ports:
     - protocol: TCP
       port: 50000

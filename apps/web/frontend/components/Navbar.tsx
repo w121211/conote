@@ -49,7 +49,7 @@ const Navbar = ({ rightBtn }: { rightBtn?: ReactNode }) => {
 
         {/* <ThemeToggle /> */}
 
-        <Link href="/setting">
+        <Link href="/settings">
           <a className="leading-none">
             <span className="material-icons-outlined text-xl leading-none p-1 rounded hover:bg-gray-200 text-gray-500 dark:text-gray-300">
               settings

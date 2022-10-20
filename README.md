@@ -8,19 +8,18 @@ Adopt monorepo style through yarn workspace, see https://github.com/vercel/next.
   - /k8s --- deployment configs
 
 ```sh
-# From project-root, sync packages versions in order to share dependencies
-# see https://github.com/JamieMason/syncpack/
+# From project-root, sync packages versions in order to share dependencies. https://github.com/JamieMason/syncpack/
 npx syncpack list-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
 npx syncpack fix-mismatches --source "packages/*/package.json" --source "apps/*/package.json"
 
-# install all packages
+# Install all packages
 yarn install
 
-# compile & build side-packages so apps can import
+# Compile & build side-packages so apps can import
 yarn run build-packages
 ```
 
-# Dev with Docker
+# Dev in Docker (local)
 
 Install [docker-sync](https://github.com/EugenMayer/docker-sync) for much better performance
 
@@ -38,9 +37,36 @@ Run vscode devcontainer: Vscode remote-container extension, specify in `./.devco
 sudo docker exec -it <container_app> zsh
 ```
 
-# Deploy with Kubernetes
+Enable access to google cloud API
+https://cloud.google.com/docs/authentication/provide-credentials-adc#local-dev
+
+```sh
+gcloud init
+gcloud auth application-default login
+```
+
+# Deploy to Kubernetes
 
 kubectl Cheat Sheet: https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+
+### Setup Google cloud, GKE
+
+Enterprise:
+Google Cloud Enterprise setup checklist. https://cloud.google.com/docs/enterprise/setup-checklist
+
+1. Create a GKE cluster.
+   Node pool config: node amount = 1, disable auto surge, enable meta...
+   https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
+
+2. Setup Google cloud build & artifact registry. Repo naming 'conote-docker-repo'.
+   Test by `skadffold run ...`
+
+3. Use Google-managed SSL certificates on GKE. This enables `https`.
+   https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs
+
+4. Modiy .env.local url (corresponding GKE's external IP）
+
+Setup workload identity
 
 ### Skaffold: dev locally
 
@@ -78,14 +104,14 @@ GCP Samples
 - https://github.com/GoogleCloudPlatform/solutions-modern-cicd-anthos
 - https://github.com/GoogleCloudPlatform/python-docs-samples
 
-Steps:
+### Google cloud storage set up
 
-- Create a GKE cluster, @see https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
-- Enable google cloud build api, @see https://cloud.google.com/build/docs/build-push-docker-image https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run
-- Create a google cloud artifact registry, eg 'conote-docker-repo', @see https://cloud.google.com/artifact-registry/docs/docker/quickstart
-- Setup gke ingress with http, enable `HttpLoadBalancing`, @see https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress?hl=en#http-add-on
-- Setup Google-managed SSL certificates, `external ip` @see https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs?hl=en
-- Modiy .env.local url (corresponding GKE's external IP）
+1. Set up cloud storage bucket using web-ui
+
+2. Set up gcloud `Workload Identity`, so that pod is authenticated to gcloud API (eg, cloud storage)
+   https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+
+   Alternative: https://cloud.google.com/kubernetes-engine/docs/tutorials/authenticating-to-cloud-platform#configuring_the_application_with_the_secret
 
 - Install postgresql on gke through helm
 
@@ -94,14 +120,22 @@ Steps:
 kubectl config get-contexts
 kubectl config use-context ...
 
-# Change repo name based on google cloud artifact registry https://cloud.google.com/artifact-registry/docs/docker/quickstart
-skaffold dev --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --port-forward
+# Important!
+# Authorize artifact. https://cloud.google.com/artifact-registry/docs/docker/authentication#gcloud-helper
+gcloud auth login
+gcloud auth application-default login
+gcloud config set project conote-webapp
+
+gcloud auth configure-docker us-central1-docker.pkg.dev
+
+# Need to setup google cloud artifact registry first. https://cloud.google.com/artifact-registry/docs/docker/quickstart
+skaffold dev --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-webapp/conote-docker-repo' --port-forward
 
 # Build & deploy
-skaffold run --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --tail
+skaffold run --profile=gcb --default-repo='us-central1-docker.pkg.dev/conote-webapp/conote-docker-repo' --tail
 
 # Deploy only (no build)
-skaffold deploy --default-repo='us-central1-docker.pkg.dev/conote-web-project/conote-docker-repo' --images='conote-webapp-image:latest' --tail
+skaffold deploy --default-repo='us-central1-docker.pkg.dev/conote-webapp/conote-docker-repo' --images='conote-webapp-image:latest' --tail
 
 # Remove deployment
 skaffold delete
@@ -117,7 +151,7 @@ Setup external-ip
   - firewall -> open port
   - external ip
 
-#### GKE guide
+### GKE FAQs
 
 How to connect my domain to pod?
 
@@ -125,9 +159,9 @@ How to setup https?
 
 How to resize gke boot disk?
 
-- TLDR, add another node pool (and set boot disk size) and delete the current
+Add another node pool (and set boot disk size) and delete the current
 
-### Postgresql install, dump, restore
+## Postgresql
 
 See:
 
@@ -136,41 +170,52 @@ https://cwienczek.com/2020/06/simple-backup-of-postgres-database-in-kubernetes/
 https://simplebackups.io/blog/postgresql-pgdump-and-pgrestore-guide-examples/#summary-of-the-pg_restore-command
 https://github.com/rinormaloku/postgre-backup-container
 
-#### Install postgres chart
+### Install postgres chart
 
 ```sh
-# use helm to install postgres chart, https://bitnami.com/stack/postgresql/helm
+# Use helm to install postgres chart. https://bitnami.com/stack/postgresql/helm
 helm repo add ...
 helm repo update
 helm install conote-release --set global.postgresql.auth.username=postgresuser bitnami/postgresql
+k
 
-# delete chart, also needs to delete PVC
+PostgreSQL can be accessed via port 5432 on the following DNS names from within your cluster:
+
+    conote-release-postgresql.default.svc.cluster.local - Read/Write connection
+
+To get the password for "postgres" run:
+
+    export POSTGRES_ADMIN_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
+
+To get the password for "postgresuser" run:
+
+    export POSTGRES_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.password}" | base64 -d)
+
+To connect to your database run the following command:
+
+    kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:14.5.0-debian-11-r24 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
+      --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
+
+    > NOTE: If you access the container using bash, make sure that you execute "/opt/bitnami/scripts/postgresql/entrypoint.sh /bin/bash" in order to avoid the error "psql: local user with ID 1001} does not exist"
+
+To connect to your database from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace default svc/conote-release-postgresql 5432:5432 &
+    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgresuser -d postgres -p 5432
+```
+
+```sh
+# Delete chart, also needs to delete PVC
 helm list
 helm delete ...
 kubectl get pvc
 kubectl delete pvc ...
 
-# get the password for "postgres"
-export POSTGRES_ADMIN_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.postgres-password}" | base64 --decode)
 
-# get the password for "postgresuser"
-export POSTGRES_PASSWORD=$(kubectl get secret --namespace default conote-release-postgresql -o jsonpath="{.data.password}" | base64 --decode)
-
-# open a psql client called conote-release-postgresql-client, and keeps it alive for dump/restore
-kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --namespace default \
-  --image docker.io/bitnami/postgresql:14.2.0-debian-10-r14 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
-  --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
-
-# connect database from outside the cluster
-kubectl port-forward --namespace default svc/conote-release-postgresql 5432:5432 \
-  & PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgresuser -d postgres -p 5432
-
-# after finish dump/restore, delete the pod
+# After finish dump/restore, delete the pod
 kubectl get pods -o wide
 kubectl delete pod conote-release-postgresql-client
 ```
-
-#### Dump
 
 ```sh
 # psql commands
@@ -178,34 +223,58 @@ kubectl delete pod conote-release-postgresql-client
 \c prisma # Change to prisma database
 \dt # List tables
 SELECT * FROM "User";
-
-# Dump from local docker
-docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Ft" > local_prisma_dump-$(date +%Y%m%d).tar
-
-# Dump from k8s
-kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Ft > gke_conote_prisma_dump-$(date +%Y%m%d).tar
 ```
 
-Dump to CSV, JSON? Use dump & restore, then access pgadmin and export to csv, json.
-
-#### Restore
+### Dump database
 
 ```sh
-# Restore to k8s
+# Dump from local docker
+docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Fc" > local_prisma_dump-$(date +%Y%m%d).dump
 
+# Dump from k8s
+kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Fc > gke_conote_prisma_dump-$(date +%Y%m%d).dump
+
+```
+
+#### Dump database to CSV, JSON?
+
+Use dump & restore, then use PGAdmin to export csv, json.
+
+TODO: Ru a pgadmin pod to access database directly?
+l
+
+#### Schedule dump to google cloud storage
+
+Use Kubernetes `CronJob` to execute scheduled jobs.
+
+Steps
+
+1. Set up workload identity follows https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+   This enables gke pod authorized to cloud storage api.
+2. Define and deploy Kubernetes crobjob. See `./k8s/dev/job/crobjob/yaml`
+
+```sh
+DUMP_FILE=/tmp/db_prisma-$(date +%Y%m%d_%H%M%S).dump && pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Fc > $DUMP_FILE && gcloud storage cp $DUMP_FILE gs://${GCLOUD_STORAGE_BUCKET_DB_BACKUP}/
+```
+
+#### Restore database
+
+See https://www.postgresql.org/docs/current/app-pgrestore.html
+
+```sh
 # (Not require)
 $(psql) CREATE DATABASE prisma;
 
-# !!!Use carefully!!!, for case require to drop database,
+# !!! Use carefully !!!, for case require to drop database,
 $(psql) DROP DATABASE prisma;
 
 # Restore to k8s
-kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql -C -d postgres -v -p 5432 -U postgresuser -Ft < ${prisma_dump_file.tar}
+kubectl exec -i conote-release-postgresql-client -- pg_restore --host conote-release-postgresql --verbose --create -d postgres -p 5432 -U postgresuser < ${prisma_dump_file.dump}
 
-# restore to local docker
-#  '-d postgres' means connect to database 'postgres' (otherwise will throw connection fail),
-#  the 'prisma' database will be created during running the restore-script
-docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_restore -C -d postgres -v -p 5432 -U postgresuser -Ft" < ${prisma_dump_file.tar}
+# Restore to local docker
+# '-d postgres' means connect to database 'postgres' (otherwise will throw connection fail),
+# the 'prisma' database will be created during running the restore-script
+docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_restore --verbose --create -d postgres -p 5432 -U postgresuser " < ${prisma_dump_file.dump}
 ```
 
 Troubleshoots:
@@ -229,19 +298,19 @@ Migration flow:
 6. Dump the local database which applied migrations
 7. Restore the after-migrate-database to cloud
 
-See
+References
 
 - https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate/add-prisma-migrate-to-a-project
 
 ```sh
-# (optional) generate prisma.schema from exisiting database
+# (optional) Generate prisma.schema from exisiting database
 yarn dotenv -e .env.local prisma migrate db pull
 
-# alter sql first then apply
+# Alter sql first then apply
 yarn run migrate --create-only
 yarn dotenv -e .env.local prisma migrate dev
 
-# exclude initial script
+# Exclude initial script
 yarn dotenv -e .env.local prisma migrate resolve
 ```
 

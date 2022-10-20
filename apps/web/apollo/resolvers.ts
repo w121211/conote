@@ -15,6 +15,7 @@ import type {
   NoteEmojiCount,
   Sym,
 } from '@prisma/client'
+import AdmZip from 'adm-zip'
 import { ApolloError, AuthenticationError } from 'apollo-server-micro'
 import { NextApiRequest, NextApiResponse } from 'next'
 import {
@@ -46,11 +47,28 @@ import { noteDocModel } from '../lib/models/note-doc.model'
 import { pollVoteModel } from '../lib/models/poll-vote.model'
 import { isNil } from 'lodash'
 import { linkModel } from '../lib/models/link.model'
+import {
+  gcloudStorageMakePublic,
+  gcloudStorageUploadFromMemory,
+} from '../lib/gcloud/common'
+import { nanoid } from 'nanoid'
 
 export type ResolverContext = {
   req: NextApiRequest
   res: NextApiResponse
 }
+
+if (
+  process.env.APP_GCLOUD_STORAGE_BUCKET_FOR_EXPORT === '' ||
+  process.env.APP_GCLOUD_STORAGE_BUCKET_FOR_EXPORT === undefined
+) {
+  throw new Error(
+    'env APP_GCLOUD_STORAGE_BUCKET_FOR_EXPORT is required but not defined',
+  )
+}
+
+const APP_GCLOUD_STORAGE_BUCKET_FOR_EXPORT =
+  process.env.APP_GCLOUD_STORAGE_BUCKET_FOR_EXPORT
 
 //
 // Helpers
@@ -509,6 +527,83 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return entries
   },
 
+  async myNoteDocsExport(_parent, _args, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const docs = await prisma.noteDoc.findMany({
+      where: { userId },
+      include: { branch: true, sym: true },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    // De-duplicate docs, only keeps the latest ones
+    const latestDocs: typeof docs = []
+    for (let i = 0; i < docs.length; i++) {
+      let hasNewer = false
+
+      for (let j = i + 1; j < docs.length; j++) {
+        if (docs[i].symId === docs[j].symId) {
+          if (docs[i].createdAt > docs[j].createdAt) {
+            throw new Error('Unexpected case')
+          } else {
+            hasNewer = true
+            break
+          }
+        }
+      }
+
+      if (!hasNewer) latestDocs.push(docs[i])
+    }
+
+    // Create a text joining all docs
+    const textDocs = latestDocs.map(e =>
+      noteDocModel.toText(noteDocModel.parse(e)),
+    )
+    const textAll = textDocs.join('\n\n\n------\n\n\n')
+
+    // Make a zip file
+    const curDate = new Date().toISOString().split('T')[0]
+    const filename = `${curDate}_konote-notes-@${userId}.txt`
+    const zip = new AdmZip()
+    zip.addFile(filename, Buffer.from(textAll, 'utf8'))
+
+    const bucket = APP_GCLOUD_STORAGE_BUCKET_FOR_EXPORT
+    const zipFileName = `${nanoid()}.zip`
+
+    await gcloudStorageUploadFromMemory(bucket, zipFileName, zip.toBuffer())
+    const publicURL = await gcloudStorageMakePublic(bucket, zipFileName)
+
+    return publicURL
+  },
+
+  async myNoteDraftsExport(_parent, _args, { req }, _info) {
+    const { userId } = await isAuthenticated(req)
+    const drafts = await prisma.noteDraft.findMany({
+      where: { userId: userId, status: 'EDIT' },
+      include: { branch: true, sym: true },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    // Create a text joining all docs
+    const textDocs = drafts.map(e =>
+      noteDraftModel.toText(noteDraftModel.parseLazy(e)),
+    )
+    const textAll = textDocs.join('\n\n\n------\n\n\n')
+
+    // Make a zip file
+    const curDate = new Date().toISOString().split('T')[0]
+    const filename = `${curDate}_konote-drafts-@${userId}.txt`
+    const zip = new AdmZip()
+    zip.addFile(filename, Buffer.from(textAll, 'utf8'))
+
+    const bucket = APP_GCLOUD_STORAGE_BUCKET_FOR_EXPORT
+    const zipFileName = `${nanoid()}.zip`
+
+    await gcloudStorageUploadFromMemory(bucket, zipFileName, zip.toBuffer())
+    const publicURL = await gcloudStorageMakePublic(bucket, zipFileName)
+
+    return publicURL
+  },
+
   async noteById(_parent, { id }, _context, _info) {
     const [note, headDoc] = await noteModel.getById(id),
       note_ = {
@@ -613,7 +708,7 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
         include: { branch: true, sym: true },
         orderBy: { createdAt: 'desc' },
         cursor: afterId ? { id: afterId } : undefined,
-        take: 30,
+        take: 10,
         skip: afterId ? 1 : 0,
       })
     ).map(e => toGQLNoteDoc(e))

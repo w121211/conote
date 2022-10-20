@@ -63,7 +63,6 @@ export async function isAuthenticated(
 async function isUserInvited(email: string) {
   const docRef = firestore().doc(`invitedEmails/${email}`)
   const doc = await docRef.get()
-  console.log(doc)
 
   return doc.exists
 }

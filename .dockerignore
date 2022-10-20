@@ -14,3 +14,6 @@ __generated__
 k8s/
 skaffold.yaml
 README.md
+
+# Secrets
+*.key.json

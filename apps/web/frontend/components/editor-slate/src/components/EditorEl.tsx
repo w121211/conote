@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import React, { useMemo, useCallback, useEffect } from 'react'
+import React, { useMemo, useCallback, useEffect, useRef } from 'react'
 import { createEditor, NodeEntry } from 'slate'
 import {
   Editable,
@@ -30,7 +30,7 @@ import DocPlaceholder from '../../../editor-textarea/src/components/doc/doc-plac
 import { docRepo } from '../../../editor-textarea/src/stores/doc.repository'
 import { indentersToBlocks } from '../indenter/serializers'
 import BlocksViewer from '../../../editor-textarea/src/components/block/BlocksViewer'
-import { toast } from 'react-toastify'
+import { Id, toast } from 'react-toastify'
 
 const Leaf = (
   props: RenderLeafProps & { docUid: string; draftId: string },
@@ -144,28 +144,35 @@ const EditorEl = ({
   preview?: boolean
 }) => {
   const [value] = useObservable(docEditorValueRepo.getValue$(docUid))
+  const editor = useMemo(
+    () =>
+      withIndenter(withAutoComplete(withHistory(withReact(createEditor())))),
+    [],
+  )
+  const renderElement = useCallback(
+    (props: RenderElementProps) => <CustomElement {...props} />,
+    [],
+  )
+  const renderLeaf = useCallback(
+    (props: RenderLeafProps) => <Leaf {...{ ...props, docUid, draftId }} />,
+    [],
+  )
+  const decorate_ = useCallback(
+    ([node, path]: NodeEntry) => decorate([node, path], editor),
+    [],
+  )
+  const toastIdRef = useRef<Id | null>(null)
 
   useEffect(() => {
     editorValueUpdate(docUid, initialValue)
   }, [])
 
-  const editor = useMemo(
-      () =>
-        withIndenter(withAutoComplete(withHistory(withReact(createEditor())))),
-      [],
-    ),
-    renderElement = useCallback(
-      (props: RenderElementProps) => <CustomElement {...props} />,
-      [],
-    ),
-    renderLeaf = useCallback(
-      (props: RenderLeafProps) => <Leaf {...{ ...props, docUid, draftId }} />,
-      [],
-    ),
-    decorate_ = useCallback(
-      ([node, path]: NodeEntry) => decorate([node, path], editor),
-      [],
-    )
+  function onClickTemplateUndo() {
+    editorValueReset(docUid)
+    if (toastIdRef.current !== null) {
+      toast.dismiss(toastIdRef.current)
+    }
+  }
 
   // useEffect(() => {
   //   // When doc changed, reset editor value,  https://github.com/ianstormtaylor/slate/issues/713
@@ -202,14 +209,13 @@ const EditorEl = ({
             docUid,
             templateName,
           )
+
           editorValueUpdate(docUid, bodyIndneters)
-          toast.info(
+
+          toastIdRef.current = toast.info(
             <div className="flex">
               <p className="flex-1 py-2">Template set.</p>
-              <button
-                className="btn-ghost-blue"
-                onClick={() => editorValueReset(docUid)}
-              >
+              <button className="btn-ghost-blue" onClick={onClickTemplateUndo}>
                 Undo
               </button>
             </div>,

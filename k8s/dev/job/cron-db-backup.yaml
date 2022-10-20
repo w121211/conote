@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: conote-dbbackup-cronjob
+spec:
+  schedule: '0 0 * * *'
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: conote-dbbackup-cronjob
+              image: conote-dbbackup-image
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: conote-release-postgresql
+                      key: password
+                - name: GCLOUD_STORAGE_BUCKET_DB_BACKUP
+                  value: conote-web-project_db-backup
+              command: ['/bin/sh']
+              args:
+                - -c
+                - DUMP_FILE=/tmp/db_prisma-$(date +%Y%m%d_%H%M%S).dump && pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Fc > $DUMP_FILE && gcloud storage cp $DUMP_FILE gs://${GCLOUD_STORAGE_BUCKET_DB_BACKUP}/
+          restartPolicy: OnFailure
+
+          # Authenticate this pod to access cloud storage API. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+          serviceAccountName: storage-api-consumer-ksa
+          nodeSelector:
+            iam.gke.io/gke-metadata-server-enabled: 'true'

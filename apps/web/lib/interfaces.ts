@@ -1,6 +1,5 @@
 import type { TreeNodeChange } from '@conote/docdiff'
 import type {
-  Branch,
   Link,
   NoteDoc,
   NoteDraft,

@@ -6,7 +6,6 @@ import {
   GoogleAuthProvider,
   UserCredential,
 } from '@firebase/auth'
-import { doc, getDoc, getFirestore } from '@firebase/firestore'
 import firebaseui from 'firebaseui'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import { useSessionLoginMutation } from '../../../apollo/query.graphql'

@@ -143,7 +143,26 @@ const input1: BlockInput = [
   ],
 ]
 
-export const mockBlockInputs: BlockInput[] = [input0, input1]
+const input_bulletListStyle: BlockInput = [
+  '[[A bullet list style note]]',
+  [
+    '[[One keyword]]',
+    '[[Another keyword]]',
+    'A thought about this webpage',
+    '',
+    '',
+    [
+      'A question about this webpage',
+      ['And provides some ideas.', 'No need to be answer'],
+    ],
+  ],
+]
+
+export const mockBlockInputs: BlockInput[] = [
+  input0,
+  input1,
+  input_bulletListStyle,
+]
 
 /**
  * The first block is doc-block, ie [doc-block, ...content-blocks]

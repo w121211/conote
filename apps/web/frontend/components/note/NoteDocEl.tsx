@@ -14,10 +14,10 @@ import MergePollAsync from '../poll/MergePollAsync'
  * Read only note doc
  */
 const NoteDocEl = (props: NoteDocElProps) => {
-  const { doc, note } = props,
-    isHeadDoc = doc.id === note.headDoc.id,
-    { blocks } = parseGQLBlocks(doc.contentBody.blocks),
-    { blocks: headBlocks } = parseGQLBlocks(note.headDoc.contentBody.blocks)
+  const { doc, note } = props
+  const isHeadDoc = doc.id === note.headDoc.id
+  const { blocks } = parseGQLBlocks(doc.contentBody.blocks)
+  const { blocks: headBlocks } = parseGQLBlocks(note.headDoc.contentBody.blocks)
   const [showModal, setShowModal] = useState(false)
   const diff = differenceBlocks(blocks, headBlocks)
 

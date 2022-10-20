@@ -1,4 +1,4 @@
-# Config for arm64, @see https://github.com/EugenMayer/docker-sync/issues/767
+# Config for arm64. https://github.com/EugenMayer/docker-sync/issues/767
 #
 # Run
 # ```
@@ -15,4 +15,13 @@ syncs:
     unison_image: 'eugenmayer/unison:2.51.3-4.12.0-ARM64'
     notify_terminal: true
     src: '.'
-    sync_excludes: ['node_modules', 'build', '.next', '__generated__', '.DS_Store', 'dist', '.cache']
+    sync_excludes:
+      [
+        'node_modules',
+        'build',
+        '.next',
+        '__generated__',
+        '.DS_Store',
+        'dist',
+        '.cache',
+      ]

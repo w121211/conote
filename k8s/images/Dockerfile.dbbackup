@@ -1,0 +1,11 @@
+# Test
+# $ docker build -f Dockerfile.dbbackup  --progress=plain .
+
+FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:slim
+
+# Install Postgresql client (version: 14). See https://www.postgresql.org/download/linux/debian/
+RUN apt-get update && apt-get install wget; \
+        sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'; \
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -; \
+        apt-get update && apt-get install -y postgresql-client-14
+

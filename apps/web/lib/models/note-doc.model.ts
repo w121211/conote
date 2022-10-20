@@ -5,6 +5,7 @@ import type {
   PrismaPromise,
   Sym,
 } from '@prisma/client'
+import { blocksToText } from '../../share/converters'
 import type {
   NoteDocContentBody,
   NoteDocContentHead,
@@ -161,6 +162,29 @@ export class NoteDocModel {
       contentHead: contentHead as unknown as NoteDocContentHead,
       contentBody: contentBody as unknown as NoteDocContentBody,
     }
+  }
+
+  /**
+   * Convert a note-doc to text. Used for export purpose.
+   */
+  toText<T extends NoteDoc & { sym: Sym }>(doc: NoteDocParsed<T>): string {
+    const {
+      sym: { symbol },
+      contentHead,
+      contentBody: { blocks },
+      createdAt,
+    } = doc
+
+    let t =
+      symbol +
+      ' ' +
+      createdAt.toISOString().split('T')[0] +
+      // ' ' +
+      // JSON.stringify(contentHead) +
+      '\n\n'
+    t += blocksToText(blocks) + '\n'
+
+    return t
   }
 }
 

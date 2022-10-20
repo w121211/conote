@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "name": "Kubernetes: Run/Debug - minikube",
+      "type": "cloudcode.kubernetes",
+      "request": "launch",
+      "skaffoldConfig": "${workspaceFolder}/skaffold.yaml",
+      "profile": "minikube",
+      "watch": true,
+      "cleanUp": true,
+      "portForward": true
+    }
+  ]
+}

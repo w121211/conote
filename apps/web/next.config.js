@@ -6,6 +6,8 @@ const path = require('path')
  */
 const nextConfig = {
   /* config options here */
+
+  // Require by next-react-svg
   include: path.resolve(__dirname, 'assets/svg'),
 
   typescript: {
