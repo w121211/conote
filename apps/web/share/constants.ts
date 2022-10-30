@@ -1,3 +1,8 @@
+/**
+ * The default branch name. We simply name it as 'default'
+ */
+export const BRANCH_NAME_DEFAULT = 'default'
+
 export const MERGE_POLL_V1_0 = {
   spec: 'merge_poll-v1_0',
 

@@ -133,13 +133,10 @@
     "build-types": "yarn run clean-types && yarn graphql-let && yarn tsc --build --verbose tsconfig.build-types.json",
     "clean-types": "rm -rf dist && rm -rf reports",
     "codegen": "graphql-let",
-    "dbpush": "dotenv -e .env.local -- GCLOUD_PROJECT=conote-webapp yarn run prisma db push",
     "dev": "NODE_OPTIONS='--inspect --trace-warnings' next dev",
     "dev-with-sb": "NODE_OPTIONS='--inspect --trace-warnings' DEV_WITH_STORYBOOK=true next dev",
     "format": "prettier --write .",
     "lint": "next lint",
-    "migrate": "dotenv -e .env.local -- yarn run prisma migrate dev",
-    "seed": "dotenv -e .env.local -- ts-node prisma/scripts/seed.ts ./prisma/seeds",
     "start": "next start",
     "start:cron": "ts-node lib/cron.ts",
     "storybook": "start-storybook -p 6006 --ci",
@@ -147,6 +144,10 @@
     "test-all": "yarn lint && yarn type-check && yarn test",
     "test-fetcher": "jest -c=jest.fetcher.config.js --watch",
     "test-lib": "dotenv -e .env.local -- jest -c=./jest.lib.config.js --watch",
-    "type-check": "tsc --pretty --noEmit"
+    "type-check": "tsc --pretty --noEmit",
+    "db:push": "dotenv -e .env.local -- GCLOUD_PROJECT=conote-webapp yarn run prisma db push",
+    "db:migrate": "dotenv -e .env.local -- yarn run prisma migrate dev",
+    "db:init": "dotenv -e .env.local -- ts-node prisma/scripts/init.ts",
+    "db:seed": "dotenv -e .env.local -- ts-node prisma/scripts/seed.ts  ./prisma/seeds"
   }
 }

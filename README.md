@@ -120,10 +120,9 @@ GCP Samples
 kubectl config get-contexts
 kubectl config use-context ...
 
-# Important!
 # Authorize artifact. https://cloud.google.com/artifact-registry/docs/docker/authentication#gcloud-helper
 gcloud auth login
-gcloud auth application-default login
+gcloud auth application-default login # Important!
 gcloud config set project conote-webapp
 
 gcloud auth configure-docker us-central1-docker.pkg.dev
@@ -177,7 +176,6 @@ https://github.com/rinormaloku/postgre-backup-container
 helm repo add ...
 helm repo update
 helm install conote-release --set global.postgresql.auth.username=postgresuser bitnami/postgresql
-k
 
 PostgreSQL can be accessed via port 5432 on the following DNS names from within your cluster:
 
@@ -193,7 +191,7 @@ To get the password for "postgresuser" run:
 
 To connect to your database run the following command:
 
-    kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:14.5.0-debian-11-r24 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
+    kubectl run conote-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:15.0.0-debian-11-r1 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
       --command -- psql --host conote-release-postgresql -U postgresuser -d postgres -p 5432
 
     > NOTE: If you access the container using bash, make sure that you execute "/opt/bitnami/scripts/postgresql/entrypoint.sh /bin/bash" in order to avoid the error "psql: local user with ID 1001} does not exist"
@@ -240,8 +238,7 @@ kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-releas
 
 Use dump & restore, then use PGAdmin to export csv, json.
 
-TODO: Ru a pgadmin pod to access database directly?
-l
+[TODO] Run a pgadmin pod to access database directly?
 
 #### Schedule dump to google cloud storage
 

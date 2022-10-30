@@ -15,8 +15,8 @@ const defaultChoices = MERGE_POLL_V1_0.codes.map(e => e[0])
 
 class PollMergeModel extends PollModel {
   /**
-   * Create the merge-poll through note-doc update,
-   *  this is to prevent duplicate creations of merge-polls
+   * Create the merge-poll through note-doc update.
+   * This is to prevent duplicate creations of merge-polls
    */
   async createMergePoll(doc: NoteDoc) {
     return this.create({

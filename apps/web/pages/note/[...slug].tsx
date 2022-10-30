@@ -20,6 +20,7 @@ import {
 import NoteDocEl from '../../frontend/components/note/NoteDocEl'
 import { getDraftPageURLBySymbol, getNotePageURL } from '../../frontend/utils'
 import { AppPageProps } from '../../frontend/interfaces'
+import { BRANCH_NAME_DEFAULT } from '../../share/constants'
 
 const SearchSymbolResult = ({ term }: { term: string }) => {
   const { data } = useSearchSymbolQuery({
@@ -151,29 +152,29 @@ export async function getServerSideProps({
     throw new Error('slug.length expect to be 1 or 3')
   }
 
-  const client = getApolloClientSSR(),
-    qNote = await client.query<
-      NoteByBranchSymbolQuery,
-      NoteByBranchSymbolQueryVariables
+  const client = getApolloClientSSR()
+  const qNote = await client.query<
+    NoteByBranchSymbolQuery,
+    NoteByBranchSymbolQueryVariables
+  >({
+    query: NoteByBranchSymbolDocument,
+    variables: { branch: BRANCH_NAME_DEFAULT, symbol },
+  })
+  const qDoc =
+    docId &&
+    (await client.query<NoteDocQuery, NoteDocQueryVariables>({
+      query: NoteDocDocument,
+      variables: { id: docId },
+    }))
+  const qDocsToMerge =
+    qNote.data.noteByBranchSymbol &&
+    (await client.query<
+      NoteDocsToMergeByNoteQuery,
+      NoteDocsToMergeByNoteQueryVariables
     >({
-      query: NoteByBranchSymbolDocument,
-      variables: { branch: 'default', symbol },
-    }),
-    qDoc =
-      docId &&
-      (await client.query<NoteDocQuery, NoteDocQueryVariables>({
-        query: NoteDocDocument,
-        variables: { id: docId },
-      })),
-    qDocsToMerge =
-      qNote.data.noteByBranchSymbol &&
-      (await client.query<
-        NoteDocsToMergeByNoteQuery,
-        NoteDocsToMergeByNoteQueryVariables
-      >({
-        query: NoteDocsToMergeByNoteDocument,
-        variables: { noteId: qNote.data.noteByBranchSymbol.id },
-      }))
+      query: NoteDocsToMergeByNoteDocument,
+      variables: { noteId: qNote.data.noteByBranchSymbol.id },
+    }))
 
   // Caching, see https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#caching-with-server-side-rendering-ssr
   res.setHeader(

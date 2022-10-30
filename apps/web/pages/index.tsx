@@ -80,7 +80,7 @@ const HomePage = ({
     <div className="max-w-2xl flex flex-col pb-12">
       <div className="dark:bg-gray-800 dark:bowrder-gray-700 pb-12">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="leading-none">Latest discussions</h2>
+          <h2 className="leading-none">New discussions</h2>
         </div>
         <DiscussList discusses={discusses} />
       </div>

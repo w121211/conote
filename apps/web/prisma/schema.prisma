@@ -23,6 +23,9 @@ model Author {
   rates     Rate[]
 }
 
+// 
+// Design to allow creating a private branch (repository) for users/groups.
+// 
 model Branch {
   id         String      @id @default(cuid())
   name       String      @unique

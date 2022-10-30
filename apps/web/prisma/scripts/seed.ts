@@ -11,7 +11,6 @@ import {
 import { mockUsers } from '../../test/__mocks__/user.mock'
 import { testHelper } from '../../test/test-helpers'
 import { mockLinks } from '../../test/__mocks__/link.mock'
-import { mockMergePolls } from '../../test/__mocks__/poll.mock'
 
 // const scraper = new FetchClient(
 //   resolve(process.cwd(), process.argv[2], '_local-cache.dump.json'),

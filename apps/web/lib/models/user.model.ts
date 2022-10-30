@@ -17,6 +17,7 @@ export async function getBotId(): Promise<string> {
   if (_botId) {
     return _botId
   }
+
   const bot = await prisma.user.findUnique({
     where: { email: getBotEmail() },
   })

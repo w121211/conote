@@ -46,6 +46,7 @@ import { genBlockUid } from './utils'
 import { BlockInput, writeBlocks } from './utils/block-writer'
 import { slateDocSave } from '../../editor-slate/src/events'
 import type { NoteDocContentHead } from '../../../../lib/interfaces'
+import { BRANCH_NAME_DEFAULT } from '../../../../share/constants'
 
 // const noteService = getNoteService(),
 //   noteDraftService = getNoteDraftService(),
@@ -718,7 +719,7 @@ function docLoadFromDraft(draft: NoteDraftFragment, note: NoteFragment | null) {
 
 async function getOrCreateDocByUrl(
   url: URL,
-  branch = 'default',
+  branch = BRANCH_NAME_DEFAULT,
   domain = 'domain',
 ) {
   const link = await linkService.getOrCreateLink(url.href)
@@ -759,7 +760,7 @@ async function getOrCreateDocByUrl(
  */
 export async function docGetOrCreate(
   symbol: string,
-  branch = 'default',
+  branch = BRANCH_NAME_DEFAULT,
   domain = 'domain',
 ): Promise<Doc> {
   // If local-doc found, do nothing.

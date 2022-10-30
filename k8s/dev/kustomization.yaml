@@ -7,7 +7,7 @@ resources:
   - 'deployment/webapp.yaml'
   - managed-cert-ingress.yaml
   # - 'job/cron-curl-api.yaml'
-  # - 'job/cron-db-backup.yaml'
+  # - 'job/cron-dbbackup.yaml'
   # - 'pod/workload-identity-test.yaml'
   # - 'pod/curl-test.yaml'
 # patchesStrategicMerge:

@@ -6,6 +6,7 @@ import {
   NoteByBranchSymbolQueryVariables,
   NoteFragment,
 } from '../../../../../apollo/query.graphql'
+import { BRANCH_NAME_DEFAULT } from '../../../../../share/constants'
 
 class NoteService {
   private apolloClient = getApolloClient()
@@ -19,7 +20,7 @@ class NoteService {
       NoteByBranchSymbolQueryVariables
     >({
       query: NoteByBranchSymbolDocument,
-      variables: { branch: 'default', symbol },
+      variables: { branch: BRANCH_NAME_DEFAULT, symbol },
       fetchPolicy,
     })
 

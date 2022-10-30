@@ -605,20 +605,18 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
   },
 
   async noteById(_parent, { id }, _context, _info) {
-    const [note, headDoc] = await noteModel.getById(id),
-      note_ = {
-        ...note,
-        branchName: note.branch.name,
-        headDoc: toGQLNoteDoc(headDoc),
-        link: note.link && linkModel.parse(note.link),
-      }
+    const [note, headDoc] = await noteModel.getById(id)
+    const note_ = {
+      ...note,
+      branchName: note.branch.name,
+      headDoc: toGQLNoteDoc(headDoc),
+      link: note.link && linkModel.parse(note.link),
+    }
     return toStringProps(note_)
   },
 
   async noteByBranchSymbol(_parent, { branch, symbol }, _context, _info) {
-    const branch_ = branch === 'default' ? 'mock-branch-0' : branch,
-      found = await noteModel.getByBranchSymbol(branch_, symbol)
-
+    const found = await noteModel.getByBranchSymbol(branch, symbol)
     if (found) {
       const [note, headDoc] = found,
         note_ = {
@@ -1111,9 +1109,8 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createNoteDraft(_parent, { branch, symbol, data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      branch_ = branch === 'default' ? 'mock-branch-0' : branch,
-      draft = await noteDraftModel.create(branch_, symbol, userId, data)
+    const { userId } = await isAuthenticated(req)
+    const draft = await noteDraftModel.create(branch, symbol, userId, data)
     return draft
   },
 
@@ -1123,28 +1120,32 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
     { req },
     _info,
   ) {
-    const { userId } = await isAuthenticated(req),
-      branch_ = branch === 'default' ? 'mock-branch-0' : branch,
-      draft = await noteDraftModel.createByLink(branch_, linkId, userId, data)
+    const { userId } = await isAuthenticated(req)
+    const draft = await noteDraftModel.createByLink(
+      branch,
+      linkId,
+      userId,
+      data,
+    )
     return draft
   },
 
   async updateNoteDraft(_parent, { id, data, newSymbol }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      draft = await noteDraftModel.update(
-        id,
-        userId,
-        data,
-        newSymbol ?? undefined,
-      )
+    const { userId } = await isAuthenticated(req)
+    const draft = await noteDraftModel.update(
+      id,
+      userId,
+      data,
+      newSymbol ?? undefined,
+    )
     return draft
   },
 
   async updateNoteDraftMeta(_parent, { id, data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      draft = await prisma.noteDraft.findUnique({
-        where: { id },
-      })
+    const { userId } = await isAuthenticated(req)
+    const draft = await prisma.noteDraft.findUnique({
+      where: { id },
+    })
 
     if (draft === null) throw new Error('NoteDraft not found.')
     if (draft.userId !== userId)
@@ -1206,8 +1207,8 @@ const Mutation: Required<MutationResolvers<ResolverContext>> = {
   },
 
   async createPoll(_parent, { data }, { req }, _info) {
-    const { userId } = await isAuthenticated(req),
-      poll = await pollModel.create({ userId, choices: data.choices })
+    const { userId } = await isAuthenticated(req)
+    const poll = await pollModel.create({ userId, choices: data.choices })
     return {
       ...toStringProps(poll),
       count: toStringProps(poll.count),

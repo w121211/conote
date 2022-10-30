@@ -205,7 +205,7 @@ const MergePollVoteForm = ({ poll }: { poll: PollFragment }) => {
             </FormSubmitBtn>
             {isOwner && (
               <span className="text-red-600">
-                Not able to vote your own request.
+                You are not eligible to vote because this is your own request.
               </span>
             )}
           </form>
