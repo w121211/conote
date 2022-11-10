@@ -15,5 +15,14 @@ k8s/
 skaffold.yaml
 README.md
 
-# Secrets
+# local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# secrets
 *.key.json
+*-key.json

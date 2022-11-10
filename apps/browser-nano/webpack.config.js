@@ -21,7 +21,11 @@ const isManifestV3 = process.env.MANIFEST_V3 !== undefined
 
 // console.log(process.env)
 console.log(
-  `Webpack build params: isManifestV3 ${isManifestV3} isDevelopment ${isDevelopment}`,
+  `Webpack build params
+- isManifestV3 ${isManifestV3}
+- isDevelopment ${isDevelopment}
+- ${process.env.APP_BASE_URL}
+  `,
 )
 const manifestPath = isManifestV3
   ? path.resolve(__dirname, 'src/manifest.v3.jsonc')

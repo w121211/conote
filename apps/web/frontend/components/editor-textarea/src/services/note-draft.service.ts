@@ -215,18 +215,18 @@ class NoteDraftService {
     note: NoteFragment | null,
   ): { doc: Doc; blocks: Block[]; docBlock: Block } {
     const {
-        contentBody: { blocks: gqlBlocks, ...restContentBody },
-        contentHead,
-      } = draft,
-      { blocks, docBlock } = parseGQLBlocks(gqlBlocks),
-      doc: Doc = {
-        uid: genDocUid(),
-        contentHead: omitTypenameDeep(contentHead),
-        contentBody: restContentBody,
-        blockUid: docBlock.uid,
-        noteCopy: note ?? null,
-        noteDraftCopy: draft,
-      }
+      contentBody: { blocks: gqlBlocks, ...restContentBody },
+      contentHead,
+    } = draft
+    const { blocks, docBlock } = parseGQLBlocks(gqlBlocks)
+    const doc: Doc = {
+      uid: genDocUid(),
+      contentHead: omitTypenameDeep(contentHead),
+      contentBody: restContentBody,
+      blockUid: docBlock.uid,
+      noteCopy: note ?? null,
+      noteDraftCopy: draft,
+    }
     return { doc, blocks, docBlock }
   }
 }

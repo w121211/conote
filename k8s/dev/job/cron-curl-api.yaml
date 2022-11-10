@@ -13,7 +13,7 @@ spec:
               image: curlimages/curl:7.84.0
               envFrom:
                 - secretRef:
-                    name: conote-webapp-envlocal
+                    name: conote-webapp-env-local
               command: ['/bin/sh']
               args:
                 - -c

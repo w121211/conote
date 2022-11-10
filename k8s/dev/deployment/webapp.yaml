@@ -11,12 +11,17 @@ spec:
   selector:
     matchLabels:
       app: conote-webapp
-  replicas: 1 # No. of replicas/pods to run in this deployment
+  replicas: 1  # No. of replicas/pods to run in this deployment
   template:
     metadata:
       labels:
         app: conote-webapp
     spec:
+      # Use google cloud workload identity. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+      # serviceAccountName: storage-api-consumer-ksa
+      # nodeSelector:
+      #   iam.gke.io/gke-metadata-server-enabled: 'true'
+
       # initContainers:
       #   - name: init-db-ready
       #     image: postgres:11-alpine
@@ -30,26 +35,31 @@ spec:
       #         value: 'postgres-release-postgresql'
       #       - name: PG_USER
       #         value: 'postgres'
+      
       containers:
         - name: conote-webapp-container
           image: conote-webapp-image
           envFrom:
             - secretRef:
-                name: conote-webapp-envlocal
+                name: conote-webapp-env-local
           env:
-            - name: ENVIRONMENT
-              value: dev
-            - name: PORT
-              value: '3000'
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: conote-release-postgresql
-                  key: password
+            - name: DB_ADDR
+              valueFrom: { secretKeyRef: { name: hippo-gcs-pguser-hippo, key: host } }
+            - name: DB_PORT
+              valueFrom: { secretKeyRef: { name: hippo-gcs-pguser-hippo, key: port } }
+            - name: DB_DATABASE
+              valueFrom: { secretKeyRef: { name: hippo-gcs-pguser-hippo, key: dbname } }
+            - name: DB_USER
+              valueFrom: { secretKeyRef: { name: hippo-gcs-pguser-hippo, key: user } }
+            - name: DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: hippo-gcs-pguser-hippo, key: password } }
             - name: APP_DATABASE_URL
-              value: 'postgresql://postgresuser:$(POSTGRES_PASSWORD)@conote-release-postgresql:5432/prisma?schema=public'
+              valueFrom: { secretKeyRef: { name: hippo-gcs-pguser-hippo, key: uri } }
+            # - name: APP_DATABASE_URL
+            #   value: 'postgresql://${DB_USER}:$(DB_PASSWORD)@${DB_ADDR}:${DB_PORT}/${DB_DATABASE}?schema=public'
           ports:
-            - containerPort: 3000 # The port that the container exposes
+            - containerPort: 3000  # Container exposes this port
+
           # command: ['/bin/sh']
           # args: ['-c', 'yarn run start']
 
@@ -79,9 +89,7 @@ spec:
           #   limits:
           #     cpu: 200m
           #     memory: 128Mi
-      serviceAccountName: storage-api-consumer-ksa
-      nodeSelector:
-        iam.gke.io/gke-metadata-server-enabled: 'true'
+      
 ---
 apiVersion: v1
 kind: Service

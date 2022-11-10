@@ -42,12 +42,12 @@ export function toNoteDraftInput(
   doc: Doc,
   value: ElementIndenter[],
 ): NoteDraftInput {
-  const { blockUid: docBlockUid, noteCopy, noteDraftCopy, contentHead } = doc,
-    bodyBlocks = indentersToBlocks(value, docBlockUid),
-    bodyBlocks_: Block[] = bodyBlocks.map(e => ({ ...e, childrenUids: [] })),
-    docBlock = docRepo.getDocBlock(doc),
-    finalBlocks = [docBlock, ...bodyBlocks_],
-    finalBlocks_ = toGQLBlocks(finalBlocks)
+  const { blockUid: docBlockUid, noteCopy, noteDraftCopy, contentHead } = doc
+  const bodyBlocks = indentersToBlocks(value, docBlockUid)
+  const bodyBlocks_: Block[] = bodyBlocks.map(e => ({ ...e, childrenUids: [] }))
+  const docBlock = docRepo.getDocBlock(doc)
+  const finalBlocks = [docBlock, ...bodyBlocks_]
+  const finalBlocks_ = toGQLBlocks(finalBlocks)
 
   // Null is a valide input for differencer, but '[]' is not
   const startBlocks = noteCopy

@@ -20,16 +20,42 @@ function findIndenters(
 }
 
 export function withIndenter(editor: Editor): Editor {
-  const { normalizeNode } = editor
+  const { normalizeNode, insertFragment } = editor
 
   // editor.insertNode = node => {
   //   console.log('editor.insertNode', node)
   //   insertNode(node)
   // }
 
-  // editor.insertFragment = fragment => {
-  //   console.log('editor.insertFragment', fragment)
-  // }
+  editor.insertFragment = fragment => {
+    console.log('editor.insertFragment', fragment)
+    // for (const node of fragment) {
+    //   if (Element.isElementType<ElementIndenter>(node, 'indenter')) {
+    //     // const sameUids = findIndenters(editor, node.uid)
+    //     // if (sameUids.length > 1) {
+    //     //   Transforms.setNodes(editor, { uid: nanoid() }, { at: p })
+    //     // }
+    //   }
+    // }
+
+    const fragment_ = fragment.map(e => {
+      if (Element.isElementType<ElementIndenter>(e, 'indenter')) {
+        // const sameUids = findIndenters(editor, node.uid)
+        // if (sameUids.length > 1) {
+        //   Transforms.setNodes(editor, { uid: nanoid() }, { at: p })
+        // }
+        return {
+          ...e,
+          uid: nanoid(),
+        }
+      } else {
+        return e
+      }
+    })
+    console.log(fragment_)
+
+    return insertFragment(fragment_)
+  }
 
   // editor.insertFragmentData = data => {
   //   console.log('editor.insertFragmentData', data)
@@ -38,8 +64,8 @@ export function withIndenter(editor: Editor): Editor {
 
   // editor.insertData = data => {
   //   console.log('editor.insertData', data)
-  //   insertData(data)
-  //   indenterNoramalize(editor)
+  //   return insertData(data)
+  //   // indenterNoramalize(editor)
   // }
 
   // editor.setFragmentData = (...props) => {

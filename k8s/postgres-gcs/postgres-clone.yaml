@@ -1,0 +1,42 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  # Give a different name
+  name: elephant-gcs
+spec:
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-14.5-1
+  postgresVersion: 14
+  
+  # Load data from backup
+  dataSource:
+    pgbackrest:
+      stanza: db
+      configuration:
+      - secret:
+          name: pgo-gcs-creds
+      global:
+        repo1-path: /pgbackrest/postgres-operator/hippo/repo1
+      repo:
+        name: repo1
+        gcs:
+          bucket: conote-webapp_dbbackup
+  
+  instances:
+    - dataVolumeClaimSpec:
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 1Gi
+  backups:
+    pgbackrest:
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.40-1
+      configuration:
+      - secret:
+          name: pgo-gcs-creds
+      global:
+        repo1-path: /pgbackrest/postgres-operator/elephant-gcs/repo1
+      repos:
+      - name: repo1
+        gcs:
+          bucket: conote-webapp_dbbackup

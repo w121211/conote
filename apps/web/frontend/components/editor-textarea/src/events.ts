@@ -705,11 +705,11 @@ export function selectedDown(selectedItems: string[]) {
  * - [] Remove branch param and use it from draft
  */
 function docLoadFromDraft(draft: NoteDraftFragment, note: NoteFragment | null) {
-  const docData = noteDraftService.toDoc(draft, note),
-    { blockReducers, docReducers, docUid } = ops.docLoadOp(
-      draft.symbol,
-      docData,
-    )
+  const docData = noteDraftService.toDoc(draft, note)
+  const { blockReducers, docReducers, docUid } = ops.docLoadOp(
+    draft.symbol,
+    docData,
+  )
   blockRepo.update(blockReducers)
   docRepo.update(docReducers)
 
@@ -764,12 +764,10 @@ export async function docGetOrCreate(
   domain = 'domain',
 ): Promise<Doc> {
   // If local-doc found, do nothing.
-  //
   const doc = docRepo.findDoc({ symbol })
   if (doc !== null) return doc
 
   // If local-doc not found, find remote's draft.
-  //
   const [queriedNote, queriedDraft] = await Promise.all([
     noteService.queryNote(symbol, 'network-only'),
     noteDraftService.queryDraft(symbol, 'network-only'),
@@ -777,7 +775,6 @@ export async function docGetOrCreate(
   if (queriedDraft !== null) return docLoadFromDraft(queriedDraft, queriedNote)
 
   // If remote's draft not found, create draft & local-doc from note's head-doc.
-  //
   const symbolParsed = parseSymbol(symbol)
 
   if (symbolParsed.url)
@@ -890,11 +887,11 @@ function genTemplateGeneral(): BlockInput {
  * Set doc template
  */
 export function docTemplateSet(docUid: string) {
-  const doc = docRepo.getDoc(docUid),
-    docBlock = docRepo.getDocBlock(doc),
-    blocks = writeBlocks(genTemplateGeneral(), { docBlock }),
-    [, ...children] = blocks,
-    op = ops.blocksInsertOp(docBlock, children)
+  const doc = docRepo.getDoc(docUid)
+  const docBlock = docRepo.getDocBlock(doc)
+  const blocks = writeBlocks(genTemplateGeneral(), { docBlock })
+  const [, ...children] = blocks
+  const op = ops.blocksInsertOp(docBlock, children)
 
   blockRepo.update(op)
 }

@@ -1,0 +1,55 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: hippo-gcs
+spec:
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-14.5-1
+  postgresVersion: 14
+  
+  users:
+    - name: hippo
+      databases:
+        - prisma
+  
+  instances:
+    - name: instance1
+      # resources:
+      #   limits:
+      #     cpu: 500m
+      #     memory: 300Mi
+      dataVolumeClaimSpec:
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 1Gi
+  
+  backups:
+    pgbackrest:
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.40-1
+      configuration:
+      - secret:
+          name: pgo-gcs-creds
+      global:
+        repo1-path: /pgbackrest/postgres-operator/hippo-gcs/repo1
+      repos:
+      - name: repo1
+        schedules:
+          full: "0 1 * * 0"
+          differential: "0 1 * * 1-6"
+        gcs:
+          bucket: conote-webapp_dbbackup
+    
+  userInterface:
+    pgAdmin:
+      # Downgrade to tag ubi8-4.30-2. https://github.com/CrunchyData/postgres-operator/issues/3409
+      # image: registry.developers.crunchydata.com/crunchydata/crunchy-pgadmin4:ubi8-4.30-4
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgadmin4:ubi8-4.30-2
+      dataVolumeClaimSpec:
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            # storage: 1Gi
+            storage: 100Mi
+

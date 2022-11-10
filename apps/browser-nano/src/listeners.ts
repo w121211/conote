@@ -8,8 +8,8 @@ export async function openSiteByCurrentTabUrl(tab: chrome.tabs.Tab) {
     await chrome.windows.create({
       url: `${process.env.APP_BASE_URL}/draft?${params.toString()}`,
       width: 550,
-      height: 650,
-      left: 100,
+      height: 850,
+      left: 50,
     })
   } else {
     console.debug('tab.url is undefined')

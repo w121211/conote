@@ -1,4 +1,3 @@
-import { parseSymbol } from '../../../../share/symbol.common'
 import { Block } from '../../editor-textarea/src/interfaces'
 import {
   BlockInput,
@@ -17,10 +16,15 @@ export const templateNames = [
 function templateGeneral(symbol: string): BlockInput {
   // const symbolParsed = parseSymbol(symbol)
   const symbolTrim = symbol.slice(2, -2)
-
   const input: BlockInput = [
     '__DUMMY_ROOT__',
     [
+      [
+        '_',
+        [
+          '// Quick notes block. Put your unorganized questions and ideas in here.',
+        ],
+      ],
       [
         '# Basics',
         [
@@ -32,7 +36,7 @@ function templateGeneral(symbol: string): BlockInput {
           // ['### What difference compared to the others?', ['']],
         ],
       ],
-      ['# Versus', ['// List of alternatives, compertitors', '', '']],
+      ['# Versus', ['// List of alternatives, compertitors.', '', '']],
       [
         '# Discussions',
         [
@@ -40,13 +44,14 @@ function templateGeneral(symbol: string): BlockInput {
             '// List of questions and answer, eg #How to mine Bitcoin?#',
             [
               '// Provide the answer to the question if possible, or just left it as blank!',
-              '// See detail guideline here, https://....',
+              '// See detail guideline here. https://....',
             ],
           ],
           '',
           '',
         ],
       ],
+      ['# Links', ['', '', '']],
     ],
   ]
   return input
