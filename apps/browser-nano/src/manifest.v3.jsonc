@@ -1,22 +1,25 @@
 {
   "manifest_version": 3,
-  "name": "Konote extension",
+  "name": "Konote",
   "description": "A konote extension (under development)",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "background": {
     "service_worker": "background-script.js"
   },
   "action": {
     "default_icon": {
-      "16": "icon-16.png",
-      "48": "icon-48.png"
+      // "16": "icon-16.png",
+      // "48": "icon-48.png",
+      // "128": "icon-128.png"
+      "192": "icon-192.png"
     },
     "default_title": "Konote"
   },
   "icons": {
-    "16": "icon-16.png",
-    "48": "icon-48.png",
-    "128": "icon-128.png"
+    // "16": "icon-16.png",
+    // "48": "icon-48.png",
+    // "128": "icon-128.png"
+    "192": "icon-192.png"
   },
   "permissions": [
     "tabs" // To get user's current tab url

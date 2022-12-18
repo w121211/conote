@@ -1,6 +1,6 @@
 {
   "name": "@conote/browser-nano",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "dependencies": {
     "@apache-annotator/dom": "^0.3.0-dev.3",
     "@apollo/client": "^3.3.15",

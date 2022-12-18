@@ -20,6 +20,8 @@ type Query {
   # Get a user's latest commits, used in user's profile page
   commitsByUser(userId: ID!, afterId: ID, beforeId: ID): CommitListResult!
 
+  commitsLatest(afterId: ID, beforeId: ID): CommitListResult!
+
   # Throw error if not found
   discuss(id: ID!): Discuss!
 

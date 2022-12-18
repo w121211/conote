@@ -222,7 +222,7 @@ const SearchAllModal = () => {
               autoFocus
               autoCorrect="off"
               autoComplete="off"
-              spellCheck="false"
+              // spellCheck="false"
               placeholder="Search"
               onChange={e => {
                 if (!compositionStart && compositionEnd) {

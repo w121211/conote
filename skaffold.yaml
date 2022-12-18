@@ -10,7 +10,7 @@ build:
     - image: conote-webapp-image
       context: .
       docker:
-        dockerfile: './k8s/images/Dockerfile.webapp'
+        dockerfile: './k8s/docker/Dockerfile.webapp'
     # - image: conote-dbbackup-image
     #   # context: './k8s/images'
     #   docker:

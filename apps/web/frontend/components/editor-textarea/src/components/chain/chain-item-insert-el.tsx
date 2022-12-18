@@ -21,7 +21,6 @@ const ChainItemInsertEl = ({
           autoFocus
           autoCorrect="off"
           autoComplete="off"
-          spellCheck="false"
           placeholder='Enter topic or URL, eg "Hello world", "https://www..."'
           value={value}
           onChange={e => {

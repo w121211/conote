@@ -244,7 +244,7 @@ const EditorEl = ({
         decorate={decorate_}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        spellCheck={false}
+        // spellCheck={false}
         onKeyDown={e => indenterOnKeyDown(e, editor)}
         // onKeyUp={event => {
         //   onKeyUpBindSearchPanel(event, editor)

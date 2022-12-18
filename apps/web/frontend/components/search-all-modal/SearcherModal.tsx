@@ -300,7 +300,7 @@ const SearcherModal = ({ searcher, createMode }: SearcherProps) => {
               autoFocus
               autoCorrect="off"
               autoComplete="off"
-              spellCheck="false"
+              // spellCheck="false"
               placeholder="Search"
               onChange={e => {
                 setSelectedIdx(0)

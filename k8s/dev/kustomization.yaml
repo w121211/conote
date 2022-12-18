@@ -10,7 +10,7 @@ secretGenerator:
       - '../../apps/web/.env.local'
 resources:
   - 'deployment/webapp.yaml'
-  # - managed-cert-ingress.yaml
+  - managed-cert-ingress.yaml
   # - 'job/cron-curl-api.yaml'
   # - 'job/cron-dbbackup.yaml'
   # - 'pod/workload-identity-test.yaml'

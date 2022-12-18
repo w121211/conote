@@ -18,9 +18,9 @@ spec:
         app: conote-webapp
     spec:
       # Use google cloud workload identity. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
-      # serviceAccountName: storage-api-consumer-ksa
-      # nodeSelector:
-      #   iam.gke.io/gke-metadata-server-enabled: 'true'
+      serviceAccountName: storage-api-consumer-ksa
+      nodeSelector:
+        iam.gke.io/gke-metadata-server-enabled: 'true'
 
       # initContainers:
       #   - name: init-db-ready

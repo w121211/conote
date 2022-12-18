@@ -3,7 +3,7 @@
 1. Install PGO (postgres-operator, https://github.com/CrunchyData/postgres-operator) first.
 
 2. Place `gcs-key.json` in this directory for accessing google cloude storage:  
-Google console > API credential > gcs service account > key
+   Google console > API credential > gcs service account > key
 
 3. Create a cluster by
 
@@ -31,8 +31,8 @@ kubectl port-forward -n ${NAMESPACE} svc/hippo-gcs-pgadmin 5050:5050
 ```
 
 2. Login pgadmin  
-    Username: hippo@pgo  // Username is set in `postgres.yaml`  
-    Password: k8s secret > hippo-gcs-pguser-hippo > password
+   Username: hippo@pgo // Username is set in `postgres.yaml`  
+   Password: k8s secret > hippo-gcs-pguser-hippo > password
 
 # Backup & recovery
 
@@ -57,7 +57,7 @@ Run `pg_dump` in the database's container.
 docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_dump -U postgresuser -d prisma -p 5432 -Fc --no-owner --no-privileges" > local_prisma_dump-$(date +%Y%m%d).dump
 
 # Dump from k8s
-kubectl exec -i conote-release-postgresql-client -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Fc --no-owner --no-privileges > gke_conote_prisma_dump-$(date +%Y%m%d).dump
+kubectl exec -i ${pg_pod_name} -- pg_dump --host conote-release-postgresql -U postgresuser -d prisma -p 5432 -Fc --no-owner --no-privileges > gke_conote_prisma_dump-$(date +%Y%m%d).dump
 ```
 
 ### Restore
@@ -73,8 +73,6 @@ kubectl exec -i ${pg_pod_name} -- pg_restore --verbose -d prisma --no-owner --ro
 # the 'prisma' database will be created during running the restore-script
 docker exec -i ${pg_container_id} sh -c "PGPASSWORD=postgrespassword pg_restore --verbose --create -d postgres -p 5432 -U postgresuser " < ${prisma_dump_file.dump}
 ```
-
-
 
 # ------ Deprecated ------
 

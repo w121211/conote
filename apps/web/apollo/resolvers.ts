@@ -201,6 +201,53 @@ const Query: Required<QueryResolvers<ResolverContext>> = {
     return { commits: commits_, hasNext, hasPrevious }
   },
 
+  async commitsLatest(_parent, { afterId, beforeId }, _context, _info) {
+    let commits: (Commit & {
+      noteDocs: (NoteDoc & { branch: Branch; sym: Sym })[]
+    })[]
+    let hasPrevious: boolean
+    let hasNext: boolean
+
+    if (afterId) {
+      commits = await prisma.commit.findMany({
+        include: { noteDocs: { include: { branch: true, sym: true } } },
+        orderBy: { createdAt: 'desc' },
+        cursor: { id: afterId },
+        take: 11,
+        skip: 1,
+      })
+      hasPrevious = true
+      hasNext = commits.length === 11
+    } else if (beforeId) {
+      commits = await prisma.commit.findMany({
+        include: { noteDocs: { include: { branch: true, sym: true } } },
+        orderBy: { createdAt: 'asc' },
+        cursor: { id: beforeId },
+        take: 11,
+        skip: 1,
+      })
+      commits.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // In-place sort result in descending order
+      hasPrevious = commits.length === 11
+      hasNext = true
+    } else {
+      commits = await prisma.commit.findMany({
+        include: { noteDocs: { include: { branch: true, sym: true } } },
+        orderBy: { createdAt: 'desc' },
+        take: 11,
+      })
+      hasPrevious = false
+      hasNext = commits.length === 11
+    }
+
+    const commits_ = commits.map(commit => {
+      const { noteDocs, ...rest } = toStringProps(commit),
+        noteDocs_ = noteDocs.map(e => toGQLNoteDoc(e))
+      return { ...rest, noteDocs: noteDocs_ }
+    })
+
+    return { commits: commits_, hasNext, hasPrevious }
+  },
+
   async discuss(_parent, { id }, _context, _info) {
     const discuss = await prisma.discuss.findUnique({
       where: { id },

@@ -17,7 +17,7 @@ const mergeState_text: Record<string, string | undefined> = {
   'paused-from_doc_not_head': 'paused-from_doc_not_head',
 }
 
-function totMergeComponents(
+export function toMergeComponents(
   mergeState: string,
   mergePollId?: string,
 ): {
@@ -86,7 +86,7 @@ const CommitListItem = ({ commit }: { commit: CommitFragment }) => (
 
     <ul role="list">
       {commit.noteDocs.map(({ id, symbol, meta, contentHead, mergePollId }) => {
-        const { icon, description } = totMergeComponents(
+        const { icon, description } = toMergeComponents(
           meta.mergeState,
           mergePollId ?? undefined,
         )

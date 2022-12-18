@@ -376,6 +376,16 @@ query CommitsByUser($userId: ID!, $afterId: ID, $beforeId: ID) {
   }
 }
 
+query CommitsLatest($afterId: ID, $beforeId: ID) {
+  commitsLatest(afterId: $afterId, beforeId: $beforeId) {
+    commits {
+      ...commit
+    }
+    hasPrevious
+    hasNext
+  }
+}
+
 query Discuss($id: ID!) {
   discuss(id: $id) {
     ...discuss

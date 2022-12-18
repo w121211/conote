@@ -12,12 +12,12 @@ spec:
         - prisma
   
   instances:
-    - name: instance1
+    # - name: instance1
       # resources:
       #   limits:
       #     cpu: 500m
       #     memory: 300Mi
-      dataVolumeClaimSpec:
+    - dataVolumeClaimSpec:
         accessModes:
         - "ReadWriteOnce"
         resources:
@@ -38,18 +38,18 @@ spec:
           full: "0 1 * * 0"
           differential: "0 1 * * 1-6"
         gcs:
-          bucket: conote-webapp_dbbackup
+          bucket: conote-webapp_pg-backup
     
-  userInterface:
-    pgAdmin:
-      # Downgrade to tag ubi8-4.30-2. https://github.com/CrunchyData/postgres-operator/issues/3409
-      # image: registry.developers.crunchydata.com/crunchydata/crunchy-pgadmin4:ubi8-4.30-4
-      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgadmin4:ubi8-4.30-2
-      dataVolumeClaimSpec:
-        accessModes:
-        - "ReadWriteOnce"
-        resources:
-          requests:
-            # storage: 1Gi
-            storage: 100Mi
+  # userInterface:
+  #   pgAdmin:
+  #     # Downgrade to tag ubi8-4.30-2. https://github.com/CrunchyData/postgres-operator/issues/3409
+  #     # image: registry.developers.crunchydata.com/crunchydata/crunchy-pgadmin4:ubi8-4.30-4
+  #     image: registry.developers.crunchydata.com/crunchydata/crunchy-pgadmin4:ubi8-4.30-2
+  #     dataVolumeClaimSpec:
+  #       accessModes:
+  #       - "ReadWriteOnce"
+  #       resources:
+  #         requests:
+  #           # storage: 1Gi
+  #           storage: 100Mi
 
