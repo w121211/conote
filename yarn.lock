@@ -13743,7 +13743,7 @@ nano-css@^5.3.1:
     stacktrace-js "^2.0.2"
     stylis "^4.0.6"
 
-nanoid@^3.1.30, nanoid@^3.3.1, nanoid@^3.3.3:
+nanoid@^3.1.30, nanoid@^3.1.31, nanoid@^3.3.1, nanoid@^3.3.3:
   version "3.3.4"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.4.tgz#730b67e3cd09e2deacf03c027c81c9d9dbc5e8ab"
   integrity sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==
@@ -18583,9 +18583,11 @@ unc-path-regex@^0.1.2:
   integrity sha1-5z3T17DXxe2G+6xrCufYxqadUPo=
 
 undici@^5.1.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.2.0.tgz#18c5bd59f8f1b1ed8dcc9dca2f754c44ec994059"
-  integrity sha512-XY6+NS3WH9b3TKOHeNz2CjR+qrVz/k4fO9g3etPpLozRvULoQmZ1+dk9JbIz40ehn27xzFk4jYVU2MU3Nle62A==
+  version "5.19.1"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.19.1.tgz#92b1fd3ab2c089b5a6bd3e579dcda8f1934ebf6d"
+  integrity sha512-YiZ61LPIgY73E7syxCDxxa3LV2yl3sN8spnIuTct60boiiRaE1J8mNWHO8Im2Zi/sFrPusjLlmRPrsyraSqX6A==
+  dependencies:
+    busboy "^1.6.0"
 
 unfetch@^4.2.0:
   version "4.2.0"
